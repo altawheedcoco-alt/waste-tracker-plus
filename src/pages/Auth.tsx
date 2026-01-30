@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle } from 'lucide-react';
+import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 import logo from '@/assets/logo.png';
 import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -528,6 +529,55 @@ const Auth = () => {
                   >
                     {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
                   </Button>
+
+                  {/* Quick Demo Login Buttons */}
+                  <div className="pt-4">
+                    <div className="relative">
+                      <Separator className="my-4" />
+                      <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
+                        دخول سريع (تجريبي)
+                      </span>
+                    </div>
+                    
+                    <div className="grid grid-cols-5 gap-2 mt-4">
+                      {[
+                        { email: 'admin@demo.com', password: 'admin123456', icon: Shield, label: 'المدير', color: 'bg-red-500 hover:bg-red-600' },
+                        { email: 'generator@demo.com', password: 'generator123456', icon: Building2, label: 'المولدة', color: 'bg-blue-500 hover:bg-blue-600' },
+                        { email: 'transporter@demo.com', password: 'transporter123456', icon: Truck, label: 'الناقلة', color: 'bg-amber-500 hover:bg-amber-600' },
+                        { email: 'recycler@demo.com', password: 'recycler123456', icon: Recycle, label: 'المدورة', color: 'bg-emerald-500 hover:bg-emerald-600' },
+                        { email: 'driver@demo.com', password: 'driver123456', icon: Car, label: 'السائق', color: 'bg-purple-500 hover:bg-purple-600' },
+                      ].map((demo) => (
+                        <motion.button
+                          key={demo.email}
+                          type="button"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              const { error } = await signIn(demo.email, demo.password);
+                              if (error) {
+                                toast({
+                                  title: 'خطأ',
+                                  description: 'فشل تسجيل الدخول',
+                                  variant: 'destructive',
+                                });
+                              } else {
+                                navigate('/dashboard');
+                              }
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading}
+                          className={`flex flex-col items-center justify-center p-3 rounded-lg text-white transition-all ${demo.color} disabled:opacity-50`}
+                        >
+                          <demo.icon className="w-5 h-5 mb-1" />
+                          <span className="text-[10px] font-medium">{demo.label}</span>
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
                 </motion.form>
               )}
 
