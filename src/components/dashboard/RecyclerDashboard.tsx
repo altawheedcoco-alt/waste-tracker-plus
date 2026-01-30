@@ -1,0 +1,346 @@
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
+import CreateShipmentButton from './CreateShipmentButton';
+import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
+import ShipmentCard from '@/components/shipments/ShipmentCard';
+import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
+import SmartRequestDialog from './SmartRequestDialog';
+import ChatWidget from '@/components/chat/ChatWidget';
+import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
+import {
+  Package,
+  Recycle,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  Truck,
+  BarChart3,
+  FileText,
+  Eye,
+  Settings,
+  Bot,
+  Users,
+  Leaf,
+  Sparkles,
+} from 'lucide-react';
+
+interface ShipmentStats {
+  total: number;
+  incoming: number;
+  processing: number;
+  completed: number;
+}
+
+interface RecentShipment {
+  id: string;
+  shipment_number: string;
+  waste_type: string;
+  quantity: number;
+  unit: string;
+  status: string;
+  created_at: string;
+  pickup_address: string;
+  delivery_address: string;
+  pickup_date: string | null;
+  expected_delivery_date: string | null;
+  notes: string | null;
+  generator_notes: string | null;
+  recycler_notes: string | null;
+  waste_description: string | null;
+  hazard_level: string | null;
+  packaging_method: string | null;
+  disposal_method: string | null;
+  approved_at: string | null;
+  collection_started_at: string | null;
+  in_transit_at: string | null;
+  delivered_at: string | null;
+  confirmed_at: string | null;
+  manual_driver_name: string | null;
+  manual_vehicle_plate: string | null;
+  generator: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
+  transporter: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
+  recycler: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
+  driver: { license_number: string; vehicle_type: string | null; vehicle_plate: string | null; profile: { full_name: string; phone: string | null } } | null;
+}
+
+const RecyclerDashboard = () => {
+  const { profile, organization } = useAuth();
+  const [stats, setStats] = useState<ShipmentStats>({
+    total: 0,
+    incoming: 0,
+    processing: 0,
+    completed: 0,
+  });
+  const [recentShipments, setRecentShipments] = useState<RecentShipment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
+
+  useEffect(() => {
+    if (organization?.id) {
+      fetchDashboardData();
+    }
+  }, [organization?.id]);
+
+  const fetchDashboardData = async () => {
+    try {
+      const { data: shipments, error } = await supabase
+        .from('shipments')
+        .select(`
+          id,
+          shipment_number,
+          waste_type,
+          quantity,
+          unit,
+          status,
+          created_at,
+          pickup_address,
+          delivery_address,
+          pickup_date,
+          expected_delivery_date,
+          notes,
+          generator_notes,
+          recycler_notes,
+          waste_description,
+          hazard_level,
+          packaging_method,
+          disposal_method,
+          approved_at,
+          collection_started_at,
+          in_transit_at,
+          delivered_at,
+          confirmed_at,
+          manual_driver_name,
+          manual_vehicle_plate,
+          generator:organizations!shipments_generator_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
+          transporter:organizations!shipments_transporter_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
+          recycler:organizations!shipments_recycler_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
+          driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
+        `)
+        .eq('recycler_id', organization?.id)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (shipments) {
+        setRecentShipments(shipments as unknown as RecentShipment[]);
+
+        const incomingStatuses = ['new', 'approved', 'collecting', 'in_transit'];
+        const processingStatuses = ['delivered'];
+        const completedStatuses = ['confirmed'];
+
+        setStats({
+          total: shipments.length,
+          incoming: shipments.filter((s) => incomingStatuses.includes(s.status)).length,
+          processing: shipments.filter((s) => processingStatuses.includes(s.status)).length,
+          completed: shipments.filter((s) => completedStatuses.includes(s.status)).length,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmShipment = async (shipmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('shipments')
+        .update({
+          status: 'confirmed',
+          confirmed_at: new Date().toISOString(),
+        })
+        .eq('id', shipmentId);
+
+      if (error) throw error;
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Error confirming shipment:', error);
+    }
+  };
+
+  const statCards = [
+    {
+      title: 'إجمالي الشحنات',
+      value: stats.total,
+      icon: Package,
+      color: 'from-blue-500 to-blue-600',
+    },
+    {
+      title: 'شحنات واردة',
+      value: stats.incoming,
+      icon: Truck,
+      color: 'from-amber-500 to-amber-600',
+    },
+    {
+      title: 'قيد المعالجة',
+      value: stats.processing,
+      icon: Clock,
+      color: 'from-purple-500 to-purple-600',
+    },
+    {
+      title: 'مؤكدة',
+      value: stats.completed,
+      icon: CheckCircle2,
+      color: 'from-emerald-500 to-emerald-600',
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Welcome section */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <CreateShipmentButton onSuccess={fetchDashboardData} />
+          <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
+          <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" className="gap-2">
+            <Sparkles className="w-4 h-4" />
+            رفع الوزنة الذكي
+          </Button>
+        </div>
+        <div className="text-right">
+          <h1 className="text-2xl font-bold">مرحباً، {profile?.full_name}</h1>
+          <p className="text-muted-foreground">
+            {organization?.name} - الجهة المدورة
+          </p>
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Card className="relative overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">{stat.title}</p>
+                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                  </div>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white`}
+                  >
+                    <stat.icon className="w-6 h-6" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Quick Actions Grid */}
+      <QuickActionsGrid
+        actions={[
+          { title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: () => setShowSmartWeightUpload(true), iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
+          { title: 'أدوات الذكاء الاصطناعي', subtitle: 'استخراج البيانات وتحليلها', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },
+          { title: 'تقارير الاستدامة البيئية', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600' },
+          { title: 'تحليل البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
+          { title: 'الشحنات الواردة', subtitle: 'عرض وإدارة الشحنات', icon: Package, path: '/dashboard/shipments' },
+          { title: 'تأكيد الاستلام', subtitle: 'تأكيد استلام الشحنات', icon: CheckCircle2, path: '/dashboard/shipments' },
+          { title: 'إدارة الموظفين', subtitle: 'إضافة وإدارة موظفي المنشأة', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
+          { title: 'التقارير', subtitle: 'تقارير التدوير والأداء', icon: BarChart3, path: '/dashboard/reports' },
+          { title: 'تتبع الشحنات', subtitle: 'متابعة الشحنات القادمة', icon: Truck, path: '/dashboard/shipments' },
+          { title: 'مستندات التدوير', subtitle: 'طباعة شهادات وأختام', icon: FileText, path: '/dashboard/documents' },
+          { title: 'إحصائيات المعالجة', subtitle: 'تحليل أداء التدوير', icon: TrendingUp, path: '/dashboard/reports' },
+          { title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings' },
+        ] as QuickAction[]}
+        title="الإجراءات السريعة"
+        subtitle="وظائف التدوير المستخدمة بكثرة"
+      />
+
+      {/* Recent shipments */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard/shipments'}>
+              <Eye className="ml-2 h-4 w-4" />
+              عرض الكل
+            </Button>
+            <div className="text-right">
+              <CardTitle className="flex items-center gap-2 justify-end">
+                <Recycle className="w-5 h-5" />
+                الشحنات الواردة
+              </CardTitle>
+              <CardDescription>آخر 10 شحنات واردة إلى منشأتك</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8 text-muted-foreground">
+              جاري التحميل...
+            </div>
+          ) : recentShipments.length === 0 ? (
+            <div className="text-center py-8">
+              <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                يمكنك إنشاء شحنة جديدة أو انتظار الشحنات الواردة
+              </p>
+              <CreateShipmentButton className="mt-4" onSuccess={fetchDashboardData} />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {recentShipments.map((shipment) => (
+                <ShipmentCard
+                  key={shipment.id}
+                  shipment={shipment}
+                  onStatusChange={fetchDashboardData}
+                  showAutoTimer={true}
+                />
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Print Dialog */}
+      <EnhancedShipmentPrintView
+        isOpen={showPrintDialog}
+        onClose={() => setShowPrintDialog(false)}
+        shipment={selectedShipment as any}
+      />
+
+      {/* Smart Weight Upload Dialog */}
+      <SmartWeightUpload
+        open={showSmartWeightUpload}
+        onOpenChange={setShowSmartWeightUpload}
+      />
+
+      {/* Recycling Certificate Report Dialog */}
+      {reportShipment && (
+        <RecyclingCertificateDialog
+          isOpen={showReportDialog}
+          onClose={() => {
+            setShowReportDialog(false);
+            setReportShipment(null);
+          }}
+          shipment={reportShipment as any}
+        />
+      )}
+
+      {/* Chat Widget */}
+      <ChatWidget />
+    </div>
+  );
+};
+
+export default RecyclerDashboard;

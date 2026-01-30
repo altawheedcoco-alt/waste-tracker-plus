@@ -1,0 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* آي ريسايكل - Design System */
+
+@layer base {
+  :root {
+    --background: 140 20% 98%;
+    --foreground: 150 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 30% 15%;
+
+    --primary: 142 71% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 20% 95%;
+    --secondary-foreground: 150 30% 20%;
+
+    --muted: 140 15% 93%;
+    --muted-foreground: 150 10% 45%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 140 20% 88%;
+    --input: 140 20% 88%;
+    --ring: 142 71% 45%;
+
+    --radius: 0.75rem;
+
+    /* Custom eco colors */
+    --eco-green: 142 71% 45%;
+    --eco-green-dark: 142 76% 36%;
+    --eco-green-light: 142 76% 55%;
+    --eco-emerald: 160 84% 39%;
+    --eco-teal: 166 72% 40%;
+    --eco-cream: 45 30% 96%;
+    --eco-sand: 40 20% 90%;
+
+    /* Gradients */
+    --gradient-eco: linear-gradient(135deg, hsl(142, 71%, 45%) 0%, hsl(160, 84%, 39%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(140, 20%, 98%) 0%, hsl(140, 30%, 95%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(140, 20%, 98%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px -2px hsl(142, 71%, 45%, 0.1);
+    --shadow-md: 0 8px 24px -4px hsl(142, 71%, 45%, 0.15);
+    --shadow-lg: 0 16px 48px -8px hsl(142, 71%, 45%, 0.2);
+    --shadow-glow: 0 0 40px hsl(142, 71%, 45%, 0.3);
+
+    --sidebar-background: 140 20% 98%;
+    --sidebar-foreground: 150 30% 20%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 140 15% 93%;
+    --sidebar-accent-foreground: 150 30% 20%;
+    --sidebar-border: 140 20% 88%;
+    --sidebar-ring: 142 71% 45%;
+  }
+
+  .dark {
+    --background: 150 30% 8%;
+    --foreground: 140 20% 95%;
+
+    --card: 150 25% 12%;
+    --card-foreground: 140 20% 95%;
+
+    --popover: 150 25% 12%;
+    --popover-foreground: 140 20% 95%;
+
+    --primary: 142 71% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 150 20% 18%;
+    --secondary-foreground: 140 20% 90%;
+
+    --muted: 150 15% 20%;
+    --muted-foreground: 140 10% 60%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 150 20% 20%;
+    --input: 150 20% 20%;
+    --ring: 142 71% 45%;
+
+    --sidebar-background: 150 30% 10%;
+    --sidebar-foreground: 140 20% 90%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 15% 18%;
+    --sidebar-accent-foreground: 140 20% 90%;
+    --sidebar-border: 150 20% 18%;
+    --sidebar-ring: 142 71% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-cairo antialiased;
+    direction: rtl;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .gradient-eco {
+    background: linear-gradient(135deg, hsl(var(--eco-green)) 0%, hsl(var(--eco-emerald)) 100%);
+  }
+
+  .gradient-eco-light {
+    background: linear-gradient(135deg, hsl(var(--eco-green-light)) 0%, hsl(var(--eco-teal)) 100%);
+  }
+
+  .text-gradient-eco {
+    background: linear-gradient(135deg, hsl(var(--eco-green)) 0%, hsl(var(--eco-emerald)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shadow-eco-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .shadow-eco-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-eco-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .shadow-eco-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glass-eco {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Enhanced hover animations */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  .hover-glow:hover {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 ease-out;
+  }
+  .hover-scale:hover {
+    @apply scale-105;
+  }
+
+  /* Card animations */
+  .card-interactive {
+    @apply transition-all duration-300 ease-out cursor-pointer;
+  }
+  .card-interactive:hover {
+    @apply -translate-y-1 shadow-md border-primary/30;
+  }
+
+  /* Smooth scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground));
+  }
+
+  /* Focus ring enhancement */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background;
+  }
+
+  /* Pulse animation for notifications */
+  .pulse-dot {
+    @apply relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    @apply absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full;
+    animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.2);
+    }
+  }
+
+  /* Skeleton loading */
+  .skeleton-loading {
+    @apply bg-muted animate-pulse rounded;
+  }
+
+  /* Safe area for mobile devices */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Touch-friendly tap targets */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Responsive text utilities */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  /* Responsive spacing utilities */
+  .gap-responsive {
+    @apply gap-2 sm:gap-3 lg:gap-4;
+  }
+
+  .p-responsive {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+
+  /* Mobile-first card styles */
+  .card-responsive {
+    @apply rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6;
+  }
+
+  /* Hide on mobile / Show on mobile */
+  .mobile-only {
+    @apply block sm:hidden;
+  }
+
+  .desktop-only {
+    @apply hidden sm:block;
+  }
+
+  /* Responsive grid utilities */
+  .grid-responsive-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2;
+  }
+
+  .grid-responsive-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .grid-responsive-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+}
+
+/* Leaflet Map Styles */
+.leaflet-container {
+  font-family: 'Cairo', sans-serif;
+  z-index: 0;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.5rem;
+  direction: rtl;
+}
+
+.leaflet-popup-content {
+  margin: 8px 12px;
+  font-family: 'Cairo', sans-serif;
+}
+
+.custom-div-icon {
+  background: transparent;
+  border: none;
+}

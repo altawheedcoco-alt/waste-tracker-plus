@@ -1,0 +1,666 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePDFExport } from '@/hooks/usePDFExport';
+import { useReportTemplates, ReportTemplate, getWasteCategoryFromType, systemTemplates } from '@/hooks/useReportTemplates';
+import { useRecyclingReports } from '@/hooks/useRecyclingReports';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import {
+  FileText,
+  Printer,
+  Download,
+  Loader2,
+  Building2,
+  Truck,
+  Recycle,
+  ClipboardCheck,
+  CheckCircle2,
+  Plus,
+  AlertTriangle,
+  Biohazard,
+  Leaf,
+  Settings,
+  Save,
+  CheckCircle,
+} from 'lucide-react';
+import RecyclingCertificatePrint from './RecyclingCertificatePrint';
+import CreateTemplateDialog from './CreateTemplateDialog';
+
+interface Shipment {
+  id: string;
+  shipment_number: string;
+  waste_type: string;
+  quantity: number;
+  unit?: string;
+  waste_description?: string;
+  disposal_method?: string;
+  pickup_address?: string;
+  delivery_address?: string;
+  pickup_date?: string | null;
+  expected_delivery_date?: string | null;
+  delivered_at?: string | null;
+  confirmed_at?: string | null;
+  generator?: {
+    name: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    commercial_register?: string;
+    environmental_license?: string;
+    representative_name?: string | null;
+  } | null;
+  transporter?: {
+    name: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    commercial_register?: string;
+    environmental_license?: string;
+    representative_name?: string | null;
+  } | null;
+  recycler?: {
+    name: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    commercial_register?: string;
+    environmental_license?: string;
+    representative_name?: string | null;
+    stamp_url?: string | null;
+    signature_url?: string | null;
+  } | null;
+}
+
+interface RecyclingCertificateDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  shipment: Shipment;
+}
+
+const wasteTypeLabels: Record<string, string> = {
+  plastic: 'بلاستيك',
+  paper: 'ورق',
+  metal: 'معادن',
+  glass: 'زجاج',
+  electronic: 'إلكترونيات',
+  organic: 'عضوية',
+  chemical: 'كيميائية',
+  medical: 'طبية',
+  construction: 'مخلفات بناء',
+  other: 'أخرى',
+};
+
+const wasteCategoryLabels: Record<string, { label: string; icon: any; color: string }> = {
+  hazardous: { label: 'مخلفات خطرة', icon: AlertTriangle, color: 'text-red-600 bg-red-100' },
+  non_hazardous: { label: 'مخلفات غير خطرة', icon: Leaf, color: 'text-green-600 bg-green-100' },
+  medical_hazardous: { label: 'مخلفات طبية خطرة', icon: Biohazard, color: 'text-purple-600 bg-purple-100' },
+  all: { label: 'جميع الأنواع', icon: Recycle, color: 'text-blue-600 bg-blue-100' },
+};
+
+const RecyclingCertificateDialog = ({
+  isOpen,
+  onClose,
+  shipment,
+}: RecyclingCertificateDialogProps) => {
+  const { organization } = useAuth();
+  const printRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, isExporting } = usePDFExport({
+    filename: `recycling-certificate-${shipment.shipment_number}`,
+    orientation: 'portrait',
+  });
+  
+  const { templates, loading: templatesLoading, getApplicableTemplates, incrementUsage } = useReportTemplates();
+  const { saveReport, loading: savingReport, getReportByShipmentId } = useRecyclingReports();
+
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [customNotes, setCustomNotes] = useState('');
+  const [processingDetails, setProcessingDetails] = useState('');
+  const [openingDeclaration, setOpeningDeclaration] = useState('');
+  const [closingDeclaration, setClosingDeclaration] = useState('');
+  const [activeTab, setActiveTab] = useState('templates');
+  const [showCreateTemplate, setShowCreateTemplate] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [isSaved, setIsSaved] = useState(false);
+  const [existingReportId, setExistingReportId] = useState<string | null>(null);
+
+  // Check if report already exists for this shipment
+  useEffect(() => {
+    const checkExistingReport = async () => {
+      const existing = await getReportByShipmentId(shipment.id);
+      if (existing) {
+        setExistingReportId(existing.id);
+        setOpeningDeclaration(existing.opening_declaration || '');
+        setProcessingDetails(existing.processing_details || '');
+        setClosingDeclaration(existing.closing_declaration || '');
+        setCustomNotes(existing.custom_notes || '');
+        setIsSaved(true);
+      }
+    };
+    if (isOpen) {
+      checkExistingReport();
+    }
+  }, [isOpen, shipment.id, getReportByShipmentId]);
+
+  // Get applicable templates for this shipment's waste type
+  const wasteCategory = getWasteCategoryFromType(shipment.waste_type);
+  const applicableTemplates = getApplicableTemplates(shipment.waste_type);
+
+  // Filter templates by category
+  const filteredTemplates = categoryFilter === 'all' 
+    ? applicableTemplates 
+    : applicableTemplates.filter(t => t.waste_category === categoryFilter);
+
+  // Group templates by type
+  const systemTemplatesList = filteredTemplates.filter(t => t.template_type === 'system');
+  const customTemplatesList = filteredTemplates.filter(t => t.template_type === 'custom');
+
+  // Apply template when selected
+  useEffect(() => {
+    if (selectedTemplateId) {
+      const template = templates.find(t => t.id === selectedTemplateId);
+      if (template) {
+        setOpeningDeclaration(template.opening_declaration || '');
+        setProcessingDetails(template.processing_details_template || '');
+        setClosingDeclaration(template.closing_declaration || '');
+        incrementUsage(template.id);
+      }
+    }
+  }, [selectedTemplateId]);
+
+  // Set default declarations based on waste category
+  useEffect(() => {
+    if (!selectedTemplateId && !openingDeclaration) {
+      const defaultTemplate = systemTemplates.find(t => 
+        t.waste_category === wasteCategory || t.waste_category === 'all'
+      );
+      if (defaultTemplate) {
+        setOpeningDeclaration(defaultTemplate.opening_declaration || '');
+        setClosingDeclaration(defaultTemplate.closing_declaration || '');
+      }
+    }
+  }, [wasteCategory, selectedTemplateId]);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!printRef.current) {
+      toast.error('لا يوجد محتوى للتصدير');
+      return;
+    }
+    await exportToPDF(printRef.current, `شهادة-اعادة-تدوير-${shipment.shipment_number}`);
+  };
+
+  const handleSaveReport = async () => {
+    if (isSaved) {
+      toast.info('تم حفظ هذا التقرير مسبقاً');
+      return;
+    }
+
+    const finalClosing = closingDeclaration || `نقر نحن ${organization?.name || 'جهة التدوير'} بأنه قد تم استلام الشحنة رقم ${shipment.shipment_number} بكامل محتوياتها وبحالة سليمة، وقد تمت إعادة تدويرها بالكامل وفقاً للمعايير والمتطلبات البيئية والقانونية والصناعية المنظمة لنشاط إعادة تدوير المخلفات، وذلك طبقاً للأنظمة واللوائح المعمول بها.`;
+
+    const result = await saveReport({
+      shipment_id: shipment.id,
+      template_id: selectedTemplateId || undefined,
+      opening_declaration: openingDeclaration,
+      processing_details: processingDetails,
+      closing_declaration: finalClosing,
+      custom_notes: customNotes,
+      waste_type: shipment.waste_type,
+      report_data: {
+        generator: shipment.generator?.name,
+        transporter: shipment.transporter?.name,
+        recycler: shipment.recycler?.name,
+        quantity: shipment.quantity,
+        unit: shipment.unit,
+      },
+    });
+
+    if (result) {
+      setIsSaved(true);
+      setExistingReportId(result.id);
+    }
+  };
+
+  const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
+
+  const renderTemplateCard = (template: ReportTemplate | typeof systemTemplates[0] & { id?: string }, isSystem: boolean = false) => {
+    const categoryInfo = wasteCategoryLabels[template.waste_category];
+    const CategoryIcon = categoryInfo?.icon || Recycle;
+    const isSelected = 'id' in template && selectedTemplateId === template.id;
+    
+    return (
+      <Card 
+        key={'id' in template ? template.id : template.name}
+        className={`cursor-pointer transition-all hover:shadow-md ${isSelected ? 'ring-2 ring-primary border-primary' : ''}`}
+        onClick={() => {
+          if ('id' in template && template.id) {
+            setSelectedTemplateId(template.id);
+            setActiveTab('write');
+          }
+        }}
+      >
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-sm font-medium">{template.name}</CardTitle>
+            <Badge variant="outline" className={`text-xs ${categoryInfo?.color || ''}`}>
+              <CategoryIcon className="w-3 h-3 ml-1" />
+              {categoryInfo?.label}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {template.description || 'بدون وصف'}
+          </p>
+          {isSystem && (
+            <Badge variant="secondary" className="mt-2 text-xs">
+              قالب النظام
+            </Badge>
+          )}
+          {'usage_count' in template && template.usage_count > 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              استخدم {template.usage_count} مرة
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-5xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-0">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <FileText className="w-6 h-6 text-primary" />
+                إنشاء تقرير إعادة التدوير
+              </DialogTitle>
+              <Badge className={wasteCategoryLabels[wasteCategory]?.color}>
+                {React.createElement(wasteCategoryLabels[wasteCategory]?.icon, { className: "w-4 h-4 ml-1" })}
+                {wasteCategoryLabels[wasteCategory]?.label}
+              </Badge>
+            </div>
+          </DialogHeader>
+
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div className="px-6">
+              <TabsList className="w-full grid grid-cols-3">
+                <TabsTrigger value="templates" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  القوالب
+                </TabsTrigger>
+                <TabsTrigger value="write" className="gap-2">
+                  <ClipboardCheck className="w-4 h-4" />
+                  كتابة التقرير
+                </TabsTrigger>
+                <TabsTrigger value="preview" className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  معاينة وطباعة
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* Templates Tab */}
+            <TabsContent value="templates" className="mt-0">
+              <ScrollArea className="h-[60vh] px-6 py-4">
+                <div className="space-y-6">
+                  {/* Category Filter */}
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <Label className="text-sm">تصفية حسب التصنيف:</Label>
+                    <div className="flex gap-2 flex-wrap">
+                      <Badge 
+                        variant={categoryFilter === 'all' ? 'default' : 'outline'}
+                        className="cursor-pointer"
+                        onClick={() => setCategoryFilter('all')}
+                      >
+                        الكل
+                      </Badge>
+                      {Object.entries(wasteCategoryLabels).filter(([k]) => k !== 'all').map(([key, { label, icon: Icon, color }]) => (
+                        <Badge 
+                          key={key}
+                          variant={categoryFilter === key ? 'default' : 'outline'}
+                          className={`cursor-pointer ${categoryFilter === key ? '' : color}`}
+                          onClick={() => setCategoryFilter(key)}
+                        >
+                          <Icon className="w-3 h-3 ml-1" />
+                          {label}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Custom Templates */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-primary" />
+                        القوالب المخصصة
+                      </h3>
+                      <Button size="sm" variant="outline" onClick={() => setShowCreateTemplate(true)} className="gap-1">
+                        <Plus className="w-4 h-4" />
+                        إنشاء قالب جديد
+                      </Button>
+                    </div>
+                    
+                    {templatesLoading ? (
+                      <div className="flex items-center justify-center p-8">
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      </div>
+                    ) : customTemplatesList.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {customTemplatesList.map(t => renderTemplateCard(t))}
+                      </div>
+                    ) : (
+                      <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                          <FileText className="w-10 h-10 text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            لم يتم إنشاء قوالب مخصصة بعد
+                          </p>
+                          <Button 
+                            size="sm" 
+                            variant="link" 
+                            onClick={() => setShowCreateTemplate(true)}
+                            className="mt-2"
+                          >
+                            إنشاء قالب جديد
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* System Templates */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Recycle className="w-5 h-5 text-green-600" />
+                      قوالب النظام
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {systemTemplatesList.length > 0 ? (
+                        systemTemplatesList.map(t => renderTemplateCard(t, true))
+                      ) : (
+                        // Show local system templates if none in DB
+                        systemTemplates
+                          .filter(t => categoryFilter === 'all' || t.waste_category === categoryFilter || t.waste_category === 'all')
+                          .map((t, i) => (
+                            <Card 
+                              key={i}
+                              className="cursor-pointer transition-all hover:shadow-md"
+                              onClick={() => {
+                                setOpeningDeclaration(t.opening_declaration || '');
+                                setProcessingDetails(t.processing_details_template || '');
+                                setClosingDeclaration(t.closing_declaration || '');
+                                setActiveTab('write');
+                              }}
+                            >
+                              <CardHeader className="pb-2">
+                                <div className="flex items-start justify-between gap-2">
+                                  <CardTitle className="text-sm font-medium">{t.name}</CardTitle>
+                                  <Badge variant="outline" className={wasteCategoryLabels[t.waste_category]?.color}>
+                                    {React.createElement(wasteCategoryLabels[t.waste_category]?.icon, { className: "w-3 h-3 ml-1" })}
+                                    {wasteCategoryLabels[t.waste_category]?.label}
+                                  </Badge>
+                                </div>
+                              </CardHeader>
+                              <CardContent className="pt-0">
+                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                  {t.description}
+                                </p>
+                                <Badge variant="secondary" className="mt-2 text-xs">
+                                  قالب النظام
+                                </Badge>
+                              </CardContent>
+                            </Card>
+                          ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+
+              <div className="p-6 pt-4 border-t flex justify-between items-center">
+                <Button variant="outline" onClick={onClose}>
+                  إلغاء
+                </Button>
+                <Button onClick={() => setActiveTab('write')} className="gap-2">
+                  <ClipboardCheck className="w-4 h-4" />
+                  متابعة للكتابة
+                </Button>
+              </div>
+            </TabsContent>
+
+            {/* Write Tab */}
+            <TabsContent value="write" className="mt-0">
+              <ScrollArea className="h-[60vh] px-6 py-4">
+                <div className="space-y-6">
+                  {/* Selected Template Info */}
+                  {selectedTemplate && (
+                    <div className="bg-primary/5 rounded-lg p-3 flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium">القالب المحدد: {selectedTemplate.name}</p>
+                        <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => setActiveTab('templates')}
+                        className="mr-auto"
+                      >
+                        تغيير
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Shipment Info Summary */}
+                  <div className="bg-muted/50 rounded-lg p-4">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Recycle className="w-5 h-5 text-primary" />
+                      بيانات الشحنة
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">رقم الشحنة:</span>
+                        <p className="font-mono font-bold">{shipment.shipment_number}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">نوع المخلفات:</span>
+                        <p>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">الكمية:</span>
+                        <p>{shipment.quantity} {shipment.unit || 'كجم'}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">تاريخ الاستلام:</span>
+                        <p>{shipment.delivered_at ? format(new Date(shipment.delivered_at), 'PP', { locale: ar }) : '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Parties Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4">
+                      <h4 className="font-semibold text-sm mb-2 flex items-center gap-2 text-blue-700 dark:text-blue-400">
+                        <Building2 className="w-4 h-4" />
+                        الجهة المولدة
+                      </h4>
+                      <p className="text-sm font-medium">{shipment.generator?.name || '-'}</p>
+                      <p className="text-xs text-muted-foreground">{shipment.generator?.city}</p>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-950/30 rounded-lg p-4">
+                      <h4 className="font-semibold text-sm mb-2 flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                        <Truck className="w-4 h-4" />
+                        جهة النقل
+                      </h4>
+                      <p className="text-sm font-medium">{shipment.transporter?.name || '-'}</p>
+                      <p className="text-xs text-muted-foreground">{shipment.transporter?.city}</p>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-950/30 rounded-lg p-4">
+                      <h4 className="font-semibold text-sm mb-2 flex items-center gap-2 text-green-700 dark:text-green-400">
+                        <Recycle className="w-4 h-4" />
+                        جهة التدوير
+                      </h4>
+                      <p className="text-sm font-medium">{shipment.recycler?.name || '-'}</p>
+                      <p className="text-xs text-muted-foreground">{shipment.recycler?.city}</p>
+                    </div>
+                  </div>
+
+                  {/* Opening Declaration */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <ClipboardCheck className="w-4 h-4" />
+                      الإقرار الافتتاحي
+                    </Label>
+                    <Textarea
+                      value={openingDeclaration}
+                      onChange={(e) => setOpeningDeclaration(e.target.value)}
+                      placeholder="نص الإقرار الذي يظهر في بداية التقرير..."
+                      className="min-h-[80px] text-right"
+                      dir="rtl"
+                    />
+                  </div>
+
+                  {/* Processing Details */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Recycle className="w-4 h-4" />
+                      تفاصيل عملية المعالجة والتدوير
+                    </Label>
+                    <Textarea
+                      value={processingDetails}
+                      onChange={(e) => setProcessingDetails(e.target.value)}
+                      placeholder="اذكر تفاصيل عملية إعادة التدوير، الطرق المستخدمة، نسبة الاسترداد، المخرجات..."
+                      className="min-h-[100px] text-right"
+                      dir="rtl"
+                    />
+                  </div>
+
+                  {/* Custom Notes */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      ملاحظات إضافية
+                    </Label>
+                    <Textarea
+                      value={customNotes}
+                      onChange={(e) => setCustomNotes(e.target.value)}
+                      placeholder="أي ملاحظات أو تعليقات إضافية تود إضافتها للتقرير..."
+                      className="min-h-[80px] text-right"
+                      dir="rtl"
+                    />
+                  </div>
+
+                  {/* Closing Declaration Preview */}
+                  <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+                    <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5" />
+                      الإقرار الختامي
+                    </h4>
+                    <Textarea
+                      value={closingDeclaration || `نقر نحن ${organization?.name || 'جهة التدوير'} بأنه قد تم استلام الشحنة رقم ${shipment.shipment_number} بكامل محتوياتها وبحالة سليمة، وقد تمت إعادة تدويرها بالكامل وفقاً للمعايير والمتطلبات البيئية والقانونية والصناعية المنظمة لنشاط إعادة تدوير المخلفات، وذلك طبقاً للأنظمة واللوائح المعمول بها.`}
+                      onChange={(e) => setClosingDeclaration(e.target.value)}
+                      className="min-h-[100px] text-right bg-transparent border-none resize-none text-emerald-700 dark:text-emerald-400"
+                      dir="rtl"
+                    />
+                  </div>
+                </div>
+              </ScrollArea>
+
+              <div className="p-6 pt-4 border-t flex justify-between items-center">
+                <Button variant="outline" onClick={() => setActiveTab('templates')}>
+                  العودة للقوالب
+                </Button>
+                <Button onClick={() => setActiveTab('preview')} className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  معاينة التقرير
+                </Button>
+              </div>
+            </TabsContent>
+
+            {/* Preview Tab */}
+            <TabsContent value="preview" className="mt-0">
+              <ScrollArea className="h-[60vh]">
+                <div ref={printRef} className="bg-white">
+                  <RecyclingCertificatePrint
+                    shipment={shipment}
+                    template={selectedTemplateId || 'custom'}
+                    customNotes={customNotes}
+                    processingDetails={processingDetails}
+                    openingDeclaration={openingDeclaration}
+                    closingDeclaration={closingDeclaration || `نقر نحن ${organization?.name || 'جهة التدوير'} بأنه قد تم استلام الشحنة رقم ${shipment.shipment_number} بكامل محتوياتها وبحالة سليمة، وقد تمت إعادة تدويرها بالكامل وفقاً للمعايير والمتطلبات البيئية والقانونية والصناعية المنظمة لنشاط إعادة تدوير المخلفات، وذلك طبقاً للأنظمة واللوائح المعمول بها.`}
+                    recyclerOrg={organization}
+                  />
+                </div>
+              </ScrollArea>
+
+              <div className="p-6 pt-4 border-t flex justify-between items-center">
+                <Button variant="outline" onClick={() => setActiveTab('write')}>
+                  العودة للتعديل
+                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={isSaved ? "secondary" : "default"}
+                    onClick={handleSaveReport} 
+                    disabled={savingReport || isSaved} 
+                    className="gap-2"
+                  >
+                    {savingReport ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : isSaved ? (
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Save className="w-4 h-4" />
+                    )}
+                    {isSaved ? 'تم الحفظ' : 'حفظ وإرسال الإشعارات'}
+                  </Button>
+                  <Button variant="outline" onClick={handlePrint} className="gap-2">
+                    <Printer className="w-4 h-4" />
+                    طباعة
+                  </Button>
+                  <Button onClick={handleDownloadPDF} disabled={isExporting} className="gap-2">
+                    {isExporting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    تحميل PDF
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <CreateTemplateDialog
+        isOpen={showCreateTemplate}
+        onClose={() => setShowCreateTemplate(false)}
+      />
+    </>
+  );
+};
+
+export default RecyclingCertificateDialog;
