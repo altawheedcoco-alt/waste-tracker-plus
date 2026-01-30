@@ -96,7 +96,22 @@ serve(async (req) => {
       throw new Error("فشل في تحليل المحتوى");
     }
 
-    const generatedContent = JSON.parse(jsonMatch[0]);
+    // Clean up the JSON - remove trailing commas before ] or }
+    let cleanedJson = jsonMatch[0]
+      .replace(/,\s*]/g, ']')  // Remove trailing comma before ]
+      .replace(/,\s*}/g, '}'); // Remove trailing comma before }
+    
+    let generatedContent;
+    try {
+      generatedContent = JSON.parse(cleanedJson);
+    } catch (parseError) {
+      console.error("JSON parse error, attempting recovery:", parseError);
+      // Try a more aggressive cleanup
+      cleanedJson = cleanedJson
+        .replace(/[\u0000-\u001F]+/g, ' ') // Remove control characters
+        .replace(/,(\s*[}\]])/g, '$1');     // Remove any trailing commas
+      generatedContent = JSON.parse(cleanedJson);
+    }
     console.log("Script generated successfully");
 
     // Step 2: Generate promotional image using AI with image modality
