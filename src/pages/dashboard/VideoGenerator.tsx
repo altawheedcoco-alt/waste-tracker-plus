@@ -24,6 +24,15 @@ interface GeneratedContent {
   videoPrompt?: string;
 }
 
+interface GenerationResult {
+  content: GeneratedContent;
+  imageUrl: string | null;
+  videoUrl: string | null;
+  posted: boolean;
+  postId?: string;
+  message: string;
+}
+
 interface Organization {
   id: string;
   name: string;
@@ -77,6 +86,7 @@ const VideoGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+  const [generatedVideoUrl, setGeneratedVideoUrl] = useState<string | null>(null);
   const [isPostingDirectly, setIsPostingDirectly] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [posted, setPosted] = useState(false);
@@ -129,6 +139,7 @@ const VideoGenerator = () => {
     setIsGenerating(true);
     setGeneratedContent(null);
     setGeneratedImageUrl(null);
+    setGeneratedVideoUrl(null);
     setPosted(false);
     setGenerationProgress(0);
 
@@ -139,8 +150,8 @@ const VideoGenerator = () => {
     try {
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setGenerationProgress(prev => Math.min(prev + 10, 90));
-      }, 500);
+        setGenerationProgress(prev => Math.min(prev + 5, 90));
+      }, 800);
 
       const { data, error } = await supabase.functions.invoke('generate-promo-video', {
         body: { 
@@ -160,12 +171,15 @@ const VideoGenerator = () => {
       if (data.success) {
         setGeneratedContent(data.content);
         setGeneratedImageUrl(data.imageUrl);
+        setGeneratedVideoUrl(data.videoUrl);
         
         if (data.posted) {
           setPosted(true);
           toast.success(`🎬 تم إنشاء ونشر المحتوى في منشورات ${selectedOrg?.name || 'الجهة'}!`);
+        } else if (data.videoUrl) {
+          toast.success('🎥 تم إنشاء الفيديو بنجاح!');
         } else {
-          toast.success('تم إنشاء المحتوى بنجاح!');
+          toast.success('✅ تم إنشاء المحتوى والصورة بنجاح!');
         }
       } else {
         throw new Error(data.error || 'فشل في إنشاء المحتوى');
@@ -192,8 +206,8 @@ const VideoGenerator = () => {
       // Create post content
       const postContent = `🎬 ${generatedContent.title}\n\n${generatedContent.script}\n\n📢 ${generatedContent.callToAction}\n\n${generatedContent.hashtags.map((h: string) => `#${h}`).join(' ')}`;
       
-      const mediaUrls = generatedImageUrl ? [generatedImageUrl] : [];
-      const postType = generatedImageUrl ? 'image' : 'text';
+      const mediaUrls = generatedVideoUrl ? [generatedVideoUrl] : (generatedImageUrl ? [generatedImageUrl] : []);
+      const postType = generatedVideoUrl ? 'video' : (generatedImageUrl ? 'image' : 'text');
 
       const { error } = await supabase
         .from('organization_posts')
@@ -462,27 +476,75 @@ const VideoGenerator = () => {
           <div className="space-y-6">
             {generatedContent ? (
               <>
-                {/* Video Preview Player */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Eye className="w-5 h-5 text-primary" />
-                      معاينة المحتوى
-                    </CardTitle>
-                    <CardDescription>
-                      شاهد المحتوى قبل النشر للتأكد من جودته
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <VideoPreviewPlayer
-                      imageUrl={generatedImageUrl}
-                      scenes={generatedContent.scenes}
-                      script={generatedContent.script}
-                      title={generatedContent.title}
-                      duration={parseInt(videoDuration)}
-                    />
-                  </CardContent>
-                </Card>
+                {/* Video Preview - Show actual video if available */}
+                {generatedVideoUrl ? (
+                  <Card className="border-2 border-green-500/30 bg-green-500/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Video className="w-5 h-5 text-green-500" />
+                        🎥 الفيديو الترويجي
+                      </CardTitle>
+                      <CardDescription>
+                        تم إنشاء فيديو احترافي بنجاح
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="relative rounded-xl overflow-hidden bg-black">
+                        <video 
+                          src={generatedVideoUrl}
+                          controls
+                          className="w-full aspect-video"
+                          poster={generatedImageUrl || undefined}
+                        >
+                          متصفحك لا يدعم تشغيل الفيديو
+                        </video>
+                      </div>
+                      <div className="mt-4 flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(generatedVideoUrl, '_blank')}
+                        >
+                          <Share2 className="w-4 h-4 ml-2" />
+                          فتح في نافذة جديدة
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            const a = document.createElement('a');
+                            a.href = generatedVideoUrl;
+                            a.download = `${generatedContent.title || 'video'}.mp4`;
+                            a.click();
+                          }}
+                        >
+                          تحميل الفيديو
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Eye className="w-5 h-5 text-primary" />
+                        معاينة المحتوى
+                      </CardTitle>
+                      <CardDescription>
+                        {generatedImageUrl ? 'تم إنشاء صورة ترويجية' : 'شاهد المحتوى قبل النشر'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <VideoPreviewPlayer
+                        imageUrl={generatedImageUrl}
+                        scenes={generatedContent.scenes}
+                        script={generatedContent.script}
+                        title={generatedContent.title}
+                        duration={parseInt(videoDuration)}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Script */}
                 <Card>

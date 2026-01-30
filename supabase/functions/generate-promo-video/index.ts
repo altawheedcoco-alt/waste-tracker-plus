@@ -50,15 +50,17 @@ serve(async (req) => {
 المدة: ${duration} ثانية
 النمط: ${style === 'modern' ? 'عصري وحديث' : style === 'corporate' ? 'احترافي رسمي' : 'إبداعي وملفت'}
 
-أجب بتنسيق JSON فقط كالتالي:
+أجب بتنسيق JSON فقط بدون أي نص إضافي كالتالي:
 {
   "title": "عنوان الفيديو",
   "script": "النص الصوتي الكامل للفيديو",
-  "scenes": ["وصف المشهد 1 مع تفاصيل بصرية دقيقة", "وصف المشهد 2", "وصف المشهد 3"],
+  "scenes": ["وصف المشهد 1", "وصف المشهد 2", "وصف المشهد 3"],
   "hashtags": ["هاشتاق1", "هاشتاق2", "هاشتاق3"],
   "callToAction": "الدعوة للعمل",
-  "videoPrompt": "وصف دقيق بالإنجليزية لتوليد الفيديو بالذكاء الاصطناعي (professional promotional video about recycling and waste management in Egypt, modern style, eco-friendly theme)"
-}`;
+  "videoPrompt": "professional cinematic video about recycling and waste management in Egypt, green eco-friendly theme, modern technology, clean environment, sustainability"
+}
+
+مهم جداً: أجب بـ JSON صالح فقط بدون فواصل زائدة`;
 
     console.log("Generating script with AI...");
     
@@ -71,7 +73,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "أنت خبير في إنشاء محتوى الفيديوهات الترويجية والتسويقية. تجيب دائماً بتنسيق JSON فقط." },
+          { role: "system", content: "أنت خبير في إنشاء محتوى الفيديوهات. تجيب دائماً بتنسيق JSON صالح فقط بدون أي نص إضافي." },
           { role: "user", content: scriptPrompt }
         ],
       }),
@@ -98,35 +100,31 @@ serve(async (req) => {
 
     // Clean up the JSON - remove trailing commas before ] or }
     let cleanedJson = jsonMatch[0]
-      .replace(/,\s*]/g, ']')  // Remove trailing comma before ]
-      .replace(/,\s*}/g, '}'); // Remove trailing comma before }
+      .replace(/,\s*]/g, ']')
+      .replace(/,\s*}/g, '}');
     
     let generatedContent;
     try {
       generatedContent = JSON.parse(cleanedJson);
     } catch (parseError) {
       console.error("JSON parse error, attempting recovery:", parseError);
-      // Try a more aggressive cleanup
       cleanedJson = cleanedJson
-        .replace(/[\u0000-\u001F]+/g, ' ') // Remove control characters
-        .replace(/,(\s*[}\]])/g, '$1');     // Remove any trailing commas
+        .replace(/[\u0000-\u001F]+/g, ' ')
+        .replace(/,(\s*[}\]])/g, '$1');
       generatedContent = JSON.parse(cleanedJson);
     }
     console.log("Script generated successfully");
 
-    // Step 2: Generate promotional image using AI with image modality
-    const imagePrompt = `Create a professional, high-quality promotional image for a recycling and waste management platform in Egypt. 
-Style: ${style === 'modern' ? 'Modern and sleek' : style === 'corporate' ? 'Professional corporate' : 'Creative and eye-catching'}
-Theme: Eco-friendly, sustainability, green technology
-Elements: Recycling symbols, clean environment, modern trucks, factories, green nature
+    // Step 2: Generate promotional image
+    const imagePrompt = `Professional promotional image for recycling platform in Egypt. 
+Style: ${style === 'modern' ? 'Modern sleek' : style === 'corporate' ? 'Corporate professional' : 'Creative eye-catching'}
+Theme: Eco-friendly, sustainability, green technology, recycling symbols, clean environment
 Colors: Green, blue, white, earth tones
-Aspect ratio: 16:9 landscape
-Ultra high resolution, professional marketing quality`;
+Ultra high resolution, marketing quality, 16:9 aspect ratio`;
 
-    console.log("Generating promotional image with AI...");
+    console.log("Generating promotional image...");
     
     let imageUrl = null;
-    let imageBase64 = null;
     
     try {
       const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -148,13 +146,11 @@ Ultra high resolution, professional marketing quality`;
         const imageData = await imageResponse.json();
         console.log("Image generation response received");
         
-        // Check for base64 image in the response
         const images = imageData.choices?.[0]?.message?.images;
         if (images && images.length > 0) {
-          imageBase64 = images[0]?.image_url?.url;
-          if (imageBase64) {
-            console.log("Base64 image generated successfully");
-            imageUrl = imageBase64; // Use the data URL directly
+          imageUrl = images[0]?.image_url?.url;
+          if (imageUrl) {
+            console.log("Image generated successfully");
           }
         }
       } else {
@@ -164,15 +160,54 @@ Ultra high resolution, professional marketing quality`;
       console.error("Error generating image:", imgError);
     }
 
-    // Step 3: Post directly to organization posts if requested
+    // Step 3: Generate actual video using Lovable video generation
+    let videoUrl = null;
+    const videoPromptText = generatedContent.videoPrompt || 
+      `Professional cinematic promotional video about recycling and waste management platform in Egypt. 
+      Modern green technology, eco-friendly theme, clean environment, sustainability concept.
+      Show recycling facilities, green nature, modern trucks, professional workers.
+      Style: ${style === 'modern' ? 'Modern and sleek' : style === 'corporate' ? 'Corporate professional' : 'Creative and dynamic'}`;
+
+    console.log("Generating video...");
+    
+    try {
+      // Use Lovable's video generation endpoint
+      const videoResponse = await fetch("https://video.lovable.dev/v1/generate", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: videoPromptText,
+          duration: parseInt(duration) <= 10 ? parseInt(duration) : 5, // API supports 5 or 10 seconds
+          aspect_ratio: "16:9",
+          resolution: "1080p"
+        }),
+      });
+
+      if (videoResponse.ok) {
+        const videoData = await videoResponse.json();
+        videoUrl = videoData.video_url || videoData.url;
+        console.log("Video generated successfully:", videoUrl);
+      } else {
+        const errorText = await videoResponse.text();
+        console.log("Video generation API response:", videoResponse.status, errorText);
+        // Video generation might not be available, continue without it
+      }
+    } catch (videoError) {
+      console.log("Video generation not available:", videoError);
+      // Continue without video - provide image as fallback
+    }
+
+    // Step 4: Post directly to organization posts if requested
     if (postDirectly && organizationId && profileId) {
       console.log("Posting to organization...");
       
-      // Create post content
       const postContent = `🎬 ${generatedContent.title}\n\n${generatedContent.script}\n\n📢 ${generatedContent.callToAction}\n\n${generatedContent.hashtags.map((h: string) => `#${h}`).join(' ')}`;
       
-      const mediaUrls = imageUrl ? [imageUrl] : [];
-      const postType = imageUrl ? 'image' : 'text';
+      const mediaUrls = videoUrl ? [videoUrl] : (imageUrl ? [imageUrl] : []);
+      const postType = videoUrl ? 'video' : (imageUrl ? 'image' : 'text');
 
       const { data: post, error: postError } = await supabase
         .from('organization_posts')
@@ -197,6 +232,7 @@ Ultra high resolution, professional marketing quality`;
           success: true,
           content: generatedContent,
           imageUrl,
+          videoUrl,
           posted: !postError,
           postId: post?.id,
           message: postError ? 'تم إنشاء المحتوى لكن فشل النشر' : 'تم إنشاء ونشر المحتوى بنجاح'
@@ -210,8 +246,9 @@ Ultra high resolution, professional marketing quality`;
         success: true,
         content: generatedContent,
         imageUrl,
+        videoUrl,
         posted: false,
-        message: 'تم إنشاء المحتوى بنجاح'
+        message: videoUrl ? 'تم إنشاء الفيديو والمحتوى بنجاح' : 'تم إنشاء المحتوى والصورة بنجاح'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
