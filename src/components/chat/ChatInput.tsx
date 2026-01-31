@@ -30,10 +30,11 @@ interface ChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
   onSendFile: (file: File) => Promise<void>;
   sending: boolean;
+  uploadProgress?: number;
   disabled?: boolean;
 }
 
-const ChatInput = ({ onSendMessage, onSendFile, sending, disabled }: ChatInputProps) => {
+const ChatInput = ({ onSendMessage, onSendFile, sending, uploadProgress = 0, disabled }: ChatInputProps) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -248,9 +249,38 @@ const ChatInput = ({ onSendMessage, onSendFile, sending, disabled }: ChatInputPr
       "border-t border-border bg-background/80 backdrop-blur-sm",
       isMobile ? "p-2" : "p-3"
     )}>
+      {/* Upload Progress Indicator */}
+      <AnimatePresence>
+        {sending && uploadProgress > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <Loader2 className="w-5 h-5 text-primary animate-spin shrink-0" />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium">جاري الرفع...</span>
+                  <span className="text-sm font-mono text-primary">{uploadProgress}%</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${uploadProgress}%` }}
+                    className="h-full bg-primary rounded-full"
+                  />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* File Preview */}
       <AnimatePresence>
-        {selectedFile && (
+        {selectedFile && !sending && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}

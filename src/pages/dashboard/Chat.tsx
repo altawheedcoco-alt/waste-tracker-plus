@@ -44,6 +44,7 @@ const Chat = () => {
   const {
     messages,
     sending,
+    uploadProgress,
     sendMessage,
     sendFileMessage,
     soundEnabled,
@@ -423,6 +424,7 @@ const Chat = () => {
                     onSendMessage={handleSendMessage}
                     onSendFile={handleSendFile}
                     sending={sending}
+                    uploadProgress={uploadProgress}
                   />
                 </>
               ) : (
