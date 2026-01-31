@@ -269,6 +269,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       ? [
           { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals', key: 'company-approvals' },
           { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals', key: 'driver-approvals' },
+          { icon: FileText, label: 'طلبات المستندات', path: '/dashboard/report-requests', key: 'report-requests' },
           { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents', key: 'org-docs' },
           { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
           { icon: Truck, label: 'خريطة السائقين', path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
