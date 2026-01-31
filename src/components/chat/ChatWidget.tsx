@@ -1,31 +1,39 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Users, ArrowRight, Loader2 } from 'lucide-react';
+import { MessageCircle, X, Send, Building2, Truck, Recycle, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useChat, ChatRoom, ChatMessage } from '@/hooks/useChat';
+import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
+interface Partner {
+  id: string;
+  name: string;
+  organization_type: 'generator' | 'transporter' | 'recycler';
+  logo_url: string | null;
+}
+
 const ChatWidget = () => {
-  const { user, profile } = useAuth();
+  const { user, organization } = useAuth();
   const {
-    rooms,
-    currentRoom,
-    setCurrentRoom,
     messages,
     loading,
     sending,
     sendMessage,
-    getOrCreateGeneralRoom,
+    fetchMessagesForPartner,
   } = useChat();
 
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [view, setView] = useState<'rooms' | 'chat'>('rooms');
+  const [view, setView] = useState<'partners' | 'chat'>('partners');
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loadingPartners, setLoadingPartners] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom
@@ -33,17 +41,54 @@ const ChatWidget = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Join general room on open
-  const handleOpen = async () => {
-    setIsOpen(true);
-    if (rooms.length === 0) {
-      await getOrCreateGeneralRoom();
+  // Fetch partners on open
+  const fetchPartners = async () => {
+    if (!organization?.id) return;
+    
+    setLoadingPartners(true);
+    try {
+      const { data: shipments } = await supabase
+        .from('shipments')
+        .select('generator_id, transporter_id, recycler_id')
+        .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`);
+
+      const partnerIds = new Set<string>();
+      shipments?.forEach(shipment => {
+        if (shipment.generator_id && shipment.generator_id !== organization.id) {
+          partnerIds.add(shipment.generator_id);
+        }
+        if (shipment.transporter_id && shipment.transporter_id !== organization.id) {
+          partnerIds.add(shipment.transporter_id);
+        }
+        if (shipment.recycler_id && shipment.recycler_id !== organization.id) {
+          partnerIds.add(shipment.recycler_id);
+        }
+      });
+
+      if (partnerIds.size > 0) {
+        const { data: orgs } = await supabase
+          .from('organizations')
+          .select('id, name, organization_type, logo_url')
+          .in('id', Array.from(partnerIds))
+          .order('name');
+        
+        setPartners((orgs || []) as Partner[]);
+      }
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+    } finally {
+      setLoadingPartners(false);
     }
   };
 
+  const handleOpen = async () => {
+    setIsOpen(true);
+    await fetchPartners();
+  };
+
   const handleSend = async () => {
-    if (!inputValue.trim()) return;
-    await sendMessage(inputValue.trim());
+    if (!inputValue.trim() || !selectedPartner) return;
+    await sendMessage(inputValue.trim(), selectedPartner.id);
     setInputValue('');
   };
 
@@ -54,21 +99,23 @@ const ChatWidget = () => {
     }
   };
 
-  const handleSelectRoom = (room: ChatRoom) => {
-    setCurrentRoom(room);
+  const handleSelectPartner = async (partner: Partner) => {
+    setSelectedPartner(partner);
     setView('chat');
+    await fetchMessagesForPartner(partner.id);
   };
 
   const handleBack = () => {
-    setCurrentRoom(null);
-    setView('rooms');
+    setSelectedPartner(null);
+    setView('partners');
   };
 
-  const handleJoinGeneralChat = async () => {
-    const room = await getOrCreateGeneralRoom();
-    if (room) {
-      setCurrentRoom(room);
-      setView('chat');
+  const getOrgTypeIcon = (type: string) => {
+    switch (type) {
+      case 'generator': return Building2;
+      case 'transporter': return Truck;
+      case 'recycler': return Recycle;
+      default: return Building2;
     }
   };
 
@@ -98,7 +145,7 @@ const ChatWidget = () => {
             {/* Header */}
             <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {view === 'chat' && currentRoom && (
+                {view === 'chat' && selectedPartner && (
                   <Button
                     variant="ghost"
                     size="icon"
@@ -110,7 +157,7 @@ const ChatWidget = () => {
                 )}
                 <MessageCircle size={20} />
                 <span className="font-semibold">
-                  {view === 'rooms' ? 'المحادثات' : currentRoom?.name || 'محادثة'}
+                  {view === 'partners' ? 'المحادثات' : selectedPartner?.name || 'محادثة'}
                 </span>
               </div>
               <Button
@@ -124,12 +171,12 @@ const ChatWidget = () => {
             </div>
 
             {/* Content */}
-            {view === 'rooms' ? (
-              <RoomsList
-                rooms={rooms}
-                loading={loading}
-                onSelectRoom={handleSelectRoom}
-                onJoinGeneral={handleJoinGeneralChat}
+            {view === 'partners' ? (
+              <PartnersList
+                partners={partners}
+                loading={loadingPartners}
+                onSelectPartner={handleSelectPartner}
+                getOrgTypeIcon={getOrgTypeIcon}
               />
             ) : (
               <ChatView
@@ -140,7 +187,7 @@ const ChatWidget = () => {
             )}
 
             {/* Input (only in chat view) */}
-            {view === 'chat' && currentRoom && (
+            {view === 'chat' && selectedPartner && (
               <div className="p-3 border-t border-border bg-muted/30">
                 <div className="flex gap-2">
                   <Input
@@ -173,17 +220,17 @@ const ChatWidget = () => {
   );
 };
 
-// Rooms List Component
-const RoomsList = ({
-  rooms,
+// Partners List Component
+const PartnersList = ({
+  partners,
   loading,
-  onSelectRoom,
-  onJoinGeneral,
+  onSelectPartner,
+  getOrgTypeIcon,
 }: {
-  rooms: ChatRoom[];
+  partners: Partner[];
   loading: boolean;
-  onSelectRoom: (room: ChatRoom) => void;
-  onJoinGeneral: () => void;
+  onSelectPartner: (partner: Partner) => void;
+  getOrgTypeIcon: (type: string) => any;
 }) => {
   if (loading) {
     return (
@@ -196,57 +243,38 @@ const RoomsList = ({
   return (
     <ScrollArea className="flex-1">
       <div className="p-3 space-y-2">
-        {/* Join General Chat Button */}
-        <motion.button
-          onClick={onJoinGeneral}
-          className="w-full p-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors text-right flex items-center gap-3"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-            <Users size={20} />
-          </div>
-          <div className="flex-1">
-            <h4 className="font-semibold text-sm">المحادثة العامة</h4>
-            <p className="text-xs text-muted-foreground">تواصل مع جميع الجهات</p>
-          </div>
-        </motion.button>
+        {partners.map((partner) => {
+          const Icon = getOrgTypeIcon(partner.organization_type);
+          return (
+            <motion.button
+              key={partner.id}
+              onClick={() => onSelectPartner(partner)}
+              className="w-full p-3 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors text-right flex items-center gap-3"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                {partner.logo_url ? (
+                  <Avatar className="w-full h-full">
+                    <AvatarImage src={partner.logo_url} />
+                    <AvatarFallback><Icon size={20} className="text-primary" /></AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <Icon size={20} className="text-primary" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-sm truncate">{partner.name}</h4>
+              </div>
+            </motion.button>
+          );
+        })}
 
-        {/* Existing Rooms */}
-        {rooms.map((room) => (
-          <motion.button
-            key={room.id}
-            onClick={() => onSelectRoom(room)}
-            className="w-full p-3 rounded-xl bg-card border border-border hover:bg-muted/50 transition-colors text-right flex items-center gap-3"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-primary/20 text-primary">
-                {room.name?.[0] || 'م'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-sm truncate">{room.name || 'محادثة'}</h4>
-              {room.lastMessage && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {room.lastMessage.content}
-                </p>
-              )}
-            </div>
-            {room.lastMessage && (
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(room.lastMessage.created_at), 'HH:mm', { locale: ar })}
-              </span>
-            )}
-          </motion.button>
-        ))}
-
-        {rooms.length === 0 && (
+        {partners.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <MessageCircle className="mx-auto mb-2 opacity-50" size={32} />
-            <p className="text-sm">لا توجد محادثات</p>
-            <p className="text-xs">انضم للمحادثة العامة للبدء</p>
+            <p className="text-sm">لا يوجد شركاء للتواصل</p>
+            <p className="text-xs">الشركاء يظهرون عند إنشاء شحنات مشتركة</p>
           </div>
         )}
       </div>
