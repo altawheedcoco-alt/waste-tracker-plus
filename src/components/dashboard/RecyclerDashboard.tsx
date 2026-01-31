@@ -13,6 +13,7 @@ import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
+import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
 import {
   Package,
   Recycle,
@@ -287,10 +288,21 @@ const RecyclerDashboard = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard/shipments'}>
-              <Eye className="ml-2 h-4 w-4" />
-              عرض الكل
-            </Button>
+            <div className="flex items-center gap-2">
+              <RecyclerBulkStatusDropdown 
+                shipments={recentShipments.map(s => ({
+                  id: s.id,
+                  status: s.status,
+                  created_at: s.created_at,
+                  waste_type: s.waste_type,
+                }))}
+                onStatusChange={fetchDashboardData}
+              />
+              <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard/shipments'}>
+                <Eye className="ml-2 h-4 w-4" />
+                عرض الكل
+              </Button>
+            </div>
             <div className="text-right">
               <CardTitle className="flex items-center gap-2 justify-end">
                 <Recycle className="w-5 h-5" />
