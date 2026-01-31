@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import ResponsivePageContainer from '@/components/dashboard/ResponsivePageContainer';
+import ResponsiveGrid from '@/components/dashboard/ResponsiveGrid';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Bell,
   Package,
@@ -158,6 +160,9 @@ const Notifications = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [soundEnabled, setSoundEnabled] = useState(true);
+  
+  // Use display mode for responsive layout
+  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
   useEffect(() => {
     setSoundEnabled(isNotificationSoundEnabled());
@@ -226,42 +231,55 @@ const Notifications = () => {
     );
   }
 
+  // Get responsive grid columns for categories
+  const categoryGridCols = isMobile ? 2 : isTablet ? 3 : 6;
+  const iconSize = getResponsiveClass({
+    mobile: 'w-8 h-8',
+    tablet: 'w-10 h-10',
+    desktop: 'w-12 h-12',
+  });
+  const iconInnerSize = getResponsiveClass({
+    mobile: 'w-4 h-4',
+    tablet: 'w-5 h-5',
+    desktop: 'w-6 h-6',
+  });
+
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Back Button */}
-        <BackButton />
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">الإشعارات</h1>
-            <p className="text-muted-foreground">
-              جميع الإشعارات والتنبيهات الخاصة بك
-            </p>
-          </div>
-          <div className="flex gap-2">
+      <ResponsivePageContainer
+        title="الإشعارات"
+        subtitle="جميع الإشعارات والتنبيهات الخاصة بك"
+        actions={
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={handleTestSound}
               variant="outline"
-              size="sm"
+              size={isMobile ? 'sm' : 'default'}
               className="gap-2"
               disabled={!soundEnabled}
             >
               <Volume2 className="w-4 h-4" />
-              اختبار الصوت
+              {!isMobile && 'اختبار الصوت'}
             </Button>
             {unreadCount > 0 && (
-              <Button onClick={markAllAsRead} variant="outline" className="gap-2">
+              <Button 
+                onClick={markAllAsRead} 
+                variant="outline" 
+                size={isMobile ? 'sm' : 'default'}
+                className="gap-2"
+              >
                 <CheckCheck className="w-4 h-4" />
-                تحديد الكل كمقروء ({unreadCount})
+                {isMobile ? `(${unreadCount})` : `تحديد الكل كمقروء (${unreadCount})`}
               </Button>
             )}
           </div>
-        </div>
+        }
+      >
+        {/* Back Button */}
+        <BackButton />
 
-        {/* Category Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* Category Cards - Responsive Grid */}
+        <ResponsiveGrid cols={{ mobile: 2, tablet: 3, desktop: 6 }} gap="sm">
           {categories.map((category) => {
             const CategoryIcon = category.icon;
             const count = getCategoryCount(category.id);
@@ -282,19 +300,19 @@ const Notifications = () => {
                   }`}
                   onClick={() => setActiveCategory(category.id)}
                 >
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full ${category.bgColor} flex items-center justify-center relative`}>
-                        <CategoryIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${category.color}`} />
+                  <CardContent className={isMobile ? 'p-2' : 'p-3'}>
+                    <div className="flex flex-col items-center text-center gap-1.5">
+                      <div className={`${iconSize} rounded-full ${category.bgColor} flex items-center justify-center relative`}>
+                        <CategoryIcon className={`${iconInnerSize} ${category.color}`} />
                         {unreadCategoryCount > 0 && (
-                          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
+                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-medium">
                             {unreadCategoryCount > 9 ? '9+' : unreadCategoryCount}
                           </span>
                         )}
                       </div>
                       <div>
-                        <p className="text-xs sm:text-sm font-medium truncate">{category.label}</p>
-                        <p className="text-lg sm:text-xl font-bold">{count}</p>
+                        <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-medium truncate`}>{category.label}</p>
+                        <p className={`${isMobile ? 'text-base' : 'text-lg'} font-bold`}>{count}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -302,7 +320,7 @@ const Notifications = () => {
               </motion.div>
             );
           })}
-        </div>
+        </ResponsiveGrid>
 
         {/* Notifications List */}
         <Card>
@@ -478,7 +496,7 @@ const Notifications = () => {
           onNavigateToRequest={handleNavigateToRequest}
           onNavigateToCarbonFootprint={handleNavigateToCarbonFootprint}
         />
-      </div>
+      </ResponsivePageContainer>
     </DashboardLayout>
   );
 };

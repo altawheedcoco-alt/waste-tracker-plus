@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LucideIcon } from 'lucide-react';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
+import ResponsiveGrid from './ResponsiveGrid';
 
 export interface QuickAction {
   title: string;
@@ -24,22 +26,47 @@ const QuickActionsGrid = ({
   subtitle = 'الوظائف الإدارية المستخدمة بكثرة' 
 }: QuickActionsGridProps) => {
   const navigate = useNavigate();
+  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
+
+  const iconSize = getResponsiveClass({
+    mobile: 'w-8 h-8',
+    tablet: 'w-9 h-9',
+    desktop: 'w-10 h-10',
+  });
+
+  const iconInnerSize = getResponsiveClass({
+    mobile: 'w-4 h-4',
+    tablet: 'w-4.5 h-4.5',
+    desktop: 'w-5 h-5',
+  });
+
+  const titleClass = getResponsiveClass({
+    mobile: 'text-sm',
+    tablet: 'text-sm',
+    desktop: 'text-base',
+  });
+
+  const subtitleClass = getResponsiveClass({
+    mobile: 'text-[10px]',
+    tablet: 'text-xs',
+    desktop: 'text-xs',
+  });
 
   return (
     <Card>
-      <CardHeader className="text-right">
-        <CardTitle className="text-xl text-primary">{title}</CardTitle>
-        <CardDescription>{subtitle}</CardDescription>
+      <CardHeader className="text-right pb-3">
+        <CardTitle className={`${isMobile ? 'text-lg' : 'text-xl'} text-primary`}>{title}</CardTitle>
+        <CardDescription className={isMobile ? 'text-xs' : 'text-sm'}>{subtitle}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <ResponsiveGrid cols={{ mobile: 2, tablet: 3, desktop: 4 }} gap="sm">
           {actions.map((action, index) => (
             <motion.div
               key={`${action.title}-${index}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: 1.02, y: -4 }}
+              transition={{ delay: index * 0.03 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className="cursor-pointer"
               onClick={() => {
@@ -50,24 +77,24 @@ const QuickActionsGrid = ({
                 }
               }}
             >
-              <Card className="h-full border hover:border-primary/50 hover:shadow-lg transition-all duration-300 bg-card group">
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-3">
+              <Card className="h-full border hover:border-primary/50 hover:shadow-md transition-all duration-300 bg-card group">
+                <CardContent className={isMobile ? 'p-3' : 'p-4'}>
+                  <div className="flex items-start justify-between gap-2">
                     <motion.div 
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${action.iconBgClass || 'bg-primary/10'} group-hover:scale-110 transition-transform duration-300`}
+                      className={`${iconSize} rounded-lg flex items-center justify-center shrink-0 ${action.iconBgClass || 'bg-primary/10'} group-hover:scale-110 transition-transform duration-300`}
                     >
-                      <action.icon className={`w-5 h-5 ${action.iconBgClass ? 'text-white' : 'text-primary'}`} />
+                      <action.icon className={`${iconInnerSize} ${action.iconBgClass ? 'text-white' : 'text-primary'}`} />
                     </motion.div>
-                    <div className="flex-1 text-right">
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{action.title}</h3>
-                      <p className="text-xs text-muted-foreground mt-1">{action.subtitle}</p>
+                    <div className="flex-1 text-right min-w-0">
+                      <h3 className={`font-semibold text-foreground group-hover:text-primary transition-colors truncate ${titleClass}`}>{action.title}</h3>
+                      <p className={`text-muted-foreground mt-0.5 line-clamp-2 ${subtitleClass}`}>{action.subtitle}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           ))}
-        </div>
+        </ResponsiveGrid>
       </CardContent>
     </Card>
   );
