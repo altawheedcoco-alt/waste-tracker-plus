@@ -29,6 +29,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [currentPartnerId, setCurrentPartnerId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -209,22 +210,54 @@ export const useChat = () => {
     }
   }, [user, organization, currentPartnerId, toast]);
 
-  // Upload file and send as message
+  // Upload file and send as message with progress tracking
   const sendFileMessage = useCallback(async (file: File, receiverOrgId: string) => {
     if (!user || !organization) return;
 
     setSending(true);
+    setUploadProgress(0);
+    
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `chat-files/${organization.id}/${receiverOrgId}/${fileName}`;
 
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from('organization-documents')
-        .upload(filePath, file);
+      // Simulate upload progress using XMLHttpRequest for real progress tracking
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+      
+      const formData = new FormData();
+      formData.append('', file);
 
-      if (uploadError) throw uploadError;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const uploadUrl = `${supabaseUrl}/storage/v1/object/organization-documents/${filePath}`;
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        
+        xhr.upload.addEventListener('progress', (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(progress);
+          }
+        });
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Upload failed'));
+        });
+
+        xhr.open('POST', uploadUrl);
+        xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+        xhr.send(file);
+      });
 
       // Get public URL
       const { data: urlData } = supabase.storage
@@ -244,6 +277,7 @@ export const useChat = () => {
       });
     } finally {
       setSending(false);
+      setUploadProgress(0);
     }
   }, [user, organization, sendMessage, toast]);
 
@@ -349,6 +383,7 @@ export const useChat = () => {
     messages,
     loading,
     sending,
+    uploadProgress,
     sendMessage,
     sendFileMessage,
     fetchMessagesForPartner,
