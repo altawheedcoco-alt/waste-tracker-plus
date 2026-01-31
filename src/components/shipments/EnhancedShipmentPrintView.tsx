@@ -670,556 +670,222 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
             </Collapsible>
 
             <TabsContent value="preview" className="mt-0">
-              {/* Print Preview with Security Features */}
+              {/* Print Preview - Unified Format */}
               <div 
                 ref={printRef}
-                className="document-wrapper relative bg-white p-6 rounded-lg border-[3px] border-primary text-foreground print-content overflow-hidden"
-                style={{ direction: 'rtl' }}
+                className="bg-white p-3 rounded-lg border text-foreground"
+                style={{ direction: 'rtl', fontSize: '7pt' }}
               >
-                {/* Security Pattern Background */}
-                <div 
-                  className="security-pattern absolute inset-0 pointer-events-none z-0 opacity-[0.03]"
-                  style={{
-                    backgroundImage: `
-                      repeating-linear-gradient(45deg, hsl(var(--primary)) 0px, hsl(var(--primary)) 1px, transparent 1px, transparent 10px),
-                      repeating-linear-gradient(-45deg, hsl(var(--primary)) 0px, hsl(var(--primary)) 1px, transparent 1px, transparent 10px)
-                    `
-                  }}
-                />
-                
-                {/* Watermark */}
-                <div className="watermark absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -rotate-45 text-[60px] font-bold text-primary/[0.04] whitespace-nowrap pointer-events-none z-0 select-none">
-                  وثيقة رسمية - {documentSerial}
-                </div>
-                
-                {/* Security Border */}
-                <div className="security-border absolute inset-[5px] border border-dashed border-primary/30 rounded-md pointer-events-none z-0" />
-                
-                {/* Security Corners */}
-                <div className="security-corner absolute top-[10px] right-[10px] w-[30px] h-[30px] border-2 border-primary border-l-0 border-b-0 z-10" />
-                <div className="security-corner absolute top-[10px] left-[10px] w-[30px] h-[30px] border-2 border-primary border-r-0 border-b-0 z-10" />
-                <div className="security-corner absolute bottom-[10px] right-[10px] w-[30px] h-[30px] border-2 border-primary border-l-0 border-t-0 z-10" />
-                <div className="security-corner absolute bottom-[10px] left-[10px] w-[30px] h-[30px] border-2 border-primary border-r-0 border-t-0 z-10" />
-                
-                {/* Security Strip */}
-                <div 
-                  className="security-strip absolute right-0 top-0 bottom-0 w-2 z-10"
-                  style={{
-                    background: 'repeating-linear-gradient(0deg, hsl(var(--primary)) 0px, hsl(var(--primary)) 5px, hsl(var(--primary) / 0.2) 5px, hsl(var(--primary) / 0.2) 10px)'
-                  }}
-                />
-                
-                {/* Verification Badge */}
-                <div className="verification-badge absolute bottom-[15px] left-[15px] bg-gradient-to-br from-primary to-green-500 text-white px-3 py-1.5 rounded text-[9px] font-bold z-20 shadow-md">
-                  ✓ كود التحقق: {verificationCode}
-                </div>
-                
-                {/* Document Content */}
-                <div className="document-content relative z-[1]">
-                  {/* Document Header with QR and Logo */}
-                  <div className="document-header flex justify-between items-start mb-6 pb-4 border-b-2 border-primary">
-                  {/* Left side - QR Code and Barcode */}
-                  <div className="header-left flex flex-col items-center gap-2">
-                    <div className="flex items-center gap-3">
-                      {/* QR Code */}
-                      <div className="qr-container bg-white p-2 border rounded-lg">
-                        <QRCodeSVG value={qrData} size={70} level="M" />
-                      </div>
-                      {/* Linear Barcode */}
-                      <div className="barcode-container bg-white p-1 border rounded-lg overflow-hidden">
-                        <Barcode 
-                          value={shipment.shipment_number.replace('SHP-', '')} 
-                          width={1}
-                          height={50}
-                          fontSize={8}
-                          margin={2}
-                          displayValue={false}
-                        />
-                      </div>
-                    </div>
-                    <span className="text-xs text-muted-foreground font-mono">{documentSerial}</span>
-                  </div>
-                  
-                  {/* Center - Document Title and Info */}
-                  <div className="header-center text-center flex-1 px-4">
-                    <p className="doc-serial text-xs text-muted-foreground mb-1">رقم الوثيقة: {documentSerial}</p>
-                    <h1 className="text-xl font-bold text-primary mb-2">بيان نقل نفايات</h1>
-                    <div className="shipment-number inline-block bg-primary/10 px-3 py-1 rounded-lg font-mono text-base">
-                      {shipment.shipment_number}
-                    </div>
-                    <div className="mt-2">
-                      <span className="status-badge inline-block px-3 py-1 rounded-full text-xs bg-primary/10 text-primary">
-                        {statusLabels[shipment.status] || shipment.status}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Right side - Organization Logo */}
-                  <div className="header-right flex flex-col items-center gap-2">
-                    {shipment.generator?.logo_url ? (
-                      <img 
-                        src={shipment.generator.logo_url} 
-                        alt={shipment.generator.name}
-                        className="w-20 h-20 object-contain rounded-lg border bg-white p-1"
-                      />
-                    ) : shipment.transporter?.logo_url ? (
-                      <img 
-                        src={shipment.transporter.logo_url} 
-                        alt={shipment.transporter.name}
-                        className="w-20 h-20 object-contain rounded-lg border bg-white p-1"
-                      />
-                    ) : shipment.recycler?.logo_url ? (
-                      <img 
-                        src={shipment.recycler.logo_url} 
-                        alt={shipment.recycler.name}
-                        className="w-20 h-20 object-contain rounded-lg border bg-white p-1"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center bg-muted/30">
-                        <Factory className="w-8 h-8 text-muted-foreground/50" />
-                      </div>
-                    )}
-                    <span className="text-xs text-muted-foreground text-center max-w-20 truncate">
-                      {shipment.generator?.name || 'الشعار'}
-                    </span>
-                  </div>
-                </div>
+                <div className="page">
+                  {/* Header Table - Barcode left, QR right */}
+                  <table style={{ marginBottom: '6px', border: 'none', width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
+                          <div className="barcode-container bg-white p-1 border rounded overflow-hidden">
+                            <Barcode value={shipment.shipment_number.replace('SHP-', '')} width={1} height={35} fontSize={8} margin={2} displayValue={false} />
+                          </div>
+                          <div style={{ fontSize: '6pt', color: '#374151', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
+                        </td>
+                        <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
+                          <div style={{ fontSize: '14pt', fontWeight: 'bold', color: '#16a34a', marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
+                          <div style={{ fontSize: '9pt', color: '#6b7280', marginBottom: '6px' }}>Waste Transport Tracking Form</div>
+                          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ background: '#dcfce7', color: '#166534', padding: '3px 12px', borderRadius: '4px', fontSize: '8pt', fontWeight: '600', border: '1px solid #86efac' }}>
+                              {statusLabels[shipment.status] || shipment.status}
+                            </span>
+                            <span style={{ background: '#16a34a', color: 'white', padding: '3px 12px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
+                              {shipment.shipment_number}
+                            </span>
+                          </div>
+                        </td>
+                        <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
+                          <div className="qr-container bg-white p-2 border rounded-lg inline-block">
+                            <QRCodeSVG value={qrData} size={60} level="M" />
+                          </div>
+                          <div style={{ fontSize: '6pt', color: '#6b7280' }}>امسح للتتبع</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Basic Info Grid */}
-                <div className="section mb-5">
-                  <h3 className="section-title text-primary font-bold mb-3 pb-2 border-b text-sm flex items-center gap-2 justify-end">
-                    معلومات الشحنة الأساسية
-                    <Package className="w-4 h-4" />
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div className="info-box bg-muted/50 p-3 rounded-lg border">
-                      <div className="info-label text-xs text-muted-foreground mb-1">نوع النفايات</div>
-                      <div className="info-value font-medium text-sm">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</div>
-                    </div>
-                    <div className="info-box bg-muted/50 p-3 rounded-lg border">
-                      <div className="info-label text-xs text-muted-foreground mb-1">الكمية</div>
-                      <div className="info-value font-medium text-sm">{shipment.quantity} {shipment.unit}</div>
-                    </div>
-                    <div className="info-box bg-muted/50 p-3 rounded-lg border">
-                      <div className="info-label text-xs text-muted-foreground mb-1">مستوى الخطورة</div>
-                      <div className="info-value font-medium text-sm">{shipment.hazard_level ? hazardLabels[shipment.hazard_level] || shipment.hazard_level : '-'}</div>
-                    </div>
-                    <div className="info-box bg-muted/50 p-3 rounded-lg border">
-                      <div className="info-label text-xs text-muted-foreground mb-1">تاريخ الإنشاء</div>
-                      <div className="info-value font-medium text-sm">{format(new Date(shipment.created_at), 'dd/MM/yyyy', { locale: ar })}</div>
-                    </div>
-                  </div>
-                  
-                  {(shipment.packaging_method || shipment.disposal_method) && (
-                    <div className="grid grid-cols-2 gap-3 mt-3">
-                      {shipment.packaging_method && (
-                        <div className="info-box bg-muted/50 p-3 rounded-lg border">
-                          <div className="info-label text-xs text-muted-foreground mb-1">طريقة التغليف</div>
-                          <div className="info-value font-medium text-sm">{packagingLabels[shipment.packaging_method] || shipment.packaging_method}</div>
-                        </div>
-                      )}
-                      {shipment.disposal_method && (
-                        <div className="info-box bg-muted/50 p-3 rounded-lg border">
-                          <div className="info-label text-xs text-muted-foreground mb-1">طريقة التخلص</div>
-                          <div className="info-value font-medium text-sm">{disposalLabels[shipment.disposal_method] || shipment.disposal_method}</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
+                  {/* Shipment Details Table - Olive/Yellow Header */}
+                  <table style={{ borderCollapse: 'collapse', marginBottom: '2px', width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td colSpan={8} style={{ background: '#a3a23a', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #8b8a32' }}>بيانات الشحنة</td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '10%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>نوع المخلفات</td>
+                        <td style={{ width: '15%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '8%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الكمية</td>
+                        <td style={{ width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>مستوى الخطورة</td>
+                        <td style={{ width: '8%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{hazardLabels[shipment.hazard_level || ''] || shipment.hazard_level || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>تاريخ الاستلام</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.pickup_date ? format(new Date(shipment.pickup_date), 'dd/MM/yyyy', { locale: ar }) : '-'}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>طريقة التعبئة</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{packagingLabels[shipment.packaging_method || ''] || shipment.packaging_method || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>طريقة التخلص</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{disposalLabels[shipment.disposal_method || ''] || shipment.disposal_method || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>وصف المخلفات</td>
+                        <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.waste_description || '-'}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>موقع الاستلام</td>
+                        <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.pickup_address}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>موقع التسليم</td>
+                        <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.delivery_address}</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Addresses */}
-                <div className="section mb-5">
-                  <h3 className="section-title text-primary font-bold mb-3 pb-2 border-b text-sm flex items-center gap-2 justify-end">
-                    عناوين الشحنة
-                    <MapPin className="w-4 h-4" />
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="info-box bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200">
-                      <div className="info-label text-xs text-blue-600 mb-1 flex items-center gap-1 justify-end">
-                        عنوان الاستلام
-                        <MapPin className="w-3 h-3" />
-                      </div>
-                      <div className="info-value font-medium text-sm">{shipment.pickup_address}</div>
-                      {shipment.pickup_date && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          التاريخ: {format(new Date(shipment.pickup_date), 'dd/MM/yyyy', { locale: ar })}
-                        </div>
-                      )}
-                    </div>
-                    <div className="info-box bg-green-50 dark:bg-green-950/20 p-3 rounded-lg border border-green-200">
-                      <div className="info-label text-xs text-green-600 mb-1 flex items-center gap-1 justify-end">
-                        عنوان التسليم
-                        <MapPin className="w-3 h-3" />
-                      </div>
-                      <div className="info-value font-medium text-sm">{shipment.delivery_address}</div>
-                      {shipment.expected_delivery_date && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          المتوقع: {format(new Date(shipment.expected_delivery_date), 'dd/MM/yyyy', { locale: ar })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                  {/* Generator Section - Blue Header */}
+                  <table style={{ borderCollapse: 'collapse', marginBottom: '2px', width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td colSpan={8} style={{ background: '#3b82f6', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #2563eb' }}>
+                          بيانات الجهة المولدة: {shipment.generator?.name || '-'}
+                          {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#dbeafe', color: '#1e40af', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السجل التجاري</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.commercial_register || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رقم الموافقة البيئية</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.environmental_license || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>النشاط</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.activity_type || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>ممثل الجهة</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.representative_name || '-'}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>العنوان</td>
+                        <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.address || '-'} {shipment.generator?.city && `- ${shipment.generator.city}`}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الهاتف</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.phone || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البريد</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.email || '-'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Generator Organization */}
-                <div className="section mb-5">
-                  <h3 className="section-title text-primary font-bold mb-3 pb-2 border-b text-sm flex items-center gap-2 justify-end">
-                    بيانات الجهة المولدة للمخلفات
-                    <Factory className="w-4 h-4" />
-                  </h3>
-                  {shipment.generator ? (
-                    <div className="company-card bg-blue-50/50 dark:bg-blue-950/20 p-4 rounded-lg border border-blue-200">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                        <div className="col-span-2 md:col-span-3">
-                          <div className="info-label text-muted-foreground mb-1">اسم الجهة</div>
-                          <div className="info-value font-bold text-base flex items-center gap-2 flex-wrap">
-                            {shipment.generator.name}
-                            {shipment.generator.client_code && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-mono rounded">
-                                🆔 {shipment.generator.client_code}
-                              </span>
-                            )}
-                          </div>
-                          {shipment.generator.name_en && (
-                            <div className="text-muted-foreground text-xs" dir="ltr">{shipment.generator.name_en}</div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">السجل التجاري</div>
-                          <div className="info-value font-medium">س.ت: {shipment.generator.commercial_register || 'غير متوفر'}</div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">رقم الموافقة البيئية</div>
-                          <div className="info-value font-medium">م.ب: {shipment.generator.environmental_license || 'غير متوفر'}</div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">النشاط المسجل</div>
-                          <div className="info-value font-medium">{shipment.generator.activity_type || 'غير متوفر'}</div>
-                        </div>
-                        <div className="col-span-2 md:col-span-3">
-                          <div className="info-label text-muted-foreground mb-1">العنوان</div>
-                          <div className="info-value font-medium">
-                            {shipment.generator.address}
-                            {shipment.generator.city && ` - ${shipment.generator.city}`}
-                            {shipment.generator.region && ` - ${shipment.generator.region}`}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">الهاتف</div>
-                          <div className="info-value font-medium" dir="ltr">{shipment.generator.phone}</div>
-                          {shipment.generator.secondary_phone && (
-                            <div className="text-muted-foreground" dir="ltr">{shipment.generator.secondary_phone}</div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">البريد الإلكتروني</div>
-                          <div className="info-value font-medium" dir="ltr">{shipment.generator.email || 'غير متوفر'}</div>
-                        </div>
-                        {shipment.generator.representative_name && (
-                          <div>
-                            <div className="info-label text-muted-foreground mb-1">الممثل القانوني</div>
-                            <div className="info-value font-medium">{shipment.generator.representative_name}</div>
-                            {shipment.generator.representative_position && (
-                              <div className="text-muted-foreground">{shipment.generator.representative_position}</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">غير محدد</p>
-                  )}
-                </div>
+                  {/* Transporter Section - Yellow/Orange Header */}
+                  <table style={{ borderCollapse: 'collapse', marginBottom: '2px', width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td colSpan={8} style={{ background: '#eab308', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #ca8a04' }}>
+                          بيانات الجهة الناقلة: {shipment.transporter?.name || '-'}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السجل التجاري</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.commercial_register || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رقم الموافقة البيئية</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.environmental_license || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>النشاط</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.activity_type || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>ممثل الجهة</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.representative_name || '-'}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>العنوان</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.address || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الهاتف</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.phone || '-'}</td>
+                        <td style={{ background: '#fef3c7', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السائق</td>
+                        <td style={{ background: '#fefce8', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.driver?.profile?.full_name || shipment.manual_driver_name || '-'}</td>
+                        <td style={{ background: '#fef3c7', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>لوحة المركبة</td>
+                        <td style={{ background: '#fefce8', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.driver?.vehicle_plate || shipment.manual_vehicle_plate || '-'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Transporter Organization */}
-                <div className="section mb-5">
-                  <h3 className="section-title text-primary font-bold mb-3 pb-2 border-b text-sm flex items-center gap-2 justify-end">
-                    بيانات الجهة الناقلة
-                    <Truck className="w-4 h-4" />
-                  </h3>
-                  {shipment.transporter ? (
-                    <div className="company-card bg-amber-50/50 dark:bg-amber-950/20 p-4 rounded-lg border border-amber-200">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                        <div className="col-span-2 md:col-span-3">
-                          <div className="info-label text-muted-foreground mb-1">اسم الناقل</div>
-                          <div className="info-value font-bold text-base flex items-center gap-2 flex-wrap">
-                            {shipment.transporter.name}
-                            {shipment.transporter.client_code && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-mono rounded">
-                                🆔 {shipment.transporter.client_code}
-                              </span>
-                            )}
-                          </div>
-                          {shipment.transporter.name_en && (
-                            <div className="text-muted-foreground text-xs" dir="ltr">{shipment.transporter.name_en}</div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">السجل التجاري</div>
-                          <div className="info-value font-medium">س.ت: {shipment.transporter.commercial_register || 'غير متوفر'}</div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">رقم الموافقة البيئية</div>
-                          <div className="info-value font-medium">م.ب: {shipment.transporter.environmental_license || 'غير متوفر'}</div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">النشاط المسجل</div>
-                          <div className="info-value font-medium">{shipment.transporter.activity_type || 'غير متوفر'}</div>
-                        </div>
-                        <div className="col-span-2 md:col-span-3">
-                          <div className="info-label text-muted-foreground mb-1">العنوان</div>
-                          <div className="info-value font-medium">
-                            {shipment.transporter.address}
-                            {shipment.transporter.city && ` - ${shipment.transporter.city}`}
-                            {shipment.transporter.region && ` - ${shipment.transporter.region}`}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">الهاتف</div>
-                          <div className="info-value font-medium" dir="ltr">{shipment.transporter.phone}</div>
-                          {shipment.transporter.secondary_phone && (
-                            <div className="text-muted-foreground" dir="ltr">{shipment.transporter.secondary_phone}</div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">البريد الإلكتروني</div>
-                          <div className="info-value font-medium" dir="ltr">{shipment.transporter.email || 'غير متوفر'}</div>
-                        </div>
-                        {shipment.transporter.representative_name && (
-                          <div>
-                            <div className="info-label text-muted-foreground mb-1">الممثل القانوني</div>
-                            <div className="info-value font-medium">{shipment.transporter.representative_name}</div>
-                            {shipment.transporter.representative_position && (
-                              <div className="text-muted-foreground">{shipment.transporter.representative_position}</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">غير محدد</p>
-                  )}
-                </div>
+                  {/* Recycler Section - Green Header */}
+                  <table style={{ borderCollapse: 'collapse', marginBottom: '2px', width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td colSpan={8} style={{ background: '#22c55e', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #16a34a' }}>
+                          بيانات جهة التدوير: {shipment.recycler?.name || '-'}
+                          {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السجل التجاري</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.commercial_register || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رقم الموافقة البيئية</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.environmental_license || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>النشاط</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.activity_type || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>ممثل الجهة</td>
+                        <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.representative_name || '-'}</td>
+                      </tr>
+                      <tr>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>العنوان</td>
+                        <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.address || '-'} {shipment.recycler?.city && `- ${shipment.recycler.city}`}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الهاتف</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.phone || '-'}</td>
+                        <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البريد</td>
+                        <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.email || '-'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Recycler Organization */}
-                <div className="section mb-5">
-                  <h3 className="section-title text-primary font-bold mb-3 pb-2 border-b text-sm flex items-center gap-2 justify-end">
-                    بيانات جهة التدوير
-                    <Recycle className="w-4 h-4" />
-                  </h3>
-                  {shipment.recycler ? (
-                    <div className="company-card bg-green-50/50 dark:bg-green-950/20 p-4 rounded-lg border border-green-200">
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-                        <div className="col-span-2 md:col-span-3">
-                          <div className="info-label text-muted-foreground mb-1">اسم الجهة</div>
-                          <div className="info-value font-bold text-base flex items-center gap-2 flex-wrap">
-                            {shipment.recycler.name}
-                            {shipment.recycler.client_code && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-mono rounded">
-                                🆔 {shipment.recycler.client_code}
-                              </span>
-                            )}
+                  {/* Stamps and Signatures Table - Dark Green Header */}
+                  <table style={{ borderCollapse: 'collapse', marginBottom: '4px', width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td colSpan={3} style={{ background: '#166534', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #14532d' }}>الأختام والتوقيعات</td>
+                      </tr>
+                      <tr>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
+                          <div style={{ fontSize: '7pt', fontWeight: '600', color: '#1e40af', marginBottom: '4px' }}>الجهة المولدة</div>
+                        </td>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
+                          <div style={{ fontSize: '7pt', fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>الجهة الناقلة</div>
+                        </td>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
+                          <div style={{ fontSize: '7pt', fontWeight: '600', color: '#166534', marginBottom: '4px' }}>جهة التدوير</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: '1px solid #d1d5db', minHeight: '60px', height: '60px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
+                            {shipment.generator?.stamp_url && <img src={shipment.generator.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
+                            {shipment.generator?.signature_url && <img src={shipment.generator.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
                           </div>
-                          {shipment.recycler.name_en && (
-                            <div className="text-muted-foreground text-xs" dir="ltr">{shipment.recycler.name_en}</div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">السجل التجاري</div>
-                          <div className="info-value font-medium">س.ت: {shipment.recycler.commercial_register || 'غير متوفر'}</div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">رقم الموافقة البيئية</div>
-                          <div className="info-value font-medium">م.ب: {shipment.recycler.environmental_license || 'غير متوفر'}</div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">النشاط المسجل</div>
-                          <div className="info-value font-medium">{shipment.recycler.activity_type || 'غير متوفر'}</div>
-                        </div>
-                        <div className="col-span-2 md:col-span-3">
-                          <div className="info-label text-muted-foreground mb-1">العنوان</div>
-                          <div className="info-value font-medium">
-                            {shipment.recycler.address}
-                            {shipment.recycler.city && ` - ${shipment.recycler.city}`}
-                            {shipment.recycler.region && ` - ${shipment.recycler.region}`}
+                          <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '8px', paddingTop: '3px', fontSize: '6pt', color: '#6b7280' }}>التوقيع والختم</div>
+                        </td>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: '1px solid #d1d5db', minHeight: '60px', height: '60px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
+                            {shipment.transporter?.stamp_url && <img src={shipment.transporter.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
+                            {shipment.transporter?.signature_url && <img src={shipment.transporter.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
                           </div>
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">الهاتف</div>
-                          <div className="info-value font-medium" dir="ltr">{shipment.recycler.phone}</div>
-                          {shipment.recycler.secondary_phone && (
-                            <div className="text-muted-foreground" dir="ltr">{shipment.recycler.secondary_phone}</div>
-                          )}
-                        </div>
-                        <div>
-                          <div className="info-label text-muted-foreground mb-1">البريد الإلكتروني</div>
-                          <div className="info-value font-medium" dir="ltr">{shipment.recycler.email || 'غير متوفر'}</div>
-                        </div>
-                        {shipment.recycler.representative_name && (
-                          <div>
-                            <div className="info-label text-muted-foreground mb-1">الممثل القانوني</div>
-                            <div className="info-value font-medium">{shipment.recycler.representative_name}</div>
-                            {shipment.recycler.representative_position && (
-                              <div className="text-muted-foreground">{shipment.recycler.representative_position}</div>
-                            )}
+                          <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '8px', paddingTop: '3px', fontSize: '6pt', color: '#6b7280' }}>التوقيع والختم</div>
+                        </td>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: '1px solid #d1d5db', minHeight: '60px', height: '60px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
+                            {shipment.recycler?.stamp_url && <img src={shipment.recycler.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
+                            {shipment.recycler?.signature_url && <img src={shipment.recycler.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">غير محدد</p>
-                  )}
-                </div>
+                          <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '8px', paddingTop: '3px', fontSize: '6pt', color: '#6b7280' }}>التوقيع والختم</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
 
-                {/* Driver Info */}
-                {(shipment.driver || shipment.manual_driver_name) && (
-                  <div className="section mb-5">
-                    <h3 className="section-title text-primary font-bold mb-3 pb-2 border-b text-sm flex items-center gap-2 justify-end">
-                      معلومات السائق
-                      <User className="w-4 h-4" />
-                    </h3>
-                    <div className="info-box bg-muted/30 p-3 rounded-lg border max-w-md mr-auto">
-                      {shipment.driver ? (
-                        <div className="space-y-1 text-xs">
-                          <p className="font-semibold">{shipment.driver.profile?.full_name}</p>
-                          {shipment.driver.profile?.phone && (
-                            <p className="text-muted-foreground" dir="ltr">{shipment.driver.profile.phone}</p>
-                          )}
-                          <p className="text-muted-foreground">رقم الرخصة: {shipment.driver.license_number}</p>
-                          {shipment.driver.vehicle_plate && (
-                            <p className="text-muted-foreground">لوحة المركبة: {shipment.driver.vehicle_plate}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="space-y-1 text-xs">
-                          <p className="font-semibold">{shipment.manual_driver_name}</p>
-                          {shipment.manual_vehicle_plate && (
-                            <p className="text-muted-foreground">لوحة المركبة: {shipment.manual_vehicle_plate}</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Signature Area */}
-                <div className={`signature-area ${getLayoutClass()} mt-10 pt-6 border-t border-dashed`}>
-                  <div className={`signature-box text-center ${stampConfig.layout === 'compact' ? 'p-2' : 'p-4'} border rounded-lg`}>
-                    {stampConfig.showLabels && (
-                      <div className="signature-title font-bold text-xs mb-1">الشركة المولدة</div>
-                    )}
-                    <div 
-                      className={`stamp-area ${getBorderClass()} rounded-full mx-auto my-2 flex items-center justify-center text-xs text-muted-foreground overflow-hidden p-1`}
-                      style={getStampStyle()}
-                    >
-                      {shipment.generator?.stamp_url ? (
-                        <img 
-                          src={shipment.generator.stamp_url} 
-                          alt="ختم المولد" 
-                          className="w-full h-full object-contain"
-                          style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        />
-                      ) : (
-                        'الختم'
-                      )}
-                    </div>
-                    <div 
-                      className="signature-line border-t mt-4 pt-2 flex items-center justify-center"
-                      style={{ height: `${stampConfig.signatureSize + 16}px` }}
-                    >
-                      {shipment.generator?.signature_url ? (
-                        <img 
-                          src={shipment.generator.signature_url} 
-                          alt="توقيع المولد" 
-                          className="max-w-full object-contain"
-                          style={{ maxHeight: `${stampConfig.signatureSize}px`, width: 'auto' }}
-                        />
-                      ) : (
-                        <span className="text-xs text-muted-foreground">التوقيع والتاريخ</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className={`signature-box text-center ${stampConfig.layout === 'compact' ? 'p-2' : 'p-4'} border rounded-lg`}>
-                    {stampConfig.showLabels && (
-                      <div className="signature-title font-bold text-xs mb-1">شركة النقل</div>
-                    )}
-                    <div 
-                      className={`stamp-area ${getBorderClass()} rounded-full mx-auto my-2 flex items-center justify-center text-xs text-muted-foreground overflow-hidden p-1`}
-                      style={getStampStyle()}
-                    >
-                      {shipment.transporter?.stamp_url ? (
-                        <img 
-                          src={shipment.transporter.stamp_url} 
-                          alt="ختم الناقل" 
-                          className="w-full h-full object-contain"
-                          style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        />
-                      ) : (
-                        'الختم'
-                      )}
-                    </div>
-                    <div 
-                      className="signature-line border-t mt-4 pt-2 flex items-center justify-center"
-                      style={{ height: `${stampConfig.signatureSize + 16}px` }}
-                    >
-                      {shipment.transporter?.signature_url ? (
-                        <img 
-                          src={shipment.transporter.signature_url} 
-                          alt="توقيع الناقل" 
-                          className="max-w-full object-contain"
-                          style={{ maxHeight: `${stampConfig.signatureSize}px`, width: 'auto' }}
-                        />
-                      ) : (
-                        <span className="text-xs text-muted-foreground">التوقيع والتاريخ</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className={`signature-box text-center ${stampConfig.layout === 'compact' ? 'p-2' : 'p-4'} border rounded-lg`}>
-                    {stampConfig.showLabels && (
-                      <div className="signature-title font-bold text-xs mb-1">جهة إعادة التدوير</div>
-                    )}
-                    <div 
-                      className={`stamp-area ${getBorderClass()} rounded-full mx-auto my-2 flex items-center justify-center text-xs text-muted-foreground overflow-hidden p-1`}
-                      style={getStampStyle()}
-                    >
-                      {shipment.recycler?.stamp_url ? (
-                        <img 
-                          src={shipment.recycler.stamp_url} 
-                          alt="ختم المدور" 
-                          className="w-full h-full object-contain"
-                          style={{ maxWidth: '100%', maxHeight: '100%' }}
-                        />
-                      ) : (
-                        'الختم'
-                      )}
-                    </div>
-                    <div 
-                      className="signature-line border-t mt-4 pt-2 flex items-center justify-center"
-                      style={{ height: `${stampConfig.signatureSize + 16}px` }}
-                    >
-                      {shipment.recycler?.signature_url ? (
-                        <img 
-                          src={shipment.recycler.signature_url} 
-                          alt="توقيع المدور" 
-                          className="max-w-full object-contain"
-                          style={{ maxHeight: `${stampConfig.signatureSize}px`, width: 'auto' }}
-                        />
-                      ) : (
-                        <span className="text-xs text-muted-foreground">التوقيع والتاريخ</span>
-                      )}
+                  {/* Footer */}
+                  <div style={{ textAlign: 'center', fontSize: '6pt', color: '#9ca3af', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
+                    <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
+                    <div style={{ marginTop: '2px' }}>رقم التتبع: {shipment.shipment_number} | رقم الوثيقة: {documentSerial}</div>
+                    <div style={{ marginTop: '3px', fontSize: '5pt', fontStyle: 'italic', color: '#a1a1aa' }}>
+                      إخلاء مسؤولية: هذا المستند تم إنشاؤه آلياً بناءً على البيانات المدخلة، والمنصة غير مسؤولة عن صحة المعلومات الواردة فيه.
                     </div>
                   </div>
                 </div>
-
-                {/* Footer */}
-                <div className="footer mt-8 pt-4 border-t text-center text-xs text-muted-foreground">
-                  <p>تم إنشاء هذه الوثيقة إلكترونياً - {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
-                  <p className="mt-1">رقم الوثيقة: {documentSerial} | رقم الشحنة: {shipment.shipment_number}</p>
-                  <p className="mt-1 font-mono text-[10px] text-primary/70">كود التحقق: {verificationCode}</p>
-                </div>
-                </div>{/* End document-content */}
-              </div>{/* End document-wrapper */}
+              </div>
             </TabsContent>
 
             <TabsContent value="details" className="mt-0">
