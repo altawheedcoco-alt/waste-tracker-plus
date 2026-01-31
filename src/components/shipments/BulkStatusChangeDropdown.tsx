@@ -84,10 +84,28 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
     return shipments.filter(s => s.waste_type === wasteType);
   };
 
+  // Get eligible shipments for a specific status (only apply once - sequential flow)
+  const getEligibleShipments = (targetShipments: Shipment[], targetStatus: string) => {
+    // Define which current statuses can transition to the target status (sequential flow)
+    const eligibleCurrentStatuses: Record<string, string[]> = {
+      approved: ['new'],           // Only new can become approved
+      collecting: ['approved'],    // Only approved can become collecting
+      in_transit: ['collecting'],  // Only collecting can become in_transit
+      delivered: ['in_transit'],   // Only in_transit can become delivered
+      confirmed: ['delivered'],    // Only delivered can become confirmed
+    };
+    
+    const allowedStatuses = eligibleCurrentStatuses[targetStatus] || [];
+    return targetShipments.filter(s => allowedStatuses.includes(s.status));
+  };
+
   // Bulk update status
   const handleBulkStatusChange = async (targetShipments: Shipment[], newStatus: string) => {
-    if (targetShipments.length === 0) {
-      toast.error('لا توجد شحنات للتحديث');
+    // Filter to only eligible shipments
+    const eligibleShipments = getEligibleShipments(targetShipments, newStatus);
+    
+    if (eligibleShipments.length === 0) {
+      toast.error('لا توجد شحنات قابلة للتحديث (تم تحديثها مسبقاً أو غير جاهزة)');
       return;
     }
 
@@ -115,7 +133,7 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
           break;
       }
 
-      const shipmentIds = targetShipments.map(s => s.id);
+      const shipmentIds = eligibleShipments.map(s => s.id);
 
       const { error } = await supabase
         .from('shipments')
@@ -137,7 +155,7 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
           const logs = shipmentIds.map(id => ({
             shipment_id: id,
             status: newStatus as any,
-            notes: `تحديث جماعي - ${targetShipments.length} شحنة`,
+            notes: `تحديث جماعي - ${eligibleShipments.length} شحنة`,
             changed_by: profileData.id,
           }));
 
@@ -146,7 +164,7 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
       }
 
       const statusLabel = statusOptions.find(s => s.value === newStatus)?.label || newStatus;
-      toast.success(`تم تحديث ${targetShipments.length} شحنة إلى "${statusLabel}"`);
+      toast.success(`تم تحديث ${eligibleShipments.length} شحنة إلى "${statusLabel}"`);
       onStatusChange();
     } catch (error) {
       console.error('Error bulk updating status:', error);
