@@ -1,18 +1,17 @@
 import { useRef, useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, 
   FileText, 
-  Image as ImageIcon,
   Download,
   Play,
   Pause,
-  Video,
-  Mic
+  X
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ChatMessage } from '@/hooks/useChat';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -115,6 +114,7 @@ const VoiceMessagePlayer = ({ url, isOwn }: { url: string; isOwn: boolean }) => 
 const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useDisplayMode();
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -276,8 +276,8 @@ const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) 
                             <img
                               src={fileUrl}
                               alt={fileName || 'صورة'}
-                              className="rounded-lg max-w-[250px] cursor-pointer"
-                              onClick={() => window.open(fileUrl, '_blank')}
+                              className="rounded-lg max-w-[250px] cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => setPreviewImage(fileUrl)}
                             />
                           )}
 
@@ -344,6 +344,34 @@ const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) 
         ))}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Image Preview Modal */}
+      <Dialog open={!!previewImage} onOpenChange={() => setPreviewImage(null)}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-black/95 border-none">
+          <div className="relative flex items-center justify-center">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute top-2 right-2 z-10 h-10 w-10 rounded-full bg-black/50 hover:bg-black/70 text-white"
+              onClick={() => setPreviewImage(null)}
+            >
+              <X className="w-5 h-5" />
+            </Button>
+            <AnimatePresence>
+              {previewImage && (
+                <motion.img
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  src={previewImage}
+                  alt="معاينة الصورة"
+                  className="max-w-full max-h-[85vh] object-contain rounded-lg"
+                />
+              )}
+            </AnimatePresence>
+          </div>
+        </DialogContent>
+      </Dialog>
     </ScrollArea>
   );
 };
