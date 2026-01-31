@@ -266,7 +266,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
     }
   }, [shipment?.id, loading]);
 
-  const shipmentUrl = shipment ? `${window.location.origin}/dashboard/shipments?highlight=${shipment.id}` : '';
+  const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
   const handleDownloadPDF = async () => {
     if (!pdfRef.current || !shipment) return;

@@ -133,8 +133,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
 
-  // Generate shipment URL for QR code
-  const shipmentUrl = shipment ? `${window.location.origin}/dashboard/shipments?highlight=${shipment.id}` : '';
+  // Generate verification URL for QR code
+  const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
   // Convert QR canvas to data URL for printing
   useEffect(() => {

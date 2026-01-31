@@ -141,12 +141,12 @@ const RecyclingCertificatePrint = ({
         {/* QR Code */}
         <div className="text-center print-qr">
           <QRCodeSVG
-            value={`RECYCLING-CERT-${shipment.shipment_number}`}
+            value={`${window.location.origin}/verify?type=certificate&code=${shipment.shipment_number}`}
             size={50}
             level="M"
             includeMargin={false}
           />
-          <p style={{ fontSize: '7pt', color: '#6b7280', marginTop: '2px' }}>رمز التحقق</p>
+          <p style={{ fontSize: '7pt', color: '#6b7280', marginTop: '2px' }}>امسح للتحقق</p>
         </div>
 
         {/* Title */}
