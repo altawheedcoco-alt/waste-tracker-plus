@@ -25,6 +25,9 @@ import {
   Building2,
   User,
   ArrowLeftRight,
+  Download,
+  Printer,
+  Eye,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -38,6 +41,7 @@ interface Notification {
   created_at: string;
   shipment_id: string | null;
   request_id: string | null;
+  pdf_url?: string | null;
 }
 
 interface SenderReceiverInfo {
@@ -380,6 +384,64 @@ const NotificationDetailDialog = ({
           <div className="p-4 rounded-lg bg-muted/50">
             <p className="text-sm leading-relaxed">{notification.message}</p>
           </div>
+
+          {/* PDF Attachment Section */}
+          {notification.pdf_url && (
+            <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-emerald-800 dark:text-emerald-300">شهادة إعادة التدوير</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">ملف PDF مرفق</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+                  onClick={() => window.open(notification.pdf_url!, '_blank')}
+                >
+                  <Eye className="w-4 h-4" />
+                  عرض الملف
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = notification.pdf_url!;
+                    link.download = `شهادة-تدوير-${notification.shipment_id || 'report'}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                >
+                  <Download className="w-4 h-4" />
+                  تنزيل
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+                  onClick={() => {
+                    const printWindow = window.open(notification.pdf_url!, '_blank');
+                    if (printWindow) {
+                      printWindow.onload = () => {
+                        printWindow.print();
+                      };
+                    }
+                  }}
+                >
+                  <Printer className="w-4 h-4" />
+                  طباعة
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Timestamp */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

@@ -13,9 +13,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { useReportTemplates, ReportTemplate, getWasteCategoryFromType, systemTemplates } from '@/hooks/useReportTemplates';
 import { useRecyclingReports } from '@/hooks/useRecyclingReports';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import {
   FileText,
   Printer,
@@ -33,6 +36,7 @@ import {
   Settings,
   Save,
   CheckCircle,
+  Send,
 } from 'lucide-react';
 import RecyclingCertificatePrint from './RecyclingCertificatePrint';
 import CreateTemplateDialog from './CreateTemplateDialog';
@@ -124,7 +128,8 @@ const RecyclingCertificateDialog = ({
   });
   
   const { templates, loading: templatesLoading, getApplicableTemplates, incrementUsage } = useReportTemplates();
-  const { saveReport, loading: savingReport, getReportByShipmentId } = useRecyclingReports();
+  const { saveReport, loading: savingReport, getReportByShipmentId, updateReportPdfUrl } = useRecyclingReports();
+  const [isSendingPdf, setIsSendingPdf] = useState(false);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [customNotes, setCustomNotes] = useState('');
@@ -234,6 +239,119 @@ const RecyclingCertificateDialog = ({
     if (result) {
       setIsSaved(true);
       setExistingReportId(result.id);
+    }
+  };
+
+  // Generate PDF blob and upload to storage
+  const generatePdfBlob = async (): Promise<Blob | null> => {
+    if (!printRef.current) {
+      toast.error('لا يوجد محتوى للتصدير');
+      return null;
+    }
+
+    try {
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      return pdf.output('blob');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      return null;
+    }
+  };
+
+  // Save PDF and send notification
+  const handleSaveAndSendPdf = async () => {
+    if (!existingReportId && !isSaved) {
+      toast.error('يرجى حفظ التقرير أولاً');
+      return;
+    }
+
+    setIsSendingPdf(true);
+    try {
+      // Generate PDF blob
+      const pdfBlob = await generatePdfBlob();
+      if (!pdfBlob) {
+        toast.error('فشل في إنشاء ملف PDF');
+        return;
+      }
+
+      // Upload to storage
+      const fileName = `${shipment.shipment_number}-${Date.now()}.pdf`;
+      const filePath = `${shipment.id}/${fileName}`;
+      
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('recycling-certificates')
+        .upload(filePath, pdfBlob, {
+          contentType: 'application/pdf',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error('فشل في رفع ملف PDF');
+        return;
+      }
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('recycling-certificates')
+        .getPublicUrl(filePath);
+
+      const pdfUrl = publicUrlData.publicUrl;
+
+      // Update report with PDF URL
+      if (existingReportId) {
+        await updateReportPdfUrl(existingReportId, pdfUrl);
+      }
+
+      // Update existing notifications with PDF URL for this shipment
+      const { error: notifyError } = await supabase
+        .from('notifications')
+        .update({ pdf_url: pdfUrl } as any)
+        .eq('shipment_id', shipment.id)
+        .eq('type', 'recycling_report');
+
+      if (notifyError) {
+        console.error('Error updating notifications:', notifyError);
+      }
+
+      toast.success('تم حفظ وإرسال ملف PDF بنجاح');
+    } catch (error) {
+      console.error('Error saving PDF:', error);
+      toast.error('حدث خطأ أثناء حفظ ملف PDF');
+    } finally {
+      setIsSendingPdf(false);
     }
   };
 
@@ -620,7 +738,7 @@ const RecyclingCertificateDialog = ({
                 <Button variant="outline" onClick={() => setActiveTab('write')}>
                   العودة للتعديل
                 </Button>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button 
                     variant={isSaved ? "secondary" : "default"}
                     onClick={handleSaveReport} 
@@ -634,8 +752,23 @@ const RecyclingCertificateDialog = ({
                     ) : (
                       <Save className="w-4 h-4" />
                     )}
-                    {isSaved ? 'تم الحفظ' : 'حفظ وإرسال الإشعارات'}
+                    {isSaved ? 'تم الحفظ' : 'حفظ التقرير'}
                   </Button>
+                  {isSaved && (
+                    <Button 
+                      variant="default"
+                      onClick={handleSaveAndSendPdf} 
+                      disabled={isSendingPdf} 
+                      className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                    >
+                      {isSendingPdf ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      حفظ وإرسال PDF
+                    </Button>
+                  )}
                   <Button variant="outline" onClick={handlePrint} className="gap-2">
                     <Printer className="w-4 h-4" />
                     طباعة

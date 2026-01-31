@@ -126,6 +126,7 @@ interface Notification {
   created_at: string;
   shipment_id: string | null;
   request_id: string | null;
+  pdf_url?: string | null;
 }
 
 interface CategoryConfig {

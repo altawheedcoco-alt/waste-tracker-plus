@@ -12,6 +12,7 @@ interface Notification {
   created_at: string;
   shipment_id: string | null;
   request_id: string | null;
+  pdf_url: string | null;
 }
 
 export const useNotifications = () => {
@@ -25,8 +26,8 @@ export const useNotifications = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('notifications')
+      const { data, error } = await (supabase
+        .from('notifications') as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -34,8 +35,8 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+      setNotifications((data || []) as Notification[]);
+      setUnreadCount(data?.filter((n: Notification) => !n.is_read).length || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
