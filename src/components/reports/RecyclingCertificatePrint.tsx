@@ -350,9 +350,9 @@ const RecyclingCertificatePrint = ({
         )}
       </div>
 
-      {/* Signature Section */}
+      {/* Signature Section - Right Aligned */}
       <div className="pt-2 mt-2 print-signatures print-avoid-break" style={{ borderTop: '1px solid #d1d5db' }}>
-        <div className="flex justify-end">
+        <div className="flex justify-start" style={{ direction: 'ltr' }}>
           {/* Recycler Signature */}
           <div className="text-center" style={{ width: '50%' }}>
             <p className="font-bold mb-1" style={{ color: '#1f2937', fontSize: '8pt' }}>التوقيع والختم</p>
