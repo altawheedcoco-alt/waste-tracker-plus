@@ -62,7 +62,6 @@ import {
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import OfficialReportPrint from '@/components/reports/OfficialReportPrint';
-import ReportRequestWrapper from '@/components/reports/ReportRequestWrapper';
 
 interface ReportData {
   shipmentsByStatus: { name: string; value: number; color: string }[];
@@ -289,31 +288,25 @@ const Reports = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ReportRequestWrapper
-              reportType="statistics_report"
-              reportTitle="التقرير الإحصائي الرسمي"
-              resourceData={{ period, statusFilter, wasteTypeFilter, fromDate: fromDate?.toISOString(), toDate: toDate?.toISOString() }}
-            >
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <FileText className="w-4 h-4" />
-                    التقرير الرسمي (طراز 1919)
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="text-right">التقرير الإحصائي الرسمي</DialogTitle>
-                  </DialogHeader>
-                  <OfficialReportPrint 
-                    data={data} 
-                    period={period} 
-                    includeStamps={includeStamps}
-                    includeSignatures={includeSignatures}
-                  />
-                </DialogContent>
-              </Dialog>
-            </ReportRequestWrapper>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  التقرير الرسمي (طراز 1919)
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-right">التقرير الإحصائي الرسمي</DialogTitle>
+                </DialogHeader>
+                <OfficialReportPrint 
+                  data={data} 
+                  period={period} 
+                  includeStamps={includeStamps}
+                  includeSignatures={includeSignatures}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="text-right">
             <h1 className="text-3xl font-bold">التقارير والإحصائيات</h1>
@@ -467,31 +460,25 @@ const Reports = () => {
                   <RefreshCw className="w-4 h-4" />
                   تحديث البيانات
                 </Button>
-                <ReportRequestWrapper
-                  reportType="statistics_report"
-                  reportTitle="التقرير الإحصائي الرسمي - طباعة"
-                  resourceData={{ period, statusFilter, wasteTypeFilter, fromDate: fromDate?.toISOString(), toDate: toDate?.toISOString() }}
-                >
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="gap-2">
-                        <Printer className="w-4 h-4" />
-                        طباعة التقرير
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle className="text-right">التقرير الإحصائي الرسمي</DialogTitle>
-                      </DialogHeader>
-                      <OfficialReportPrint 
-                        data={data} 
-                        period={period}
-                        includeStamps={includeStamps}
-                        includeSignatures={includeSignatures}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                </ReportRequestWrapper>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Printer className="w-4 h-4" />
+                      طباعة التقرير
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-right">التقرير الإحصائي الرسمي</DialogTitle>
+                    </DialogHeader>
+                    <OfficialReportPrint 
+                      data={data} 
+                      period={period}
+                      includeStamps={includeStamps}
+                      includeSignatures={includeSignatures}
+                    />
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </CardContent>
