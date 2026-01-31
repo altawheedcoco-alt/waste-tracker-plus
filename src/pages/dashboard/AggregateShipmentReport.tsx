@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -37,7 +37,9 @@ import {
   Share2,
   CheckCircle2,
   Send,
-  X
+  X,
+  Eye,
+  Save
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
@@ -45,6 +47,9 @@ import { ar } from 'date-fns/locale';
 import BackButton from '@/components/ui/back-button';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { motion, AnimatePresence } from 'framer-motion';
+import AggregateReportPrint from '@/components/reports/AggregateReportPrint';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface ShipmentData {
   id: string;
@@ -109,14 +114,151 @@ const AggregateShipmentReport = () => {
   const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
   const [isSharing, setIsSharing] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  
-  const { exportToPDF, isExporting: isExportingPDF } = usePDFExport({
-    filename: 'تقرير-مجمع-الشحنات',
-    orientation: 'landscape',
-  });
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [isSavingToStorage, setIsSavingToStorage] = useState(false);
 
-  const handleExportPDF = async () => {
-    await exportToPDF(printRef.current, 'تقرير-مجمع-الشحنات');
+  // Generate PDF from the print component
+  const generatePDF = useCallback(async (): Promise<Blob | null> => {
+    const element = printRef.current;
+    if (!element) {
+      toast.error('لا يوجد محتوى للتصدير');
+      return null;
+    }
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      return pdf.output('blob');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      return null;
+    }
+  }, []);
+
+  // Download PDF directly
+  const handleDownloadPDF = async () => {
+    setIsExportingPDF(true);
+    try {
+      const pdfBlob = await generatePDF();
+      if (pdfBlob) {
+        const dateStr = format(new Date(), 'yyyy-MM-dd');
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `تقرير-مجمع-الشحنات-${dateStr}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success('تم تحميل التقرير بنجاح');
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('حدث خطأ أثناء تحميل التقرير');
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
+
+  // Save PDF to storage and share
+  const handleSaveAndShare = async () => {
+    if (selectedPartners.length === 0) {
+      toast.error('يرجى اختيار جهة واحدة على الأقل للمشاركة');
+      return;
+    }
+
+    setIsSavingToStorage(true);
+    try {
+      // Generate PDF
+      const pdfBlob = await generatePDF();
+      if (!pdfBlob) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      // Generate unique filename
+      const reportNumber = `AGR-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      const fileName = `${reportNumber}.pdf`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('recycling-certificates')
+        .upload(`aggregate-reports/${fileName}`, pdfBlob, {
+          contentType: 'application/pdf',
+          upsert: true,
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('recycling-certificates')
+        .getPublicUrl(`aggregate-reports/${fileName}`);
+
+      const pdfUrl = urlData?.publicUrl;
+
+      // Get user IDs for selected partner organizations
+      const { data: partnerProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, organization_id')
+        .in('organization_id', selectedPartners)
+        .eq('is_active', true);
+
+      if (partnerProfiles && partnerProfiles.length > 0) {
+        const notifications = partnerProfiles.map(p => ({
+          user_id: p.user_id,
+          title: 'تقرير مجمع للشحنات',
+          message: `شاركت ${organization?.name} تقريرًا مجمعًا للشحنات يتضمن ${filteredShipments.length} شحنة`,
+          type: 'aggregate_report',
+          pdf_url: pdfUrl,
+        }));
+
+        const { error: notifError } = await supabase.from('notifications').insert(notifications);
+        if (notifError) throw notifError;
+      }
+
+      const selectedPartnersData = partnerOrganizations.filter(p => selectedPartners.includes(p.id));
+      toast.success(`تم حفظ التقرير ومشاركته مع ${selectedPartnersData.map(p => p.name).join('، ')}`);
+      setShowShareDialog(false);
+      setSelectedPartners([]);
+    } catch (error) {
+      console.error('Error saving and sharing report:', error);
+      toast.error('حدث خطأ أثناء حفظ ومشاركة التقرير');
+    } finally {
+      setIsSavingToStorage(false);
+    }
   };
 
   const { data: shipments = [], isLoading, refetch } = useQuery({
@@ -268,46 +410,8 @@ const AggregateShipmentReport = () => {
     }, 500);
   };
 
-  const handleShare = async () => {
-    if (selectedPartners.length === 0) {
-      toast.error('يرجى اختيار جهة واحدة على الأقل للمشاركة');
-      return;
-    }
-
-    setIsSharing(true);
-    try {
-      // Create notifications for selected partners
-      const selectedPartnersData = partnerOrganizations.filter(p => selectedPartners.includes(p.id));
-      
-      // Get user IDs for selected partner organizations
-      const { data: partnerProfiles } = await supabase
-        .from('profiles')
-        .select('user_id, organization_id')
-        .in('organization_id', selectedPartners)
-        .eq('is_active', true);
-
-      if (partnerProfiles && partnerProfiles.length > 0) {
-        const notifications = partnerProfiles.map(p => ({
-          user_id: p.user_id,
-          title: 'تقرير مجمع مشترك',
-          message: `شاركت ${organization?.name} تقريرًا مجمعًا للشحنات يتضمن ${filteredShipments.length} شحنة`,
-          type: 'report_shared'
-        }));
-
-        const { error } = await supabase.from('notifications').insert(notifications);
-        if (error) throw error;
-      }
-
-      toast.success(`تم مشاركة التقرير مع ${selectedPartnersData.map(p => p.name).join('، ')}`);
-      setShowShareDialog(false);
-      setSelectedPartners([]);
-    } catch (error) {
-      console.error('Error sharing report:', error);
-      toast.error('حدث خطأ أثناء مشاركة التقرير');
-    } finally {
-      setIsSharing(false);
-    }
-  };
+  // Legacy handleShare kept for backward compatibility (redirects to new method)
+  const handleShare = handleSaveAndShare;
 
   const togglePartnerSelection = (partnerId: string) => {
     setSelectedPartners(prev => 
@@ -504,11 +608,20 @@ const AggregateShipmentReport = () => {
                 <RefreshCw className="w-4 h-4" />
                 تحديث البيانات
               </Button>
+              <Button 
+                onClick={() => setShowPreviewDialog(true)} 
+                disabled={filteredShipments.length === 0}
+                variant="outline"
+                className="gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                معاينة التقرير
+              </Button>
               <Button onClick={handlePrint} disabled={filteredShipments.length === 0 || isPrinting} className="gap-2">
                 {isPrinting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
                 طباعة التقرير
               </Button>
-              <Button onClick={handleExportPDF} disabled={filteredShipments.length === 0 || isExportingPDF} variant="secondary" className="gap-2">
+              <Button onClick={handleDownloadPDF} disabled={filteredShipments.length === 0 || isExportingPDF} variant="secondary" className="gap-2">
                 {isExportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                 تحميل PDF
               </Button>
@@ -519,7 +632,7 @@ const AggregateShipmentReport = () => {
                 className="gap-2"
               >
                 <Share2 className="w-4 h-4" />
-                مشاركة مع جهات
+                مشاركة وإرسال
               </Button>
             </div>
           </CardContent>
@@ -860,16 +973,57 @@ const AggregateShipmentReport = () => {
               إلغاء
             </Button>
             <Button 
-              onClick={handleShare} 
-              disabled={selectedPartners.length === 0 || isSharing}
+              onClick={handleSaveAndShare} 
+              disabled={selectedPartners.length === 0 || isSavingToStorage}
               className="gap-2"
             >
-              {isSharing ? (
+              {isSavingToStorage ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <Send className="w-4 h-4" />
               )}
-              مشاركة التقرير
+              حفظ وإرسال التقرير
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              معاينة التقرير المجمع
+            </DialogTitle>
+            <DialogDescription>
+              معاينة التقرير قبل الطباعة أو التحميل
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="border rounded-lg overflow-hidden">
+            <div ref={printRef}>
+              <AggregateReportPrint
+                shipments={filteredShipments}
+                organization={organization}
+                includeStamps={includeStamps}
+                includeSignatures={includeSignatures}
+                dateRange={{ start: startDate, end: endDate }}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 mt-4">
+            <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>
+              إغلاق
+            </Button>
+            <Button onClick={handlePrint} disabled={isPrinting} className="gap-2">
+              {isPrinting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+              طباعة
+            </Button>
+            <Button onClick={handleDownloadPDF} disabled={isExportingPDF} variant="secondary" className="gap-2">
+              {isExportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              تحميل PDF
             </Button>
           </DialogFooter>
         </DialogContent>
