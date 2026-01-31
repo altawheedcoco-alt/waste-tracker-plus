@@ -344,23 +344,35 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
       return;
     }
 
+    // Handle manual entries - extract actual IDs or null
+    const isManualGenerator = formData.generator_id.startsWith('manual:');
+    const isManualRecycler = formData.recycler_id.startsWith('manual:');
+    const isManualTransporter = formData.transporter_id.startsWith('manual:');
+    
+    const generatorId = isManualGenerator ? null : formData.generator_id;
+    const recyclerId = isManualRecycler ? null : formData.recycler_id;
+    const manualGeneratorName = isManualGenerator ? formData.generator_id.replace('manual:', '') : null;
+    const manualRecyclerName = isManualRecycler ? formData.recycler_id.replace('manual:', '') : null;
+    const manualTransporterName = isManualTransporter ? formData.transporter_id.replace('manual:', '') : null;
+
     // Determine transporter_id and driver_id based on user role
-    let transporterId: string | undefined;
+    let transporterId: string | null = null;
     let driverId: string | null = null;
 
     if (isDriver) {
-      transporterId = driverOrganization?.id;
+      transporterId = driverOrganization?.id || null;
       driverId = driverInfo?.id || null;
     } else if (isAdmin) {
-      transporterId = formData.transporter_id;
+      transporterId = isManualTransporter ? null : (formData.transporter_id || null);
       driverId = driverInputType === 'select' ? (formData.driver_id || null) : null;
     } else {
-      transporterId = organization?.id;
+      transporterId = organization?.id || null;
       driverId = driverInputType === 'select' ? (formData.driver_id || null) : null;
     }
 
-    if (!transporterId) {
-      toast.error('يرجى اختيار شركة النقل');
+    // Require either an ID or a manual name for transporter
+    if (!transporterId && !manualTransporterName && !organization?.id) {
+      toast.error('يرجى اختيار أو إدخال شركة النقل');
       return;
     }
 
@@ -368,9 +380,9 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
 
     try {
       const { data: shipmentData, error } = await supabase.from('shipments').insert({
-        generator_id: formData.generator_id,
-        recycler_id: formData.recycler_id,
-        transporter_id: transporterId,
+        generator_id: generatorId,
+        recycler_id: recyclerId,
+        transporter_id: transporterId || organization?.id,
         driver_id: driverId,
         waste_type: formData.waste_type as WasteType,
         quantity: parseFloat(formData.quantity),
@@ -387,6 +399,9 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
         disposal_method: formData.disposal_method || null,
         manual_driver_name: driverInputType === 'manual' ? formData.manual_driver_name : null,
         manual_vehicle_plate: driverInputType === 'manual' ? formData.manual_vehicle_plate : null,
+        manual_generator_name: manualGeneratorName,
+        manual_recycler_name: manualRecyclerName,
+        manual_transporter_name: manualTransporterName,
         packaging_method: formData.packaging_method || null,
         hazard_level: formData.hazard_level || null,
         waste_state: formData.waste_state || 'solid',
@@ -394,18 +409,18 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
 
       if (error) throw error;
 
-      // Create automatic chat room for all parties
-      if (shipmentData) {
+      // Create automatic chat room for all parties (only if we have IDs)
+      if (shipmentData && generatorId && transporterId && recyclerId) {
         await createShipmentChatRoom({
           shipmentId: shipmentData.id,
           shipmentNumber: shipmentData.shipment_number,
-          generatorId: formData.generator_id,
-          transporterId: transporterId!,
-          recyclerId: formData.recycler_id,
+          generatorId: generatorId,
+          transporterId: transporterId,
+          recyclerId: recyclerId,
         });
       }
 
-      toast.success('تم إنشاء الشحنة بنجاح وتم إنشاء غرفة دردشة للأطراف');
+      toast.success('تم إنشاء الشحنة بنجاح');
       
       if (onSuccess) {
         onSuccess();

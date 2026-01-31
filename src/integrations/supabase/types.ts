@@ -1289,19 +1289,22 @@ export type Database = {
           disposal_method: string | null
           driver_id: string | null
           expected_delivery_date: string | null
-          generator_id: string
+          generator_id: string | null
           generator_notes: string | null
           hazard_level: string | null
           id: string
           in_transit_at: string | null
           manual_driver_name: string | null
+          manual_generator_name: string | null
+          manual_recycler_name: string | null
+          manual_transporter_name: string | null
           manual_vehicle_plate: string | null
           notes: string | null
           packaging_method: string | null
           pickup_address: string
           pickup_date: string | null
           quantity: number
-          recycler_id: string
+          recycler_id: string | null
           recycler_notes: string | null
           shipment_number: string
           shipment_type: string | null
@@ -1325,19 +1328,22 @@ export type Database = {
           disposal_method?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
-          generator_id: string
+          generator_id?: string | null
           generator_notes?: string | null
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
           manual_driver_name?: string | null
+          manual_generator_name?: string | null
+          manual_recycler_name?: string | null
+          manual_transporter_name?: string | null
           manual_vehicle_plate?: string | null
           notes?: string | null
           packaging_method?: string | null
           pickup_address: string
           pickup_date?: string | null
           quantity: number
-          recycler_id: string
+          recycler_id?: string | null
           recycler_notes?: string | null
           shipment_number: string
           shipment_type?: string | null
@@ -1361,19 +1367,22 @@ export type Database = {
           disposal_method?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
-          generator_id?: string
+          generator_id?: string | null
           generator_notes?: string | null
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
           manual_driver_name?: string | null
+          manual_generator_name?: string | null
+          manual_recycler_name?: string | null
+          manual_transporter_name?: string | null
           manual_vehicle_plate?: string | null
           notes?: string | null
           packaging_method?: string | null
           pickup_address?: string
           pickup_date?: string | null
           quantity?: number
-          recycler_id?: string
+          recycler_id?: string | null
           recycler_notes?: string | null
           shipment_number?: string
           shipment_type?: string | null
