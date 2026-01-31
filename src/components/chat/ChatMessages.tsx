@@ -1,11 +1,14 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   MessageCircle, 
   FileText, 
   Image as ImageIcon,
   Download,
-  ExternalLink
+  Play,
+  Pause,
+  Video,
+  Mic
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,6 +24,98 @@ interface ChatMessagesProps {
   currentUserId: string;
   roomName?: string;
 }
+
+// Voice Message Player Component
+const VoiceMessagePlayer = ({ url, isOwn }: { url: string; isOwn: boolean }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = new Audio(url);
+    audioRef.current = audio;
+
+    audio.addEventListener('loadedmetadata', () => {
+      setDuration(audio.duration);
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      setProgress((audio.currentTime / audio.duration) * 100);
+    });
+
+    audio.addEventListener('ended', () => {
+      setIsPlaying(false);
+      setProgress(0);
+    });
+
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, [url]);
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className={cn(
+      "flex items-center gap-2 p-2 rounded-lg min-w-[180px]",
+      isOwn ? "bg-primary-foreground/10" : "bg-background/50"
+    )}>
+      <Button
+        size="icon"
+        variant="ghost"
+        className={cn(
+          "h-9 w-9 rounded-full shrink-0",
+          isOwn ? "bg-primary-foreground/20 hover:bg-primary-foreground/30" : "bg-emerald-500/20 hover:bg-emerald-500/30"
+        )}
+        onClick={togglePlay}
+      >
+        {isPlaying ? (
+          <Pause className={cn("w-4 h-4", isOwn ? "text-primary-foreground" : "text-emerald-600")} />
+        ) : (
+          <Play className={cn("w-4 h-4", isOwn ? "text-primary-foreground" : "text-emerald-600")} />
+        )}
+      </Button>
+      <div className="flex-1 min-w-0">
+        <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+          <div 
+            className={cn(
+              "h-full rounded-full transition-all",
+              isOwn ? "bg-primary-foreground/50" : "bg-emerald-500"
+            )}
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className={cn(
+          "text-[10px] mt-1",
+          isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+        )}>
+          {formatDuration(duration)}
+        </p>
+      </div>
+      <Mic className={cn(
+        "w-4 h-4 shrink-0",
+        isOwn ? "text-primary-foreground/50" : "text-emerald-500/50"
+      )} />
+    </div>
+  );
+};
 
 const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -46,6 +141,20 @@ const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) 
     } catch {
       return { text: message.content, fileUrl: null, fileName: null };
     }
+  };
+
+  // Detect if file is audio/voice message
+  const isVoiceMessage = (fileName: string | null) => {
+    if (!fileName) return false;
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return ['webm', 'mp3', 'wav', 'ogg', 'm4a'].includes(ext || '');
+  };
+
+  // Detect if file is video
+  const isVideoFile = (fileName: string | null) => {
+    if (!fileName) return false;
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext || '');
   };
 
   // Group messages by date
@@ -161,7 +270,7 @@ const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) 
                           )}
                         >
                           {/* Text */}
-                          {text && (
+                          {text && message.message_type === 'text' && (
                             <p className={cn(
                               "whitespace-pre-wrap leading-relaxed",
                               isMobile ? "text-sm" : "text-sm"
@@ -172,20 +281,36 @@ const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) 
 
                           {/* Image */}
                           {message.message_type === 'image' && fileUrl && (
-                            <div className="mt-2">
+                            <div className="mt-1">
                               <img
                                 src={fileUrl}
                                 alt={fileName || 'صورة'}
-                                className="rounded-lg max-w-[250px] cursor-pointer hover:opacity-90 transition-opacity"
+                                className="rounded-lg max-w-[280px] cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => window.open(fileUrl, '_blank')}
                               />
                             </div>
                           )}
 
-                          {/* File */}
-                          {message.message_type === 'file' && fileUrl && (
+                          {/* Video */}
+                          {message.message_type === 'file' && fileUrl && isVideoFile(fileName) && (
+                            <div className="mt-1">
+                              <video
+                                src={fileUrl}
+                                controls
+                                className="rounded-lg max-w-[280px]"
+                              />
+                            </div>
+                          )}
+
+                          {/* Voice Message */}
+                          {message.message_type === 'file' && fileUrl && isVoiceMessage(fileName) && (
+                            <VoiceMessagePlayer url={fileUrl} isOwn={isOwn} />
+                          )}
+
+                          {/* Regular File */}
+                          {message.message_type === 'file' && fileUrl && !isVoiceMessage(fileName) && !isVideoFile(fileName) && (
                             <div className={cn(
-                              "mt-2 flex items-center gap-2 p-2 rounded-lg",
+                              "flex items-center gap-2 p-2 rounded-lg",
                               isOwn ? "bg-primary-foreground/10" : "bg-background/50"
                             )}>
                               <FileText className="w-8 h-8 shrink-0" />
