@@ -421,31 +421,49 @@ const AggregateShipmentReport = () => {
                   </div>
 
                   {/* Stamps and Signatures Section */}
-                  {(includeStamps || includeSignatures) && (
+                  {(includeStamps || includeSignatures) && shipments.length > 0 && (
                     <div className="mt-8 pt-6 border-t print:break-inside-avoid">
                       <h4 className="font-semibold mb-4 text-center">التوثيق والاعتماد</h4>
                       <div className="grid grid-cols-3 gap-6">
                         {/* Generator */}
-                        <div className="text-center space-y-3">
-                          <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                        <div className="text-center space-y-3 border rounded-lg p-4">
+                          <div className="flex items-center justify-center gap-2 text-sm font-medium text-blue-700">
                             <Building2 className="w-4 h-4" />
                             الجهة المولدة
                           </div>
-                          <p className="text-sm text-muted-foreground">{organization?.name}</p>
+                          <p className="text-sm font-medium">{shipments[0]?.generator?.name || organization?.name || '-'}</p>
                           <div className="flex justify-center gap-4 min-h-[80px]">
-                            {includeStamps && organization && (
+                            {includeStamps && (
                               <div className="text-center">
-                                <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center">
-                                  <Stamp className="w-8 h-8 text-muted-foreground/30" />
-                                </div>
+                                {shipments[0]?.generator?.stamp_url ? (
+                                  <img 
+                                    src={shipments[0].generator.stamp_url} 
+                                    alt="ختم الجهة المولدة" 
+                                    className="w-20 h-20 object-contain border rounded"
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center bg-muted/20">
+                                    <Stamp className="w-8 h-8 text-muted-foreground/30" />
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">الختم</p>
                               </div>
                             )}
                             {includeSignatures && (
                               <div className="text-center">
-                                <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center">
-                                  <PenTool className="w-8 h-8 text-muted-foreground/30" />
-                                </div>
+                                {shipments[0]?.generator?.signature_url ? (
+                                  <img 
+                                    src={shipments[0].generator.signature_url} 
+                                    alt="توقيع الجهة المولدة" 
+                                    className="w-20 h-20 object-contain border rounded"
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center bg-muted/20">
+                                    <PenTool className="w-8 h-8 text-muted-foreground/30" />
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">التوقيع</p>
                               </div>
                             )}
@@ -453,26 +471,44 @@ const AggregateShipmentReport = () => {
                         </div>
 
                         {/* Transporter */}
-                        <div className="text-center space-y-3">
-                          <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                        <div className="text-center space-y-3 border rounded-lg p-4">
+                          <div className="flex items-center justify-center gap-2 text-sm font-medium text-amber-700">
                             <Truck className="w-4 h-4" />
                             الجهة الناقلة
                           </div>
-                          <p className="text-sm text-muted-foreground">_______________</p>
+                          <p className="text-sm font-medium">{shipments[0]?.transporter?.name || '-'}</p>
                           <div className="flex justify-center gap-4 min-h-[80px]">
                             {includeStamps && (
                               <div className="text-center">
-                                <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center">
-                                  <Stamp className="w-8 h-8 text-muted-foreground/30" />
-                                </div>
+                                {shipments[0]?.transporter?.stamp_url ? (
+                                  <img 
+                                    src={shipments[0].transporter.stamp_url} 
+                                    alt="ختم الجهة الناقلة" 
+                                    className="w-20 h-20 object-contain border rounded"
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center bg-muted/20">
+                                    <Stamp className="w-8 h-8 text-muted-foreground/30" />
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">الختم</p>
                               </div>
                             )}
                             {includeSignatures && (
                               <div className="text-center">
-                                <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center">
-                                  <PenTool className="w-8 h-8 text-muted-foreground/30" />
-                                </div>
+                                {shipments[0]?.transporter?.signature_url ? (
+                                  <img 
+                                    src={shipments[0].transporter.signature_url} 
+                                    alt="توقيع الجهة الناقلة" 
+                                    className="w-20 h-20 object-contain border rounded"
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center bg-muted/20">
+                                    <PenTool className="w-8 h-8 text-muted-foreground/30" />
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">التوقيع</p>
                               </div>
                             )}
@@ -480,26 +516,44 @@ const AggregateShipmentReport = () => {
                         </div>
 
                         {/* Recycler */}
-                        <div className="text-center space-y-3">
-                          <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                        <div className="text-center space-y-3 border rounded-lg p-4 bg-emerald-50/50">
+                          <div className="flex items-center justify-center gap-2 text-sm font-medium text-emerald-700">
                             <Recycle className="w-4 h-4" />
                             الجهة المدورة
                           </div>
-                          <p className="text-sm text-muted-foreground">_______________</p>
+                          <p className="text-sm font-medium">{shipments[0]?.recycler?.name || '-'}</p>
                           <div className="flex justify-center gap-4 min-h-[80px]">
                             {includeStamps && (
                               <div className="text-center">
-                                <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center">
-                                  <Stamp className="w-8 h-8 text-muted-foreground/30" />
-                                </div>
+                                {shipments[0]?.recycler?.stamp_url ? (
+                                  <img 
+                                    src={shipments[0].recycler.stamp_url} 
+                                    alt="ختم الجهة المدورة" 
+                                    className="w-20 h-20 object-contain border rounded"
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center bg-muted/20">
+                                    <Stamp className="w-8 h-8 text-muted-foreground/30" />
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">الختم</p>
                               </div>
                             )}
                             {includeSignatures && (
                               <div className="text-center">
-                                <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center">
-                                  <PenTool className="w-8 h-8 text-muted-foreground/30" />
-                                </div>
+                                {shipments[0]?.recycler?.signature_url ? (
+                                  <img 
+                                    src={shipments[0].recycler.signature_url} 
+                                    alt="توقيع الجهة المدورة" 
+                                    className="w-20 h-20 object-contain border rounded"
+                                    crossOrigin="anonymous"
+                                  />
+                                ) : (
+                                  <div className="w-20 h-20 border-2 border-dashed rounded flex items-center justify-center bg-muted/20">
+                                    <PenTool className="w-8 h-8 text-muted-foreground/30" />
+                                  </div>
+                                )}
                                 <p className="text-xs text-muted-foreground mt-1">التوقيع</p>
                               </div>
                             )}
