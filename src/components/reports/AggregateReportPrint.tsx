@@ -144,45 +144,59 @@ const AggregateReportPrint = ({
     .filter((r, i, arr) => r?.id && arr.findIndex(x => x?.id === r.id) === i);
 
   return (
-    <div className="p-8 bg-white text-black" dir="rtl" style={{ minHeight: '297mm', width: '210mm', margin: '0 auto' }}>
+    <div 
+      className="print-container bg-white text-black print:p-0" 
+      dir="rtl" 
+      style={{ 
+        minHeight: '297mm', 
+        width: '210mm', 
+        margin: '0 auto',
+        padding: '25px',
+        fontFamily: 'Cairo, sans-serif'
+      }}
+    >
       {/* Header with QR and Barcode */}
-      <div className="flex items-start justify-between mb-6 border-b-2 border-primary pb-4">
+      <header className="print-header flex items-start justify-between mb-6 pb-4" style={{ borderBottom: '3px solid #16a34a' }}>
         {/* QR Code */}
-        <div className="text-center">
+        <div className="text-center print-qr">
           <QRCodeSVG
             value={`AGGREGATE-REPORT-${reportNumber}`}
-            size={80}
+            size={75}
             level="M"
+            includeMargin={false}
           />
-          <p className="text-xs mt-1 text-gray-600">رمز التحقق</p>
+          <p className="text-xs mt-1" style={{ color: '#6b7280' }}>رمز التحقق</p>
         </div>
 
         {/* Title */}
-        <div className="text-center flex-1 px-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Leaf className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold text-primary">{reportTitle}</h1>
-            <Leaf className="w-8 h-8 text-primary" />
+        <div className="text-center flex-1 px-6">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <Leaf className="w-8 h-8" style={{ color: '#16a34a' }} />
+            <h1 className="text-2xl font-bold" style={{ color: '#15803d' }}>{reportTitle}</h1>
+            <Leaf className="w-8 h-8" style={{ color: '#16a34a' }} />
           </div>
-          <p className="text-sm text-gray-600">نظام إدارة المخلفات وإعادة التدوير</p>
-          <div className="mt-2 inline-block bg-primary/10 border border-primary/30 rounded px-3 py-1">
+          <p className="text-sm" style={{ color: '#4b5563' }}>نظام إدارة المخلفات وإعادة التدوير</p>
+          <div 
+            className="mt-3 inline-block rounded px-4 py-2" 
+            style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}
+          >
             <span className="text-sm">رقم التقرير: </span>
-            <span className="font-mono font-bold text-primary">{reportNumber}</span>
+            <span className="font-mono font-bold" style={{ color: '#15803d', fontSize: '14px' }}>{reportNumber}</span>
           </div>
         </div>
 
         {/* Barcode */}
-        <div className="text-center">
+        <div className="text-center print-barcode">
           <Barcode
             value={reportNumber}
-            width={1.2}
-            height={40}
-            fontSize={10}
+            width={1.3}
+            height={45}
+            fontSize={9}
             displayValue={false}
           />
-          <p className="text-xs mt-1 font-mono">{reportNumber}</p>
+          <p className="text-xs font-mono mt-1" style={{ color: '#374151' }}>{reportNumber}</p>
         </div>
-      </div>
+      </header>
 
       {/* Report Info */}
       <div className="bg-gray-50 border rounded-lg p-4 mb-6">
@@ -490,13 +504,13 @@ const AggregateReportPrint = ({
       )}
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t text-center text-xs text-gray-500">
-        <p>هذا التقرير صادر إلكترونياً من نظام إدارة المخلفات وإعادة التدوير</p>
+      <footer className="mt-10 pt-4 text-center text-xs print-footer" style={{ borderTop: '1px solid #e5e7eb', color: '#6b7280' }}>
+        <p>هذا التقرير صادر إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل</p>
         <p className="mt-1">تاريخ الإصدار: {currentDateTime} | رقم المرجع: {reportNumber}</p>
-        <p className="mt-2 text-gray-400">
-          هذه الوثيقة تم إنشاؤها آلياً طبقاً للبيانات المدخلة والواردة إلينا على النظام
+        <p className="mt-2" style={{ color: '#9ca3af', fontSize: '8pt' }}>
+          هذه الوثيقة تم إنشاؤها آلياً طبقاً للبيانات المدخلة والواردة إلينا على النظام - دون أدنى مسؤولية على النظام
         </p>
-      </div>
+      </footer>
     </div>
   );
 };

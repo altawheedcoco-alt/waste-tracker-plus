@@ -9,10 +9,7 @@ import {
   CheckCircle2,
   FileText,
   Scale,
-  Calendar,
   MapPin,
-  Phone,
-  Mail,
   Hash,
   Leaf,
 } from 'lucide-react';
@@ -125,204 +122,267 @@ const RecyclingCertificatePrint = ({
     : '-';
 
   return (
-    <div className="p-8 bg-white text-black print:p-4" dir="rtl" style={{ minHeight: '297mm', width: '210mm', margin: '0 auto' }}>
+    <div 
+      className="print-container bg-white text-black print:p-0" 
+      dir="rtl" 
+      style={{ 
+        minHeight: '297mm', 
+        width: '210mm', 
+        margin: '0 auto',
+        padding: '25px',
+        fontFamily: 'Cairo, sans-serif'
+      }}
+    >
       {/* Header with QR and Barcode */}
-      <div className="flex items-start justify-between mb-6 border-b-2 border-emerald-600 pb-4">
+      <header className="print-header flex items-start justify-between mb-6 pb-4" style={{ borderBottom: '3px solid #16a34a' }}>
         {/* QR Code */}
-        <div className="text-center">
+        <div className="text-center print-qr">
           <QRCodeSVG
             value={`RECYCLING-CERT-${shipment.shipment_number}`}
-            size={80}
+            size={75}
             level="M"
+            includeMargin={false}
           />
-          <p className="text-xs mt-1 text-gray-600">رمز التحقق</p>
+          <p className="text-xs mt-1" style={{ color: '#6b7280' }}>رمز التحقق</p>
         </div>
 
         {/* Title */}
-        <div className="text-center flex-1 px-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Leaf className="w-8 h-8 text-emerald-600" />
-            <h1 className="text-2xl font-bold text-emerald-700">{templateTitles[template]}</h1>
-            <Leaf className="w-8 h-8 text-emerald-600" />
+        <div className="text-center flex-1 px-6">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <Leaf className="w-8 h-8" style={{ color: '#16a34a' }} />
+            <h1 className="text-2xl font-bold" style={{ color: '#15803d' }}>
+              {templateTitles[template]}
+            </h1>
+            <Leaf className="w-8 h-8" style={{ color: '#16a34a' }} />
           </div>
-          <p className="text-sm text-gray-600">إدارة المخلفات وإعادة التدوير</p>
-          <div className="mt-2 inline-block bg-emerald-50 border border-emerald-200 rounded px-3 py-1">
+          <p className="text-sm" style={{ color: '#4b5563' }}>إدارة المخلفات وإعادة التدوير</p>
+          <div 
+            className="mt-3 inline-block rounded px-4 py-2" 
+            style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}
+          >
             <span className="text-sm">رقم الشهادة: </span>
-            <span className="font-mono font-bold text-emerald-700">{shipment.shipment_number}</span>
+            <span className="font-mono font-bold" style={{ color: '#15803d', fontSize: '14px' }}>
+              {shipment.shipment_number}
+            </span>
           </div>
         </div>
 
         {/* Barcode */}
-        <div className="text-center">
+        <div className="text-center print-barcode">
           <Barcode
             value={shipment.shipment_number}
-            width={1.2}
-            height={40}
-            fontSize={10}
+            width={1.3}
+            height={45}
+            fontSize={9}
             displayValue={false}
           />
-          <p className="text-xs mt-1 font-mono">{shipment.shipment_number}</p>
+          <p className="text-xs font-mono mt-1" style={{ color: '#374151' }}>
+            {shipment.shipment_number}
+          </p>
         </div>
-      </div>
+      </header>
 
       {/* Opening Declaration */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h2 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
+      <div 
+        className="rounded-lg p-5 mb-6 print-declaration" 
+        style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}
+      >
+        <h2 className="font-bold mb-3 flex items-center gap-2" style={{ color: '#1e40af', fontSize: '14px' }}>
           <FileText className="w-5 h-5" />
           إقرار رسمي
         </h2>
-        <p className="text-sm leading-relaxed text-blue-900">
-          إلى السادة / <strong>{shipment.generator?.name || 'الجهة المولدة'}</strong> - الجهة المولدة للمخلفات
-          <br />
-          وإلى السادة / <strong>{shipment.transporter?.name || 'جهة النقل'}</strong> - جهة الجمع والنقل
-          <br /><br />
-          تحية طيبة وبعد،
-          <br />
-          {openingDeclaration || `نفيدكم علماً بأن شركة ${recyclerOrg?.name || shipment.recycler?.name || 'جهة التدوير'} المرخصة في مجال إعادة تدوير المخلفات قد تسلمت الشحنة المشار إليها أعلاه وتم معالجتها وفقاً للإجراءات المعتمدة.`}
-        </p>
+        <div className="text-sm leading-loose" style={{ color: '#1e3a8a' }}>
+          <p>
+            إلى السادة / <strong>{shipment.generator?.name || 'الجهة المولدة'}</strong> - الجهة المولدة للمخلفات
+          </p>
+          <p>
+            وإلى السادة / <strong>{shipment.transporter?.name || 'جهة النقل'}</strong> - جهة الجمع والنقل
+          </p>
+          <p className="mt-3">تحية طيبة وبعد،</p>
+          <p className="mt-2">
+            {openingDeclaration || `نفيدكم علماً بأن شركة ${recyclerOrg?.name || shipment.recycler?.name || 'جهة التدوير'} المرخصة في مجال إعادة تدوير المخلفات قد تسلمت الشحنة المشار إليها أعلاه وتم معالجتها وفقاً للإجراءات المعتمدة.`}
+          </p>
+        </div>
       </div>
 
       {/* Shipment Details Table */}
-      <div className="mb-6">
-        <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2 bg-gray-100 p-2 rounded">
-          <Scale className="w-5 h-5 text-emerald-600" />
+      <div className="mb-6 print-info-box">
+        <h3 
+          className="font-bold mb-3 flex items-center gap-2 p-2 rounded" 
+          style={{ backgroundColor: '#f3f4f6', color: '#1f2937' }}
+        >
+          <Scale className="w-5 h-5" style={{ color: '#16a34a' }} />
           بيانات الشحنة
         </h3>
-        <table className="w-full border-collapse text-sm">
+        <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
           <tbody>
-            <tr className="border-b">
-              <td className="p-2 bg-gray-50 font-semibold w-1/4">رقم الشحنة</td>
-              <td className="p-2 font-mono">{shipment.shipment_number}</td>
-              <td className="p-2 bg-gray-50 font-semibold w-1/4">تاريخ الاستلام</td>
-              <td className="p-2">{deliveryDate}</td>
+            <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <td className="p-3 font-semibold" style={{ backgroundColor: '#f9fafb', width: '25%' }}>رقم الشحنة</td>
+              <td className="p-3 font-mono">{shipment.shipment_number}</td>
+              <td className="p-3 font-semibold" style={{ backgroundColor: '#f9fafb', width: '25%' }}>تاريخ الاستلام</td>
+              <td className="p-3">{deliveryDate}</td>
             </tr>
-            <tr className="border-b">
-              <td className="p-2 bg-gray-50 font-semibold">نوع المخلفات</td>
-              <td className="p-2">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
-              <td className="p-2 bg-gray-50 font-semibold">الكمية</td>
-              <td className="p-2 font-bold">{shipment.quantity} {shipment.unit || 'كجم'}</td>
+            <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <td className="p-3 font-semibold" style={{ backgroundColor: '#f9fafb' }}>نوع المخلفات</td>
+              <td className="p-3">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
+              <td className="p-3 font-semibold" style={{ backgroundColor: '#f9fafb' }}>الكمية</td>
+              <td className="p-3 font-bold" style={{ color: '#16a34a' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
             </tr>
-            <tr className="border-b">
-              <td className="p-2 bg-gray-50 font-semibold">طريقة التخلص</td>
-              <td className="p-2">{shipment.disposal_method || 'إعادة التدوير'}</td>
-              <td className="p-2 bg-gray-50 font-semibold">وصف المخلفات</td>
-              <td className="p-2">{shipment.waste_description || '-'}</td>
+            <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <td className="p-3 font-semibold" style={{ backgroundColor: '#f9fafb' }}>طريقة التخلص</td>
+              <td className="p-3">{shipment.disposal_method || 'إعادة التدوير'}</td>
+              <td className="p-3 font-semibold" style={{ backgroundColor: '#f9fafb' }}>وصف المخلفات</td>
+              <td className="p-3">{shipment.waste_description || '-'}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       {/* Parties Section */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-4 mb-6 print-grid-3">
         {/* Generator */}
-        <div className="border rounded-lg p-3">
-          <h4 className="font-bold text-blue-700 mb-2 flex items-center gap-1 text-sm border-b pb-2">
+        <div className="rounded-lg p-4" style={{ border: '1px solid #e5e7eb' }}>
+          <h4 className="font-bold mb-3 flex items-center gap-2 text-sm pb-2" style={{ borderBottom: '1px solid #e5e7eb', color: '#2563eb' }}>
             <Building2 className="w-4 h-4" />
             الجهة المولدة
           </h4>
-          <div className="text-xs space-y-1">
-            <p className="font-semibold">{shipment.generator?.name || '-'}</p>
-            <p className="flex items-center gap-1 text-gray-600">
+          <div className="text-xs space-y-2">
+            <p className="font-semibold text-sm">{shipment.generator?.name || '-'}</p>
+            <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
               <MapPin className="w-3 h-3" />
               {shipment.generator?.city || '-'}
             </p>
             {shipment.generator?.commercial_register && (
-              <p className="flex items-center gap-1 text-gray-600">
+              <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
                 <Hash className="w-3 h-3" />
                 س.ت: {shipment.generator.commercial_register}
+              </p>
+            )}
+            {shipment.generator?.environmental_license && (
+              <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
+                <FileText className="w-3 h-3" />
+                ترخيص: {shipment.generator.environmental_license}
               </p>
             )}
           </div>
         </div>
 
         {/* Transporter */}
-        <div className="border rounded-lg p-3">
-          <h4 className="font-bold text-amber-700 mb-2 flex items-center gap-1 text-sm border-b pb-2">
+        <div className="rounded-lg p-4" style={{ border: '1px solid #e5e7eb' }}>
+          <h4 className="font-bold mb-3 flex items-center gap-2 text-sm pb-2" style={{ borderBottom: '1px solid #e5e7eb', color: '#d97706' }}>
             <Truck className="w-4 h-4" />
             جهة النقل
           </h4>
-          <div className="text-xs space-y-1">
-            <p className="font-semibold">{shipment.transporter?.name || '-'}</p>
-            <p className="flex items-center gap-1 text-gray-600">
+          <div className="text-xs space-y-2">
+            <p className="font-semibold text-sm">{shipment.transporter?.name || '-'}</p>
+            <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
               <MapPin className="w-3 h-3" />
               {shipment.transporter?.city || '-'}
             </p>
             {shipment.transporter?.commercial_register && (
-              <p className="flex items-center gap-1 text-gray-600">
+              <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
                 <Hash className="w-3 h-3" />
                 س.ت: {shipment.transporter.commercial_register}
+              </p>
+            )}
+            {shipment.transporter?.environmental_license && (
+              <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
+                <FileText className="w-3 h-3" />
+                ترخيص: {shipment.transporter.environmental_license}
               </p>
             )}
           </div>
         </div>
 
         {/* Recycler */}
-        <div className="border rounded-lg p-3 bg-emerald-50">
-          <h4 className="font-bold text-emerald-700 mb-2 flex items-center gap-1 text-sm border-b pb-2">
+        <div className="rounded-lg p-4" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
+          <h4 className="font-bold mb-3 flex items-center gap-2 text-sm pb-2" style={{ borderBottom: '1px solid #86efac', color: '#15803d' }}>
             <Recycle className="w-4 h-4" />
             جهة التدوير
           </h4>
-          <div className="text-xs space-y-1">
-            <p className="font-semibold">{recyclerOrg?.name || shipment.recycler?.name || '-'}</p>
-            <p className="flex items-center gap-1 text-gray-600">
+          <div className="text-xs space-y-2">
+            <p className="font-semibold text-sm">{recyclerOrg?.name || shipment.recycler?.name || '-'}</p>
+            <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
               <MapPin className="w-3 h-3" />
               {recyclerOrg?.city || shipment.recycler?.city || '-'}
             </p>
             {(recyclerOrg?.commercial_register || shipment.recycler?.commercial_register) && (
-              <p className="flex items-center gap-1 text-gray-600">
+              <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
                 <Hash className="w-3 h-3" />
                 س.ت: {recyclerOrg?.commercial_register || shipment.recycler?.commercial_register}
+              </p>
+            )}
+            {(recyclerOrg?.environmental_license || shipment.recycler?.environmental_license) && (
+              <p className="flex items-center gap-1" style={{ color: '#6b7280' }}>
+                <FileText className="w-3 h-3" />
+                ترخيص: {recyclerOrg?.environmental_license || shipment.recycler?.environmental_license}
               </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Processing Details (if provided) */}
+      {/* Processing Details */}
       {processingDetails && (
-        <div className="mb-6">
-          <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2 bg-gray-100 p-2 rounded">
-            <Recycle className="w-5 h-5 text-emerald-600" />
+        <div className="mb-6 print-info-box">
+          <h3 
+            className="font-bold mb-3 flex items-center gap-2 p-2 rounded" 
+            style={{ backgroundColor: '#f3f4f6', color: '#1f2937' }}
+          >
+            <Recycle className="w-5 h-5" style={{ color: '#16a34a' }} />
             تفاصيل عملية المعالجة والتدوير
           </h3>
-          <div className="border rounded p-3 text-sm leading-relaxed bg-gray-50">
+          <div 
+            className="rounded p-4 text-sm leading-relaxed" 
+            style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
+          >
             {processingDetails}
           </div>
         </div>
       )}
 
-      {/* Custom Notes (if provided) */}
+      {/* Custom Notes */}
       {customNotes && (
-        <div className="mb-6">
-          <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2 bg-gray-100 p-2 rounded">
-            <FileText className="w-5 h-5 text-emerald-600" />
+        <div className="mb-6 print-info-box">
+          <h3 
+            className="font-bold mb-3 flex items-center gap-2 p-2 rounded" 
+            style={{ backgroundColor: '#f3f4f6', color: '#1f2937' }}
+          >
+            <FileText className="w-5 h-5" style={{ color: '#16a34a' }} />
             ملاحظات إضافية
           </h3>
-          <div className="border rounded p-3 text-sm leading-relaxed bg-gray-50">
+          <div 
+            className="rounded p-4 text-sm leading-relaxed" 
+            style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}
+          >
             {customNotes}
           </div>
         </div>
       )}
 
       {/* Closing Declaration */}
-      <div className="bg-emerald-50 border-2 border-emerald-300 rounded-lg p-4 mb-6">
-        <h2 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+      <div 
+        className="rounded-lg p-5 mb-6 print-declaration print-avoid-break" 
+        style={{ backgroundColor: '#f0fdf4', border: '2px solid #86efac' }}
+      >
+        <h2 className="font-bold mb-3 flex items-center gap-2" style={{ color: '#15803d', fontSize: '14px' }}>
           <CheckCircle2 className="w-6 h-6" />
           إقرار استلام ومعالجة
         </h2>
         {closingDeclaration ? (
-          <p className="text-sm leading-loose text-emerald-900 whitespace-pre-wrap">
+          <p className="text-sm leading-loose whitespace-pre-wrap" style={{ color: '#14532d' }}>
             {closingDeclaration}
           </p>
         ) : (
           <>
-            <p className="text-sm leading-loose text-emerald-900">
+            <p className="text-sm leading-loose" style={{ color: '#14532d' }}>
               نقر نحن شركة <strong>{recyclerOrg?.name || shipment.recycler?.name || 'جهة التدوير'}</strong> بأنه قد تم استلام الشحنة رقم <strong className="font-mono">{shipment.shipment_number}</strong> 
               بتاريخ <strong>{deliveryDate}</strong> بكامل محتوياتها المكونة من <strong>{shipment.quantity} {shipment.unit || 'كجم'}</strong> من مخلفات <strong>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</strong> وبحالة سليمة.
-              <br /><br />
+            </p>
+            <p className="text-sm leading-loose mt-3" style={{ color: '#14532d' }}>
               كما نقر بأنه تمت إعادة تدوير ومعالجة هذه المخلفات بالكامل وفقاً للمعايير والمتطلبات التالية:
             </p>
-            <ul className="text-sm mt-2 mr-4 space-y-1 text-emerald-800">
+            <ul className="text-sm mt-2 mr-4 space-y-1" style={{ color: '#166534' }}>
               <li>✓ المتطلبات البيئية المنظمة لنشاط إدارة المخلفات وإعادة التدوير</li>
               <li>✓ المتطلبات القانونية والتشريعية السارية</li>
               <li>✓ المعايير الصناعية والفنية المعتمدة</li>
@@ -333,52 +393,68 @@ const RecyclingCertificatePrint = ({
       </div>
 
       {/* Signature Section */}
-      <div className="border-t-2 border-gray-300 pt-6 mt-8">
-        <div className="grid grid-cols-2 gap-8">
+      <div className="pt-6 mt-8 print-signatures print-avoid-break" style={{ borderTop: '2px solid #d1d5db' }}>
+        <div className="grid grid-cols-2 gap-10">
           {/* Empty space for balance */}
           <div />
 
           {/* Recycler Signature */}
           <div className="text-center">
-            <p className="font-bold text-gray-800 mb-2">التوقيع والختم</p>
-            <p className="text-sm text-gray-600 mb-4">{recyclerOrg?.name || shipment.recycler?.name}</p>
+            <p className="font-bold mb-2" style={{ color: '#1f2937' }}>التوقيع والختم</p>
+            <p className="text-sm mb-4" style={{ color: '#6b7280' }}>
+              {recyclerOrg?.name || shipment.recycler?.name}
+            </p>
             
-            <div className="flex justify-center gap-6 mt-4">
+            <div className="flex justify-center gap-8 mt-4">
               {/* Signature */}
-              <div className="text-center">
+              <div className="text-center print-signature-box">
                 {recyclerOrg?.signature_url || shipment.recycler?.signature_url ? (
                   <img
                     src={recyclerOrg?.signature_url || shipment.recycler?.signature_url || ''}
                     alt="التوقيع"
-                    className="h-16 mx-auto mb-1 object-contain"
+                    className="h-16 mx-auto mb-2 object-contain"
+                    crossOrigin="anonymous"
+                    style={{ maxWidth: '120px' }}
                   />
                 ) : (
-                  <div className="h-16 w-32 border-b-2 border-gray-400 mx-auto mb-1" />
+                  <div 
+                    className="mx-auto mb-2" 
+                    style={{ height: '50px', width: '100px', borderBottom: '2px solid #9ca3af' }} 
+                  />
                 )}
-                <p className="text-xs text-gray-500">التوقيع</p>
+                <p className="text-xs" style={{ color: '#6b7280' }}>التوقيع</p>
               </div>
 
               {/* Stamp */}
-              <div className="text-center">
+              <div className="text-center print-signature-box">
                 {recyclerOrg?.stamp_url || shipment.recycler?.stamp_url ? (
                   <img
                     src={recyclerOrg?.stamp_url || shipment.recycler?.stamp_url || ''}
                     alt="الختم"
-                    className="h-16 mx-auto mb-1 object-contain"
+                    className="h-16 mx-auto mb-2 object-contain"
+                    crossOrigin="anonymous"
+                    style={{ maxWidth: '80px' }}
                   />
                 ) : (
-                  <div className="h-16 w-16 border-2 border-dashed border-gray-400 rounded-full mx-auto mb-1 flex items-center justify-center">
-                    <span className="text-xs text-gray-400">الختم</span>
+                  <div 
+                    className="mx-auto mb-2 rounded-full flex items-center justify-center" 
+                    style={{ 
+                      height: '60px', 
+                      width: '60px', 
+                      border: '2px dashed #d1d5db' 
+                    }}
+                  >
+                    <span className="text-xs" style={{ color: '#9ca3af' }}>الختم</span>
                   </div>
                 )}
-                <p className="text-xs text-gray-500">الختم</p>
+                <p className="text-xs" style={{ color: '#6b7280' }}>الختم</p>
               </div>
             </div>
 
             <p className="text-sm mt-4">
               الممثل القانوني: {recyclerOrg?.representative_name || shipment.recycler?.representative_name || '________________'}
             </p>
-            <p className="text-sm mt-1">
+            <p className="text-sm mt-2">
               التاريخ: {currentDate}
             </p>
           </div>
@@ -386,13 +462,13 @@ const RecyclingCertificatePrint = ({
       </div>
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t text-center text-xs text-gray-500">
-        <p>هذه الشهادة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير</p>
+      <footer className="mt-10 pt-4 text-center text-xs print-footer" style={{ borderTop: '1px solid #e5e7eb', color: '#6b7280' }}>
+        <p>هذه الشهادة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل</p>
         <p className="mt-1">تاريخ الإصدار: {currentDate} | رقم المرجع: {shipment.shipment_number}</p>
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2" style={{ color: '#9ca3af', fontSize: '8pt' }}>
           هذه الوثيقة تم إنشاؤها آلياً طبقاً للبيانات المدخلة والواردة إلينا على النظام - دون أدنى مسؤولية على النظام
         </p>
-      </div>
+      </footer>
     </div>
   );
 };
