@@ -21,6 +21,7 @@ import {
   AlertCircle,
   Printer,
   MapPin,
+  ChevronDown,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -229,7 +230,8 @@ const ShipmentCard = ({
                       className="gap-1 text-xs"
                     >
                       <RefreshCw className="w-3 h-3" />
-                      تغيير الحالة
+                      تغيير
+                      <ChevronDown className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
@@ -388,6 +390,7 @@ const ShipmentCard = ({
                       >
                         <RefreshCw className="w-4 h-4" />
                         تغيير الحالة
+                        <ChevronDown className="w-4 h-4" />
                       </Button>
                     ) : isCompleted ? (
                       <Badge className="bg-emerald-500 text-white gap-1">
