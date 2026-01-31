@@ -62,17 +62,41 @@ const DriverTracking = () => {
 
   useEffect(() => {
     fetchDrivers();
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      updateDriverLocations();
-    }, 5000);
+    // Real-time subscription for location updates
+    const channel = supabase
+      .channel('driver-locations-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'driver_location_logs',
+        },
+        (payload) => {
+          const newLocation = payload.new as any;
+          setDrivers(prev => prev.map(driver => 
+            driver.id === newLocation.driver_id
+              ? {
+                  ...driver,
+                  latitude: newLocation.latitude,
+                  longitude: newLocation.longitude,
+                  last_update: newLocation.recorded_at,
+                }
+              : driver
+          ));
+        }
+      )
+      .subscribe();
 
-    return () => clearInterval(interval);
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchDrivers = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch drivers with their organization
+      const { data: driversData, error } = await supabase
         .from('drivers')
         .select(`
           id,
@@ -86,13 +110,37 @@ const DriverTracking = () => {
 
       if (error) throw error;
 
-      // Add simulated location data
-      const driversWithLocations = (data || []).map(driver => ({
-        ...driver,
-        latitude: 24.7136 + (Math.random() - 0.5) * 0.1,
-        longitude: 46.6753 + (Math.random() - 0.5) * 0.1,
-        last_update: new Date().toISOString(),
-      }));
+      // Fetch latest location for each driver
+      const driverIds = (driversData || []).map(d => d.id);
+      const locationsMap = new Map<string, { latitude: number; longitude: number; recorded_at: string }>();
+      
+      if (driverIds.length > 0) {
+        // Get the latest location for each driver
+        for (const driverId of driverIds) {
+          const { data: locationData } = await supabase
+            .from('driver_location_logs')
+            .select('latitude, longitude, recorded_at')
+            .eq('driver_id', driverId)
+            .order('recorded_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (locationData) {
+            locationsMap.set(driverId, locationData);
+          }
+        }
+      }
+
+      // Combine drivers with their locations
+      const driversWithLocations = (driversData || []).map(driver => {
+        const location = locationsMap.get(driver.id);
+        return {
+          ...driver,
+          latitude: location?.latitude || undefined,
+          longitude: location?.longitude || undefined,
+          last_update: location?.recorded_at || undefined,
+        };
+      });
 
       setDrivers(driversWithLocations);
     } catch (error) {
@@ -107,22 +155,17 @@ const DriverTracking = () => {
     }
   };
 
-  const updateDriverLocations = () => {
-    setDrivers(prev => prev.map(driver => ({
-      ...driver,
-      latitude: (driver.latitude || 24.7136) + (Math.random() - 0.5) * 0.01,
-      longitude: (driver.longitude || 46.6753) + (Math.random() - 0.5) * 0.01,
-      last_update: new Date().toISOString(),
-    })));
-  };
-
   const filteredDrivers = drivers.filter(d =>
     d.profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.license_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.vehicle_plate?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const activeDrivers = drivers.filter(d => d.is_available).length;
+  // Count drivers by status
+  const activeDrivers = drivers.filter(d => d.is_available && d.latitude).length;
+  const busyDrivers = drivers.filter(d => !d.is_available && d.latitude).length;
+  const offlineDrivers = drivers.filter(d => !d.latitude).length;
+  const driversWithLocation = drivers.filter(d => d.latitude && d.longitude);
 
   const getVehicleTypeLabel = (type: string | null) => {
     const labels: Record<string, string> = {
@@ -156,42 +199,55 @@ const DriverTracking = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
-            <CardContent className="p-6 text-right">
+            <CardContent className="p-4 text-right">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <User className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">إجمالي السائقين</p>
-                  <p className="text-3xl font-bold">{drivers.length}</p>
+                  <p className="text-xs text-muted-foreground">إجمالي السائقين</p>
+                  <p className="text-2xl font-bold">{drivers.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-green-500/30 bg-green-500/5">
-            <CardContent className="p-6 text-right">
+            <CardContent className="p-4 text-right">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <Navigation className="w-6 h-6 text-green-500" />
+                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                  <Navigation className="w-5 h-5 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">سائقون متاحون</p>
-                  <p className="text-3xl font-bold text-green-600">{activeDrivers}</p>
+                  <p className="text-xs text-muted-foreground">متاح ونشط</p>
+                  <p className="text-2xl font-bold text-green-600">{activeDrivers}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-amber-500/30 bg-amber-500/5">
-            <CardContent className="p-6 text-right">
+            <CardContent className="p-4 text-right">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <Truck className="w-6 h-6 text-amber-500" />
+                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">في مهمة</p>
-                  <p className="text-3xl font-bold text-amber-600">{drivers.length - activeDrivers}</p>
+                  <p className="text-xs text-muted-foreground">في مهمة</p>
+                  <p className="text-2xl font-bold text-amber-600">{busyDrivers}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-muted bg-muted/5">
+            <CardContent className="p-4 text-right">
+              <div className="flex items-center justify-between">
+                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
+                  <Circle className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">غير متصل</p>
+                  <p className="text-2xl font-bold text-muted-foreground">{offlineDrivers}</p>
                 </div>
               </div>
             </CardContent>
@@ -248,49 +304,79 @@ const DriverTracking = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {filteredDrivers.map((driver) => (
-                    <motion.div
-                      key={driver.id}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        selectedDriver?.id === driver.id
-                          ? 'border-primary bg-primary/5'
-                          : 'hover:bg-muted/50'
-                      }`}
-                      onClick={() => setSelectedDriver(driver)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="flex-1 text-right">
-                          <div className="flex items-center gap-2 justify-end mb-1">
-                            <Badge variant={driver.is_available ? 'default' : 'secondary'}>
-                              <Circle className={`w-2 h-2 ml-1 ${
-                                driver.is_available ? 'fill-green-400' : 'fill-amber-400'
-                              }`} />
-                              {driver.is_available ? 'متاح' : 'في مهمة'}
-                            </Badge>
-                            <span className="font-medium">{driver.profile?.full_name}</span>
+                  {filteredDrivers.map((driver) => {
+                    const hasLocation = driver.latitude && driver.longitude;
+                    const isOnline = hasLocation && driver.last_update && 
+                      (new Date().getTime() - new Date(driver.last_update).getTime()) < 10 * 60 * 1000; // 10 minutes
+                    
+                    return (
+                      <motion.div
+                        key={driver.id}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                          selectedDriver?.id === driver.id
+                            ? 'border-primary bg-primary/5'
+                            : 'hover:bg-muted/50'
+                        }`}
+                        onClick={() => setSelectedDriver(driver)}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1 text-right">
+                            <div className="flex items-center gap-2 justify-end mb-1">
+                              {/* Connection status badge */}
+                              {!hasLocation ? (
+                                <Badge variant="outline" className="text-muted-foreground">
+                                  <Circle className="w-2 h-2 ml-1 fill-gray-400" />
+                                  غير متصل
+                                </Badge>
+                              ) : isOnline ? (
+                                <Badge variant={driver.is_available ? 'default' : 'secondary'}>
+                                  <Circle className={`w-2 h-2 ml-1 ${
+                                    driver.is_available ? 'fill-green-400 animate-pulse' : 'fill-amber-400'
+                                  }`} />
+                                  {driver.is_available ? 'متاح' : 'في مهمة'}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-amber-600">
+                                  <Circle className="w-2 h-2 ml-1 fill-amber-400" />
+                                  غير نشط
+                                </Badge>
+                              )}
+                              <span className="font-medium">{driver.profile?.full_name}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-1">
+                              {driver.organization?.name}
+                            </p>
+                            <div className="flex items-center gap-3 justify-end text-xs text-muted-foreground">
+                              {driver.last_update && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  {new Date(driver.last_update).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Truck className="w-3 h-3" />
+                                {driver.vehicle_plate || '-'}
+                              </span>
+                              <span>{getVehicleTypeLabel(driver.vehicle_type)}</span>
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground mb-1">
-                            {driver.organization?.name}
-                          </p>
-                          <div className="flex items-center gap-3 justify-end text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Truck className="w-3 h-3" />
-                              {driver.vehicle_plate || '-'}
-                            </span>
-                            <span>{getVehicleTypeLabel(driver.vehicle_type)}</span>
+                          <div className="relative">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={driver.profile?.avatar_url || undefined} />
+                              <AvatarFallback>
+                                {driver.profile?.full_name?.charAt(0) || 'S'}
+                              </AvatarFallback>
+                            </Avatar>
+                            {isOnline && (
+                              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
+                            )}
                           </div>
                         </div>
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={driver.profile?.avatar_url || undefined} />
-                          <AvatarFallback>
-                            {driver.profile?.full_name?.charAt(0) || 'S'}
-                          </AvatarFallback>
-                        </Avatar>
-                      </div>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
