@@ -25,7 +25,7 @@ interface ChatMessagesProps {
   roomName?: string;
 }
 
-// Voice Message Player Component
+// Voice Message Player Component - WhatsApp Style
 const VoiceMessagePlayer = ({ url, isOwn }: { url: string; isOwn: boolean }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -57,7 +57,6 @@ const VoiceMessagePlayer = ({ url, isOwn }: { url: string; isOwn: boolean }) => 
 
   const togglePlay = () => {
     if (!audioRef.current) return;
-
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -73,46 +72,42 @@ const VoiceMessagePlayer = ({ url, isOwn }: { url: string; isOwn: boolean }) => 
   };
 
   return (
-    <div className={cn(
-      "flex items-center gap-2 p-2 rounded-lg min-w-[180px]",
-      isOwn ? "bg-primary-foreground/10" : "bg-background/50"
-    )}>
+    <div className="flex items-center gap-3 min-w-[200px]">
       <Button
         size="icon"
         variant="ghost"
-        className={cn(
-          "h-9 w-9 rounded-full shrink-0",
-          isOwn ? "bg-primary-foreground/20 hover:bg-primary-foreground/30" : "bg-emerald-500/20 hover:bg-emerald-500/30"
-        )}
+        className="h-10 w-10 rounded-full bg-emerald-500 hover:bg-emerald-600 shrink-0"
         onClick={togglePlay}
       >
         {isPlaying ? (
-          <Pause className={cn("w-4 h-4", isOwn ? "text-primary-foreground" : "text-emerald-600")} />
+          <Pause className="w-5 h-5 text-white" />
         ) : (
-          <Play className={cn("w-4 h-4", isOwn ? "text-primary-foreground" : "text-emerald-600")} />
+          <Play className="w-5 h-5 text-white fill-white" />
         )}
       </Button>
-      <div className="flex-1 min-w-0">
-        <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
-          <div 
-            className={cn(
-              "h-full rounded-full transition-all",
-              isOwn ? "bg-primary-foreground/50" : "bg-emerald-500"
-            )}
-            style={{ width: `${progress}%` }}
-          />
+      <div className="flex-1">
+        {/* WhatsApp-style waveform bars */}
+        <div className="flex items-center gap-[2px] h-6">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "w-[3px] rounded-full transition-all",
+                i < (progress / 100) * 30
+                  ? isOwn ? "bg-emerald-200" : "bg-emerald-500"
+                  : isOwn ? "bg-white/30" : "bg-muted-foreground/30"
+              )}
+              style={{ height: `${Math.random() * 16 + 8}px` }}
+            />
+          ))}
         </div>
         <p className={cn(
-          "text-[10px] mt-1",
-          isOwn ? "text-primary-foreground/70" : "text-muted-foreground"
+          "text-[11px] mt-1",
+          isOwn ? "text-white/70" : "text-muted-foreground"
         )}>
           {formatDuration(duration)}
         </p>
       </div>
-      <Mic className={cn(
-        "w-4 h-4 shrink-0",
-        isOwn ? "text-primary-foreground/50" : "text-emerald-500/50"
-      )} />
     </div>
   );
 };
@@ -271,60 +266,63 @@ const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) 
                         >
                           {/* Text */}
                           {text && message.message_type === 'text' && (
-                            <p className={cn(
-                              "whitespace-pre-wrap leading-relaxed",
-                              isMobile ? "text-sm" : "text-sm"
-                            )}>
+                            <p className="whitespace-pre-wrap leading-relaxed text-sm">
                               {text}
                             </p>
                           )}
 
-                          {/* Image */}
+                          {/* Image - WhatsApp Style */}
                           {message.message_type === 'image' && fileUrl && (
-                            <div className="mt-1">
-                              <img
-                                src={fileUrl}
-                                alt={fileName || 'صورة'}
-                                className="rounded-lg max-w-[280px] cursor-pointer hover:opacity-90 transition-opacity"
-                                onClick={() => window.open(fileUrl, '_blank')}
-                              />
-                            </div>
+                            <img
+                              src={fileUrl}
+                              alt={fileName || 'صورة'}
+                              className="rounded-lg max-w-[250px] cursor-pointer"
+                              onClick={() => window.open(fileUrl, '_blank')}
+                            />
                           )}
 
-                          {/* Video */}
+                          {/* Video - WhatsApp Style */}
                           {message.message_type === 'file' && fileUrl && isVideoFile(fileName) && (
-                            <div className="mt-1">
+                            <div className="relative max-w-[250px]">
                               <video
                                 src={fileUrl}
                                 controls
-                                className="rounded-lg max-w-[280px]"
+                                className="rounded-lg w-full"
                               />
                             </div>
                           )}
 
-                          {/* Voice Message */}
+                          {/* Voice Message - WhatsApp Style */}
                           {message.message_type === 'file' && fileUrl && isVoiceMessage(fileName) && (
                             <VoiceMessagePlayer url={fileUrl} isOwn={isOwn} />
                           )}
 
-                          {/* Regular File */}
+                          {/* Regular File - WhatsApp Style */}
                           {message.message_type === 'file' && fileUrl && !isVoiceMessage(fileName) && !isVideoFile(fileName) && (
-                            <div className={cn(
-                              "flex items-center gap-2 p-2 rounded-lg",
-                              isOwn ? "bg-primary-foreground/10" : "bg-background/50"
-                            )}>
-                              <FileText className="w-8 h-8 shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{fileName}</p>
+                            <div 
+                              className={cn(
+                                "flex items-center gap-3 p-3 rounded-lg cursor-pointer min-w-[200px]",
+                                isOwn ? "bg-white/10" : "bg-background"
+                              )}
+                              onClick={() => window.open(fileUrl, '_blank')}
+                            >
+                              <div className={cn(
+                                "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                                isOwn ? "bg-white/20" : "bg-primary/10"
+                              )}>
+                                <FileText className={cn("w-5 h-5", isOwn ? "text-white" : "text-primary")} />
                               </div>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                className="h-8 w-8 shrink-0"
-                                onClick={() => window.open(fileUrl, '_blank')}
-                              >
-                                <Download className="w-4 h-4" />
-                              </Button>
+                              <div className="flex-1 min-w-0">
+                                <p className={cn(
+                                  "text-sm font-medium truncate",
+                                  isOwn ? "text-white" : "text-foreground"
+                                )}>{fileName}</p>
+                                <p className={cn(
+                                  "text-xs",
+                                  isOwn ? "text-white/60" : "text-muted-foreground"
+                                )}>مستند</p>
+                              </div>
+                              <Download className={cn("w-5 h-5 shrink-0", isOwn ? "text-white/70" : "text-muted-foreground")} />
                             </div>
                           )}
                         </div>
