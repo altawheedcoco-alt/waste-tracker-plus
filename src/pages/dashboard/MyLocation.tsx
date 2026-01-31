@@ -18,10 +18,12 @@ import {
   Send,
   Radio,
   Route,
+  History,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import DriverTripTracker from '@/components/driver/DriverTripTracker';
+import TripHistoryView from '@/components/driver/TripHistoryView';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -279,7 +281,7 @@ const MyLocation = () => {
 
         {/* Tabs for Location vs Trip Tracking */}
         <Tabs defaultValue="location" className="w-full" dir="rtl">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
             <TabsTrigger value="location" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               موقعي الحالي
@@ -287,6 +289,10 @@ const MyLocation = () => {
             <TabsTrigger value="tracking" className="flex items-center gap-2">
               <Route className="h-4 w-4" />
               تتبع الرحلات
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              السجل
             </TabsTrigger>
           </TabsList>
 
@@ -466,6 +472,10 @@ const MyLocation = () => {
 
           <TabsContent value="tracking" className="mt-4">
             <DriverTripTracker driverId={driverInfo.id} />
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-4">
+            <TripHistoryView driverId={driverInfo.id} />
           </TabsContent>
         </Tabs>
       </motion.div>
