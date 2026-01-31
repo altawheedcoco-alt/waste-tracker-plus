@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -10,6 +10,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { 
   Printer,
@@ -24,13 +32,19 @@ import {
   PenTool,
   Download,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Search,
+  Share2,
+  CheckCircle2,
+  Send,
+  X
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import BackButton from '@/components/ui/back-button';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ShipmentData {
   id: string;
@@ -45,38 +59,56 @@ interface ShipmentData {
   pickup_date: string | null;
   delivered_at: string | null;
   generator: {
+    id?: string;
     name: string;
     logo_url: string | null;
     stamp_url: string | null;
     signature_url: string | null;
     client_code: string | null;
+    email?: string;
   };
   transporter: {
+    id?: string;
     name: string;
     logo_url: string | null;
     stamp_url: string | null;
     signature_url: string | null;
     client_code: string | null;
+    email?: string;
   };
   recycler: {
+    id?: string;
     name: string;
     logo_url: string | null;
     stamp_url: string | null;
     signature_url: string | null;
     client_code: string | null;
+    email?: string;
   };
 }
 
+interface PartnerOrg {
+  id: string;
+  name: string;
+  organization_type: string;
+  email: string;
+}
+
 const AggregateShipmentReport = () => {
-  const { organization } = useAuth();
+  const { organization, profile } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [wasteTypeFilter, setWasteTypeFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [includeStamps, setIncludeStamps] = useState(true);
   const [includeSignatures, setIncludeSignatures] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [selectedPartners, setSelectedPartners] = useState<string[]>([]);
+  const [isSharing, setIsSharing] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
   
   const { exportToPDF, isExporting: isExportingPDF } = usePDFExport({
     filename: 'تقرير-مجمع-الشحنات',
@@ -106,9 +138,9 @@ const AggregateShipmentReport = () => {
           created_at,
           pickup_date,
           delivered_at,
-          generator:generator_id(name, logo_url, stamp_url, signature_url, client_code),
-          transporter:transporter_id(name, logo_url, stamp_url, signature_url, client_code),
-          recycler:recycler_id(name, logo_url, stamp_url, signature_url, client_code)
+          generator:generator_id(id, name, logo_url, stamp_url, signature_url, client_code, email),
+          transporter:transporter_id(id, name, logo_url, stamp_url, signature_url, client_code, email),
+          recycler:recycler_id(id, name, logo_url, stamp_url, signature_url, client_code, email)
         `)
         .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`)
         .order('created_at', { ascending: false });
@@ -126,13 +158,63 @@ const AggregateShipmentReport = () => {
         query = query.eq('waste_type', wasteTypeFilter as 'plastic' | 'paper' | 'metal' | 'glass' | 'electronic' | 'organic' | 'chemical' | 'medical' | 'construction' | 'other');
       }
 
-      const { data, error } = await query.limit(100);
+      const { data, error } = await query.limit(500);
 
       if (error) throw error;
       return (data || []) as unknown as ShipmentData[];
     },
     enabled: !!organization?.id,
   });
+
+  // Filter shipments based on search query
+  const filteredShipments = useMemo(() => {
+    if (!searchQuery.trim()) return shipments;
+    
+    const query = searchQuery.toLowerCase();
+    return shipments.filter(s => 
+      s.shipment_number.toLowerCase().includes(query) ||
+      s.generator?.name?.toLowerCase().includes(query) ||
+      s.transporter?.name?.toLowerCase().includes(query) ||
+      s.recycler?.name?.toLowerCase().includes(query) ||
+      s.waste_type.toLowerCase().includes(query) ||
+      s.pickup_address?.toLowerCase().includes(query) ||
+      s.delivery_address?.toLowerCase().includes(query)
+    );
+  }, [shipments, searchQuery]);
+
+  // Get unique partner organizations from shipments
+  const partnerOrganizations = useMemo(() => {
+    const partners = new Map<string, PartnerOrg>();
+    
+    filteredShipments.forEach(s => {
+      if (s.generator?.id && s.generator.id !== organization?.id) {
+        partners.set(s.generator.id, {
+          id: s.generator.id,
+          name: s.generator.name,
+          organization_type: 'generator',
+          email: s.generator.email || ''
+        });
+      }
+      if (s.transporter?.id && s.transporter.id !== organization?.id) {
+        partners.set(s.transporter.id, {
+          id: s.transporter.id,
+          name: s.transporter.name,
+          organization_type: 'transporter',
+          email: s.transporter.email || ''
+        });
+      }
+      if (s.recycler?.id && s.recycler.id !== organization?.id) {
+        partners.set(s.recycler.id, {
+          id: s.recycler.id,
+          name: s.recycler.name,
+          organization_type: 'recycler',
+          email: s.recycler.email || ''
+        });
+      }
+    });
+    
+    return Array.from(partners.values());
+  }, [filteredShipments, organization?.id]);
 
   const getStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
@@ -162,7 +244,21 @@ const AggregateShipmentReport = () => {
     return labels[type] || type;
   };
 
-  const totalQuantity = shipments.reduce((sum, s) => sum + (s.quantity || 0), 0);
+  const getOrgTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      generator: 'مولد',
+      transporter: 'ناقل',
+      recycler: 'مدور',
+    };
+    return labels[type] || type;
+  };
+
+  const totalQuantity = filteredShipments.reduce((sum, s) => sum + (s.quantity || 0), 0);
+
+  const handleSearch = () => {
+    setHasSearched(true);
+    refetch();
+  };
 
   const handlePrint = () => {
     setIsPrinting(true);
@@ -170,6 +266,55 @@ const AggregateShipmentReport = () => {
       window.print();
       setIsPrinting(false);
     }, 500);
+  };
+
+  const handleShare = async () => {
+    if (selectedPartners.length === 0) {
+      toast.error('يرجى اختيار جهة واحدة على الأقل للمشاركة');
+      return;
+    }
+
+    setIsSharing(true);
+    try {
+      // Create notifications for selected partners
+      const selectedPartnersData = partnerOrganizations.filter(p => selectedPartners.includes(p.id));
+      
+      // Get user IDs for selected partner organizations
+      const { data: partnerProfiles } = await supabase
+        .from('profiles')
+        .select('user_id, organization_id')
+        .in('organization_id', selectedPartners)
+        .eq('is_active', true);
+
+      if (partnerProfiles && partnerProfiles.length > 0) {
+        const notifications = partnerProfiles.map(p => ({
+          user_id: p.user_id,
+          title: 'تقرير مجمع مشترك',
+          message: `شاركت ${organization?.name} تقريرًا مجمعًا للشحنات يتضمن ${filteredShipments.length} شحنة`,
+          type: 'report_shared'
+        }));
+
+        const { error } = await supabase.from('notifications').insert(notifications);
+        if (error) throw error;
+      }
+
+      toast.success(`تم مشاركة التقرير مع ${selectedPartnersData.map(p => p.name).join('، ')}`);
+      setShowShareDialog(false);
+      setSelectedPartners([]);
+    } catch (error) {
+      console.error('Error sharing report:', error);
+      toast.error('حدث خطأ أثناء مشاركة التقرير');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const togglePartnerSelection = (partnerId: string) => {
+    setSelectedPartners(prev => 
+      prev.includes(partnerId) 
+        ? prev.filter(id => id !== partnerId)
+        : [...prev, partnerId]
+    );
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -196,6 +341,72 @@ const AggregateShipmentReport = () => {
             <CardDescription>حدد معايير التصفية لإنشاء التقرير المجمع للشحنات</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Search Input */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Search className="w-4 h-4" />
+                بحث سريع
+              </Label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Input
+                    placeholder="ابحث برقم الشحنة، اسم الجهة، العنوان..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="pr-10"
+                  />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                </div>
+                <Button onClick={handleSearch} className="gap-2">
+                  <Search className="w-4 h-4" />
+                  بحث
+                </Button>
+              </div>
+            </div>
+
+            {/* Search Results Counter */}
+            <AnimatePresence>
+              {hasSearched && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="flex items-center justify-between p-4 rounded-lg bg-primary/5 border border-primary/20"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-primary/10">
+                      <CheckCircle2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-lg">
+                        {filteredShipments.length} نتيجة متطابقة
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        من إجمالي {shipments.length} شحنة
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant="secondary">{totalQuantity.toLocaleString()} كجم</Badge>
+                    {searchQuery && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => {
+                          setSearchQuery('');
+                          setHasSearched(false);
+                        }}
+                      >
+                        <X className="w-4 h-4" />
+                        مسح البحث
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Date Filters */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
@@ -293,13 +504,22 @@ const AggregateShipmentReport = () => {
                 <RefreshCw className="w-4 h-4" />
                 تحديث البيانات
               </Button>
-              <Button onClick={handlePrint} disabled={shipments.length === 0 || isPrinting} className="gap-2">
+              <Button onClick={handlePrint} disabled={filteredShipments.length === 0 || isPrinting} className="gap-2">
                 {isPrinting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
                 طباعة التقرير
               </Button>
-              <Button onClick={handleExportPDF} disabled={shipments.length === 0 || isExportingPDF} className="gap-2">
+              <Button onClick={handleExportPDF} disabled={filteredShipments.length === 0 || isExportingPDF} variant="secondary" className="gap-2">
                 {isExportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                 تحميل PDF
+              </Button>
+              <Button 
+                onClick={() => setShowShareDialog(true)} 
+                disabled={filteredShipments.length === 0}
+                variant="outline"
+                className="gap-2"
+              >
+                <Share2 className="w-4 h-4" />
+                مشاركة مع جهات
               </Button>
             </div>
           </CardContent>
@@ -320,7 +540,7 @@ const AggregateShipmentReport = () => {
                   </CardDescription>
                 </div>
                 <div className="text-left print:block hidden">
-                  <p className="text-sm text-muted-foreground">عدد الشحنات: {shipments.length}</p>
+                  <p className="text-sm text-muted-foreground">عدد الشحنات: {filteredShipments.length}</p>
                   <p className="text-sm text-muted-foreground">إجمالي الكميات: {totalQuantity.toLocaleString()} كجم</p>
                 </div>
               </div>
@@ -330,17 +550,18 @@ const AggregateShipmentReport = () => {
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
-              ) : shipments.length === 0 ? (
+              ) : filteredShipments.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>لا توجد شحنات تطابق معايير البحث</p>
+                  <p className="text-sm mt-2">جرب تغيير معايير البحث أو التصفية</p>
                 </div>
               ) : (
                 <div className="space-y-6">
                   {/* Summary Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:grid-cols-4">
                     <div className="p-4 rounded-lg bg-primary/10 text-center">
-                      <p className="text-2xl font-bold text-primary">{shipments.length}</p>
+                      <p className="text-2xl font-bold text-primary">{filteredShipments.length}</p>
                       <p className="text-sm text-muted-foreground">إجمالي الشحنات</p>
                     </div>
                     <div className="p-4 rounded-lg bg-emerald-500/10 text-center">
@@ -349,13 +570,13 @@ const AggregateShipmentReport = () => {
                     </div>
                     <div className="p-4 rounded-lg bg-blue-500/10 text-center">
                       <p className="text-2xl font-bold text-blue-600">
-                        {shipments.filter(s => s.status === 'confirmed').length}
+                        {filteredShipments.filter(s => s.status === 'confirmed').length}
                       </p>
                       <p className="text-sm text-muted-foreground">شحنات مؤكدة</p>
                     </div>
                     <div className="p-4 rounded-lg bg-amber-500/10 text-center">
                       <p className="text-2xl font-bold text-amber-600">
-                        {shipments.filter(s => s.status === 'in_transit').length}
+                        {filteredShipments.filter(s => s.status === 'in_transit').length}
                       </p>
                       <p className="text-sm text-muted-foreground">في الطريق</p>
                     </div>
@@ -378,7 +599,7 @@ const AggregateShipmentReport = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {shipments.map((shipment, index) => (
+                        {filteredShipments.map((shipment, index) => (
                           <tr key={shipment.id} className="hover:bg-muted/30">
                             <td className="border p-2">{index + 1}</td>
                             <td className="border p-2 font-mono text-xs">{shipment.shipment_number}</td>
@@ -421,7 +642,7 @@ const AggregateShipmentReport = () => {
                   </div>
 
                   {/* Stamps and Signatures Section */}
-                  {(includeStamps || includeSignatures) && shipments.length > 0 && (
+                  {(includeStamps || includeSignatures) && filteredShipments.length > 0 && (
                     <div className="mt-8 pt-6 border-t print:break-inside-avoid">
                       <h4 className="font-semibold mb-4 text-center">التوثيق والاعتماد</h4>
                       <div className="grid grid-cols-3 gap-6">
@@ -431,13 +652,13 @@ const AggregateShipmentReport = () => {
                             <Building2 className="w-4 h-4" />
                             الجهة المولدة
                           </div>
-                          <p className="text-sm font-medium">{shipments[0]?.generator?.name || organization?.name || '-'}</p>
+                          <p className="text-sm font-medium">{filteredShipments[0]?.generator?.name || organization?.name || '-'}</p>
                           <div className="flex justify-center gap-4 min-h-[80px]">
                             {includeStamps && (
                               <div className="text-center">
-                                {shipments[0]?.generator?.stamp_url ? (
+                                {filteredShipments[0]?.generator?.stamp_url ? (
                                   <img 
-                                    src={shipments[0].generator.stamp_url} 
+                                    src={filteredShipments[0].generator.stamp_url} 
                                     alt="ختم الجهة المولدة" 
                                     className="w-20 h-20 object-contain border rounded"
                                     crossOrigin="anonymous"
@@ -452,9 +673,9 @@ const AggregateShipmentReport = () => {
                             )}
                             {includeSignatures && (
                               <div className="text-center">
-                                {shipments[0]?.generator?.signature_url ? (
+                                {filteredShipments[0]?.generator?.signature_url ? (
                                   <img 
-                                    src={shipments[0].generator.signature_url} 
+                                    src={filteredShipments[0].generator.signature_url} 
                                     alt="توقيع الجهة المولدة" 
                                     className="w-20 h-20 object-contain border rounded"
                                     crossOrigin="anonymous"
@@ -476,13 +697,13 @@ const AggregateShipmentReport = () => {
                             <Truck className="w-4 h-4" />
                             الجهة الناقلة
                           </div>
-                          <p className="text-sm font-medium">{shipments[0]?.transporter?.name || '-'}</p>
+                          <p className="text-sm font-medium">{filteredShipments[0]?.transporter?.name || '-'}</p>
                           <div className="flex justify-center gap-4 min-h-[80px]">
                             {includeStamps && (
                               <div className="text-center">
-                                {shipments[0]?.transporter?.stamp_url ? (
+                                {filteredShipments[0]?.transporter?.stamp_url ? (
                                   <img 
-                                    src={shipments[0].transporter.stamp_url} 
+                                    src={filteredShipments[0].transporter.stamp_url} 
                                     alt="ختم الجهة الناقلة" 
                                     className="w-20 h-20 object-contain border rounded"
                                     crossOrigin="anonymous"
@@ -497,9 +718,9 @@ const AggregateShipmentReport = () => {
                             )}
                             {includeSignatures && (
                               <div className="text-center">
-                                {shipments[0]?.transporter?.signature_url ? (
+                                {filteredShipments[0]?.transporter?.signature_url ? (
                                   <img 
-                                    src={shipments[0].transporter.signature_url} 
+                                    src={filteredShipments[0].transporter.signature_url} 
                                     alt="توقيع الجهة الناقلة" 
                                     className="w-20 h-20 object-contain border rounded"
                                     crossOrigin="anonymous"
@@ -521,13 +742,13 @@ const AggregateShipmentReport = () => {
                             <Recycle className="w-4 h-4" />
                             الجهة المدورة
                           </div>
-                          <p className="text-sm font-medium">{shipments[0]?.recycler?.name || '-'}</p>
+                          <p className="text-sm font-medium">{filteredShipments[0]?.recycler?.name || '-'}</p>
                           <div className="flex justify-center gap-4 min-h-[80px]">
                             {includeStamps && (
                               <div className="text-center">
-                                {shipments[0]?.recycler?.stamp_url ? (
+                                {filteredShipments[0]?.recycler?.stamp_url ? (
                                   <img 
-                                    src={shipments[0].recycler.stamp_url} 
+                                    src={filteredShipments[0].recycler.stamp_url} 
                                     alt="ختم الجهة المدورة" 
                                     className="w-20 h-20 object-contain border rounded"
                                     crossOrigin="anonymous"
@@ -542,9 +763,9 @@ const AggregateShipmentReport = () => {
                             )}
                             {includeSignatures && (
                               <div className="text-center">
-                                {shipments[0]?.recycler?.signature_url ? (
+                                {filteredShipments[0]?.recycler?.signature_url ? (
                                   <img 
-                                    src={shipments[0].recycler.signature_url} 
+                                    src={filteredShipments[0].recycler.signature_url} 
                                     alt="توقيع الجهة المدورة" 
                                     className="w-20 h-20 object-contain border rounded"
                                     crossOrigin="anonymous"
@@ -574,6 +795,85 @@ const AggregateShipmentReport = () => {
           </Card>
         </div>
       </div>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5" />
+              مشاركة التقرير مع الجهات
+            </DialogTitle>
+            <DialogDescription>
+              اختر الجهات التي تريد مشاركة التقرير المجمع معها
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {partnerOrganizations.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <Building2 className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                <p>لا توجد جهات شريكة في الشحنات المحددة</p>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                {partnerOrganizations.map((partner) => (
+                  <div 
+                    key={partner.id}
+                    className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${
+                      selectedPartners.includes(partner.id) 
+                        ? 'bg-primary/10 border-primary' 
+                        : 'hover:bg-muted/50'
+                    }`}
+                    onClick={() => togglePartnerSelection(partner.id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Checkbox 
+                        checked={selectedPartners.includes(partner.id)}
+                        onCheckedChange={() => togglePartnerSelection(partner.id)}
+                      />
+                      <div>
+                        <p className="font-medium">{partner.name}</p>
+                        <Badge variant="outline" className="text-xs mt-1">
+                          {getOrgTypeLabel(partner.organization_type)}
+                        </Badge>
+                      </div>
+                    </div>
+                    {partner.organization_type === 'generator' && <Building2 className="w-4 h-4 text-blue-500" />}
+                    {partner.organization_type === 'transporter' && <Truck className="w-4 h-4 text-amber-500" />}
+                    {partner.organization_type === 'recycler' && <Recycle className="w-4 h-4 text-emerald-500" />}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {selectedPartners.length > 0 && (
+              <div className="p-3 rounded-lg bg-muted/50 text-sm">
+                <p className="font-medium mb-1">سيتم إرسال إشعار للجهات المختارة ({selectedPartners.length})</p>
+                <p className="text-muted-foreground">سيتمكنون من الاطلاع على التقرير المجمع</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              إلغاء
+            </Button>
+            <Button 
+              onClick={handleShare} 
+              disabled={selectedPartners.length === 0 || isSharing}
+              className="gap-2"
+            >
+              {isSharing ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Send className="w-4 h-4" />
+              )}
+              مشاركة التقرير
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Print Styles */}
       <style>{`
