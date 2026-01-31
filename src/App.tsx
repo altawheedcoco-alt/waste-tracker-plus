@@ -45,6 +45,7 @@ import AddOrganization from "./pages/dashboard/AddOrganization";
 import ShipmentReports from "./pages/dashboard/ShipmentReports";
 import AdminDriversMap from "./pages/dashboard/AdminDriversMap";
 import VideoGenerator from "./pages/dashboard/VideoGenerator";
+import MyLocation from "./pages/dashboard/MyLocation";
 import AIChatbot from "./components/ai/AIChatbot";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
@@ -101,6 +102,7 @@ const App = () => (
                 <Route path="/dashboard/shipment-reports" element={<ShipmentReports />} />
                 <Route path="/dashboard/admin-drivers-map" element={<AdminDriversMap />} />
                 <Route path="/dashboard/video-generator" element={<VideoGenerator />} />
+                <Route path="/dashboard/my-location" element={<MyLocation />} />
                 <Route path="/dashboard/*" element={<Dashboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

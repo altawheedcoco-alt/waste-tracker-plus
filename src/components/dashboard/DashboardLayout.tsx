@@ -196,7 +196,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const driverMenuItems = [
     { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard' },
     { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments' },
-    { icon: MapPin, label: 'موقعي', path: '/dashboard/driver-tracking' },
+    { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications' },
