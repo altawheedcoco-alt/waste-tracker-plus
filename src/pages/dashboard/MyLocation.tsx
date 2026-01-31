@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,19 +19,34 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+// Fix for default marker icons in Leaflet with Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '500px',
-};
+const defaultCenter: [number, number] = [30.0444, 31.2357]; // Cairo, Egypt
 
-const defaultCenter = {
-  lat: 30.0444,
-  lng: 31.2357,
-};
+// Custom green marker icon for driver location
+const driverIcon = new L.DivIcon({
+  className: 'driver-marker',
+  html: `<div style="
+    width: 24px;
+    height: 24px;
+    background: #22c55e;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  "></div>`,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+});
 
 const MyLocation = () => {
   const { profile } = useAuth();
@@ -203,28 +218,18 @@ const MyLocation = () => {
     };
   }, [liveIntervalId]);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-  });
-
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [showInfoWindow, setShowInfoWindow] = useState(false);
-
-  const mapCenter = currentLocation 
-    ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
+  const mapCenter: [number, number] = currentLocation 
+    ? [currentLocation.latitude, currentLocation.longitude]
     : defaultCenter;
 
-  const onMapLoad = useCallback((mapInstance: google.maps.Map) => {
-    setMap(mapInstance);
-  }, []);
-
-  // Pan to new location when it changes
-  useEffect(() => {
-    if (map && currentLocation) {
-      map.panTo({ lat: currentLocation.latitude, lng: currentLocation.longitude });
-      map.setZoom(15);
-    }
-  }, [map, currentLocation]);
+  // Component to recenter map when location changes
+  const MapRecenter = ({ center }: { center: [number, number] }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(center, 15);
+    }, [center, map]);
+    return null;
+  };
 
   if (loading) {
     return (
@@ -378,51 +383,24 @@ const MyLocation = () => {
           </CardHeader>
           <CardContent>
             <div className="h-[500px] rounded-lg overflow-hidden border">
-              {loadError && (
-                <div className="h-full flex items-center justify-center bg-muted">
-                  <p className="text-destructive">خطأ في تحميل الخريطة</p>
-                </div>
-              )}
-              
-              {!isLoaded && !loadError && (
-                <div className="h-full flex items-center justify-center bg-muted">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              )}
-
-              {isLoaded && !loadError && (
-                <GoogleMap
-                  mapContainerStyle={mapContainerStyle}
-                  center={mapCenter}
-                  zoom={currentLocation ? 15 : 6}
-                  onLoad={onMapLoad}
-                  options={{
-                    streetViewControl: false,
-                    mapTypeControl: true,
-                    fullscreenControl: true,
-                    zoomControl: true,
-                  }}
-                >
-                  {currentLocation && (
-                    <Marker
-                      position={{ lat: currentLocation.latitude, lng: currentLocation.longitude }}
-                      onClick={() => setShowInfoWindow(true)}
-                      icon={{
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 12,
-                        fillColor: '#22c55e',
-                        fillOpacity: 1,
-                        strokeColor: '#ffffff',
-                        strokeWeight: 3,
-                      }}
-                    />
-                  )}
-
-                  {currentLocation && showInfoWindow && (
-                    <InfoWindow
-                      position={{ lat: currentLocation.latitude, lng: currentLocation.longitude }}
-                      onCloseClick={() => setShowInfoWindow(false)}
-                    >
+            <MapContainer
+              center={mapCenter}
+              zoom={currentLocation ? 15 : 6}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {currentLocation && (
+                <>
+                  <MapRecenter center={[currentLocation.latitude, currentLocation.longitude]} />
+                  <Marker 
+                    position={[currentLocation.latitude, currentLocation.longitude]}
+                    icon={driverIcon}
+                  >
+                    <Popup>
                       <div className="text-right p-2" dir="rtl">
                         <p className="font-bold">{profile?.full_name}</p>
                         <p className="text-sm text-gray-600">
@@ -432,10 +410,11 @@ const MyLocation = () => {
                           آخر تحديث: {new Date(currentLocation.recorded_at).toLocaleTimeString('ar-SA')}
                         </p>
                       </div>
-                    </InfoWindow>
-                  )}
-                </GoogleMap>
+                    </Popup>
+                  </Marker>
+                </>
               )}
+            </MapContainer>
             </div>
 
             {!currentLocation && (
