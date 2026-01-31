@@ -56,6 +56,15 @@ const disposalMethods = [
   { value: 'reuse', label: 'إعادة استخدام' },
 ];
 
+const packagingMethods = [
+  { value: 'packaged', label: 'معبأ' },
+  { value: 'unpackaged', label: 'غير معبأ' },
+];
+
+const hazardLevels = [
+  { value: 'hazardous', label: 'خطرة' },
+  { value: 'non_hazardous', label: 'غير خطرة' },
+];
 
 const driverInputTypes = [
   { value: 'select', label: 'اختيار من السائقين المسجلين' },
@@ -109,6 +118,7 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     disposal_method: '',
     manual_driver_name: '',
     manual_vehicle_plate: prefilledVehiclePlate,
+    packaging_method: '',
     hazard_level: '',
     waste_state: 'solid',
   });
@@ -392,9 +402,8 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
         manual_generator_name: manualGeneratorName,
         manual_recycler_name: manualRecyclerName,
         manual_transporter_name: manualTransporterName,
-        hazard_level: formData.hazard_level?.startsWith('manual:') 
-          ? formData.hazard_level.replace('manual:', '') 
-          : (formData.hazard_level || null),
+        packaging_method: formData.packaging_method || null,
+        hazard_level: formData.hazard_level || null,
         waste_state: formData.waste_state?.startsWith('manual:') 
           ? formData.waste_state.replace('manual:', '') 
           : (formData.waste_state || 'solid'),
@@ -634,6 +643,25 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
               يمكنك اختيار حالة من القائمة أو إدخال حالة جديدة يدوياً
             </p>
           </div>
+          <div>
+            <Label>طريقة التعبئة</Label>
+            <Select 
+              value={formData.packaging_method} 
+              onValueChange={(v) => setFormData(prev => ({ ...prev, packaging_method: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="اختر طريقة التعبئة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="packaged">معبأ</SelectItem>
+                <SelectItem value="unpackaged">غير معبأ</SelectItem>
+                <SelectItem value="drums">براميل</SelectItem>
+                <SelectItem value="tanks">خزانات</SelectItem>
+                <SelectItem value="bags">أكياس</SelectItem>
+                <SelectItem value="bulk">سائب</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div>
@@ -755,27 +783,47 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
         </div>
       </div>
 
-      {/* Row 8: Hazard Level */}
-      <div>
-        <Label>مستوى الخطورة</Label>
-        <ComboboxWithInput
-          options={[
-            { value: 'hazardous', label: '⚠️ خطرة' },
-            { value: 'non_hazardous', label: '✓ غير خطرة' },
-            { value: 'low', label: '🟢 منخفضة' },
-            { value: 'medium', label: '🟡 متوسطة' },
-            { value: 'high', label: '🟠 عالية' },
-            { value: 'critical', label: '🔴 حرجة' },
-          ]}
-          value={formData.hazard_level}
-          onValueChange={(v) => setFormData(prev => ({ ...prev, hazard_level: v }))}
-          placeholder="اختر أو أدخل مستوى الخطورة"
-          searchPlaceholder="ابحث أو أدخل مستوى جديد..."
-          emptyMessage="لا توجد نتائج"
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          يمكنك اختيار مستوى من القائمة أو إدخال مستوى جديد يدوياً
-        </p>
+      {/* Row 8: Packaging & Hazard Level */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>طريقة التعبئة</Label>
+          <Select value={formData.packaging_method} onValueChange={(v) => setFormData(prev => ({ ...prev, packaging_method: v }))}>
+            <SelectTrigger>
+              <SelectValue placeholder="اختر طريقة التعبئة" />
+            </SelectTrigger>
+            <SelectContent>
+              {packagingMethods.map(method => (
+                <SelectItem key={method.value} value={method.value}>
+                  {method.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>مستوى الخطورة (يتحدد تلقائياً)</Label>
+          <div className={`flex items-center gap-2 p-3 rounded-md border ${
+            formData.hazard_level === 'hazardous' 
+              ? 'bg-destructive/10 border-destructive text-destructive' 
+              : formData.hazard_level === 'non_hazardous'
+              ? 'bg-primary/10 border-primary text-primary'
+              : 'bg-muted border-border text-muted-foreground'
+          }`}>
+            {formData.hazard_level === 'hazardous' && (
+              <>
+                <span className="font-medium">⚠️ خطرة</span>
+              </>
+            )}
+            {formData.hazard_level === 'non_hazardous' && (
+              <>
+                <span className="font-medium">✓ غير خطرة</span>
+              </>
+            )}
+            {!formData.hazard_level && (
+              <span>سيتم التحديد عند اختيار نوع النفايات</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Row 9: Disposal Method */}
