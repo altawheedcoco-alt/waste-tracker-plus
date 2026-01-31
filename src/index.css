@@ -309,6 +309,57 @@
   .grid-responsive-4 {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
   }
+
+  /* Display Mode Classes - تطبق بناءً على وضع العرض المحدد في الإعدادات */
+  .display-mobile {
+    @apply text-sm;
+  }
+  
+  .display-mobile .card-content {
+    @apply p-3;
+  }
+  
+  .display-tablet {
+    @apply text-base;
+  }
+  
+  .display-tablet .card-content {
+    @apply p-4;
+  }
+  
+  .display-desktop {
+    @apply text-base;
+  }
+  
+  .display-desktop .card-content {
+    @apply p-5;
+  }
+
+  /* Responsive stat cards */
+  .stat-card {
+    @apply transition-all duration-200;
+  }
+  
+  .stat-card-compact {
+    @apply p-3;
+  }
+  
+  .stat-card-normal {
+    @apply p-4 sm:p-5;
+  }
+
+  /* Responsive icon sizes */
+  .icon-responsive-sm {
+    @apply w-4 h-4 sm:w-5 sm:h-5;
+  }
+  
+  .icon-responsive-md {
+    @apply w-5 h-5 sm:w-6 sm:h-6;
+  }
+  
+  .icon-responsive-lg {
+    @apply w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12;
+  }
 }
 
 /* Leaflet Map Styles */

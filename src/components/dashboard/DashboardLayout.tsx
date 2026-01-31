@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
@@ -72,20 +73,29 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
-  const [isDesktop, setIsDesktop] = useState(false);
   const { profile, organization, signOut, roles } = useAuth();
   const { count: partnersCount } = usePartnersCount();
   const { unreadCount: notificationCount } = useNotifications();
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // Use display mode for responsive layout
+  const { 
+    isMobile, 
+    isTablet, 
+    isDesktop, 
+    shouldCollapseSidebar,
+    getResponsiveClass 
+  } = useDisplayMode();
 
-  // Check if desktop
+  // Auto-collapse sidebar on mobile/tablet
   useEffect(() => {
-    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
-    checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
-  }, []);
+    if (shouldCollapseSidebar) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, [shouldCollapseSidebar]);
 
   // Unlock notification audio on first user gesture (required by browser autoplay policies)
   useEffect(() => {
@@ -213,68 +223,68 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     </svg>
   );
 
-  // Driver-specific menu items (simplified)
+  // Driver-specific menu items (simplified) - with unique keys
   const driverMenuItems = [
-    { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard' },
-    { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments' },
-    { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location' },
-    { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests' },
-    { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat' },
-    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount },
-    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
+    { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard', key: 'driver-dashboard' },
+    { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments', key: 'driver-shipments' },
+    { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location', key: 'driver-location' },
+    { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
+    { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
+    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
+    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'driver-settings' },
   ];
 
-  // Full menu items for organizations and admins
+  // Full menu items for organizations and admins - with unique keys
   const fullMenuItems = [
-    { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard' },
-    { icon: Building2, label: 'ملف الجهة', path: '/dashboard/organization-profile' },
-    { icon: Newspaper, label: 'المنشورات', path: '/dashboard/organization-profile?tab=posts' },
-    { icon: Rss, label: 'تايم لاين الشركاء', path: '/dashboard/partners-timeline' },
-    { icon: Handshake, label: 'الشركاء', path: '/dashboard/partners', badge: partnersCount },
+    { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard', key: 'dashboard' },
+    { icon: Building2, label: 'ملف الجهة', path: '/dashboard/organization-profile', key: 'org-profile' },
+    { icon: Newspaper, label: 'المنشورات', path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
+    { icon: Rss, label: 'تايم لاين الشركاء', path: '/dashboard/partners-timeline', key: 'partners-timeline' },
+    { icon: Handshake, label: 'الشركاء', path: '/dashboard/partners', badge: partnersCount, key: 'partners' },
     ...(organization?.organization_type === 'transporter'
       ? [
-          { icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments' },
-          { icon: Users, label: 'السائقين', path: '/dashboard/transporter-drivers' },
-          { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking' },
-          { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials' },
-          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates' },
+          { icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments', key: 'transporter-shipments' },
+          { icon: Users, label: 'السائقين', path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
+          { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
+          { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials', key: 'transporter-team' },
+          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'transporter-certs' },
         ]
       : organization?.organization_type === 'recycler'
       ? [
-          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments' },
-          { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates' },
+          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'recycler-shipments' },
+          { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs' },
         ]
       : [
-          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments' },
-          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates' },
+          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'generator-shipments' },
+          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'generator-certs' },
         ]),
     // Add team credentials for all organization types with employees
     ...(!isTransporter && !isAdmin ? [
-      { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials' },
+      { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials', key: 'other-team' },
     ] : []),
     ...(isAdmin
       ? [
-          { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals' },
-          { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals' },
-          { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents' },
-          { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking' },
-          { icon: Truck, label: 'خريطة السائقين', path: '/dashboard/admin-drivers-map' },
-          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates' },
-          { icon: Video, label: 'إنشاء فيديوهات ترويجية', path: '/dashboard/video-generator' },
+          { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals', key: 'company-approvals' },
+          { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals', key: 'driver-approvals' },
+          { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents', key: 'org-docs' },
+          { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
+          { icon: Truck, label: 'خريطة السائقين', path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
+          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'admin-certs' },
+          { icon: Video, label: 'إنشاء فيديوهات ترويجية', path: '/dashboard/video-generator', key: 'video-gen' },
         ]
       : []),
-    { icon: BarChart3, label: 'التقارير', path: '/dashboard/reports' },
-    { icon: FileText, label: 'تقارير الشحنات', path: '/dashboard/shipment-reports' },
-    { icon: ClipboardList, label: 'التقرير المجمع', path: '/dashboard/aggregate-report' },
-    { icon: FileSpreadsheet, label: 'سجل المخلفات الغير خطرة', path: '/dashboard/non-hazardous-register' },
-    { icon: AlertTriangle, label: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register' },
-    { icon: Layers, label: 'تصنيف أنواع المخلفات', path: '/dashboard/waste-types' },
-    { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests' },
-    { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates' },
-    { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans' },
-    { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat' },
-    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount },
-    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
+    { icon: BarChart3, label: 'التقارير', path: '/dashboard/reports', key: 'reports' },
+    { icon: FileText, label: 'تقارير الشحنات', path: '/dashboard/shipment-reports', key: 'shipment-reports' },
+    { icon: ClipboardList, label: 'التقرير المجمع', path: '/dashboard/aggregate-report', key: 'aggregate-report' },
+    { icon: FileSpreadsheet, label: 'سجل المخلفات الغير خطرة', path: '/dashboard/non-hazardous-register', key: 'non-hazardous' },
+    { icon: AlertTriangle, label: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register', key: 'hazardous' },
+    { icon: Layers, label: 'تصنيف أنواع المخلفات', path: '/dashboard/waste-types', key: 'waste-types' },
+    { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'my-requests' },
+    { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
+    { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
+    { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
+    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
+    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
   ];
 
   // Use driver menu if user is a driver (not admin)
@@ -284,20 +294,29 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const filteredMenuItems = useMemo(() => {
     if (!sidebarSearch.trim()) return menuItems;
     const searchLower = sidebarSearch.toLowerCase();
-    return menuItems.filter(item => 
+    return menuItems.filter((item: any) => 
       item.label.toLowerCase().includes(searchLower) ||
       item.path.toLowerCase().includes(searchLower)
     );
   }, [menuItems, sidebarSearch]);
 
+  // Get responsive values
+  const sidebarWidth = isSidebarOpen ? (isMobile ? 260 : isTablet ? 270 : 280) : 80;
+  const headerHeight = isMobile ? 'h-14' : 'h-16';
+  const mainPadding = getResponsiveClass({
+    mobile: 'p-3',
+    tablet: 'p-4',
+    desktop: 'p-6',
+  });
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background flex flex-row-reverse" dir="rtl">
-        {/* Desktop Sidebar */}
+        {/* Desktop Sidebar - Hidden on mobile when using display mode */}
         <motion.aside
           initial={false}
-          animate={{ width: isSidebarOpen ? 280 : 80 }}
-          className="hidden lg:flex flex-col bg-card border-l border-border shadow-sm fixed right-0 top-0 h-screen z-50"
+          animate={{ width: isSidebarOpen ? sidebarWidth : 80 }}
+          className={`${isMobile ? 'hidden' : 'flex'} flex-col bg-card border-l border-border shadow-sm fixed right-0 top-0 h-screen z-50`}
         >
           {/* Logo */}
           <div className="p-4 border-b border-border">
@@ -305,7 +324,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <motion.img 
                 src={logo} 
                 alt="آي ريسايكل" 
-                className="h-10 w-10 object-contain"
+                className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} object-contain`}
                 whileHover={{ rotate: 10 }}
                 transition={{ type: 'spring', stiffness: 300 }}
               />
@@ -317,7 +336,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     exit={{ opacity: 0, width: 0 }}
                     className="overflow-hidden"
                   >
-                    <h1 className="text-lg font-bold text-gradient-eco whitespace-nowrap">
+                    <h1 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold text-gradient-eco whitespace-nowrap`}>
                       آي ريسايكل
                     </h1>
                   </motion.div>
@@ -364,14 +383,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {/* Navigation */}
           <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
             {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item) => (
+              filteredMenuItems.map((item: any) => (
                 <SidebarNavItem
-                  key={item.path}
+                  key={item.key || item.path}
                   icon={item.icon}
                   label={item.label}
                   path={item.path}
                   isCollapsed={!isSidebarOpen}
-                  badge={'badge' in item ? (item.badge as number) : undefined}
+                  badge={item.badge}
                 />
               ))
             ) : (
@@ -396,40 +415,38 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
         </motion.aside>
 
-        {/* Main content - Desktop with sidebar margin */}
+        {/* Main content - Responsive margin */}
         <div 
           className="flex-1 flex flex-col transition-[margin] duration-200"
           style={{ 
-            marginRight: isDesktop ? (isSidebarOpen ? 280 : 80) : 0 
+            marginRight: !isMobile ? (isSidebarOpen ? sidebarWidth : 80) : 0 
           }}
         >
-          {/* Top header */}
-          <header className="sticky top-0 z-40 h-14 sm:h-16 bg-card border-b border-border flex items-center justify-between px-3 sm:px-4 lg:px-6 shadow-sm">
+          {/* Top header - Responsive height */}
+          <header className={`sticky top-0 z-40 ${headerHeight} bg-card border-b border-border flex items-center justify-between px-3 sm:px-4 lg:px-6 shadow-sm`}>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation"
+              className={`${isMobile ? 'block' : 'hidden'} p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation`}
               aria-label="فتح القائمة"
             >
               {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
 
-            {/* Mobile logo */}
-            <div className="lg:hidden flex items-center gap-2">
-              <img src={logo} alt="آي ريسايكل" className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
-              <span className="font-bold text-gradient-eco text-sm sm:text-base">آي ريسايكل</span>
+            {/* Mobile logo - Only show on mobile */}
+            <div className={`${isMobile ? 'flex' : 'hidden'} items-center gap-2`}>
+              <img src={logo} alt="آي ريسايكل" className="h-7 w-7 object-contain" />
+              <span className="font-bold text-gradient-eco text-sm">آي ريسايكل</span>
             </div>
 
-            {/* Command Palette - Desktop */}
-            <div className="hidden lg:block flex-1 max-w-md mx-4">
+            {/* Command Palette - Hide on mobile */}
+            <div className={`${isMobile ? 'hidden' : 'block'} flex-1 max-w-md mx-4`}>
               <CommandPalette />
             </div>
 
-            {/* Right side */}
-            <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
-              {/* Focus Music Player - Hidden on very small screens */}
-              <div className="hidden sm:block">
-                <FocusMusicPlayer />
-              </div>
+            {/* Right side - Responsive spacing */}
+            <div className={`flex items-center ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
+              {/* Focus Music Player - Hidden on mobile */}
+              {!isMobile && <FocusMusicPlayer />}
 
               {/* Theme Customizer */}
               <ThemeCustomizer />
@@ -561,14 +578,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </div>
                 <nav className="p-3 sm:p-4 space-y-1 pb-safe">
                   {filteredMenuItems.length > 0 ? (
-                    filteredMenuItems.map((item) => (
-                      <div key={item.path} onClick={() => setIsMobileMenuOpen(false)}>
+                    filteredMenuItems.map((item: any) => (
+                      <div key={item.key || item.path} onClick={() => setIsMobileMenuOpen(false)}>
                         <SidebarNavItem
                           icon={item.icon}
                           label={item.label}
                           path={item.path}
                           isCollapsed={false}
-                          badge={'badge' in item ? (item.badge as number) : undefined}
+                          badge={item.badge}
                         />
                       </div>
                     ))
@@ -582,8 +599,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             )}
           </AnimatePresence>
 
-          {/* Page content */}
-          <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-auto">
+          {/* Page content - Responsive padding */}
+          <main className={`flex-1 ${mainPadding} overflow-auto`}>
             <DashboardBreadcrumb />
             {children}
           </main>
@@ -592,12 +609,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           {(isTransporter || isDriver) && (
             <motion.button
               onClick={() => navigate('/dashboard/shipments/new')}
-              className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center touch-manipulation"
-              whileHover={{ scale: 1.1, boxShadow: '0 0 20px hsl(142, 71%, 45%, 0.4)' }}
+              className={`fixed z-50 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center touch-manipulation ${
+                isMobile ? 'bottom-4 left-4 w-12 h-12' : 'bottom-6 left-6 w-14 h-14'
+              }`}
+              whileHover={{ scale: 1.1, boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
               whileTap={{ scale: 0.9 }}
               title="إنشاء شحنة جديدة"
             >
-              <Plus size={22} className="sm:w-6 sm:h-6" />
+              <Plus size={isMobile ? 20 : 24} />
             </motion.button>
           )}
         </div>

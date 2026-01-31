@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,7 @@ import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye,
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
+import ResponsiveGrid from './ResponsiveGrid';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
@@ -58,6 +60,7 @@ interface RecentShipment {
 const GeneratorDashboard = () => {
   const { profile, organization } = useAuth();
   const navigate = useNavigate();
+  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
   const [stats, setStats] = useState<ShipmentStats>({
     total: 0,
     new: 0,
@@ -69,6 +72,31 @@ const GeneratorDashboard = () => {
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);
+
+  // Responsive styles
+  const titleClass = getResponsiveClass({
+    mobile: 'text-lg',
+    tablet: 'text-xl',
+    desktop: 'text-2xl',
+  });
+
+  const statValueClass = getResponsiveClass({
+    mobile: 'text-xl',
+    tablet: 'text-2xl',
+    desktop: 'text-3xl',
+  });
+
+  const iconContainerClass = getResponsiveClass({
+    mobile: 'w-10 h-10',
+    tablet: 'w-11 h-11',
+    desktop: 'w-12 h-12',
+  });
+
+  const iconClass = getResponsiveClass({
+    mobile: 'w-5 h-5',
+    tablet: 'w-5.5 h-5.5',
+    desktop: 'w-6 h-6',
+  });
 
   useEffect(() => {
     if (organization?.id) {
@@ -196,50 +224,50 @@ const GeneratorDashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Welcome section */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="default" />
-          <Button onClick={() => setShowDocumentVerification(true)} variant="outline" className="gap-2">
+      {/* Welcome section - Responsive */}
+      <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'}`}>
+        <div className={`flex items-center gap-2 ${isMobile ? 'order-2' : ''}`}>
+          <SmartRequestDialog buttonText={isMobile ? 'طلب' : 'طلب تقارير'} buttonVariant="default" />
+          <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
             <FileCheck className="w-4 h-4" />
-            التحقق من الوثائق
+            {!isMobile && 'التحقق من الوثائق'}
           </Button>
         </div>
-        <div className="text-right">
-          <h1 className="text-2xl font-bold">مرحباً، {profile?.full_name}</h1>
-          <p className="text-muted-foreground">
+        <div className={`text-right ${isMobile ? 'order-1' : ''}`}>
+          <h1 className={`font-bold ${titleClass}`}>مرحباً، {profile?.full_name}</h1>
+          <p className="text-muted-foreground text-sm">
             {organization?.name} - الجهة المولدة
           </p>
         </div>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats grid - Responsive */}
+      <ResponsiveGrid cols={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
         {statCards.map((stat, index) => (
           <motion.div
             key={stat.title}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.05 }}
           >
             <Card className="relative overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
+              <CardContent className={isMobile ? 'p-3' : 'p-5'}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground truncate`}>{stat.title}</p>
+                    <p className={`${statValueClass} font-bold mt-1`}>{stat.value}</p>
                   </div>
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white`}
+                    className={`${iconContainerClass} rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shrink-0`}
                   >
-                    <stat.icon className="w-6 h-6" />
+                    <stat.icon className={iconClass} />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
         ))}
-      </div>
+      </ResponsiveGrid>
 
       {/* Quick Actions */}
       <QuickActionsGrid
