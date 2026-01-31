@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import {
   MapPin,
@@ -16,9 +17,11 @@ import {
   MapPinned,
   Send,
   Radio,
+  Route,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
+import DriverTripTracker from '@/components/driver/DriverTripTracker';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -268,183 +271,203 @@ const MyLocation = () => {
           <div className="text-right">
             <h1 className="text-3xl font-bold flex items-center gap-3 justify-end">
               <MapPinned className="h-8 w-8 text-primary" />
-              موقعي الحالي
+              موقعي والتتبع
             </h1>
-            <p className="text-muted-foreground">عرض وتحديث موقعك على الخريطة</p>
+            <p className="text-muted-foreground">عرض موقعك وإدارة رحلات التتبع</p>
           </div>
         </div>
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-4 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Navigation className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">الحالة</p>
-                  <Badge variant={driverInfo.is_available ? 'default' : 'secondary'}>
-                    <Circle className={`w-2 h-2 ml-1 ${driverInfo.is_available ? 'fill-green-400' : 'fill-amber-400'}`} />
-                    {driverInfo.is_available ? 'متاح' : 'في مهمة'}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Tabs for Location vs Trip Tracking */}
+        <Tabs defaultValue="location" className="w-full" dir="rtl">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="location" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              موقعي الحالي
+            </TabsTrigger>
+            <TabsTrigger value="tracking" className="flex items-center gap-2">
+              <Route className="h-4 w-4" />
+              تتبع الرحلات
+            </TabsTrigger>
+          </TabsList>
 
-          <Card>
-            <CardContent className="p-4 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Clock className="w-5 h-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">آخر تحديث</p>
-                  <p className="font-medium">
-                    {currentLocation 
-                      ? new Date(currentLocation.recorded_at).toLocaleString('ar-SA', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          day: 'numeric',
-                          month: 'short',
-                        })
-                      : 'لم يتم التحديد بعد'
-                    }
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <TabsContent value="location" className="mt-4 space-y-4">
+            {/* Info Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="p-4 text-right">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Navigation className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">الحالة</p>
+                      <Badge variant={driverInfo.is_available ? 'default' : 'secondary'}>
+                        <Circle className={`w-2 h-2 ml-1 ${driverInfo.is_available ? 'fill-primary' : 'fill-muted-foreground'}`} />
+                        {driverInfo.is_available ? 'متاح' : 'في مهمة'}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Card>
-            <CardContent className="p-4 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <Satellite className="w-5 h-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">الدقة</p>
-                  <p className="font-medium">
-                    {currentLocation?.accuracy 
-                      ? `${Math.round(currentLocation.accuracy)} متر`
-                      : '-'
-                    }
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Card>
+                <CardContent className="p-4 text-right">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">آخر تحديث</p>
+                      <p className="font-medium">
+                        {currentLocation 
+                          ? new Date(currentLocation.recorded_at).toLocaleString('ar-SA', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              day: 'numeric',
+                              month: 'short',
+                            })
+                          : 'لم يتم التحديد بعد'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-        {/* Map */}
-        <Card>
-          <CardHeader className="text-right">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={updateMyLocation}
-                  disabled={updating}
-                  size="sm"
-                  className="gap-2"
-                >
-                  {updating ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                  تحديد موقعي
-                </Button>
-                <Button
-                  onClick={toggleLiveTracking}
-                  size="sm"
-                  variant={liveTracking ? 'destructive' : 'outline'}
-                  className="gap-2"
-                >
-                  <Radio className={`h-4 w-4 ${liveTracking ? 'animate-pulse' : ''}`} />
-                  {liveTracking ? 'إيقاف التتبع' : 'تتبع مباشر'}
-                </Button>
-              </div>
-              <div>
-                <CardTitle className="flex items-center gap-2 justify-end">
-                  خريطة موقعي
-                  {liveTracking && (
-                    <Badge variant="default" className="bg-green-500 animate-pulse">
-                      <Radio className="w-3 h-3 ml-1" />
-                      مباشر
-                    </Badge>
-                  )}
-                </CardTitle>
-                <CardDescription>
-                  {driverInfo.organization_name || 'شركة النقل'} • {driverInfo.vehicle_plate || 'غير محدد'}
-                </CardDescription>
-              </div>
+              <Card>
+                <CardContent className="p-4 text-right">
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Satellite className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">الدقة</p>
+                      <p className="font-medium">
+                        {currentLocation?.accuracy 
+                          ? `${Math.round(currentLocation.accuracy)} متر`
+                          : '-'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[500px] rounded-lg overflow-hidden border">
-            <MapContainer
-              center={mapCenter}
-              zoom={currentLocation ? 15 : 6}
-              style={{ height: '100%', width: '100%' }}
-              scrollWheelZoom={true}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {currentLocation && (
-                <>
-                  <MapRecenter center={[currentLocation.latitude, currentLocation.longitude]} />
-                  <Marker 
-                    position={[currentLocation.latitude, currentLocation.longitude]}
-                    icon={driverIcon}
+
+            {/* Map */}
+            <Card>
+              <CardHeader className="text-right">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={updateMyLocation}
+                      disabled={updating}
+                      size="sm"
+                      className="gap-2"
+                    >
+                      {updating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      تحديد موقعي
+                    </Button>
+                    <Button
+                      onClick={toggleLiveTracking}
+                      size="sm"
+                      variant={liveTracking ? 'destructive' : 'outline'}
+                      className="gap-2"
+                    >
+                      <Radio className={`h-4 w-4 ${liveTracking ? 'animate-pulse' : ''}`} />
+                      {liveTracking ? 'إيقاف التتبع' : 'تتبع مباشر'}
+                    </Button>
+                  </div>
+                  <div>
+                    <CardTitle className="flex items-center gap-2 justify-end">
+                      خريطة موقعي
+                      {liveTracking && (
+                        <Badge variant="default" className="bg-primary animate-pulse">
+                          <Radio className="w-3 h-3 ml-1" />
+                          مباشر
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      {driverInfo.organization_name || 'شركة النقل'} • {driverInfo.vehicle_plate || 'غير محدد'}
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px] rounded-lg overflow-hidden border">
+                  <MapContainer
+                    center={mapCenter}
+                    zoom={currentLocation ? 15 : 6}
+                    style={{ height: '100%', width: '100%' }}
+                    scrollWheelZoom={true}
                   >
-                    <Popup>
-                      <div className="text-right p-2" dir="rtl">
-                        <p className="font-bold">{profile?.full_name}</p>
-                        <p className="text-sm text-gray-600">
-                          {driverInfo.vehicle_plate}
-                        </p>
-                        <p className="text-xs mt-1">
-                          آخر تحديث: {new Date(currentLocation.recorded_at).toLocaleTimeString('ar-SA')}
-                        </p>
-                      </div>
-                    </Popup>
-                  </Marker>
-                </>
-              )}
-            </MapContainer>
-            </div>
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    {currentLocation && (
+                      <>
+                        <MapRecenter center={[currentLocation.latitude, currentLocation.longitude]} />
+                        <Marker 
+                          position={[currentLocation.latitude, currentLocation.longitude]}
+                          icon={driverIcon}
+                        >
+                          <Popup>
+                            <div className="text-right p-2" dir="rtl">
+                              <p className="font-bold">{profile?.full_name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {driverInfo.vehicle_plate}
+                              </p>
+                              <p className="text-xs mt-1">
+                                آخر تحديث: {new Date(currentLocation.recorded_at).toLocaleTimeString('ar-SA')}
+                              </p>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      </>
+                    )}
+                  </MapContainer>
+                </div>
 
-            {!currentLocation && (
-              <div className="mt-4 p-4 bg-muted/50 rounded-lg text-center">
-                <MapPin className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-muted-foreground">
-                  اضغط على "تحديد موقعي" لإرسال موقعك الحالي
-                </p>
-              </div>
+                {!currentLocation && (
+                  <div className="mt-4 p-4 bg-muted/50 rounded-lg text-center">
+                    <MapPin className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      اضغط على "تحديد موقعي" لإرسال موقعك الحالي
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Coordinates Info */}
+            {currentLocation && (
+              <Card>
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">خط العرض</p>
+                      <p className="font-mono text-sm">{currentLocation.latitude.toFixed(6)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground mb-1">خط الطول</p>
+                      <p className="font-mono text-sm">{currentLocation.longitude.toFixed(6)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             )}
-          </CardContent>
-        </Card>
+          </TabsContent>
 
-        {/* Coordinates Info */}
-        {currentLocation && (
-          <Card>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">خط العرض</p>
-                  <p className="font-mono text-sm">{currentLocation.latitude.toFixed(6)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">خط الطول</p>
-                  <p className="font-mono text-sm">{currentLocation.longitude.toFixed(6)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          <TabsContent value="tracking" className="mt-4">
+            <DriverTripTracker driverId={driverInfo.id} />
+          </TabsContent>
+        </Tabs>
       </motion.div>
     </DashboardLayout>
   );
