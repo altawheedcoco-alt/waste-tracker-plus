@@ -121,6 +121,10 @@ const getAudioContext = (): AudioContext => {
   if (!audioContext) {
     audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
+  // Resume context if suspended (required after user interaction)
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+  }
   return audioContext;
 };
 
@@ -172,7 +176,7 @@ const getDefaultSoundSettings = (): Record<NotificationSoundType, boolean> => {
   return settings;
 };
 
-export const playNotificationSound = (type: NotificationSoundType = 'default') => {
+export const playNotificationSound = async (type: NotificationSoundType = 'default') => {
   // Check if master sound is enabled
   const masterEnabled = localStorage.getItem('notification_sound_enabled');
   if (masterEnabled === 'false') return;
@@ -183,6 +187,12 @@ export const playNotificationSound = (type: NotificationSoundType = 'default') =
   
   try {
     const ctx = getAudioContext();
+    
+    // Ensure audio context is running
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+    
     const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
     const now = ctx.currentTime;
     
@@ -195,15 +205,23 @@ export const playNotificationSound = (type: NotificationSoundType = 'default') =
         sound.volume
       );
     });
+    
+    console.log('🔔 Notification sound played:', type);
   } catch (error) {
     console.warn('Could not play notification sound:', error);
   }
 };
 
 // Preview a specific sound
-export const previewNotificationSound = (type: NotificationSoundType) => {
+export const previewNotificationSound = async (type: NotificationSoundType) => {
   try {
     const ctx = getAudioContext();
+    
+    // Ensure audio context is running
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+    
     const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
     const now = ctx.currentTime;
     
@@ -216,6 +234,8 @@ export const previewNotificationSound = (type: NotificationSoundType) => {
         sound.volume
       );
     });
+    
+    console.log('🔊 Preview sound played:', type);
   } catch (error) {
     console.warn('Could not preview notification sound:', error);
   }
