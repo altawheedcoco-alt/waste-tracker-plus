@@ -16,6 +16,7 @@ import {
   Satellite,
   MapPinned,
   Send,
+  Radio,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
@@ -84,6 +85,8 @@ const MyLocation = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [liveTracking, setLiveTracking] = useState(false);
+  const [liveIntervalId, setLiveIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (profile?.id) {
@@ -198,6 +201,42 @@ const MyLocation = () => {
     }
   };
 
+  const toggleLiveTracking = () => {
+    if (liveTracking) {
+      // Stop live tracking
+      if (liveIntervalId) {
+        clearInterval(liveIntervalId);
+        setLiveIntervalId(null);
+      }
+      setLiveTracking(false);
+      toast({
+        title: 'تم إيقاف التتبع المباشر',
+        description: 'لن يتم تحديث موقعك تلقائياً',
+      });
+    } else {
+      // Start live tracking
+      setLiveTracking(true);
+      updateMyLocation(); // Update immediately
+      const intervalId = setInterval(() => {
+        updateMyLocation();
+      }, 30000); // Update every 30 seconds
+      setLiveIntervalId(intervalId);
+      toast({
+        title: 'تم تفعيل التتبع المباشر',
+        description: 'سيتم تحديث موقعك تلقائياً كل 30 ثانية',
+      });
+    }
+  };
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (liveIntervalId) {
+        clearInterval(liveIntervalId);
+      }
+    };
+  }, [liveIntervalId]);
+
   const mapCenter: [number, number] = currentLocation 
     ? [currentLocation.latitude, currentLocation.longitude] 
     : [30.0444, 31.2357]; // Cairo default
@@ -235,29 +274,7 @@ const MyLocation = () => {
         <BackButton />
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={updateMyLocation}
-              disabled={updating}
-              className="gap-2"
-            >
-              {updating ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-              تحديث موقعي
-            </Button>
-            <Button
-              onClick={() => fetchLatestLocation(driverInfo.id)}
-              variant="outline"
-              className="gap-2"
-            >
-              <RefreshCcw className="h-4 w-4" />
-              تحديث
-            </Button>
-          </div>
+        <div className="flex items-center justify-end gap-3">
           <div className="text-right">
             <h1 className="text-3xl font-bold flex items-center gap-3 justify-end">
               <MapPinned className="h-8 w-8 text-primary" />
@@ -334,14 +351,42 @@ const MyLocation = () => {
         <Card>
           <CardHeader className="text-right">
             <div className="flex items-center justify-between">
-              <Badge variant="outline" className="gap-1">
-                <MapPin className="w-3 h-3" />
-                {driverInfo.vehicle_plate || 'غير محدد'}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={updateMyLocation}
+                  disabled={updating}
+                  size="sm"
+                  className="gap-2"
+                >
+                  {updating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  تحديد موقعي
+                </Button>
+                <Button
+                  onClick={toggleLiveTracking}
+                  size="sm"
+                  variant={liveTracking ? 'destructive' : 'outline'}
+                  className="gap-2"
+                >
+                  <Radio className={`h-4 w-4 ${liveTracking ? 'animate-pulse' : ''}`} />
+                  {liveTracking ? 'إيقاف التتبع' : 'تتبع مباشر'}
+                </Button>
+              </div>
               <div>
-                <CardTitle>خريطة موقعي</CardTitle>
+                <CardTitle className="flex items-center gap-2 justify-end">
+                  خريطة موقعي
+                  {liveTracking && (
+                    <Badge variant="default" className="bg-green-500 animate-pulse">
+                      <Radio className="w-3 h-3 ml-1" />
+                      مباشر
+                    </Badge>
+                  )}
+                </CardTitle>
                 <CardDescription>
-                  {driverInfo.organization_name || 'شركة النقل'}
+                  {driverInfo.organization_name || 'شركة النقل'} • {driverInfo.vehicle_plate || 'غير محدد'}
                 </CardDescription>
               </div>
             </div>
