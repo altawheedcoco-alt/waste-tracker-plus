@@ -20,6 +20,7 @@ import {
   FileText,
   AlertCircle,
   Printer,
+  MapPin,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -31,6 +32,7 @@ import {
 import StatusChangeDialog from './StatusChangeDialog';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import ShipmentQuickPrint from './ShipmentQuickPrint';
+import ShipmentRouteMap from './ShipmentRouteMap';
 
 interface ShipmentCardProps {
   shipment: {
@@ -41,6 +43,8 @@ interface ShipmentCardProps {
     quantity: number;
     unit?: string;
     created_at: string;
+    pickup_address?: string;
+    delivery_address?: string;
     expected_delivery_date?: string | null;
     approved_at?: string | null;
     collection_started_at?: string | null;
@@ -78,6 +82,7 @@ const ShipmentCard = ({
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [autoCountdown, setAutoCountdown] = useState<{ minutes: number; seconds: number } | null>(null);
 
   // Map legacy status to new status
@@ -165,6 +170,11 @@ const ShipmentCard = ({
     setIsPrintDialogOpen(true);
   };
 
+  const handleMapButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMapDialogOpen(true);
+  };
+
   if (variant === 'compact') {
     return (
       <>
@@ -181,6 +191,15 @@ const ShipmentCard = ({
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleMapButtonClick}
+                    className="gap-1 text-xs"
+                    title="تتبع على الخريطة"
+                  >
+                    <MapPin className="w-3 h-3" />
+                  </Button>
                   <Button
                     size="sm"
                     variant="ghost"
@@ -256,6 +275,14 @@ const ShipmentCard = ({
           onClose={() => setIsPrintDialogOpen(false)}
           shipmentId={shipment.id}
         />
+
+        <ShipmentRouteMap
+          isOpen={isMapDialogOpen}
+          onClose={() => setIsMapDialogOpen(false)}
+          pickupAddress={shipment.pickup_address || 'غير محدد'}
+          deliveryAddress={shipment.delivery_address || 'غير محدد'}
+          shipmentNumber={shipment.shipment_number}
+        />
       </>
     );
   }
@@ -319,6 +346,16 @@ const ShipmentCard = ({
                 {/* Left Side - Action Buttons */}
                 <div className="flex flex-col items-start gap-2 order-2 sm:order-1 w-full sm:w-auto">
                   <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleMapButtonClick}
+                      className="gap-2"
+                      title="تتبع على الخريطة"
+                    >
+                      <MapPin className="w-4 h-4" />
+                      تتبع الخريطة
+                    </Button>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -481,6 +518,14 @@ const ShipmentCard = ({
         isOpen={isPrintDialogOpen}
         onClose={() => setIsPrintDialogOpen(false)}
         shipmentId={shipment.id}
+      />
+
+      <ShipmentRouteMap
+        isOpen={isMapDialogOpen}
+        onClose={() => setIsMapDialogOpen(false)}
+        pickupAddress={shipment.pickup_address || 'غير محدد'}
+        deliveryAddress={shipment.delivery_address || 'غير محدد'}
+        shipmentNumber={shipment.shipment_number}
       />
     </>
   );
