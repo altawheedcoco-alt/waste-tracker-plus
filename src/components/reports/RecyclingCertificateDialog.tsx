@@ -37,6 +37,7 @@ import {
   Save,
   CheckCircle,
   Send,
+  Eye,
 } from 'lucide-react';
 import RecyclingCertificatePrint from './RecyclingCertificatePrint';
 import CreateTemplateDialog from './CreateTemplateDialog';
@@ -199,8 +200,38 @@ const RecyclingCertificateDialog = ({
     }
   }, [wasteCategory, selectedTemplateId]);
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    if (!printRef.current) {
+      toast.error('لا يوجد محتوى للطباعة');
+      return;
+    }
+
+    try {
+      // Generate PDF blob
+      const pdfBlob = await generatePdfBlob();
+      if (!pdfBlob) {
+        toast.error('فشل في إنشاء ملف PDF');
+        return;
+      }
+
+      // Create blob URL and open in new window for printing
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const printWindow = window.open(blobUrl, '_blank');
+      
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.focus();
+          printWindow.print();
+        };
+      } else {
+        // Fallback if popup blocked
+        window.print();
+      }
+    } catch (error) {
+      console.error('Error preparing print:', error);
+      // Fallback to native print
+      window.print();
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -208,7 +239,56 @@ const RecyclingCertificateDialog = ({
       toast.error('لا يوجد محتوى للتصدير');
       return;
     }
-    await exportToPDF(printRef.current, `شهادة-اعادة-تدوير-${shipment.shipment_number}`);
+
+    try {
+      // Generate PDF blob
+      const pdfBlob = await generatePdfBlob();
+      if (!pdfBlob) {
+        toast.error('فشل في إنشاء ملف PDF');
+        return;
+      }
+
+      // Create download link
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      const dateStr = new Date().toISOString().split('T')[0];
+      link.href = blobUrl;
+      link.download = `شهادة-اعادة-تدوير-${shipment.shipment_number}-${dateStr}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up blob URL after download
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      
+      toast.success('تم تحميل ملف PDF بنجاح');
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('حدث خطأ أثناء تحميل PDF');
+    }
+  };
+
+  const handlePreviewPDF = async () => {
+    if (!printRef.current) {
+      toast.error('لا يوجد محتوى للمعاينة');
+      return;
+    }
+
+    try {
+      // Generate PDF blob
+      const pdfBlob = await generatePdfBlob();
+      if (!pdfBlob) {
+        toast.error('فشل في إنشاء ملف PDF');
+        return;
+      }
+
+      // Open PDF in new tab for preview
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      window.open(blobUrl, '_blank');
+    } catch (error) {
+      console.error('Error previewing PDF:', error);
+      toast.error('حدث خطأ أثناء معاينة PDF');
+    }
   };
 
   const handleSaveReport = async () => {
@@ -769,16 +849,16 @@ const RecyclingCertificateDialog = ({
                       حفظ وإرسال PDF
                     </Button>
                   )}
+                  <Button variant="outline" onClick={handlePreviewPDF} className="gap-2">
+                    <Eye className="w-4 h-4" />
+                    معاينة PDF
+                  </Button>
                   <Button variant="outline" onClick={handlePrint} className="gap-2">
                     <Printer className="w-4 h-4" />
                     طباعة
                   </Button>
-                  <Button onClick={handleDownloadPDF} disabled={isExporting} className="gap-2">
-                    {isExporting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Download className="w-4 h-4" />
-                    )}
+                  <Button onClick={handleDownloadPDF} className="gap-2">
+                    <Download className="w-4 h-4" />
                     تحميل PDF
                   </Button>
                 </div>
