@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { 
   FileText, 
   Truck, 
@@ -7,14 +8,17 @@ import {
   BookOpen,
   AlertTriangle,
   Leaf,
-  ArrowLeft,
   CheckCircle2,
   Users,
-  Building2
+  Building2,
+  Clock,
+  Send,
+  ShieldCheck
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { cn } from '@/lib/utils';
@@ -294,6 +298,74 @@ const ReportsGuide = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* Request Process Info */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="mt-8"
+        >
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+                آلية طلب المستندات الرسمية
+              </CardTitle>
+              <CardDescription>
+                جميع المستندات الرسمية تتطلب موافقة من إدارة النظام قبل الطباعة أو التحميل
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-background border">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Send className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">1. إرسال الطلب</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      اضغط على "طلب المستند" من صفحة التقرير المطلوب
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-background border">
+                  <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">2. المراجعة</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      يتم مراجعة الطلب من الإدارة (5 دقائق كحد أقصى)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-background border">
+                  <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm">3. الموافقة</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      يتم إشعارك فور الموافقة لطباعة وتحميل المستند
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 text-sm">
+                <span className="text-muted-foreground">
+                  يمكنك متابعة حالة طلباتك من صفحة "طلباتي"
+                </span>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/dashboard/my-requests">عرض طلباتي</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Summary Note */}
         <motion.div
