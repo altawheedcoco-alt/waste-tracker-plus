@@ -21,7 +21,21 @@ import {
   Zap,
   Scale,
   FileText,
-  Handshake
+  Handshake,
+  Crown,
+  Smartphone,
+  FileCheck,
+  Route,
+  Bell,
+  Headphones,
+  LayoutDashboard,
+  Camera,
+  Brain,
+  Printer,
+  BadgeCheck,
+  Share2,
+  MessageSquare,
+  ChartPie
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -170,6 +184,94 @@ const AboutPlatform = () => {
     { icon: Heart, label: 'واجهة سهلة الاستخدام' },
   ];
 
+  // الخدمات المميزة - المنصة الأولى في مصر
+  const premiumServices = [
+    {
+      icon: Route,
+      title: 'تتبع GPS مباشر للسائقين',
+      description: 'رقابة كاملة على مخلفاتك عبر تتبع ذكي يضمن لك التخلص النهائي الصحيح بكل شفافية',
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-blue-500/10',
+    },
+    {
+      icon: LayoutDashboard,
+      title: 'إدارة متكاملة للشحنات',
+      description: 'نظام شامل يسهل تتبع الشحنة من المصدر حتى التخلص النهائي مع توثيق كل مرحلة',
+      color: 'from-emerald-500 to-green-500',
+      bgColor: 'bg-emerald-500/10',
+    },
+    {
+      icon: ChartPie,
+      title: 'تقارير بيئية شاملة',
+      description: 'تحليلات بيئية دقيقة تدعم اتخاذ القرار وتوفر الوقت والجهد في إعداد التقارير',
+      color: 'from-purple-500 to-violet-500',
+      bgColor: 'bg-purple-500/10',
+    },
+    {
+      icon: FileCheck,
+      title: 'نظام موافقات إلكتروني',
+      description: 'وداعاً للورق، اعتمد طلباتك بضغطة زر مع سجل كامل للموافقات والرفض',
+      color: 'from-amber-500 to-orange-500',
+      bgColor: 'bg-amber-500/10',
+    },
+    {
+      icon: Bell,
+      title: 'تنبيهات فورية ذكية',
+      description: 'ابقَ على اطلاع دائم بكل تحديث من خلال نظام الإشعارات المتعددة القنوات',
+      color: 'from-rose-500 to-pink-500',
+      bgColor: 'bg-rose-500/10',
+    },
+    {
+      icon: Brain,
+      title: 'تحليل البيانات بالذكاء الاصطناعي',
+      description: 'توقعات دقيقة للكميات المستقبلية لتحسين إدارة الموارد والتخطيط الاستراتيجي',
+      color: 'from-indigo-500 to-blue-500',
+      bgColor: 'bg-indigo-500/10',
+    },
+    {
+      icon: Camera,
+      title: 'توثيق بالصور والباركود',
+      description: 'ضمان جودة الاستلام والتسليم عبر مسح الرموز والتوثيق البصري لكل شحنة',
+      color: 'from-teal-500 to-emerald-500',
+      bgColor: 'bg-teal-500/10',
+    },
+    {
+      icon: Headphones,
+      title: 'دعم فني على مدار الساعة',
+      description: 'فريق متخصص لمساعدتك في حل المشاكل التقنية واللوجستية في أي وقت',
+      color: 'from-sky-500 to-blue-500',
+      bgColor: 'bg-sky-500/10',
+    },
+    {
+      icon: Printer,
+      title: 'طباعة شهادات معتمدة',
+      description: 'إصدار شهادات إعادة التدوير والتقارير الرسمية بشكل فوري ومعتمد',
+      color: 'from-slate-500 to-gray-600',
+      bgColor: 'bg-slate-500/10',
+    },
+    {
+      icon: MessageSquare,
+      title: 'نظام محادثات متكامل',
+      description: 'تواصل مباشر بين جميع الأطراف المشاركة في الشحنة بشكل آمن وسريع',
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'bg-green-500/10',
+    },
+    {
+      icon: Share2,
+      title: 'تكامل مع الجهات الرقابية',
+      description: 'ربط مباشر مع منظومة WMRA لضمان الامتثال التنظيمي الكامل',
+      color: 'from-red-500 to-rose-500',
+      bgColor: 'bg-red-500/10',
+    },
+    {
+      icon: Smartphone,
+      title: 'تطبيق متجاوب للجوال',
+      description: 'واجهة سهلة الاستخدام تعمل على جميع الأجهزة بسلاسة تامة',
+      color: 'from-violet-500 to-purple-500',
+      bgColor: 'bg-violet-500/10',
+    },
+  ];
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -223,6 +325,83 @@ const AboutPlatform = () => {
               ))}
             </div>
           </div>
+        </motion.div>
+
+        {/* Premium Services Section - المنصة الأولى في مصر */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <Card className="overflow-hidden border-2 border-primary/20">
+            <CardHeader className={cn('bg-gradient-to-r from-primary/10 via-primary/5 to-transparent', cardPadding)}>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+                    <Crown className="w-7 h-7 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className={cn('flex items-center gap-2', isMobile ? 'text-lg' : 'text-2xl')}>
+                      الخدمات المميزة
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">كل ما تحتاجه لإدارة مخلفاتك بكفاءة</p>
+                  </div>
+                </div>
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-sm py-2 px-4 shadow-lg w-fit">
+                  <Sparkles className="w-4 h-4 ml-2" />
+                  المنصة الأولى في مصر
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className={cn(cardPadding, 'pt-6')}>
+              <div className={cn('grid gap-4', isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4')}>
+                {premiumServices.map((service, index) => (
+                  <motion.div
+                    key={service.title}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: index * 0.05, duration: 0.4 }}
+                    whileHover={{ y: -5, scale: 1.02 }}
+                    className="group"
+                  >
+                    <div className="relative h-full p-5 rounded-2xl border border-border/50 bg-card hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                      {/* Icon */}
+                      <div className={cn(
+                        'relative w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-transform duration-300 group-hover:scale-110',
+                        service.bgColor
+                      )}>
+                        <service.icon className="w-6 h-6 text-primary" />
+                      </div>
+
+                      {/* Content */}
+                      <h4 className="font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                        {service.title}
+                      </h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {service.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Call to Action */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 text-center"
+              >
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <BadgeCheck className="w-6 h-6 text-primary" />
+                  <h4 className="text-lg font-bold">ابدأ رحلة التحول الرقمي في إدارة المخلفات الآن</h4>
+                </div>
+                <p className="text-muted-foreground max-w-2xl mx-auto">
+                  انضم إلى مئات الشركات والمصانع التي تثق في iRecycle لإدارة مخلفاتها بكفاءة واحترافية
+                </p>
+              </motion.div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Tabs Section */}
