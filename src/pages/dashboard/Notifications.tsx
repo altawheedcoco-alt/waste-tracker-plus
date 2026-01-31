@@ -22,6 +22,9 @@ import {
   Send,
   PackageCheck,
   MessageSquare,
+  Download,
+  Printer,
+  Eye,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
@@ -325,6 +328,38 @@ const Notifications = () => {
                   const Icon = getNotificationIcon(notification.type);
                   const iconColorClass = getNotificationColor(notification.type);
                   const badge = getNotificationBadge(notification.type);
+                  const isRecyclingReport = notification.type === 'recycling_report' && notification.pdf_url;
+
+                  const handlePdfView = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    if (notification.pdf_url) {
+                      window.open(notification.pdf_url, '_blank');
+                    }
+                  };
+
+                  const handlePdfDownload = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    if (notification.pdf_url) {
+                      const link = document.createElement('a');
+                      link.href = notification.pdf_url;
+                      link.download = `شهادة-تدوير-${notification.shipment_id || 'report'}.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
+                  };
+
+                  const handlePdfPrint = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    if (notification.pdf_url) {
+                      const printWindow = window.open(notification.pdf_url, '_blank');
+                      if (printWindow) {
+                        printWindow.onload = () => {
+                          printWindow.print();
+                        };
+                      }
+                    }
+                  };
 
                   return (
                     <motion.div
@@ -364,6 +399,43 @@ const Notifications = () => {
                           <p className="text-sm text-muted-foreground line-clamp-2">
                             {notification.message}
                           </p>
+                          
+                          {/* PDF Actions for Recycling Reports */}
+                          {isRecyclingReport && (
+                            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-800">
+                              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs mb-2 w-full">
+                                <FileText className="w-4 h-4" />
+                                <span className="font-medium">شهادة إعادة التدوير مرفقة</span>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 text-xs h-8 border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                                onClick={handlePdfView}
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                عرض
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 text-xs h-8 border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                                onClick={handlePdfDownload}
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                تنزيل
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="gap-1.5 text-xs h-8 border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                                onClick={handlePdfPrint}
+                              >
+                                <Printer className="w-3.5 h-3.5" />
+                                طباعة
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </motion.div>
