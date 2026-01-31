@@ -31,6 +31,8 @@ import {
   ChevronDown,
   Settings2,
   Loader2,
+  BadgeCheck,
+  FileCheck,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -71,6 +73,7 @@ interface ShipmentCardProps {
     generator?: { name: string } | null;
     recycler?: { name: string } | null;
     transporter?: { name: string } | null;
+    has_report?: boolean;
   };
   onStatusChange?: () => void;
   showAutoTimer?: boolean;
@@ -331,7 +334,14 @@ const ShipmentCard = ({
                   )}
                 </div>
                 <div className="flex-1 text-right">
-                  <div className="flex items-center gap-2 justify-end">
+                  <div className="flex items-center gap-2 justify-end flex-wrap">
+                    {/* Recycling Report Issued Badge */}
+                    {shipment.has_report && (
+                      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700 gap-1">
+                        <FileCheck className="w-3 h-3" />
+                        تم إصدار شهادة التدوير
+                      </Badge>
+                    )}
                     {currentStatusConfig && (
                       <Badge className={cn(
                         currentStatusConfig.bgClass,
@@ -406,6 +416,13 @@ const ShipmentCard = ({
                 {/* Right Side - Shipment Info */}
                 <div className="flex-1 text-right order-1 sm:order-2">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
+                    {/* Recycling Report Issued Badge - Prominent indicator */}
+                    {shipment.has_report && (
+                      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 gap-1.5 animate-pulse">
+                        <FileCheck className="w-4 h-4" />
+                        تم إصدار شهادة التدوير
+                      </Badge>
+                    )}
                     {currentStatusConfig && (
                       <Badge className={cn(
                         currentStatusConfig.bgClass,

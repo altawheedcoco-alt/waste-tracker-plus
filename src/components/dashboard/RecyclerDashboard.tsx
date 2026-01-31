@@ -69,6 +69,7 @@ interface RecentShipment {
   transporter: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
   recycler: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
   driver: { license_number: string; vehicle_type: string | null; vehicle_plate: string | null; profile: { full_name: string; phone: string | null } } | null;
+  has_report?: boolean;
 }
 
 const RecyclerDashboard = () => {
@@ -136,7 +137,21 @@ const RecyclerDashboard = () => {
       if (error) throw error;
 
       if (shipments) {
-        setRecentShipments(shipments as unknown as RecentShipment[]);
+        // Fetch recycling reports to check which shipments have reports
+        const shipmentIds = shipments.map(s => s.id);
+        const { data: reportsData } = await supabase
+          .from('recycling_reports')
+          .select('shipment_id')
+          .in('shipment_id', shipmentIds);
+
+        const reportedShipmentIds = new Set(reportsData?.map(r => r.shipment_id) || []);
+
+        const shipmentsWithReportStatus = shipments.map(s => ({
+          ...s,
+          has_report: reportedShipmentIds.has(s.id),
+        }));
+
+        setRecentShipments(shipmentsWithReportStatus as unknown as RecentShipment[]);
 
         const incomingStatuses = ['new', 'approved', 'collecting', 'in_transit'];
         const processingStatuses = ['delivered'];
