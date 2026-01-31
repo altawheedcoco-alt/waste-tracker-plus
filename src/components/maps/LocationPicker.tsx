@@ -458,7 +458,7 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
               width="100%"
               height="100%"
               style={{ border: 0 }}
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=25.0,22.0,35.0,32.0&layer=mapnik&marker=${mapCoordinates?.lat || 26.8206},${mapCoordinates?.lng || 30.8025}`}
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=24.7,22.0,37.0,32.0&layer=mapnik&marker=${mapCoordinates?.lat || 30.0444},${mapCoordinates?.lng || 31.2357}`}
               allowFullScreen
             />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
