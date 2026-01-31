@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { playNotificationSound } from '@/hooks/useNotificationSound';
+import { playNotificationSound, mapNotificationTypeToSound } from '@/hooks/useNotificationSound';
 
 interface Notification {
   id: string;
@@ -133,11 +133,7 @@ export const useNotifications = () => {
           const newNotification = payload.new as Notification;
           
           // Play notification sound based on type
-          const soundType = newNotification.type === 'urgent' || newNotification.type === 'approval_request' 
-            ? 'urgent' 
-            : newNotification.type === 'recycling_report' 
-              ? 'success' 
-              : 'default';
+          const soundType = mapNotificationTypeToSound(newNotification.type);
           playNotificationSound(soundType);
           
           // Show toast for new notification

@@ -1,12 +1,119 @@
-// Notification sound frequencies and patterns
-const NOTIFICATION_SOUNDS = {
-  default: { frequencies: [523.25, 659.25, 783.99], duration: 150 },
-  success: { frequencies: [523.25, 783.99], duration: 200 },
-  urgent: { frequencies: [783.99, 659.25, 783.99, 659.25], duration: 100 },
-  message: { frequencies: [659.25, 783.99], duration: 180 },
-} as const;
+// Enhanced notification sound system with distinct tones for each notification type
+export type NotificationSoundType = 
+  | 'shipment_created'
+  | 'shipment_status'
+  | 'shipment_approved'
+  | 'shipment_delivered'
+  | 'shipment_assigned'
+  | 'recycling_report'
+  | 'document_uploaded'
+  | 'approval_request'
+  | 'chat_message'
+  | 'warning'
+  | 'default';
 
-type SoundType = keyof typeof NOTIFICATION_SOUNDS;
+interface SoundConfig {
+  frequencies: number[];
+  duration: number;
+  waveform: OscillatorType;
+  volume: number;
+}
+
+// Distinct sound configurations for each notification type
+const NOTIFICATION_SOUNDS: Record<NotificationSoundType, SoundConfig> = {
+  // New shipment - ascending cheerful tones
+  shipment_created: { 
+    frequencies: [523.25, 659.25, 783.99, 1046.50], 
+    duration: 120, 
+    waveform: 'sine',
+    volume: 0.3
+  },
+  // Status update - two quick beeps
+  shipment_status: { 
+    frequencies: [659.25, 783.99], 
+    duration: 100, 
+    waveform: 'triangle',
+    volume: 0.25
+  },
+  // Approval - success ascending melody
+  shipment_approved: { 
+    frequencies: [523.25, 659.25, 783.99], 
+    duration: 150, 
+    waveform: 'sine',
+    volume: 0.3
+  },
+  // Delivered - celebratory tones
+  shipment_delivered: { 
+    frequencies: [659.25, 783.99, 1046.50, 1318.51], 
+    duration: 130, 
+    waveform: 'sine',
+    volume: 0.35
+  },
+  // Assignment - attention grabbing
+  shipment_assigned: { 
+    frequencies: [440, 554.37, 659.25], 
+    duration: 140, 
+    waveform: 'triangle',
+    volume: 0.3
+  },
+  // Recycling report - eco-friendly gentle tones
+  recycling_report: { 
+    frequencies: [392, 523.25, 659.25], 
+    duration: 180, 
+    waveform: 'sine',
+    volume: 0.25
+  },
+  // Document uploaded - quick confirmation
+  document_uploaded: { 
+    frequencies: [587.33, 783.99], 
+    duration: 100, 
+    waveform: 'triangle',
+    volume: 0.2
+  },
+  // Approval request - important attention
+  approval_request: { 
+    frequencies: [783.99, 659.25, 783.99, 987.77], 
+    duration: 110, 
+    waveform: 'square',
+    volume: 0.25
+  },
+  // Chat message - friendly notification
+  chat_message: { 
+    frequencies: [698.46, 880], 
+    duration: 80, 
+    waveform: 'sine',
+    volume: 0.2
+  },
+  // Warning - urgent attention
+  warning: { 
+    frequencies: [880, 698.46, 880, 698.46], 
+    duration: 100, 
+    waveform: 'sawtooth',
+    volume: 0.35
+  },
+  // Default - simple notification
+  default: { 
+    frequencies: [523.25, 659.25], 
+    duration: 150, 
+    waveform: 'sine',
+    volume: 0.25
+  },
+};
+
+// Sound labels in Arabic
+export const SOUND_LABELS: Record<NotificationSoundType, string> = {
+  shipment_created: 'شحنة جديدة',
+  shipment_status: 'تحديث الحالة',
+  shipment_approved: 'موافقة على الشحنة',
+  shipment_delivered: 'تم التسليم',
+  shipment_assigned: 'إسناد شحنة',
+  recycling_report: 'تقرير تدوير',
+  document_uploaded: 'رفع وثيقة',
+  approval_request: 'طلب موافقة',
+  chat_message: 'رسالة جديدة',
+  warning: 'تحذير',
+  default: 'إشعار عام',
+};
 
 let audioContext: AudioContext | null = null;
 
@@ -17,7 +124,13 @@ const getAudioContext = (): AudioContext => {
   return audioContext;
 };
 
-const playTone = (frequency: number, duration: number, startTime: number) => {
+const playTone = (
+  frequency: number, 
+  duration: number, 
+  startTime: number, 
+  waveform: OscillatorType,
+  volume: number
+) => {
   const ctx = getAudioContext();
   
   const oscillator = ctx.createOscillator();
@@ -27,31 +140,84 @@ const playTone = (frequency: number, duration: number, startTime: number) => {
   gainNode.connect(ctx.destination);
   
   oscillator.frequency.value = frequency;
-  oscillator.type = 'sine';
+  oscillator.type = waveform;
   
   // Smooth envelope
   gainNode.gain.setValueAtTime(0, startTime);
-  gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
+  gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
   gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration / 1000);
   
   oscillator.start(startTime);
   oscillator.stop(startTime + duration / 1000);
 };
 
-export const playNotificationSound = (type: SoundType = 'default') => {
-  const enabled = localStorage.getItem('notification_sound_enabled');
-  if (enabled === 'false') return;
+// Get sound settings from localStorage
+const getSoundSettings = (): Record<NotificationSoundType, boolean> => {
+  const stored = localStorage.getItem('notification_sound_settings');
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return getDefaultSoundSettings();
+    }
+  }
+  return getDefaultSoundSettings();
+};
+
+const getDefaultSoundSettings = (): Record<NotificationSoundType, boolean> => {
+  const settings: Record<NotificationSoundType, boolean> = {} as any;
+  Object.keys(NOTIFICATION_SOUNDS).forEach(key => {
+    settings[key as NotificationSoundType] = true;
+  });
+  return settings;
+};
+
+export const playNotificationSound = (type: NotificationSoundType = 'default') => {
+  // Check if master sound is enabled
+  const masterEnabled = localStorage.getItem('notification_sound_enabled');
+  if (masterEnabled === 'false') return;
+  
+  // Check if specific sound type is enabled
+  const soundSettings = getSoundSettings();
+  if (!soundSettings[type]) return;
   
   try {
     const ctx = getAudioContext();
-    const sound = NOTIFICATION_SOUNDS[type];
+    const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
     const now = ctx.currentTime;
     
     sound.frequencies.forEach((freq, index) => {
-      playTone(freq, sound.duration, now + (index * sound.duration) / 1000);
+      playTone(
+        freq, 
+        sound.duration, 
+        now + (index * sound.duration) / 1000,
+        sound.waveform,
+        sound.volume
+      );
     });
   } catch (error) {
     console.warn('Could not play notification sound:', error);
+  }
+};
+
+// Preview a specific sound
+export const previewNotificationSound = (type: NotificationSoundType) => {
+  try {
+    const ctx = getAudioContext();
+    const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
+    const now = ctx.currentTime;
+    
+    sound.frequencies.forEach((freq, index) => {
+      playTone(
+        freq, 
+        sound.duration, 
+        now + (index * sound.duration) / 1000,
+        sound.waveform,
+        sound.volume
+      );
+    });
+  } catch (error) {
+    console.warn('Could not preview notification sound:', error);
   }
 };
 
@@ -62,4 +228,53 @@ export const setNotificationSoundEnabled = (enabled: boolean) => {
 export const isNotificationSoundEnabled = (): boolean => {
   const stored = localStorage.getItem('notification_sound_enabled');
   return stored !== 'false';
+};
+
+export const setSoundTypeEnabled = (type: NotificationSoundType, enabled: boolean) => {
+  const settings = getSoundSettings();
+  settings[type] = enabled;
+  localStorage.setItem('notification_sound_settings', JSON.stringify(settings));
+};
+
+export const isSoundTypeEnabled = (type: NotificationSoundType): boolean => {
+  const settings = getSoundSettings();
+  return settings[type] !== false;
+};
+
+export const getAllSoundSettings = (): Record<NotificationSoundType, boolean> => {
+  return getSoundSettings();
+};
+
+export const resetSoundSettings = () => {
+  localStorage.removeItem('notification_sound_settings');
+  localStorage.removeItem('notification_sound_enabled');
+};
+
+// Map notification types from DB to sound types
+export const mapNotificationTypeToSound = (dbType: string | null): NotificationSoundType => {
+  switch (dbType) {
+    case 'shipment_created':
+      return 'shipment_created';
+    case 'shipment_status':
+      return 'shipment_status';
+    case 'shipment_approved':
+      return 'shipment_approved';
+    case 'shipment_delivered':
+      return 'shipment_delivered';
+    case 'shipment_assigned':
+      return 'shipment_assigned';
+    case 'recycling_report':
+      return 'recycling_report';
+    case 'document_uploaded':
+      return 'document_uploaded';
+    case 'approval_request':
+      return 'approval_request';
+    case 'chat_message':
+    case 'message':
+      return 'chat_message';
+    case 'warning':
+      return 'warning';
+    default:
+      return 'default';
+  }
 };
