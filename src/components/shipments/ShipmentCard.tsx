@@ -10,6 +10,13 @@ import { format, differenceInSeconds, differenceInMinutes, differenceInHours } f
 import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Clock,
   Timer,
   Building2,
@@ -22,6 +29,8 @@ import {
   Printer,
   MapPin,
   ChevronDown,
+  Settings2,
+  Loader2,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -29,11 +38,16 @@ import {
   allStatuses,
   wasteTypeLabels,
   mapLegacyStatus,
+  getAvailableNextStatuses,
+  mapToDbStatus,
+  type ShipmentStatus,
 } from '@/lib/shipmentStatusConfig';
 import StatusChangeDialog from './StatusChangeDialog';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import ShipmentQuickPrint from './ShipmentQuickPrint';
 import ShipmentRouteMap from './ShipmentRouteMap';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ShipmentCardProps {
   shipment: {
@@ -86,6 +100,7 @@ const ShipmentCard = ({
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [autoCountdown, setAutoCountdown] = useState<{ minutes: number; seconds: number } | null>(null);
+  const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
 
   // Map legacy status to new status
   const mappedStatus = mapLegacyStatus(shipment.status);
@@ -96,6 +111,9 @@ const ShipmentCard = ({
   const isRecycler = organizationType === 'recycler';
   const isTransporter = organizationType === 'transporter';
   const isCompleted = shipment.status === 'completed' || shipment.status === 'confirmed';
+
+  // Get available next statuses for quick change
+  const availableNextStatuses = getAvailableNextStatuses(mappedStatus, organizationType as 'generator' | 'transporter' | 'recycler');
 
   // Calculate current status index for progress display
   const currentStatusIndex = allStatuses.findIndex(s => s.key === mappedStatus);
@@ -162,6 +180,29 @@ const ShipmentCard = ({
     onStatusChange?.();
   };
 
+  // Quick status change handler
+  const handleQuickStatusChange = async (newStatus: ShipmentStatus) => {
+    setIsQuickStatusChanging(true);
+    try {
+      const dbStatus = mapToDbStatus(newStatus);
+      
+      const { error } = await supabase
+        .from('shipments')
+        .update({ status: dbStatus as any })
+        .eq('id', shipment.id);
+
+      if (error) throw error;
+
+      toast.success(`تم تغيير الحالة إلى: ${getStatusConfig(newStatus)?.labelAr}`);
+      onStatusChange?.();
+    } catch (error) {
+      console.error('Error changing status:', error);
+      toast.error('حدث خطأ أثناء تغيير الحالة');
+    } finally {
+      setIsQuickStatusChanging(false);
+    }
+  };
+
   const handleReportButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsReportDialogOpen(true);
@@ -223,16 +264,69 @@ const ShipmentCard = ({
                     </Button>
                   )}
                   {canChange && !isCompleted && (
-                    <Button
-                      size="sm"
-                      variant="eco"
-                      onClick={handleStatusButtonClick}
-                      className="gap-1 text-xs"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      تغيير
-                      <ChevronDown className="w-3 h-3" />
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button
+                          size="sm"
+                          variant="eco"
+                          className="gap-1 text-xs"
+                          disabled={isQuickStatusChanging}
+                        >
+                          {isQuickStatusChanging ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-3 h-3" />
+                          )}
+                          تغيير
+                          <ChevronDown className="w-3 h-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent 
+                        align="start" 
+                        className="w-48 bg-popover z-50"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {availableNextStatuses.slice(0, 3).map((status) => {
+                          const StatusIcon = status.icon;
+                          return (
+                            <DropdownMenuItem
+                              key={status.key}
+                              onClick={() => handleQuickStatusChange(status.key)}
+                              className="gap-2 cursor-pointer"
+                            >
+                              <div className={cn("w-6 h-6 rounded-full flex items-center justify-center", status.bgClass)}>
+                                <StatusIcon className="w-3 h-3" />
+                              </div>
+                              <span>{status.labelAr}</span>
+                            </DropdownMenuItem>
+                          );
+                        })}
+                        {availableNextStatuses.length > 3 && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={handleStatusButtonClick}
+                              className="gap-2 cursor-pointer"
+                            >
+                              <Settings2 className="w-4 h-4" />
+                              <span>المزيد من الخيارات...</span>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {availableNextStatuses.length <= 3 && availableNextStatuses.length > 0 && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={handleStatusButtonClick}
+                              className="gap-2 cursor-pointer text-muted-foreground"
+                            >
+                              <Settings2 className="w-4 h-4" />
+                              <span>تغيير متقدم...</span>
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   )}
                 </div>
                 <div className="flex-1 text-right">
@@ -383,15 +477,69 @@ const ShipmentCard = ({
                       </Button>
                     )}
                     {canChange && !isCompleted ? (
-                      <Button
-                        variant="eco"
-                        onClick={handleStatusButtonClick}
-                        className="gap-2 w-full sm:w-auto"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                        تغيير الحالة
-                        <ChevronDown className="w-4 h-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="eco"
+                            className="gap-2 w-full sm:w-auto"
+                            disabled={isQuickStatusChanging}
+                          >
+                            {isQuickStatusChanging ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-4 h-4" />
+                            )}
+                            تغيير الحالة
+                            <ChevronDown className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent 
+                          align="start" 
+                          className="w-56 bg-popover z-50"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {availableNextStatuses.slice(0, 5).map((status) => {
+                            const StatusIcon = status.icon;
+                            return (
+                              <DropdownMenuItem
+                                key={status.key}
+                                onClick={() => handleQuickStatusChange(status.key)}
+                                className="gap-3 cursor-pointer py-2"
+                              >
+                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", status.bgClass)}>
+                                  <StatusIcon className="w-4 h-4" />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{status.labelAr}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {status.phase === 'transporter' ? 'مرحلة النقل' : 'مرحلة التدوير'}
+                                  </span>
+                                </div>
+                              </DropdownMenuItem>
+                            );
+                          })}
+                          {availableNextStatuses.length > 5 && (
+                            <>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={handleStatusButtonClick}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <Settings2 className="w-4 h-4" />
+                                <span>عرض جميع الخيارات ({availableNextStatuses.length})</span>
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={handleStatusButtonClick}
+                            className="gap-2 cursor-pointer text-muted-foreground"
+                          >
+                            <Settings2 className="w-4 h-4" />
+                            <span>تغيير متقدم مع ملاحظات...</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     ) : isCompleted ? (
                       <Badge className="bg-emerald-500 text-white gap-1">
                         <CheckCircle2 className="w-4 h-4" />
