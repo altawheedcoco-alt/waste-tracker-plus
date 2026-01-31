@@ -21,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useThemeSettings, ThemeColor, FontFamily, DisplayMode } from '@/contexts/ThemeSettingsContext';
 import { cn } from '@/lib/utils';
+import BackButton from '@/components/ui/back-button';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -115,9 +116,12 @@ const Settings = () => {
   return (
     <div className="space-y-6 pb-10">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">الإعدادات</h1>
-          <p className="text-muted-foreground">تخصيص مظهر وإعدادات لوحة التحكم</p>
+        <div className="flex items-center gap-3">
+          <BackButton />
+          <div>
+            <h1 className="text-2xl font-bold">الإعدادات</h1>
+            <p className="text-muted-foreground">تخصيص مظهر وإعدادات لوحة التحكم</p>
+          </div>
         </div>
         <Button variant="outline" onClick={resetToDefaults}>
           <RotateCcw className="h-4 w-4 ml-2" />
