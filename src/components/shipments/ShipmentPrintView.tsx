@@ -133,10 +133,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
 
-  // Generate verification URL for QR code
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
-  // Convert QR canvas to data URL for printing
   useEffect(() => {
     if (qrRef.current && shipment) {
       const dataUrl = qrRef.current.toDataURL('image/png');
@@ -144,7 +142,6 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     }
   }, [shipment?.id]);
 
-  // Convert Barcode SVG to data URL for printing
   useEffect(() => {
     if (barcodeRef.current && shipment) {
       const svgElement = barcodeRef.current.querySelector('svg');
@@ -188,77 +185,66 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
         <meta charset="UTF-8">
         <title>نموذج تتبع الشحنة - ${shipment.shipment_number}</title>
         <style>
-          @page {
-            size: A4;
-            margin: 10mm;
-          }
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
+          @page { size: A4; margin: 8mm; }
+          * { margin: 0; padding: 0; box-sizing: border-box; }
           body {
             font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
             font-size: 9pt;
             direction: rtl;
             background: white;
-            color: #1a1a1a;
+            color: #000;
             line-height: 1.3;
           }
-          .page {
-            width: 100%;
-            max-width: 210mm;
-            margin: 0 auto;
-            position: relative;
-          }
+          .page { width: 100%; max-width: 210mm; margin: 0 auto; }
+          
           /* Header */
           .header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 3px solid #16a34a;
+            align-items: flex-start;
+            border-bottom: 2px solid #16a34a;
             padding-bottom: 8px;
             margin-bottom: 10px;
-          }
-          .header-right {
-            text-align: right;
           }
           .header-center {
             text-align: center;
             flex: 1;
           }
-          .header-left {
-            text-align: left;
-          }
           .main-title {
-            font-size: 16pt;
+            font-size: 14pt;
             font-weight: bold;
             color: #16a34a;
             margin-bottom: 2px;
           }
-          .sub-title {
-            font-size: 10pt;
-            color: #666;
-          }
-          .shipment-number-box {
-            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+          .sub-title { font-size: 10pt; color: #333; }
+          .shipment-badge {
+            display: inline-block;
+            background: #16a34a;
             color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
+            padding: 4px 12px;
+            border-radius: 4px;
             font-family: monospace;
-            font-size: 11pt;
+            font-size: 10pt;
             font-weight: bold;
+            margin-top: 4px;
           }
           .status-badge {
             display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 8pt;
-            font-weight: 600;
             background: #dcfce7;
             color: #166534;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 8pt;
+            font-weight: 600;
             margin-top: 4px;
           }
+          .qr-box, .barcode-box {
+            text-align: center;
+          }
+          .qr-box img { width: 55px; height: 55px; }
+          .barcode-box img { max-height: 30px; }
+          .code-label { font-size: 6pt; color: #666; margin-top: 2px; }
+          
           /* Tables */
           table {
             width: 100%;
@@ -266,146 +252,61 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             margin-bottom: 8px;
           }
           th, td {
-            border: 1px solid #d1d5db;
+            border: 1px solid #999;
             padding: 4px 6px;
             text-align: right;
             font-size: 8pt;
-          }
-          th {
-            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-            font-weight: 600;
-            color: #374151;
-          }
-          .section-header {
-            background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
-            color: white;
-            font-weight: bold;
-            font-size: 9pt;
-            text-align: center;
-          }
-          .label-cell {
-            background: #f9fafb;
-            font-weight: 600;
-            color: #4b5563;
-            width: 20%;
-          }
-          .value-cell {
-            background: white;
-          }
-          .highlight-value {
-            font-weight: bold;
-            color: #16a34a;
-          }
-          /* Three column party table */
-          .party-table td {
-            width: 33.33%;
             vertical-align: top;
           }
-          .party-header {
+          .section-title {
+            background: #f5f5f5;
             font-weight: bold;
             font-size: 9pt;
-            padding: 4px;
             text-align: center;
+            padding: 5px;
           }
-          .party-generator { background: #dbeafe; color: #1e40af; }
-          .party-transporter { background: #fef3c7; color: #92400e; }
-          .party-recycler { background: #dcfce7; color: #166534; }
-          .party-content {
-            font-size: 8pt;
-            padding: 6px;
-          }
-          .party-name {
-            font-weight: bold;
-            font-size: 9pt;
-            margin-bottom: 3px;
-          }
-          .party-detail {
-            color: #6b7280;
-            margin-bottom: 2px;
-          }
-          .client-code {
-            display: inline-block;
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 1px 6px;
-            border-radius: 4px;
-            font-size: 7pt;
-            font-family: monospace;
-          }
+          .label { background: #f9f9f9; font-weight: 600; width: 18%; color: #333; }
+          .value { background: white; }
+          .highlight { font-weight: bold; color: #16a34a; }
+          
+          /* Colored labels for parties */
+          .label-generator { background: #dbeafe; color: #1e40af; }
+          .label-transporter { background: #fef3c7; color: #92400e; }
+          .label-recycler { background: #dcfce7; color: #166534; }
+          
           /* Timeline */
-          .timeline-table td {
-            text-align: center;
-            font-size: 7pt;
-          }
-          .timeline-label {
-            background: #f3f4f6;
-            font-weight: 600;
-          }
-          .timeline-value {
-            font-family: monospace;
-            font-size: 7pt;
-          }
+          .timeline-header { background: #f3f4f6; font-weight: 600; font-size: 7pt; text-align: center; }
+          .timeline-value { font-family: monospace; font-size: 7pt; text-align: center; }
+          
           /* Signatures */
-          .signature-table {
-            margin-top: 12px;
-          }
-          .signature-table td {
-            width: 33.33%;
+          .signature-row td {
             text-align: center;
-            vertical-align: bottom;
             height: 50px;
             border: none;
-            border-top: 1px dashed #9ca3af;
-          }
-          .signature-label {
+            border-top: 1px dashed #999;
+            padding-top: 35px;
             font-size: 8pt;
-            color: #6b7280;
-            padding-top: 4px;
+            color: #666;
           }
+          
           /* Footer */
           .footer {
             margin-top: 8px;
             padding-top: 6px;
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #ccc;
             text-align: center;
             font-size: 7pt;
-            color: #9ca3af;
+            color: #555;
           }
-          .qr-code {
-            width: 60px;
-            height: 60px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-          }
-          .qr-label {
+          .disclaimer {
             font-size: 6pt;
-            color: #6b7280;
-            text-align: center;
-            margin-top: 2px;
+            color: #888;
+            font-style: italic;
+            margin-top: 4px;
           }
-          .barcode-container {
-            text-align: center;
-          }
-          .barcode-img {
-            max-height: 35px;
-            width: auto;
-          }
-          .barcode-label {
-            font-size: 6pt;
-            color: #6b7280;
-            text-align: center;
-            margin-top: 2px;
-          }
-          .codes-section {
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
-          }
+          
           @media print {
-            body { 
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-            }
+            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           }
         </style>
       </head>
@@ -451,357 +352,268 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
           </DialogTitle>
         </DialogHeader>
 
-        {/* Print Preview - A4 Optimized */}
         <div 
           ref={printRef}
           className="bg-white p-4 rounded-lg border text-foreground text-sm"
           style={{ direction: 'rtl' }}
         >
           <div className="page">
-            {/* Hidden QR Code for data URL generation */}
+            {/* Hidden QR & Barcode for data URL */}
             <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-              <QRCodeCanvas
-                ref={qrRef}
-                value={shipmentUrl}
-                size={60}
-                level="M"
-                includeMargin={false}
-              />
+              <QRCodeCanvas ref={qrRef} value={shipmentUrl} size={55} level="M" includeMargin={false} />
             </div>
-            
-            {/* Hidden Barcode for data URL generation */}
             <div ref={barcodeRef} style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-              <Barcode
-                value={shipment.shipment_number}
-                format="CODE128"
-                width={1.2}
-                height={35}
-                displayValue={false}
-                background="#ffffff"
-                lineColor="#000000"
-              />
+              <Barcode value={shipment.shipment_number} format="CODE128" width={1.2} height={30} displayValue={false} background="#ffffff" lineColor="#000000" />
             </div>
 
-            {/* Header - iRecycle Branding */}
-            <div style={{ marginBottom: '15px', borderBottom: '3px solid #16a34a', paddingBottom: '10px', position: 'relative' }}>
-              {/* QR Code - Top Right */}
-              <div style={{ position: 'absolute', top: '0', right: '0', textAlign: 'center' }}>
+            {/* Header */}
+            <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #16a34a', paddingBottom: '8px', marginBottom: '10px' }}>
+              {/* QR Code */}
+              <div className="qr-box" style={{ textAlign: 'center' }}>
                 {qrDataUrl ? (
-                  <img 
-                    src={qrDataUrl} 
-                    alt="QR Code" 
-                    style={{ width: '60px', height: '60px', border: '1px solid #e5e7eb', borderRadius: '4px' }} 
-                  />
+                  <img src={qrDataUrl} alt="QR" style={{ width: '55px', height: '55px' }} />
                 ) : (
-                  <div style={{ width: '60px', height: '60px', border: '1px dashed #d1d5db', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6pt', color: '#9ca3af', borderRadius: '4px' }}>
-                    QR
-                  </div>
+                  <div style={{ width: '55px', height: '55px', border: '1px dashed #ccc', fontSize: '6pt', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>QR</div>
                 )}
-                <div style={{ fontSize: '6pt', color: '#6b7280', marginTop: '2px' }}>امسح للتتبع</div>
+                <div style={{ fontSize: '6pt', color: '#666', marginTop: '2px' }}>امسح للتتبع</div>
               </div>
 
-              {/* Center Content */}
-              <div style={{ textAlign: 'center', paddingTop: '5px' }}>
-                <div style={{ fontSize: '18pt', fontWeight: 'bold', color: '#16a34a', marginBottom: '4px' }}>
-                  آي ريسايكل - iRecycle
-                </div>
-                <div style={{ fontSize: '11pt', color: '#374151', marginBottom: '2px' }}>
-                  نظام إدارة وتتبع المخلفات
-                </div>
-                <div style={{ fontSize: '13pt', fontWeight: 'bold', color: '#1e40af' }}>
-                  نموذج تتبع المخلفات
-                </div>
-              </div>
-
-              {/* Barcode - Top Left with Shipment Info */}
-              <div style={{ position: 'absolute', top: '0', left: '0', textAlign: 'center' }}>
-                {barcodeDataUrl ? (
-                  <img 
-                    src={barcodeDataUrl} 
-                    alt="Barcode" 
-                    style={{ maxHeight: '35px', width: 'auto', border: '1px solid #e5e7eb', borderRadius: '4px', padding: '3px', background: 'white' }} 
-                  />
-                ) : (
-                  <div style={{ width: '90px', height: '35px', border: '1px dashed #d1d5db', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6pt', color: '#9ca3af', borderRadius: '4px' }}>
-                    Barcode
-                  </div>
-                )}
-                <div style={{ 
-                  fontSize: '9pt', 
-                  color: '#000000', 
-                  marginTop: '3px', 
-                  fontFamily: 'monospace', 
-                  fontWeight: 'bold',
-                  background: '#ffffff',
-                  border: '1px solid #e5e7eb',
-                  padding: '2px 8px',
-                  borderRadius: '4px'
-                }}>
+              {/* Center Title */}
+              <div style={{ textAlign: 'center', flex: 1 }}>
+                <div style={{ fontSize: '14pt', fontWeight: 'bold', color: '#16a34a' }}>نموذج تتبع المخلفات</div>
+                <div style={{ fontSize: '10pt', color: '#333', marginBottom: '4px' }}>آي ريسايكل - iRecycle</div>
+                <div style={{ display: 'inline-block', background: '#16a34a', color: 'white', padding: '3px 10px', borderRadius: '4px', fontFamily: 'monospace', fontSize: '10pt', fontWeight: 'bold' }}>
                   {shipment.shipment_number}
                 </div>
-                <div style={{ fontSize: '6pt', color: '#374151', marginTop: '2px', fontWeight: '600' }}>
-                  إصدارات موثقة ومؤمنة وذكية
-                </div>
-                <div style={{ marginTop: '2px' }}>
-                  <span style={{ display: 'inline-block', padding: '1px 8px', borderRadius: '10px', fontSize: '7pt', fontWeight: 600, background: '#dcfce7', color: '#166534' }}>
+                <div style={{ marginTop: '4px' }}>
+                  <span style={{ display: 'inline-block', background: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '10px', fontSize: '8pt', fontWeight: 600 }}>
                     {statusLabels[shipment.status] || shipment.status}
                   </span>
                 </div>
               </div>
+
+              {/* Barcode */}
+              <div className="barcode-box" style={{ textAlign: 'center' }}>
+                {barcodeDataUrl ? (
+                  <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '30px' }} />
+                ) : (
+                  <div style={{ width: '80px', height: '30px', border: '1px dashed #ccc', fontSize: '6pt', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Barcode</div>
+                )}
+                <div style={{ fontSize: '7pt', fontFamily: 'monospace', marginTop: '2px' }}>{shipment.shipment_number}</div>
+              </div>
             </div>
 
-            {/* Generator Organization Details */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px' }}>
+            {/* Generator Table */}
+            <table>
               <thead>
-              <tr>
-                  <th colSpan={4} style={{ background: '#f9fafb', color: '#000000', fontWeight: 'bold', fontSize: '10pt', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db' }}>
-                    بيانات الجهة المولدة للمخلفات
-                  </th>
-                </tr>
+                <tr><th colSpan={4} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>بيانات الجهة المولدة للمخلفات</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', width: '18%', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>اسم الجهة:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt', fontWeight: 'bold' }}>{shipment.generator?.name || '-'}</td>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', width: '18%', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>كود العميل:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt', fontFamily: 'monospace' }}>{shipment.generator?.client_code || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600, width: '18%' }}>اسم الجهة</td>
+                  <td className="value" style={{ fontWeight: 'bold' }}>{shipment.generator?.name || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600, width: '18%' }}>كود العميل</td>
+                  <td className="value" style={{ fontFamily: 'monospace' }}>{shipment.generator?.client_code || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>السجل التجاري:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.generator?.commercial_register || '-'}</td>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>رقم الموافقة البيئية:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.generator?.environmental_license || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600 }}>السجل التجاري</td>
+                  <td className="value">{shipment.generator?.commercial_register || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600 }}>رقم الموافقة البيئية</td>
+                  <td className="value">{shipment.generator?.environmental_license || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>النشاط المسجل:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.generator?.activity_type || '-'}</td>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>المدينة:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.generator?.city || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600 }}>النشاط</td>
+                  <td className="value">{shipment.generator?.activity_type || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600 }}>المدينة</td>
+                  <td className="value">{shipment.generator?.city || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>العنوان:</td>
-                  <td colSpan={3} style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.generator?.address || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600 }}>العنوان</td>
+                  <td colSpan={3} className="value">{shipment.generator?.address || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>الهاتف:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }} dir="ltr">{shipment.generator?.phone || '-'}</td>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>البريد الإلكتروني:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }} dir="ltr">{shipment.generator?.email || '-'}</td>
-                </tr>
-                <tr>
-                  <td style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>ممثل الجهة:</td>
-                  <td colSpan={3} style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.generator?.representative_name || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600 }}>الهاتف</td>
+                  <td className="value" dir="ltr">{shipment.generator?.phone || '-'}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600 }}>ممثل الجهة</td>
+                  <td className="value">{shipment.generator?.representative_name || '-'}</td>
                 </tr>
               </tbody>
             </table>
 
-            {/* Transporter Organization Details */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px' }}>
+            {/* Transporter Table */}
+            <table>
               <thead>
-              <tr>
-                  <th colSpan={4} style={{ background: '#f9fafb', color: '#000000', fontWeight: 'bold', fontSize: '10pt', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db' }}>
-                    بيانات الجهة الناقلة
-                  </th>
-                </tr>
+                <tr><th colSpan={4} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>بيانات الجهة الناقلة</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', width: '18%', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>اسم جهة النقل:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt', fontWeight: 'bold' }}>{shipment.transporter?.name || '-'}</td>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', width: '18%', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>كود العميل:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt', fontFamily: 'monospace' }}>{shipment.transporter?.client_code || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600, width: '18%' }}>اسم الجهة</td>
+                  <td className="value" style={{ fontWeight: 'bold' }}>{shipment.transporter?.name || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600, width: '18%' }}>كود العميل</td>
+                  <td className="value" style={{ fontFamily: 'monospace' }}>{shipment.transporter?.client_code || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>السجل التجاري:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.transporter?.commercial_register || '-'}</td>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>رقم الموافقة البيئية:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.transporter?.environmental_license || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>السجل التجاري</td>
+                  <td className="value">{shipment.transporter?.commercial_register || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>رقم الموافقة البيئية</td>
+                  <td className="value">{shipment.transporter?.environmental_license || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>النشاط المسجل:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.transporter?.activity_type || '-'}</td>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>المدينة:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.transporter?.city || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>النشاط</td>
+                  <td className="value">{shipment.transporter?.activity_type || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>المدينة</td>
+                  <td className="value">{shipment.transporter?.city || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>العنوان:</td>
-                  <td colSpan={3} style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.transporter?.address || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>العنوان</td>
+                  <td colSpan={3} className="value">{shipment.transporter?.address || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>الهاتف:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }} dir="ltr">{shipment.transporter?.phone || '-'}</td>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>البريد الإلكتروني:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }} dir="ltr">{shipment.transporter?.email || '-'}</td>
-                </tr>
-                <tr>
-                  <td style={{ background: '#fef3c7', fontWeight: 600, color: '#92400e', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>ممثل الجهة:</td>
-                  <td colSpan={3} style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.transporter?.representative_name || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>الهاتف</td>
+                  <td className="value" dir="ltr">{shipment.transporter?.phone || '-'}</td>
+                  <td className="label label-transporter" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 600 }}>ممثل الجهة</td>
+                  <td className="value">{shipment.transporter?.representative_name || '-'}</td>
                 </tr>
               </tbody>
             </table>
 
-            {/* Recycler Organization Details */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '10px' }}>
+            {/* Recycler Table */}
+            <table>
               <thead>
-              <tr>
-                  <th colSpan={4} style={{ background: '#f9fafb', color: '#000000', fontWeight: 'bold', fontSize: '10pt', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db' }}>
-                    بيانات الجهة المدورة
-                  </th>
-                </tr>
+                <tr><th colSpan={4} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>بيانات الجهة المستقبلة / المدورة</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', width: '18%', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>اسم جهة التدوير:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt', fontWeight: 'bold' }}>{shipment.recycler?.name || '-'}</td>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', width: '18%', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>كود العميل:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt', fontFamily: 'monospace' }}>{shipment.recycler?.client_code || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600, width: '18%' }}>اسم الجهة</td>
+                  <td className="value" style={{ fontWeight: 'bold' }}>{shipment.recycler?.name || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600, width: '18%' }}>كود العميل</td>
+                  <td className="value" style={{ fontFamily: 'monospace' }}>{shipment.recycler?.client_code || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>السجل التجاري:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.recycler?.commercial_register || '-'}</td>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>رقم الموافقة البيئية:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.recycler?.environmental_license || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600 }}>السجل التجاري</td>
+                  <td className="value">{shipment.recycler?.commercial_register || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600 }}>رقم الموافقة البيئية</td>
+                  <td className="value">{shipment.recycler?.environmental_license || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>النشاط المسجل:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.recycler?.activity_type || '-'}</td>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>المدينة:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.recycler?.city || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600 }}>النشاط</td>
+                  <td className="value">{shipment.recycler?.activity_type || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600 }}>المدينة</td>
+                  <td className="value">{shipment.recycler?.city || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>العنوان:</td>
-                  <td colSpan={3} style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.recycler?.address || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600 }}>العنوان</td>
+                  <td colSpan={3} className="value">{shipment.recycler?.address || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>الهاتف:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }} dir="ltr">{shipment.recycler?.phone || '-'}</td>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>البريد الإلكتروني:</td>
-                  <td style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }} dir="ltr">{shipment.recycler?.email || '-'}</td>
-                </tr>
-                <tr>
-                  <td style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>ممثل الجهة:</td>
-                  <td colSpan={3} style={{ background: 'white', border: '1px solid #d1d5db', padding: '5px 8px', fontSize: '8pt' }}>{shipment.recycler?.representative_name || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600 }}>الهاتف</td>
+                  <td className="value" dir="ltr">{shipment.recycler?.phone || '-'}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600 }}>ممثل الجهة</td>
+                  <td className="value">{shipment.recycler?.representative_name || '-'}</td>
                 </tr>
               </tbody>
             </table>
 
-            {/* Shipment Info Table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
+            {/* Shipment Details Table */}
+            <table>
               <thead>
-              <tr>
-                  <th colSpan={6} className="section-header" style={{ background: '#f9fafb', color: '#000000', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px', border: '1px solid #d1d5db' }}>
-                    معلومات الشحنة الأساسية
-                  </th>
-                </tr>
+                <tr><th colSpan={6} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>تفاصيل الشحنة</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', width: '15%', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>نوع المخلفات</td>
-                  <td className="value-cell highlight-value" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt', fontWeight: 'bold', color: '#16a34a' }}>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', width: '15%', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>الكمية</td>
-                  <td className="value-cell highlight-value" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt', fontWeight: 'bold', color: '#16a34a' }}>{shipment.quantity} {shipment.unit}</td>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', width: '15%', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>مستوى الخطورة</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{hazardLabels[shipment.hazard_level || ''] || shipment.hazard_level || '-'}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>نوع المخلفات</td>
+                  <td className="value highlight" style={{ fontWeight: 'bold', color: '#16a34a' }}>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>الكمية</td>
+                  <td className="value highlight" style={{ fontWeight: 'bold', color: '#16a34a' }}>{shipment.quantity} {shipment.unit}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>مستوى الخطورة</td>
+                  <td className="value">{hazardLabels[shipment.hazard_level || ''] || shipment.hazard_level || '-'}</td>
                 </tr>
                 <tr>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>طريقة التغليف</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{packagingLabels[shipment.packaging_method || ''] || shipment.packaging_method || '-'}</td>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>طريقة التخلص</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{disposalLabels[shipment.disposal_method || ''] || shipment.disposal_method || '-'}</td>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>السائق</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{driverName}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>طريقة التغليف</td>
+                  <td className="value">{packagingLabels[shipment.packaging_method || ''] || shipment.packaging_method || '-'}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>طريقة المعالجة</td>
+                  <td className="value">{disposalLabels[shipment.disposal_method || ''] || shipment.disposal_method || '-'}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>السائق</td>
+                  <td className="value">{driverName}</td>
                 </tr>
                 <tr>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>لوحة المركبة</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{vehiclePlate}</td>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>تاريخ الاستلام</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{formatDate(shipment.pickup_date)}</td>
-                  <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>التسليم المتوقع</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{formatDate(shipment.expected_delivery_date)}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>لوحة المركبة</td>
+                  <td className="value">{vehiclePlate}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>تاريخ الاستلام</td>
+                  <td className="value">{formatDate(shipment.pickup_date)}</td>
+                  <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>التسليم المتوقع</td>
+                  <td className="value">{formatDate(shipment.expected_delivery_date)}</td>
                 </tr>
                 {shipment.waste_description && (
                   <tr>
-                    <td className="label-cell" style={{ background: '#f9fafb', fontWeight: 600, color: '#4b5563', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>وصف المخلفات</td>
-                    <td colSpan={5} className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>{shipment.waste_description}</td>
+                    <td className="label" style={{ background: '#f9f9f9', fontWeight: 600 }}>وصف المخلفات</td>
+                    <td colSpan={5} className="value">{shipment.waste_description}</td>
                   </tr>
                 )}
               </tbody>
             </table>
 
             {/* Addresses Table */}
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
+            <table>
               <thead>
-              <tr>
-                  <th colSpan={4} className="section-header" style={{ background: '#f9fafb', color: '#000000', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px', border: '1px solid #d1d5db' }}>
-                    عناوين الشحنة
-                  </th>
-                </tr>
+                <tr><th colSpan={4} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>العناوين</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="label-cell" style={{ background: '#dbeafe', fontWeight: 600, color: '#1e40af', width: '15%', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>عنوان الاستلام</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt', width: '35%' }}>{shipment.pickup_address}</td>
-                  <td className="label-cell" style={{ background: '#dcfce7', fontWeight: 600, color: '#166534', width: '15%', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt' }}>عنوان التسليم</td>
-                  <td className="value-cell" style={{ background: 'white', border: '1px solid #d1d5db', padding: '4px 6px', fontSize: '8pt', width: '35%' }}>{shipment.delivery_address}</td>
+                  <td className="label label-generator" style={{ background: '#dbeafe', color: '#1e40af', fontWeight: 600, width: '15%' }}>عنوان الاستلام</td>
+                  <td className="value" style={{ width: '35%' }}>{shipment.pickup_address}</td>
+                  <td className="label label-recycler" style={{ background: '#dcfce7', color: '#166534', fontWeight: 600, width: '15%' }}>عنوان التسليم</td>
+                  <td className="value" style={{ width: '35%' }}>{shipment.delivery_address}</td>
                 </tr>
               </tbody>
             </table>
 
-
             {/* Timeline Table */}
-            <table className="timeline-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
+            <table>
               <thead>
-              <tr>
-                  <th colSpan={6} className="section-header" style={{ background: '#f9fafb', color: '#000000', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px', border: '1px solid #d1d5db' }}>
-                    سجل الحالات الزمني
-                  </th>
-                </tr>
+                <tr><th colSpan={6} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>السجل الزمني</th></tr>
                 <tr>
-                  <th style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db' }}>تاريخ الإنشاء</th>
-                  <th style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db' }}>تاريخ الاعتماد</th>
-                  <th style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db' }}>بدء التجميع</th>
-                  <th style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db' }}>في الطريق</th>
-                  <th style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db' }}>تم التسليم</th>
-                  <th style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db' }}>التأكيد</th>
+                  <th className="timeline-header" style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', textAlign: 'center' }}>الإنشاء</th>
+                  <th className="timeline-header" style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', textAlign: 'center' }}>الاعتماد</th>
+                  <th className="timeline-header" style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', textAlign: 'center' }}>بدء التجميع</th>
+                  <th className="timeline-header" style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', textAlign: 'center' }}>في الطريق</th>
+                  <th className="timeline-header" style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', textAlign: 'center' }}>التسليم</th>
+                  <th className="timeline-header" style={{ background: '#f3f4f6', fontWeight: 600, fontSize: '7pt', textAlign: 'center' }}>التأكيد</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db', fontFamily: 'monospace' }}>{formatDateTime(shipment.created_at)}</td>
-                  <td style={{ fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db', fontFamily: 'monospace' }}>{formatDateTime(shipment.approved_at)}</td>
-                  <td style={{ fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db', fontFamily: 'monospace' }}>{formatDateTime(shipment.collection_started_at)}</td>
-                  <td style={{ fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db', fontFamily: 'monospace' }}>{formatDateTime(shipment.in_transit_at)}</td>
-                  <td style={{ fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db', fontFamily: 'monospace' }}>{formatDateTime(shipment.delivered_at)}</td>
-                  <td style={{ fontSize: '7pt', padding: '4px', textAlign: 'center', border: '1px solid #d1d5db', fontFamily: 'monospace' }}>{formatDateTime(shipment.confirmed_at)}</td>
+                  <td className="timeline-value" style={{ fontFamily: 'monospace', fontSize: '7pt', textAlign: 'center' }}>{formatDateTime(shipment.created_at)}</td>
+                  <td className="timeline-value" style={{ fontFamily: 'monospace', fontSize: '7pt', textAlign: 'center' }}>{formatDateTime(shipment.approved_at)}</td>
+                  <td className="timeline-value" style={{ fontFamily: 'monospace', fontSize: '7pt', textAlign: 'center' }}>{formatDateTime(shipment.collection_started_at)}</td>
+                  <td className="timeline-value" style={{ fontFamily: 'monospace', fontSize: '7pt', textAlign: 'center' }}>{formatDateTime(shipment.in_transit_at)}</td>
+                  <td className="timeline-value" style={{ fontFamily: 'monospace', fontSize: '7pt', textAlign: 'center' }}>{formatDateTime(shipment.delivered_at)}</td>
+                  <td className="timeline-value" style={{ fontFamily: 'monospace', fontSize: '7pt', textAlign: 'center' }}>{formatDateTime(shipment.confirmed_at)}</td>
                 </tr>
               </tbody>
             </table>
 
             {/* Notes Table */}
             {(shipment.notes || shipment.generator_notes || shipment.recycler_notes) && (
-              <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
+              <table>
                 <thead>
-                  <tr>
-                    <th colSpan={3} className="section-header" style={{ background: '#f9fafb', color: '#000000', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px', border: '1px solid #d1d5db' }}>
-                      الملاحظات
-                    </th>
-                  </tr>
+                  <tr><th colSpan={3} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>الملاحظات</th></tr>
                 </thead>
                 <tbody>
                   <tr>
                     {shipment.notes && (
-                      <td style={{ border: '1px solid #d1d5db', padding: '6px', fontSize: '8pt', verticalAlign: 'top' }}>
-                        <strong style={{ color: '#4b5563' }}>ملاحظات عامة:</strong><br />{shipment.notes}
+                      <td className="value" style={{ verticalAlign: 'top' }}>
+                        <strong>ملاحظات عامة:</strong><br />{shipment.notes}
                       </td>
                     )}
                     {shipment.generator_notes && (
-                      <td style={{ border: '1px solid #d1d5db', padding: '6px', fontSize: '8pt', verticalAlign: 'top' }}>
-                        <strong style={{ color: '#4b5563' }}>ملاحظات المولد:</strong><br />{shipment.generator_notes}
+                      <td className="value" style={{ verticalAlign: 'top' }}>
+                        <strong>ملاحظات المولد:</strong><br />{shipment.generator_notes}
                       </td>
                     )}
                     {shipment.recycler_notes && (
-                      <td style={{ border: '1px solid #d1d5db', padding: '6px', fontSize: '8pt', verticalAlign: 'top' }}>
-                        <strong style={{ color: '#4b5563' }}>ملاحظات المدور:</strong><br />{shipment.recycler_notes}
+                      <td className="value" style={{ verticalAlign: 'top' }}>
+                        <strong>ملاحظات المستقبل:</strong><br />{shipment.recycler_notes}
                       </td>
                     )}
                   </tr>
@@ -809,41 +621,30 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
               </table>
             )}
 
-            {/* Signatures Table */}
-            <table className="signature-table" style={{ width: '100%', borderCollapse: 'collapse', marginTop: '12px' }}>
+            {/* Signatures */}
+            <table style={{ marginTop: '12px' }}>
               <tbody>
-                <tr>
-                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #9ca3af', paddingTop: '4px' }}>
-                    <div style={{ height: '40px' }}></div>
-                    <div className="signature-label" style={{ fontSize: '8pt', color: '#6b7280' }}>توقيع وختم الجهة المولدة</div>
-                  </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #9ca3af', paddingTop: '4px' }}>
-                    <div style={{ height: '40px' }}></div>
-                    <div className="signature-label" style={{ fontSize: '8pt', color: '#6b7280' }}>توقيع وختم الجهة الناقلة</div>
-                  </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #9ca3af', paddingTop: '4px' }}>
-                    <div style={{ height: '40px' }}></div>
-                    <div className="signature-label" style={{ fontSize: '8pt', color: '#6b7280' }}>توقيع وختم الجهة المدورة</div>
-                  </td>
+                <tr className="signature-row">
+                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #999', paddingTop: '35px', fontSize: '8pt', color: '#666' }}>توقيع وختم الجهة المولدة</td>
+                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #999', paddingTop: '35px', fontSize: '8pt', color: '#666' }}>توقيع وختم الجهة الناقلة</td>
+                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #999', paddingTop: '35px', fontSize: '8pt', color: '#666' }}>توقيع وختم الجهة المستقبلة</td>
                 </tr>
               </tbody>
             </table>
 
             {/* Footer */}
-            <div className="footer" style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #d1d5db', textAlign: 'center', fontSize: '7pt', color: '#374151' }}>
-              <div>تم إنشاء هذا المستند إلكترونياً طبقاً للبيانات المدخلة والواردة إلينا على النظام بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات الإلكتروني</div>
-              <div style={{ marginTop: '2px' }}>هذا المستند صالح للاستخدام الرسمي ويحتوي على رقم تتبع فريد: {shipment.shipment_number}</div>
-              <div style={{ marginTop: '4px', fontSize: '6pt', color: '#6b7280', fontStyle: 'italic' }}>
-                إخلاء مسؤولية: هذا المستند تم إنشاؤه آلياً بناءً على البيانات المدخلة من قِبَل الأطراف المعنية، ودون أدنى مسؤولية على النظام. المنصة غير مسؤولة عن صحة أو دقة المعلومات الواردة فيه.
+            <div className="footer" style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #ccc', textAlign: 'center', fontSize: '7pt', color: '#555' }}>
+              <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
+              <div style={{ marginTop: '2px' }}>رقم التتبع: {shipment.shipment_number}</div>
+              <div className="disclaimer" style={{ marginTop: '4px', fontSize: '6pt', color: '#888', fontStyle: 'italic' }}>
+                إخلاء مسؤولية: هذا المستند تم إنشاؤه آلياً بناءً على البيانات المدخلة، والمنصة غير مسؤولة عن صحة المعلومات الواردة فيه.
               </div>
             </div>
           </div>
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>
-            إغلاق
-          </Button>
+          <Button variant="outline" onClick={onClose}>إغلاق</Button>
           <Button variant="outline" onClick={handleExportPDF} className="gap-2">
             <Download className="w-4 h-4" />
             تصدير PDF
