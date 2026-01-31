@@ -424,18 +424,6 @@ const NotificationDetailDialog = ({
             )}
 
             <Button
-              variant="outline"
-              className="gap-2"
-              onClick={() => {
-                onOpenChange(false);
-                onNavigateToCarbonFootprint();
-              }}
-            >
-              <Sparkles className="w-4 h-4" />
-              تحليل البصمة الكربونية
-            </Button>
-
-            <Button
               variant="ghost"
               onClick={() => onOpenChange(false)}
             >
