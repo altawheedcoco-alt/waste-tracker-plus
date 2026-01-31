@@ -11,7 +11,8 @@ import {
   MonitorSmartphone,
   Check,
   Sparkles,
-  Eye
+  Eye,
+  Volume2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -22,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { useThemeSettings, ThemeColor, FontFamily, DisplayMode } from '@/contexts/ThemeSettingsContext';
 import { cn } from '@/lib/utils';
 import BackButton from '@/components/ui/back-button';
+import NotificationSoundSettings from '@/components/settings/NotificationSoundSettings';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -130,7 +132,7 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="themes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
             <span className="hidden sm:inline">ثيمات جاهزة</span>
@@ -146,6 +148,10 @@ const Settings = () => {
           <TabsTrigger value="display" className="gap-2">
             <Eye className="h-4 w-4" />
             <span className="hidden sm:inline">العرض</span>
+          </TabsTrigger>
+          <TabsTrigger value="sounds" className="gap-2">
+            <Volume2 className="h-4 w-4" />
+            <span className="hidden sm:inline">الأصوات</span>
           </TabsTrigger>
         </TabsList>
 
@@ -513,6 +519,11 @@ const Settings = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Sounds Tab */}
+        <TabsContent value="sounds" className="space-y-6">
+          <NotificationSoundSettings />
         </TabsContent>
       </Tabs>
     </div>
