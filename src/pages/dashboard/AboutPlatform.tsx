@@ -35,7 +35,16 @@ import {
   BadgeCheck,
   Share2,
   MessageSquare,
-  ChartPie
+  ChartPie,
+  Cpu,
+  CloudCog,
+  Database,
+  Workflow,
+  QrCode,
+  Lock,
+  RefreshCcw,
+  Layers,
+  Network
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -272,6 +281,66 @@ const AboutPlatform = () => {
     },
   ];
 
+  // الرقمنة والتحول الرقمي
+  const digitizationFeatures = [
+    {
+      icon: Workflow,
+      title: 'أتمتة العمليات',
+      description: 'تحويل جميع العمليات الورقية إلى إجراءات رقمية آلية بدون تدخل بشري',
+      stat: '100%',
+      statLabel: 'أتمتة',
+    },
+    {
+      icon: Database,
+      title: 'قاعدة بيانات مركزية',
+      description: 'تخزين آمن ومركزي لجميع بيانات الشحنات والمستندات والتقارير',
+      stat: '∞',
+      statLabel: 'سعة تخزين',
+    },
+    {
+      icon: QrCode,
+      title: 'رموز QR للتتبع',
+      description: 'رموز استجابة سريعة على كل شحنة ووثيقة للتحقق الفوري',
+      stat: '< 1ث',
+      statLabel: 'وقت التحقق',
+    },
+    {
+      icon: CloudCog,
+      title: 'البنية السحابية',
+      description: 'وصول من أي مكان وفي أي وقت عبر الحوسبة السحابية الآمنة',
+      stat: '24/7',
+      statLabel: 'توفر النظام',
+    },
+    {
+      icon: Lock,
+      title: 'أمان وتشفير متقدم',
+      description: 'حماية البيانات بأعلى معايير التشفير والأمان السيبراني',
+      stat: '256-bit',
+      statLabel: 'تشفير',
+    },
+    {
+      icon: RefreshCcw,
+      title: 'تحديثات لحظية',
+      description: 'مزامنة فورية للبيانات بين جميع الأطراف في الوقت الحقيقي',
+      stat: 'Real-time',
+      statLabel: 'مزامنة',
+    },
+    {
+      icon: Layers,
+      title: 'تكامل الأنظمة',
+      description: 'ربط سلس مع أنظمة ERP والمحاسبة والجهات الرقابية',
+      stat: 'API',
+      statLabel: 'واجهات برمجية',
+    },
+    {
+      icon: Network,
+      title: 'شبكة موحدة',
+      description: 'منظومة واحدة تربط المولدين والناقلين والمدورين في مصر',
+      stat: '700+',
+      statLabel: 'جهة متصلة',
+    },
+  ];
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -399,6 +468,162 @@ const AboutPlatform = () => {
                 <p className="text-muted-foreground max-w-2xl mx-auto">
                   انضم إلى مئات الشركات والمصانع التي تثق في iRecycle لإدارة مخلفاتها بكفاءة واحترافية
                 </p>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Digitization Section - الرقمنة والتحول الرقمي */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Card className="overflow-hidden border-2 border-cyan-500/20">
+            <CardHeader className={cn('bg-gradient-to-r from-cyan-500/10 via-blue-500/5 to-transparent', cardPadding)}>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <Cpu className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className={cn('flex items-center gap-2', isMobile ? 'text-lg' : 'text-2xl')}>
+                      الرقمنة والتحول الرقمي
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">تحويل إدارة المخلفات من الورق إلى الرقمية</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white border-0 text-sm py-2 px-4">
+                    <Zap className="w-4 h-4 ml-2" />
+                    نظام ذكي متكامل
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className={cn(cardPadding, 'pt-6')}>
+              {/* Before & After Comparison */}
+              <div className={cn('grid gap-6 mb-8', isMobile ? 'grid-cols-1' : 'grid-cols-2')}>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="p-5 rounded-2xl bg-muted/50 border border-border"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-red-500" />
+                    </div>
+                    <h4 className="font-bold text-red-500">قبل الرقمنة</h4>
+                  </div>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      مستندات ورقية قابلة للتلف والضياع
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      تأخر في الموافقات والإجراءات
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      صعوبة التتبع والمراقبة
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                      أخطاء بشرية متكررة
+                    </li>
+                  </ul>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <Cpu className="w-4 h-4 text-emerald-500" />
+                    </div>
+                    <h4 className="font-bold text-emerald-500">بعد الرقمنة مع iRecycle</h4>
+                  </div>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      سجلات رقمية دائمة ومؤمنة
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      موافقات فورية بضغطة زر
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      تتبع لحظي لكل شحنة
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      دقة عالية وأخطاء صفرية
+                    </li>
+                  </ul>
+                </motion.div>
+              </div>
+
+              {/* Digitization Features Grid */}
+              <div className={cn('grid gap-4', isMobile ? 'grid-cols-2' : 'grid-cols-4')}>
+                {digitizationFeatures.map((feature, index) => (
+                  <motion.div
+                    key={feature.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.03 }}
+                    className="group"
+                  >
+                    <div className="relative h-full p-4 rounded-xl border border-border/50 bg-card hover:border-cyan-500/30 hover:shadow-lg transition-all duration-300 text-center">
+                      <div className="w-12 h-12 mx-auto rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <feature.icon className="w-6 h-6 text-cyan-600" />
+                      </div>
+                      <div className="text-2xl font-bold text-primary mb-1">{feature.stat}</div>
+                      <div className="text-xs text-muted-foreground mb-2">{feature.statLabel}</div>
+                      <h5 className="font-semibold text-sm mb-1">{feature.title}</h5>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{feature.description}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Digital Transformation Stats */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="mt-8 p-6 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-blue-500/5 to-purple-500/10 border border-cyan-500/20"
+              >
+                <div className="text-center mb-6">
+                  <h4 className="text-lg font-bold mb-2">نتائج التحول الرقمي</h4>
+                  <p className="text-sm text-muted-foreground">تأثير الرقمنة على كفاءة العمليات</p>
+                </div>
+                <div className={cn('grid gap-6', isMobile ? 'grid-cols-2' : 'grid-cols-4')}>
+                  {[
+                    { value: '90%', label: 'توفير في الوقت', icon: Clock },
+                    { value: '85%', label: 'خفض التكاليف', icon: TrendingUp },
+                    { value: '99%', label: 'دقة البيانات', icon: Target },
+                    { value: '0%', label: 'أخطاء بشرية', icon: Shield },
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.7 + index * 0.1 }}
+                      className="text-center"
+                    >
+                      <div className="w-12 h-12 mx-auto rounded-full bg-white/80 dark:bg-card shadow-md flex items-center justify-center mb-2">
+                        <stat.icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="text-2xl font-bold text-primary">{stat.value}</div>
+                      <div className="text-xs text-muted-foreground">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
             </CardContent>
           </Card>
