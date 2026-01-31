@@ -4,11 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Printer, Users, Leaf, FileCheck, Send } from 'lucide-react';
+import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
+import ShipmentCard from '@/components/shipments/ShipmentCard';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
@@ -137,35 +138,6 @@ const GeneratorDashboard = () => {
     setShowPrintDialog(true);
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      new: { label: 'جديدة', variant: 'default' },
-      approved: { label: 'معتمدة', variant: 'secondary' },
-      collecting: { label: 'قيد الجمع', variant: 'outline' },
-      in_transit: { label: 'في الطريق', variant: 'outline' },
-      delivered: { label: 'تم التسليم', variant: 'secondary' },
-      confirmed: { label: 'مؤكدة', variant: 'default' },
-    };
-    const config = statusMap[status] || { label: status, variant: 'outline' as const };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
-  const getWasteTypeLabel = (type: string) => {
-    const wasteTypes: Record<string, string> = {
-      plastic: 'بلاستيك',
-      paper: 'ورق',
-      metal: 'معادن',
-      glass: 'زجاج',
-      electronic: 'إلكترونيات',
-      organic: 'عضوية',
-      chemical: 'كيميائية',
-      medical: 'طبية',
-      construction: 'مخلفات بناء',
-      other: 'أخرى',
-    };
-    return wasteTypes[type] || type;
-  };
-
   const statCards = [
     {
       title: 'إجمالي الشحنات',
@@ -279,47 +251,13 @@ const GeneratorDashboard = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {recentShipments.map((shipment, index) => (
-                <motion.div
+              {recentShipments.map((shipment) => (
+                <ShipmentCard
                   key={shipment.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleViewShipment(shipment)}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleViewShipment(shipment)}>
-                      <Printer className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="text-left">
-                      <p className="text-sm">
-                        {shipment.transporter?.name || 'غير محدد'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(shipment.created_at).toLocaleDateString('ar-EG')}
-                      </p>
-                    </div>
-                    {getStatusBadge(shipment.status)}
-                    <div className="flex-1 text-right">
-                      <div className="flex items-center gap-3 justify-end">
-                        <div>
-                          <p className="font-medium">{shipment.shipment_number}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {getWasteTypeLabel(shipment.waste_type)} - {shipment.quantity} {shipment.unit || 'كجم'}
-                          </p>
-                        </div>
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Package className="w-5 h-5 text-primary" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+                  shipment={shipment}
+                  onStatusChange={fetchDashboardData}
+                  showAutoTimer={true}
+                />
               ))}
             </div>
           )}
