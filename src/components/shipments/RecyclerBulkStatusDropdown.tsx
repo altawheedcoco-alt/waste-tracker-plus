@@ -75,10 +75,25 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
     return shipments.filter(s => s.waste_type === wasteType);
   };
 
+  // Get eligible shipments for a specific status (only apply once)
+  const getEligibleShipments = (targetShipments: Shipment[], targetStatus: string) => {
+    // Define which current statuses can transition to the target status
+    const eligibleCurrentStatuses: Record<string, string[]> = {
+      delivered: ['in_transit'], // Only in_transit can become delivered
+      confirmed: ['delivered'],  // Only delivered can become confirmed
+    };
+    
+    const allowedStatuses = eligibleCurrentStatuses[targetStatus] || [];
+    return targetShipments.filter(s => allowedStatuses.includes(s.status));
+  };
+
   // Bulk update status
   const handleBulkStatusChange = async (targetShipments: Shipment[], newStatus: string) => {
-    if (targetShipments.length === 0) {
-      toast.error('لا توجد شحنات للتحديث');
+    // Filter to only eligible shipments
+    const eligibleShipments = getEligibleShipments(targetShipments, newStatus);
+    
+    if (eligibleShipments.length === 0) {
+      toast.error('لا توجد شحنات قابلة للتحديث (تم تأكيدها مسبقاً أو غير جاهزة)');
       return;
     }
 
@@ -97,7 +112,7 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
           break;
       }
 
-      const shipmentIds = targetShipments.map(s => s.id);
+      const shipmentIds = eligibleShipments.map(s => s.id);
 
       const { error } = await supabase
         .from('shipments')
@@ -119,7 +134,7 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
           const logs = shipmentIds.map(id => ({
             shipment_id: id,
             status: newStatus as any,
-            notes: `تحديث جماعي من الجهة المدورة - ${targetShipments.length} شحنة`,
+            notes: `تحديث جماعي من الجهة المدورة - ${eligibleShipments.length} شحنة`,
             changed_by: profileData.id,
           }));
 
@@ -128,7 +143,7 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
       }
 
       const statusLabel = statusOptions.find(s => s.value === newStatus)?.label || newStatus;
-      toast.success(`تم تحديث ${targetShipments.length} شحنة إلى "${statusLabel}"`);
+      toast.success(`تم تحديث ${eligibleShipments.length} شحنة إلى "${statusLabel}"`);
       onStatusChange();
     } catch (error) {
       console.error('Error bulk updating status:', error);
