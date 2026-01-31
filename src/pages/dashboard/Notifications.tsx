@@ -241,7 +241,13 @@ const Notifications = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleTestSound} variant="outline" size="sm" className="gap-2">
+            <Button
+              onClick={handleTestSound}
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={!soundEnabled}
+            >
               <Volume2 className="w-4 h-4" />
               اختبار الصوت
             </Button>
