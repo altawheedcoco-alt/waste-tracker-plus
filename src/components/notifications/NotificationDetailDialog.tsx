@@ -135,6 +135,8 @@ const getOrgTypeLabel = (type: string | null) => {
       return 'جهة ناقلة';
     case 'recycler':
       return 'جهة معالجة';
+    case 'driver':
+      return 'سائق';
     default:
       return 'مؤسسة';
   }
@@ -182,11 +184,12 @@ const NotificationDetailDialog = ({
           }
         }
 
-        // For shipment-related notifications, get the shipment's transporter as sender
+        // For shipment-related notifications
         if (notification.shipment_id) {
           const { data: shipment } = await supabase
             .from('shipments')
             .select(`
+              driver_id,
               generator:organizations!shipments_generator_id_fkey(name, organization_type, logo_url),
               transporter:organizations!shipments_transporter_id_fkey(name, organization_type, logo_url),
               recycler:organizations!shipments_recycler_id_fkey(name, organization_type, logo_url)
@@ -195,19 +198,51 @@ const NotificationDetailDialog = ({
             .single();
 
           if (shipment) {
-            // Determine sender based on notification type
-            if (notification.type === 'shipment_created' || notification.type === 'shipment_status') {
-              info.senderName = shipment.transporter?.name || 'جهة ناقلة';
-              info.senderType = 'transporter';
-              info.senderLogo = shipment.transporter?.logo_url || null;
+            // Check if notification is from a driver (shipment_assigned type)
+            if (notification.type === 'shipment_assigned' && shipment.driver_id) {
+              // Get driver info
+              const { data: driver } = await supabase
+                .from('drivers')
+                .select(`
+                  profile:profiles!drivers_profile_id_fkey(full_name, avatar_url)
+                `)
+                .eq('id', shipment.driver_id)
+                .single();
+
+              if (driver?.profile) {
+                info.senderName = driver.profile.full_name;
+                info.senderType = 'driver';
+                info.senderLogo = driver.profile.avatar_url;
+              }
+            } else if (notification.type === 'shipment_created' || notification.type === 'shipment_status') {
+              // Check if created by a driver
+              if (shipment.driver_id) {
+                const { data: driver } = await supabase
+                  .from('drivers')
+                  .select(`
+                    profile:profiles!drivers_profile_id_fkey(full_name, avatar_url)
+                  `)
+                  .eq('id', shipment.driver_id)
+                  .single();
+
+                if (driver?.profile) {
+                  info.senderName = driver.profile.full_name;
+                  info.senderType = 'driver';
+                  info.senderLogo = driver.profile.avatar_url;
+                } else {
+                  info.senderName = shipment.transporter?.name || 'جهة ناقلة';
+                  info.senderType = 'transporter';
+                  info.senderLogo = shipment.transporter?.logo_url || null;
+                }
+              } else {
+                info.senderName = shipment.transporter?.name || 'جهة ناقلة';
+                info.senderType = 'transporter';
+                info.senderLogo = shipment.transporter?.logo_url || null;
+              }
             } else if (notification.type === 'recycling_report') {
               info.senderName = shipment.recycler?.name || 'جهة معالجة';
               info.senderType = 'recycler';
               info.senderLogo = shipment.recycler?.logo_url || null;
-            } else if (notification.type === 'shipment_assigned') {
-              info.senderName = shipment.transporter?.name || 'جهة ناقلة';
-              info.senderType = 'transporter';
-              info.senderLogo = shipment.transporter?.logo_url || null;
             }
           }
         }
