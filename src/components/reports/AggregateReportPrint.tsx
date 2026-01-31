@@ -143,373 +143,215 @@ const AggregateReportPrint = ({
     .map(s => s.recycler)
     .filter((r, i, arr) => r?.id && arr.findIndex(x => x?.id === r.id) === i);
 
+  // Limit shipments to show based on count for single page
+  const maxShipmentsToShow = Math.min(shipments.length, 15);
+  const displayedShipments = shipments.slice(0, maxShipmentsToShow);
+  const hasMoreShipments = shipments.length > maxShipmentsToShow;
+
   return (
     <div 
-      className="print-container bg-white text-black print:p-0" 
+      className="print-container bg-white text-black" 
       dir="rtl" 
       style={{ 
-        minHeight: '297mm', 
+        height: '297mm', 
         width: '210mm', 
         margin: '0 auto',
-        padding: '25px',
-        fontFamily: 'Cairo, sans-serif'
+        padding: '8mm 10mm',
+        fontFamily: 'Cairo, sans-serif',
+        fontSize: '8pt',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
-      {/* Header with QR and Barcode */}
-      <header className="print-header flex items-start justify-between mb-6 pb-4" style={{ borderBottom: '3px solid #16a34a' }}>
-        {/* QR Code */}
-        <div className="text-center print-qr">
+      <style>{`
+        @media print {
+          @page { size: A4 portrait; margin: 0; }
+          .print-container { 
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+          }
+        }
+      `}</style>
+
+      {/* Compact Header */}
+      <header className="flex items-center justify-between mb-2 pb-2" style={{ borderBottom: '2px solid #16a34a' }}>
+        <div className="text-center">
           <QRCodeSVG
             value={`${window.location.origin}/verify?type=aggregate&code=${reportNumber}`}
-            size={75}
-            level="M"
-            includeMargin={false}
+            size={45}
+            level="L"
           />
-          <p className="text-xs mt-1" style={{ color: '#6b7280' }}>امسح للتحقق</p>
         </div>
 
-        {/* Title */}
-        <div className="text-center flex-1 px-6">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Leaf className="w-8 h-8" style={{ color: '#16a34a' }} />
-            <h1 className="text-2xl font-bold" style={{ color: '#15803d' }}>{reportTitle}</h1>
-            <Leaf className="w-8 h-8" style={{ color: '#16a34a' }} />
+        <div className="text-center flex-1 px-3">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Leaf className="w-5 h-5" style={{ color: '#16a34a' }} />
+            <h1 className="text-sm font-bold" style={{ color: '#15803d' }}>{reportTitle}</h1>
+            <Leaf className="w-5 h-5" style={{ color: '#16a34a' }} />
           </div>
-          <p className="text-sm" style={{ color: '#4b5563' }}>نظام إدارة المخلفات وإعادة التدوير</p>
-          <div 
-            className="mt-3 inline-block rounded px-4 py-2" 
-            style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}
-          >
-            <span className="text-sm">رقم التقرير: </span>
-            <span className="font-mono font-bold" style={{ color: '#15803d', fontSize: '14px' }}>{reportNumber}</span>
+          <div className="inline-block rounded px-2 py-0.5" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
+            <span className="font-mono font-bold" style={{ color: '#15803d', fontSize: '9pt' }}>{reportNumber}</span>
           </div>
         </div>
 
-        {/* Barcode */}
-        <div className="text-center print-barcode">
-          <Barcode
-            value={reportNumber}
-            width={1.3}
-            height={45}
-            fontSize={9}
-            displayValue={false}
-          />
-          <p className="text-xs font-mono mt-1" style={{ color: '#374151' }}>{reportNumber}</p>
+        <div className="text-center">
+          <Barcode value={reportNumber} width={1} height={30} fontSize={7} displayValue={false} />
         </div>
       </header>
 
-      {/* Report Info */}
-      <div className="bg-gray-50 border rounded-lg p-4 mb-6">
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-gray-600">الجهة المصدرة:</span>
-            <span className="font-bold mr-2">{organization?.name || '-'}</span>
-          </div>
-          <div>
-            <span className="text-gray-600">تاريخ الإصدار:</span>
-            <span className="font-bold mr-2">{currentDate}</span>
-          </div>
-          {dateRange?.start && (
-            <div>
-              <span className="text-gray-600">الفترة من:</span>
-              <span className="font-bold mr-2">{formatDate(dateRange.start)}</span>
-            </div>
-          )}
-          {dateRange?.end && (
-            <div>
-              <span className="text-gray-600">الفترة إلى:</span>
-              <span className="font-bold mr-2">{formatDate(dateRange.end)}</span>
-            </div>
-          )}
+      {/* Compact Info Row */}
+      <div className="grid grid-cols-4 gap-1 text-[7pt] mb-2 p-1.5 rounded" style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}>
+        <div><span className="text-gray-500">المصدر:</span> <strong>{organization?.name || '-'}</strong></div>
+        <div><span className="text-gray-500">التاريخ:</span> <strong>{currentDate}</strong></div>
+        {dateRange?.start && <div><span className="text-gray-500">من:</span> <strong>{formatDate(dateRange.start)}</strong></div>}
+        {dateRange?.end && <div><span className="text-gray-500">إلى:</span> <strong>{formatDate(dateRange.end)}</strong></div>}
+      </div>
+
+      {/* Compact Stats Row */}
+      <div className="grid grid-cols-4 gap-1 mb-2">
+        <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
+          <Package className="w-4 h-4 mx-auto text-primary" />
+          <p className="text-base font-bold text-primary">{shipments.length}</p>
+          <p className="text-[6pt] text-gray-600">شحنات</p>
+        </div>
+        <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#ecfdf5', border: '1px solid #6ee7b7' }}>
+          <Scale className="w-4 h-4 mx-auto text-emerald-600" />
+          <p className="text-base font-bold text-emerald-600">{totalQuantity.toLocaleString()}</p>
+          <p className="text-[6pt] text-gray-600">كجم</p>
+        </div>
+        <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#eff6ff', border: '1px solid #93c5fd' }}>
+          <FileText className="w-4 h-4 mx-auto text-blue-600" />
+          <p className="text-base font-bold text-blue-600">{confirmedCount}</p>
+          <p className="text-[6pt] text-gray-600">مؤكدة</p>
+        </div>
+        <div className="text-center p-1.5 rounded" style={{ backgroundColor: '#fffbeb', border: '1px solid #fcd34d' }}>
+          <Truck className="w-4 h-4 mx-auto text-amber-600" />
+          <p className="text-base font-bold text-amber-600">{inTransitCount + deliveredCount}</p>
+          <p className="text-[6pt] text-gray-600">منجزة</p>
         </div>
       </div>
 
-      {/* Summary Statistics */}
-      <div className="mb-6">
-        <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2 bg-gray-100 p-2 rounded">
-          <Scale className="w-5 h-5 text-primary" />
-          ملخص التقرير
-        </h3>
-        <div className="grid grid-cols-4 gap-3 text-center">
-          <div className="border rounded-lg p-3 bg-primary/5">
-            <Package className="w-6 h-6 mx-auto text-primary mb-1" />
-            <p className="text-xl font-bold text-primary">{shipments.length}</p>
-            <p className="text-xs text-gray-600">إجمالي الشحنات</p>
-          </div>
-          <div className="border rounded-lg p-3 bg-emerald-50">
-            <Scale className="w-6 h-6 mx-auto text-emerald-600 mb-1" />
-            <p className="text-xl font-bold text-emerald-600">{totalQuantity.toLocaleString()}</p>
-            <p className="text-xs text-gray-600">الكمية الإجمالية (كجم)</p>
-          </div>
-          <div className="border rounded-lg p-3 bg-blue-50">
-            <FileText className="w-6 h-6 mx-auto text-blue-600 mb-1" />
-            <p className="text-xl font-bold text-blue-600">{confirmedCount}</p>
-            <p className="text-xs text-gray-600">شحنات مؤكدة</p>
-          </div>
-          <div className="border rounded-lg p-3 bg-amber-50">
-            <Truck className="w-6 h-6 mx-auto text-amber-600 mb-1" />
-            <p className="text-xl font-bold text-amber-600">{inTransitCount + deliveredCount}</p>
-            <p className="text-xs text-gray-600">شحنات منجزة</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Shipments Table */}
-      <div className="mb-6">
-        <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2 bg-gray-100 p-2 rounded">
-          <Package className="w-5 h-5 text-primary" />
-          تفاصيل الشحنات
-        </h3>
-        <table className="w-full border-collapse text-xs">
+      {/* Compact Table */}
+      <div className="flex-1 overflow-hidden mb-2">
+        <table className="w-full border-collapse" style={{ fontSize: '7pt' }}>
           <thead>
-            <tr className="bg-gray-100">
-              <th className="border p-1.5 text-right">#</th>
-              <th className="border p-1.5 text-right">رقم الشحنة</th>
-              <th className="border p-1.5 text-right">النوع</th>
-              <th className="border p-1.5 text-right">الكمية</th>
-              <th className="border p-1.5 text-right">الحالة</th>
-              <th className="border p-1.5 text-right">المولد</th>
-              <th className="border p-1.5 text-right">الناقل</th>
-              <th className="border p-1.5 text-right">المدور</th>
-              <th className="border p-1.5 text-right">التاريخ</th>
+            <tr style={{ backgroundColor: '#f3f4f6' }}>
+              <th className="border p-0.5 text-center" style={{ width: '4%' }}>#</th>
+              <th className="border p-0.5 text-right" style={{ width: '14%' }}>رقم الشحنة</th>
+              <th className="border p-0.5 text-right" style={{ width: '10%' }}>النوع</th>
+              <th className="border p-0.5 text-right" style={{ width: '8%' }}>الكمية</th>
+              <th className="border p-0.5 text-right" style={{ width: '8%' }}>الحالة</th>
+              <th className="border p-0.5 text-right" style={{ width: '18%' }}>المولد</th>
+              <th className="border p-0.5 text-right" style={{ width: '18%' }}>الناقل</th>
+              <th className="border p-0.5 text-right" style={{ width: '18%' }}>المدور</th>
             </tr>
           </thead>
           <tbody>
-            {shipments.map((shipment, index) => (
-              <tr key={shipment.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                <td className="border p-1.5 text-center">{index + 1}</td>
-                <td className="border p-1.5 font-mono">{shipment.shipment_number}</td>
-                <td className="border p-1.5">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
-                <td className="border p-1.5">{shipment.quantity} {shipment.unit || 'كجم'}</td>
-                <td className="border p-1.5">
-                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-gray-200">
+            {displayedShipments.map((shipment, index) => (
+              <tr key={shipment.id} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f9fafb' }}>
+                <td className="border p-0.5 text-center">{index + 1}</td>
+                <td className="border p-0.5 font-mono" style={{ fontSize: '6pt' }}>{shipment.shipment_number}</td>
+                <td className="border p-0.5">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
+                <td className="border p-0.5">{shipment.quantity}</td>
+                <td className="border p-0.5">
+                  <span className="px-1 py-0.5 rounded" style={{ fontSize: '6pt', backgroundColor: '#e5e7eb' }}>
                     {statusLabels[shipment.status] || shipment.status}
                   </span>
                 </td>
-                <td className="border p-1.5">{shipment.generator?.name || '-'}</td>
-                <td className="border p-1.5">{shipment.transporter?.name || '-'}</td>
-                <td className="border p-1.5">{shipment.recycler?.name || '-'}</td>
-                <td className="border p-1.5">{formatDate(shipment.created_at)}</td>
+                <td className="border p-0.5 truncate" style={{ maxWidth: '60px' }}>{shipment.generator?.name || '-'}</td>
+                <td className="border p-0.5 truncate" style={{ maxWidth: '60px' }}>{shipment.transporter?.name || '-'}</td>
+                <td className="border p-0.5 truncate" style={{ maxWidth: '60px' }}>{shipment.recycler?.name || '-'}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="bg-gray-100 font-bold">
-              <td colSpan={3} className="border p-1.5 text-right">الإجمالي</td>
-              <td className="border p-1.5">{totalQuantity.toLocaleString()} كجم</td>
-              <td colSpan={5} className="border p-1.5"></td>
+            <tr style={{ backgroundColor: '#f3f4f6' }}>
+              <td colSpan={3} className="border p-0.5 text-right font-bold">الإجمالي</td>
+              <td className="border p-0.5 font-bold">{totalQuantity.toLocaleString()}</td>
+              <td colSpan={4} className="border p-0.5 text-right text-[6pt] text-gray-500">
+                {hasMoreShipments && `+${shipments.length - maxShipmentsToShow} شحنات إضافية`}
+              </td>
             </tr>
           </tfoot>
         </table>
       </div>
 
-      {/* Parties Summary */}
-      <div className="mb-6">
-        <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2 bg-gray-100 p-2 rounded">
-          <Building2 className="w-5 h-5 text-primary" />
-          الجهات المشاركة
-        </h3>
-        <div className="grid grid-cols-3 gap-4 text-xs">
-          {/* Generators */}
-          <div className="border rounded-lg p-3">
-            <h4 className="font-bold text-blue-700 mb-2 flex items-center gap-1 border-b pb-2">
-              <Building2 className="w-4 h-4" />
-              الجهات المولدة ({uniqueGenerators.length})
-            </h4>
-            <ul className="space-y-1">
-              {uniqueGenerators.slice(0, 5).map((g, i) => (
-                <li key={i} className="truncate">{g?.name || '-'}</li>
-              ))}
-              {uniqueGenerators.length > 5 && (
-                <li className="text-gray-500">+{uniqueGenerators.length - 5} جهات أخرى</li>
-              )}
-            </ul>
+      {/* Compact Parties */}
+      <div className="grid grid-cols-3 gap-1 mb-2" style={{ fontSize: '6pt' }}>
+        <div className="border rounded p-1.5" style={{ backgroundColor: '#eff6ff' }}>
+          <div className="flex items-center gap-1 font-bold text-blue-700 mb-1">
+            <Building2 className="w-3 h-3" />
+            <span>المولدة ({uniqueGenerators.length})</span>
           </div>
-
-          {/* Transporters */}
-          <div className="border rounded-lg p-3">
-            <h4 className="font-bold text-amber-700 mb-2 flex items-center gap-1 border-b pb-2">
-              <Truck className="w-4 h-4" />
-              جهات النقل ({uniqueTransporters.length})
-            </h4>
-            <ul className="space-y-1">
-              {uniqueTransporters.slice(0, 5).map((t, i) => (
-                <li key={i} className="truncate">{t?.name || '-'}</li>
-              ))}
-              {uniqueTransporters.length > 5 && (
-                <li className="text-gray-500">+{uniqueTransporters.length - 5} جهات أخرى</li>
-              )}
-            </ul>
+          <div className="truncate">{uniqueGenerators.slice(0, 2).map(g => g?.name).join('، ') || '-'}</div>
+        </div>
+        <div className="border rounded p-1.5" style={{ backgroundColor: '#fffbeb' }}>
+          <div className="flex items-center gap-1 font-bold text-amber-700 mb-1">
+            <Truck className="w-3 h-3" />
+            <span>النقل ({uniqueTransporters.length})</span>
           </div>
-
-          {/* Recyclers */}
-          <div className="border rounded-lg p-3 bg-emerald-50">
-            <h4 className="font-bold text-emerald-700 mb-2 flex items-center gap-1 border-b pb-2">
-              <Recycle className="w-4 h-4" />
-              جهات التدوير ({uniqueRecyclers.length})
-            </h4>
-            <ul className="space-y-1">
-              {uniqueRecyclers.slice(0, 5).map((r, i) => (
-                <li key={i} className="truncate">{r?.name || '-'}</li>
-              ))}
-              {uniqueRecyclers.length > 5 && (
-                <li className="text-gray-500">+{uniqueRecyclers.length - 5} جهات أخرى</li>
-              )}
-            </ul>
+          <div className="truncate">{uniqueTransporters.slice(0, 2).map(t => t?.name).join('، ') || '-'}</div>
+        </div>
+        <div className="border rounded p-1.5" style={{ backgroundColor: '#ecfdf5' }}>
+          <div className="flex items-center gap-1 font-bold text-emerald-700 mb-1">
+            <Recycle className="w-3 h-3" />
+            <span>التدوير ({uniqueRecyclers.length})</span>
           </div>
+          <div className="truncate">{uniqueRecyclers.slice(0, 2).map(r => r?.name).join('، ') || '-'}</div>
         </div>
       </div>
 
-      {/* Stamps and Signatures */}
+      {/* Compact Stamps/Signatures */}
       {(includeStamps || includeSignatures) && (
-        <div className="border-t-2 border-gray-300 pt-6 mt-8">
-          <h4 className="font-semibold mb-4 text-center">التوثيق والاعتماد</h4>
-          <div className="grid grid-cols-3 gap-6">
-            {/* Generator stamp/signature from first shipment */}
-            <div className="text-center border rounded-lg p-4">
-              <div className="flex items-center justify-center gap-2 text-sm font-medium text-blue-700 mb-2">
-                <Building2 className="w-4 h-4" />
-                الجهة المولدة
+        <div className="grid grid-cols-3 gap-2 mb-2 pt-2" style={{ borderTop: '1px solid #e5e7eb' }}>
+          {[
+            { label: 'المولدة', data: shipments[0]?.generator, color: '#1e40af', bg: '#eff6ff', Icon: Building2 },
+            { label: 'الناقل', data: shipments[0]?.transporter, color: '#92400e', bg: '#fffbeb', Icon: Truck },
+            { label: 'المدور', data: shipments[0]?.recycler, color: '#166534', bg: '#ecfdf5', Icon: Recycle },
+          ].map(({ label, data, color, bg, Icon }) => (
+            <div key={label} className="text-center p-1 rounded" style={{ backgroundColor: bg }}>
+              <div className="flex items-center justify-center gap-1 mb-1" style={{ color, fontSize: '7pt' }}>
+                <Icon className="w-3 h-3" />
+                <span className="font-medium">{label}</span>
               </div>
-              <p className="text-xs font-medium mb-3">{shipments[0]?.generator?.name || '-'}</p>
-              <div className="flex justify-center gap-4 min-h-[60px]">
+              <p className="text-[6pt] font-medium mb-1 truncate">{data?.name || '-'}</p>
+              <div className="flex justify-center gap-2">
                 {includeStamps && (
                   <div className="text-center">
-                    {shipments[0]?.generator?.stamp_url ? (
-                      <img 
-                        src={shipments[0].generator.stamp_url} 
-                        alt="ختم" 
-                        className="w-16 h-16 object-contain border rounded mx-auto"
-                        crossOrigin="anonymous"
-                      />
+                    {data?.stamp_url ? (
+                      <img src={data.stamp_url} alt="ختم" className="w-10 h-10 object-contain mx-auto" crossOrigin="anonymous" />
                     ) : (
-                      <div className="w-16 h-16 border-2 border-dashed rounded flex items-center justify-center bg-gray-50 mx-auto">
-                        <Stamp className="w-6 h-6 text-gray-300" />
+                      <div className="w-10 h-10 border border-dashed rounded flex items-center justify-center bg-white/50 mx-auto">
+                        <Stamp className="w-4 h-4 text-gray-300" />
                       </div>
                     )}
-                    <p className="text-[10px] text-gray-500 mt-1">الختم</p>
                   </div>
                 )}
                 {includeSignatures && (
                   <div className="text-center">
-                    {shipments[0]?.generator?.signature_url ? (
-                      <img 
-                        src={shipments[0].generator.signature_url} 
-                        alt="توقيع" 
-                        className="w-16 h-16 object-contain border rounded mx-auto"
-                        crossOrigin="anonymous"
-                      />
+                    {data?.signature_url ? (
+                      <img src={data.signature_url} alt="توقيع" className="w-10 h-10 object-contain mx-auto" crossOrigin="anonymous" />
                     ) : (
-                      <div className="w-16 h-16 border-2 border-dashed rounded flex items-center justify-center bg-gray-50 mx-auto">
-                        <PenTool className="w-6 h-6 text-gray-300" />
+                      <div className="w-10 h-10 border border-dashed rounded flex items-center justify-center bg-white/50 mx-auto">
+                        <PenTool className="w-4 h-4 text-gray-300" />
                       </div>
                     )}
-                    <p className="text-[10px] text-gray-500 mt-1">التوقيع</p>
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Transporter stamp/signature */}
-            <div className="text-center border rounded-lg p-4">
-              <div className="flex items-center justify-center gap-2 text-sm font-medium text-amber-700 mb-2">
-                <Truck className="w-4 h-4" />
-                جهة النقل
-              </div>
-              <p className="text-xs font-medium mb-3">{shipments[0]?.transporter?.name || '-'}</p>
-              <div className="flex justify-center gap-4 min-h-[60px]">
-                {includeStamps && (
-                  <div className="text-center">
-                    {shipments[0]?.transporter?.stamp_url ? (
-                      <img 
-                        src={shipments[0].transporter.stamp_url} 
-                        alt="ختم" 
-                        className="w-16 h-16 object-contain border rounded mx-auto"
-                        crossOrigin="anonymous"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 border-2 border-dashed rounded flex items-center justify-center bg-gray-50 mx-auto">
-                        <Stamp className="w-6 h-6 text-gray-300" />
-                      </div>
-                    )}
-                    <p className="text-[10px] text-gray-500 mt-1">الختم</p>
-                  </div>
-                )}
-                {includeSignatures && (
-                  <div className="text-center">
-                    {shipments[0]?.transporter?.signature_url ? (
-                      <img 
-                        src={shipments[0].transporter.signature_url} 
-                        alt="توقيع" 
-                        className="w-16 h-16 object-contain border rounded mx-auto"
-                        crossOrigin="anonymous"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 border-2 border-dashed rounded flex items-center justify-center bg-gray-50 mx-auto">
-                        <PenTool className="w-6 h-6 text-gray-300" />
-                      </div>
-                    )}
-                    <p className="text-[10px] text-gray-500 mt-1">التوقيع</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Recycler stamp/signature */}
-            <div className="text-center border rounded-lg p-4 bg-emerald-50">
-              <div className="flex items-center justify-center gap-2 text-sm font-medium text-emerald-700 mb-2">
-                <Recycle className="w-4 h-4" />
-                جهة التدوير
-              </div>
-              <p className="text-xs font-medium mb-3">{shipments[0]?.recycler?.name || '-'}</p>
-              <div className="flex justify-center gap-4 min-h-[60px]">
-                {includeStamps && (
-                  <div className="text-center">
-                    {shipments[0]?.recycler?.stamp_url ? (
-                      <img 
-                        src={shipments[0].recycler.stamp_url} 
-                        alt="ختم" 
-                        className="w-16 h-16 object-contain border rounded mx-auto"
-                        crossOrigin="anonymous"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 border-2 border-dashed rounded flex items-center justify-center bg-gray-50 mx-auto">
-                        <Stamp className="w-6 h-6 text-gray-300" />
-                      </div>
-                    )}
-                    <p className="text-[10px] text-gray-500 mt-1">الختم</p>
-                  </div>
-                )}
-                {includeSignatures && (
-                  <div className="text-center">
-                    {shipments[0]?.recycler?.signature_url ? (
-                      <img 
-                        src={shipments[0].recycler.signature_url} 
-                        alt="توقيع" 
-                        className="w-16 h-16 object-contain border rounded mx-auto"
-                        crossOrigin="anonymous"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 border-2 border-dashed rounded flex items-center justify-center bg-gray-50 mx-auto">
-                        <PenTool className="w-6 h-6 text-gray-300" />
-                      </div>
-                    )}
-                    <p className="text-[10px] text-gray-500 mt-1">التوقيع</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="mt-10 pt-4 text-center text-xs print-footer" style={{ borderTop: '1px solid #e5e7eb', color: '#6b7280' }}>
-        <p>هذا التقرير صادر إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل</p>
-        <p className="mt-1">تاريخ الإصدار: {currentDateTime} | رقم المرجع: {reportNumber}</p>
-        <p className="mt-2" style={{ color: '#9ca3af', fontSize: '8pt' }}>
-          هذه الوثيقة تم إنشاؤها آلياً طبقاً للبيانات المدخلة والواردة إلينا على النظام - دون أدنى مسؤولية على النظام
-        </p>
+      {/* Compact Footer */}
+      <footer className="text-center pt-1 mt-auto" style={{ borderTop: '1px solid #e5e7eb', fontSize: '6pt', color: '#6b7280' }}>
+        <p>نظام إدارة المخلفات - آي ريسايكل | {currentDateTime} | {reportNumber}</p>
+        <p style={{ color: '#9ca3af' }}>وثيقة إلكترونية - دون أدنى مسؤولية على النظام</p>
       </footer>
     </div>
   );
