@@ -71,14 +71,26 @@ const DriverDashboard = () => {
   const [updatingLocation, setUpdatingLocation] = useState(false);
 
   const updateMyLocation = async () => {
-    if (!driverInfo?.id) return;
+    if (!driverInfo?.id) {
+      toast({
+        title: 'خطأ',
+        description: 'لم يتم العثور على بيانات السائق',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setUpdatingLocation(true);
     try {
+      // Check if geolocation is supported
+      if (!navigator.geolocation) {
+        throw new Error('Geolocation not supported');
+      }
+
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
-          timeout: 10000,
+          timeout: 15000,
           maximumAge: 0,
         });
       });
@@ -96,16 +108,27 @@ const DriverDashboard = () => {
       if (error) throw error;
 
       toast({
-        title: 'تم تحديث الموقع',
-        description: 'تم إرسال موقعك الحالي بنجاح',
+        title: 'تم تحديث الموقع ✓',
+        description: `إحداثيات: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
       });
     } catch (error: any) {
       console.error('Error updating location:', error);
+      
+      let errorMessage = 'فشل في الحصول على الموقع الحالي';
+      
+      if (error.code === 1 || error.message === 'User denied Geolocation') {
+        errorMessage = 'يرجى السماح بالوصول إلى موقعك من إعدادات المتصفح';
+      } else if (error.code === 2) {
+        errorMessage = 'تعذر تحديد الموقع، تأكد من تفعيل GPS';
+      } else if (error.code === 3) {
+        errorMessage = 'انتهت مهلة تحديد الموقع، حاول مرة أخرى';
+      } else if (error.message === 'Geolocation not supported') {
+        errorMessage = 'المتصفح لا يدعم تحديد الموقع';
+      }
+      
       toast({
         title: 'خطأ في تحديد الموقع',
-        description: error.message === 'User denied Geolocation' 
-          ? 'يرجى السماح بالوصول إلى موقعك من إعدادات المتصفح'
-          : 'فشل في الحصول على الموقع الحالي',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
