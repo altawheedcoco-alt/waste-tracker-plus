@@ -241,6 +241,18 @@ export const previewNotificationSound = async (type: NotificationSoundType) => {
   }
 };
 
+// Initialize/unlock audio context (required by most browsers; needs a user gesture)
+export const initNotificationAudio = async () => {
+  try {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+  } catch (error) {
+    console.warn('Could not init notification audio:', error);
+  }
+};
+
 export const setNotificationSoundEnabled = (enabled: boolean) => {
   localStorage.setItem('notification_sound_enabled', String(enabled));
 };

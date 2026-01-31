@@ -59,6 +59,7 @@ import CreateRequestButton from './CreateRequestButton';
 import AccountSwitcher from './AccountSwitcher';
 import { usePartnersCount } from '@/hooks/usePartnersCount';
 import { useNotifications } from '@/hooks/useNotifications';
+import { initNotificationAudio } from '@/hooks/useNotificationSound';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
@@ -84,6 +85,24 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     checkDesktop();
     window.addEventListener('resize', checkDesktop);
     return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
+
+  // Unlock notification audio on first user gesture (required by browser autoplay policies)
+  useEffect(() => {
+    let didInit = false;
+    const unlock = () => {
+      if (didInit) return;
+      didInit = true;
+      void initNotificationAudio();
+    };
+
+    window.addEventListener('pointerdown', unlock, { once: true });
+    window.addEventListener('keydown', unlock, { once: true });
+
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      window.removeEventListener('keydown', unlock);
+    };
   }, []);
 
   // Fetch organization documents count
