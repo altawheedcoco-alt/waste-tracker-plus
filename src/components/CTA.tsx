@@ -45,13 +45,13 @@ const CTA = () => {
               </div>
               
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                انضم إلى آلاف الشركات التي
+                انضم إلى مئات الشركات في مصر
                 <br />
-                تثق في حلولنا لإدارة النفايات
+                التي تثق في حلولنا لإدارة النفايات
               </h2>
               
               <p className="text-white/80 text-lg max-w-2xl mx-auto mb-10">
-                سجل شركتك الآن واحصل على فترة تجريبية مجانية مع دعم فني على مدار الساعة
+                سجل شركتك الآن واحصل على نظام متوافق مع متطلبات جهاز تنظيم إدارة المخلفات المصري
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
