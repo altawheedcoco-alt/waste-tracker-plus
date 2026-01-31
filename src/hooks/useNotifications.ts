@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 interface Notification {
   id: string;
@@ -21,6 +22,7 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(true);
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { playNotificationSound } = useNotificationSound();
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -131,6 +133,14 @@ export const useNotifications = () => {
         (payload) => {
           const newNotification = payload.new as Notification;
           
+          // Play notification sound based on type
+          const soundType = newNotification.type === 'urgent' || newNotification.type === 'approval_request' 
+            ? 'urgent' 
+            : newNotification.type === 'recycling_report' 
+              ? 'success' 
+              : 'default';
+          playNotificationSound(soundType);
+          
           // Show toast for new notification
           toast({
             title: newNotification.title,
@@ -147,7 +157,7 @@ export const useNotifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchNotifications, toast]);
+  }, [user, fetchNotifications, toast, playNotificationSound]);
 
   return {
     notifications,
