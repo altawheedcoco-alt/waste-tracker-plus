@@ -40,6 +40,7 @@ import {
   Rss,
   Video,
   Info,
+  BookOpen,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -287,6 +288,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
+    { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
   ];
 
