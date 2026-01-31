@@ -9,7 +9,7 @@ export interface ChatMessage {
   sender_organization_id: string | null;
   receiver_organization_id: string;
   content: string;
-  message_type: 'text' | 'image' | 'file' | 'system';
+  message_type: 'text' | 'image' | 'file' | 'video' | 'audio' | 'system';
   file_url?: string;
   file_name?: string;
   created_at: string;
