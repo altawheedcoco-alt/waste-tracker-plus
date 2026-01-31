@@ -64,6 +64,7 @@ interface RecentShipment {
   confirmed_at: string | null;
   manual_driver_name: string | null;
   manual_vehicle_plate: string | null;
+  driver_id: string | null;
   generator: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
   transporter: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
   recycler: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
@@ -122,6 +123,7 @@ const RecyclerDashboard = () => {
           confirmed_at,
           manual_driver_name,
           manual_vehicle_plate,
+          driver_id,
           generator:organizations!shipments_generator_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
           transporter:organizations!shipments_transporter_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
           recycler:organizations!shipments_recycler_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),

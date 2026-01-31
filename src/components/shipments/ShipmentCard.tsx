@@ -45,6 +45,7 @@ interface ShipmentCardProps {
     created_at: string;
     pickup_address?: string;
     delivery_address?: string;
+    driver_id?: string | null;
     expected_delivery_date?: string | null;
     approved_at?: string | null;
     collection_started_at?: string | null;
@@ -282,6 +283,8 @@ const ShipmentCard = ({
           pickupAddress={shipment.pickup_address || 'غير محدد'}
           deliveryAddress={shipment.delivery_address || 'غير محدد'}
           shipmentNumber={shipment.shipment_number}
+          driverId={shipment.driver_id}
+          shipmentStatus={shipment.status}
         />
       </>
     );
@@ -526,6 +529,8 @@ const ShipmentCard = ({
         pickupAddress={shipment.pickup_address || 'غير محدد'}
         deliveryAddress={shipment.delivery_address || 'غير محدد'}
         shipmentNumber={shipment.shipment_number}
+        driverId={shipment.driver_id}
+        shipmentStatus={shipment.status}
       />
     </>
   );
