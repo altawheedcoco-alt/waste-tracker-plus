@@ -35,8 +35,38 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications((data || []) as Notification[]);
-      setUnreadCount(data?.filter((n: Notification) => !n.is_read).length || 0);
+      // Get all shipment IDs for recycling_report notifications without pdf_url
+      const recyclingReportShipmentIds = (data || [])
+        .filter((n: Notification) => n.type === 'recycling_report' && !n.pdf_url && n.shipment_id)
+        .map((n: Notification) => n.shipment_id);
+
+      let pdfUrlMap: Record<string, string> = {};
+
+      // Fetch pdf_urls from recycling_reports table
+      if (recyclingReportShipmentIds.length > 0) {
+        const { data: reports } = await supabase
+          .from('recycling_reports')
+          .select('shipment_id, pdf_url')
+          .in('shipment_id', recyclingReportShipmentIds)
+          .not('pdf_url', 'is', null);
+
+        if (reports) {
+          reports.forEach((report: { shipment_id: string; pdf_url: string }) => {
+            pdfUrlMap[report.shipment_id] = report.pdf_url;
+          });
+        }
+      }
+
+      // Merge pdf_urls into notifications
+      const enrichedNotifications = (data || []).map((n: Notification) => {
+        if (n.type === 'recycling_report' && !n.pdf_url && n.shipment_id && pdfUrlMap[n.shipment_id]) {
+          return { ...n, pdf_url: pdfUrlMap[n.shipment_id] };
+        }
+        return n;
+      });
+
+      setNotifications(enrichedNotifications as Notification[]);
+      setUnreadCount(enrichedNotifications?.filter((n: Notification) => !n.is_read).length || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
