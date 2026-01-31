@@ -160,12 +160,12 @@ const AggregateReportPrint = ({
         {/* QR Code */}
         <div className="text-center print-qr">
           <QRCodeSVG
-            value={`AGGREGATE-REPORT-${reportNumber}`}
+            value={`${window.location.origin}/verify?type=aggregate&code=${reportNumber}`}
             size={75}
             level="M"
             includeMargin={false}
           />
-          <p className="text-xs mt-1" style={{ color: '#6b7280' }}>رمز التحقق</p>
+          <p className="text-xs mt-1" style={{ color: '#6b7280' }}>امسح للتحقق</p>
         </div>
 
         {/* Title */}

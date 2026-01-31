@@ -44,7 +44,8 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
 }, ref) => {
   const currentDate = format(new Date(), 'PP', { locale: ar });
   const currentTime = format(new Date(), 'p', { locale: ar });
-  const qrContent = qrValue || `DOC-${documentNumber || Date.now()}`;
+  // Generate verification URL for QR codes
+  const qrContent = qrValue || `${window.location.origin}/verify?type=document&code=${documentNumber || Date.now()}`;
   const barcodeContent = barcodeValue || documentNumber || `DOC${Date.now()}`;
 
   return (
@@ -72,7 +73,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
               level="M"
               includeMargin={false}
             />
-            <p className="text-xs mt-1 text-gray-500">رمز التحقق</p>
+            <p className="text-xs mt-1 text-gray-500">امسح للتحقق</p>
           </div>
         )}
 
