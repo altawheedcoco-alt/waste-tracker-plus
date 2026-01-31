@@ -402,56 +402,80 @@ const Notifications = () => {
                     }
                   };
 
+                  // Responsive notification card sizing
+                  const cardPadding = isMobile ? 'p-3' : 'p-4';
+                  const iconContainerSize = isMobile ? 'w-10 h-10' : 'w-12 h-12';
+                  const iconSizeInCard = isMobile ? 'w-5 h-5' : 'w-6 h-6';
+
                   return (
                     <motion.div
                       key={notification.id}
-                      initial={{ opacity: 0, y: 20 }}
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: index * 0.03 }}
                       onClick={() => handleNotificationClick(notification)}
-                      className={`p-4 rounded-lg border cursor-pointer transition-all hover:shadow-md ${
+                      className={`${cardPadding} rounded-xl border cursor-pointer transition-all hover:shadow-lg group ${
                         !notification.is_read
-                          ? 'bg-primary/5 border-primary/20'
-                          : 'bg-card hover:bg-muted/50'
+                          ? 'bg-gradient-to-l from-primary/5 to-transparent border-primary/30 shadow-sm'
+                          : 'bg-card hover:bg-muted/30 border-border/50'
                       }`}
                     >
-                      <div className="flex gap-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${iconColorClass}`}>
-                          <Icon className="w-6 h-6" />
+                      <div className="flex gap-3">
+                        {/* Icon */}
+                        <div className={`${iconContainerSize} rounded-xl flex items-center justify-center shrink-0 ${iconColorClass} transition-transform group-hover:scale-105`}>
+                          <Icon className={iconSizeInCard} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-1">
+                        
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 space-y-2">
+                          {/* Header Row */}
+                          <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className="font-semibold">{notification.title}</h4>
-                              <Badge variant={badge.variant} className="text-xs">
-                                {badge.label}
-                              </Badge>
+                              <h4 className={`font-semibold leading-tight ${isMobile ? 'text-sm' : 'text-base'}`}>
+                                {notification.title}
+                              </h4>
                               {!notification.is_read && (
-                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
                               )}
                             </div>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            <Badge variant={badge.variant} className={`shrink-0 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-xs'}`}>
+                              {badge.label}
+                            </Badge>
+                          </div>
+                          
+                          {/* Message - Formatted nicely */}
+                          <div className={`text-muted-foreground leading-relaxed ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                            <p className="line-clamp-3 whitespace-pre-wrap">
+                              {notification.message}
+                            </p>
+                          </div>
+                          
+                          {/* Footer - Time */}
+                          <div className="flex items-center justify-between pt-1">
+                            <span className={`text-muted-foreground/70 ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
                               {formatDistanceToNow(new Date(notification.created_at), {
                                 addSuffix: true,
                                 locale: ar,
                               })}
                             </span>
+                            {notification.shipment_id && (
+                              <span className={`text-primary/70 ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+                                رقم الشحنة: {notification.shipment_id.slice(0, 8)}...
+                              </span>
+                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {notification.message}
-                          </p>
                           
                           {/* PDF Actions for Recycling Reports */}
                           {isRecyclingReport && (
-                            <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-emerald-200 dark:border-emerald-800">
-                              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs mb-2 w-full">
+                            <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-border/50">
+                              <div className="flex items-center gap-2 text-primary text-xs mb-1 w-full">
                                 <FileText className="w-4 h-4" />
                                 <span className="font-medium">شهادة إعادة التدوير مرفقة</span>
                               </div>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1.5 text-xs h-8 border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                                className="gap-1.5 text-xs h-8"
                                 onClick={handlePdfView}
                               >
                                 <Eye className="w-3.5 h-3.5" />
@@ -460,7 +484,7 @@ const Notifications = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1.5 text-xs h-8 border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                                className="gap-1.5 text-xs h-8"
                                 onClick={handlePdfDownload}
                               >
                                 <Download className="w-3.5 h-3.5" />
@@ -469,7 +493,7 @@ const Notifications = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="gap-1.5 text-xs h-8 border-emerald-300 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                                className="gap-1.5 text-xs h-8"
                                 onClick={handlePdfPrint}
                               >
                                 <Printer className="w-3.5 h-3.5" />
