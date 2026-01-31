@@ -855,7 +855,7 @@ const RecyclingCertificateDialog = ({
                   </Button>
                   <Button variant="outline" onClick={handlePrint} className="gap-2">
                     <Printer className="w-4 h-4" />
-                    طباعة
+                    طباعة الوثيقة
                   </Button>
                   <Button onClick={handleDownloadPDF} className="gap-2">
                     <Download className="w-4 h-4" />
