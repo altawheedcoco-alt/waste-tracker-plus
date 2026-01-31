@@ -75,18 +75,42 @@ const SendDriverNotificationDialog = ({
     setSending(true);
 
     try {
-      // First get the driver's user_id from their profile
-      const { data: driverData, error: driverError } = await supabase
-        .from('drivers')
-        .select('profile:profiles!drivers_profile_id_fkey(user_id)')
-        .eq('id', driver.id)
-        .single();
+      // Get the driver's user_id - first check if it's already in the driver object
+      let driverUserId = driver.profile?.user_id;
+      
+      if (!driverUserId) {
+        // Fallback: fetch from database
+        const { data: driverData, error: driverError } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('id', driver.id)
+          .maybeSingle();
 
-      if (driverError || !driverData?.profile?.user_id) {
-        throw new Error('لم يتم العثور على بيانات السائق');
+        // If not found by profile id, try getting via drivers table
+        if (!driverData?.user_id) {
+          const { data: driverRecord, error: driverRecordError } = await supabase
+            .from('drivers')
+            .select('profile_id')
+            .eq('id', driver.id)
+            .single();
+          
+          if (driverRecord?.profile_id) {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('id', driverRecord.profile_id)
+              .single();
+            
+            driverUserId = profileData?.user_id;
+          }
+        } else {
+          driverUserId = driverData.user_id;
+        }
       }
 
-      const driverUserId = driverData.profile.user_id;
+      if (!driverUserId) {
+        throw new Error('لم يتم العثور على بيانات السائق');
+      }
 
       // Build notification title with type indicator
       let notificationTitle = title;

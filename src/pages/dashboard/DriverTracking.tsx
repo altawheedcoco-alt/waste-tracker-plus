@@ -40,6 +40,7 @@ interface Driver {
     full_name: string;
     phone: string | null;
     avatar_url: string | null;
+    user_id?: string;
   } | null;
   organization: {
     name: string;
@@ -95,7 +96,7 @@ const DriverTracking = () => {
 
   const fetchDrivers = async () => {
     try {
-      // Fetch drivers with their organization
+      // Fetch drivers with their organization and user_id for notifications
       const { data: driversData, error } = await supabase
         .from('drivers')
         .select(`
@@ -104,7 +105,7 @@ const DriverTracking = () => {
           vehicle_type,
           vehicle_plate,
           is_available,
-          profile:profiles!drivers_profile_id_fkey(full_name, phone, avatar_url),
+          profile:profiles!drivers_profile_id_fkey(full_name, phone, avatar_url, user_id),
           organization:organizations!drivers_organization_id_fkey(name)
         `);
 
