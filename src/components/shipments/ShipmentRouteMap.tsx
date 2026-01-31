@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,39 @@ import { MapPin, Navigation, Loader2, Route, Truck, RefreshCw } from 'lucide-rea
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default marker icons in Leaflet with Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+// Custom icons
+const pickupIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="width:20px;height:20px;background:#3b82f6;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+const deliveryIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="width:20px;height:20px;background:#22c55e;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
+
+const driverIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:20px solid #ef4444;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));"></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 20],
+});
 
 interface DriverLocation {
   latitude: number;
@@ -25,9 +58,75 @@ interface ShipmentRouteMapProps {
   shipmentStatus?: string;
 }
 
-const defaultCenter = {
-  lat: 30.0444,
-  lng: 31.2357
+const defaultCenter: [number, number] = [30.0444, 31.2357];
+
+// Map bounds adjuster component
+const MapBoundsAdjuster = ({ bounds }: { bounds: L.LatLngBoundsExpression | null }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [bounds, map]);
+  return null;
+};
+
+// Egyptian cities geocoding (simple lookup)
+const egyptianCities: { [key: string]: [number, number] } = {
+  'القاهرة': [30.0444, 31.2357],
+  'الجيزة': [30.0131, 31.2089],
+  'الإسكندرية': [31.2001, 29.9187],
+  'بورسعيد': [31.2653, 32.3019],
+  'السويس': [29.9668, 32.5498],
+  'الأقصر': [25.6872, 32.6396],
+  'أسوان': [24.0889, 32.8998],
+  'المنصورة': [31.0409, 31.3785],
+  'طنطا': [30.7865, 31.0004],
+  'الزقازيق': [30.5877, 31.5020],
+  'دمياط': [31.4165, 31.8133],
+  'المنيا': [28.1099, 30.7503],
+  'أسيوط': [27.1809, 31.1837],
+  'سوهاج': [26.5591, 31.6948],
+  'قنا': [26.1551, 32.7160],
+  'بني سويف': [29.0661, 31.0994],
+  'الفيوم': [29.3084, 30.8428],
+  'شرم الشيخ': [27.9158, 34.3300],
+  'الغردقة': [27.2579, 33.8116],
+  'مرسى مطروح': [31.3543, 27.2373],
+  '6 أكتوبر': [29.9285, 30.9188],
+  'العاشر من رمضان': [30.2833, 31.7333],
+  'المعادي': [29.9602, 31.2569],
+  'مدينة نصر': [30.0511, 31.3656],
+  'حلوان': [29.8419, 31.3034],
+  'العبور': [30.1833, 31.4833],
+  'الشروق': [30.1167, 31.6167],
+  'cairo': [30.0444, 31.2357],
+  'giza': [30.0131, 31.2089],
+  'alexandria': [31.2001, 29.9187],
+};
+
+// Simple geocoding function
+const geocodeAddress = (address: string): [number, number] | null => {
+  const lowerAddress = address.toLowerCase();
+  
+  // Check for coordinates in the address
+  const coordMatch = address.match(/(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)/);
+  if (coordMatch) {
+    const lat = parseFloat(coordMatch[1]);
+    const lng = parseFloat(coordMatch[2]);
+    if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      return [lat, lng];
+    }
+  }
+  
+  // Check Egyptian cities
+  for (const [city, coords] of Object.entries(egyptianCities)) {
+    if (address.includes(city) || lowerAddress.includes(city.toLowerCase())) {
+      return coords;
+    }
+  }
+  
+  return null;
 };
 
 const ShipmentRouteMap = ({
@@ -46,12 +145,8 @@ const ShipmentRouteMap = ({
   } | null>(null);
   const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const mapRef = useRef<any>(null);
-  const directionsRendererRef = useRef<any>(null);
-  const driverMarkerRef = useRef<any>(null);
-
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const hasApiKey = !!apiKey;
+  const [pickupCoords, setPickupCoords] = useState<[number, number] | null>(null);
+  const [deliveryCoords, setDeliveryCoords] = useState<[number, number] | null>(null);
 
   // Fetch driver's latest location
   const fetchDriverLocation = useCallback(async () => {
@@ -86,193 +181,47 @@ const ShipmentRouteMap = ({
     toast.success('تم تحديث موقع السائق');
   };
 
-  const loadGoogleMapsScript = useCallback(() => {
-    return new Promise<void>((resolve, reject) => {
-      const win = window as any;
-      if (win.google && win.google.maps) {
-        resolve();
-        return;
-      }
+  // Calculate distance between two points
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  };
 
-      const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
-      if (existingScript) {
-        existingScript.addEventListener('load', () => resolve());
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,directions&language=ar`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Failed to load Google Maps'));
-      document.head.appendChild(script);
-    });
-  }, [apiKey]);
-
-  const updateDriverMarker = useCallback(() => {
-    const win = window as any;
-    if (!mapRef.current || !win.google || !driverLocation) return;
-
-    const position = { lat: driverLocation.latitude, lng: driverLocation.longitude };
-
-    if (driverMarkerRef.current) {
-      driverMarkerRef.current.setPosition(position);
-    } else {
-      driverMarkerRef.current = new win.google.maps.Marker({
-        position,
-        map: mapRef.current,
-        title: 'موقع السائق الحالي',
-        icon: {
-          path: win.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          fillColor: '#ef4444',
-          fillOpacity: 1,
-          strokeColor: '#ffffff',
-          strokeWeight: 2,
-          scale: 8,
-          rotation: driverLocation.heading || 0,
-        },
-        zIndex: 1000,
-      });
-
-      // Add info window for driver
-      const infoWindow = new win.google.maps.InfoWindow({
-        content: `
-          <div style="text-align: right; direction: rtl; padding: 8px;">
-            <strong>🚛 السائق</strong><br/>
-            <span>السرعة: ${driverLocation.speed ? Math.round(driverLocation.speed) + ' كم/س' : 'غير محددة'}</span><br/>
-            <span style="font-size: 12px; color: #666;">
-              آخر تحديث: ${new Date(driverLocation.recorded_at).toLocaleTimeString('ar-SA')}
-            </span>
-          </div>
-        `,
-      });
-
-      driverMarkerRef.current.addListener('click', () => {
-        infoWindow.open(mapRef.current, driverMarkerRef.current);
-      });
-    }
-
-    // Pan to driver location
-    mapRef.current.panTo(position);
-  }, [driverLocation]);
-
-  const initializeMap = useCallback(async () => {
-    const win = window as any;
-    const mapContainer = document.getElementById('route-map-container');
-    if (!mapContainer || !win.google) return;
-
-    const map = new win.google.maps.Map(mapContainer, {
-      center: defaultCenter,
-      zoom: 10,
-      zoomControl: true,
-      streetViewControl: false,
-      mapTypeControl: true,
-      fullscreenControl: true,
-    });
-
-    mapRef.current = map;
-
-    // Create directions renderer
-    directionsRendererRef.current = new win.google.maps.DirectionsRenderer({
-      map,
-      suppressMarkers: false,
-      polylineOptions: {
-        strokeColor: '#16a34a',
-        strokeWeight: 5,
-        strokeOpacity: 0.8,
-      },
-    });
-
-    // Calculate route
-    const directionsService = new win.google.maps.DirectionsService();
-
-    try {
-      const result = await directionsService.route({
-        origin: pickupAddress,
-        destination: deliveryAddress,
-        travelMode: win.google.maps.TravelMode.DRIVING,
-        region: 'EG',
-      });
-
-      directionsRendererRef.current.setDirections(result);
-
-      if (result.routes[0]?.legs[0]) {
+  // Initialize geocoding
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      
+      const pickup = geocodeAddress(pickupAddress);
+      const delivery = geocodeAddress(deliveryAddress);
+      
+      setPickupCoords(pickup);
+      setDeliveryCoords(delivery);
+      
+      if (pickup && delivery) {
+        const distance = calculateDistance(pickup[0], pickup[1], delivery[0], delivery[1]);
+        // Estimate duration (assuming average speed of 50 km/h in Egypt with traffic)
+        const durationHours = distance / 50;
+        const hours = Math.floor(durationHours);
+        const minutes = Math.round((durationHours - hours) * 60);
+        
         setRouteInfo({
-          distance: result.routes[0].legs[0].distance?.text || '',
-          duration: result.routes[0].legs[0].duration?.text || '',
+          distance: `${distance.toFixed(1)} كم`,
+          duration: hours > 0 ? `${hours} ساعة ${minutes} دقيقة` : `${minutes} دقيقة`,
         });
+      } else {
+        toast.info('لم يتمكن من تحديد المواقع بدقة، يتم عرض العناوين فقط');
       }
-    } catch (error: any) {
-      console.error('Directions error:', error);
       
-      // Fallback: Try geocoding both addresses and showing markers
-      const geocoder = new win.google.maps.Geocoder();
-      
-      try {
-        const [pickupResult, deliveryResult] = await Promise.all([
-          new Promise((resolve) => {
-            geocoder.geocode({ address: pickupAddress }, (results: any, status: string) => {
-              resolve(status === 'OK' && results?.[0] ? results[0].geometry.location : null);
-            });
-          }),
-          new Promise((resolve) => {
-            geocoder.geocode({ address: deliveryAddress }, (results: any, status: string) => {
-              resolve(status === 'OK' && results?.[0] ? results[0].geometry.location : null);
-            });
-          }),
-        ]);
-
-        if (pickupResult) {
-          new win.google.maps.Marker({
-            position: pickupResult,
-            map,
-            title: 'نقطة الاستلام',
-            icon: {
-              url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-            },
-          });
-        }
-
-        if (deliveryResult) {
-          new win.google.maps.Marker({
-            position: deliveryResult,
-            map,
-            title: 'نقطة التسليم',
-            icon: {
-              url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-            },
-          });
-        }
-
-        if (pickupResult && deliveryResult) {
-          const bounds = new win.google.maps.LatLngBounds();
-          bounds.extend(pickupResult);
-          bounds.extend(deliveryResult);
-          map.fitBounds(bounds);
-
-          // Draw a straight line between points
-          new win.google.maps.Polyline({
-            path: [pickupResult, deliveryResult],
-            geodesic: true,
-            strokeColor: '#16a34a',
-            strokeOpacity: 0.8,
-            strokeWeight: 3,
-            map,
-          });
-        }
-
-        toast.info('لم يتمكن من حساب المسار، يتم عرض المواقع فقط');
-      } catch (geocodeError) {
-        toast.error('فشل في تحديد المواقع على الخريطة');
-      }
+      setIsLoading(false);
     }
-
-    // Update driver marker if location exists
-    if (driverLocation) {
-      updateDriverMarker();
-    }
-  }, [pickupAddress, deliveryAddress, driverLocation, updateDriverMarker]);
+  }, [isOpen, pickupAddress, deliveryAddress]);
 
   // Fetch driver location when dialog opens
   useEffect(() => {
@@ -280,32 +229,6 @@ const ShipmentRouteMap = ({
       fetchDriverLocation();
     }
   }, [isOpen, driverId, fetchDriverLocation]);
-
-  // Update driver marker when location changes
-  useEffect(() => {
-    if (driverLocation && mapRef.current) {
-      updateDriverMarker();
-    }
-  }, [driverLocation, updateDriverMarker]);
-
-  useEffect(() => {
-    if (isOpen && hasApiKey) {
-      setIsLoading(true);
-      setRouteInfo(null);
-
-      loadGoogleMapsScript()
-        .then(() => {
-          setTimeout(() => {
-            initializeMap();
-            setIsLoading(false);
-          }, 100);
-        })
-        .catch(() => {
-          toast.error('فشل تحميل الخريطة');
-          setIsLoading(false);
-        });
-    }
-  }, [isOpen, hasApiKey, loadGoogleMapsScript, initializeMap]);
 
   // Real-time subscription for driver location
   useEffect(() => {
@@ -333,28 +256,20 @@ const ShipmentRouteMap = ({
     };
   }, [isOpen, driverId]);
 
-  if (!hasApiKey) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-md" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 justify-end">
-              <span>خريطة المسار</span>
-              <Route className="w-5 h-5" />
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-8 text-center">
-            <MapPin className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
-              يرجى إضافة مفتاح Google Maps API لتفعيل الخريطة
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  // Calculate map bounds
+  const getBounds = (): L.LatLngBoundsExpression | null => {
+    const points: [number, number][] = [];
+    if (pickupCoords) points.push(pickupCoords);
+    if (deliveryCoords) points.push(deliveryCoords);
+    if (driverLocation) points.push([driverLocation.latitude, driverLocation.longitude]);
+    
+    if (points.length >= 2) {
+      return L.latLngBounds(points);
+    }
+    return null;
+  };
 
-  const isDriverTracking = shipmentStatus === 'collecting' || shipmentStatus === 'in_transit';
+  const mapCenter = pickupCoords || deliveryCoords || defaultCenter;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -442,10 +357,71 @@ const ShipmentRouteMap = ({
               </div>
             </div>
           )}
-          <div
-            id="route-map-container"
-            className="w-full h-[400px] rounded-lg border"
-          />
+          <div className="w-full h-[400px] rounded-lg border overflow-hidden">
+            <MapContainer
+              center={mapCenter}
+              zoom={10}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              
+              <MapBoundsAdjuster bounds={getBounds()} />
+              
+              {/* Pickup marker */}
+              {pickupCoords && (
+                <Marker position={pickupCoords} icon={pickupIcon}>
+                  <Popup>
+                    <div className="text-right" dir="rtl">
+                      <p className="font-medium text-blue-600">نقطة الاستلام</p>
+                      <p className="text-sm">{pickupAddress}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+              
+              {/* Delivery marker */}
+              {deliveryCoords && (
+                <Marker position={deliveryCoords} icon={deliveryIcon}>
+                  <Popup>
+                    <div className="text-right" dir="rtl">
+                      <p className="font-medium text-green-600">نقطة التسليم</p>
+                      <p className="text-sm">{deliveryAddress}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+              
+              {/* Route line */}
+              {pickupCoords && deliveryCoords && (
+                <Polyline
+                  positions={[pickupCoords, deliveryCoords]}
+                  pathOptions={{ color: '#16a34a', weight: 4, opacity: 0.8, dashArray: '10, 10' }}
+                />
+              )}
+              
+              {/* Driver marker */}
+              {driverLocation && (
+                <Marker 
+                  position={[driverLocation.latitude, driverLocation.longitude]} 
+                  icon={driverIcon}
+                >
+                  <Popup>
+                    <div className="text-right" dir="rtl">
+                      <p className="font-medium text-red-600">🚛 السائق</p>
+                      <p className="text-sm">السرعة: {driverLocation.speed ? Math.round(driverLocation.speed) + ' كم/س' : 'غير محددة'}</p>
+                      <p className="text-xs text-gray-500">
+                        آخر تحديث: {new Date(driverLocation.recorded_at).toLocaleTimeString('ar-SA')}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+            </MapContainer>
+          </div>
         </div>
 
         {/* Address Info */}

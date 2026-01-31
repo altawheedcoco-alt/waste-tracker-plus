@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { GoogleMap, useJsApiLoader, Polyline, Marker, InfoWindow } from '@react-google-maps/api';
+import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Polyline, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +11,36 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, MapPin, Clock, Navigation, Play, Pause, SkipBack, SkipForward } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+
+// Fix for default marker icons in Leaflet with Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+// Custom icons
+const startIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="width:16px;height:16px;background:#22c55e;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+const endIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="width:16px;height:16px;background:#ef4444;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+});
+
+const currentIcon = new L.DivIcon({
+  className: 'custom-marker',
+  html: `<div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:16px solid #3b82f6;filter:drop-shadow(0 2px 2px rgba(0,0,0,0.3));"></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 16],
+});
 
 interface LocationLog {
   id: string;
@@ -26,24 +58,21 @@ interface DriverLocationHistoryProps {
   onClose?: () => void;
 }
 
-const mapContainerStyle = {
-  width: '100%',
-  height: '400px',
-  borderRadius: '0.5rem',
+// Component to handle map panning
+const MapPanner = ({ center }: { center: [number, number] }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.panTo(center);
+  }, [center, map]);
+  return null;
 };
 
 const DriverLocationHistory = ({ driverId, driverName, date = new Date(), onClose }: DriverLocationHistoryProps) => {
   const [locations, setLocations] = useState<LocationLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<LocationLog | null>(null);
   const [playbackIndex, setPlaybackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-    language: 'ar',
-  });
 
   useEffect(() => {
     fetchLocationHistory();
@@ -64,13 +93,6 @@ const DriverLocationHistory = ({ driverId, driverName, date = new Date(), onClos
     }
     return () => clearInterval(interval);
   }, [isPlaying, locations.length]);
-
-  useEffect(() => {
-    if (map && locations[playbackIndex]) {
-      const loc = locations[playbackIndex];
-      map.panTo({ lat: Number(loc.latitude), lng: Number(loc.longitude) });
-    }
-  }, [playbackIndex, map, locations]);
 
   const fetchLocationHistory = async () => {
     setLoading(true);
@@ -98,22 +120,12 @@ const DriverLocationHistory = ({ driverId, driverName, date = new Date(), onClos
     }
   };
 
-  const onLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
-  }, []);
-
-  const getPathCoordinates = () => {
-    return locations.map(loc => ({
-      lat: Number(loc.latitude),
-      lng: Number(loc.longitude),
-    }));
+  const getPathCoordinates = (): [number, number][] => {
+    return locations.map(loc => [Number(loc.latitude), Number(loc.longitude)]);
   };
 
-  const getPlayedPath = () => {
-    return locations.slice(0, playbackIndex + 1).map(loc => ({
-      lat: Number(loc.latitude),
-      lng: Number(loc.longitude),
-    }));
+  const getPlayedPath = (): [number, number][] => {
+    return locations.slice(0, playbackIndex + 1).map(loc => [Number(loc.latitude), Number(loc.longitude)]);
   };
 
   const calculateDistance = () => {
@@ -143,18 +155,13 @@ const DriverLocationHistory = ({ driverId, driverName, date = new Date(), onClos
 
   const deg2rad = (deg: number) => deg * (Math.PI / 180);
 
-  if (loadError) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-muted-foreground">
-            <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>فشل تحميل الخريطة</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const mapCenter: [number, number] = locations.length > 0 
+    ? [Number(locations[0].latitude), Number(locations[0].longitude)]
+    : [30.0444, 31.2357];
+
+  const currentPosition: [number, number] | null = locations[playbackIndex] 
+    ? [Number(locations[playbackIndex].latitude), Number(locations[playbackIndex].longitude)]
+    : null;
 
   return (
     <Card className="w-full">
@@ -203,10 +210,6 @@ const DriverLocationHistory = ({ driverId, driverName, date = new Date(), onClos
           <div className="h-[400px] rounded-lg bg-muted flex items-center justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        ) : !isLoaded ? (
-          <div className="h-[400px] rounded-lg bg-muted flex items-center justify-center">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
         ) : locations.length === 0 ? (
           <div className="h-[400px] rounded-lg bg-muted flex items-center justify-center">
             <div className="text-center text-muted-foreground">
@@ -215,115 +218,74 @@ const DriverLocationHistory = ({ driverId, driverName, date = new Date(), onClos
             </div>
           </div>
         ) : (
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            center={{ 
-              lat: Number(locations[0].latitude), 
-              lng: Number(locations[0].longitude) 
-            }}
-            zoom={13}
-            onLoad={onLoad}
-            options={{
-              mapTypeControl: false,
-              streetViewControl: false,
-            }}
-          >
-            {/* Full path (gray) */}
-            <Polyline
-              path={getPathCoordinates()}
-              options={{
-                strokeColor: '#9ca3af',
-                strokeOpacity: 0.5,
-                strokeWeight: 3,
-              }}
-            />
-            
-            {/* Played path (primary color) */}
-            <Polyline
-              path={getPlayedPath()}
-              options={{
-                strokeColor: '#22c55e',
-                strokeOpacity: 1,
-                strokeWeight: 4,
-              }}
-            />
-
-            {/* Start marker */}
-            <Marker
-              position={{ 
-                lat: Number(locations[0].latitude), 
-                lng: Number(locations[0].longitude) 
-              }}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: '#22c55e',
-                fillOpacity: 1,
-                strokeColor: '#fff',
-                strokeWeight: 2,
-                scale: 8,
-              }}
-              onClick={() => setSelectedPoint(locations[0])}
-            />
-
-            {/* End marker */}
-            {locations.length > 1 && (
-              <Marker
-                position={{ 
-                  lat: Number(locations[locations.length - 1].latitude), 
-                  lng: Number(locations[locations.length - 1].longitude) 
-                }}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  fillColor: '#ef4444',
-                  fillOpacity: 1,
-                  strokeColor: '#fff',
-                  strokeWeight: 2,
-                  scale: 8,
-                }}
-                onClick={() => setSelectedPoint(locations[locations.length - 1])}
+          <div className="h-[400px] rounded-lg overflow-hidden border">
+            <MapContainer
+              center={mapCenter}
+              zoom={13}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-            )}
-
-            {/* Current playback position */}
-            {locations[playbackIndex] && (
-              <Marker
-                position={{ 
-                  lat: Number(locations[playbackIndex].latitude), 
-                  lng: Number(locations[playbackIndex].longitude) 
-                }}
-                icon={{
-                  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                  fillColor: '#3b82f6',
-                  fillOpacity: 1,
-                  strokeColor: '#fff',
-                  strokeWeight: 2,
-                  scale: 6,
-                  rotation: locations[playbackIndex].heading || 0,
-                }}
+              
+              {currentPosition && <MapPanner center={currentPosition} />}
+              
+              {/* Full path (gray) */}
+              <Polyline
+                positions={getPathCoordinates()}
+                pathOptions={{ color: '#9ca3af', weight: 3, opacity: 0.5 }}
               />
-            )}
+              
+              {/* Played path (green) */}
+              <Polyline
+                positions={getPlayedPath()}
+                pathOptions={{ color: '#22c55e', weight: 4, opacity: 1 }}
+              />
 
-            {selectedPoint && (
-              <InfoWindow
-                position={{ 
-                  lat: Number(selectedPoint.latitude), 
-                  lng: Number(selectedPoint.longitude) 
-                }}
-                onCloseClick={() => setSelectedPoint(null)}
-              >
-                <div className="p-2 text-right" dir="rtl">
-                  <p className="font-medium">
-                    {format(new Date(selectedPoint.recorded_at), 'HH:mm:ss', { locale: ar })}
-                  </p>
-                  {selectedPoint.speed && (
-                    <p className="text-sm text-gray-600">
-                      السرعة: {Math.round(selectedPoint.speed)} كم/س
-                    </p>
-                  )}
-                </div>
-              </InfoWindow>
-            )}
-          </GoogleMap>
+              {/* Start marker */}
+              <Marker position={[Number(locations[0].latitude), Number(locations[0].longitude)]} icon={startIcon}>
+                <Popup>
+                  <div className="text-right" dir="rtl">
+                    <p className="font-medium">نقطة البداية</p>
+                    <p className="text-sm">{format(new Date(locations[0].recorded_at), 'HH:mm:ss')}</p>
+                  </div>
+                </Popup>
+              </Marker>
+
+              {/* End marker */}
+              {locations.length > 1 && (
+                <Marker 
+                  position={[Number(locations[locations.length - 1].latitude), Number(locations[locations.length - 1].longitude)]} 
+                  icon={endIcon}
+                >
+                  <Popup>
+                    <div className="text-right" dir="rtl">
+                      <p className="font-medium">نقطة النهاية</p>
+                      <p className="text-sm">{format(new Date(locations[locations.length - 1].recorded_at), 'HH:mm:ss')}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+
+              {/* Current playback position */}
+              {currentPosition && (
+                <Marker position={currentPosition} icon={currentIcon}>
+                  <Popup>
+                    <div className="text-right" dir="rtl">
+                      <p className="font-medium">
+                        {format(new Date(locations[playbackIndex].recorded_at), 'HH:mm:ss')}
+                      </p>
+                      {locations[playbackIndex].speed && (
+                        <p className="text-sm">السرعة: {Math.round(locations[playbackIndex].speed!)} كم/س</p>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              )}
+            </MapContainer>
+          </div>
         )}
 
         {/* Playback controls */}
