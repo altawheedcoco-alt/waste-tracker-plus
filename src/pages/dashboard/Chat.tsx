@@ -2,95 +2,75 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageCircle, 
-  Plus, 
   Search, 
   Building2, 
   Truck, 
   Recycle, 
-  Handshake,
   Loader2,
-  X
+  ArrowRight,
+  Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useChat, ChatRoom } from '@/hooks/useChat';
+import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import ChatSidebar from '@/components/chat/ChatSidebar';
-import ChatHeader from '@/components/chat/ChatHeader';
 import ChatMessages from '@/components/chat/ChatMessages';
 import ChatInput from '@/components/chat/ChatInput';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
-interface Organization {
+interface Partner {
   id: string;
   name: string;
   organization_type: 'generator' | 'transporter' | 'recycler';
   city: string;
   email: string;
   logo_url: string | null;
+  lastMessage?: string;
+  lastMessageTime?: string;
+  unreadCount?: number;
 }
 
-type TabType = 'partners' | 'generator' | 'transporter' | 'recycler';
-
 const Chat = () => {
-  const { user, organization, roles } = useAuth();
-  const { toast } = useToast();
+  const { user, organization } = useAuth();
   const { isMobile, isTablet } = useDisplayMode();
   const {
-    rooms,
-    currentRoom,
-    setCurrentRoom,
     messages,
-    loading,
     sending,
     sendMessage,
     sendFileMessage,
-    getOrCreateGeneralRoom,
-    createRoom,
     soundEnabled,
     setSoundEnabled,
+    fetchMessagesForPartner,
+    markPartnerAsRead,
+    getPartnerUnreadCount,
   } = useChat();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [orgSearchQuery, setOrgSearchQuery] = useState('');
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [partnerOrganizations, setPartnerOrganizations] = useState<Organization[]>([]);
-  const [loadingOrgs, setLoadingOrgs] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<TabType>('partners');
-  const [creatingRoom, setCreatingRoom] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
+  const [showPartnerList, setShowPartnerList] = useState(true);
 
-  const isAdmin = roles.includes('admin');
-
-  // On mobile, hide sidebar when room is selected
+  // On mobile, hide partner list when partner is selected
   useEffect(() => {
-    if (isMobile && currentRoom) {
-      setShowSidebar(false);
+    if (isMobile && selectedPartner) {
+      setShowPartnerList(false);
     }
-  }, [currentRoom, isMobile]);
+  }, [selectedPartner, isMobile]);
 
-  // Load rooms on mount
-  useEffect(() => {
-    if (rooms.length === 0 && !loading) {
-      getOrCreateGeneralRoom();
-    }
-  }, [rooms.length, loading, getOrCreateGeneralRoom]);
-
-  // Fetch partner organizations
-  const fetchPartnerOrganizations = async () => {
+  // Fetch partners (organizations with shared shipments)
+  const fetchPartners = async () => {
     if (!organization?.id) return;
     
-    setLoadingOrgs(true);
+    setLoading(true);
     try {
       const { data: shipments, error: shipmentsError } = await supabase
         .from('shipments')
@@ -113,147 +93,94 @@ const Chat = () => {
       });
 
       if (partnerIds.size === 0) {
-        setPartnerOrganizations([]);
-        setLoadingOrgs(false);
+        setPartners([]);
+        setLoading(false);
         return;
       }
 
-      const { data: partners, error: partnersError } = await supabase
+      const { data: orgs, error: orgsError } = await supabase
         .from('organizations')
         .select('id, name, organization_type, city, email, logo_url')
         .in('id', Array.from(partnerIds))
         .order('name');
 
-      if (partnersError) throw partnersError;
-      setPartnerOrganizations(partners || []);
-    } catch (error) {
-      console.error('Error fetching partner organizations:', error);
-    } finally {
-      setLoadingOrgs(false);
-    }
-  };
+      if (orgsError) throw orgsError;
 
-  // Fetch organizations by type
-  const fetchOrganizationsByType = async (type: 'generator' | 'transporter' | 'recycler') => {
-    setLoadingOrgs(true);
-    try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type, city, email, logo_url')
-        .eq('organization_type', type)
-        .order('name');
+      // Get last messages and unread counts for each partner
+      const partnersWithDetails = await Promise.all(
+        (orgs || []).map(async (org) => {
+          const unreadCount = await getPartnerUnreadCount(org.id);
+          
+          // Get last message
+          const { data: lastMsgData } = await supabase
+            .from('chat_messages')
+            .select('content, created_at')
+            .or(`and(sender_id.eq.${user?.id},receiver_organization_id.eq.${org.id}),and(sender_organization_id.eq.${org.id},receiver_user_id.eq.${user?.id})`)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
-      if (error) throw error;
-      setOrganizations(data || []);
-    } catch (error) {
-      console.error('Error fetching organizations:', error);
-    } finally {
-      setLoadingOrgs(false);
-    }
-  };
-
-  // Handle tab change
-  const handleTabChange = (value: string) => {
-    const tab = value as TabType;
-    setSelectedTab(tab);
-    setOrgSearchQuery('');
-    
-    if (tab === 'partners') {
-      fetchPartnerOrganizations();
-    } else {
-      fetchOrganizationsByType(tab);
-    }
-  };
-
-  // Open dialog
-  const handleOpenDialog = () => {
-    setIsAddDialogOpen(true);
-    if (isAdmin) {
-      setSelectedTab('generator');
-      fetchOrganizationsByType('generator');
-    } else {
-      setSelectedTab('partners');
-      fetchPartnerOrganizations();
-    }
-  };
-
-  // Start chat with organization
-  const startChatWithOrganization = async (org: Organization) => {
-    if (!user || creatingRoom) return;
-
-    setCreatingRoom(true);
-    try {
-      const { data: orgUsers, error: usersError } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('organization_id', org.id);
-
-      if (usersError) throw usersError;
-
-      const existingRoom = rooms.find(room => 
-        room.type === 'direct' && room.name === org.name
+          return {
+            ...org,
+            lastMessage: lastMsgData?.content,
+            lastMessageTime: lastMsgData?.created_at,
+            unreadCount,
+          };
+        })
       );
 
-      if (existingRoom) {
-        setCurrentRoom(existingRoom);
-        setIsAddDialogOpen(false);
-        if (isMobile) setShowSidebar(false);
-        toast({
-          title: 'محادثة موجودة',
-          description: `تم فتح المحادثة مع ${org.name}`,
-        });
-        return;
-      }
-
-      const participantIds = orgUsers?.map(u => u.user_id) || [];
-      const room = await createRoom(org.name, 'direct', participantIds);
-
-      if (room) {
-        setCurrentRoom(room);
-        setIsAddDialogOpen(false);
-        if (isMobile) setShowSidebar(false);
-        toast({
-          title: 'تم بنجاح',
-          description: `تم بدء محادثة مع ${org.name}`,
-        });
-      }
-    } catch (error) {
-      console.error('Error starting chat:', error);
-      toast({
-        title: 'خطأ',
-        description: 'فشل بدء المحادثة',
-        variant: 'destructive',
+      // Sort by last message time
+      partnersWithDetails.sort((a, b) => {
+        if (!a.lastMessageTime && !b.lastMessageTime) return 0;
+        if (!a.lastMessageTime) return 1;
+        if (!b.lastMessageTime) return -1;
+        return new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime();
       });
+
+      setPartners(partnersWithDetails);
+    } catch (error) {
+      console.error('Error fetching partners:', error);
     } finally {
-      setCreatingRoom(false);
+      setLoading(false);
     }
   };
 
-  const handleSelectRoom = (room: ChatRoom) => {
-    setCurrentRoom(room);
-    if (isMobile) setShowSidebar(false);
+  useEffect(() => {
+    fetchPartners();
+  }, [organization?.id, user?.id]);
+
+  // Handle partner selection
+  const handleSelectPartner = async (partner: Partner) => {
+    setSelectedPartner(partner);
+    await fetchMessagesForPartner(partner.id);
+    await markPartnerAsRead(partner.id);
+    
+    // Update local state to remove unread count
+    setPartners(prev => 
+      prev.map(p => p.id === partner.id ? { ...p, unreadCount: 0 } : p)
+    );
+    
+    if (isMobile) setShowPartnerList(false);
   };
 
   const handleBack = () => {
-    setShowSidebar(true);
-    if (isMobile) setCurrentRoom(null);
+    setShowPartnerList(true);
+    if (isMobile) setSelectedPartner(null);
   };
 
-  const handleJoinGeneralChat = async () => {
-    const room = await getOrCreateGeneralRoom();
-    if (room) {
-      setCurrentRoom(room);
-      if (isMobile) setShowSidebar(false);
-    }
+  const handleSendMessage = async (content: string) => {
+    if (!selectedPartner) return;
+    await sendMessage(content, selectedPartner.id);
+    
+    // Refresh partner list to update last message
+    fetchPartners();
   };
 
-  const totalUnreadCount = rooms.reduce((sum, room) => sum + (room.unreadCount || 0), 0);
-
-  const displayOrganizations = selectedTab === 'partners' ? partnerOrganizations : organizations;
-  const filteredOrganizations = displayOrganizations.filter(org =>
-    org.name.toLowerCase().includes(orgSearchQuery.toLowerCase()) ||
-    org.city.toLowerCase().includes(orgSearchQuery.toLowerCase())
-  );
+  const handleSendFile = async (file: File) => {
+    if (!selectedPartner) return;
+    await sendFileMessage(file, selectedPartner.id);
+    fetchPartners();
+  };
 
   const getOrgTypeLabel = (type: string) => {
     switch (type) {
@@ -273,12 +200,27 @@ const Chat = () => {
     }
   };
 
+  const getOrgTypeColor = (type: string) => {
+    switch (type) {
+      case 'generator': return 'bg-blue-500/10 text-blue-600';
+      case 'transporter': return 'bg-amber-500/10 text-amber-600';
+      case 'recycler': return 'bg-emerald-500/10 text-emerald-600';
+      default: return 'bg-primary/10 text-primary';
+    }
+  };
+
+  const filteredPartners = partners.filter(partner =>
+    partner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    partner.city.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalUnread = partners.reduce((sum, p) => sum + (p.unreadCount || 0), 0);
+
   if (!user) return null;
 
-  // Calculate layout dimensions
-  const sidebarWidth = isMobile ? '100%' : isTablet ? '280px' : '320px';
-  const showChat = !isMobile || !showSidebar;
-  const showSidebarPanel = !isMobile || showSidebar;
+  const sidebarWidth = isMobile ? '100%' : isTablet ? '300px' : '340px';
+  const showChat = !isMobile || !showPartnerList;
+  const showSidebarPanel = !isMobile || showPartnerList;
 
   return (
     <DashboardLayout>
@@ -286,7 +228,7 @@ const Chat = () => {
         "flex h-[calc(100vh-4rem)] overflow-hidden rounded-xl border border-border bg-background shadow-sm",
         isMobile ? "mx-2 my-2" : "mx-4 my-4"
       )}>
-        {/* Sidebar */}
+        {/* Partners List */}
         <AnimatePresence mode="wait">
           {showSidebarPanel && (
             <motion.div
@@ -295,19 +237,133 @@ const Chat = () => {
               exit={isMobile ? { x: -300, opacity: 0 } : undefined}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               style={{ width: sidebarWidth, minWidth: sidebarWidth }}
-              className="h-full"
+              className="h-full flex flex-col bg-card border-l border-border"
             >
-              <ChatSidebar
-                rooms={rooms}
-                currentRoom={currentRoom}
-                loading={loading}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onSelectRoom={handleSelectRoom}
-                onNewChat={handleOpenDialog}
-                onJoinGeneralChat={handleJoinGeneralChat}
-                totalUnreadCount={totalUnreadCount}
-              />
+              {/* Header */}
+              <div className={cn(
+                "border-b border-border bg-gradient-to-l from-primary/5 to-transparent",
+                isMobile ? "p-3" : "p-4"
+              )}>
+                <div className="flex items-center gap-2 mb-3">
+                  <MessageCircle className="w-5 h-5 text-primary" />
+                  <h2 className={cn("font-bold", isMobile ? "text-base" : "text-lg")}>المحادثات</h2>
+                  {totalUnread > 0 && (
+                    <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
+                      {totalUnread}
+                    </Badge>
+                  )}
+                </div>
+                
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="بحث في الشركاء..."
+                    className="pr-9 h-9 text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Partners List */}
+              <ScrollArea className="flex-1">
+                <div className={cn("space-y-1", isMobile ? "p-2" : "p-3")}>
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="animate-spin text-primary" size={24} />
+                    </div>
+                  ) : filteredPartners.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      {searchQuery ? (
+                        <>
+                          <Search className="mx-auto mb-2 opacity-30" size={32} />
+                          <p className="text-sm">لا توجد نتائج للبحث</p>
+                        </>
+                      ) : (
+                        <>
+                          <MessageCircle className="mx-auto mb-2 opacity-30" size={32} />
+                          <p className="text-sm">لا يوجد شركاء للتواصل</p>
+                          <p className="text-xs mt-1">الشركاء يظهرون عند إنشاء شحنات مشتركة</p>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    filteredPartners.map((partner) => {
+                      const PartnerIcon = getOrgTypeIcon(partner.organization_type);
+                      const iconColor = getOrgTypeColor(partner.organization_type);
+                      const isActive = selectedPartner?.id === partner.id;
+
+                      return (
+                        <motion.button
+                          key={partner.id}
+                          onClick={() => handleSelectPartner(partner)}
+                          className={cn(
+                            "w-full rounded-xl border transition-all text-right flex items-center gap-3 group",
+                            isActive 
+                              ? "bg-primary/10 border-primary/30 shadow-sm" 
+                              : "bg-card border-border/50 hover:bg-muted/50 hover:border-border",
+                            isMobile ? "p-2.5" : "p-3"
+                          )}
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                        >
+                          <div className={cn(
+                            "rounded-full flex items-center justify-center shrink-0 relative",
+                            iconColor,
+                            isMobile ? "w-10 h-10" : "w-11 h-11"
+                          )}>
+                            {partner.logo_url ? (
+                              <Avatar className="w-full h-full">
+                                <AvatarImage src={partner.logo_url} />
+                                <AvatarFallback><PartnerIcon className="w-5 h-5" /></AvatarFallback>
+                              </Avatar>
+                            ) : (
+                              <PartnerIcon className="w-5 h-5" />
+                            )}
+                            {(partner.unreadCount || 0) > 0 && (
+                              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold">
+                                {partner.unreadCount > 9 ? '9+' : partner.unreadCount}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <h4 className={cn(
+                                "font-semibold truncate",
+                                isMobile ? "text-sm" : "text-sm",
+                                (partner.unreadCount || 0) > 0 && "text-foreground"
+                              )}>
+                                {partner.name}
+                              </h4>
+                              {partner.lastMessageTime && (
+                                <span className="text-[10px] text-muted-foreground shrink-0">
+                                  {format(new Date(partner.lastMessageTime), 'HH:mm', { locale: ar })}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                                {getOrgTypeLabel(partner.organization_type)}
+                              </Badge>
+                              <span className="text-[10px] text-muted-foreground">• {partner.city}</span>
+                            </div>
+                            {partner.lastMessage && (
+                              <p className={cn(
+                                "text-xs truncate mt-1",
+                                (partner.unreadCount || 0) > 0 ? "text-foreground/70 font-medium" : "text-muted-foreground"
+                              )}>
+                                {partner.lastMessage}
+                              </p>
+                            )}
+                          </div>
+                        </motion.button>
+                      );
+                    })
+                  )}
+                </div>
+              </ScrollArea>
             </motion.div>
           )}
         </AnimatePresence>
@@ -322,23 +378,50 @@ const Chat = () => {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="flex-1 flex flex-col h-full bg-muted/30"
             >
-              {currentRoom ? (
+              {selectedPartner ? (
                 <>
-                  <ChatHeader
-                    room={currentRoom}
-                    onBack={handleBack}
-                    soundEnabled={soundEnabled}
-                    onToggleSound={() => setSoundEnabled(!soundEnabled)}
-                    showBackButton={isMobile}
-                  />
+                  {/* Chat Header */}
+                  <div className="flex items-center gap-3 p-3 border-b border-border bg-card">
+                    {isMobile && (
+                      <Button variant="ghost" size="icon" onClick={handleBack}>
+                        <ArrowRight className="w-5 h-5" />
+                      </Button>
+                    )}
+                    <div className={cn(
+                      "rounded-full flex items-center justify-center",
+                      getOrgTypeColor(selectedPartner.organization_type),
+                      "w-10 h-10"
+                    )}>
+                      {selectedPartner.logo_url ? (
+                        <Avatar className="w-full h-full">
+                          <AvatarImage src={selectedPartner.logo_url} />
+                          <AvatarFallback>
+                            {(() => { const Icon = getOrgTypeIcon(selectedPartner.organization_type); return <Icon className="w-5 h-5" />; })()}
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        (() => { const Icon = getOrgTypeIcon(selectedPartner.organization_type); return <Icon className="w-5 h-5" />; })()
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold truncate">{selectedPartner.name}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {getOrgTypeLabel(selectedPartner.organization_type)} • {selectedPartner.city}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Messages */}
                   <ChatMessages
                     messages={messages}
                     currentUserId={user.id}
-                    roomName={currentRoom.name || undefined}
+                    roomName={selectedPartner.name}
                   />
+
+                  {/* Input */}
                   <ChatInput
-                    onSendMessage={async (msg) => { await sendMessage(msg); }}
-                    onSendFile={sendFileMessage}
+                    onSendMessage={handleSendMessage}
+                    onSendFile={handleSendFile}
                     sending={sending}
                   />
                 </>
@@ -349,13 +432,9 @@ const Chat = () => {
                       <MessageCircle className="w-10 h-10 text-primary" />
                     </div>
                     <h3 className="text-lg font-semibold mb-2">مرحباً بك في المحادثات</h3>
-                    <p className="text-muted-foreground text-sm mb-4">
-                      اختر محادثة من القائمة أو ابدأ محادثة جديدة
+                    <p className="text-muted-foreground text-sm">
+                      اختر شريك من القائمة لبدء المحادثة
                     </p>
-                    <Button onClick={handleOpenDialog} className="gap-2">
-                      <Plus className="w-4 h-4" />
-                      بدء محادثة جديدة
-                    </Button>
                   </div>
                 </div>
               )}
@@ -363,166 +442,6 @@ const Chat = () => {
           )}
         </AnimatePresence>
       </div>
-
-      {/* New Chat Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-primary" />
-              {isAdmin ? 'اختر جهة للتواصل معها' : 'اختر شريك للتواصل معه'}
-            </DialogTitle>
-          </DialogHeader>
-
-          {isAdmin ? (
-            <Tabs value={selectedTab} onValueChange={handleTabChange} className="mt-4">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="generator" className="gap-2">
-                  <Building2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">الجهات المولدة</span>
-                  <span className="sm:hidden">مولدة</span>
-                </TabsTrigger>
-                <TabsTrigger value="transporter" className="gap-2">
-                  <Truck className="w-4 h-4" />
-                  <span className="hidden sm:inline">الجهات الناقلة</span>
-                  <span className="sm:hidden">ناقلة</span>
-                </TabsTrigger>
-                <TabsTrigger value="recycler" className="gap-2">
-                  <Recycle className="w-4 h-4" />
-                  <span className="hidden sm:inline">الجهات المدورة</span>
-                  <span className="sm:hidden">مدورة</span>
-                </TabsTrigger>
-              </TabsList>
-
-              <div className="mt-4">
-                <div className="relative mb-4">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    value={orgSearchQuery}
-                    onChange={(e) => setOrgSearchQuery(e.target.value)}
-                    placeholder="بحث بالاسم أو المدينة..."
-                    className="pr-9"
-                  />
-                </div>
-
-                <ScrollArea className="h-[400px]">
-                  {loadingOrgs ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="animate-spin text-primary" size={32} />
-                    </div>
-                  ) : filteredOrganizations.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Building2 className="mx-auto mb-2 opacity-50" size={32} />
-                      <p className="text-sm">لا توجد جهات متاحة</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {filteredOrganizations.map((org) => {
-                        const OrgIcon = getOrgTypeIcon(org.organization_type);
-                        return (
-                          <motion.button
-                            key={org.id}
-                            onClick={() => startChatWithOrganization(org)}
-                            disabled={creatingRoom}
-                            className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors text-right flex items-center gap-4 disabled:opacity-50"
-                            whileHover={{ scale: 1.01 }}
-                            whileTap={{ scale: 0.99 }}
-                          >
-                            <Avatar className="h-12 w-12">
-                              <AvatarImage src={org.logo_url || undefined} />
-                              <AvatarFallback className="bg-primary/10 text-primary">
-                                <OrgIcon className="w-6 h-6" />
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold truncate">{org.name}</h4>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="secondary" className="text-xs">
-                                  {getOrgTypeLabel(org.organization_type)}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">{org.city}</span>
-                              </div>
-                            </div>
-                            {creatingRoom && (
-                              <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                            )}
-                          </motion.button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </ScrollArea>
-              </div>
-            </Tabs>
-          ) : (
-            <div className="mt-4">
-              <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
-                <Handshake className="w-5 h-5 text-primary" />
-                <p className="text-sm">يمكنك التواصل مع الجهات التي لديك شحنات مشتركة معها</p>
-              </div>
-
-              <div className="relative mb-4">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  value={orgSearchQuery}
-                  onChange={(e) => setOrgSearchQuery(e.target.value)}
-                  placeholder="بحث في الشركاء..."
-                  className="pr-9"
-                />
-              </div>
-
-              <ScrollArea className="h-[400px]">
-                {loadingOrgs ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="animate-spin text-primary" size={32} />
-                  </div>
-                ) : filteredOrganizations.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Handshake className="mx-auto mb-2 opacity-50" size={32} />
-                    <p className="text-sm">لا يوجد شركاء حالياً</p>
-                    <p className="text-xs mt-1">سيظهر الشركاء عند إنشاء شحنات مشتركة</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {filteredOrganizations.map((org) => {
-                      const OrgIcon = getOrgTypeIcon(org.organization_type);
-                      return (
-                        <motion.button
-                          key={org.id}
-                          onClick={() => startChatWithOrganization(org)}
-                          disabled={creatingRoom}
-                          className="w-full p-4 rounded-xl border border-border bg-card hover:bg-muted/50 transition-colors text-right flex items-center gap-4 disabled:opacity-50"
-                          whileHover={{ scale: 1.01 }}
-                          whileTap={{ scale: 0.99 }}
-                        >
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={org.logo_url || undefined} />
-                            <AvatarFallback className="bg-primary/10 text-primary">
-                              <OrgIcon className="w-6 h-6" />
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold truncate">{org.name}</h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary" className="text-xs">
-                                {getOrgTypeLabel(org.organization_type)}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">{org.city}</span>
-                            </div>
-                          </div>
-                          {creatingRoom && (
-                            <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                          )}
-                        </motion.button>
-                      );
-                    })}
-                  </div>
-                )}
-              </ScrollArea>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </DashboardLayout>
   );
 };
