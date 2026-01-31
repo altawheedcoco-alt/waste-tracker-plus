@@ -220,33 +220,50 @@ const DriverDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-primary">{shipments.length}</div>
-            <p className="text-sm text-muted-foreground">إجمالي الشحنات</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-blue-500">{activeShipments.length}</div>
-            <p className="text-sm text-muted-foreground">شحنات نشطة</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-green-500">{completedShipments.length}</div>
-            <p className="text-sm text-muted-foreground">شحنات مكتملة</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-3xl font-bold text-amber-500">{driverInfo?.vehicle_type || '-'}</div>
-            <p className="text-sm text-muted-foreground">نوع المركبة</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* My Shipments Quick Access Card */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-full bg-primary/10">
+                <Package className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">شحناتي</h3>
+                <p className="text-sm text-muted-foreground">إدارة ومتابعة الشحنات المسندة إليك</p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/dashboard/transporter-shipments')}
+              className="flex items-center gap-2"
+            >
+              عرض الكل
+              <Truck className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-3 rounded-lg bg-background/50 border">
+              <div className="text-2xl font-bold text-primary">{shipments.length}</div>
+              <p className="text-xs text-muted-foreground">إجمالي الشحنات</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50 border">
+              <div className="text-2xl font-bold text-blue-500">{activeShipments.length}</div>
+              <p className="text-xs text-muted-foreground">شحنات نشطة</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50 border">
+              <div className="text-2xl font-bold text-green-500">{completedShipments.length}</div>
+              <p className="text-xs text-muted-foreground">شحنات مكتملة</p>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-background/50 border">
+              <div className="text-2xl font-bold text-amber-500">{driverInfo?.vehicle_type || '-'}</div>
+              <p className="text-xs text-muted-foreground">نوع المركبة</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Shipments Tabs - Using ShipmentCard like Transporter Dashboard */}
       <Tabs defaultValue="active" className="w-full" dir="rtl">
