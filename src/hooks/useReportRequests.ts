@@ -11,6 +11,7 @@ export type ReportRequestType =
   | 'shipment_report' 
   | 'waste_register' 
   | 'operational_plan'
+  | 'statistics_report'
   | 'reports';
 
 export interface ReportRequest {
