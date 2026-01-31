@@ -1,11 +1,30 @@
 import { useRef, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, Download } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Printer, Download, Stamp } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeCanvas } from 'qrcode.react';
 import Barcode from 'react-barcode';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
+interface OrganizationData {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  representative_name: string | null;
+  client_code?: string | null;
+  commercial_register?: string | null;
+  environmental_license?: string | null;
+  activity_type?: string | null;
+  stamp_url?: string | null;
+  signature_url?: string | null;
+}
 
 interface ShipmentData {
   id: string;
@@ -33,42 +52,9 @@ interface ShipmentData {
   confirmed_at: string | null;
   manual_driver_name: string | null;
   manual_vehicle_plate: string | null;
-  generator: { 
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-    client_code?: string | null;
-    commercial_register?: string | null;
-    environmental_license?: string | null;
-    activity_type?: string | null;
-  } | null;
-  transporter: { 
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-    client_code?: string | null;
-    commercial_register?: string | null;
-    environmental_license?: string | null;
-    activity_type?: string | null;
-  } | null;
-  recycler: { 
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    representative_name: string | null;
-    client_code?: string | null;
-    commercial_register?: string | null;
-    environmental_license?: string | null;
-    activity_type?: string | null;
-  } | null;
+  generator: OrganizationData | null;
+  transporter: OrganizationData | null;
+  recycler: OrganizationData | null;
   driver: {
     license_number: string;
     vehicle_type: string | null;
@@ -132,8 +118,17 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const barcodeRef = useRef<HTMLDivElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
+  const [showStampsSignatures, setShowStampsSignatures] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
 
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
+
+  // Check if any stamps or signatures exist
+  const hasStampsOrSignatures = shipment && (
+    shipment.generator?.stamp_url || shipment.generator?.signature_url ||
+    shipment.transporter?.stamp_url || shipment.transporter?.signature_url ||
+    shipment.recycler?.stamp_url || shipment.recycler?.signature_url
+  );
 
   useEffect(() => {
     if (qrRef.current && shipment) {
@@ -171,151 +166,86 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
 
   if (!shipment) return null;
 
-  const handlePrint = () => {
+  const getPrintStyles = () => `
+    @page { size: A4; margin: 8mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      font-size: 9pt;
+      direction: rtl;
+      background: white;
+      color: #000;
+      line-height: 1.3;
+    }
+    .page { width: 100%; max-width: 210mm; margin: 0 auto; }
+    
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #16a34a;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+    }
+    .qr-box, .barcode-box { text-align: center; }
+    .qr-box img { width: 55px; height: 55px; }
+    .barcode-box img { max-height: 30px; }
+    
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+    th, td { border: 1px solid #999; padding: 4px 6px; text-align: right; font-size: 8pt; vertical-align: top; }
+    .section-title { background: #f5f5f5; font-weight: bold; font-size: 9pt; text-align: center; padding: 5px; }
+    .label { background: #f9f9f9; font-weight: 600; width: 18%; color: #333; }
+    .value { background: white; }
+    .highlight { font-weight: bold; color: #16a34a; }
+    .label-generator { background: #dbeafe; color: #1e40af; }
+    .label-transporter { background: #fef3c7; color: #92400e; }
+    .label-recycler { background: #dcfce7; color: #166534; }
+    .timeline-header { background: #f3f4f6; font-weight: 600; font-size: 7pt; text-align: center; }
+    .timeline-value { font-family: monospace; font-size: 7pt; text-align: center; }
+    
+    /* Stamps & Signatures */
+    .stamp-signature-section { margin-top: 10px; }
+    .stamp-signature-table td { text-align: center; vertical-align: top; padding: 8px; border: 1px solid #ddd; }
+    .stamp-signature-title { font-weight: bold; font-size: 8pt; margin-bottom: 6px; color: #333; }
+    .stamp-img { max-width: 70px; max-height: 70px; object-fit: contain; margin: 4px auto; display: block; }
+    .signature-img { max-width: 80px; max-height: 40px; object-fit: contain; margin: 4px auto; display: block; }
+    .stamp-label { font-size: 6pt; color: #666; margin-top: 2px; }
+    .empty-stamp { width: 60px; height: 60px; border: 1px dashed #ccc; border-radius: 50%; margin: 4px auto; display: flex; align-items: center; justify-content: center; font-size: 6pt; color: #999; }
+    .empty-signature { width: 80px; height: 30px; border-bottom: 1px dashed #999; margin: 4px auto; }
+    
+    /* Footer */
+    .footer { margin-top: 8px; padding-top: 6px; border-top: 1px solid #ccc; text-align: center; font-size: 7pt; color: #555; }
+    .disclaimer { font-size: 6pt; color: #888; font-style: italic; margin-top: 4px; }
+    
+    @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
+  `;
+
+  const getDocumentHTML = () => {
     const printContent = printRef.current;
-    if (!printContent) return;
-
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
+    if (!printContent) return '';
+    
+    return `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
       <head>
         <meta charset="UTF-8">
         <title>نموذج تتبع الشحنة - ${shipment.shipment_number}</title>
-        <style>
-          @page { size: A4; margin: 8mm; }
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body {
-            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-            font-size: 9pt;
-            direction: rtl;
-            background: white;
-            color: #000;
-            line-height: 1.3;
-          }
-          .page { width: 100%; max-width: 210mm; margin: 0 auto; }
-          
-          /* Header */
-          .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 2px solid #16a34a;
-            padding-bottom: 8px;
-            margin-bottom: 10px;
-          }
-          .header-center {
-            text-align: center;
-            flex: 1;
-          }
-          .main-title {
-            font-size: 14pt;
-            font-weight: bold;
-            color: #16a34a;
-            margin-bottom: 2px;
-          }
-          .sub-title { font-size: 10pt; color: #333; }
-          .shipment-badge {
-            display: inline-block;
-            background: #16a34a;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 10pt;
-            font-weight: bold;
-            margin-top: 4px;
-          }
-          .status-badge {
-            display: inline-block;
-            background: #dcfce7;
-            color: #166534;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 8pt;
-            font-weight: 600;
-            margin-top: 4px;
-          }
-          .qr-box, .barcode-box {
-            text-align: center;
-          }
-          .qr-box img { width: 55px; height: 55px; }
-          .barcode-box img { max-height: 30px; }
-          .code-label { font-size: 6pt; color: #666; margin-top: 2px; }
-          
-          /* Tables */
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 8px;
-          }
-          th, td {
-            border: 1px solid #999;
-            padding: 4px 6px;
-            text-align: right;
-            font-size: 8pt;
-            vertical-align: top;
-          }
-          .section-title {
-            background: #f5f5f5;
-            font-weight: bold;
-            font-size: 9pt;
-            text-align: center;
-            padding: 5px;
-          }
-          .label { background: #f9f9f9; font-weight: 600; width: 18%; color: #333; }
-          .value { background: white; }
-          .highlight { font-weight: bold; color: #16a34a; }
-          
-          /* Colored labels for parties */
-          .label-generator { background: #dbeafe; color: #1e40af; }
-          .label-transporter { background: #fef3c7; color: #92400e; }
-          .label-recycler { background: #dcfce7; color: #166534; }
-          
-          /* Timeline */
-          .timeline-header { background: #f3f4f6; font-weight: 600; font-size: 7pt; text-align: center; }
-          .timeline-value { font-family: monospace; font-size: 7pt; text-align: center; }
-          
-          /* Signatures */
-          .signature-row td {
-            text-align: center;
-            height: 50px;
-            border: none;
-            border-top: 1px dashed #999;
-            padding-top: 35px;
-            font-size: 8pt;
-            color: #666;
-          }
-          
-          /* Footer */
-          .footer {
-            margin-top: 8px;
-            padding-top: 6px;
-            border-top: 1px solid #ccc;
-            text-align: center;
-            font-size: 7pt;
-            color: #555;
-          }
-          .disclaimer {
-            font-size: 6pt;
-            color: #888;
-            font-style: italic;
-            margin-top: 4px;
-          }
-          
-          @media print {
-            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          }
-        </style>
+        <style>${getPrintStyles()}</style>
       </head>
       <body>
         ${printContent.innerHTML}
       </body>
       </html>
-    `);
+    `;
+  };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(getDocumentHTML());
     printWindow.document.close();
     printWindow.focus();
     
@@ -325,8 +255,29 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     }, 250);
   };
 
-  const handleExportPDF = () => {
-    handlePrint();
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    try {
+      // Open in new window for download
+      const pdfWindow = window.open('', '_blank');
+      if (!pdfWindow) {
+        setIsExporting(false);
+        return;
+      }
+      
+      pdfWindow.document.write(getDocumentHTML());
+      pdfWindow.document.close();
+      
+      // Add download instruction
+      const downloadBtn = pdfWindow.document.createElement('div');
+      downloadBtn.style.cssText = 'position:fixed;top:10px;left:10px;background:#16a34a;color:white;padding:10px 20px;border-radius:6px;cursor:pointer;font-family:Arial;font-size:14px;z-index:9999;';
+      downloadBtn.innerHTML = '💾 اضغط Ctrl+P ثم اختر "حفظ كـ PDF"';
+      pdfWindow.document.body.appendChild(downloadBtn);
+      
+      pdfWindow.focus();
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const formatDate = (date: string | null) => {
@@ -621,16 +572,80 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
               </table>
             )}
 
-            {/* Signatures */}
-            <table style={{ marginTop: '12px' }}>
-              <tbody>
-                <tr className="signature-row">
-                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #999', paddingTop: '35px', fontSize: '8pt', color: '#666' }}>توقيع وختم الجهة المولدة</td>
-                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #999', paddingTop: '35px', fontSize: '8pt', color: '#666' }}>توقيع وختم الجهة الناقلة</td>
-                  <td style={{ width: '33.33%', textAlign: 'center', height: '50px', border: 'none', borderTop: '1px dashed #999', paddingTop: '35px', fontSize: '8pt', color: '#666' }}>توقيع وختم الجهة المستقبلة</td>
-                </tr>
-              </tbody>
-            </table>
+            {/* Stamps and Signatures Section */}
+            {showStampsSignatures && (
+              <table className="stamp-signature-table" style={{ marginTop: '10px' }}>
+                <thead>
+                  <tr><th colSpan={3} className="section-title" style={{ background: '#f5f5f5', fontWeight: 'bold', fontSize: '9pt', textAlign: 'center', padding: '5px' }}>الأختام والتوقيعات</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {/* Generator Stamp & Signature */}
+                    <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'top', padding: '8px', border: '1px solid #ddd' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '8pt', marginBottom: '6px', color: '#1e40af' }}>الجهة المولدة</div>
+                      <div style={{ marginBottom: '8px' }}>
+                        {shipment.generator?.stamp_url ? (
+                          <img src={shipment.generator.stamp_url} alt="ختم" crossOrigin="anonymous" style={{ maxWidth: '70px', maxHeight: '70px', objectFit: 'contain', margin: '4px auto', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '60px', height: '60px', border: '1px dashed #ccc', borderRadius: '50%', margin: '4px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6pt', color: '#999' }}>الختم</div>
+                        )}
+                        <div style={{ fontSize: '6pt', color: '#666', marginTop: '2px' }}>الختم</div>
+                      </div>
+                      <div>
+                        {shipment.generator?.signature_url ? (
+                          <img src={shipment.generator.signature_url} alt="توقيع" crossOrigin="anonymous" style={{ maxWidth: '80px', maxHeight: '40px', objectFit: 'contain', margin: '4px auto', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '80px', height: '30px', borderBottom: '1px dashed #999', margin: '4px auto' }} />
+                        )}
+                        <div style={{ fontSize: '6pt', color: '#666', marginTop: '2px' }}>التوقيع</div>
+                      </div>
+                    </td>
+
+                    {/* Transporter Stamp & Signature */}
+                    <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'top', padding: '8px', border: '1px solid #ddd' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '8pt', marginBottom: '6px', color: '#92400e' }}>الجهة الناقلة</div>
+                      <div style={{ marginBottom: '8px' }}>
+                        {shipment.transporter?.stamp_url ? (
+                          <img src={shipment.transporter.stamp_url} alt="ختم" crossOrigin="anonymous" style={{ maxWidth: '70px', maxHeight: '70px', objectFit: 'contain', margin: '4px auto', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '60px', height: '60px', border: '1px dashed #ccc', borderRadius: '50%', margin: '4px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6pt', color: '#999' }}>الختم</div>
+                        )}
+                        <div style={{ fontSize: '6pt', color: '#666', marginTop: '2px' }}>الختم</div>
+                      </div>
+                      <div>
+                        {shipment.transporter?.signature_url ? (
+                          <img src={shipment.transporter.signature_url} alt="توقيع" crossOrigin="anonymous" style={{ maxWidth: '80px', maxHeight: '40px', objectFit: 'contain', margin: '4px auto', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '80px', height: '30px', borderBottom: '1px dashed #999', margin: '4px auto' }} />
+                        )}
+                        <div style={{ fontSize: '6pt', color: '#666', marginTop: '2px' }}>التوقيع</div>
+                      </div>
+                    </td>
+
+                    {/* Recycler Stamp & Signature */}
+                    <td style={{ width: '33.33%', textAlign: 'center', verticalAlign: 'top', padding: '8px', border: '1px solid #ddd' }}>
+                      <div style={{ fontWeight: 'bold', fontSize: '8pt', marginBottom: '6px', color: '#166534' }}>الجهة المستقبلة</div>
+                      <div style={{ marginBottom: '8px' }}>
+                        {shipment.recycler?.stamp_url ? (
+                          <img src={shipment.recycler.stamp_url} alt="ختم" crossOrigin="anonymous" style={{ maxWidth: '70px', maxHeight: '70px', objectFit: 'contain', margin: '4px auto', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '60px', height: '60px', border: '1px dashed #ccc', borderRadius: '50%', margin: '4px auto', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '6pt', color: '#999' }}>الختم</div>
+                        )}
+                        <div style={{ fontSize: '6pt', color: '#666', marginTop: '2px' }}>الختم</div>
+                      </div>
+                      <div>
+                        {shipment.recycler?.signature_url ? (
+                          <img src={shipment.recycler.signature_url} alt="توقيع" crossOrigin="anonymous" style={{ maxWidth: '80px', maxHeight: '40px', objectFit: 'contain', margin: '4px auto', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '80px', height: '30px', borderBottom: '1px dashed #999', margin: '4px auto' }} />
+                        )}
+                        <div style={{ fontSize: '6pt', color: '#666', marginTop: '2px' }}>التوقيع</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
 
             {/* Footer */}
             <div className="footer" style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #ccc', textAlign: 'center', fontSize: '7pt', color: '#555' }}>
@@ -643,16 +658,31 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>إغلاق</Button>
-          <Button variant="outline" onClick={handleExportPDF} className="gap-2">
-            <Download className="w-4 h-4" />
-            تصدير PDF
-          </Button>
-          <Button onClick={handlePrint} className="gap-2">
-            <Printer className="w-4 h-4" />
-            طباعة
-          </Button>
+        <DialogFooter className="flex-col sm:flex-row gap-3">
+          {/* Stamps Toggle Option */}
+          <div className="flex items-center gap-2 mr-auto">
+            <Switch
+              id="show-stamps"
+              checked={showStampsSignatures}
+              onCheckedChange={setShowStampsSignatures}
+            />
+            <Label htmlFor="show-stamps" className="text-sm flex items-center gap-1">
+              <Stamp className="w-4 h-4" />
+              عرض الأختام والتوقيعات
+            </Label>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>إغلاق</Button>
+            <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
+              <Download className="w-4 h-4" />
+              {isExporting ? 'جاري التحميل...' : 'تحميل PDF'}
+            </Button>
+            <Button onClick={handlePrint} className="gap-2">
+              <Printer className="w-4 h-4" />
+              طباعة
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
