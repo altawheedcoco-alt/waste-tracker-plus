@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +10,6 @@ import {
   MapPin,
   Navigation,
   Loader2,
-  RefreshCcw,
   Circle,
   Clock,
   Satellite,
@@ -20,51 +19,18 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 
-// Fix default marker icon
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-// Custom driver marker icon
-const createDriverIcon = () => {
-  return L.divIcon({
-    html: `
-      <div class="relative">
-        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg border-4 border-white animate-pulse">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-        </div>
-        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rotate-45 -z-10"></div>
-      </div>
-    `,
-    className: 'custom-driver-marker',
-    iconSize: [48, 56],
-    iconAnchor: [24, 56],
-    popupAnchor: [0, -56],
-  });
+const mapContainerStyle = {
+  width: '100%',
+  height: '500px',
 };
 
-interface MapUpdaterProps {
-  center: [number, number];
-}
-
-const MapUpdater = ({ center }: MapUpdaterProps) => {
-  const map = useMap();
-  useEffect(() => {
-    if (center[0] !== 0 && center[1] !== 0) {
-      map.flyTo(center, 15, { duration: 1.5 });
-    }
-  }, [center, map]);
-  return null;
+const defaultCenter = {
+  lat: 30.0444,
+  lng: 31.2357,
 };
 
 const MyLocation = () => {
@@ -237,9 +203,28 @@ const MyLocation = () => {
     };
   }, [liveIntervalId]);
 
-  const mapCenter: [number, number] = currentLocation 
-    ? [currentLocation.latitude, currentLocation.longitude] 
-    : [30.0444, 31.2357]; // Cairo default
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+  });
+
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+
+  const mapCenter = currentLocation 
+    ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
+    : defaultCenter;
+
+  const onMapLoad = useCallback((mapInstance: google.maps.Map) => {
+    setMap(mapInstance);
+  }, []);
+
+  // Pan to new location when it changes
+  useEffect(() => {
+    if (map && currentLocation) {
+      map.panTo({ lat: currentLocation.latitude, lng: currentLocation.longitude });
+      map.setZoom(15);
+    }
+  }, [map, currentLocation]);
 
   if (loading) {
     return (
@@ -393,45 +378,71 @@ const MyLocation = () => {
           </CardHeader>
           <CardContent>
             <div className="h-[500px] rounded-lg overflow-hidden border">
-              <MapContainer
-                center={mapCenter}
-                zoom={currentLocation ? 15 : 6}
-                className="h-full w-full"
-                scrollWheelZoom={true}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                
-                <MapUpdater center={mapCenter} />
+              {loadError && (
+                <div className="h-full flex items-center justify-center bg-muted">
+                  <p className="text-destructive">خطأ في تحميل الخريطة</p>
+                </div>
+              )}
+              
+              {!isLoaded && !loadError && (
+                <div className="h-full flex items-center justify-center bg-muted">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
 
-                {currentLocation && (
-                  <Marker
-                    position={[currentLocation.latitude, currentLocation.longitude]}
-                    icon={createDriverIcon()}
-                  >
-                    <Popup>
-                      <div className="text-right p-2">
+              {isLoaded && !loadError && (
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={mapCenter}
+                  zoom={currentLocation ? 15 : 6}
+                  onLoad={onMapLoad}
+                  options={{
+                    streetViewControl: false,
+                    mapTypeControl: true,
+                    fullscreenControl: true,
+                    zoomControl: true,
+                  }}
+                >
+                  {currentLocation && (
+                    <Marker
+                      position={{ lat: currentLocation.latitude, lng: currentLocation.longitude }}
+                      onClick={() => setShowInfoWindow(true)}
+                      icon={{
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 12,
+                        fillColor: '#22c55e',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 3,
+                      }}
+                    />
+                  )}
+
+                  {currentLocation && showInfoWindow && (
+                    <InfoWindow
+                      position={{ lat: currentLocation.latitude, lng: currentLocation.longitude }}
+                      onCloseClick={() => setShowInfoWindow(false)}
+                    >
+                      <div className="text-right p-2" dir="rtl">
                         <p className="font-bold">{profile?.full_name}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-gray-600">
                           {driverInfo.vehicle_plate}
                         </p>
                         <p className="text-xs mt-1">
                           آخر تحديث: {new Date(currentLocation.recorded_at).toLocaleTimeString('ar-SA')}
                         </p>
                       </div>
-                    </Popup>
-                  </Marker>
-                )}
-              </MapContainer>
+                    </InfoWindow>
+                  )}
+                </GoogleMap>
+              )}
             </div>
 
             {!currentLocation && (
               <div className="mt-4 p-4 bg-muted/50 rounded-lg text-center">
                 <MapPin className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-muted-foreground">
-                  اضغط على "تحديث موقعي" لإرسال موقعك الحالي
+                  اضغط على "تحديد موقعي" لإرسال موقعك الحالي
                 </p>
               </div>
             )}
