@@ -58,6 +58,7 @@ import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
 import AccountSwitcher from './AccountSwitcher';
 import { usePartnersCount } from '@/hooks/usePartnersCount';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
@@ -73,6 +74,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [isDesktop, setIsDesktop] = useState(false);
   const { profile, organization, signOut, roles } = useAuth();
   const { count: partnersCount } = usePartnersCount();
+  const { unreadCount: notificationCount } = useNotifications();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -199,7 +201,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat' },
-    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications' },
+    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
   ];
 
@@ -252,7 +254,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates' },
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat' },
-    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications' },
+    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
   ];
 
