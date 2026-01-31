@@ -16,7 +16,10 @@ import {
   Clock,
   Loader2,
   Shield,
+  MapPin,
+  Send,
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import CreateShipmentButton from './CreateShipmentButton';
 import DriverSettingsDialog from './DriverSettingsDialog';
@@ -60,10 +63,55 @@ interface Shipment {
 const DriverDashboard = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [driverInfo, setDriverInfo] = useState<DriverInfo | null>(null);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [updatingLocation, setUpdatingLocation] = useState(false);
+
+  const updateMyLocation = async () => {
+    if (!driverInfo?.id) return;
+
+    setUpdatingLocation(true);
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        });
+      });
+
+      const { latitude, longitude, accuracy } = position.coords;
+
+      const { error } = await supabase.from('driver_location_logs').insert({
+        driver_id: driverInfo.id,
+        latitude,
+        longitude,
+        accuracy,
+        recorded_at: new Date().toISOString(),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'تم تحديث الموقع',
+        description: 'تم إرسال موقعك الحالي بنجاح',
+      });
+    } catch (error: any) {
+      console.error('Error updating location:', error);
+      toast({
+        title: 'خطأ في تحديد الموقع',
+        description: error.message === 'User denied Geolocation' 
+          ? 'يرجى السماح بالوصول إلى موقعك من إعدادات المتصفح'
+          : 'فشل في الحصول على الموقع الحالي',
+        variant: 'destructive',
+      });
+    } finally {
+      setUpdatingLocation(false);
+    }
+  };
 
   useEffect(() => {
     if (profile?.id) {
@@ -151,6 +199,19 @@ const DriverDashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            onClick={updateMyLocation}
+            disabled={updatingLocation}
+            size="icon"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            title="تحديد موقعي"
+          >
+            {updatingLocation ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MapPin className="h-4 w-4" />
+            )}
+          </Button>
           <CreateShipmentButton 
             variant="eco" 
             onSuccess={fetchDriverData}
