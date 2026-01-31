@@ -1226,17 +1226,86 @@ const WasteTypesClassification = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Footer Note */}
-        <Card className="bg-muted/50">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <FileText className="w-5 h-5 text-muted-foreground mt-0.5" />
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">المرجعية القانونية</p>
-                <p>
-                  هذا التصنيف مبني على اللائحة التنفيذية لنظام إدارة النفايات الصادرة بموجب قرار مجلس الوزراء رقم (469) وتاريخ 25/8/1442هـ،
-                  والمعايير البيئية الصادرة عن الهيئة العامة للأرصاد وحماية البيئة (حالياً: وزارة البيئة والمياه والزراعة).
-                </p>
+        {/* Footer Note - Egyptian Environmental Law Reference */}
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-full bg-primary/10">
+                <ShieldCheck className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1 space-y-4">
+                <div>
+                  <h3 className="font-bold text-lg text-foreground mb-2 flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    المرجعية القانونية والتشريعية
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    هذا التصنيف البيئي للمخلفات معتمد وفقاً للتشريعات البيئية المصرية الرسمية ومعايير وزارة البيئة المصرية.
+                  </p>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2">
+                  {/* Law No. 4 of 1994 */}
+                  <div className="p-4 rounded-lg bg-background/80 border border-border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-primary text-primary-foreground">القانون الأساسي</Badge>
+                    </div>
+                    <h4 className="font-semibold text-foreground mb-1">قانون البيئة رقم 4 لسنة 1994</h4>
+                    <p className="text-sm text-muted-foreground">
+                      القانون الإطاري لحماية البيئة في جمهورية مصر العربية، والذي يحدد الأسس العامة لإدارة المخلفات الخطرة وغير الخطرة.
+                    </p>
+                  </div>
+
+                  {/* Executive Regulations */}
+                  <div className="p-4 rounded-lg bg-background/80 border border-border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary">اللائحة التنفيذية</Badge>
+                    </div>
+                    <h4 className="font-semibold text-foreground mb-1">اللائحة التنفيذية لقانون البيئة</h4>
+                    <p className="text-sm text-muted-foreground">
+                      الصادرة بقرار رئيس مجلس الوزراء رقم 338 لسنة 1995 وتعديلاتها، والتي تحدد التصنيفات التفصيلية للمخلفات.
+                    </p>
+                  </div>
+
+                  {/* Law No. 202 of 2020 */}
+                  <div className="p-4 rounded-lg bg-background/80 border border-border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className="bg-green-600 text-white">قانون المخلفات</Badge>
+                    </div>
+                    <h4 className="font-semibold text-foreground mb-1">قانون تنظيم إدارة المخلفات رقم 202 لسنة 2020</h4>
+                    <p className="text-sm text-muted-foreground">
+                      القانون المتخصص في تنظيم منظومة إدارة المخلفات بأنواعها، ويحدد مسؤوليات كافة الأطراف في سلسلة الإدارة.
+                    </p>
+                  </div>
+
+                  {/* Ministerial Decrees */}
+                  <div className="p-4 rounded-lg bg-background/80 border border-border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline">القرارات الوزارية</Badge>
+                    </div>
+                    <h4 className="font-semibold text-foreground mb-1">قرارات وزارة البيئة المصرية</h4>
+                    <p className="text-sm text-muted-foreground">
+                      القرارات المنظمة لترخيص منشآت إدارة المخلفات وتصنيف المواد الخطرة وفقاً للمعايير الدولية والمحلية.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Additional Info */}
+                <div className="flex items-center gap-2 pt-2 text-sm text-muted-foreground border-t border-border">
+                  <Info className="w-4 h-4" />
+                  <span>
+                    للاطلاع على النصوص الكاملة، يرجى زيارة الموقع الرسمي لـ 
+                    <a 
+                      href="https://www.eeaa.gov.eg" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline mx-1 font-medium"
+                    >
+                      جهاز شؤون البيئة المصري (EEAA)
+                    </a>
+                    أو بوابة التشريعات المصرية.
+                  </span>
+                </div>
               </div>
             </div>
           </CardContent>
