@@ -391,9 +391,9 @@ const RecyclingCertificates = () => {
     }
   };
 
-  const handlePrint = async (report: RecyclingReport) => {
-    // Print button now exports PDF directly (same as download)
-    await handleDownloadPDF(report);
+  const handlePrint = (report: RecyclingReport) => {
+    setSelectedReport(report);
+    setTimeout(() => window.print(), 300);
   };
 
   const clearFilters = () => {
