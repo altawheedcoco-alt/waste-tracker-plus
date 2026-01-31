@@ -18,6 +18,7 @@ import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPr
 import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimeline';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
+import BulkStatusChangeDropdown from '@/components/shipments/BulkStatusChangeDropdown';
 import { useShipmentAutoStatus } from '@/hooks/useShipmentAutoStatus';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
@@ -501,10 +502,21 @@ const TransporterDashboard = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/transporter-shipments')}>
-                  <Eye className="ml-2 h-4 w-4" />
-                  عرض الكل
-                </Button>
+                <div className="flex items-center gap-2">
+                  <BulkStatusChangeDropdown 
+                    shipments={recentShipments.map(s => ({
+                      id: s.id,
+                      status: s.status,
+                      created_at: s.created_at,
+                      waste_type: s.waste_type,
+                    }))}
+                    onStatusChange={fetchDashboardData}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/transporter-shipments')}>
+                    <Eye className="ml-2 h-4 w-4" />
+                    عرض الكل
+                  </Button>
+                </div>
                 <div className="text-right">
                   <CardTitle>شحناتي</CardTitle>
                   <CardDescription>الشحنات المدارة بواسطة شركة النقل الخاصة بك</CardDescription>
