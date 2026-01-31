@@ -11,26 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { CreateTemplateInput, useReportTemplates } from '@/hooks/useReportTemplates';
 import { toast } from 'sonner';
 import { Loader2, Plus, FileText, X } from 'lucide-react';
+import { wasteTypeLabels, wasteCategoryLabels } from '@/lib/wasteClassification';
 
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'مخلفات بناء',
-  other: 'أخرى',
-};
-
-const wasteCategoryLabels: Record<string, string> = {
-  hazardous: 'مخلفات خطرة',
-  non_hazardous: 'مخلفات غير خطرة',
-  medical_hazardous: 'مخلفات طبية خطرة',
-  all: 'جميع الأنواع',
-};
 
 interface CreateTemplateDialogProps {
   isOpen: boolean;
