@@ -252,17 +252,18 @@ const ShipmentCard = ({
                   >
                     <Printer className="w-3 h-3" />
                   </Button>
-                  {isRecycler && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleReportButtonClick}
-                      className="gap-1 text-xs"
-                    >
-                      <FileText className="w-3 h-3" />
-                      تقرير
-                    </Button>
-                  )}
+                    {/* Show recycling certificate button for recycler (to issue) or transporter (to view) */}
+                    {(isRecycler || isTransporter) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleReportButtonClick}
+                        className="gap-1 text-xs"
+                      >
+                        <FileText className="w-3 h-3" />
+                        {isRecycler ? 'إصدار' : 'شهادة'}
+                      </Button>
+                    )}
                   {canChange && !isCompleted && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -359,7 +360,8 @@ const ShipmentCard = ({
           onStatusChanged={handleStatusChanged}
         />
 
-        {isRecycler && (
+        {/* Show certificate dialog for both recycler (issue) and transporter (view) */}
+        {(isRecycler || isTransporter) && (
           <RecyclingCertificateDialog
             isOpen={isReportDialogOpen}
             onClose={() => setIsReportDialogOpen(false)}
@@ -465,7 +467,8 @@ const ShipmentCard = ({
                       <Printer className="w-4 h-4" />
                       طباعة
                     </Button>
-                    {isRecycler && (
+                    {/* Show recycling certificate button for recycler (to issue) or transporter/admin (to view) */}
+                    {(isRecycler || isTransporter || (shipment as any).has_report) && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -473,7 +476,7 @@ const ShipmentCard = ({
                         className="gap-2"
                       >
                         <FileText className="w-4 h-4" />
-                        تقرير التدوير
+                        {isRecycler ? 'إصدار شهادة' : 'شهادة التدوير'}
                       </Button>
                     )}
                     {canChange && !isCompleted ? (
