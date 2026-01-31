@@ -17,7 +17,8 @@ const BackButton = ({
   const navigate = useNavigate();
 
   const handleBack = () => {
-    if (window.history.length > 2) {
+    // Always try to go back first, fallback if no history
+    if (window.history.state && window.history.state.idx > 0) {
       navigate(-1);
     } else {
       navigate(fallbackPath);
