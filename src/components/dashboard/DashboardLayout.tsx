@@ -223,7 +223,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           { icon: Package, label: 'الشحنات', path: '/dashboard/shipments' },
           { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates' },
         ]
-      : [{ icon: Package, label: 'الشحنات', path: '/dashboard/shipments' }]),
+      : [
+          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments' },
+          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates' },
+        ]),
     // Add team credentials for all organization types with employees
     ...(!isTransporter && !isAdmin ? [
       { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials' },
