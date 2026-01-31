@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -9,6 +10,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Package,
   Truck,
@@ -19,7 +22,12 @@ import {
   Sparkles,
   Clock,
   FileText,
+  Building2,
+  User,
+  ArrowLeftRight,
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Notification {
   id: string;
@@ -30,6 +38,15 @@ interface Notification {
   created_at: string;
   shipment_id: string | null;
   request_id: string | null;
+}
+
+interface SenderReceiverInfo {
+  senderName: string | null;
+  senderType: string | null;
+  senderLogo: string | null;
+  receiverName: string | null;
+  receiverType: string | null;
+  receiverLogo: string | null;
 }
 
 interface NotificationDetailDialogProps {
@@ -110,6 +127,19 @@ const getNotificationBadge = (type: string | null) => {
   }
 };
 
+const getOrgTypeLabel = (type: string | null) => {
+  switch (type) {
+    case 'generator':
+      return 'جهة مولدة';
+    case 'transporter':
+      return 'جهة ناقلة';
+    case 'recycler':
+      return 'جهة معالجة';
+    default:
+      return 'مؤسسة';
+  }
+};
+
 const NotificationDetailDialog = ({
   notification,
   open,
@@ -118,6 +148,98 @@ const NotificationDetailDialog = ({
   onNavigateToRequest,
   onNavigateToCarbonFootprint,
 }: NotificationDetailDialogProps) => {
+  const { profile } = useAuth();
+  const [senderReceiverInfo, setSenderReceiverInfo] = useState<SenderReceiverInfo | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchSenderReceiverInfo = async () => {
+      if (!notification || !open) return;
+
+      setLoading(true);
+      try {
+        let info: SenderReceiverInfo = {
+          senderName: 'النظام',
+          senderType: null,
+          senderLogo: null,
+          receiverName: profile?.full_name || 'المستخدم',
+          receiverType: null,
+          receiverLogo: profile?.avatar_url || null,
+        };
+
+        // Get receiver's organization info
+        if (profile?.organization_id) {
+          const { data: receiverOrg } = await supabase
+            .from('organizations')
+            .select('name, organization_type, logo_url')
+            .eq('id', profile.organization_id)
+            .single();
+
+          if (receiverOrg) {
+            info.receiverName = receiverOrg.name;
+            info.receiverType = receiverOrg.organization_type;
+            info.receiverLogo = receiverOrg.logo_url;
+          }
+        }
+
+        // For shipment-related notifications, get the shipment's transporter as sender
+        if (notification.shipment_id) {
+          const { data: shipment } = await supabase
+            .from('shipments')
+            .select(`
+              generator:organizations!shipments_generator_id_fkey(name, organization_type, logo_url),
+              transporter:organizations!shipments_transporter_id_fkey(name, organization_type, logo_url),
+              recycler:organizations!shipments_recycler_id_fkey(name, organization_type, logo_url)
+            `)
+            .eq('id', notification.shipment_id)
+            .single();
+
+          if (shipment) {
+            // Determine sender based on notification type
+            if (notification.type === 'shipment_created' || notification.type === 'shipment_status') {
+              info.senderName = shipment.transporter?.name || 'جهة ناقلة';
+              info.senderType = 'transporter';
+              info.senderLogo = shipment.transporter?.logo_url || null;
+            } else if (notification.type === 'recycling_report') {
+              info.senderName = shipment.recycler?.name || 'جهة معالجة';
+              info.senderType = 'recycler';
+              info.senderLogo = shipment.recycler?.logo_url || null;
+            } else if (notification.type === 'shipment_assigned') {
+              info.senderName = shipment.transporter?.name || 'جهة ناقلة';
+              info.senderType = 'transporter';
+              info.senderLogo = shipment.transporter?.logo_url || null;
+            }
+          }
+        }
+
+        // For approval requests, get the requester organization
+        if (notification.request_id) {
+          const { data: request } = await supabase
+            .from('approval_requests')
+            .select(`
+              requester_organization:organizations!approval_requests_requester_organization_id_fkey(name, organization_type, logo_url)
+            `)
+            .eq('id', notification.request_id)
+            .single();
+
+          if (request?.requester_organization) {
+            info.senderName = request.requester_organization.name;
+            info.senderType = request.requester_organization.organization_type;
+            info.senderLogo = request.requester_organization.logo_url;
+          }
+        }
+
+        setSenderReceiverInfo(info);
+      } catch (error) {
+        console.error('Error fetching sender/receiver info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSenderReceiverInfo();
+  }, [notification, open, profile]);
+
   if (!notification) return null;
 
   const Icon = getNotificationIcon(notification.type);
@@ -151,6 +273,68 @@ const NotificationDetailDialog = ({
               </Badge>
             )}
           </div>
+
+          {/* Sender and Receiver Info */}
+          {loading ? (
+            <div className="p-4 rounded-lg bg-muted/30 space-y-3">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-4 w-24 mx-auto" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : senderReceiverInfo && (
+            <div className="p-4 rounded-lg bg-muted/30 space-y-3">
+              {/* Sender */}
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={senderReceiverInfo.senderLogo || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    <Building2 className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{senderReceiverInfo.senderName}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>المُرسِل</span>
+                    {senderReceiverInfo.senderType && (
+                      <>
+                        <span>•</span>
+                        <span>{getOrgTypeLabel(senderReceiverInfo.senderType)}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="flex justify-center">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <ArrowLeftRight className="w-4 h-4 text-primary rotate-90" />
+                </div>
+              </div>
+
+              {/* Receiver */}
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-background border">
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={senderReceiverInfo.receiverLogo || undefined} />
+                  <AvatarFallback className="bg-green-500/10 text-green-600">
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{senderReceiverInfo.receiverName}</p>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>المُستلِم</span>
+                    {senderReceiverInfo.receiverType && (
+                      <>
+                        <span>•</span>
+                        <span>{getOrgTypeLabel(senderReceiverInfo.receiverType)}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Title */}
           <div>
