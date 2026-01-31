@@ -84,7 +84,7 @@ const DriverDashboard = () => {
       if (driver) {
         setDriverInfo(driver as unknown as DriverInfo);
 
-        // Fetch driver's shipments
+        // Fetch all driver's shipments (no limit)
         const { data: shipmentsData } = await supabase
           .from('shipments')
           .select(`
@@ -99,8 +99,7 @@ const DriverDashboard = () => {
             delivery_address
           `)
           .eq('driver_id', driver.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
+          .order('created_at', { ascending: false });
 
         if (shipmentsData) {
           setShipments(shipmentsData);
