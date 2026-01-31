@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import {
   Table,
@@ -15,6 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Loader2,
   FileText,
@@ -28,12 +37,19 @@ import {
   FileCheck,
   AlertCircle,
   Recycle,
+  Printer,
+  Download,
+  Eye,
+  FileStack,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
+import AggregateCertificatesPrint from '@/components/reports/AggregateCertificatesPrint';
 
 interface Shipment {
   id: string;
@@ -108,11 +124,15 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 
 const IssueRecyclingCertificates = () => {
   const { organization } = useAuth();
+  const printRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
   const [showCertificateDialog, setShowCertificateDialog] = useState(false);
+  const [showAggregateDialog, setShowAggregateDialog] = useState(false);
+  const [selectedForAggregate, setSelectedForAggregate] = useState<string[]>([]);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -205,6 +225,151 @@ const IssueRecyclingCertificates = () => {
     fetchShipments();
   };
 
+  // Toggle shipment selection for aggregate
+  const toggleShipmentSelection = (shipmentId: string) => {
+    setSelectedForAggregate(prev => 
+      prev.includes(shipmentId)
+        ? prev.filter(id => id !== shipmentId)
+        : [...prev, shipmentId]
+    );
+  };
+
+  // Select all completed shipments
+  const selectAllCompleted = () => {
+    if (selectedForAggregate.length === completedShipments.length) {
+      setSelectedForAggregate([]);
+    } else {
+      setSelectedForAggregate(completedShipments.map(s => s.id));
+    }
+  };
+
+  // Get selected shipments data
+  const selectedShipmentsData = completedShipments.filter(s => selectedForAggregate.includes(s.id));
+
+  // Generate aggregate report number
+  const generateReportNumber = () => {
+    const date = format(new Date(), 'yyyyMMdd');
+    const random = Math.random().toString(36).substr(2, 6).toUpperCase();
+    return `AGC-${date}-${random}`;
+  };
+
+  // Generate PDF blob
+  const generatePdfBlob = async (): Promise<Blob | null> => {
+    if (!printRef.current) return null;
+    
+    try {
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      return pdf.output('blob');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      return null;
+    }
+  };
+
+  // Handle aggregate print
+  const handleAggregatePrint = async () => {
+    if (selectedForAggregate.length === 0) {
+      toast({
+        title: 'خطأ',
+        description: 'يرجى اختيار شحنة واحدة على الأقل',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setShowAggregateDialog(true);
+  };
+
+  // Print aggregate certificate
+  const handlePrintAggregate = async () => {
+    setIsGeneratingPDF(true);
+    try {
+      const pdfBlob = await generatePdfBlob();
+      if (pdfBlob) {
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const printWindow = window.open(blobUrl, '_blank');
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.focus();
+            printWindow.print();
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Error printing:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء الطباعة',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  // Download aggregate PDF
+  const handleDownloadAggregate = async () => {
+    setIsGeneratingPDF(true);
+    try {
+      const pdfBlob = await generatePdfBlob();
+      if (pdfBlob) {
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        const dateStr = new Date().toISOString().split('T')[0];
+        link.href = blobUrl;
+        link.download = `شهادة-تدوير-مجمعة-${dateStr}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        toast({
+          title: 'تم التحميل',
+          description: 'تم تحميل الشهادة المجمعة بنجاح',
+        });
+      }
+    } catch (error) {
+      console.error('Error downloading:', error);
+      toast({
+        title: 'خطأ',
+        description: 'حدث خطأ أثناء التحميل',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -236,7 +401,17 @@ const IssueRecyclingCertificates = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {selectedForAggregate.length > 0 && (
+              <Button 
+                onClick={handleAggregatePrint}
+                className="gap-2"
+                variant="default"
+              >
+                <FileStack className="w-4 h-4" />
+                طباعة {selectedForAggregate.length} شهادة مجمعة
+              </Button>
+            )}
             <Badge variant="outline" className="gap-1">
               <Clock className="w-3 h-3" />
               {pendingShipments.length} بانتظار التقرير
@@ -358,12 +533,30 @@ const IssueRecyclingCertificates = () => {
         {/* Completed Shipments - Already have Certificate */}
         <Card>
           <CardHeader className="text-right">
-            <CardTitle className="flex items-center gap-2 justify-end">
-              <CheckCircle className="w-5 h-5 text-green-500" />
-              شحنات تم إصدار التقرير لها
-            </CardTitle>
-            <CardDescription>
-              الشحنات التي تم إصدار تقرير إعادة التدوير لها
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {completedShipments.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={selectAllCompleted}
+                    className="gap-1"
+                  >
+                    <Checkbox 
+                      checked={selectedForAggregate.length === completedShipments.length && completedShipments.length > 0}
+                      className="ml-1"
+                    />
+                    تحديد الكل
+                  </Button>
+                )}
+              </div>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-500" />
+                شحنات تم إصدار التقرير لها
+              </CardTitle>
+            </div>
+            <CardDescription className="text-right">
+              الشحنات التي تم إصدار تقرير إعادة التدوير لها - حدد الشحنات لطباعة شهادة مجمعة
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -378,6 +571,7 @@ const IssueRecyclingCertificates = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="text-center w-12">تحديد</TableHead>
                       <TableHead className="text-right">رقم الشحنة</TableHead>
                       <TableHead className="text-right">الجهة المولدة</TableHead>
                       <TableHead className="text-right">جهة النقل</TableHead>
@@ -390,7 +584,16 @@ const IssueRecyclingCertificates = () => {
                   </TableHeader>
                   <TableBody>
                     {completedShipments.map((shipment) => (
-                      <TableRow key={shipment.id}>
+                      <TableRow 
+                        key={shipment.id}
+                        className={selectedForAggregate.includes(shipment.id) ? 'bg-primary/5' : ''}
+                      >
+                        <TableCell className="text-center">
+                          <Checkbox
+                            checked={selectedForAggregate.includes(shipment.id)}
+                            onCheckedChange={() => toggleShipmentSelection(shipment.id)}
+                          />
+                        </TableCell>
                         <TableCell className="font-mono text-sm">
                           <Badge variant="outline">{shipment.shipment_number}</Badge>
                         </TableCell>
@@ -482,6 +685,71 @@ const IssueRecyclingCertificates = () => {
           shipment={selectedShipment as any}
         />
       )}
+
+      {/* Aggregate Certificates Dialog */}
+      <Dialog open={showAggregateDialog} onOpenChange={setShowAggregateDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+          <DialogHeader className="p-6 pb-0">
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <FileStack className="w-6 h-6 text-primary" />
+              شهادة إعادة تدوير مجمعة
+            </DialogTitle>
+          </DialogHeader>
+          
+          <ScrollArea className="h-[60vh]">
+            <div ref={printRef} className="bg-white">
+              <AggregateCertificatesPrint
+                shipments={selectedShipmentsData}
+                recyclerOrg={organization ? {
+                  name: organization.name,
+                  stamp_url: organization.stamp_url,
+                  signature_url: organization.signature_url,
+                  commercial_register: organization.commercial_register,
+                  environmental_license: organization.environmental_license,
+                  address: (organization as any).address || '',
+                  city: (organization as any).city || '',
+                } : null}
+                reportNumber={generateReportNumber()}
+                includeStamp={true}
+                includeSignature={true}
+              />
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="p-6 pt-4 border-t flex justify-between gap-2">
+            <Button variant="outline" onClick={() => setShowAggregateDialog(false)}>
+              إغلاق
+            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handlePrintAggregate}
+                disabled={isGeneratingPDF}
+                className="gap-2"
+              >
+                {isGeneratingPDF ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Printer className="w-4 h-4" />
+                )}
+                طباعة الوثيقة
+              </Button>
+              <Button 
+                onClick={handleDownloadAggregate}
+                disabled={isGeneratingPDF}
+                className="gap-2"
+              >
+                {isGeneratingPDF ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                تحميل PDF
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
