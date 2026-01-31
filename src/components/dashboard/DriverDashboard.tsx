@@ -10,8 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Package,
   Truck,
-  MapPin,
-  Eye,
   Mail,
   Phone,
   Settings,
@@ -21,11 +19,10 @@ import {
   Shield,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import CreateShipmentButton from './CreateShipmentButton';
 import DriverLocationTracker from './DriverLocationTracker';
 import DriverSettingsDialog from './DriverSettingsDialog';
+import ShipmentCard from '@/components/shipments/ShipmentCard';
 
 interface DriverInfo {
   id: string;
@@ -49,6 +46,17 @@ interface Shipment {
   created_at: string;
   pickup_address: string;
   delivery_address: string;
+  driver_id: string | null;
+  expected_delivery_date: string | null;
+  approved_at: string | null;
+  collection_started_at: string | null;
+  in_transit_at: string | null;
+  delivered_at: string | null;
+  confirmed_at: string | null;
+  recycler_notes: string | null;
+  generator: { name: string } | null;
+  recycler: { name: string } | null;
+  transporter: { name: string } | null;
 }
 
 const DriverDashboard = () => {
@@ -84,7 +92,7 @@ const DriverDashboard = () => {
       if (driver) {
         setDriverInfo(driver as unknown as DriverInfo);
 
-        // Fetch all driver's shipments (no limit)
+        // Fetch all driver's shipments with full details like transporter dashboard
         const { data: shipmentsData } = await supabase
           .from('shipments')
           .select(`
@@ -96,13 +104,24 @@ const DriverDashboard = () => {
             status,
             created_at,
             pickup_address,
-            delivery_address
+            delivery_address,
+            driver_id,
+            expected_delivery_date,
+            approved_at,
+            collection_started_at,
+            in_transit_at,
+            delivered_at,
+            confirmed_at,
+            recycler_notes,
+            generator:organizations!shipments_generator_id_fkey(name),
+            recycler:organizations!shipments_recycler_id_fkey(name),
+            transporter:organizations!shipments_transporter_id_fkey(name)
           `)
           .eq('driver_id', driver.id)
           .order('created_at', { ascending: false });
 
         if (shipmentsData) {
-          setShipments(shipmentsData);
+          setShipments(shipmentsData as unknown as Shipment[]);
         }
       }
     } catch (error) {
@@ -110,35 +129,6 @@ const DriverDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { label: string; className: string }> = {
-      new: { label: 'جديدة', className: 'bg-blue-100 text-blue-800' },
-      approved: { label: 'معتمدة', className: 'bg-green-100 text-green-800' },
-      collecting: { label: 'قيد الجمع', className: 'bg-yellow-100 text-yellow-800' },
-      in_transit: { label: 'في الطريق', className: 'bg-purple-100 text-purple-800' },
-      delivered: { label: 'تم التسليم', className: 'bg-teal-100 text-teal-800' },
-      confirmed: { label: 'مؤكدة', className: 'bg-emerald-100 text-emerald-800' },
-    };
-    const config = statusConfig[status] || { label: status, className: 'bg-muted text-muted-foreground' };
-    return <Badge className={config.className}>{config.label}</Badge>;
-  };
-
-  const getWasteTypeLabel = (type: string) => {
-    const wasteTypes: Record<string, string> = {
-      plastic: 'بلاستيك',
-      paper: 'ورق',
-      metal: 'معادن',
-      glass: 'زجاج',
-      electronic: 'إلكترونيات',
-      organic: 'عضوية',
-      chemical: 'كيميائية',
-      medical: 'طبية',
-      construction: 'مخلفات بناء',
-      other: 'أخرى',
-    };
-    return wasteTypes[type] || type;
   };
 
   const activeShipments = shipments.filter(s => ['new', 'approved', 'collecting', 'in_transit'].includes(s.status));
@@ -258,7 +248,7 @@ const DriverDashboard = () => {
         </Card>
       </div>
 
-      {/* Shipments Tabs */}
+      {/* Shipments Tabs - Using ShipmentCard like Transporter Dashboard */}
       <Tabs defaultValue="active" className="w-full" dir="rtl">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="active" className="flex items-center gap-2">
@@ -282,42 +272,13 @@ const DriverDashboard = () => {
               </Card>
             ) : (
               activeShipments.map((shipment) => (
-                <motion.div
+                <ShipmentCard
                   key={shipment.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold">#{shipment.shipment_number}</span>
-                            {getStatusBadge(shipment.status)}
-                          </div>
-                          <p className="text-sm">
-                            {getWasteTypeLabel(shipment.waste_type)} - {shipment.quantity} {shipment.unit || 'طن'}
-                          </p>
-                          <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                            <span>من: {shipment.pickup_address}</span>
-                          </div>
-                          <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
-                            <span>إلى: {shipment.delivery_address}</span>
-                          </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                  shipment={shipment}
+                  onStatusChange={fetchDriverData}
+                  showAutoTimer={true}
+                  variant="full"
+                />
               ))
             )}
           </div>
@@ -334,37 +295,13 @@ const DriverDashboard = () => {
               </Card>
             ) : (
               completedShipments.map((shipment) => (
-                <motion.div
+                <ShipmentCard
                   key={shipment.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold">#{shipment.shipment_number}</span>
-                            {getStatusBadge(shipment.status)}
-                          </div>
-                          <p className="text-sm">
-                            {getWasteTypeLabel(shipment.waste_type)} - {shipment.quantity} {shipment.unit || 'طن'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(shipment.created_at), 'PPP', { locale: ar })}
-                          </p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+                  shipment={shipment}
+                  onStatusChange={fetchDriverData}
+                  showAutoTimer={false}
+                  variant="full"
+                />
               ))
             )}
           </div>
