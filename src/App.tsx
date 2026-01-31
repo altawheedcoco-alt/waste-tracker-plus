@@ -49,6 +49,7 @@ import MyLocation from "./pages/dashboard/MyLocation";
 import RecyclingCertificates from "./pages/dashboard/RecyclingCertificates";
 import IssueRecyclingCertificates from "./pages/dashboard/IssueRecyclingCertificates";
 import Settings from "./pages/dashboard/Settings";
+import AboutPlatform from "./pages/dashboard/AboutPlatform";
 import AIChatbot from "./components/ai/AIChatbot";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
@@ -111,6 +112,7 @@ const App = () => (
                 <Route path="/dashboard/recycling-certificates" element={<RecyclingCertificates />} />
                 <Route path="/dashboard/issue-recycling-certificates" element={<IssueRecyclingCertificates />} />
                 <Route path="/dashboard/settings" element={<Settings />} />
+                <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
                 <Route path="/dashboard/*" element={<Dashboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

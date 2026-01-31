@@ -39,6 +39,7 @@ import {
   Newspaper,
   Rss,
   Video,
+  Info,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -231,6 +232,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
+    { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'driver-about' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'driver-settings' },
   ];
 
@@ -284,6 +286,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
+    { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
   ];
 
