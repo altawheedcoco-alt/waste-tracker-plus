@@ -16,12 +16,14 @@ import {
   Clock,
   Loader2,
   Shield,
+  Route,
+  Navigation,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CreateShipmentButton from './CreateShipmentButton';
-import DriverLocationTracker from './DriverLocationTracker';
 import DriverSettingsDialog from './DriverSettingsDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
+import DriverTripTracker from '@/components/driver/DriverTripTracker';
 
 interface DriverInfo {
   id: string;
@@ -167,9 +169,9 @@ const DriverDashboard = () => {
         </div>
       </div>
 
-      {/* Location Tracker - Show only if driver has organization */}
+      {/* Trip Tracker System */}
       {driverInfo?.id && (
-        <DriverLocationTracker driverId={driverInfo.id} autoStart={true} />
+        <DriverTripTracker driverId={driverInfo.id} />
       )}
 
       {/* Profile Card */}
@@ -266,7 +268,7 @@ const DriverDashboard = () => {
 
       {/* Shipments Tabs - Using ShipmentCard like Transporter Dashboard */}
       <Tabs defaultValue="active" className="w-full" dir="rtl">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-lg grid-cols-3">
           <TabsTrigger value="active" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             نشطة ({activeShipments.length})
@@ -274,6 +276,10 @@ const DriverDashboard = () => {
           <TabsTrigger value="completed" className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4" />
             مكتملة ({completedShipments.length})
+          </TabsTrigger>
+          <TabsTrigger value="tracking" className="flex items-center gap-2">
+            <Route className="h-4 w-4" />
+            التتبع
           </TabsTrigger>
         </TabsList>
 
@@ -321,6 +327,12 @@ const DriverDashboard = () => {
               ))
             )}
           </div>
+        </TabsContent>
+
+        <TabsContent value="tracking" className="mt-4">
+          {driverInfo?.id && (
+            <DriverTripTracker driverId={driverInfo.id} />
+          )}
         </TabsContent>
       </Tabs>
 
