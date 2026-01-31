@@ -192,7 +192,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     </svg>
   );
 
-  const menuItems = [
+  // Driver-specific menu items (simplified)
+  const driverMenuItems = [
+    { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard' },
+    { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments' },
+    { icon: MapPin, label: 'موقعي', path: '/dashboard/driver-tracking' },
+    { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests' },
+    { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat' },
+    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications' },
+    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
+  ];
+
+  // Full menu items for organizations and admins
+  const fullMenuItems = [
     { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard' },
     { icon: Building2, label: 'ملف الجهة', path: '/dashboard/organization-profile' },
     { icon: Newspaper, label: 'المنشورات', path: '/dashboard/organization-profile?tab=posts' },
@@ -233,6 +245,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
   ];
+
+  // Use driver menu if user is a driver (not admin)
+  const menuItems = isDriver && !isAdmin ? driverMenuItems : fullMenuItems;
 
   // Filter menu items based on search
   const filteredMenuItems = useMemo(() => {
@@ -325,7 +340,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   label={item.label}
                   path={item.path}
                   isCollapsed={!isSidebarOpen}
-                  badge={'badge' in item ? item.badge : undefined}
+                  badge={'badge' in item ? (item.badge as number) : undefined}
                 />
               ))
             ) : (
@@ -522,7 +537,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                           label={item.label}
                           path={item.path}
                           isCollapsed={false}
-                          badge={'badge' in item ? item.badge : undefined}
+                          badge={'badge' in item ? (item.badge as number) : undefined}
                         />
                       </div>
                     ))
