@@ -120,7 +120,7 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     manual_vehicle_plate: prefilledVehiclePlate,
     packaging_method: '',
     hazard_level: '',
-    waste_state: 'solid' as 'solid' | 'liquid' | 'semi_solid' | 'gas',
+    waste_state: 'solid',
   });
 
   const [suggestingWasteState, setSuggestingWasteState] = useState(false);
@@ -404,7 +404,9 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
         manual_transporter_name: manualTransporterName,
         packaging_method: formData.packaging_method || null,
         hazard_level: formData.hazard_level || null,
-        waste_state: formData.waste_state || 'solid',
+        waste_state: formData.waste_state?.startsWith('manual:') 
+          ? formData.waste_state.replace('manual:', '') 
+          : (formData.waste_state || 'solid'),
       }).select().single();
 
       if (error) throw error;
@@ -624,42 +626,21 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
                 </span>
               )}
             </Label>
-            <Select 
-              value={formData.waste_state} 
-              onValueChange={(v) => setFormData(prev => ({ ...prev, waste_state: v as 'solid' | 'liquid' | 'semi_solid' | 'gas' }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر حالة المخلف" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="solid">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🧱</span>
-                    <span>صلبة</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="liquid">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">💧</span>
-                    <span>سائلة</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="semi_solid">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🫗</span>
-                    <span>شبه صلبة</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="gas">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">💨</span>
-                    <span>غازية</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <ComboboxWithInput
+              options={[
+                { value: 'solid', label: '🧱 صلبة' },
+                { value: 'liquid', label: '💧 سائلة' },
+                { value: 'semi_solid', label: '🫗 شبه صلبة' },
+                { value: 'gas', label: '💨 غازية' },
+              ]}
+              value={formData.waste_state}
+              onValueChange={(v) => setFormData(prev => ({ ...prev, waste_state: v }))}
+              placeholder="اختر أو أدخل حالة المخلف"
+              searchPlaceholder="ابحث أو أدخل حالة جديدة..."
+              emptyMessage="لا توجد نتائج"
+            />
             <p className="text-xs text-muted-foreground mt-1">
-              يتم اقتراح الحالة تلقائياً بالذكاء الاصطناعي عند اختيار نوع النفايات
+              يمكنك اختيار حالة من القائمة أو إدخال حالة جديدة يدوياً
             </p>
           </div>
           <div>
