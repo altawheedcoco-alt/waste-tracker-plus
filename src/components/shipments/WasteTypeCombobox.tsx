@@ -416,11 +416,18 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
 
   const selectedItem = allWasteItems.find(item => item.value === value);
 
+  // Valid waste types according to database enum
+  const validWasteTypes: WasteType[] = ['plastic', 'paper', 'metal', 'glass', 'electronic', 'organic', 'chemical', 'medical', 'construction', 'other'];
+
   const handleSelect = (selectedValue: string) => {
     const item = allWasteItems.find(i => i.value === selectedValue);
     if (item) {
-      const [wasteType] = selectedValue.split(':');
-      const hazardLevel = getHazardLevelFromWasteType(wasteType as WasteType);
+      const [rawWasteType] = selectedValue.split(':');
+      // Ensure waste type is valid, fallback to 'other' for custom types with invalid parentCategory
+      const wasteType = validWasteTypes.includes(rawWasteType as WasteType) 
+        ? rawWasteType as WasteType 
+        : 'other';
+      const hazardLevel = getHazardLevelFromWasteType(wasteType);
       const wasteLabel = `${item.code} - ${item.label}`;
       onChange(wasteType, hazardLevel, wasteLabel);
     }
