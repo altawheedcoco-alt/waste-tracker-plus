@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,10 +25,12 @@ import {
   Download,
   Printer,
   Eye,
+  Volume2,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
 import NotificationDetailDialog from '@/components/notifications/NotificationDetailDialog';
+import { previewNotificationSound, isNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 
 const getNotificationIcon = (type: string | null) => {
   switch (type) {
@@ -155,6 +157,15 @@ const Notifications = () => {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  useEffect(() => {
+    setSoundEnabled(isNotificationSoundEnabled());
+  }, []);
+
+  const handleTestSound = async () => {
+    await previewNotificationSound('default');
+  };
 
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id);
@@ -229,12 +240,18 @@ const Notifications = () => {
               جميع الإشعارات والتنبيهات الخاصة بك
             </p>
           </div>
-          {unreadCount > 0 && (
-            <Button onClick={markAllAsRead} variant="outline" className="gap-2">
-              <CheckCheck className="w-4 h-4" />
-              تحديد الكل كمقروء ({unreadCount})
+          <div className="flex gap-2">
+            <Button onClick={handleTestSound} variant="outline" size="sm" className="gap-2">
+              <Volume2 className="w-4 h-4" />
+              اختبار الصوت
             </Button>
-          )}
+            {unreadCount > 0 && (
+              <Button onClick={markAllAsRead} variant="outline" className="gap-2">
+                <CheckCheck className="w-4 h-4" />
+                تحديد الكل كمقروء ({unreadCount})
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Category Cards */}
