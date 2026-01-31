@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import {
   Table,
@@ -20,8 +21,21 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import {
   Loader2,
   FileCheck,
@@ -29,16 +43,30 @@ import {
   Eye,
   Download,
   Recycle,
-  Package,
   Building2,
   Calendar,
   Printer,
   Filter,
+  MoreHorizontal,
+  FileText,
+  ChevronDown,
+  AlertTriangle,
+  Leaf,
+  Biohazard,
+  RefreshCw,
+  Share2,
+  Truck,
+  Package,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
+import RecyclingCertificatePrint from '@/components/reports/RecyclingCertificatePrint';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { QRCodeSVG } from 'qrcode.react';
+import Barcode from 'react-barcode';
 
 interface RecyclingReport {
   id: string;
@@ -48,6 +76,7 @@ interface RecyclingReport {
   opening_declaration: string | null;
   closing_declaration: string | null;
   custom_notes: string | null;
+  pdf_url: string | null;
   created_at: string;
   shipment: {
     id: string;
@@ -59,9 +88,40 @@ interface RecyclingReport {
     delivery_address: string;
     delivered_at: string | null;
     confirmed_at: string | null;
-    generator: { name: string } | null;
-    transporter: { name: string } | null;
-    recycler: { name: string } | null;
+    waste_description?: string;
+    disposal_method?: string;
+    generator: { 
+      name: string;
+      email?: string;
+      phone?: string;
+      address?: string;
+      city?: string;
+      commercial_register?: string;
+      environmental_license?: string;
+      representative_name?: string | null;
+    } | null;
+    transporter: { 
+      name: string;
+      email?: string;
+      phone?: string;
+      address?: string;
+      city?: string;
+      commercial_register?: string;
+      environmental_license?: string;
+      representative_name?: string | null;
+    } | null;
+    recycler: { 
+      name: string;
+      email?: string;
+      phone?: string;
+      address?: string;
+      city?: string;
+      commercial_register?: string;
+      environmental_license?: string;
+      representative_name?: string | null;
+      stamp_url?: string | null;
+      signature_url?: string | null;
+    } | null;
   } | null;
   recycler_organization: {
     id: string;
@@ -69,13 +129,21 @@ interface RecyclingReport {
     logo_url: string | null;
     stamp_url: string | null;
     signature_url: string | null;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    commercial_register?: string;
+    environmental_license?: string;
+    representative_name?: string | null;
   } | null;
 }
 
-const wasteCategoryLabels: Record<string, string> = {
-  hazardous: 'خطرة',
-  non_hazardous: 'غير خطرة',
-  all: 'الكل',
+const wasteCategoryLabels: Record<string, { label: string; icon: any; color: string }> = {
+  hazardous: { label: 'خطرة', icon: AlertTriangle, color: 'bg-red-100 text-red-800' },
+  non_hazardous: { label: 'غير خطرة', icon: Leaf, color: 'bg-green-100 text-green-800' },
+  medical_hazardous: { label: 'طبية خطرة', icon: Biohazard, color: 'bg-purple-100 text-purple-800' },
+  all: { label: 'الكل', icon: Recycle, color: 'bg-blue-100 text-blue-800' },
 };
 
 const wasteTypeLabels: Record<string, string> = {
@@ -97,10 +165,17 @@ const RecyclingCertificates = () => {
   const [reports, setReports] = useState<RecyclingReport[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedReport, setSelectedReport] = useState<RecyclingReport | null>(null);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [wasteTypeFilter, setWasteTypeFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
+  const [isExporting, setIsExporting] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const isAdmin = roles.includes('admin');
   const isTransporter = organization?.organization_type === 'transporter';
+  const isGenerator = organization?.organization_type === 'generator';
 
   useEffect(() => {
     fetchRecyclingReports();
@@ -119,6 +194,7 @@ const RecyclingCertificates = () => {
           opening_declaration,
           closing_declaration,
           custom_notes,
+          pdf_url,
           created_at,
           shipment:shipments!recycling_reports_shipment_id_fkey(
             id,
@@ -130,23 +206,31 @@ const RecyclingCertificates = () => {
             delivery_address,
             delivered_at,
             confirmed_at,
-            generator:organizations!shipments_generator_id_fkey(name),
-            transporter:organizations!shipments_transporter_id_fkey(name),
-            recycler:organizations!shipments_recycler_id_fkey(name)
+            waste_description,
+            disposal_method,
+            generator:organizations!shipments_generator_id_fkey(name, email, phone, address, city, commercial_register, environmental_license, representative_name),
+            transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, commercial_register, environmental_license, representative_name),
+            recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, commercial_register, environmental_license, representative_name, stamp_url, signature_url)
           ),
           recycler_organization:organizations!recycling_reports_recycler_organization_id_fkey(
             id,
             name,
             logo_url,
             stamp_url,
-            signature_url
+            signature_url,
+            email,
+            phone,
+            address,
+            city,
+            commercial_register,
+            environmental_license,
+            representative_name
           )
         `)
         .order('created_at', { ascending: false });
 
-      // For transporter, filter by shipments where they are the transporter
+      // Filter based on user role
       if (isTransporter && organization?.id) {
-        // First get shipment IDs where this org is the transporter
         const { data: transporterShipments } = await supabase
           .from('shipments')
           .select('id')
@@ -156,7 +240,20 @@ const RecyclingCertificates = () => {
           const shipmentIds = transporterShipments.map(s => s.id);
           query = query.in('shipment_id', shipmentIds);
         } else {
-          // No shipments for this transporter
+          setReports([]);
+          setLoading(false);
+          return;
+        }
+      } else if (isGenerator && organization?.id) {
+        const { data: generatorShipments } = await supabase
+          .from('shipments')
+          .select('id')
+          .eq('generator_id', organization.id);
+
+        if (generatorShipments && generatorShipments.length > 0) {
+          const shipmentIds = generatorShipments.map(s => s.id);
+          query = query.in('shipment_id', shipmentIds);
+        } else {
           setReports([]);
           setLoading(false);
           return;
@@ -180,19 +277,133 @@ const RecyclingCertificates = () => {
     }
   };
 
-  const filteredReports = reports.filter(report => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      report.report_number.toLowerCase().includes(searchLower) ||
-      report.shipment?.shipment_number.toLowerCase().includes(searchLower) ||
-      report.recycler_organization?.name.toLowerCase().includes(searchLower) ||
-      report.shipment?.generator?.name?.toLowerCase().includes(searchLower)
-    );
-  });
+  // Filtered reports based on all filters
+  const filteredReports = useMemo(() => {
+    return reports.filter(report => {
+      // Text search
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch = !searchQuery || 
+        report.report_number.toLowerCase().includes(searchLower) ||
+        report.shipment?.shipment_number.toLowerCase().includes(searchLower) ||
+        report.recycler_organization?.name.toLowerCase().includes(searchLower) ||
+        report.shipment?.generator?.name?.toLowerCase().includes(searchLower) ||
+        report.shipment?.transporter?.name?.toLowerCase().includes(searchLower);
+
+      // Category filter
+      const matchesCategory = categoryFilter === 'all' || report.waste_category === categoryFilter;
+
+      // Waste type filter
+      const matchesWasteType = wasteTypeFilter === 'all' || report.shipment?.waste_type === wasteTypeFilter;
+
+      // Date filter
+      let matchesDate = true;
+      if (dateFilter !== 'all') {
+        const reportDate = new Date(report.created_at);
+        const now = new Date();
+        const diffDays = Math.floor((now.getTime() - reportDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (dateFilter === 'week') matchesDate = diffDays <= 7;
+        else if (dateFilter === 'month') matchesDate = diffDays <= 30;
+        else if (dateFilter === 'quarter') matchesDate = diffDays <= 90;
+        else if (dateFilter === 'year') matchesDate = diffDays <= 365;
+      }
+
+      return matchesSearch && matchesCategory && matchesWasteType && matchesDate;
+    });
+  }, [reports, searchQuery, categoryFilter, wasteTypeFilter, dateFilter]);
+
+  // Stats for filtered results
+  const totalQuantity = useMemo(() => {
+    return filteredReports.reduce((sum, r) => sum + (r.shipment?.quantity || 0), 0);
+  }, [filteredReports]);
+
+  const handlePreview = (report: RecyclingReport) => {
+    setSelectedReport(report);
+    setShowPreviewDialog(true);
+  };
+
+  const handleDownloadPDF = async (report: RecyclingReport) => {
+    // If PDF URL exists, download directly
+    if (report.pdf_url) {
+      const link = document.createElement('a');
+      link.href = report.pdf_url;
+      link.download = `شهادة-اعادة-تدوير-${report.report_number}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    // Otherwise generate PDF
+    setSelectedReport(report);
+    setIsExporting(true);
+
+    // Wait for render
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    try {
+      if (!printRef.current) {
+        toast({ title: 'خطأ', description: 'لا يمكن إنشاء ملف PDF', variant: 'destructive' });
+        return;
+      }
+
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save(`شهادة-اعادة-تدوير-${report.report_number}.pdf`);
+      toast({ title: 'تم التحميل', description: 'تم تحميل ملف PDF بنجاح' });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({ title: 'خطأ', description: 'فشل في إنشاء ملف PDF', variant: 'destructive' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handlePrint = (report: RecyclingReport) => {
     setSelectedReport(report);
+    setTimeout(() => window.print(), 300);
   };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setCategoryFilter('all');
+    setWasteTypeFilter('all');
+    setDateFilter('all');
+  };
+
+  const hasActiveFilters = searchQuery || categoryFilter !== 'all' || wasteTypeFilter !== 'all' || dateFilter !== 'all';
 
   if (loading) {
     return (
@@ -228,7 +439,11 @@ const RecyclingCertificates = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={fetchRecyclingReports}>
+              <RefreshCw className="w-4 h-4 ml-1" />
+              تحديث
+            </Button>
             <Badge variant="outline" className="gap-1">
               <Recycle className="w-3 h-3" />
               {reports.length} شهادة
@@ -236,17 +451,99 @@ const RecyclingCertificates = () => {
           </div>
         </div>
 
-        {/* Search */}
+        {/* Search and Filters */}
         <Card>
           <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="البحث برقم التقرير أو رقم الشحنة أو اسم الجهة..."
-                className="pr-10"
-              />
+            <div className="space-y-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="البحث برقم التقرير أو رقم الشحنة أو اسم الجهة..."
+                  className="pr-10"
+                />
+              </div>
+
+              {/* Filters Row */}
+              <div className="flex flex-wrap gap-3 items-end">
+                {/* Category Filter */}
+                <div className="flex-1 min-w-[150px]">
+                  <Label className="text-xs text-muted-foreground mb-1 block">التصنيف</Label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="جميع التصنيفات" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع التصنيفات</SelectItem>
+                      <SelectItem value="hazardous">مخلفات خطرة</SelectItem>
+                      <SelectItem value="non_hazardous">مخلفات غير خطرة</SelectItem>
+                      <SelectItem value="medical_hazardous">مخلفات طبية خطرة</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Waste Type Filter */}
+                <div className="flex-1 min-w-[150px]">
+                  <Label className="text-xs text-muted-foreground mb-1 block">نوع المخلفات</Label>
+                  <Select value={wasteTypeFilter} onValueChange={setWasteTypeFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="جميع الأنواع" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الأنواع</SelectItem>
+                      {Object.entries(wasteTypeLabels).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>{label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date Filter */}
+                <div className="flex-1 min-w-[150px]">
+                  <Label className="text-xs text-muted-foreground mb-1 block">الفترة الزمنية</Label>
+                  <Select value={dateFilter} onValueChange={setDateFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="جميع الفترات" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الفترات</SelectItem>
+                      <SelectItem value="week">آخر أسبوع</SelectItem>
+                      <SelectItem value="month">آخر شهر</SelectItem>
+                      <SelectItem value="quarter">آخر 3 أشهر</SelectItem>
+                      <SelectItem value="year">آخر سنة</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Clear Filters */}
+                {hasActiveFilters && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters}>
+                    <Filter className="w-4 h-4 ml-1" />
+                    مسح الفلاتر
+                  </Button>
+                )}
+              </div>
+
+              {/* Results Counter */}
+              {(hasActiveFilters || filteredReports.length !== reports.length) && (
+                <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="gap-1">
+                      <FileText className="w-3 h-3" />
+                      {filteredReports.length} شهادة مطابقة
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">من أصل {reports.length}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="gap-1">
+                      <Package className="w-3 h-3" />
+                      {totalQuantity.toLocaleString()} كجم إجمالي
+                    </Badge>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -266,10 +563,20 @@ const RecyclingCertificates = () => {
             {filteredReports.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Recycle className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">لا توجد تقارير حتى الآن</p>
-                <p className="text-sm mt-2">
-                  ستظهر هنا تقارير إعادة التدوير عندما تصدرها جهات التدوير
+                <p className="text-lg font-medium">
+                  {hasActiveFilters ? 'لا توجد نتائج مطابقة' : 'لا توجد تقارير حتى الآن'}
                 </p>
+                <p className="text-sm mt-2">
+                  {hasActiveFilters 
+                    ? 'جرب تغيير معايير البحث أو الفلاتر'
+                    : 'ستظهر هنا تقارير إعادة التدوير عندما تصدرها جهات التدوير'
+                  }
+                </p>
+                {hasActiveFilters && (
+                  <Button variant="outline" size="sm" onClick={clearFilters} className="mt-4">
+                    مسح الفلاتر
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -280,178 +587,130 @@ const RecyclingCertificates = () => {
                       <TableHead className="text-right">رقم الشحنة</TableHead>
                       <TableHead className="text-right">جهة التدوير</TableHead>
                       <TableHead className="text-right">الجهة المولدة</TableHead>
-                      <TableHead className="text-right">نوع المخلفات</TableHead>
+                      <TableHead className="text-right">جهة النقل</TableHead>
+                      <TableHead className="text-right">الكمية</TableHead>
                       <TableHead className="text-right">التصنيف</TableHead>
                       <TableHead className="text-right">التاريخ</TableHead>
                       <TableHead className="text-right">الإجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredReports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell className="font-mono text-sm">
-                          {report.report_number}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="font-mono">
-                            {report.shipment?.shipment_number || '-'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Recycle className="w-4 h-4 text-green-500" />
-                            {report.recycler_organization?.name || '-'}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Building2 className="w-4 h-4 text-blue-500" />
-                            {report.shipment?.generator?.name || '-'}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {wasteTypeLabels[report.shipment?.waste_type || ''] || report.shipment?.waste_type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={report.waste_category === 'hazardous' ? 'destructive' : 'default'}
-                          >
-                            {wasteCategoryLabels[report.waste_category] || report.waste_category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Calendar className="w-3 h-3" />
-                            {format(new Date(report.created_at), 'dd/MM/yyyy', { locale: ar })}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => setSelectedReport(report)}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                                <DialogHeader>
-                                  <DialogTitle className="text-right">
-                                    شهادة إعادة التدوير - {report.report_number}
-                                  </DialogTitle>
-                                </DialogHeader>
-                                {selectedReport && (
-                                  <div className="p-6 bg-white text-black" dir="rtl">
-                                    <div className="text-center mb-6 border-b pb-4">
-                                      <h2 className="text-2xl font-bold text-emerald-700">شهادة إعادة التدوير</h2>
-                                      <p className="text-sm text-gray-600 mt-1">رقم التقرير: {selectedReport.report_number}</p>
-                                    </div>
-                                    
-                                    <div className="space-y-4">
-                                      <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div>
-                                          <span className="font-semibold">رقم الشحنة:</span>
-                                          <span className="mr-2">{selectedReport.shipment?.shipment_number}</span>
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">التصنيف:</span>
-                                          <span className="mr-2">{wasteCategoryLabels[selectedReport.waste_category]}</span>
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">الكمية:</span>
-                                          <span className="mr-2">{selectedReport.shipment?.quantity} {selectedReport.shipment?.unit}</span>
-                                        </div>
-                                        <div>
-                                          <span className="font-semibold">نوع المخلفات:</span>
-                                          <span className="mr-2">{wasteTypeLabels[selectedReport.shipment?.waste_type || '']}</span>
-                                        </div>
-                                      </div>
-                                      
-                                      <div className="border-t pt-4">
-                                        <h3 className="font-semibold mb-2">الأطراف</h3>
-                                        <div className="grid grid-cols-3 gap-4 text-sm">
-                                          <div>
-                                            <p className="text-gray-600">الجهة المولدة</p>
-                                            <p className="font-medium">{selectedReport.shipment?.generator?.name}</p>
-                                          </div>
-                                          <div>
-                                            <p className="text-gray-600">جهة النقل</p>
-                                            <p className="font-medium">{selectedReport.shipment?.transporter?.name}</p>
-                                          </div>
-                                          <div>
-                                            <p className="text-gray-600">جهة التدوير</p>
-                                            <p className="font-medium">{selectedReport.recycler_organization?.name}</p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      
-                                      {selectedReport.opening_declaration && (
-                                        <div className="border-t pt-4">
-                                          <h3 className="font-semibold mb-2">الإقرار الافتتاحي</h3>
-                                          <p className="text-sm">{selectedReport.opening_declaration}</p>
-                                        </div>
-                                      )}
-                                      
-                                      {selectedReport.processing_details && (
-                                        <div className="border-t pt-4">
-                                          <h3 className="font-semibold mb-2">تفاصيل المعالجة</h3>
-                                          <p className="text-sm">{selectedReport.processing_details}</p>
-                                        </div>
-                                      )}
-                                      
-                                      {selectedReport.closing_declaration && (
-                                        <div className="border-t pt-4">
-                                          <h3 className="font-semibold mb-2">الإقرار الختامي</h3>
-                                          <p className="text-sm">{selectedReport.closing_declaration}</p>
-                                        </div>
-                                      )}
-                                      
-                                      {selectedReport.custom_notes && (
-                                        <div className="border-t pt-4">
-                                          <h3 className="font-semibold mb-2">ملاحظات</h3>
-                                          <p className="text-sm">{selectedReport.custom_notes}</p>
-                                        </div>
-                                      )}
-                                      
-                                      <div className="border-t pt-4 flex justify-between items-end">
-                                        <div>
-                                          <p className="text-xs text-gray-500">تاريخ الإصدار</p>
-                                          <p className="text-sm">{format(new Date(selectedReport.created_at), 'dd/MM/yyyy', { locale: ar })}</p>
-                                        </div>
-                                        <div className="text-center">
-                                          {selectedReport.recycler_organization?.stamp_url && (
-                                            <img src={selectedReport.recycler_organization.stamp_url} alt="الختم" className="h-16 mx-auto" />
-                                          )}
-                                          {selectedReport.recycler_organization?.signature_url && (
-                                            <img src={selectedReport.recycler_organization.signature_url} alt="التوقيع" className="h-12 mx-auto mt-2" />
-                                          )}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
+                    {filteredReports.map((report) => {
+                      const CategoryIcon = wasteCategoryLabels[report.waste_category]?.icon || Recycle;
+                      return (
+                        <TableRow key={report.id}>
+                          <TableCell className="font-mono text-sm">
+                            <Badge variant="outline">{report.report_number}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="font-mono">
+                              {report.shipment?.shipment_number || '-'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Recycle className="w-4 h-4 text-green-500" />
+                              <span className="font-medium">{report.recycler_organization?.name || '-'}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Building2 className="w-4 h-4 text-blue-500" />
+                              {report.shipment?.generator?.name || '-'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Truck className="w-4 h-4 text-amber-500" />
+                              {report.shipment?.transporter?.name || '-'}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-semibold">
+                              {report.shipment?.quantity} {report.shipment?.unit || 'كجم'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={wasteCategoryLabels[report.waste_category]?.color}>
+                              <CategoryIcon className="w-3 h-3 ml-1" />
+                              {wasteCategoryLabels[report.waste_category]?.label || report.waste_category}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                              <Calendar className="w-3 h-3" />
+                              {format(new Date(report.created_at), 'dd/MM/yyyy', { locale: ar })}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {/* Quick Actions */}
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handlePreview(report)}
+                                title="معاينة"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleDownloadPDF(report)}
+                                disabled={isExporting}
+                                title="تحميل PDF"
+                              >
+                                {isExporting && selectedReport?.id === report.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Download className="w-4 h-4" />
                                 )}
-                              </DialogContent>
-                            </Dialog>
-                            
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => {
-                                setSelectedReport(report);
-                                setTimeout(() => window.print(), 100);
-                              }}
-                            >
-                              <Printer className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handlePrint(report)}
+                                title="طباعة"
+                              >
+                                <Printer className="w-4 h-4" />
+                              </Button>
+
+                              {/* More Actions */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="w-4 h-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handlePreview(report)}>
+                                    <Eye className="w-4 h-4 ml-2" />
+                                    معاينة الشهادة
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDownloadPDF(report)}>
+                                    <Download className="w-4 h-4 ml-2" />
+                                    تحميل PDF
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handlePrint(report)}>
+                                    <Printer className="w-4 h-4 ml-2" />
+                                    طباعة
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  {report.pdf_url && (
+                                    <DropdownMenuItem asChild>
+                                      <a href={report.pdf_url} target="_blank" rel="noopener noreferrer">
+                                        <Share2 className="w-4 h-4 ml-2" />
+                                        فتح الرابط المباشر
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -460,7 +719,7 @@ const RecyclingCertificates = () => {
         </Card>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card>
             <CardContent className="p-4 text-center">
               <div className="text-3xl font-bold text-primary">{reports.length}</div>
@@ -485,6 +744,14 @@ const RecyclingCertificates = () => {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
+              <div className="text-3xl font-bold text-purple-500">
+                {reports.filter(r => r.waste_category === 'medical_hazardous').length}
+              </div>
+              <p className="text-sm text-muted-foreground">مخلفات طبية</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
               <div className="text-3xl font-bold text-blue-500">
                 {new Set(reports.map(r => r.recycler_organization?.id)).size}
               </div>
@@ -493,6 +760,104 @@ const RecyclingCertificates = () => {
           </Card>
         </div>
       </motion.div>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <FileCheck className="w-5 h-5 text-primary" />
+                شهادة إعادة التدوير - {selectedReport?.report_number}
+              </span>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => selectedReport && handleDownloadPDF(selectedReport)}
+                  disabled={isExporting}
+                >
+                  {isExporting ? (
+                    <Loader2 className="w-4 h-4 ml-1 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4 ml-1" />
+                  )}
+                  تحميل PDF
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => selectedReport && handlePrint(selectedReport)}
+                >
+                  <Printer className="w-4 h-4 ml-1" />
+                  طباعة
+                </Button>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedReport && selectedReport.shipment && (
+            <div ref={printRef}>
+              <RecyclingCertificatePrint
+                shipment={{
+                  id: selectedReport.shipment.id,
+                  shipment_number: selectedReport.shipment.shipment_number,
+                  waste_type: selectedReport.shipment.waste_type,
+                  quantity: selectedReport.shipment.quantity,
+                  unit: selectedReport.shipment.unit,
+                  waste_description: selectedReport.shipment.waste_description,
+                  disposal_method: selectedReport.shipment.disposal_method,
+                  pickup_address: selectedReport.shipment.pickup_address,
+                  delivery_address: selectedReport.shipment.delivery_address,
+                  delivered_at: selectedReport.shipment.delivered_at,
+                  confirmed_at: selectedReport.shipment.confirmed_at,
+                  generator: selectedReport.shipment.generator,
+                  transporter: selectedReport.shipment.transporter,
+                  recycler: selectedReport.shipment.recycler,
+                }}
+                template="standard"
+                customNotes={selectedReport.custom_notes || ''}
+                processingDetails={selectedReport.processing_details || ''}
+                openingDeclaration={selectedReport.opening_declaration || undefined}
+                closingDeclaration={selectedReport.closing_declaration || undefined}
+                recyclerOrg={selectedReport.recycler_organization}
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Hidden print element for PDF generation outside dialog */}
+      {selectedReport && selectedReport.shipment && !showPreviewDialog && (
+        <div className="hidden print:block">
+          <div ref={printRef}>
+            <RecyclingCertificatePrint
+              shipment={{
+                id: selectedReport.shipment.id,
+                shipment_number: selectedReport.shipment.shipment_number,
+                waste_type: selectedReport.shipment.waste_type,
+                quantity: selectedReport.shipment.quantity,
+                unit: selectedReport.shipment.unit,
+                waste_description: selectedReport.shipment.waste_description,
+                disposal_method: selectedReport.shipment.disposal_method,
+                pickup_address: selectedReport.shipment.pickup_address,
+                delivery_address: selectedReport.shipment.delivery_address,
+                delivered_at: selectedReport.shipment.delivered_at,
+                confirmed_at: selectedReport.shipment.confirmed_at,
+                generator: selectedReport.shipment.generator,
+                transporter: selectedReport.shipment.transporter,
+                recycler: selectedReport.shipment.recycler,
+              }}
+              template="standard"
+              customNotes={selectedReport.custom_notes || ''}
+              processingDetails={selectedReport.processing_details || ''}
+              openingDeclaration={selectedReport.opening_declaration || undefined}
+              closingDeclaration={selectedReport.closing_declaration || undefined}
+              recyclerOrg={selectedReport.recycler_organization}
+            />
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 };
