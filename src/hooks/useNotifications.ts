@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useNotificationSound } from '@/hooks/useNotificationSound';
+import { playNotificationSound } from '@/hooks/useNotificationSound';
 
 interface Notification {
   id: string;
@@ -20,9 +20,8 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const { playNotificationSound } = useNotificationSound();
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
@@ -157,7 +156,7 @@ export const useNotifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchNotifications, toast, playNotificationSound]);
+  }, [user, fetchNotifications, toast]);
 
   return {
     notifications,
