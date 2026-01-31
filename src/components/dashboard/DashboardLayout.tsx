@@ -216,6 +216,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           { icon: Users, label: 'السائقين', path: '/dashboard/transporter-drivers' },
           { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking' },
           { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials' },
+          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates' },
         ]
       : [{ icon: Package, label: 'الشحنات', path: '/dashboard/shipments' }]),
     // Add team credentials for all organization types with employees
@@ -229,6 +230,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents' },
           { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking' },
           { icon: Truck, label: 'خريطة السائقين', path: '/dashboard/admin-drivers-map' },
+          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates' },
           { icon: Video, label: 'إنشاء فيديوهات ترويجية', path: '/dashboard/video-generator' },
         ]
       : []),
