@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +18,7 @@ import EnhancedLocationPicker from '@/components/shipments/EnhancedLocationPicke
 import RouteEstimation from '@/components/shipments/RouteEstimation';
 import { useAutoChat } from '@/hooks/useAutoChat';
 import WasteTypeCombobox, { isHazardousWasteType, getHazardLevelFromWasteType } from '@/components/shipments/WasteTypeCombobox';
+import { ComboboxWithInput, type ComboboxOption } from '@/components/ui/combobox-with-input';
 import type { Database } from '@/integrations/supabase/types';
 
 type WasteType = Database['public']['Enums']['waste_type'];
@@ -239,22 +240,60 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     }
   }, [formData.transporter_id, isAdmin]);
 
-  const handleGeneratorChange = (generatorId: string) => {
-    const generator = generators.find(g => g.id === generatorId);
-    setFormData(prev => ({
-      ...prev,
-      generator_id: generatorId,
-      pickup_address: generator ? `${generator.address}, ${generator.city}` : '',
-    }));
+  // Convert organizations to combobox options
+  const generatorOptions: ComboboxOption[] = useMemo(() => 
+    generators.map(g => ({ value: g.id, label: g.name, sublabel: g.city })),
+    [generators]
+  );
+
+  const recyclerOptions: ComboboxOption[] = useMemo(() => 
+    recyclers.map(r => ({ value: r.id, label: r.name, sublabel: r.city })),
+    [recyclers]
+  );
+
+  const transporterOptions: ComboboxOption[] = useMemo(() => 
+    transporters.map(t => ({ value: t.id, label: t.name, sublabel: t.city })),
+    [transporters]
+  );
+
+  const handleGeneratorChange = (value: string) => {
+    // Check if it's a manual entry or selection
+    if (value.startsWith('manual:')) {
+      setFormData(prev => ({
+        ...prev,
+        generator_id: value,
+        pickup_address: '',
+      }));
+    } else {
+      const generator = generators.find(g => g.id === value);
+      setFormData(prev => ({
+        ...prev,
+        generator_id: value,
+        pickup_address: generator ? `${generator.address}, ${generator.city}` : '',
+      }));
+    }
   };
 
-  const handleRecyclerChange = (recyclerId: string) => {
-    const recycler = recyclers.find(r => r.id === recyclerId);
-    setFormData(prev => ({
-      ...prev,
-      recycler_id: recyclerId,
-      delivery_address: recycler ? `${recycler.address}, ${recycler.city}` : '',
-    }));
+  const handleRecyclerChange = (value: string) => {
+    // Check if it's a manual entry or selection
+    if (value.startsWith('manual:')) {
+      setFormData(prev => ({
+        ...prev,
+        recycler_id: value,
+        delivery_address: '',
+      }));
+    } else {
+      const recycler = recyclers.find(r => r.id === value);
+      setFormData(prev => ({
+        ...prev,
+        recycler_id: value,
+        delivery_address: recycler ? `${recycler.address}, ${recycler.city}` : '',
+      }));
+    }
+  };
+
+  const handleTransporterChange = (value: string) => {
+    setFormData(prev => ({ ...prev, transporter_id: value }));
   };
 
   // AI-powered waste state suggestion
@@ -387,18 +426,15 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label>الشركة المولدة *</Label>
-          <Select value={formData.generator_id} onValueChange={handleGeneratorChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر الشركة المولدة" />
-            </SelectTrigger>
-            <SelectContent>
-              {generators.map(gen => (
-                <SelectItem key={gen.id} value={gen.id}>
-                  {gen.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <ComboboxWithInput
+            options={generatorOptions}
+            value={formData.generator_id}
+            onValueChange={handleGeneratorChange}
+            placeholder="اختر أو أدخل الشركة المولدة"
+            searchPlaceholder="ابحث عن شركة..."
+            emptyMessage="لا توجد شركات"
+            manualInputLabel="إدخال يدوي"
+          />
         </div>
 
         <div>
@@ -406,18 +442,15 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
           {isDriver ? (
             <Input value={driverOrganization?.name || 'غير محدد'} disabled className="bg-muted" />
           ) : isAdmin ? (
-            <Select value={formData.transporter_id} onValueChange={(v) => setFormData(prev => ({ ...prev, transporter_id: v }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="اختر شركة النقل" />
-              </SelectTrigger>
-              <SelectContent>
-                {transporters.map(t => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ComboboxWithInput
+              options={transporterOptions}
+              value={formData.transporter_id}
+              onValueChange={handleTransporterChange}
+              placeholder="اختر أو أدخل شركة النقل"
+              searchPlaceholder="ابحث عن شركة..."
+              emptyMessage="لا توجد شركات"
+              manualInputLabel="إدخال يدوي"
+            />
           ) : (
             <Input value={organization?.name || ''} disabled className="bg-muted" />
           )}
@@ -425,18 +458,15 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
 
         <div>
           <Label>شركة إعادة التدوير *</Label>
-          <Select value={formData.recycler_id} onValueChange={handleRecyclerChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر شركة إعادة التدوير" />
-            </SelectTrigger>
-            <SelectContent>
-              {recyclers.map(rec => (
-                <SelectItem key={rec.id} value={rec.id}>
-                  {rec.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <ComboboxWithInput
+            options={recyclerOptions}
+            value={formData.recycler_id}
+            onValueChange={handleRecyclerChange}
+            placeholder="اختر أو أدخل شركة إعادة التدوير"
+            searchPlaceholder="ابحث عن شركة..."
+            emptyMessage="لا توجد شركات"
+            manualInputLabel="إدخال يدوي"
+          />
         </div>
       </div>
 
