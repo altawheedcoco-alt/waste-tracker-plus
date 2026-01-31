@@ -218,6 +218,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials' },
           { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates' },
         ]
+      : organization?.organization_type === 'recycler'
+      ? [
+          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments' },
+          { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates' },
+        ]
       : [{ icon: Package, label: 'الشحنات', path: '/dashboard/shipments' }]),
     // Add team credentials for all organization types with employees
     ...(!isTransporter && !isAdmin ? [
