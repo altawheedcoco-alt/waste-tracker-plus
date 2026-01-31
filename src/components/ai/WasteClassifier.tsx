@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { toast } from 'sonner';
+import { wasteTypeLabels } from '@/lib/wasteClassification';
 
 interface WasteClassification {
   waste_type: string;
@@ -13,17 +14,17 @@ interface WasteClassification {
   recommendations: string;
 }
 
-const wasteTypeLabels: Record<string, { label: string; color: string }> = {
-  plastic: { label: 'بلاستيك', color: 'bg-blue-500' },
-  paper: { label: 'ورق', color: 'bg-amber-500' },
-  metal: { label: 'معادن', color: 'bg-gray-500' },
-  glass: { label: 'زجاج', color: 'bg-cyan-500' },
-  electronic: { label: 'إلكترونيات', color: 'bg-purple-500' },
-  organic: { label: 'عضوية', color: 'bg-green-500' },
-  chemical: { label: 'كيميائية', color: 'bg-red-500' },
-  medical: { label: 'طبية', color: 'bg-pink-500' },
-  construction: { label: 'مخلفات بناء', color: 'bg-orange-500' },
-  other: { label: 'أخرى', color: 'bg-slate-500' },
+const wasteTypeColors: Record<string, string> = {
+  plastic: 'bg-blue-500',
+  paper: 'bg-amber-500',
+  metal: 'bg-gray-500',
+  glass: 'bg-cyan-500',
+  electronic: 'bg-purple-500',
+  organic: 'bg-green-500',
+  chemical: 'bg-red-500',
+  medical: 'bg-pink-500',
+  construction: 'bg-orange-500',
+  other: 'bg-slate-500',
 };
 
 interface WasteClassifierProps {
@@ -57,7 +58,8 @@ const WasteClassifier = ({ onClassified }: WasteClassifierProps) => {
     reader.readAsDataURL(file);
   };
 
-  const wasteInfo = classification ? wasteTypeLabels[classification.waste_type] || wasteTypeLabels.other : null;
+  const wasteLabel = classification ? (wasteTypeLabels[classification.waste_type] || 'أخرى') : null;
+  const wasteColor = classification ? (wasteTypeColors[classification.waste_type] || wasteTypeColors.other) : null;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -112,7 +114,7 @@ const WasteClassifier = ({ onClassified }: WasteClassifierProps) => {
         </div>
 
         {/* Classification Result */}
-        {classification && wasteInfo && (
+        {classification && wasteLabel && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -120,8 +122,8 @@ const WasteClassifier = ({ onClassified }: WasteClassifierProps) => {
           >
             {/* Type Badge */}
             <div className="flex items-center justify-center gap-3">
-              <Badge className={`${wasteInfo.color} text-white text-lg px-4 py-2`}>
-                {wasteInfo.label}
+              <Badge className={`${wasteColor} text-white text-lg px-4 py-2`}>
+                {wasteLabel}
               </Badge>
             </div>
 

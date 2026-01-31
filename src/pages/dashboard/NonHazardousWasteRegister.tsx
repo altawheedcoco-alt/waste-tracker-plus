@@ -40,19 +40,12 @@ import {
 } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 
+// Import from unified waste classification
+import { wasteTypeLabels } from '@/lib/wasteClassification';
+
 // Non-hazardous waste types
 const NON_HAZARDOUS_WASTE_TYPES = ['plastic', 'paper', 'metal', 'glass', 'organic', 'construction', 'other'] as const;
 type NonHazardousWasteType = typeof NON_HAZARDOUS_WASTE_TYPES[number];
-
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  organic: 'عضوي',
-  construction: 'مخلفات بناء',
-  other: 'أخرى',
-};
 
 const statusLabels: Record<string, string> = {
   new: 'جديدة',

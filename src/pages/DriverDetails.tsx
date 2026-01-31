@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { wasteTypeLabels as wasteTypeLabelsImported } from '@/lib/wasteClassification';
 import {
   User,
   Phone,
@@ -197,19 +198,7 @@ const DriverDetailsPage = () => {
   };
 
   const getWasteTypeLabel = (type: string) => {
-    const wasteTypes: Record<string, string> = {
-      plastic: 'بلاستيك',
-      paper: 'ورق',
-      metal: 'معادن',
-      glass: 'زجاج',
-      electronic: 'إلكترونيات',
-      organic: 'عضوية',
-      chemical: 'كيميائية',
-      medical: 'طبية',
-      construction: 'مخلفات بناء',
-      other: 'أخرى',
-    };
-    return wasteTypes[type] || type;
+    return wasteTypeLabelsImported[type] || type;
   };
 
   const getStatusLabel = (status: string) => {

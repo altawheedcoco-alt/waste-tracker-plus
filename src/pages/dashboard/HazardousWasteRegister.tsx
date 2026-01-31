@@ -42,15 +42,17 @@ import {
 } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 
+// Import from unified waste classification
+import { 
+  wasteTypeLabels, 
+  hazardLevelLabels as hazardLevelLabelsFromLib,
+  getHazardLevelColor,
+  isHazardousWasteType 
+} from '@/lib/wasteClassification';
+
 // Hazardous waste types
 const HAZARDOUS_WASTE_TYPES = ['chemical', 'electronic', 'medical'] as const;
 type HazardousWasteType = typeof HAZARDOUS_WASTE_TYPES[number];
-
-const wasteTypeLabels: Record<string, string> = {
-  chemical: 'كيميائي',
-  electronic: 'إلكتروني',
-  medical: 'طبي',
-};
 
 const statusLabels: Record<string, string> = {
   new: 'جديدة',
