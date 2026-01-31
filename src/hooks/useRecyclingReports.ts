@@ -19,6 +19,7 @@ export interface RecyclingReport {
   report_data: any;
   created_at: string;
   updated_at: string;
+  pdf_url?: string | null;
 }
 
 export interface CreateReportInput {
@@ -30,6 +31,7 @@ export interface CreateReportInput {
   custom_notes?: string;
   waste_type: string;
   report_data?: any;
+  pdf_url?: string;
 }
 
 export const useRecyclingReports = () => {
@@ -59,6 +61,7 @@ export const useRecyclingReports = () => {
           custom_notes: input.custom_notes,
           waste_category: wasteCategory,
           report_data: input.report_data || {},
+          pdf_url: input.pdf_url || null,
         })
         .select()
         .single();
@@ -110,11 +113,27 @@ export const useRecyclingReports = () => {
     }
   }, [organization?.id]);
 
+  const updateReportPdfUrl = useCallback(async (reportId: string, pdfUrl: string): Promise<boolean> => {
+    try {
+      const { error } = await (supabase
+        .from('recycling_reports') as any)
+        .update({ pdf_url: pdfUrl })
+        .eq('id', reportId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error updating report PDF URL:', error);
+      return false;
+    }
+  }, []);
+
   return {
     loading,
     saveReport,
     getReportByShipmentId,
     getReportsByOrganization,
+    updateReportPdfUrl,
   };
 };
 

@@ -367,6 +367,7 @@ export type Database = {
           id: string
           is_read: boolean | null
           message: string
+          pdf_url: string | null
           request_id: string | null
           shipment_id: string | null
           title: string
@@ -378,6 +379,7 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           message: string
+          pdf_url?: string | null
           request_id?: string | null
           shipment_id?: string | null
           title: string
@@ -389,6 +391,7 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           message?: string
+          pdf_url?: string | null
           request_id?: string | null
           shipment_id?: string | null
           title?: string
@@ -1066,6 +1069,7 @@ export type Database = {
           custom_notes: string | null
           id: string
           opening_declaration: string | null
+          pdf_url: string | null
           processing_details: string | null
           recycler_organization_id: string
           report_data: Json | null
@@ -1082,6 +1086,7 @@ export type Database = {
           custom_notes?: string | null
           id?: string
           opening_declaration?: string | null
+          pdf_url?: string | null
           processing_details?: string | null
           recycler_organization_id: string
           report_data?: Json | null
@@ -1098,6 +1103,7 @@ export type Database = {
           custom_notes?: string | null
           id?: string
           opening_declaration?: string | null
+          pdf_url?: string | null
           processing_details?: string | null
           recycler_organization_id?: string
           report_data?: Json | null
