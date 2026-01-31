@@ -23,7 +23,33 @@ import {
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Send, Loader2, Sparkles, FileText, Leaf, BarChart3 } from 'lucide-react';
+import { 
+  Send, 
+  Loader2, 
+  Sparkles, 
+  FileText, 
+  Leaf, 
+  BarChart3,
+  Package,
+  Truck,
+  Recycle,
+  Users,
+  Building2,
+  MapPin,
+  ClipboardList,
+  Award,
+  Shield,
+  AlertTriangle,
+  FileCheck,
+  Settings,
+  HelpCircle,
+  MessageSquare,
+  Lightbulb,
+  UserPlus,
+  Car,
+  ScrollText,
+  Calculator
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface SmartRequestDialogProps {
@@ -34,19 +60,75 @@ interface SmartRequestDialogProps {
   children?: React.ReactNode;
 }
 
+// تصنيفات أنواع الطلبات
+const REQUEST_CATEGORIES = [
+  { id: 'shipments', label: 'الشحنات والنقل', icon: Package },
+  { id: 'reports', label: 'التقارير والتحليلات', icon: BarChart3 },
+  { id: 'registers', label: 'السجلات والوثائق', icon: ScrollText },
+  { id: 'certificates', label: 'الشهادات والاعتمادات', icon: Award },
+  { id: 'organization', label: 'المؤسسة والموظفين', icon: Building2 },
+  { id: 'drivers', label: 'السائقين والمركبات', icon: Car },
+  { id: 'partners', label: 'الشركاء', icon: Users },
+  { id: 'support', label: 'الدعم والمساعدة', icon: HelpCircle },
+];
+
 const REQUEST_TYPES = [
+  // الشحنات والنقل
+  { value: 'shipment_create', label: 'إنشاء شحنة جديدة', icon: Package, category: 'shipments' },
+  { value: 'shipment_modify', label: 'تعديل شحنة قائمة', icon: Package, category: 'shipments' },
+  { value: 'shipment_cancel', label: 'إلغاء شحنة', icon: Package, category: 'shipments' },
+  { value: 'shipment_tracking', label: 'تتبع شحنة', icon: MapPin, category: 'shipments' },
+  { value: 'bulk_shipments', label: 'شحنات متعددة', icon: ClipboardList, category: 'shipments' },
+  { value: 'route_optimization', label: 'تحسين المسار', icon: Truck, category: 'shipments' },
+  
+  // التقارير والتحليلات
   { value: 'environmental_sustainability', label: 'تحليل الاستدامة البيئية', icon: Leaf, category: 'reports' },
   { value: 'carbon_footprint', label: 'تحليل البصمة الكربونية', icon: BarChart3, category: 'reports' },
+  { value: 'shipment_report', label: 'تقرير الشحنات', icon: FileText, category: 'reports' },
+  { value: 'aggregate_report', label: 'تقرير تجميعي', icon: Calculator, category: 'reports' },
+  { value: 'performance_report', label: 'تقرير الأداء', icon: BarChart3, category: 'reports' },
+  { value: 'waste_analysis', label: 'تحليل النفايات', icon: Recycle, category: 'reports' },
+  
+  // السجلات والوثائق
+  { value: 'hazardous_register', label: 'سجل النفايات الخطرة', icon: AlertTriangle, category: 'registers' },
+  { value: 'non_hazardous_register', label: 'سجل النفايات غير الخطرة', icon: ScrollText, category: 'registers' },
   { value: 'waste_register', label: 'طلب سجل نفايات', icon: FileText, category: 'registers' },
-  { value: 'document_upload', label: 'طلب رفع وثيقة', icon: FileText, category: 'general' },
-  { value: 'profile_update', label: 'طلب تحديث بيانات', icon: FileText, category: 'general' },
-  { value: 'data_change', label: 'طلب تغيير بيانات', icon: FileText, category: 'general' },
-  { value: 'shipment_create', label: 'طلب إنشاء شحنة', icon: FileText, category: 'operations' },
-  { value: 'technical_support', label: 'دعم فني', icon: FileText, category: 'support' },
-  { value: 'inquiry', label: 'استفسار', icon: FileText, category: 'support' },
-  { value: 'complaint', label: 'شكوى', icon: FileText, category: 'support' },
-  { value: 'suggestion', label: 'اقتراح', icon: FileText, category: 'support' },
-  { value: 'general', label: 'طلب عام', icon: FileText, category: 'general' },
+  { value: 'document_upload', label: 'رفع وثيقة', icon: FileCheck, category: 'registers' },
+  { value: 'document_verification', label: 'التحقق من وثيقة', icon: Shield, category: 'registers' },
+  
+  // الشهادات والاعتمادات
+  { value: 'recycling_certificate', label: 'شهادة تدوير', icon: Award, category: 'certificates' },
+  { value: 'sustainability_certificate', label: 'شهادة استدامة', icon: Leaf, category: 'certificates' },
+  { value: 'environmental_compliance', label: 'شهادة الامتثال البيئي', icon: Shield, category: 'certificates' },
+  { value: 'aggregate_certificate', label: 'شهادة تجميعية', icon: Award, category: 'certificates' },
+  
+  // المؤسسة والموظفين
+  { value: 'organization_update', label: 'تحديث بيانات المؤسسة', icon: Building2, category: 'organization' },
+  { value: 'profile_update', label: 'تحديث البيانات الشخصية', icon: Users, category: 'organization' },
+  { value: 'add_employee', label: 'إضافة موظف جديد', icon: UserPlus, category: 'organization' },
+  { value: 'employee_permissions', label: 'صلاحيات الموظفين', icon: Shield, category: 'organization' },
+  { value: 'location_management', label: 'إدارة المواقع', icon: MapPin, category: 'organization' },
+  { value: 'stamp_signature', label: 'الختم والتوقيع', icon: FileCheck, category: 'organization' },
+  
+  // السائقين والمركبات
+  { value: 'add_driver', label: 'إضافة سائق جديد', icon: UserPlus, category: 'drivers' },
+  { value: 'driver_approval', label: 'اعتماد سائق', icon: Shield, category: 'drivers' },
+  { value: 'driver_tracking', label: 'تتبع السائقين', icon: MapPin, category: 'drivers' },
+  { value: 'vehicle_management', label: 'إدارة المركبات', icon: Truck, category: 'drivers' },
+  { value: 'driver_assignment', label: 'تعيين سائق لشحنة', icon: Car, category: 'drivers' },
+  
+  // الشركاء
+  { value: 'add_partner', label: 'إضافة شريك جديد', icon: UserPlus, category: 'partners' },
+  { value: 'partner_approval', label: 'اعتماد شريك', icon: Shield, category: 'partners' },
+  { value: 'partner_notes', label: 'ملاحظات للشريك', icon: MessageSquare, category: 'partners' },
+  
+  // الدعم والمساعدة
+  { value: 'technical_support', label: 'دعم فني', icon: Settings, category: 'support' },
+  { value: 'inquiry', label: 'استفسار عام', icon: HelpCircle, category: 'support' },
+  { value: 'complaint', label: 'شكوى', icon: AlertTriangle, category: 'support' },
+  { value: 'suggestion', label: 'اقتراح أو فكرة', icon: Lightbulb, category: 'support' },
+  { value: 'training_request', label: 'طلب تدريب', icon: Users, category: 'support' },
+  { value: 'general', label: 'طلب عام آخر', icon: FileText, category: 'support' },
 ];
 
 const PRIORITY_OPTIONS = [
@@ -318,24 +400,32 @@ const SmartRequestDialog = ({
                 <SelectTrigger>
                   <SelectValue placeholder="اختر نوع الطلب" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="environmental_sustainability">
-                    <span className="flex items-center gap-2">
-                      <Leaf className="h-4 w-4 text-green-500" />
-                      تحليل الاستدامة البيئية
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="carbon_footprint">
-                    <span className="flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4 text-blue-500" />
-                      تحليل البصمة الكربونية
-                    </span>
-                  </SelectItem>
-                  {REQUEST_TYPES.filter(t => !['environmental_sustainability', 'carbon_footprint'].includes(t.value)).map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
+                <SelectContent className="max-h-[300px]">
+                  {REQUEST_CATEGORIES.map((category) => {
+                    const CategoryIcon = category.icon;
+                    const categoryTypes = REQUEST_TYPES.filter(t => t.category === category.id);
+                    if (categoryTypes.length === 0) return null;
+                    
+                    return (
+                      <div key={category.id}>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground flex items-center gap-2 bg-muted/50 sticky top-0">
+                          <CategoryIcon className="h-3.5 w-3.5" />
+                          {category.label}
+                        </div>
+                        {categoryTypes.map((type) => {
+                          const TypeIcon = type.icon;
+                          return (
+                            <SelectItem key={type.value} value={type.value}>
+                              <span className="flex items-center gap-2">
+                                <TypeIcon className="h-4 w-4 text-primary" />
+                                {type.label}
+                              </span>
+                            </SelectItem>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
