@@ -1,8 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { MapPin, Navigation, Loader2, Route } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Navigation, Loader2, Route, Truck, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
+
+interface DriverLocation {
+  latitude: number;
+  longitude: number;
+  speed: number | null;
+  heading: number | null;
+  recorded_at: string;
+}
 
 interface ShipmentRouteMapProps {
   isOpen: boolean;
@@ -10,11 +21,13 @@ interface ShipmentRouteMapProps {
   pickupAddress: string;
   deliveryAddress: string;
   shipmentNumber: string;
+  driverId?: string | null;
+  shipmentStatus?: string;
 }
 
 const defaultCenter = {
-  lat: 24.7136,
-  lng: 46.6753
+  lat: 30.0444,
+  lng: 31.2357
 };
 
 const ShipmentRouteMap = ({
@@ -23,17 +36,55 @@ const ShipmentRouteMap = ({
   pickupAddress,
   deliveryAddress,
   shipmentNumber,
+  driverId,
+  shipmentStatus,
 }: ShipmentRouteMapProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{
     distance: string;
     duration: string;
   } | null>(null);
+  const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const mapRef = useRef<any>(null);
   const directionsRendererRef = useRef<any>(null);
+  const driverMarkerRef = useRef<any>(null);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const hasApiKey = !!apiKey;
+
+  // Fetch driver's latest location
+  const fetchDriverLocation = useCallback(async () => {
+    if (!driverId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('driver_location_logs')
+        .select('latitude, longitude, speed, heading, recorded_at')
+        .eq('driver_id', driverId)
+        .order('recorded_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error('Error fetching driver location:', error);
+        return;
+      }
+
+      if (data) {
+        setDriverLocation(data);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  }, [driverId]);
+
+  const refreshDriverLocation = async () => {
+    setIsRefreshing(true);
+    await fetchDriverLocation();
+    setIsRefreshing(false);
+    toast.success('تم تحديث موقع السائق');
+  };
 
   const loadGoogleMapsScript = useCallback(() => {
     return new Promise<void>((resolve, reject) => {
@@ -59,6 +110,53 @@ const ShipmentRouteMap = ({
     });
   }, [apiKey]);
 
+  const updateDriverMarker = useCallback(() => {
+    const win = window as any;
+    if (!mapRef.current || !win.google || !driverLocation) return;
+
+    const position = { lat: driverLocation.latitude, lng: driverLocation.longitude };
+
+    if (driverMarkerRef.current) {
+      driverMarkerRef.current.setPosition(position);
+    } else {
+      driverMarkerRef.current = new win.google.maps.Marker({
+        position,
+        map: mapRef.current,
+        title: 'موقع السائق الحالي',
+        icon: {
+          path: win.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          fillColor: '#ef4444',
+          fillOpacity: 1,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+          scale: 8,
+          rotation: driverLocation.heading || 0,
+        },
+        zIndex: 1000,
+      });
+
+      // Add info window for driver
+      const infoWindow = new win.google.maps.InfoWindow({
+        content: `
+          <div style="text-align: right; direction: rtl; padding: 8px;">
+            <strong>🚛 السائق</strong><br/>
+            <span>السرعة: ${driverLocation.speed ? Math.round(driverLocation.speed) + ' كم/س' : 'غير محددة'}</span><br/>
+            <span style="font-size: 12px; color: #666;">
+              آخر تحديث: ${new Date(driverLocation.recorded_at).toLocaleTimeString('ar-SA')}
+            </span>
+          </div>
+        `,
+      });
+
+      driverMarkerRef.current.addListener('click', () => {
+        infoWindow.open(mapRef.current, driverMarkerRef.current);
+      });
+    }
+
+    // Pan to driver location
+    mapRef.current.panTo(position);
+  }, [driverLocation]);
+
   const initializeMap = useCallback(async () => {
     const win = window as any;
     const mapContainer = document.getElementById('route-map-container');
@@ -66,7 +164,7 @@ const ShipmentRouteMap = ({
 
     const map = new win.google.maps.Map(mapContainer, {
       center: defaultCenter,
-      zoom: 8,
+      zoom: 10,
       zoomControl: true,
       streetViewControl: false,
       mapTypeControl: true,
@@ -94,7 +192,7 @@ const ShipmentRouteMap = ({
         origin: pickupAddress,
         destination: deliveryAddress,
         travelMode: win.google.maps.TravelMode.DRIVING,
-        region: 'SA',
+        region: 'EG',
       });
 
       directionsRendererRef.current.setDirections(result);
@@ -169,7 +267,26 @@ const ShipmentRouteMap = ({
         toast.error('فشل في تحديد المواقع على الخريطة');
       }
     }
-  }, [pickupAddress, deliveryAddress]);
+
+    // Update driver marker if location exists
+    if (driverLocation) {
+      updateDriverMarker();
+    }
+  }, [pickupAddress, deliveryAddress, driverLocation, updateDriverMarker]);
+
+  // Fetch driver location when dialog opens
+  useEffect(() => {
+    if (isOpen && driverId) {
+      fetchDriverLocation();
+    }
+  }, [isOpen, driverId, fetchDriverLocation]);
+
+  // Update driver marker when location changes
+  useEffect(() => {
+    if (driverLocation && mapRef.current) {
+      updateDriverMarker();
+    }
+  }, [driverLocation, updateDriverMarker]);
 
   useEffect(() => {
     if (isOpen && hasApiKey) {
@@ -189,6 +306,32 @@ const ShipmentRouteMap = ({
         });
     }
   }, [isOpen, hasApiKey, loadGoogleMapsScript, initializeMap]);
+
+  // Real-time subscription for driver location
+  useEffect(() => {
+    if (!isOpen || !driverId) return;
+
+    const channel = supabase
+      .channel(`driver-location-${driverId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'driver_location_logs',
+          filter: `driver_id=eq.${driverId}`,
+        },
+        (payload) => {
+          const newLocation = payload.new as DriverLocation;
+          setDriverLocation(newLocation);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isOpen, driverId]);
 
   if (!hasApiKey) {
     return (
@@ -211,15 +354,51 @@ const ShipmentRouteMap = ({
     );
   }
 
+  const isDriverTracking = shipmentStatus === 'collecting' || shipmentStatus === 'in_transit';
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh]" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 justify-end">
-            <span>خريطة مسار الشحنة {shipmentNumber}</span>
-            <Route className="w-5 h-5" />
+          <DialogTitle className="flex items-center gap-2 justify-between">
+            <div className="flex items-center gap-2">
+              <Route className="w-5 h-5" />
+              <span>تتبع الشحنة {shipmentNumber}</span>
+            </div>
+            {driverId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshDriverLocation}
+                disabled={isRefreshing}
+                className="gap-2"
+              >
+                <RefreshCw className={cn("w-4 h-4", isRefreshing && "animate-spin")} />
+                تحديث موقع السائق
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Driver Status */}
+        {driverId && driverLocation && (
+          <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-500 rounded-full">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-medium text-red-700 dark:text-red-400">السائق في الطريق</p>
+                <p className="text-sm text-muted-foreground">
+                  السرعة: {driverLocation.speed ? Math.round(driverLocation.speed) + ' كم/س' : 'غير محددة'}
+                </p>
+              </div>
+            </div>
+            <Badge variant="outline" className="bg-red-100 text-red-700 border-red-300">
+              آخر تحديث: {new Date(driverLocation.recorded_at).toLocaleTimeString('ar-SA')}
+            </Badge>
+          </div>
+        )}
 
         {/* Route Info */}
         {routeInfo && (
@@ -236,7 +415,7 @@ const ShipmentRouteMap = ({
         )}
 
         {/* Legend */}
-        <div className="flex items-center justify-center gap-6 text-sm">
+        <div className="flex items-center justify-center gap-6 text-sm flex-wrap">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-blue-500" />
             <span>نقطة الاستلام</span>
@@ -245,6 +424,12 @@ const ShipmentRouteMap = ({
             <div className="w-3 h-3 rounded-full bg-green-500" />
             <span>نقطة التسليم</span>
           </div>
+          {driverId && (
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <span>موقع السائق</span>
+            </div>
+          )}
         </div>
 
         {/* Map Container */}
