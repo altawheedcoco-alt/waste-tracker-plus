@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { format, differenceInSeconds, differenceInMinutes, differenceInHours } from 'date-fns';
+import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   Clock,
-  Timer,
   Building2,
   Truck,
   Recycle,
@@ -76,33 +75,20 @@ interface ShipmentCardProps {
     has_report?: boolean;
   };
   onStatusChange?: () => void;
-  showAutoTimer?: boolean;
   variant?: 'compact' | 'full';
-  countdown?: { minutes: number; seconds: number };
 }
-
-// Auto-status configuration - same as in hook
-const AUTO_STATUS_CONFIG = {
-  autoReceiveMinutes: 2,
-  autoConfirmHours: 6,
-};
 
 const ShipmentCard = ({ 
   shipment, 
   onStatusChange, 
-  showAutoTimer = true,
   variant = 'full',
-  countdown,
 }: ShipmentCardProps) => {
   const navigate = useNavigate();
   const { organization } = useAuth();
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
-  const [progress, setProgress] = useState(0);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
-  const [autoCountdown, setAutoCountdown] = useState<{ minutes: number; seconds: number } | null>(null);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
 
   // Map legacy status to new status
@@ -120,54 +106,6 @@ const ShipmentCard = ({
 
   // Calculate current status index for progress display
   const currentStatusIndex = allStatuses.findIndex(s => s.key === mappedStatus);
-
-  // Calculate auto-status countdown
-  useEffect(() => {
-    if (!showAutoTimer || isCompleted) {
-      setAutoCountdown(null);
-      return;
-    }
-
-    const calculateAutoCountdown = () => {
-      const now = new Date();
-      const createdAt = new Date(shipment.created_at);
-      const status = shipment.status; // Use original status for comparison
-
-      // For in_transit or delivering - countdown to auto-receive
-      if (status === 'in_transit' || status === 'delivering') {
-        const autoReceiveTime = new Date(createdAt.getTime() + AUTO_STATUS_CONFIG.autoReceiveMinutes * 60 * 1000);
-        const remainingMs = autoReceiveTime.getTime() - now.getTime();
-
-        if (remainingMs > 0) {
-          const remainingMinutes = Math.floor(remainingMs / (1000 * 60));
-          const remainingSeconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
-          setAutoCountdown({ minutes: remainingMinutes, seconds: remainingSeconds });
-        } else {
-          setAutoCountdown(null);
-        }
-      }
-      // For delivered - countdown to auto-confirm
-      else if (status === 'delivered') {
-        const autoConfirmTime = new Date(createdAt.getTime() + AUTO_STATUS_CONFIG.autoConfirmHours * 60 * 60 * 1000);
-        const remainingMs = autoConfirmTime.getTime() - now.getTime();
-
-        if (remainingMs > 0) {
-          const remainingMinutes = Math.floor(remainingMs / (1000 * 60));
-          const remainingSeconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
-          setAutoCountdown({ minutes: remainingMinutes, seconds: remainingSeconds });
-        } else {
-          setAutoCountdown(null);
-        }
-      } else {
-        setAutoCountdown(null);
-      }
-    };
-
-    calculateAutoCountdown();
-    const interval = setInterval(calculateAutoCountdown, 1000);
-
-    return () => clearInterval(interval);
-  }, [shipment.created_at, shipment.status, showAutoTimer, isCompleted]);
 
   const handleCardClick = () => {
     navigate(`/dashboard/shipments/${shipment.id}`);
@@ -571,33 +509,6 @@ const ShipmentCard = ({
               </div>
             </div>
 
-            {/* Auto-Status Countdown Timer */}
-            {showAutoTimer && autoCountdown && !isCompleted && (
-              <div className="border-t bg-amber-50 dark:bg-amber-950/30 p-3">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div className="flex items-center gap-2 text-sm">
-                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span className="text-amber-700 dark:text-amber-300 font-medium">
-                      {(shipment.status === 'in_transit' || shipment.status === 'delivering') 
-                        ? 'تغيير الحالة تلقائياً خلال:' 
-                        : 'الإقرار التلقائي خلال:'}
-                    </span>
-                    <span className="font-mono font-bold text-amber-800 dark:text-amber-200">
-                      {autoCountdown.minutes > 0 
-                        ? `${autoCountdown.minutes} دقيقة ${autoCountdown.seconds} ثانية`
-                        : `${autoCountdown.seconds} ثانية`}
-                    </span>
-                  </div>
-                  <Badge className="bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 gap-1">
-                    <Timer className="w-3 h-3" />
-                    {(shipment.status === 'in_transit' || shipment.status === 'delivering') 
-                      ? `${AUTO_STATUS_CONFIG.autoReceiveMinutes} دقيقة للاستلام التلقائي`
-                      : `${AUTO_STATUS_CONFIG.autoConfirmHours} ساعات للإقرار التلقائي`}
-                  </Badge>
-                </div>
-              </div>
-            )}
-
             {/* Recycler Notes Section - Visible to Transporter */}
             {isTransporter && shipment.recycler_notes && (
               <div className="border-t bg-green-50 dark:bg-green-950/30 p-3">
@@ -612,29 +523,6 @@ const ShipmentCard = ({
                     </p>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {/* Timer Section */}
-            {showAutoTimer && shipment.expected_delivery_date && !isCompleted && (
-              <div className="border-t bg-muted/30 p-3">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Timer className="w-4 h-4 text-primary" />
-                    <span className="text-muted-foreground">الوقت المتبقي:</span>
-                    <span className={cn(
-                      "font-semibold",
-                      timeRemaining === 'متأخرة' ? 'text-destructive' : 'text-primary'
-                    )}>
-                      {timeRemaining || 'غير محدد'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    <span>الوصول المتوقع: {format(new Date(shipment.expected_delivery_date), 'PPp', { locale: ar })}</span>
-                  </div>
-                </div>
-                <Progress value={progress} className="mt-2 h-2" />
               </div>
             )}
 
