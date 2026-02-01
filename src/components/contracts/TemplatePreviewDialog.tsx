@@ -23,10 +23,15 @@ import {
   Gavel,
   CreditCard,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  Shield,
+  Leaf
 } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { ContractTemplate, partnerTypeLabels, contractCategoryLabels } from '@/hooks/useContractTemplates';
+import { QRCodeSVG } from 'qrcode.react';
+import Barcode from 'react-barcode';
+import logoImg from '@/assets/logo.png';
 
 interface TemplatePreviewDialogProps {
   open: boolean;
@@ -50,20 +55,48 @@ const TemplatePreviewDialog = ({
 
   if (!template) return null;
 
+  // Generate verification code for the template
+  const verificationCode = `EG-I-RECYCLE-TPL-${template.id.substring(0, 8).toUpperCase()}`;
+  
+  // Get category color based on partner type
+  const getCategoryColor = () => {
+    if (template.partner_type === 'generator') return { bg: 'bg-blue-50', border: 'border-blue-300', accent: 'text-blue-700' };
+    if (template.partner_type === 'recycler') return { bg: 'bg-green-50', border: 'border-green-300', accent: 'text-green-700' };
+    return { bg: 'bg-amber-50', border: 'border-amber-300', accent: 'text-amber-700' };
+  };
+  
+  const categoryColor = getCategoryColor();
+
   const handlePrint = () => {
     printContent(printRef.current, `
+      @page { size: A4; margin: 20mm 15mm; }
       * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-      body { padding: 30px; direction: rtl; background: white; }
-      .template-header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #16a34a; padding-bottom: 20px; }
-      .template-title { font-size: 24px; font-weight: bold; color: #16a34a; margin-bottom: 8px; }
-      .template-subtitle { font-size: 14px; color: #666; }
-      .section { margin-bottom: 20px; }
-      .section-title { font-size: 14px; font-weight: bold; color: #16a34a; margin-bottom: 8px; padding: 6px 12px; background: #f0fdf4; border-right: 4px solid #16a34a; }
-      .section-content { font-size: 12px; line-height: 1.8; padding: 10px; background: #fafafa; border-radius: 4px; white-space: pre-wrap; }
-      .badges { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-      .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; background: #e5e7eb; }
-      .footer { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; display: flex; justify-content: space-between; font-size: 11px; color: #666; }
-      @media print { body { padding: 20px; } }
+      body { padding: 0; direction: rtl; background: white; }
+      .print-container { padding: 25px; }
+      .print-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px double #16a34a; padding-bottom: 15px; margin-bottom: 20px; }
+      .print-logo { height: 50px; }
+      .print-title-section { text-align: center; flex: 1; padding: 0 15px; }
+      .print-title { font-size: 22px; font-weight: bold; color: #16a34a; margin-bottom: 6px; }
+      .print-subtitle { font-size: 12px; color: #666; }
+      .print-verification { font-family: monospace; font-size: 11px; color: #16a34a; margin-top: 8px; padding: 4px 10px; background: #f0fdf4; border-radius: 4px; display: inline-block; }
+      .print-qr-section { text-align: center; }
+      .print-barcode-section { text-align: center; }
+      .confidential-banner { text-align: center; background: linear-gradient(135deg, #dc2626, #991b1b); color: white; padding: 8px; font-size: 11px; font-weight: bold; margin: 15px 0; border-radius: 4px; }
+      .section { margin-bottom: 18px; page-break-inside: avoid; }
+      .section-title { font-size: 13px; font-weight: bold; color: #16a34a; margin-bottom: 8px; padding: 8px 14px; background: linear-gradient(90deg, #f0fdf4, #dcfce7); border-right: 4px solid #16a34a; border-radius: 0 4px 4px 0; }
+      .section-content { font-size: 11px; line-height: 1.9; padding: 12px; background: #fafafa; border-radius: 4px; border: 1px solid #e5e7eb; white-space: pre-wrap; text-align: justify; }
+      .badges { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+      .badge { padding: 5px 14px; border-radius: 20px; font-size: 10px; background: #e5e7eb; }
+      .settings-bar { display: flex; justify-content: center; gap: 20px; padding: 10px; background: #f9fafb; border-radius: 6px; margin-bottom: 15px; }
+      .platform-rights { margin-top: 25px; padding: 15px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #16a34a; border-radius: 8px; text-align: center; }
+      .platform-rights-title { font-size: 12px; font-weight: bold; color: #16a34a; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+      .platform-rights-content { font-size: 10px; color: #374151; line-height: 1.7; }
+      .footer { margin-top: 20px; padding-top: 15px; border-top: 2px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 10px; color: #666; }
+      @media print { 
+        body { padding: 0; } 
+        .print-container { padding: 0; }
+        .section { page-break-inside: avoid; }
+      }
     `);
   };
 
@@ -140,15 +173,58 @@ const TemplatePreviewDialog = ({
         </DialogHeader>
 
         <ScrollArea className="h-[60vh]">
-          <div className="p-6 space-y-4" ref={printRef}>
-            {/* Print Header */}
-            <div className="template-header text-center pb-4 border-b-2 border-primary/20 print:block hidden">
-              <h1 className="template-title text-2xl font-bold text-primary">{template.name}</h1>
-              <p className="template-subtitle text-muted-foreground">{template.description}</p>
+          <div className={`p-6 space-y-4 ${categoryColor.bg}`} ref={printRef}>
+            {/* Enhanced Print Header with Logo, QR, Barcode */}
+            <div className="print-header flex items-start justify-between pb-4 border-b-2 border-primary/30 mb-4">
+              {/* QR Code Section */}
+              <div className="print-qr-section text-center">
+                <QRCodeSVG
+                  value={`${window.location.origin}/verify?type=template&code=${verificationCode}`}
+                  size={70}
+                  level="M"
+                  includeMargin={false}
+                />
+                <p className="text-[10px] mt-1 text-muted-foreground">امسح للتحقق</p>
+              </div>
+
+              {/* Title Section with Logo */}
+              <div className="print-title-section text-center flex-1 px-4">
+                <div className="flex items-center justify-center gap-3 mb-2">
+                  <img src={logoImg} alt="آي ريسايكل" className="h-10 object-contain" />
+                  <Leaf className="w-6 h-6 text-primary" />
+                </div>
+                <h1 className="print-title text-xl font-bold text-primary">{template.name}</h1>
+                {template.description && (
+                  <p className="print-subtitle text-sm text-muted-foreground">{template.description}</p>
+                )}
+                <div className="print-verification mt-2 inline-block bg-primary/10 border border-primary/30 rounded px-3 py-1">
+                  <span className="text-xs">رقم التحقق: </span>
+                  <span className="font-mono font-bold text-primary text-sm">{verificationCode}</span>
+                </div>
+              </div>
+
+              {/* Barcode Section */}
+              <div className="print-barcode-section text-center">
+                <Barcode
+                  value={verificationCode}
+                  width={1}
+                  height={35}
+                  fontSize={8}
+                  displayValue={false}
+                />
+                <p className="text-[9px] font-mono mt-1">{verificationCode}</p>
+              </div>
+            </div>
+
+            {/* Confidential Banner */}
+            <div className="confidential-banner bg-destructive text-destructive-foreground text-center py-2 px-4 rounded-md flex items-center justify-center gap-2">
+              <Shield className="w-4 h-4" />
+              <span className="font-semibold text-sm">هذه الوثيقة سرية ومؤمنة - يُحظر نسخها أو توزيعها دون إذن</span>
+              <Shield className="w-4 h-4" />
             </div>
 
             {/* Settings Icons */}
-            <div className="flex items-center justify-center gap-6 py-3 bg-muted/30 rounded-lg">
+            <div className={`flex items-center justify-center gap-6 py-3 rounded-lg border ${categoryColor.border}`}>
               <div className={`flex items-center gap-2 text-sm ${template.include_header_logo ? 'text-primary' : 'text-muted-foreground/50'}`}>
                 <ImageIcon className="w-4 h-4" />
                 <span>شعار</span>
@@ -236,8 +312,22 @@ const TemplatePreviewDialog = ({
               />
             </div>
 
+            {/* Platform Rights Section */}
+            <div className="platform-rights mt-6 p-4 bg-gradient-to-br from-primary/5 to-primary/10 border-2 border-primary rounded-lg">
+              <div className="platform-rights-title flex items-center justify-center gap-2 text-primary font-bold mb-3">
+                <Shield className="w-5 h-5" />
+                <span>ضمان حقوق المنصة</span>
+                <Shield className="w-5 h-5" />
+              </div>
+              <div className="platform-rights-content text-center text-sm text-muted-foreground leading-relaxed space-y-2">
+                <p>هذا القالب مملوك لمنصة <strong className="text-primary">آي ريسايكل</strong> وهو محمي بموجب قوانين الملكية الفكرية المصرية.</p>
+                <p>يُحظر نسخ أو توزيع أو تعديل هذا القالب دون الحصول على إذن كتابي مسبق من إدارة المنصة.</p>
+                <p>جميع الحقوق محفوظة © {new Date().getFullYear()} - منصة آي ريسايكل لإدارة المخلفات وإعادة التدوير</p>
+              </div>
+            </div>
+
             {/* Usage Stats */}
-            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg mt-6">
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg mt-4 border">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <AlertTriangle className="w-4 h-4" />
                 <span>عدد مرات الاستخدام: {template.usage_count}</span>
