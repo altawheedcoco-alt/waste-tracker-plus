@@ -262,16 +262,10 @@ const ContractTemplates = () => {
             </h1>
             <p className="text-muted-foreground">إنشاء وإدارة صيغ عقود الجمع والنقل ({allEgyptianGeneratorTemplates.length + allEgyptianRecyclerTemplates.length} قالب قانوني مصري)</p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowImportDialog(true)} className="gap-2">
-              <Download className="w-4 h-4" />
-              استيراد قوالب جاهزة
-            </Button>
-            <Button onClick={() => { resetForm(); setShowCreateDialog(true); }} className="gap-2">
-              <Plus className="w-4 h-4" />
-              إنشاء قالب جديد
-            </Button>
-          </div>
+          <Button onClick={() => { resetForm(); setShowCreateDialog(true); }} className="gap-2">
+            <Plus className="w-4 h-4" />
+            إنشاء قالب جديد
+          </Button>
         </div>
 
         {/* Stats */}
