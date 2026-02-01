@@ -407,17 +407,34 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             )}
           </nav>
 
-          {/* Toggle button */}
-          <div className="p-4 border-t border-border">
+          {/* Toggle button - Collapse/Expand Arrow */}
+          <div className="p-3 border-t border-border">
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="w-full hover:bg-muted/80"
+              className={`w-full flex items-center justify-center gap-2 h-10 bg-muted/50 hover:bg-primary/10 hover:border-primary/50 transition-all duration-200 ${
+                isSidebarOpen ? '' : 'px-2'
+              }`}
             >
-              <motion.div animate={{ rotate: isSidebarOpen ? 0 : 180 }}>
-                <ChevronDown className="w-5 h-5 rotate-90" />
+              <motion.div 
+                animate={{ rotate: isSidebarOpen ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="flex items-center justify-center"
+              >
+                <ChevronDown className={`${isSidebarOpen ? 'w-5 h-5' : 'w-6 h-6'} text-primary`} />
               </motion.div>
+              <AnimatePresence>
+                {isSidebarOpen && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="text-sm font-medium text-muted-foreground whitespace-nowrap overflow-hidden"
+                  >
+                    طي القائمة
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Button>
           </div>
         </motion.aside>
