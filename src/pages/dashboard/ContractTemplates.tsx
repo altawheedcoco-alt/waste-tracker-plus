@@ -28,7 +28,7 @@ import {
   List,
   Filter
 } from 'lucide-react';
-import { allGeneratorTemplates, allRecyclerTemplates } from '@/data/contractTemplatesData';
+import { allEgyptianGeneratorTemplates, allEgyptianRecyclerTemplates } from '@/data/egyptianLegalContractTemplates';
 import { 
   useContractTemplates, 
   ContractTemplate, 
@@ -178,10 +178,10 @@ const ContractTemplates = () => {
     
     try {
       const templatesToImport = type === 'generator' 
-        ? allGeneratorTemplates 
+        ? allEgyptianGeneratorTemplates 
         : type === 'recycler' 
-          ? allRecyclerTemplates 
-          : [...allGeneratorTemplates, ...allRecyclerTemplates];
+          ? allEgyptianRecyclerTemplates 
+          : [...allEgyptianGeneratorTemplates, ...allEgyptianRecyclerTemplates];
       
       const total = templatesToImport.length;
       let imported = 0;
@@ -275,7 +275,7 @@ const ContractTemplates = () => {
               <FileText className="w-6 h-6" />
               قوالب العقود
             </h1>
-            <p className="text-muted-foreground">إنشاء وإدارة صيغ عقود الجمع والنقل ({allGeneratorTemplates.length + allRecyclerTemplates.length} قالب جاهز)</p>
+            <p className="text-muted-foreground">إنشاء وإدارة صيغ عقود الجمع والنقل ({allEgyptianGeneratorTemplates.length + allEgyptianRecyclerTemplates.length} قالب قانوني مصري)</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowImportDialog(true)} className="gap-2">
@@ -683,7 +683,7 @@ const ContractTemplates = () => {
                         <div className="flex-1">
                           <h4 className="font-medium">قوالب الجهات المولدة</h4>
                           <p className="text-sm text-muted-foreground">
-                            {allGeneratorTemplates.length} قالب - عقود جمع ونقل
+                            {allEgyptianGeneratorTemplates.length} قالب - عقود جمع ونقل
                           </p>
                         </div>
                       </div>
@@ -702,7 +702,7 @@ const ContractTemplates = () => {
                         <div className="flex-1">
                           <h4 className="font-medium">قوالب جهات التدوير</h4>
                           <p className="text-sm text-muted-foreground">
-                            {allRecyclerTemplates.length} قالب - عقود توريد وتدوير
+                            {allEgyptianRecyclerTemplates.length} قالب - عقود توريد وتدوير
                           </p>
                         </div>
                       </div>
@@ -723,7 +723,7 @@ const ContractTemplates = () => {
                         <div className="flex-1">
                           <h4 className="font-medium">استيراد جميع القوالب</h4>
                           <p className="text-sm text-muted-foreground">
-                            {allGeneratorTemplates.length + allRecyclerTemplates.length} قالب شامل
+                            {allEgyptianGeneratorTemplates.length + allEgyptianRecyclerTemplates.length} قالب شامل
                           </p>
                         </div>
                         <Badge variant="secondary">موصى به</Badge>
