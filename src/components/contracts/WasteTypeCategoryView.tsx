@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ContractTemplate } from '@/hooks/useContractTemplates';
 import TemplateCard from './TemplateCard';
-import AIContractGenerator from './AIContractGenerator';
 import { 
   ChevronDown, 
   ChevronUp,
@@ -22,7 +21,6 @@ import {
   Building,
   FileText,
   Layers,
-  Sparkles,
   AlertTriangle
 } from 'lucide-react';
 import { 
@@ -128,8 +126,6 @@ const WasteTypeCategoryView = ({
   searchQuery
 }: WasteTypeCategoryViewProps) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [showAIGenerator, setShowAIGenerator] = useState(false);
-  const [selectedCategoryForAI, setSelectedCategoryForAI] = useState<WasteCategoryInfo | null>(null);
 
   // تجميع القوالب حسب نوع المخلف
   const categorizedTemplates = templates.reduce((acc, template) => {
@@ -161,11 +157,6 @@ const WasteTypeCategoryView = ({
     });
   };
 
-  // Handle AI generation for a category
-  const handleAIGenerate = (category: WasteCategoryInfo) => {
-    setSelectedCategoryForAI(category);
-    setShowAIGenerator(true);
-  };
 
   // Separate hazardous and non-hazardous with templates
   const hazardousCategoriesWithTemplates = hazardousWasteCategories.filter(
@@ -211,18 +202,6 @@ const WasteTypeCategoryView = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="gap-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAIGenerate(category);
-                    }}
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    إنشاء بالذكاء
-                  </Button>
                   <Badge variant={isHazardous ? "destructive" : "secondary"}>
                     {isHazardous ? 'خطرة' : 'غير خطرة'}
                   </Badge>
@@ -283,14 +262,6 @@ const WasteTypeCategoryView = ({
                       <div className="text-center py-6 text-muted-foreground">
                         <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
                         <p className="text-sm">لا توجد قوالب لهذا التصنيف</p>
-                        <Button 
-                          variant="link" 
-                          className="mt-2 gap-1"
-                          onClick={() => handleAIGenerate(category)}
-                        >
-                          <Sparkles className="w-4 h-4" />
-                          أنشئ قالب بالذكاء الاصطناعي
-                        </Button>
                       </div>
                     )}
                   </CardContent>
@@ -328,18 +299,11 @@ const WasteTypeCategoryView = ({
             <p className="text-lg font-bold">{templates.length}</p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-purple-200">
+        <Card>
           <CardContent className="p-3 text-center">
-            <Sparkles className="w-6 h-6 mx-auto text-purple-500 mb-1" />
-            <p className="text-xs text-muted-foreground">إنشاء بالذكاء</p>
-            <Button 
-              variant="link" 
-              size="sm" 
-              className="text-purple-600 p-0 h-auto"
-              onClick={() => setShowAIGenerator(true)}
-            >
-              ابدأ الآن
-            </Button>
+            <Layers className="w-6 h-6 mx-auto text-muted-foreground mb-1" />
+            <p className="text-xs text-muted-foreground">أنواع المخلفات</p>
+            <p className="text-lg font-bold">{allWasteCategories.reduce((acc, cat) => acc + cat.subcategories.length, 0)}</p>
           </CardContent>
         </Card>
       </div>
@@ -372,13 +336,6 @@ const WasteTypeCategoryView = ({
         </div>
       </div>
 
-      {/* AI Contract Generator Dialog */}
-      <AIContractGenerator
-        open={showAIGenerator}
-        onOpenChange={setShowAIGenerator}
-        selectedCategory={selectedCategoryForAI}
-        wasteCategories={allWasteCategories}
-      />
     </div>
   );
 };
