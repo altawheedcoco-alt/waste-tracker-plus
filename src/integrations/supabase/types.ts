@@ -418,12 +418,17 @@ export type Database = {
           company_name: string
           created_at: string
           created_by: string | null
+          generator_company_id: string | null
+          generator_company_name: string | null
           id: string
           is_linked_to_system: boolean
           linked_at: string | null
           linked_by: string | null
           notes: string | null
           organization_id: string
+          partner_company_id: string | null
+          partner_company_name: string | null
+          partner_type: string | null
           quantity: number
           record_date: string
           unit: string
@@ -436,12 +441,17 @@ export type Database = {
           company_name: string
           created_at?: string
           created_by?: string | null
+          generator_company_id?: string | null
+          generator_company_name?: string | null
           id?: string
           is_linked_to_system?: boolean
           linked_at?: string | null
           linked_by?: string | null
           notes?: string | null
           organization_id: string
+          partner_company_id?: string | null
+          partner_company_name?: string | null
+          partner_type?: string | null
           quantity: number
           record_date: string
           unit?: string
@@ -454,12 +464,17 @@ export type Database = {
           company_name?: string
           created_at?: string
           created_by?: string | null
+          generator_company_id?: string | null
+          generator_company_name?: string | null
           id?: string
           is_linked_to_system?: boolean
           linked_at?: string | null
           linked_by?: string | null
           notes?: string | null
           organization_id?: string
+          partner_company_id?: string | null
+          partner_company_name?: string | null
+          partner_type?: string | null
           quantity?: number
           record_date?: string
           unit?: string
@@ -483,6 +498,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "external_weight_records_generator_company_id_fkey"
+            columns: ["generator_company_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "external_weight_records_linked_by_fkey"
             columns: ["linked_by"]
             isOneToOne: false
@@ -492,6 +514,13 @@ export type Database = {
           {
             foreignKeyName: "external_weight_records_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_partner_company_id_fkey"
+            columns: ["partner_company_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]

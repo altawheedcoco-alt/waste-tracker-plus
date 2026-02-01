@@ -14,10 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { Plus, CalendarIcon, Link2, Link2Off, Trash2, Edit, Scale, Building2, Filter } from "lucide-react";
+import { Plus, CalendarIcon, Link2, Link2Off, Trash2, Edit, Scale, Building2, Filter, Check, ChevronsUpDown, Factory, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { wasteTypeLabels } from "@/lib/wasteClassification";
 
@@ -25,6 +26,11 @@ interface ExternalRecord {
   id: string;
   company_name: string;
   company_id: string | null;
+  generator_company_id: string | null;
+  generator_company_name: string | null;
+  partner_company_id: string | null;
+  partner_company_name: string | null;
+  partner_type: string | null;
   quantity: number;
   unit: string;
   waste_type: string;
@@ -34,6 +40,12 @@ interface ExternalRecord {
   linked_at: string | null;
   notes: string | null;
   created_at: string;
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  organization_type: string;
 }
 
 interface Props {
@@ -48,10 +60,16 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ExternalRecord | null>(null);
   const [filterLinked, setFilterLinked] = useState<'all' | 'linked' | 'unlinked'>('all');
+  const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [partnerOpen, setPartnerOpen] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
     company_name: '',
+    generator_company_id: '',
+    generator_company_name: '',
+    partner_company_id: '',
+    partner_company_name: '',
     quantity: '',
     unit: 'كجم',
     waste_type: '',
@@ -59,6 +77,30 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
     record_date: new Date(),
     notes: ''
   });
+
+  // Fetch organizations for dropdowns
+  const { data: organizations = [] } = useQuery({
+    queryKey: ['organizations-for-records'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type')
+        .eq('is_verified', true)
+        .order('name');
+      
+      if (error) throw error;
+      return data as Organization[];
+    }
+  });
+
+  const generators = organizations.filter(o => o.organization_type === 'generator');
+  const transporters = organizations.filter(o => o.organization_type === 'transporter');
+  const recyclers = organizations.filter(o => o.organization_type === 'recycler');
+
+  // Partner list depends on organization type
+  const partnerList = organizationType === 'recycler' ? transporters : recyclers;
+  const partnerLabel = organizationType === 'recycler' ? 'الجهة الناقلة' : 'جهة التدوير';
+  const partnerIcon = organizationType === 'recycler' ? Truck : Factory;
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['external-weight-records', profile?.organization_id],
@@ -81,7 +123,12 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
         .from('external_weight_records')
         .insert({
           organization_id: profile?.organization_id,
-          company_name: data.company_name,
+          company_name: data.generator_company_name || data.company_name,
+          generator_company_id: data.generator_company_id || null,
+          generator_company_name: data.generator_company_name || null,
+          partner_company_id: data.partner_company_id || null,
+          partner_company_name: data.partner_company_name || null,
+          partner_type: organizationType === 'recycler' ? 'transporter' : 'recycler',
           quantity: parseFloat(data.quantity),
           unit: data.unit,
           waste_type: data.waste_type,
@@ -106,7 +153,11 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
       const { error } = await supabase
         .from('external_weight_records')
         .update({
-          company_name: data.company_name,
+          company_name: data.generator_company_name || data.company_name,
+          generator_company_id: data.generator_company_id || null,
+          generator_company_name: data.generator_company_name || null,
+          partner_company_id: data.partner_company_id || null,
+          partner_company_name: data.partner_company_name || null,
           quantity: parseFloat(data.quantity),
           unit: data.unit,
           waste_type: data.waste_type,
@@ -164,6 +215,10 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
   const resetForm = () => {
     setFormData({
       company_name: '',
+      generator_company_id: '',
+      generator_company_name: '',
+      partner_company_id: '',
+      partner_company_name: '',
       quantity: '',
       unit: 'كجم',
       waste_type: '',
@@ -177,6 +232,10 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
     setEditingRecord(record);
     setFormData({
       company_name: record.company_name,
+      generator_company_id: record.generator_company_id || '',
+      generator_company_name: record.generator_company_name || '',
+      partner_company_id: record.partner_company_id || '',
+      partner_company_name: record.partner_company_name || '',
       quantity: record.quantity.toString(),
       unit: record.unit,
       waste_type: record.waste_type,
@@ -294,19 +353,165 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
                   إضافة سجل
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md">
+              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{editingRecord ? 'تعديل السجل' : 'إضافة سجل جديد'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Generator Company */}
                   <div className="space-y-2">
-                    <Label>اسم الشركة / الجهة</Label>
-                    <Input
-                      value={formData.company_name}
-                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                      placeholder="أدخل اسم الشركة"
-                      required
-                    />
+                    <Label className="flex items-center gap-2">
+                      <Factory className="h-4 w-4" />
+                      الجهة المولدة
+                    </Label>
+                    <Popover open={generatorOpen} onOpenChange={setGeneratorOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={generatorOpen}
+                          className="w-full justify-between"
+                        >
+                          {formData.generator_company_name || "اختر أو أدخل اسم الجهة المولدة"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0 z-50" align="start">
+                        <Command>
+                          <CommandInput 
+                            placeholder="ابحث أو أدخل اسم جديد..." 
+                            onValueChange={(val) => {
+                              if (!generators.find(g => g.name === val)) {
+                                setFormData({ ...formData, generator_company_id: '', generator_company_name: val });
+                              }
+                            }}
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-start"
+                                onClick={() => {
+                                  setGeneratorOpen(false);
+                                }}
+                              >
+                                استخدم الاسم المكتوب
+                              </Button>
+                            </CommandEmpty>
+                            <CommandGroup heading="الجهات المولدة المسجلة">
+                              {generators.map((org) => (
+                                <CommandItem
+                                  key={org.id}
+                                  value={org.name}
+                                  onSelect={() => {
+                                    setFormData({ 
+                                      ...formData, 
+                                      generator_company_id: org.id, 
+                                      generator_company_name: org.name 
+                                    });
+                                    setGeneratorOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.generator_company_id === org.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {org.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {!formData.generator_company_id && (
+                      <Input
+                        value={formData.generator_company_name}
+                        onChange={(e) => setFormData({ ...formData, generator_company_name: e.target.value, generator_company_id: '' })}
+                        placeholder="أو أدخل اسم الجهة يدوياً"
+                        className="mt-2"
+                      />
+                    )}
+                  </div>
+
+                  {/* Partner Company (Transporter for Recycler, Recycler for Transporter) */}
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      {organizationType === 'recycler' ? <Truck className="h-4 w-4" /> : <Factory className="h-4 w-4" />}
+                      {partnerLabel}
+                    </Label>
+                    <Popover open={partnerOpen} onOpenChange={setPartnerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={partnerOpen}
+                          className="w-full justify-between"
+                        >
+                          {formData.partner_company_name || `اختر أو أدخل اسم ${partnerLabel}`}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-full p-0 z-50" align="start">
+                        <Command>
+                          <CommandInput 
+                            placeholder="ابحث أو أدخل اسم جديد..." 
+                            onValueChange={(val) => {
+                              if (!partnerList.find(p => p.name === val)) {
+                                setFormData({ ...formData, partner_company_id: '', partner_company_name: val });
+                              }
+                            }}
+                          />
+                          <CommandList>
+                            <CommandEmpty>
+                              <Button
+                                variant="ghost"
+                                className="w-full justify-start"
+                                onClick={() => {
+                                  setPartnerOpen(false);
+                                }}
+                              >
+                                استخدم الاسم المكتوب
+                              </Button>
+                            </CommandEmpty>
+                            <CommandGroup heading={`${partnerLabel} المسجلة`}>
+                              {partnerList.map((org) => (
+                                <CommandItem
+                                  key={org.id}
+                                  value={org.name}
+                                  onSelect={() => {
+                                    setFormData({ 
+                                      ...formData, 
+                                      partner_company_id: org.id, 
+                                      partner_company_name: org.name 
+                                    });
+                                    setPartnerOpen(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      formData.partner_company_id === org.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {org.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    {!formData.partner_company_id && (
+                      <Input
+                        value={formData.partner_company_name}
+                        onChange={(e) => setFormData({ ...formData, partner_company_name: e.target.value, partner_company_id: '' })}
+                        placeholder={`أو أدخل اسم ${partnerLabel} يدوياً`}
+                        className="mt-2"
+                      />
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
@@ -414,7 +619,8 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>الشركة</TableHead>
+                    <TableHead>الجهة المولدة</TableHead>
+                    <TableHead>{partnerLabel}</TableHead>
                     <TableHead>نوع المخلف</TableHead>
                     <TableHead>الكمية</TableHead>
                     <TableHead>التاريخ</TableHead>
@@ -426,7 +632,28 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
                 <TableBody>
                   {filteredRecords.map((record) => (
                     <TableRow key={record.id}>
-                      <TableCell className="font-medium">{record.company_name}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          <Factory className="h-4 w-4 text-muted-foreground" />
+                          <span>{record.generator_company_name || record.company_name}</span>
+                          {record.generator_company_id && (
+                            <Badge variant="secondary" className="text-xs">مسجل</Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {organizationType === 'recycler' ? (
+                            <Truck className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Factory className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          <span>{record.partner_company_name || '-'}</span>
+                          {record.partner_company_id && (
+                            <Badge variant="secondary" className="text-xs">مسجل</Badge>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline">
                           {wasteTypeLabels[record.waste_type as keyof typeof wasteTypeLabels] || record.waste_type}
