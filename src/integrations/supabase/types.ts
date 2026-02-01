@@ -234,6 +234,107 @@ export type Database = {
           },
         ]
       }
+      contract_custom_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_closing_text: string | null
+          custom_dispute_resolution: string | null
+          custom_duration_clause: string | null
+          custom_header_text: string | null
+          custom_introduction_text: string | null
+          custom_notes: string | null
+          custom_obligations_party_one: string | null
+          custom_obligations_party_two: string | null
+          custom_payment_terms: string | null
+          custom_termination_clause: string | null
+          custom_terms_template: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          original_contract_id: string | null
+          template_id: string | null
+          updated_at: string
+          version_name: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_closing_text?: string | null
+          custom_dispute_resolution?: string | null
+          custom_duration_clause?: string | null
+          custom_header_text?: string | null
+          custom_introduction_text?: string | null
+          custom_notes?: string | null
+          custom_obligations_party_one?: string | null
+          custom_obligations_party_two?: string | null
+          custom_payment_terms?: string | null
+          custom_termination_clause?: string | null
+          custom_terms_template?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          original_contract_id?: string | null
+          template_id?: string | null
+          updated_at?: string
+          version_name: string
+          version_number?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_closing_text?: string | null
+          custom_dispute_resolution?: string | null
+          custom_duration_clause?: string | null
+          custom_header_text?: string | null
+          custom_introduction_text?: string | null
+          custom_notes?: string | null
+          custom_obligations_party_one?: string | null
+          custom_obligations_party_two?: string | null
+          custom_payment_terms?: string | null
+          custom_termination_clause?: string | null
+          custom_terms_template?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          original_contract_id?: string | null
+          template_id?: string | null
+          updated_at?: string
+          version_name?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_custom_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_custom_versions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_custom_versions_original_contract_id_fkey"
+            columns: ["original_contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_custom_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "contract_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_templates: {
         Row: {
           closing_text: string | null
@@ -333,9 +434,51 @@ export type Database = {
           },
         ]
       }
+      contract_verifications: {
+        Row: {
+          contract_id: string
+          created_at: string
+          id: string
+          user_agent: string | null
+          verification_code: string
+          verification_result: boolean
+          verified_at: string
+          verified_by_ip: string | null
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          id?: string
+          user_agent?: string | null
+          verification_code: string
+          verification_result?: boolean
+          verified_at?: string
+          verified_by_ip?: string | null
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          id?: string
+          user_agent?: string | null
+          verification_code?: string
+          verification_result?: boolean
+          verified_at?: string
+          verified_by_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_verifications_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           attachment_url: string | null
+          clause_count: number | null
           contract_number: string
           contract_type: string
           created_at: string
@@ -344,6 +487,8 @@ export type Database = {
           description: string | null
           end_date: string | null
           id: string
+          is_verified: boolean | null
+          legal_references: Json | null
           notes: string | null
           organization_id: string
           partner_name: string | null
@@ -354,9 +499,16 @@ export type Database = {
           title: string
           updated_at: string
           value: number | null
+          verification_code: string | null
+          verification_qr_url: string | null
+          verified_at: string | null
+          verified_by: string | null
+          waste_category: string | null
+          waste_type: string | null
         }
         Insert: {
           attachment_url?: string | null
+          clause_count?: number | null
           contract_number: string
           contract_type?: string
           created_at?: string
@@ -365,6 +517,8 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          is_verified?: boolean | null
+          legal_references?: Json | null
           notes?: string | null
           organization_id: string
           partner_name?: string | null
@@ -375,9 +529,16 @@ export type Database = {
           title: string
           updated_at?: string
           value?: number | null
+          verification_code?: string | null
+          verification_qr_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          waste_category?: string | null
+          waste_type?: string | null
         }
         Update: {
           attachment_url?: string | null
+          clause_count?: number | null
           contract_number?: string
           contract_type?: string
           created_at?: string
@@ -386,6 +547,8 @@ export type Database = {
           description?: string | null
           end_date?: string | null
           id?: string
+          is_verified?: boolean | null
+          legal_references?: Json | null
           notes?: string | null
           organization_id?: string
           partner_name?: string | null
@@ -396,6 +559,12 @@ export type Database = {
           title?: string
           updated_at?: string
           value?: number | null
+          verification_code?: string | null
+          verification_qr_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          waste_category?: string | null
+          waste_type?: string | null
         }
         Relationships: [
           {
@@ -417,6 +586,13 @@ export type Database = {
             columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1917,6 +2093,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_contract_verification_code: { Args: never; Returns: string }
       get_pending_drivers: {
         Args: never
         Returns: {
