@@ -268,7 +268,7 @@ const RecyclerDashboard = () => {
       <QuickActionsGrid
         actions={[
           { title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: () => setShowSmartWeightUpload(true), iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
-          { title: 'أدوات الذكاء الاصطناعي', subtitle: 'استخراج البيانات وتحليلها', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },
+          { title: 'أدوات تحليل التدوير', subtitle: 'إحصائيات وتحليلات متقدمة', icon: Bot, path: '/dashboard/recycler-ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },
           { title: 'تقارير الاستدامة البيئية', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600' },
           { title: 'تحليل البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
           { title: 'الشحنات الواردة', subtitle: 'عرض وإدارة الشحنات', icon: Package, path: '/dashboard/shipments' },
