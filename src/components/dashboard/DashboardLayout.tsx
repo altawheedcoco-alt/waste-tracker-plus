@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,7 +71,10 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+// Memoized sidebar nav item for performance
+const MemoizedSidebarNavItem = memo(SidebarNavItem);
+
+const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
@@ -711,6 +714,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </div>
     </TooltipProvider>
   );
-};
+});
+
+DashboardLayout.displayName = 'DashboardLayout';
 
 export default DashboardLayout;

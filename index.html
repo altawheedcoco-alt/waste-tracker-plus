@@ -9,6 +9,16 @@
     <meta name="geo.region" content="EG" />
     <meta name="geo.placename" content="Cairo, Egypt" />
     
+    <!-- Preload critical fonts for faster rendering -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" /></noscript>
+    
+    <!-- DNS Prefetch for external resources -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#10b981" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -41,6 +51,18 @@
     <meta name="twitter:description" content="نظام متكامل لإدارة النفايات والحفاظ على البيئة في مصر" />
     
     <link rel="icon" type="image/png" href="/favicon.png" />
+    
+    <!-- Critical CSS for instant first paint -->
+    <style>
+      #root{min-height:100vh}
+      .min-h-screen{min-height:100vh}
+      .flex{display:flex}
+      .items-center{align-items:center}
+      .justify-center{justify-content:center}
+      .bg-background{background-color:hsl(140 20% 98%)}
+      .animate-spin{animation:spin 1s linear infinite}
+      @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
   </head>
   <body>
     <div id="root"></div>

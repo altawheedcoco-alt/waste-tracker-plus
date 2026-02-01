@@ -161,39 +161,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserData = useCallback(async (userId: string) => {
     try {
-      // Fetch profile
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
+      // Parallel fetch for better performance
+      const [profileResult, rolesResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle(),
+        supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+      ]);
+
+      const profileData = profileResult.data;
+      const rolesData = rolesResult.data;
+
+      if (rolesData) {
+        setRoles(rolesData.map((r: UserRole) => r.role));
+      }
 
       if (profileData) {
         setProfile(profileData as Profile);
 
-        // Fetch user's organizations
-        const orgs = await fetchUserOrganizations(userId);
-        setUserOrganizations(orgs);
+        // Fetch organizations in background (non-blocking)
+        fetchUserOrganizations(userId).then(orgs => {
+          setUserOrganizations(orgs);
+        });
 
         // Determine which organization to load
         const activeOrgId = profileData.active_organization_id || profileData.organization_id;
         
         if (activeOrgId) {
-          const org = await fetchOrganization(activeOrgId);
-          if (org) {
-            setOrganization(org);
-          }
+          fetchOrganization(activeOrgId).then(org => {
+            if (org) {
+              setOrganization(org);
+            }
+          });
         }
-      }
-
-      // Fetch roles
-      const { data: rolesData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
-
-      if (rolesData) {
-        setRoles(rolesData.map((r: UserRole) => r.role));
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
