@@ -2,12 +2,13 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Loader2, Navigation, MapPin, Truck, Route } from 'lucide-react';
+import { Loader2, Navigation, MapPin, Truck, Route, Eye, Radio } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useViewerPresence } from '@/hooks/useDriverPresence';
 
 // Fix for default marker icons in Leaflet with Vite
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -118,7 +119,7 @@ const ShipmentTrackingMap = ({
   onDriverLocationUpdate,
   className = '',
 }: ShipmentTrackingMapProps) => {
-  const { roles } = useAuth();
+  const { roles, profile, organization } = useAuth();
   const [driverLocation, setDriverLocation] = useState<Location | null>(initialDriverLocation || null);
   const [driverPath, setDriverPath] = useState<LocationLog[]>([]);
   const [isTracking, setIsTracking] = useState(false);
@@ -127,10 +128,18 @@ const ShipmentTrackingMap = ({
   const [routeData, setRouteData] = useState<OSRMRoute | null>(null);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
+  const [isLiveTracking, setIsLiveTracking] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const lastSavedRef = useRef<number>(0);
 
   const isDriver = roles.includes('driver');
+
+  // Live tracking presence - announce to driver when watching
+  const { isConnected: isPresenceConnected } = useViewerPresence(
+    isLiveTracking && driverId ? driverId : '',
+    profile?.full_name || 'مستخدم',
+    organization?.name
+  );
 
   // Fetch route from OSRM
   const fetchRoute = useCallback(async () => {
@@ -599,6 +608,38 @@ const ShipmentTrackingMap = ({
 
         {/* Controls overlay */}
         <div className="absolute bottom-4 right-4 z-[1000] flex flex-col gap-2">
+          {/* Live Tracking Button - for non-drivers to track the shipment */}
+          {driverId && !isDriver && (
+            <Button
+              size="sm"
+              variant={isLiveTracking ? 'default' : 'outline'}
+              onClick={() => setIsLiveTracking(!isLiveTracking)}
+              className={`shadow-lg transition-all duration-300 ${
+                isLiveTracking 
+                  ? 'bg-green-600 hover:bg-green-700 text-white' 
+                  : 'bg-background hover:bg-muted'
+              }`}
+            >
+              {isLiveTracking ? (
+                <>
+                  <Radio className="w-4 h-4 mr-1 animate-pulse" />
+                  تتبع مباشر نشط
+                  {isPresenceConnected && (
+                    <span className="relative flex h-2 w-2 mr-1">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                  )}
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4 mr-1" />
+                  تتبع مباشر
+                </>
+              )}
+            </Button>
+          )}
+
           {showDriverTracking && isDriver && (
             <Button
               size="sm"
