@@ -8,14 +8,14 @@ import TransporterDashboard from '@/components/dashboard/TransporterDashboard';
 import RecyclerDashboard from '@/components/dashboard/RecyclerDashboard';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import DriverDashboard from '@/components/dashboard/DriverDashboard';
-import TransporterTermsDialog from '@/components/auth/TransporterTermsDialog';
+import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, organization, loading, roles } = useAuth();
   const navigate = useNavigate();
-  const { requiresAcceptance, loading: termsLoading, markAsAccepted } = useTermsAcceptance();
+  const { requiresAcceptance, loading: termsLoading, markAsAccepted, organizationType } = useTermsAcceptance();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -69,11 +69,14 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* Terms acceptance dialog for transporters */}
-      <TransporterTermsDialog 
-        open={requiresAcceptance} 
-        onAccept={markAsAccepted} 
-      />
+      {/* Terms acceptance dialog for all organization types */}
+      {requiresAcceptance && organizationType && (
+        <OrganizationTermsDialog 
+          open={requiresAcceptance} 
+          onAccept={markAsAccepted}
+          organizationType={organizationType}
+        />
+      )}
       
       <DashboardLayout>
         {renderDashboard()}

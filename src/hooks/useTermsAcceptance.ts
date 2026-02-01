@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { CURRENT_TERMS_VERSION } from '@/data/transporterTermsContent';
+import { CURRENT_TERMS_VERSION, OrganizationType } from '@/data/organizationTermsContent';
 
 interface TermsAcceptance {
   id: string;
@@ -28,8 +28,9 @@ export const useTermsAcceptance = () => {
         return;
       }
 
-      // Only require terms for transporters
-      if (organization.organization_type !== 'transporter') {
+      // All organization types require terms acceptance
+      const validOrgTypes: OrganizationType[] = ['generator', 'transporter', 'recycler'];
+      if (!validOrgTypes.includes(organization.organization_type as OrganizationType)) {
         setLoading(false);
         setHasAcceptedTerms(true);
         return;
@@ -66,11 +67,14 @@ export const useTermsAcceptance = () => {
     setHasAcceptedTerms(true);
   };
 
+  const organizationType = organization?.organization_type as OrganizationType | undefined;
+
   return {
     hasAcceptedTerms,
     loading,
     acceptance,
     markAsAccepted,
-    requiresAcceptance: organization?.organization_type === 'transporter' && hasAcceptedTerms === false,
+    organizationType,
+    requiresAcceptance: organizationType && hasAcceptedTerms === false,
   };
 };

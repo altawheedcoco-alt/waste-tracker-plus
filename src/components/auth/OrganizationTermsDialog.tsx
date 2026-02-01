@@ -21,25 +21,64 @@ import {
   Lock,
   CheckCircle,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Factory,
+  Truck,
+  Recycle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
-  transporterTermsSections, 
+  getTermsSections,
+  getTermsTitle,
+  getOrganizationTypeLabel,
+  getAgreementText,
   legalReferences,
-  CURRENT_TERMS_VERSION 
-} from '@/data/transporterTermsContent';
+  CURRENT_TERMS_VERSION,
+  OrganizationType
+} from '@/data/organizationTermsContent';
 
-interface TransporterTermsDialogProps {
+interface OrganizationTermsDialogProps {
   open: boolean;
   onAccept: () => void;
+  organizationType: OrganizationType;
 }
 
-const TransporterTermsDialog = ({ open, onAccept }: TransporterTermsDialogProps) => {
+const OrganizationTermsDialog = ({ open, onAccept, organizationType }: OrganizationTermsDialogProps) => {
   const { user, profile, organization } = useAuth();
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const termsSections = getTermsSections(organizationType);
+  const termsTitle = getTermsTitle(organizationType);
+  const orgTypeLabel = getOrganizationTypeLabel(organizationType);
+  const agreementText = getAgreementText(organizationType);
+
+  const getOrgIcon = () => {
+    switch (organizationType) {
+      case 'generator':
+        return <Factory className="w-8 h-8" />;
+      case 'transporter':
+        return <Truck className="w-8 h-8" />;
+      case 'recycler':
+        return <Recycle className="w-8 h-8" />;
+      default:
+        return <Shield className="w-8 h-8" />;
+    }
+  };
+
+  const getWarningText = () => {
+    switch (organizationType) {
+      case 'generator':
+        return 'بالموافقة على هذه الشروط، فإنك تقر بالتزامك الكامل بالقوانين واللوائح البيئية المصرية وتتحمل المسؤولية القانونية الكاملة عن تصنيف وتخزين المخلفات المولدة.';
+      case 'transporter':
+        return 'بالموافقة على هذه الشروط، فإنك تقر بالتزامك الكامل بالقوانين واللوائح البيئية المصرية وتتحمل المسؤولية القانونية الكاملة عن عمليات نقل المخلفات.';
+      case 'recycler':
+        return 'بالموافقة على هذه الشروط، فإنك تقر بالتزامك الكامل بالقوانين واللوائح البيئية المصرية وتتحمل المسؤولية القانونية الكاملة عن عمليات التدوير والمعالجة.';
+      default:
+        return 'بالموافقة على هذه الشروط، فإنك تقر بالتزامك الكامل بالقوانين واللوائح البيئية المصرية.';
+    }
+  };
 
   const handleAcceptTerms = async () => {
     if (!agreed) {
@@ -90,13 +129,13 @@ const TransporterTermsDialog = ({ open, onAccept }: TransporterTermsDialogProps)
         <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground p-6">
           <DialogHeader>
             <div className="flex items-center justify-center gap-3 mb-2">
-              <Shield className="w-8 h-8" />
+              {getOrgIcon()}
               <DialogTitle className="text-2xl font-bold">
                 آي ريسايكل
               </DialogTitle>
             </div>
             <DialogDescription className="text-primary-foreground/90 text-center text-lg">
-              الشروط والأحكام للجهات الناقلة للمخلفات
+              {termsTitle}
             </DialogDescription>
           </DialogHeader>
           
@@ -132,15 +171,14 @@ const TransporterTermsDialog = ({ open, onAccept }: TransporterTermsDialogProps)
                     تنبيه هام
                   </p>
                   <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                    بالموافقة على هذه الشروط، فإنك تقر بالتزامك الكامل بالقوانين واللوائح البيئية المصرية 
-                    وتتحمل المسؤولية القانونية الكاملة عن عمليات نقل المخلفات.
+                    {getWarningText()}
                   </p>
                 </div>
               </div>
             </motion.div>
 
             {/* Terms Sections */}
-            {transporterTermsSections.map((section, index) => (
+            {termsSections.map((section, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 10 }}
@@ -159,7 +197,7 @@ const TransporterTermsDialog = ({ open, onAccept }: TransporterTermsDialogProps)
                     </p>
                   ))}
                 </div>
-                {index < transporterTermsSections.length - 1 && (
+                {index < termsSections.length - 1 && (
                   <Separator className="mt-4" />
                 )}
               </motion.div>
@@ -196,7 +234,7 @@ const TransporterTermsDialog = ({ open, onAccept }: TransporterTermsDialogProps)
                   </div>
                   <div className="space-y-1">
                     <span className="text-muted-foreground">نوع الجهة:</span>
-                    <p className="font-medium">جهة ناقلة</p>
+                    <p className="font-medium">{orgTypeLabel}</p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-muted-foreground">تاريخ الموافقة:</span>
@@ -221,9 +259,7 @@ const TransporterTermsDialog = ({ open, onAccept }: TransporterTermsDialogProps)
               htmlFor="terms-agree" 
               className="text-sm cursor-pointer leading-relaxed"
             >
-              أقر بأنني قرأت وفهمت جميع الشروط والأحكام الواردة أعلاه، وأوافق على الالتزام بها التزاماً كاملاً، 
-              وأتحمل كامل المسؤولية القانونية عن أي مخالفة. كما أوافق على إعفاء منصة آي ريسايكل من أي مسؤولية 
-              قانونية أو مالية ناتجة عن عملياتي.
+              {agreementText}
             </label>
           </div>
 
@@ -255,4 +291,4 @@ const TransporterTermsDialog = ({ open, onAccept }: TransporterTermsDialogProps)
   );
 };
 
-export default TransporterTermsDialog;
+export default OrganizationTermsDialog;
