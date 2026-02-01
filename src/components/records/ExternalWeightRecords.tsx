@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,12 +15,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { Plus, CalendarIcon, Link2, Link2Off, Trash2, Edit, Scale, Building2, Filter, Check, ChevronsUpDown, Factory, Truck } from "lucide-react";
+import { Plus, CalendarIcon, Link2, Link2Off, Trash2, Edit, Scale, Building2, Filter, Check, ChevronsUpDown, Factory, Truck, Printer, Download, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { wasteTypeLabels } from "@/lib/wasteClassification";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import ExternalRecordsPrint from "./ExternalRecordsPrint";
 
 interface ExternalRecord {
   id: string;
@@ -55,13 +59,15 @@ interface Props {
 const units = ['كجم', 'طن', 'متر مكعب', 'وحدة'];
 
 export default function ExternalWeightRecords({ organizationType }: Props) {
-  const { profile } = useAuth();
+  const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<ExternalRecord | null>(null);
   const [filterLinked, setFilterLinked] = useState<'all' | 'linked' | 'unlinked'>('all');
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -271,6 +277,164 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
 
   const roleLabel = organizationType === 'recycler' ? 'المستلمة' : 'المنقولة';
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow || !printRef.current) return;
+    
+    const content = printRef.current.innerHTML;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="rtl">
+        <head>
+          <title>سجل الكميات الخارجية</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+            body { padding: 20px; direction: rtl; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-size: 11px; }
+            th { background-color: #f5f5f5; }
+            .text-center { text-align: center; }
+            .font-bold { font-weight: bold; }
+            .text-lg { font-size: 16px; }
+            .text-xl { font-size: 18px; }
+            .text-xs { font-size: 10px; }
+            .border { border: 1px solid #ddd; }
+            .rounded { border-radius: 4px; }
+            .p-2 { padding: 8px; }
+            .p-3 { padding: 12px; }
+            .mb-1 { margin-bottom: 4px; }
+            .mb-3 { margin-bottom: 12px; }
+            .mb-4 { margin-bottom: 16px; }
+            .mt-4 { margin-top: 16px; }
+            .mt-6 { margin-top: 24px; }
+            .pt-4 { padding-top: 16px; }
+            .pb-4 { padding-bottom: 16px; }
+            .px-1\\.5 { padding-left: 6px; padding-right: 6px; }
+            .py-0\\.5 { padding-top: 2px; padding-bottom: 2px; }
+            .grid { display: grid; }
+            .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+            .gap-2 { gap: 8px; }
+            .flex { display: flex; }
+            .items-center { align-items: center; }
+            .justify-between { justify-content: space-between; }
+            .border-b-2 { border-bottom: 2px solid #333; }
+            .border-t { border-top: 1px solid #ddd; }
+            .bg-green-50 { background-color: #f0fdf4; }
+            .bg-green-100 { background-color: #dcfce7; }
+            .bg-orange-50 { background-color: #fff7ed; }
+            .bg-orange-100 { background-color: #ffedd5; }
+            .bg-blue-50 { background-color: #eff6ff; }
+            .bg-gray-50 { background-color: #f9fafb; }
+            .bg-gray-100 { background-color: #f3f4f6; }
+            .text-green-700 { color: #15803d; }
+            .text-green-800 { color: #166534; }
+            .text-orange-600 { color: #ea580c; }
+            .text-orange-800 { color: #9a3412; }
+            .text-blue-700 { color: #1d4ed8; }
+            .text-blue-800 { color: #1e40af; }
+            .text-gray-500 { color: #6b7280; }
+            .text-gray-600 { color: #4b5563; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>${content}</body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!printRef.current) return;
+    
+    setIsExporting(true);
+    toast.loading('جاري إنشاء ملف PDF...');
+    
+    try {
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      const fileName = `سجل_الكميات_الخارجية_${format(new Date(), 'yyyy-MM-dd')}.pdf`;
+      pdf.save(fileName);
+      
+      toast.dismiss();
+      toast.success('تم تحميل الملف بنجاح');
+    } catch (error) {
+      toast.dismiss();
+      toast.error('حدث خطأ أثناء إنشاء PDF');
+      console.error(error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleOpenPDF = async () => {
+    if (!printRef.current) return;
+    
+    setIsExporting(true);
+    toast.loading('جاري إنشاء المعاينة...');
+    
+    try {
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      toast.dismiss();
+      toast.success('تم فتح المعاينة');
+    } catch (error) {
+      toast.dismiss();
+      toast.error('حدث خطأ');
+      console.error(error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header Stats */}
@@ -328,7 +492,31 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
             <Scale className="h-5 w-5" />
             سجل الكميات {roleLabel} الخارجية
           </CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Export Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" disabled={isExporting || filteredRecords.length === 0}>
+                  <FileText className="h-4 w-4 ml-2" />
+                  تصدير
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background z-50">
+                <DropdownMenuItem onClick={handlePrint}>
+                  <Printer className="h-4 w-4 ml-2" />
+                  طباعة
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleOpenPDF}>
+                  <FileText className="h-4 w-4 ml-2" />
+                  معاينة PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDownloadPDF}>
+                  <Download className="h-4 w-4 ml-2" />
+                  تحميل PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Select value={filterLinked} onValueChange={(v: any) => setFilterLinked(v)}>
               <SelectTrigger className="w-[140px]">
                 <Filter className="h-4 w-4 ml-2" />
@@ -730,6 +918,17 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Hidden Print Component */}
+      <div className="hidden">
+        <ExternalRecordsPrint
+          ref={printRef}
+          records={filteredRecords}
+          organizationType={organizationType}
+          organizationName={organization?.name || ''}
+          filterType={filterLinked}
+        />
+      </div>
     </div>
   );
 }
