@@ -169,11 +169,20 @@ const getSoundSettings = (): Record<NotificationSoundType, boolean> => {
 };
 
 const getDefaultSoundSettings = (): Record<NotificationSoundType, boolean> => {
-  const settings: Record<NotificationSoundType, boolean> = {} as any;
-  Object.keys(NOTIFICATION_SOUNDS).forEach(key => {
-    settings[key as NotificationSoundType] = true;
-  });
-  return settings;
+  // All sounds enabled by default
+  return {
+    shipment_created: true,
+    shipment_status: true,
+    shipment_approved: true,
+    shipment_delivered: true,
+    shipment_assigned: true,
+    recycling_report: true,
+    document_uploaded: true,
+    approval_request: true,
+    chat_message: true,
+    warning: true,
+    default: true,
+  };
 };
 
 export const playNotificationSound = async (type: NotificationSoundType = 'default') => {
@@ -259,7 +268,18 @@ export const setNotificationSoundEnabled = (enabled: boolean) => {
 
 export const isNotificationSoundEnabled = (): boolean => {
   const stored = localStorage.getItem('notification_sound_enabled');
+  // Default to true if not set
   return stored !== 'false';
+};
+
+// Initialize all sounds to enabled on first load
+export const ensureSoundsEnabled = () => {
+  if (localStorage.getItem('notification_sound_enabled') === null) {
+    localStorage.setItem('notification_sound_enabled', 'true');
+  }
+  if (localStorage.getItem('notification_sound_settings') === null) {
+    localStorage.setItem('notification_sound_settings', JSON.stringify(getDefaultSoundSettings()));
+  }
 };
 
 export const setSoundTypeEnabled = (type: NotificationSoundType, enabled: boolean) => {

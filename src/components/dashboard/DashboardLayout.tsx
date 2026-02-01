@@ -62,7 +62,7 @@ import CreateRequestButton from './CreateRequestButton';
 import AccountSwitcher from './AccountSwitcher';
 import { usePartnersCount } from '@/hooks/usePartnersCount';
 import { useNotifications } from '@/hooks/useNotifications';
-import { initNotificationAudio } from '@/hooks/useNotificationSound';
+import { initNotificationAudio, ensureSoundsEnabled } from '@/hooks/useNotificationSound';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
@@ -100,7 +100,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }, [shouldCollapseSidebar]);
 
   // Unlock notification audio on first user gesture (required by browser autoplay policies)
+  // Also ensure all sounds are enabled by default
   useEffect(() => {
+    // Ensure sounds are enabled on first load
+    ensureSoundsEnabled();
+    
     let didInit = false;
     const unlock = () => {
       if (didInit) return;
