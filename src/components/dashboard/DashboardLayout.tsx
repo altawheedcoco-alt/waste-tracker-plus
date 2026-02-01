@@ -228,6 +228,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   // Driver-specific menu items (simplified) - with unique keys
   const driverMenuItems = [
     { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard', key: 'driver-dashboard' },
+    { icon: User, label: 'ملف السائق', path: '/dashboard/driver-profile', key: 'driver-profile' },
+    { icon: Truck, label: 'بيانات السائق', path: '/dashboard/driver-data', key: 'driver-data' },
     { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments', key: 'driver-shipments' },
     { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location', key: 'driver-location' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },

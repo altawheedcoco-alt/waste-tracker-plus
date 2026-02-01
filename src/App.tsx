@@ -51,6 +51,8 @@ import IssueRecyclingCertificates from "./pages/dashboard/IssueRecyclingCertific
 import Settings from "./pages/dashboard/Settings";
 import ReportsGuide from "./pages/dashboard/ReportsGuide";
 import AboutPlatform from "./pages/dashboard/AboutPlatform";
+import DriverProfile from "./pages/dashboard/DriverProfile";
+import DriverData from "./pages/dashboard/DriverData";
 import AIChatbot from "./components/ai/AIChatbot";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
@@ -115,6 +117,8 @@ const App = () => (
                 <Route path="/dashboard/settings" element={<Settings />} />
                 <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
                 <Route path="/dashboard/reports-guide" element={<ReportsGuide />} />
+                <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
+                <Route path="/dashboard/driver-data" element={<DriverData />} />
                 <Route path="/dashboard/*" element={<Dashboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
