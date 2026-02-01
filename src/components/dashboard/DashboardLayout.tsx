@@ -681,10 +681,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             )}
           </AnimatePresence>
 
-          {/* Page content - Responsive padding */}
-          <main className={`flex-1 ${mainPadding} overflow-auto`}>
+          {/* Page content - Responsive padding with proper overflow handling */}
+          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto`}>
             <DashboardBreadcrumb />
-            {children}
+            <div className="w-full max-w-full">
+              {children}
+            </div>
           </main>
 
           {/* Floating Create Shipment Button for Transporters/Drivers - positioned to avoid chat widget */}
