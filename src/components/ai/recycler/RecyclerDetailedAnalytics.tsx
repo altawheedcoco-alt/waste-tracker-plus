@@ -10,13 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { 
   CalendarDays, TrendingUp, TrendingDown, Loader2, Package, 
   AlertTriangle, CheckCircle2, Clock, Recycle, Scale, Zap,
-  Activity, Target, Award, BarChart3
+  Activity, Target, Award, BarChart3, Focus, Star, Building2
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, BarChart, Bar, Legend, ComposedChart, Line,
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
-  RadialBarChart, RadialBar, Cell
+  RadialBarChart, RadialBar, Cell, LineChart
 } from 'recharts';
 import { 
   format, subWeeks, subMonths, subYears, startOfWeek, endOfWeek, 
@@ -24,7 +24,7 @@ import {
   differenceInDays
 } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { wasteTypeLabels, isHazardousWasteType } from '@/lib/wasteClassification';
+import { wasteTypeLabels, isHazardousWasteType, getWasteTypeCode } from '@/lib/wasteClassification';
 
 interface PeriodData {
   period: string;
@@ -33,6 +33,26 @@ interface PeriodData {
   efficiency: number;
   avgProcessingTime: number;
   shipmentCount: number;
+}
+
+interface SpecializationStats {
+  waste_type: string;
+  name: string;
+  code: string;
+  weeklyData: PeriodData[];
+  monthlyData: PeriodData[];
+  yearlyData: PeriodData[];
+  totalReceived: number;
+  totalProcessed: number;
+  efficiency: number;
+  weeklyGrowth: number;
+  monthlyGrowth: number;
+  yearlyGrowth: number;
+  avgProcessingTime: number;
+  shipmentCount: number;
+  isHazardous: boolean;
+  uniqueGenerators: number;
+  isPrimary: boolean;
 }
 
 interface OverallStats {
@@ -44,34 +64,19 @@ interface OverallStats {
   totalShipments: number;
   hazardousRatio: number;
   avgProcessingDays: number;
+  specializationScore: number;
 }
 
-interface WasteTypePeriodStats {
-  waste_type: string;
-  name: string;
-  weeklyData: PeriodData[];
-  monthlyData: PeriodData[];
-  yearlyData: PeriodData[];
-  totalReceived: number;
-  totalProcessed: number;
-  weeklyGrowth: number;
-  monthlyGrowth: number;
-  yearlyGrowth: number;
-  avgProcessingTime: number;
-  shipmentCount: number;
-  isHazardous: boolean;
-}
-
-const CHART_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-const RADIAL_COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444', '#ec4899'];
+const CHART_COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 const RecyclerDetailedAnalytics = () => {
   const { organization } = useAuth();
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
-  const [wasteTypeStats, setWasteTypeStats] = useState<WasteTypePeriodStats[]>([]);
-  const [selectedWasteType, setSelectedWasteType] = useState<string | null>(null);
+  const [specializationStats, setSpecializationStats] = useState<SpecializationStats[]>([]);
+  const [selectedSpecialization, setSelectedSpecialization] = useState<string | null>(null);
   const [overallStats, setOverallStats] = useState<OverallStats | null>(null);
+  const [generatorBreakdown, setGeneratorBreakdown] = useState<any[]>([]);
 
   useEffect(() => {
     if (organization?.id) {
@@ -85,7 +90,7 @@ const RecyclerDetailedAnalytics = () => {
       
       const { data: shipments, error } = await supabase
         .from('shipments')
-        .select('id, waste_type, quantity, status, created_at, delivered_at, confirmed_at')
+        .select('id, waste_type, quantity, status, created_at, delivered_at, confirmed_at, generator_id')
         .eq('recycler_id', organization?.id)
         .order('created_at', { ascending: false });
 
@@ -119,17 +124,6 @@ const RecyclerDetailedAnalytics = () => {
         });
         const peakEntry = Object.entries(monthlyQuantities).sort((a, b) => b[1] - a[1])[0];
 
-        setOverallStats({
-          totalReceived,
-          totalProcessed,
-          avgEfficiency: totalReceived > 0 ? (totalProcessed / totalReceived) * 100 : 0,
-          peakMonth: peakEntry ? format(new Date(peakEntry[0] + '-01'), 'MMMM yyyy', { locale: ar }) : '-',
-          peakQuantity: peakEntry ? peakEntry[1] : 0,
-          totalShipments: shipments.length,
-          hazardousRatio: totalReceived > 0 ? (hazardousQuantity / totalReceived) * 100 : 0,
-          avgProcessingDays: processedCount > 0 ? totalProcessingDays / processedCount : 0,
-        });
-
         // Group by waste type
         const wasteTypeMap: Record<string, any[]> = {};
         shipments.forEach(s => {
@@ -139,10 +133,36 @@ const RecyclerDetailedAnalytics = () => {
           wasteTypeMap[s.waste_type].push(s);
         });
 
-        const now = new Date();
-        const statsArray: WasteTypePeriodStats[] = [];
+        // Calculate specialization score (concentration on top 2 types)
+        const typeTotals = Object.entries(wasteTypeMap).map(([type, items]) => ({
+          type,
+          total: items.reduce((sum, s) => sum + (s.quantity || 0), 0)
+        })).sort((a, b) => b.total - a.total);
 
-        Object.entries(wasteTypeMap).forEach(([wasteType, typeShipments]) => {
+        const top2Total = typeTotals.slice(0, 2).reduce((sum, t) => sum + t.total, 0);
+        const specializationScore = totalReceived > 0 ? (top2Total / totalReceived) * 100 : 0;
+
+        setOverallStats({
+          totalReceived,
+          totalProcessed,
+          avgEfficiency: totalReceived > 0 ? (totalProcessed / totalReceived) * 100 : 0,
+          peakMonth: peakEntry ? format(new Date(peakEntry[0] + '-01'), 'MMMM yyyy', { locale: ar }) : '-',
+          peakQuantity: peakEntry ? peakEntry[1] : 0,
+          totalShipments: shipments.length,
+          hazardousRatio: totalReceived > 0 ? (hazardousQuantity / totalReceived) * 100 : 0,
+          avgProcessingDays: processedCount > 0 ? totalProcessingDays / processedCount : 0,
+          specializationScore,
+        });
+
+        const now = new Date();
+        const statsArray: SpecializationStats[] = [];
+
+        // Only process top 2 waste types (specialization focus)
+        const topTypes = typeTotals.slice(0, 2);
+
+        topTypes.forEach(({ type: wasteType }, idx) => {
+          const typeShipments = wasteTypeMap[wasteType];
+          
           // Weekly data (12 weeks)
           const weeklyData: PeriodData[] = [];
           for (let i = 11; i >= 0; i--) {
@@ -231,8 +251,8 @@ const RecyclerDetailedAnalytics = () => {
           }
 
           const typeConfirmed = typeShipments.filter(s => s.status === 'confirmed');
-          const totalReceived = typeShipments.reduce((sum, s) => sum + (s.quantity || 0), 0);
-          const totalProcessed = typeConfirmed.reduce((sum, s) => sum + (s.quantity || 0), 0);
+          const typeReceived = typeShipments.reduce((sum, s) => sum + (s.quantity || 0), 0);
+          const typeProcessed = typeConfirmed.reduce((sum, s) => sum + (s.quantity || 0), 0);
 
           // Calculate processing time
           let totalDays = 0;
@@ -243,6 +263,9 @@ const RecyclerDetailedAnalytics = () => {
               count++;
             }
           });
+
+          // Unique generators
+          const uniqueGenerators = new Set(typeShipments.map(s => s.generator_id).filter(Boolean)).size;
 
           // Calculate growth rates
           const weeklyGrowth = weeklyData.length >= 2 && weeklyData[weeklyData.length - 2].received > 0
@@ -263,24 +286,46 @@ const RecyclerDetailedAnalytics = () => {
           statsArray.push({
             waste_type: wasteType,
             name: wasteTypeLabels[wasteType] || wasteType,
+            code: getWasteTypeCode(wasteType),
             weeklyData,
             monthlyData,
             yearlyData,
-            totalReceived,
-            totalProcessed,
+            totalReceived: typeReceived,
+            totalProcessed: typeProcessed,
+            efficiency: typeReceived > 0 ? (typeProcessed / typeReceived) * 100 : 0,
             weeklyGrowth,
             monthlyGrowth,
             yearlyGrowth,
             avgProcessingTime: count > 0 ? totalDays / count : 0,
             shipmentCount: typeShipments.length,
             isHazardous: isHazardousWasteType(wasteType),
+            uniqueGenerators,
+            isPrimary: idx === 0,
           });
         });
 
-        statsArray.sort((a, b) => b.totalReceived - a.totalReceived);
-        setWasteTypeStats(statsArray);
+        setSpecializationStats(statsArray);
         if (statsArray.length > 0) {
-          setSelectedWasteType(statsArray[0].waste_type);
+          setSelectedSpecialization(statsArray[0].waste_type);
+        }
+
+        // Generator breakdown for primary specialization
+        if (topTypes.length > 0) {
+          const primaryType = topTypes[0].type;
+          const primaryShipments = wasteTypeMap[primaryType];
+          const generatorMap: Record<string, { id: string; quantity: number; count: number }> = {};
+          
+          primaryShipments.forEach(s => {
+            if (s.generator_id) {
+              if (!generatorMap[s.generator_id]) {
+                generatorMap[s.generator_id] = { id: s.generator_id, quantity: 0, count: 0 };
+              }
+              generatorMap[s.generator_id].quantity += s.quantity || 0;
+              generatorMap[s.generator_id].count += 1;
+            }
+          });
+
+          setGeneratorBreakdown(Object.values(generatorMap).sort((a, b) => b.quantity - a.quantity).slice(0, 5));
         }
       }
     } catch (error) {
@@ -290,27 +335,42 @@ const RecyclerDetailedAnalytics = () => {
     }
   };
 
-  const selectedStats = wasteTypeStats.find(s => s.waste_type === selectedWasteType);
+  const selectedStats = specializationStats.find(s => s.waste_type === selectedSpecialization);
   const chartData = selectedStats 
     ? (selectedPeriod === 'weekly' ? selectedStats.weeklyData 
       : selectedPeriod === 'monthly' ? selectedStats.monthlyData 
       : selectedStats.yearlyData)
     : [];
 
-  // Radar chart data for top 6 waste types comparison
-  const top6Stats = wasteTypeStats.slice(0, 6);
-  const radarData = [
-    { metric: 'الكمية', ...Object.fromEntries(top6Stats.map(s => [s.name, Math.min(100, (s.totalReceived / (overallStats?.totalReceived || 1)) * 100)])) },
-    { metric: 'الكفاءة', ...Object.fromEntries(top6Stats.map(s => [s.name, s.totalReceived > 0 ? (s.totalProcessed / s.totalReceived) * 100 : 0])) },
-    { metric: 'الشحنات', ...Object.fromEntries(top6Stats.map(s => [s.name, Math.min(100, (s.shipmentCount / (overallStats?.totalShipments || 1)) * 100)])) },
-    { metric: 'النمو', ...Object.fromEntries(top6Stats.map(s => [s.name, Math.max(0, Math.min(100, 50 + s.monthlyGrowth))])) },
-  ];
+  // Radar chart comparing both specializations
+  const radarData = specializationStats.length >= 2 ? [
+    { 
+      metric: 'الكفاءة', 
+      [specializationStats[0].name]: specializationStats[0].efficiency,
+      [specializationStats[1].name]: specializationStats[1].efficiency,
+    },
+    { 
+      metric: 'الكمية %', 
+      [specializationStats[0].name]: overallStats ? (specializationStats[0].totalReceived / overallStats.totalReceived) * 100 : 0,
+      [specializationStats[1].name]: overallStats ? (specializationStats[1].totalReceived / overallStats.totalReceived) * 100 : 0,
+    },
+    { 
+      metric: 'الشركاء', 
+      [specializationStats[0].name]: Math.min(100, specializationStats[0].uniqueGenerators * 10),
+      [specializationStats[1].name]: Math.min(100, specializationStats[1].uniqueGenerators * 10),
+    },
+    { 
+      metric: 'النمو', 
+      [specializationStats[0].name]: Math.max(0, Math.min(100, 50 + specializationStats[0].monthlyGrowth)),
+      [specializationStats[1].name]: Math.max(0, Math.min(100, 50 + specializationStats[1].monthlyGrowth)),
+    },
+  ] : [];
 
-  // Radial chart data for performance metrics
-  const radialData = top6Stats.map((s, i) => ({
+  // Efficiency comparison radial
+  const efficiencyRadial = specializationStats.map((s, i) => ({
     name: s.name,
-    value: s.totalReceived > 0 ? (s.totalProcessed / s.totalReceived) * 100 : 0,
-    fill: RADIAL_COLORS[i % RADIAL_COLORS.length],
+    value: s.efficiency,
+    fill: CHART_COLORS[i % CHART_COLORS.length],
   }));
 
   if (loading) {
@@ -323,10 +383,20 @@ const RecyclerDetailedAnalytics = () => {
 
   return (
     <div className="space-y-6">
-      {/* Overall Stats Dashboard */}
+      {/* Specialization Overview Stats */}
       {overallStats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+              <CardContent className="p-3 text-center">
+                <Focus className="w-6 h-6 mx-auto text-green-500 mb-1" />
+                <p className="text-xs text-muted-foreground">مستوى التخصص</p>
+                <p className="text-lg font-bold">{overallStats.specializationScore.toFixed(0)}%</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.05 }}>
             <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 border-blue-500/20">
               <CardContent className="p-3 text-center">
                 <Package className="w-6 h-6 mx-auto text-blue-500 mb-1" />
@@ -337,10 +407,10 @@ const RecyclerDetailedAnalytics = () => {
             </Card>
           </motion.div>
           
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.05 }}>
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5 border-green-500/20">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
+            <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
               <CardContent className="p-3 text-center">
-                <Recycle className="w-6 h-6 mx-auto text-green-500 mb-1" />
+                <Recycle className="w-6 h-6 mx-auto text-emerald-500 mb-1" />
                 <p className="text-xs text-muted-foreground">تم معالجته</p>
                 <p className="text-lg font-bold">{(overallStats.totalProcessed / 1000).toFixed(1)}</p>
                 <p className="text-xs text-muted-foreground">طن</p>
@@ -348,17 +418,17 @@ const RecyclerDetailedAnalytics = () => {
             </Card>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-            <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 border-emerald-500/20">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}>
+            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
               <CardContent className="p-3 text-center">
-                <Target className="w-6 h-6 mx-auto text-emerald-500 mb-1" />
+                <Target className="w-6 h-6 mx-auto text-amber-500 mb-1" />
                 <p className="text-xs text-muted-foreground">كفاءة المعالجة</p>
                 <p className="text-lg font-bold">{overallStats.avgEfficiency.toFixed(0)}%</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15 }}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
             <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5 border-purple-500/20">
               <CardContent className="p-3 text-center">
                 <Clock className="w-6 h-6 mx-auto text-purple-500 mb-1" />
@@ -369,7 +439,7 @@ const RecyclerDetailedAnalytics = () => {
             </Card>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 }}>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25 }}>
             <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5 border-red-500/20">
               <CardContent className="p-3 text-center">
                 <AlertTriangle className="w-6 h-6 mx-auto text-red-500 mb-1" />
@@ -379,31 +449,20 @@ const RecyclerDetailedAnalytics = () => {
             </Card>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.25 }}>
-            <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
+            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
               <CardContent className="p-3 text-center">
-                <Award className="w-6 h-6 mx-auto text-amber-500 mb-1" />
+                <Award className="w-6 h-6 mx-auto text-cyan-500 mb-1" />
                 <p className="text-xs text-muted-foreground">شهر الذروة</p>
                 <p className="text-sm font-bold truncate">{overallStats.peakMonth}</p>
               </CardContent>
             </Card>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
-            <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 border-cyan-500/20">
-              <CardContent className="p-3 text-center">
-                <Scale className="w-6 h-6 mx-auto text-cyan-500 mb-1" />
-                <p className="text-xs text-muted-foreground">أعلى كمية</p>
-                <p className="text-lg font-bold">{(overallStats.peakQuantity / 1000).toFixed(1)}</p>
-                <p className="text-xs text-muted-foreground">طن</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 }}>
-            <Card className="bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 border-indigo-500/20">
+            <Card className="bg-gradient-to-br from-pink-500/10 to-pink-600/5 border-pink-500/20">
               <CardContent className="p-3 text-center">
-                <Activity className="w-6 h-6 mx-auto text-indigo-500 mb-1" />
+                <BarChart3 className="w-6 h-6 mx-auto text-pink-500 mb-1" />
                 <p className="text-xs text-muted-foreground">عدد الشحنات</p>
                 <p className="text-lg font-bold">{overallStats.totalShipments}</p>
               </CardContent>
@@ -412,400 +471,309 @@ const RecyclerDetailedAnalytics = () => {
         </div>
       )}
 
-      {/* Radar & Radial Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 justify-end text-base">
-              <BarChart3 className="w-5 h-5 text-primary" />
-              مقارنة متعددة الأبعاد لأنواع المخلفات
-            </CardTitle>
-            <CardDescription className="text-right">تحليل شامل للكمية والكفاءة والنمو</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <RadarChart data={radarData}>
-                <PolarGrid stroke="hsl(var(--muted-foreground))" strokeOpacity={0.3} />
-                <PolarAngleAxis dataKey="metric" tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
-                {top6Stats.map((stat, i) => (
-                  <Radar
-                    key={stat.waste_type}
-                    name={stat.name}
-                    dataKey={stat.name}
-                    stroke={CHART_COLORS[i]}
-                    fill={CHART_COLORS[i]}
-                    fillOpacity={0.2}
-                    strokeWidth={2}
-                  />
-                ))}
-                <Legend wrapperStyle={{ direction: 'rtl' }} />
-                <Tooltip />
-              </RadarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Specialization Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {specializationStats.map((spec, index) => (
+          <motion.div
+            key={spec.waste_type}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+          >
+            <Card 
+              className={`cursor-pointer transition-all ${
+                selectedSpecialization === spec.waste_type 
+                  ? 'ring-2 ring-primary border-primary' 
+                  : 'hover:border-primary/50'
+              } ${spec.isPrimary ? 'bg-gradient-to-br from-green-500/5 to-emerald-500/5' : 'bg-gradient-to-br from-blue-500/5 to-cyan-500/5'}`}
+              onClick={() => setSelectedSpecialization(spec.waste_type)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    {spec.isPrimary && <Star className="w-5 h-5 text-amber-500" />}
+                    <Badge variant={spec.isHazardous ? 'destructive' : 'secondary'}>
+                      {spec.isHazardous ? 'خطرة' : 'غير خطرة'}
+                    </Badge>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center gap-2 justify-end">
+                      <h3 className="text-lg font-bold">{spec.name}</h3>
+                      <Badge variant="outline">{spec.code}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {spec.isPrimary ? 'التخصص الرئيسي' : 'التخصص الثانوي'}
+                    </p>
+                  </div>
+                </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 justify-end text-base">
-              <Zap className="w-5 h-5 text-primary" />
-              مؤشرات كفاءة المعالجة
-            </CardTitle>
-            <CardDescription className="text-right">نسبة المعالجة لكل نوع مخلفات</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <RadialBarChart 
-                cx="50%" 
-                cy="50%" 
-                innerRadius="20%" 
-                outerRadius="90%" 
-                data={radialData}
-                startAngle={180}
-                endAngle={0}
-              >
-                <RadialBar
-                  background
-                  dataKey="value"
-                  cornerRadius={10}
-                  label={{ fill: 'hsl(var(--foreground))', position: 'insideStart', fontSize: 10 }}
-                />
-                <Legend 
-                  iconSize={10}
-                  layout="horizontal"
-                  verticalAlign="bottom"
-                  wrapperStyle={{ direction: 'rtl' }}
-                />
-                <Tooltip formatter={(value: number) => [`${value.toFixed(1)}%`, 'الكفاءة']} />
-              </RadialBarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+                <div className="grid grid-cols-4 gap-3 text-center">
+                  <div>
+                    <p className="text-xs text-muted-foreground">المستلم</p>
+                    <p className="text-lg font-bold">{(spec.totalReceived / 1000).toFixed(1)}</p>
+                    <p className="text-xs text-muted-foreground">طن</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">الكفاءة</p>
+                    <p className="text-lg font-bold">{spec.efficiency.toFixed(0)}%</p>
+                    <Progress value={spec.efficiency} className="h-1 mt-1" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">المعالجة</p>
+                    <p className="text-lg font-bold">{spec.avgProcessingTime.toFixed(1)}</p>
+                    <p className="text-xs text-muted-foreground">يوم</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">النمو</p>
+                    <div className="flex items-center justify-center gap-1">
+                      {spec.monthlyGrowth >= 0 ? (
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <TrendingDown className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={`text-lg font-bold ${spec.monthlyGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {Math.abs(spec.monthlyGrowth).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
 
-      {/* Waste Type Selector */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 justify-end">
-            <CalendarDays className="w-5 h-5 text-primary" />
-            تحليل تفصيلي لكل نوع مخلفات
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2 justify-end">
-            {wasteTypeStats.map((stat) => (
-              <Badge
-                key={stat.waste_type}
-                variant={selectedWasteType === stat.waste_type ? 'default' : 'outline'}
-                className={`cursor-pointer transition-all ${
-                  selectedWasteType === stat.waste_type 
-                    ? 'scale-105' 
-                    : 'hover:scale-105'
-                } ${stat.isHazardous ? 'border-red-500/50' : ''}`}
-                onClick={() => setSelectedWasteType(stat.waste_type)}
-              >
-                {stat.isHazardous && <AlertTriangle className="w-3 h-3 ml-1" />}
-                {stat.name}
-                <span className="mr-1 text-xs opacity-70">({stat.totalReceived.toLocaleString()} كجم)</span>
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {selectedStats && (
-        <>
-          {/* Selected Type Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <Package className="w-6 h-6 text-blue-500" />
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">إجمالي المستلم</p>
-                      <p className="text-xl font-bold">{selectedStats.totalReceived.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">كجم</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <CheckCircle2 className="w-6 h-6 text-green-500" />
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">تم معالجته</p>
-                      <p className="text-xl font-bold">{selectedStats.totalProcessed.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground">كجم</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <Clock className="w-6 h-6 text-purple-500" />
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">متوسط المعالجة</p>
-                      <p className="text-xl font-bold">{selectedStats.avgProcessingTime.toFixed(1)}</p>
-                      <p className="text-xs text-muted-foreground">يوم</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    {selectedStats.weeklyGrowth >= 0 ? (
-                      <TrendingUp className="w-6 h-6 text-emerald-500" />
-                    ) : (
-                      <TrendingDown className="w-6 h-6 text-red-500" />
-                    )}
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">نمو أسبوعي</p>
-                      <p className={`text-xl font-bold ${selectedStats.weeklyGrowth >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {selectedStats.weeklyGrowth >= 0 ? '+' : ''}{selectedStats.weeklyGrowth.toFixed(1)}%
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    {selectedStats.monthlyGrowth >= 0 ? (
-                      <TrendingUp className="w-6 h-6 text-emerald-500" />
-                    ) : (
-                      <TrendingDown className="w-6 h-6 text-red-500" />
-                    )}
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">نمو شهري</p>
-                      <p className={`text-xl font-bold ${selectedStats.monthlyGrowth >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {selectedStats.monthlyGrowth >= 0 ? '+' : ''}{selectedStats.monthlyGrowth.toFixed(1)}%
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    {selectedStats.yearlyGrowth >= 0 ? (
-                      <TrendingUp className="w-6 h-6 text-emerald-500" />
-                    ) : (
-                      <TrendingDown className="w-6 h-6 text-red-500" />
-                    )}
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">نمو سنوي</p>
-                      <p className={`text-xl font-bold ${selectedStats.yearlyGrowth >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                        {selectedStats.yearlyGrowth >= 0 ? '+' : ''}{selectedStats.yearlyGrowth.toFixed(1)}%
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Period Tabs with Composed Chart */}
+      {/* Comparison Charts */}
+      {specializationStats.length >= 2 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Radar Comparison */}
           <Card>
             <CardHeader>
-              <Tabs value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as any)} dir="rtl">
-                <TabsList className="grid w-full grid-cols-3">
+              <CardTitle className="flex items-center gap-2 justify-end">
+                <Activity className="w-5 h-5 text-primary" />
+                مقارنة التخصصات
+              </CardTitle>
+              <CardDescription className="text-right">
+                مقارنة متعددة الأبعاد بين التخصص الرئيسي والثانوي
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <RadarChart data={radarData}>
+                  <PolarGrid strokeDasharray="3 3" />
+                  <PolarAngleAxis dataKey="metric" />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                  <Radar 
+                    name={specializationStats[0].name} 
+                    dataKey={specializationStats[0].name} 
+                    stroke="#10b981" 
+                    fill="#10b981" 
+                    fillOpacity={0.5} 
+                  />
+                  <Radar 
+                    name={specializationStats[1].name} 
+                    dataKey={specializationStats[1].name} 
+                    stroke="#3b82f6" 
+                    fill="#3b82f6" 
+                    fillOpacity={0.5} 
+                  />
+                  <Legend />
+                  <Tooltip />
+                </RadarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* Efficiency Radial */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 justify-end">
+                <Target className="w-5 h-5 text-primary" />
+                كفاءة المعالجة
+              </CardTitle>
+              <CardDescription className="text-right">
+                مقارنة كفاءة المعالجة لكل تخصص
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <RadialBarChart 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius="30%" 
+                  outerRadius="90%" 
+                  data={efficiencyRadial}
+                  startAngle={90}
+                  endAngle={-270}
+                >
+                  <RadialBar
+                    dataKey="value"
+                    cornerRadius={10}
+                    label={{ position: 'insideStart', fill: '#fff', fontSize: 12 }}
+                  />
+                  <Legend 
+                    iconSize={10}
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                  />
+                  <Tooltip formatter={(value: number) => [`${value.toFixed(1)}%`, 'الكفاءة']} />
+                </RadialBarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Detailed Trend Analysis */}
+      {selectedStats && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <Tabs value={selectedPeriod} onValueChange={(v) => setSelectedPeriod(v as any)}>
+                <TabsList>
                   <TabsTrigger value="weekly">أسبوعي</TabsTrigger>
                   <TabsTrigger value="monthly">شهري</TabsTrigger>
                   <TabsTrigger value="yearly">سنوي</TabsTrigger>
                 </TabsList>
               </Tabs>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <ComposedChart data={chartData}>
-                  <defs>
-                    <linearGradient id="receivedGradientRecycler" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="processedGradientRecycler" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="period" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" domain={[0, 100]} unit="%" />
-                  <Tooltip 
-                    formatter={(value: number, name: string) => {
-                      if (name === 'efficiency') return [`${value.toFixed(1)}%`, 'الكفاءة'];
-                      return [`${value.toLocaleString()} كجم`, name === 'received' ? 'المستلم' : 'المعالج'];
-                    }} 
-                  />
-                  <Legend formatter={(value) => {
-                    if (value === 'received') return 'المستلم';
-                    if (value === 'processed') return 'المعالج';
-                    if (value === 'efficiency') return 'الكفاءة';
-                    return value;
-                  }} />
-                  <Area 
-                    yAxisId="left"
-                    type="monotone" 
-                    dataKey="received" 
-                    stroke="#3b82f6" 
-                    fill="url(#receivedGradientRecycler)"
-                    strokeWidth={2}
-                  />
-                  <Area 
-                    yAxisId="left"
-                    type="monotone" 
-                    dataKey="processed" 
-                    stroke="#10b981" 
-                    fill="url(#processedGradientRecycler)"
-                    strokeWidth={2}
-                  />
-                  <Line 
-                    yAxisId="right"
-                    type="monotone" 
-                    dataKey="efficiency" 
-                    stroke="#8b5cf6" 
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          {/* Detailed Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 justify-end">
-                <Scale className="w-5 h-5 text-primary" />
-                جدول البيانات التفصيلي
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-right">الفترة</TableHead>
-                      <TableHead className="text-right">المستلم (كجم)</TableHead>
-                      <TableHead className="text-right">المعالج (كجم)</TableHead>
-                      <TableHead className="text-right">الكفاءة</TableHead>
-                      <TableHead className="text-right">متوسط المعالجة</TableHead>
-                      <TableHead className="text-right">الشحنات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {chartData.map((row, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">{row.period}</TableCell>
-                        <TableCell>{row.received.toLocaleString()}</TableCell>
-                        <TableCell>{row.processed.toLocaleString()}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Progress value={row.efficiency} className="h-2 w-16" />
-                            <span className="text-sm">{row.efficiency.toFixed(0)}%</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>{row.avgProcessingTime.toFixed(1)} يوم</TableCell>
-                        <TableCell>{row.shipmentCount}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <div className="text-right">
+                <CardTitle className="flex items-center gap-2 justify-end">
+                  <CalendarDays className="w-5 h-5 text-primary" />
+                  التحليل الزمني للتخصص
+                </CardTitle>
+                <CardDescription className="flex items-center gap-2 justify-end">
+                  <Badge variant="outline">{selectedStats.code}</Badge>
+                  <span>{selectedStats.name}</span>
+                </CardDescription>
               </div>
-            </CardContent>
-          </Card>
-        </>
-      )}
-
-      {/* Full Comparison Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 justify-end">
-            <BarChart3 className="w-5 h-5 text-primary" />
-            جدول مقارنة شامل لجميع الأنواع
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-right">نوع المخلفات</TableHead>
-                  <TableHead className="text-right">المستلم</TableHead>
-                  <TableHead className="text-right">المعالج</TableHead>
-                  <TableHead className="text-right">النسبة</TableHead>
-                  <TableHead className="text-right">نمو شهري</TableHead>
-                  <TableHead className="text-right">متوسط المعالجة</TableHead>
-                  <TableHead className="text-right">الشحنات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {wasteTypeStats.map((stat) => {
-                  const percentage = overallStats?.totalReceived 
-                    ? (stat.totalReceived / overallStats.totalReceived) * 100 
-                    : 0;
-                  return (
-                    <TableRow key={stat.waste_type}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2 justify-end">
-                          {stat.name}
-                          {stat.isHazardous && <AlertTriangle className="w-4 h-4 text-red-500" />}
-                        </div>
-                      </TableCell>
-                      <TableCell>{stat.totalReceived.toLocaleString()} كجم</TableCell>
-                      <TableCell>{stat.totalProcessed.toLocaleString()} كجم</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress value={percentage} className="h-2 w-16" />
-                          <span className="text-sm">{percentage.toFixed(1)}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className={stat.monthlyGrowth >= 0 ? 'text-emerald-500' : 'text-red-500'}>
-                          {stat.monthlyGrowth >= 0 ? '+' : ''}{stat.monthlyGrowth.toFixed(1)}%
-                        </span>
-                      </TableCell>
-                      <TableCell>{stat.avgProcessingTime.toFixed(1)} يوم</TableCell>
-                      <TableCell>{stat.shipmentCount}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      {wasteTypeStats.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center text-muted-foreground">
-            <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>لا توجد بيانات لعرضها</p>
-            <p className="text-sm">ستظهر الإحصائيات هنا بعد استلام الشحنات</p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={350}>
+              <ComposedChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorReceived" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                  </linearGradient>
+                  <linearGradient id="colorProcessed" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="period" />
+                <YAxis yAxisId="left" tickFormatter={(value) => `${(value / 1000).toFixed(1)}t`} />
+                <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+                <Tooltip 
+                  formatter={(value: number, name: string) => {
+                    if (name === 'الكفاءة') return [`${value.toFixed(1)}%`, name];
+                    return [`${(value / 1000).toFixed(2)} طن`, name];
+                  }} 
+                />
+                <Legend />
+                <Area 
+                  yAxisId="left"
+                  type="monotone" 
+                  dataKey="received" 
+                  name="المستلم" 
+                  stroke="#10b981" 
+                  fillOpacity={1}
+                  fill="url(#colorReceived)"
+                />
+                <Area 
+                  yAxisId="left"
+                  type="monotone" 
+                  dataKey="processed" 
+                  name="المعالج" 
+                  stroke="#3b82f6" 
+                  fillOpacity={1}
+                  fill="url(#colorProcessed)"
+                />
+                <Line 
+                  yAxisId="right"
+                  type="monotone" 
+                  dataKey="efficiency" 
+                  name="الكفاءة" 
+                  stroke="#f59e0b" 
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#f59e0b' }}
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       )}
+
+      {/* Specialization Details Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 justify-end">
+            <Scale className="w-5 h-5 text-primary" />
+            تفاصيل التخصصات
+          </CardTitle>
+          <CardDescription className="text-right">
+            جدول مقارنة تفصيلي للتخصص الرئيسي والثانوي
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center">النمو الشهري</TableHead>
+                <TableHead className="text-center">وقت المعالجة</TableHead>
+                <TableHead className="text-center">الكفاءة</TableHead>
+                <TableHead className="text-center">الشركاء</TableHead>
+                <TableHead className="text-center">الشحنات</TableHead>
+                <TableHead className="text-center">المستلم (طن)</TableHead>
+                <TableHead className="text-center">الكود</TableHead>
+                <TableHead className="text-right">التخصص</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {specializationStats.map((spec, index) => (
+                <TableRow key={spec.waste_type} className={spec.isPrimary ? 'bg-green-500/5' : ''}>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      {spec.monthlyGrowth >= 0 ? (
+                        <TrendingUp className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <TrendingDown className="w-4 h-4 text-red-500" />
+                      )}
+                      <span className={spec.monthlyGrowth >= 0 ? 'text-green-500' : 'text-red-500'}>
+                        {Math.abs(spec.monthlyGrowth).toFixed(0)}%
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">{spec.avgProcessingTime.toFixed(1)} يوم</TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center gap-2">
+                      <Progress value={spec.efficiency} className="h-2 w-16" />
+                      <span>{spec.efficiency.toFixed(0)}%</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">{spec.uniqueGenerators}</TableCell>
+                  <TableCell className="text-center">{spec.shipmentCount}</TableCell>
+                  <TableCell className="text-center font-bold">{(spec.totalReceived / 1000).toFixed(2)}</TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="outline">{spec.code}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center gap-2 justify-end">
+                      {spec.isPrimary && <Star className="w-4 h-4 text-amber-500" />}
+                      <span className="font-medium">{spec.name}</span>
+                      <Badge variant={spec.isHazardous ? 'destructive' : 'secondary'} className="text-xs">
+                        {spec.isHazardous ? 'خطرة' : 'غير خطرة'}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };
