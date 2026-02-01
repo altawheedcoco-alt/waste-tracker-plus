@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useViewerPresence } from '@/hooks/useDriverPresence';
 import {
   MapPin,
   Search,
@@ -23,12 +25,28 @@ import {
   History,
   Calendar,
   Send,
+  Eye,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import DriverTrackingMap from '@/components/maps/DriverTrackingMap';
 import DriverLocationHistory from '@/components/maps/DriverLocationHistory';
 import BackButton from '@/components/ui/back-button';
 import SendDriverNotificationDialog from '@/components/drivers/SendDriverNotificationDialog';
+
+// Component to announce viewer presence when viewing a specific driver
+const ViewerPresenceAnnouncer = ({ 
+  driverId, 
+  viewerName, 
+  organizationName 
+}: { 
+  driverId: string; 
+  viewerName: string; 
+  organizationName?: string;
+}) => {
+  // This hook announces presence when mounted
+  useViewerPresence(driverId, viewerName, organizationName);
+  return null; // Invisible component
+};
 
 interface Driver {
   id: string;
@@ -52,6 +70,7 @@ interface Driver {
 }
 
 const DriverTracking = () => {
+  const { profile, organization } = useAuth();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -386,89 +405,101 @@ const DriverTracking = () => {
 
         {/* Selected Driver Details */}
         {selectedDriver && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <Card>
-              <CardHeader className="text-right">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      className="gap-2"
-                      onClick={() => setHistoryDriver(selectedDriver)}
-                    >
-                      <History className="w-4 h-4" />
-                      سجل المواقع
-                    </Button>
-                    <Button
-                      variant="default"
-                      className="gap-2"
-                      onClick={() => setNotificationDriver(selectedDriver)}
-                    >
-                      <Send className="w-4 h-4" />
-                      إرسال إشعار
-                    </Button>
-                  </div>
-                  <CardTitle>تفاصيل السائق</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <div className="flex items-center gap-4 justify-end">
-                    <div className="text-right">
-                      <p className="font-medium text-lg">{selectedDriver.profile?.full_name}</p>
-                      <p className="text-sm text-muted-foreground">{selectedDriver.organization?.name}</p>
+          <>
+            {/* Announce presence when viewing this driver */}
+            <ViewerPresenceAnnouncer 
+              driverId={selectedDriver.id}
+              viewerName={profile?.full_name || 'مستخدم'}
+              organizationName={organization?.name}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <Card>
+                <CardHeader className="text-right">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-primary gap-1">
+                        <Eye className="w-3 h-3" />
+                        جاري المتابعة
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => setHistoryDriver(selectedDriver)}
+                      >
+                        <History className="w-4 h-4" />
+                        سجل المواقع
+                      </Button>
+                      <Button
+                        variant="default"
+                        className="gap-2"
+                        onClick={() => setNotificationDriver(selectedDriver)}
+                      >
+                        <Send className="w-4 h-4" />
+                        إرسال إشعار
+                      </Button>
                     </div>
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={selectedDriver.profile?.avatar_url || undefined} />
-                      <AvatarFallback className="text-xl">
-                        {selectedDriver.profile?.full_name?.charAt(0) || 'S'}
-                      </AvatarFallback>
-                    </Avatar>
+                    <CardTitle>تفاصيل السائق</CardTitle>
                   </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="flex items-center gap-4 justify-end">
+                      <div className="text-right">
+                        <p className="font-medium text-lg">{selectedDriver.profile?.full_name}</p>
+                        <p className="text-sm text-muted-foreground">{selectedDriver.organization?.name}</p>
+                      </div>
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={selectedDriver.profile?.avatar_url || undefined} />
+                        <AvatarFallback className="text-xl">
+                          {selectedDriver.profile?.full_name?.charAt(0) || 'S'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </div>
 
-                  <div className="space-y-3 text-right">
-                    <div className="flex items-center gap-2 justify-end">
-                      <span>{selectedDriver.license_number}</span>
-                      <Badge variant="outline">رقم الرخصة</Badge>
+                    <div className="space-y-3 text-right">
+                      <div className="flex items-center gap-2 justify-end">
+                        <span>{selectedDriver.license_number}</span>
+                        <Badge variant="outline">رقم الرخصة</Badge>
+                      </div>
+                      <div className="flex items-center gap-2 justify-end">
+                        <span>{selectedDriver.vehicle_plate || '-'}</span>
+                        <Badge variant="outline">لوحة المركبة</Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 justify-end">
-                      <span>{selectedDriver.vehicle_plate || '-'}</span>
-                      <Badge variant="outline">لوحة المركبة</Badge>
-                    </div>
-                  </div>
 
-                  <div className="space-y-3 text-right">
-                    <div className="flex items-center gap-2 justify-end">
-                      <span dir="ltr">{selectedDriver.profile?.phone || '-'}</span>
-                      <Phone className="w-4 h-4 text-muted-foreground" />
+                    <div className="space-y-3 text-right">
+                      <div className="flex items-center gap-2 justify-end">
+                        <span dir="ltr">{selectedDriver.profile?.phone || '-'}</span>
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex items-center gap-2 justify-end">
+                        <span>{getVehicleTypeLabel(selectedDriver.vehicle_type)}</span>
+                        <Truck className="w-4 h-4 text-muted-foreground" />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 justify-end">
-                      <span>{getVehicleTypeLabel(selectedDriver.vehicle_type)}</span>
-                      <Truck className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </div>
 
-                  <div className="space-y-3 text-right">
-                    <div className="flex items-center gap-2 justify-end">
-                      <span className="font-mono text-sm">
-                        {selectedDriver.latitude?.toFixed(4)}, {selectedDriver.longitude?.toFixed(4)}
-                      </span>
-                      <MapPin className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div className="flex items-center gap-2 justify-end">
-                      <span className="text-sm">
-                        {selectedDriver.last_update && new Date(selectedDriver.last_update).toLocaleTimeString('ar-SA')}
-                      </span>
-                      <Clock className="w-4 h-4 text-muted-foreground" />
+                    <div className="space-y-3 text-right">
+                      <div className="flex items-center gap-2 justify-end">
+                        <span className="font-mono text-sm">
+                          {selectedDriver.latitude?.toFixed(4)}, {selectedDriver.longitude?.toFixed(4)}
+                        </span>
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <div className="flex items-center gap-2 justify-end">
+                        <span className="text-sm">
+                          {selectedDriver.last_update && new Date(selectedDriver.last_update).toLocaleTimeString('ar-SA')}
+                        </span>
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </>
         )}
 
         {/* Location History Dialog */}

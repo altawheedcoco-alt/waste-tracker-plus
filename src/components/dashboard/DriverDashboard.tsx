@@ -24,6 +24,7 @@ import DriverSettingsDialog from './DriverSettingsDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import QuickLocationButton from '@/components/tracking/QuickLocationButton';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
+import TrackingWatcherIndicator from '@/components/tracking/TrackingWatcherIndicator';
 import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPicker';
 
 interface DriverInfo {
@@ -172,12 +173,17 @@ const DriverDashboard = () => {
             
             {/* Availability Status */}
             <div className="flex items-center gap-1.5 border-r pr-2 mr-1">
-              <div className={`w-2.5 h-2.5 rounded-full ${driverInfo?.is_available ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+              <div className={`w-2.5 h-2.5 rounded-full ${driverInfo?.is_available ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'}`} />
               <span className="text-xs font-medium">
                 {driverInfo?.is_available ? 'نشط' : 'غير نشط'}
               </span>
             </div>
           </div>
+
+          {/* Watcher Indicator - Shows if someone is tracking this driver */}
+          {driverInfo && (
+            <TrackingWatcherIndicator driverId={driverInfo.id} />
+          )}
 
           {driverInfo && (
             <QuickLocationButton 
