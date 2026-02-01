@@ -16,14 +16,14 @@ import {
   Clock,
   Loader2,
   Shield,
-  MapPin,
-  Send,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import CreateShipmentButton from './CreateShipmentButton';
 import DriverSettingsDialog from './DriverSettingsDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
+import QuickLocationButton from '@/components/tracking/QuickLocationButton';
+import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 
 interface DriverInfo {
   id: string;
@@ -68,72 +68,10 @@ const DriverDashboard = () => {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
-  const [updatingLocation, setUpdatingLocation] = useState(false);
+  const [lastLocationUpdate, setLastLocationUpdate] = useState<Date | null>(null);
 
-  const updateMyLocation = async () => {
-    if (!driverInfo?.id) {
-      toast({
-        title: 'خطأ',
-        description: 'لم يتم العثور على بيانات السائق',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setUpdatingLocation(true);
-    try {
-      // Check if geolocation is supported
-      if (!navigator.geolocation) {
-        throw new Error('Geolocation not supported');
-      }
-
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0,
-        });
-      });
-
-      const { latitude, longitude, accuracy } = position.coords;
-
-      const { error } = await supabase.from('driver_location_logs').insert({
-        driver_id: driverInfo.id,
-        latitude,
-        longitude,
-        accuracy,
-        recorded_at: new Date().toISOString(),
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: 'تم تحديث الموقع ✓',
-        description: `إحداثيات: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
-      });
-    } catch (error: any) {
-      console.error('Error updating location:', error);
-      
-      let errorMessage = 'فشل في الحصول على الموقع الحالي';
-      
-      if (error.code === 1 || error.message === 'User denied Geolocation') {
-        errorMessage = 'يرجى السماح بالوصول إلى موقعك من إعدادات المتصفح';
-      } else if (error.code === 2) {
-        errorMessage = 'تعذر تحديد الموقع، تأكد من تفعيل GPS';
-      } else if (error.code === 3) {
-        errorMessage = 'انتهت مهلة تحديد الموقع، حاول مرة أخرى';
-      } else if (error.message === 'Geolocation not supported') {
-        errorMessage = 'المتصفح لا يدعم تحديد الموقع';
-      }
-      
-      toast({
-        title: 'خطأ في تحديد الموقع',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } finally {
-      setUpdatingLocation(false);
-    }
+  const handleLocationSuccess = (location: { lat: number; lng: number }) => {
+    setLastLocationUpdate(new Date());
   };
 
   useEffect(() => {
@@ -222,19 +160,13 @@ const DriverDashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            onClick={updateMyLocation}
-            disabled={updatingLocation}
-            size="icon"
-            className="bg-green-600 hover:bg-green-700 text-white"
-            title="تحديد موقعي"
-          >
-            {updatingLocation ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <MapPin className="h-4 w-4" />
-            )}
-          </Button>
+          {driverInfo && (
+            <QuickLocationButton 
+              driverId={driverInfo.id} 
+              variant="icon"
+              onSuccess={handleLocationSuccess}
+            />
+          )}
           <CreateShipmentButton 
             variant="eco" 
             onSuccess={fetchDriverData}
@@ -409,6 +341,15 @@ const DriverDashboard = () => {
         driverId={driverInfo?.id || ''}
         onUpdate={fetchDriverData}
       />
+
+      {/* Floating Action Button for Quick Location */}
+      {driverInfo && (
+        <QuickLocationButton 
+          driverId={driverInfo.id} 
+          variant="fab"
+          onSuccess={handleLocationSuccess}
+        />
+      )}
     </div>
   );
 };
