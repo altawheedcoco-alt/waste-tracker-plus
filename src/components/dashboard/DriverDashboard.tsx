@@ -24,6 +24,7 @@ import DriverSettingsDialog from './DriverSettingsDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import QuickLocationButton from '@/components/tracking/QuickLocationButton';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
+import DestinationPicker from '@/components/driver/DestinationPicker';
 
 interface DriverInfo {
   id: string;
@@ -273,6 +274,14 @@ const DriverDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Destination Picker Card */}
+      {driverInfo && (
+        <DestinationPicker 
+          driverId={driverInfo.id} 
+          onDestinationAdded={fetchDriverData}
+        />
+      )}
 
       {/* Shipments Tabs - Using ShipmentCard like Transporter Dashboard */}
       <Tabs defaultValue="active" className="w-full" dir="rtl">
