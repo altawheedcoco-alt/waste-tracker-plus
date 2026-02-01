@@ -59,6 +59,7 @@ import ExternalRecords from "./pages/dashboard/ExternalRecords";
 import Contracts from "./pages/dashboard/Contracts";
 import ContractTemplates from "./pages/dashboard/ContractTemplates";
 import ContractVerificationPage from "./components/contracts/ContractVerificationPage";
+import TermsAcceptances from "./pages/dashboard/TermsAcceptances";
 import AIChatbot from "./components/ai/AIChatbot";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
@@ -131,6 +132,7 @@ const App = () => (
                 <Route path="/dashboard/contracts" element={<Contracts />} />
                 <Route path="/dashboard/contract-templates" element={<ContractTemplates />} />
                 <Route path="/dashboard/verify-contract" element={<ContractVerificationPage />} />
+                <Route path="/dashboard/terms-acceptances" element={<TermsAcceptances />} />
                 <Route path="/dashboard/*" element={<Dashboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

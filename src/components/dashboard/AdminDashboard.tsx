@@ -55,6 +55,7 @@ import {
   AlertCircle,
   Shield,
   Send,
+  FileCheck,
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -514,6 +515,7 @@ const AdminDashboard = () => {
     { title: 'عرض التقارير', subtitle: 'إنشاء تقارير النظام', icon: ChartBar, path: '/dashboard/reports' },
     { title: 'ربط المستخدمين بالشركات', subtitle: 'إدارة ربط المستخدمين بالشركات', icon: Link, path: '/dashboard/user-linking' },
     { title: 'مستندات الشركات', subtitle: 'عرض وطباعة مستندات الشروط والأختام', icon: FileText, path: '/dashboard/documents' },
+    { title: 'موافقات الشروط والأحكام', subtitle: 'متابعة موافقات الجهات على السياسات', icon: FileCheck, path: '/dashboard/terms-acceptances', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
     { title: 'إنشاء شحنة', subtitle: 'إنشاء شحنة جديدة', icon: Plus, path: '/dashboard/shipments/new' },
     { title: 'تتبع السائقين', subtitle: 'خريطة مواقع السائقين', icon: MapPin, path: '/dashboard/driver-tracking' },
     { title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log' },
