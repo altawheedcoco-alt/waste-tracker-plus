@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { 
   FileText, 
@@ -20,17 +21,12 @@ import {
   Building2, 
   Recycle,
   Search,
-  Trash2,
-  Edit,
-  Eye,
   Loader2,
-  Copy,
-  FileSignature,
-  Stamp,
-  Image as ImageIcon,
-  Users,
   Download,
-  Sparkles
+  Sparkles,
+  LayoutGrid,
+  List,
+  Filter
 } from 'lucide-react';
 import { allGeneratorTemplates, allRecyclerTemplates } from '@/data/contractTemplatesData';
 import { 
@@ -40,6 +36,9 @@ import {
   partnerTypeLabels,
   contractCategoryLabels 
 } from '@/hooks/useContractTemplates';
+import TemplateCard from '@/components/contracts/TemplateCard';
+import TemplatePreviewDialog from '@/components/contracts/TemplatePreviewDialog';
+import { usePDFExport } from '@/hooks/usePDFExport';
 
 const ContractTemplates = () => {
   const { templates, loading, createTemplate, updateTemplate, deleteTemplate, fetchTemplates } = useContractTemplates();
@@ -235,101 +234,6 @@ const ContractTemplates = () => {
       t.description?.toLowerCase().includes(query)
     );
   };
-
-  const TemplateCard = ({ template }: { template: ContractTemplate }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <Card className="hover:shadow-md transition-all">
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                <Badge variant={template.template_type === 'system' ? 'secondary' : 'default'}>
-                  {template.template_type === 'system' ? 'نظام' : 'مخصص'}
-                </Badge>
-                <Badge variant="outline">
-                  {contractCategoryLabels[template.contract_category]}
-                </Badge>
-                <Badge variant="outline" className="gap-1">
-                  {template.partner_type === 'generator' ? (
-                    <Building2 className="w-3 h-3" />
-                  ) : template.partner_type === 'recycler' ? (
-                    <Recycle className="w-3 h-3" />
-                  ) : (
-                    <Users className="w-3 h-3" />
-                  )}
-                  {partnerTypeLabels[template.partner_type]}
-                </Badge>
-              </div>
-              <h3 className="font-semibold text-lg truncate">{template.name}</h3>
-              {template.description && (
-                <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{template.description}</p>
-              )}
-              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                {template.include_stamp && (
-                  <span className="flex items-center gap-1">
-                    <Stamp className="w-3 h-3" /> ختم
-                  </span>
-                )}
-                {template.include_signature && (
-                  <span className="flex items-center gap-1">
-                    <FileSignature className="w-3 h-3" /> توقيع
-                  </span>
-                )}
-                {template.include_header_logo && (
-                  <span className="flex items-center gap-1">
-                    <ImageIcon className="w-3 h-3" /> شعار
-                  </span>
-                )}
-                <span>استخدام: {template.usage_count}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => {
-                  setSelectedTemplate(template);
-                  setShowViewDialog(true);
-                }}
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => handleDuplicate(template)}
-              >
-                <Copy className="w-4 h-4" />
-              </Button>
-              {template.template_type === 'custom' && (
-                <>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handleEdit(template)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => handleDelete(template.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-
   const TemplatesList = ({ templates: list, emptyMessage }: { templates: ContractTemplate[]; emptyMessage: string }) => {
     const filtered = filterTemplates(list);
     
@@ -343,9 +247,19 @@ const ContractTemplates = () => {
     }
 
     return (
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filtered.map(template => (
-          <TemplateCard key={template.id} template={template} />
+          <TemplateCard 
+            key={template.id} 
+            template={template}
+            onView={(t) => {
+              setSelectedTemplate(t);
+              setShowViewDialog(true);
+            }}
+            onEdit={handleEdit}
+            onDuplicate={handleDuplicate}
+            onDelete={handleDelete}
+          />
         ))}
       </div>
     );
@@ -715,134 +629,13 @@ const ContractTemplates = () => {
           </DialogContent>
         </Dialog>
 
-        {/* View Dialog */}
-        <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-          <DialogContent className="max-w-3xl max-h-[90vh]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Eye className="w-5 h-5 text-primary" />
-                عرض قالب العقد
-              </DialogTitle>
-            </DialogHeader>
-
-            {selectedTemplate && (
-              <ScrollArea className="h-[60vh] px-1">
-                <div className="space-y-6 py-4">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant={selectedTemplate.template_type === 'system' ? 'secondary' : 'default'}>
-                      {selectedTemplate.template_type === 'system' ? 'قالب نظام' : 'قالب مخصص'}
-                    </Badge>
-                    <Badge variant="outline">
-                      {contractCategoryLabels[selectedTemplate.contract_category]}
-                    </Badge>
-                    <Badge variant="outline">
-                      {partnerTypeLabels[selectedTemplate.partner_type]}
-                    </Badge>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-bold">{selectedTemplate.name}</h3>
-                    {selectedTemplate.description && (
-                      <p className="text-muted-foreground mt-1">{selectedTemplate.description}</p>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  {selectedTemplate.header_text && (
-                    <div>
-                      <Label className="text-muted-foreground">ترويسة العقد</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.header_text}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.introduction_text && (
-                    <div>
-                      <Label className="text-muted-foreground">المقدمة</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.introduction_text}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.terms_template && (
-                    <div>
-                      <Label className="text-muted-foreground">البنود والشروط</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.terms_template}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.obligations_party_one && (
-                    <div>
-                      <Label className="text-muted-foreground">التزامات الطرف الأول</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.obligations_party_one}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.obligations_party_two && (
-                    <div>
-                      <Label className="text-muted-foreground">التزامات الطرف الثاني</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.obligations_party_two}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.payment_terms_template && (
-                    <div>
-                      <Label className="text-muted-foreground">شروط الدفع</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.payment_terms_template}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.duration_clause && (
-                    <div>
-                      <Label className="text-muted-foreground">مدة العقد</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.duration_clause}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.termination_clause && (
-                    <div>
-                      <Label className="text-muted-foreground">شروط الإنهاء</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.termination_clause}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.dispute_resolution && (
-                    <div>
-                      <Label className="text-muted-foreground">حل النزاعات</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.dispute_resolution}</p>
-                    </div>
-                  )}
-
-                  {selectedTemplate.closing_text && (
-                    <div>
-                      <Label className="text-muted-foreground">الختام</Label>
-                      <p className="mt-1 whitespace-pre-wrap">{selectedTemplate.closing_text}</p>
-                    </div>
-                  )}
-
-                  <Separator />
-
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    {selectedTemplate.include_header_logo && <span className="flex items-center gap-1"><ImageIcon className="w-4 h-4" /> شعار</span>}
-                    {selectedTemplate.include_stamp && <span className="flex items-center gap-1"><Stamp className="w-4 h-4" /> ختم</span>}
-                    {selectedTemplate.include_signature && <span className="flex items-center gap-1"><FileSignature className="w-4 h-4" /> توقيع</span>}
-                  </div>
-                </div>
-              </ScrollArea>
-            )}
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowViewDialog(false)}>
-                إغلاق
-              </Button>
-              {selectedTemplate && selectedTemplate.template_type === 'custom' && (
-                <Button onClick={() => { setShowViewDialog(false); handleEdit(selectedTemplate); }} className="gap-2">
-                  <Edit className="w-4 h-4" />
-                  تعديل
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Template Preview Dialog */}
+        <TemplatePreviewDialog
+          open={showViewDialog}
+          onOpenChange={setShowViewDialog}
+          template={selectedTemplate}
+          onEdit={handleEdit}
+        />
 
         {/* Import Templates Dialog */}
         <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
@@ -903,8 +696,8 @@ const ContractTemplates = () => {
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-500/10 rounded-lg">
-                          <Recycle className="w-6 h-6 text-green-500" />
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Recycle className="w-6 h-6 text-primary" />
                         </div>
                         <div className="flex-1">
                           <h4 className="font-medium">قوالب جهات التدوير</h4>
@@ -919,12 +712,12 @@ const ContractTemplates = () => {
                   <Separator />
 
                   <Card 
-                    className="cursor-pointer hover:border-primary transition-colors bg-gradient-to-r from-primary/5 to-green-500/5"
+                    className="cursor-pointer hover:border-primary transition-colors bg-gradient-to-r from-primary/5 to-primary/10"
                     onClick={() => handleImportTemplates('all')}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-lg">
+                        <div className="p-2 bg-primary/20 rounded-lg">
                           <FileText className="w-6 h-6 text-primary" />
                         </div>
                         <div className="flex-1">
