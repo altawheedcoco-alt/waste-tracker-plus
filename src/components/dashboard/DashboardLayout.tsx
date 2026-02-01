@@ -320,37 +320,69 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <TooltipProvider>
       <div className="min-h-screen bg-background flex flex-row-reverse" dir="rtl">
         {/* Desktop Sidebar - Hidden on mobile when using display mode */}
-        <motion.aside
-          initial={false}
-          animate={{ width: isSidebarOpen ? sidebarWidth : 80 }}
-          className={`${isMobile ? 'hidden' : 'flex'} flex-col bg-card border-l border-border shadow-sm fixed right-0 top-0 h-screen z-50`}
-        >
-          {/* Logo */}
-          <div className="p-4 border-b border-border">
-            <Link to="/dashboard" className="flex items-center gap-3">
-              <motion.img 
-                src={logo} 
-                alt="آي ريسايكل" 
-                className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} object-contain`}
-                whileHover={{ rotate: 10 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-              />
-              <AnimatePresence>
-                {isSidebarOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    className="overflow-hidden"
-                  >
-                    <h1 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold text-gradient-eco whitespace-nowrap`}>
-                      آي ريسايكل
-                    </h1>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </Link>
-          </div>
+        <AnimatePresence>
+          {(isSidebarOpen || !isMobile) && (
+            <motion.aside
+              initial={{ x: 300, opacity: 0 }}
+              animate={{ 
+                x: isSidebarOpen ? 0 : 300, 
+                opacity: isSidebarOpen ? 1 : 0,
+                width: isSidebarOpen ? sidebarWidth : 0
+              }}
+              exit={{ x: 300, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className={`${isMobile ? 'hidden' : 'flex'} flex-col bg-card border-l border-border shadow-sm fixed right-0 top-0 h-screen z-50 overflow-hidden`}
+            >
+              {/* Top Toggle Button + Logo */}
+              <div className="p-4 border-b border-border">
+                <div className="flex items-center justify-between gap-2">
+                  <Link to="/dashboard" className="flex items-center gap-3 flex-1">
+                    <motion.img 
+                      src={logo} 
+                      alt="آي ريسايكل" 
+                      className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} object-contain`}
+                      whileHover={{ rotate: 10 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                    />
+                    <AnimatePresence>
+                      {isSidebarOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: 'auto' }}
+                          exit={{ opacity: 0, width: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <h1 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold text-gradient-eco whitespace-nowrap`}>
+                            آي ريسايكل
+                          </h1>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Link>
+                  
+                  {/* Top Hide Button */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0"
+                      >
+                        <motion.div
+                          whileHover={{ x: 3 }}
+                          transition={{ type: 'spring', stiffness: 400 }}
+                        >
+                          <X className="w-4 h-4" />
+                        </motion.div>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">
+                      <p>إخفاء القائمة</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </div>
 
           {/* Account Switcher / Organization info */}
           <div className="border-b border-border">
@@ -407,43 +439,69 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             )}
           </nav>
 
-          {/* Toggle button - Collapse/Expand Arrow */}
+          {/* Bottom Hide Button */}
           <div className="p-3 border-t border-border">
             <Button
               variant="outline"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className={`w-full flex items-center justify-center gap-2 h-10 bg-muted/50 hover:bg-primary/10 hover:border-primary/50 transition-all duration-200 ${
-                isSidebarOpen ? '' : 'px-2'
-              }`}
+              onClick={() => setIsSidebarOpen(false)}
+              className="w-full flex items-center justify-center gap-2 h-10 bg-muted/50 hover:bg-destructive/10 hover:border-destructive/50 hover:text-destructive transition-all duration-200"
             >
               <motion.div 
-                animate={{ rotate: isSidebarOpen ? 180 : 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                whileHover={{ x: 3 }}
+                transition={{ type: 'spring', stiffness: 400 }}
                 className="flex items-center justify-center"
               >
-                <ChevronDown className={`${isSidebarOpen ? 'w-5 h-5' : 'w-6 h-6'} text-primary`} />
+                <ChevronDown className="w-5 h-5 -rotate-90" />
               </motion.div>
-              <AnimatePresence>
-                {isSidebarOpen && (
-                  <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    className="text-sm font-medium text-muted-foreground whitespace-nowrap overflow-hidden"
-                  >
-                    طي القائمة
-                  </motion.span>
-                )}
-              </AnimatePresence>
+              <span className="text-sm font-medium whitespace-nowrap">
+                إخفاء القائمة
+              </span>
             </Button>
           </div>
-        </motion.aside>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Show Sidebar Button - Visible when sidebar is hidden */}
+        <AnimatePresence>
+          {!isSidebarOpen && !isMobile && (
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 50, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="fixed right-0 top-1/2 -translate-y-1/2 z-50"
+            >
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="rounded-r-none rounded-l-xl h-24 w-8 flex flex-col items-center justify-center gap-1 shadow-lg bg-primary hover:bg-primary/90 transition-all duration-200"
+                  >
+                    <motion.div
+                      animate={{ x: [0, -3, 0] }}
+                      transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+                    >
+                      <ChevronDown className="w-5 h-5 rotate-90 text-primary-foreground" />
+                    </motion.div>
+                    <span className="text-[10px] text-primary-foreground writing-mode-vertical">القائمة</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>إظهار القائمة</p>
+                </TooltipContent>
+              </Tooltip>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main content - Responsive margin */}
         <div 
-          className="flex-1 flex flex-col transition-[margin] duration-200"
+          className="flex-1 flex flex-col transition-[margin] duration-300"
           style={{ 
-            marginRight: !isMobile ? (isSidebarOpen ? sidebarWidth : 80) : 0 
+            marginRight: !isMobile ? (isSidebarOpen ? sidebarWidth : 0) : 0 
           }}
         >
           {/* Top header - Responsive height */}
