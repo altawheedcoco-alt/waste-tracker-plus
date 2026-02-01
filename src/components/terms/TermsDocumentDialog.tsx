@@ -1,0 +1,97 @@
+import { useRef } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Printer, Download, X } from 'lucide-react';
+import { usePDFExport } from '@/hooks/usePDFExport';
+import TermsDocumentPrint from './TermsDocumentPrint';
+
+interface TermsAcceptanceData {
+  id: string;
+  full_name: string | null;
+  organization_name: string | null;
+  organization_type: string;
+  terms_version: string;
+  accepted_at: string;
+  ip_address: string | null;
+}
+
+interface TermsDocumentDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  acceptance: TermsAcceptanceData | null;
+}
+
+const TermsDocumentDialog = ({ open, onOpenChange, acceptance }: TermsDocumentDialogProps) => {
+  const printRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, printContent, isExporting } = usePDFExport({
+    filename: `terms-acceptance-${acceptance?.id?.slice(0, 8) || 'document'}`,
+    orientation: 'portrait',
+    format: 'a4',
+  });
+
+  if (!acceptance) return null;
+
+  const handlePrint = () => {
+    if (printRef.current) {
+      printContent(printRef.current);
+    }
+  };
+
+  const handleDownload = () => {
+    if (printRef.current) {
+      exportToPDF(printRef.current, `موافقة-الشروط-${acceptance.organization_name || acceptance.id.slice(0, 8)}`);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+        <DialogHeader className="p-4 border-b sticky top-0 bg-background z-10">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-right">
+              وثيقة الموافقة على الشروط والأحكام
+            </DialogTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                disabled={isExporting}
+              >
+                <Printer className="ml-2 h-4 w-4" />
+                طباعة
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleDownload}
+                disabled={isExporting}
+              >
+                <Download className="ml-2 h-4 w-4" />
+                تحميل PDF
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </DialogHeader>
+        <ScrollArea className="max-h-[calc(90vh-80px)]">
+          <TermsDocumentPrint ref={printRef} acceptance={acceptance} />
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default TermsDocumentDialog;

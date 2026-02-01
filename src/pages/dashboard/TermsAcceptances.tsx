@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -14,6 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import BackButton from '@/components/ui/back-button';
 import {
   FileCheck,
@@ -29,9 +35,16 @@ import {
   Building2,
   Shield,
   AlertTriangle,
+  Eye,
+  Printer,
+  Download,
+  MoreHorizontal,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { usePDFExport } from '@/hooks/usePDFExport';
+import TermsDocumentDialog from '@/components/terms/TermsDocumentDialog';
+import TermsDocumentPrint from '@/components/terms/TermsDocumentPrint';
 
 interface TermsAcceptance {
   id: string;
@@ -72,6 +85,14 @@ const TermsAcceptances = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedAcceptance, setSelectedAcceptance] = useState<TermsAcceptance | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, printContent, isExporting } = usePDFExport({
+    filename: 'terms-acceptance',
+    orientation: 'portrait',
+    format: 'a4',
+  });
 
   useEffect(() => {
     fetchData();
@@ -182,6 +203,29 @@ const TermsAcceptances = () => {
     
     return matchesSearch && matchesTab;
   });
+
+  const handleViewDocument = (acceptance: TermsAcceptance) => {
+    setSelectedAcceptance(acceptance);
+    setDialogOpen(true);
+  };
+
+  const handlePrintDocument = (acceptance: TermsAcceptance) => {
+    setSelectedAcceptance(acceptance);
+    setTimeout(() => {
+      if (printRef.current) {
+        printContent(printRef.current);
+      }
+    }, 100);
+  };
+
+  const handleDownloadDocument = (acceptance: TermsAcceptance) => {
+    setSelectedAcceptance(acceptance);
+    setTimeout(() => {
+      if (printRef.current) {
+        exportToPDF(printRef.current, `موافقة-الشروط-${acceptance.organization_name || acceptance.id.slice(0, 8)}`);
+      }
+    }, 100);
+  };
 
   const statCards = [
     { 
@@ -370,6 +414,7 @@ const TermsAcceptances = () => {
                         <TableHead className="text-right">الإصدار</TableHead>
                         <TableHead className="text-right">تاريخ الموافقة</TableHead>
                         <TableHead className="text-right">الحالة</TableHead>
+                        <TableHead className="text-right">إجراءات</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -409,6 +454,29 @@ const TermsAcceptances = () => {
                                 تمت الموافقة
                               </Badge>
                             </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem onClick={() => handleViewDocument(acceptance)}>
+                                    <Eye className="ml-2 h-4 w-4" />
+                                    عرض الوثيقة
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handlePrintDocument(acceptance)}>
+                                    <Printer className="ml-2 h-4 w-4" />
+                                    طباعة الوثيقة
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleDownloadDocument(acceptance)}>
+                                    <Download className="ml-2 h-4 w-4" />
+                                    تحميل PDF
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
                           </TableRow>
                         );
                       })}
@@ -420,6 +488,20 @@ const TermsAcceptances = () => {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* Document View Dialog */}
+      <TermsDocumentDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        acceptance={selectedAcceptance}
+      />
+
+      {/* Hidden Print Component */}
+      <div className="hidden">
+        {selectedAcceptance && (
+          <TermsDocumentPrint ref={printRef} acceptance={selectedAcceptance} />
+        )}
+      </div>
     </motion.div>
   );
 };
