@@ -12,6 +12,10 @@ interface PinnedParty {
 interface PinnedPartiesData {
   generator: PinnedParty | null;
   recycler: PinnedParty | null;
+  pickupAddress: string | null;
+  deliveryAddress: string | null;
+  wasteType: string | null;
+  wasteDescription: string | null;
   lastUpdated: string;
 }
 
@@ -21,6 +25,10 @@ export const usePinnedParties = () => {
   const [pinnedParties, setPinnedParties] = useState<PinnedPartiesData>({
     generator: null,
     recycler: null,
+    pickupAddress: null,
+    deliveryAddress: null,
+    wasteType: null,
+    wasteDescription: null,
     lastUpdated: '',
   });
   const [isLoaded, setIsLoaded] = useState(false);
@@ -76,8 +84,59 @@ export const usePinnedParties = () => {
     recycler: Omit<PinnedParty, 'type'> | null
   ) => {
     const newData: PinnedPartiesData = {
+      ...pinnedParties,
       generator: generator ? { ...generator, type: 'generator' } : pinnedParties.generator,
       recycler: recycler ? { ...recycler, type: 'recycler' } : pinnedParties.recycler,
+      lastUpdated: new Date().toISOString(),
+    };
+    setPinnedParties(newData);
+    saveToStorage(newData);
+  }, [pinnedParties, saveToStorage]);
+
+  // Pin addresses
+  const pinAddresses = useCallback((pickupAddress: string | null, deliveryAddress: string | null) => {
+    const newData: PinnedPartiesData = {
+      ...pinnedParties,
+      pickupAddress: pickupAddress || pinnedParties.pickupAddress,
+      deliveryAddress: deliveryAddress || pinnedParties.deliveryAddress,
+      lastUpdated: new Date().toISOString(),
+    };
+    setPinnedParties(newData);
+    saveToStorage(newData);
+  }, [pinnedParties, saveToStorage]);
+
+  // Pin waste type
+  const pinWasteType = useCallback((wasteType: string | null, wasteDescription?: string | null) => {
+    const newData: PinnedPartiesData = {
+      ...pinnedParties,
+      wasteType: wasteType || pinnedParties.wasteType,
+      wasteDescription: wasteDescription !== undefined ? wasteDescription : pinnedParties.wasteDescription,
+      lastUpdated: new Date().toISOString(),
+    };
+    setPinnedParties(newData);
+    saveToStorage(newData);
+  }, [pinnedParties, saveToStorage]);
+
+  // Pin all data at once
+  const pinAll = useCallback((data: {
+    generator?: Omit<PinnedParty, 'type'> | null;
+    recycler?: Omit<PinnedParty, 'type'> | null;
+    pickupAddress?: string | null;
+    deliveryAddress?: string | null;
+    wasteType?: string | null;
+    wasteDescription?: string | null;
+  }) => {
+    const newData: PinnedPartiesData = {
+      generator: data.generator !== undefined 
+        ? (data.generator ? { ...data.generator, type: 'generator' } : null)
+        : pinnedParties.generator,
+      recycler: data.recycler !== undefined 
+        ? (data.recycler ? { ...data.recycler, type: 'recycler' } : null)
+        : pinnedParties.recycler,
+      pickupAddress: data.pickupAddress !== undefined ? data.pickupAddress : pinnedParties.pickupAddress,
+      deliveryAddress: data.deliveryAddress !== undefined ? data.deliveryAddress : pinnedParties.deliveryAddress,
+      wasteType: data.wasteType !== undefined ? data.wasteType : pinnedParties.wasteType,
+      wasteDescription: data.wasteDescription !== undefined ? data.wasteDescription : pinnedParties.wasteDescription,
       lastUpdated: new Date().toISOString(),
     };
     setPinnedParties(newData);
@@ -106,27 +165,40 @@ export const usePinnedParties = () => {
     saveToStorage(newData);
   }, [pinnedParties, saveToStorage]);
 
-  // Clear all pinned parties
+  // Clear all pinned data
   const clearAll = useCallback(() => {
     const newData: PinnedPartiesData = {
       generator: null,
       recycler: null,
+      pickupAddress: null,
+      deliveryAddress: null,
+      wasteType: null,
+      wasteDescription: null,
       lastUpdated: new Date().toISOString(),
     };
     setPinnedParties(newData);
     saveToStorage(newData);
   }, [saveToStorage]);
 
-  // Check if has any pinned parties
+  // Check if has any pinned data
   const hasPinnedParties = Boolean(pinnedParties.generator || pinnedParties.recycler);
+  const hasPinnedAddresses = Boolean(pinnedParties.pickupAddress || pinnedParties.deliveryAddress);
+  const hasPinnedWasteType = Boolean(pinnedParties.wasteType);
+  const hasAnyPinned = hasPinnedParties || hasPinnedAddresses || hasPinnedWasteType;
 
   return {
     pinnedParties,
     isLoaded,
     hasPinnedParties,
+    hasPinnedAddresses,
+    hasPinnedWasteType,
+    hasAnyPinned,
     pinGenerator,
     pinRecycler,
     pinBothParties,
+    pinAddresses,
+    pinWasteType,
+    pinAll,
     unpinGenerator,
     unpinRecycler,
     clearAll,
