@@ -317,6 +317,25 @@ export const getHazardLevelColor = (level: HazardLevel): string => {
 };
 
 /**
+ * Get waste type code
+ */
+export const getWasteTypeCode = (wasteType: WasteType | string): string => {
+  const codes: Record<string, string> = {
+    plastic: 'PL',
+    paper: 'PA',
+    metal: 'MT',
+    glass: 'GL',
+    electronic: 'EL',
+    organic: 'OR',
+    chemical: 'CH',
+    medical: 'MD',
+    construction: 'CN',
+    other: 'OT',
+  };
+  return codes[wasteType] || 'OT';
+};
+
+/**
  * Check if waste type is hazardous
  */
 export const isHazardousWasteType = (wasteType: WasteType | string): boolean => {

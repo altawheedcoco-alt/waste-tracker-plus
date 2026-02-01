@@ -8,26 +8,46 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   Lightbulb, TrendingUp, TrendingDown, Loader2, CheckCircle2, 
-  AlertTriangle, Target, Sparkles, Clock, Recycle, Award
+  AlertTriangle, Target, Sparkles, Clock, Recycle, Award,
+  Focus, Star, Building2, Zap, Shield, Users
 } from 'lucide-react';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
-import { wasteTypeLabels, isHazardousWasteType } from '@/lib/wasteClassification';
+import { wasteTypeLabels, isHazardousWasteType, getWasteTypeCode } from '@/lib/wasteClassification';
 import ReactMarkdown from 'react-markdown';
+import { differenceInDays } from 'date-fns';
+import { RadialBarChart, RadialBar, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-interface PerformanceMetric {
+interface SpecializationMetric {
   name: string;
   value: number;
   target: number;
   unit: string;
   status: 'excellent' | 'good' | 'needs_improvement';
+  description: string;
+}
+
+interface SpecializationData {
+  primaryType: string;
+  primaryName: string;
+  primaryCode: string;
+  primaryPercentage: number;
+  primaryEfficiency: number;
+  primaryProcessingTime: number;
+  secondaryType: string | null;
+  secondaryName: string | null;
+  secondaryPercentage: number;
+  isHazardous: boolean;
+  uniqueGenerators: number;
+  certificatesIssued: number;
 }
 
 const RecyclerPerformanceAdvisor = () => {
   const { organization } = useAuth();
   const { isLoading: aiLoading, generateReport } = useAIAssistant();
   const [loading, setLoading] = useState(true);
-  const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
+  const [metrics, setMetrics] = useState<SpecializationMetric[]>([]);
   const [aiRecommendations, setAiRecommendations] = useState<string>('');
+  const [specialization, setSpecialization] = useState<SpecializationData | null>(null);
   const [processingStats, setProcessingStats] = useState({
     totalReceived: 0,
     totalProcessed: 0,
@@ -35,6 +55,7 @@ const RecyclerPerformanceAdvisor = () => {
     hazardousPercentage: 0,
     certificatesIssued: 0,
     uniqueGenerators: 0,
+    specializationScore: 0,
   });
 
   useEffect(() => {
@@ -75,13 +96,63 @@ const RecyclerPerformanceAdvisor = () => {
         let count = 0;
         confirmedShipments.forEach(s => {
           if (s.delivered_at && s.confirmed_at) {
-            const days = (new Date(s.confirmed_at).getTime() - new Date(s.delivered_at).getTime()) / (1000 * 60 * 60 * 24);
-            totalDays += days;
+            const days = differenceInDays(new Date(s.confirmed_at), new Date(s.delivered_at));
+            totalDays += Math.max(0, days);
             count++;
           }
         });
 
         const uniqueGenerators = new Set(shipments.map(s => s.generator_id).filter(Boolean)).size;
+
+        // Calculate specialization
+        const wasteTypeMap: Record<string, { quantity: number; processed: number; count: number; days: number; processedCount: number }> = {};
+        shipments.forEach(s => {
+          if (!wasteTypeMap[s.waste_type]) {
+            wasteTypeMap[s.waste_type] = { quantity: 0, processed: 0, count: 0, days: 0, processedCount: 0 };
+          }
+          wasteTypeMap[s.waste_type].quantity += s.quantity || 0;
+          wasteTypeMap[s.waste_type].count += 1;
+          if (s.status === 'confirmed') {
+            wasteTypeMap[s.waste_type].processed += s.quantity || 0;
+            if (s.delivered_at && s.confirmed_at) {
+              wasteTypeMap[s.waste_type].days += differenceInDays(new Date(s.confirmed_at), new Date(s.delivered_at));
+              wasteTypeMap[s.waste_type].processedCount += 1;
+            }
+          }
+        });
+
+        const sortedTypes = Object.entries(wasteTypeMap)
+          .map(([type, data]) => ({ type, ...data }))
+          .sort((a, b) => b.quantity - a.quantity);
+
+        const primary = sortedTypes[0];
+        const secondary = sortedTypes[1];
+
+        const primaryPct = primary ? (primary.quantity / totalReceived) * 100 : 0;
+        const secondaryPct = secondary ? (secondary.quantity / totalReceived) * 100 : 0;
+        const specializationScore = Math.min(100, (primaryPct + secondaryPct) * 1.1);
+
+        // Primary type unique generators
+        const primaryGenerators = new Set(
+          shipments.filter(s => s.waste_type === primary?.type).map(s => s.generator_id).filter(Boolean)
+        ).size;
+
+        const specializationData: SpecializationData = {
+          primaryType: primary?.type || '',
+          primaryName: wasteTypeLabels[primary?.type || ''] || primary?.type || '',
+          primaryCode: getWasteTypeCode(primary?.type || ''),
+          primaryPercentage: primaryPct,
+          primaryEfficiency: primary && primary.quantity > 0 ? (primary.processed / primary.quantity) * 100 : 0,
+          primaryProcessingTime: primary && primary.processedCount > 0 ? primary.days / primary.processedCount : 0,
+          secondaryType: secondary?.type || null,
+          secondaryName: secondary ? wasteTypeLabels[secondary.type] || secondary.type : null,
+          secondaryPercentage: secondaryPct,
+          isHazardous: isHazardousWasteType(primary?.type || ''),
+          uniqueGenerators: primaryGenerators,
+          certificatesIssued: certificates?.length || 0,
+        };
+
+        setSpecialization(specializationData);
 
         const stats = {
           totalReceived,
@@ -90,43 +161,65 @@ const RecyclerPerformanceAdvisor = () => {
           hazardousPercentage: totalReceived > 0 ? (hazardousQuantity / totalReceived) * 100 : 0,
           certificatesIssued: certificates?.length || 0,
           uniqueGenerators,
+          specializationScore,
         };
         setProcessingStats(stats);
 
-        // Calculate metrics
+        // Calculate metrics focused on specialization
         const processingEfficiency = totalReceived > 0 ? (totalProcessed / totalReceived) * 100 : 0;
+        const primaryEfficiency = specializationData.primaryEfficiency;
         const certificateRate = confirmedShipments.length > 0 
           ? ((certificates?.length || 0) / confirmedShipments.length) * 100 
           : 0;
 
-        const metricsData: PerformanceMetric[] = [
+        const metricsData: SpecializationMetric[] = [
           {
-            name: 'كفاءة المعالجة',
-            value: processingEfficiency,
+            name: 'مستوى التخصص',
+            value: specializationScore,
+            target: 85,
+            unit: '%',
+            status: specializationScore >= 85 ? 'excellent' : specializationScore >= 70 ? 'good' : 'needs_improvement',
+            description: 'نسبة التركيز على التخصص الرئيسي والثانوي'
+          },
+          {
+            name: 'كفاءة التخصص الرئيسي',
+            value: primaryEfficiency,
             target: 95,
             unit: '%',
-            status: processingEfficiency >= 90 ? 'excellent' : processingEfficiency >= 70 ? 'good' : 'needs_improvement'
+            status: primaryEfficiency >= 90 ? 'excellent' : primaryEfficiency >= 70 ? 'good' : 'needs_improvement',
+            description: `كفاءة معالجة ${specializationData.primaryName}`
           },
           {
             name: 'سرعة المعالجة',
-            value: stats.avgProcessingTime,
+            value: specializationData.primaryProcessingTime,
             target: 3,
             unit: 'يوم',
-            status: stats.avgProcessingTime <= 2 ? 'excellent' : stats.avgProcessingTime <= 5 ? 'good' : 'needs_improvement'
+            status: specializationData.primaryProcessingTime <= 2 ? 'excellent' : specializationData.primaryProcessingTime <= 5 ? 'good' : 'needs_improvement',
+            description: 'متوسط وقت معالجة التخصص الرئيسي'
           },
           {
             name: 'معدل إصدار الشهادات',
             value: certificateRate,
             target: 100,
             unit: '%',
-            status: certificateRate >= 90 ? 'excellent' : certificateRate >= 70 ? 'good' : 'needs_improvement'
+            status: certificateRate >= 90 ? 'excellent' : certificateRate >= 70 ? 'good' : 'needs_improvement',
+            description: 'نسبة الشحنات المؤكدة التي صدرت لها شهادات'
           },
           {
-            name: 'تنوع الشركاء',
-            value: uniqueGenerators,
+            name: 'قاعدة الموردين',
+            value: primaryGenerators,
             target: 10,
             unit: 'جهة',
-            status: uniqueGenerators >= 10 ? 'excellent' : uniqueGenerators >= 5 ? 'good' : 'needs_improvement'
+            status: primaryGenerators >= 10 ? 'excellent' : primaryGenerators >= 5 ? 'good' : 'needs_improvement',
+            description: 'عدد الجهات المولدة للتخصص الرئيسي'
+          },
+          {
+            name: 'كفاءة المعالجة العامة',
+            value: processingEfficiency,
+            target: 95,
+            unit: '%',
+            status: processingEfficiency >= 90 ? 'excellent' : processingEfficiency >= 70 ? 'good' : 'needs_improvement',
+            description: 'نسبة المخلفات المعالجة من إجمالي المستلم'
           },
         ];
         setMetrics(metricsData);
@@ -140,14 +233,26 @@ const RecyclerPerformanceAdvisor = () => {
 
   const handleGetRecommendations = async () => {
     const analysisData = {
-      organization_type: 'recycler',
+      organization_type: 'specialized_recycler',
       organization_name: organization?.name,
+      specialization_focus: {
+        primary_waste_type: specialization?.primaryName,
+        primary_code: specialization?.primaryCode,
+        primary_percentage: specialization?.primaryPercentage.toFixed(1),
+        primary_efficiency: specialization?.primaryEfficiency.toFixed(1),
+        primary_processing_days: specialization?.primaryProcessingTime.toFixed(1),
+        is_hazardous: specialization?.isHazardous,
+        secondary_waste_type: specialization?.secondaryName,
+        secondary_percentage: specialization?.secondaryPercentage.toFixed(1),
+        primary_generators_count: specialization?.uniqueGenerators,
+      },
       performance_metrics: metrics.map(m => ({
         metric_name: m.name,
         current_value: m.value,
         target_value: m.target,
         unit: m.unit,
-        status: m.status
+        status: m.status,
+        description: m.description
       })),
       processing_stats: {
         total_received_kg: processingStats.totalReceived,
@@ -155,18 +260,23 @@ const RecyclerPerformanceAdvisor = () => {
         avg_processing_time_days: processingStats.avgProcessingTime.toFixed(1),
         hazardous_percentage: processingStats.hazardousPercentage.toFixed(1),
         certificates_issued: processingStats.certificatesIssued,
-        unique_generators: processingStats.uniqueGenerators
+        unique_generators: processingStats.uniqueGenerators,
+        specialization_score: processingStats.specializationScore.toFixed(1)
       },
       request: `
-        بناءً على بيانات أداء منشأة التدوير، قدم تقريراً تفصيلياً يتضمن:
-        1. تقييم عام لأداء المنشأة
-        2. تحليل نقاط القوة والضعف
-        3. توصيات محددة لتحسين كفاءة المعالجة
-        4. استراتيجيات لتقليل وقت المعالجة
-        5. نصائح لزيادة معدل إصدار الشهادات
-        6. فرص التوسع وزيادة الشركاء
-        7. أفضل الممارسات في التعامل مع المخلفات الخطرة
-        قدم التوصيات بشكل عملي وقابل للتنفيذ.
+        هذه منشأة تدوير متخصصة في ${specialization?.primaryName || 'نوع محدد من المخلفات'} ${specialization?.isHazardous ? '(مخلفات خطرة)' : '(مخلفات غير خطرة)'}.
+        مستوى التخصص الحالي: ${processingStats.specializationScore.toFixed(0)}%
+        
+        قدم تقريراً تفصيلياً وتوصيات عملية تتضمن:
+        1. تقييم مستوى التخصص والتركيز الحالي
+        2. تحليل نقاط القوة في التخصص الرئيسي
+        3. توصيات لتعميق التخصص وزيادة الكفاءة
+        4. استراتيجيات لتقليل وقت المعالجة للتخصص الرئيسي
+        5. فرص توسيع قاعدة الموردين للتخصص
+        6. أفضل الممارسات للمنشآت المتخصصة في هذا النوع من المخلفات
+        7. مقارنة بمعايير الصناعة للمنشآت المتخصصة
+        ${specialization?.isHazardous ? '8. إجراءات السلامة المحسنة للمخلفات الخطرة' : ''}
+        قدم التوصيات بشكل عملي وقابل للتنفيذ مع تحديد أولويات التنفيذ.
       `
     };
 
@@ -200,6 +310,11 @@ const RecyclerPerformanceAdvisor = () => {
     }
   };
 
+  // Radial data for specialization score
+  const specializationRadialData = [
+    { name: 'التخصص', value: processingStats.specializationScore, fill: '#10b981' }
+  ];
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -210,53 +325,121 @@ const RecyclerPerformanceAdvisor = () => {
 
   return (
     <div className="space-y-6">
+      {/* Specialization Overview Banner */}
+      {specialization && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Card className="bg-gradient-to-r from-green-500/20 via-emerald-500/10 to-teal-500/20 border-green-500/30">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row items-center gap-6">
+                {/* Specialization Score Radial */}
+                <div className="w-36 h-36 flex-shrink-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadialBarChart 
+                      cx="50%" 
+                      cy="50%" 
+                      innerRadius="60%" 
+                      outerRadius="100%" 
+                      data={specializationRadialData}
+                      startAngle={90}
+                      endAngle={-270}
+                    >
+                      <RadialBar
+                        dataKey="value"
+                        cornerRadius={10}
+                        background={{ fill: 'hsl(var(--muted))' }}
+                      />
+                      <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-foreground">
+                        <tspan x="50%" dy="-0.3em" className="text-xl font-bold">{processingStats.specializationScore.toFixed(0)}%</tspan>
+                        <tspan x="50%" dy="1.3em" className="text-[10px] fill-muted-foreground">تخصص</tspan>
+                      </text>
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Specialization Info */}
+                <div className="flex-1 text-center lg:text-right">
+                  <div className="flex items-center justify-center lg:justify-end gap-2 mb-2">
+                    <Focus className="w-5 h-5 text-green-500" />
+                    <h3 className="text-lg font-bold">منشأة تدوير متخصصة</h3>
+                  </div>
+                  
+                  <div className="flex flex-wrap justify-center lg:justify-end gap-2 mb-3">
+                    <Badge className="py-1.5 px-3 bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30">
+                      <Star className="w-3 h-3 ml-1" />
+                      {specialization.primaryName}
+                      <span className="mr-1 font-bold">{specialization.primaryPercentage.toFixed(0)}%</span>
+                    </Badge>
+                    <Badge variant="outline">{specialization.primaryCode}</Badge>
+                    {specialization.isHazardous && (
+                      <Badge variant="destructive" className="gap-1">
+                        <Shield className="w-3 h-3" />
+                        مخلفات خطرة
+                      </Badge>
+                    )}
+                  </div>
+
+                  {specialization.secondaryName && (
+                    <p className="text-sm text-muted-foreground">
+                      تخصص ثانوي: {specialization.secondaryName} ({specialization.secondaryPercentage.toFixed(0)}%)
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <Card className="bg-gradient-to-br from-blue-500/10 to-blue-600/5">
           <CardContent className="p-4 text-center">
             <Recycle className="w-6 h-6 mx-auto mb-2 text-blue-500" />
-            <p className="text-2xl font-bold">{processingStats.totalReceived.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">كجم مستلم</p>
+            <p className="text-xl font-bold">{(processingStats.totalReceived / 1000).toFixed(1)}</p>
+            <p className="text-xs text-muted-foreground">طن مستلم</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-500/10 to-green-600/5">
           <CardContent className="p-4 text-center">
             <CheckCircle2 className="w-6 h-6 mx-auto mb-2 text-green-500" />
-            <p className="text-2xl font-bold">{processingStats.totalProcessed.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">كجم معالج</p>
+            <p className="text-xl font-bold">{(processingStats.totalProcessed / 1000).toFixed(1)}</p>
+            <p className="text-xs text-muted-foreground">طن معالج</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/5">
           <CardContent className="p-4 text-center">
             <Clock className="w-6 h-6 mx-auto mb-2 text-purple-500" />
-            <p className="text-2xl font-bold">{processingStats.avgProcessingTime.toFixed(1)}</p>
+            <p className="text-xl font-bold">{processingStats.avgProcessingTime.toFixed(1)}</p>
             <p className="text-xs text-muted-foreground">يوم متوسط</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-red-500/10 to-red-600/5">
-          <CardContent className="p-4 text-center">
-            <AlertTriangle className="w-6 h-6 mx-auto mb-2 text-red-500" />
-            <p className="text-2xl font-bold">{processingStats.hazardousPercentage.toFixed(0)}%</p>
-            <p className="text-xs text-muted-foreground">مخلفات خطرة</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-amber-500/10 to-amber-600/5">
           <CardContent className="p-4 text-center">
             <Award className="w-6 h-6 mx-auto mb-2 text-amber-500" />
-            <p className="text-2xl font-bold">{processingStats.certificatesIssued}</p>
+            <p className="text-xl font-bold">{processingStats.certificatesIssued}</p>
             <p className="text-xs text-muted-foreground">شهادة صادرة</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-cyan-500/10 to-cyan-600/5">
           <CardContent className="p-4 text-center">
-            <TrendingUp className="w-6 h-6 mx-auto mb-2 text-cyan-500" />
-            <p className="text-2xl font-bold">{processingStats.uniqueGenerators}</p>
-            <p className="text-xs text-muted-foreground">جهة مولدة</p>
+            <Users className="w-6 h-6 mx-auto mb-2 text-cyan-500" />
+            <p className="text-xl font-bold">{specialization?.uniqueGenerators || 0}</p>
+            <p className="text-xs text-muted-foreground">مورد للتخصص</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-600/5">
+          <CardContent className="p-4 text-center">
+            <Zap className="w-6 h-6 mx-auto mb-2 text-emerald-500" />
+            <p className="text-xl font-bold">{specialization?.primaryEfficiency.toFixed(0) || 0}%</p>
+            <p className="text-xs text-muted-foreground">كفاءة التخصص</p>
           </CardContent>
         </Card>
       </div>
@@ -266,14 +449,14 @@ const RecyclerPerformanceAdvisor = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 justify-end">
             <Target className="w-5 h-5 text-primary" />
-            مؤشرات الأداء الرئيسية
+            مؤشرات أداء التخصص
           </CardTitle>
           <CardDescription className="text-right">
-            تقييم أداء منشأة التدوير مقارنة بالأهداف المحددة
+            تقييم أداء المنشأة في تخصصها الرئيسي مقارنة بالأهداف
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {metrics.map((metric, index) => (
               <motion.div
                 key={metric.name}
@@ -288,9 +471,11 @@ const RecyclerPerformanceAdvisor = () => {
                   </Badge>
                   <div className="flex items-center gap-2">
                     {getStatusIcon(metric.status)}
-                    <span className="font-medium">{metric.name}</span>
+                    <span className="font-medium text-sm">{metric.name}</span>
                   </div>
                 </div>
+                
+                <p className="text-xs text-muted-foreground mb-2 text-right">{metric.description}</p>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -320,15 +505,15 @@ const RecyclerPerformanceAdvisor = () => {
               className="gap-2"
             >
               {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {aiLoading ? 'جاري التحليل...' : 'توصيات ذكية'}
+              {aiLoading ? 'جاري التحليل...' : 'توصيات التخصص الذكية'}
             </Button>
             <div className="text-right">
               <CardTitle className="flex items-center gap-2 justify-end">
                 <Lightbulb className="w-5 h-5 text-primary" />
-                توصيات تحسين الأداء
+                توصيات تحسين التخصص
               </CardTitle>
               <CardDescription>
-                تحليل ذكي وتوصيات مخصصة لتحسين كفاءة التدوير
+                تحليل ذكي وتوصيات مخصصة لتعميق التخصص وزيادة الكفاءة
               </CardDescription>
             </div>
           </div>
