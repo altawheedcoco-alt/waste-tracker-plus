@@ -18,12 +18,14 @@ const Dashboard = () => {
   const { requiresAcceptance, loading: termsLoading, markAsAccepted, organizationType } = useTermsAcceptance();
 
   useEffect(() => {
+    // Only redirect if we're sure the user is not logged in
     if (!loading && !user) {
-      navigate('/auth');
+      navigate('/auth', { replace: true });
     }
   }, [user, loading, navigate]);
 
-  if (loading || termsLoading) {
+  // Show loading only during initial auth check
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <motion.div
@@ -36,6 +38,7 @@ const Dashboard = () => {
     );
   }
 
+  // If no user after loading, don't render anything (redirect will happen)
   if (!user) {
     return null;
   }
