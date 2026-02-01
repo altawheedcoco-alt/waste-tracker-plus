@@ -82,7 +82,7 @@ const MyLocation = () => {
 
   const fetchDriverInfo = async () => {
     try {
-      // Fetch driver info
+      // Fetch driver info using maybeSingle to handle no data gracefully
       const { data: driver, error } = await supabase
         .from('drivers')
         .select(`
@@ -93,9 +93,13 @@ const MyLocation = () => {
           organization:organizations(name)
         `)
         .eq('profile_id', profile?.id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching driver info:', error);
+        setLoading(false);
+        return;
+      }
 
       if (driver) {
         setDriverInfo({
