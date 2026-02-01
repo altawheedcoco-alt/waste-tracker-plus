@@ -391,16 +391,10 @@ const Contracts = () => {
               <p className="text-muted-foreground">إدارة العقود والاتفاقيات مع الشركاء</p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShowGeneratorDialog(true)} className="gap-2">
-              <Wand2 className="w-4 h-4" />
-              إنشاء عقد أوتوماتيكي
-            </Button>
-            <Button onClick={() => { resetForm(); setShowAddDialog(true); }} className="gap-2">
-              <Plus className="w-4 h-4" />
-              إضافة عقد يدوي
-            </Button>
-          </div>
+          <Button onClick={() => { resetForm(); setShowAddDialog(true); }} className="gap-2">
+            <Plus className="w-4 h-4" />
+            إضافة عقد
+          </Button>
         </div>
 
         {/* Stats Cards */}
