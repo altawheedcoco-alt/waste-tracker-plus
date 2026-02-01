@@ -532,24 +532,23 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     } : null;
   };
 
-  const handleApplyPinnedParties = (
-    generator: { id: string; name: string; address?: string } | null,
-    recycler: { id: string; name: string; address?: string } | null
-  ) => {
-    if (generator) {
-      setFormData(prev => ({
-        ...prev,
-        generator_id: generator.id,
-        pickup_address: generator.address || prev.pickup_address,
-      }));
-    }
-    if (recycler) {
-      setFormData(prev => ({
-        ...prev,
-        recycler_id: recycler.id,
-        delivery_address: recycler.address || prev.delivery_address,
-      }));
-    }
+  const handleApplyPinnedParties = (data: {
+    generator: { id: string; name: string; address?: string } | null;
+    recycler: { id: string; name: string; address?: string } | null;
+    pickupAddress: string | null;
+    deliveryAddress: string | null;
+    wasteType: string | null;
+    wasteDescription: string | null;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      generator_id: data.generator?.id || prev.generator_id,
+      recycler_id: data.recycler?.id || prev.recycler_id,
+      pickup_address: data.pickupAddress || data.generator?.address || prev.pickup_address,
+      delivery_address: data.deliveryAddress || data.recycler?.address || prev.delivery_address,
+      waste_type: (data.wasteType as any) || prev.waste_type,
+      waste_description: data.wasteDescription || prev.waste_description,
+    }));
   };
 
   const formContent = (
@@ -559,6 +558,10 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
         <PinnedPartiesControls
           currentGenerator={getCurrentGeneratorInfo()}
           currentRecycler={getCurrentRecyclerInfo()}
+          currentPickupAddress={formData.pickup_address}
+          currentDeliveryAddress={formData.delivery_address}
+          currentWasteType={formData.waste_type}
+          currentWasteDescription={formData.waste_description}
           onApplyPinned={handleApplyPinnedParties}
         />
       )}
