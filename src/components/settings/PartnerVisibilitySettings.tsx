@@ -1,0 +1,292 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  Map, 
+  Navigation, 
+  Route, 
+  Eye, 
+  EyeOff, 
+  Building2, 
+  Recycle,
+  Shield,
+  Settings2,
+  Lock,
+  Unlock,
+  RefreshCw
+} from 'lucide-react';
+import { usePartnerVisibility } from '@/hooks/usePartnerVisibility';
+
+const PartnerVisibilitySettings = () => {
+  const { 
+    partnersWithSettings, 
+    isLoading, 
+    updateVisibility, 
+    isUpdating,
+    refetch 
+  } = usePartnerVisibility();
+
+  const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
+
+  const handleToggle = (
+    partnerId: string, 
+    field: 'can_view_maps' | 'can_view_tracking' | 'can_view_routes' | 'can_view_driver_location',
+    currentValue: boolean
+  ) => {
+    const newValue = !currentValue;
+    
+    // Update local state immediately for responsiveness
+    setLocalSettings(prev => ({
+      ...prev,
+      [partnerId]: {
+        ...prev[partnerId],
+        [field]: newValue,
+      }
+    }));
+
+    // Send update to server
+    updateVisibility({
+      partner_organization_id: partnerId,
+      [field]: newValue,
+    });
+  };
+
+  const getSettingValue = (partner: any, field: string): boolean => {
+    if (localSettings[partner.id]?.[field] !== undefined) {
+      return localSettings[partner.id][field];
+    }
+    return partner.visibility[field] ?? true;
+  };
+
+  const toggleAll = (partnerId: string, enable: boolean) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [partnerId]: {
+        can_view_maps: enable,
+        can_view_tracking: enable,
+        can_view_routes: enable,
+        can_view_driver_location: enable,
+      }
+    }));
+
+    updateVisibility({
+      partner_organization_id: partnerId,
+      can_view_maps: enable,
+      can_view_tracking: enable,
+      can_view_routes: enable,
+      can_view_driver_location: enable,
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-72 mt-2" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Shield className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">التحكم في رؤية الشركاء</CardTitle>
+              <CardDescription>
+                إدارة صلاحيات رؤية الخرائط والتتبع للجهات المولدة والمدورة
+              </CardDescription>
+            </div>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => refetch()}
+            disabled={isUpdating}
+          >
+            <RefreshCw className={`w-4 h-4 ${isUpdating ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        {partnersWithSettings.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Eye className="w-12 h-12 mx-auto mb-4 opacity-30" />
+            <p>لا يوجد شركاء حتى الآن</p>
+            <p className="text-sm mt-1">سيظهر الشركاء هنا بعد إنشاء شحنات معهم</p>
+          </div>
+        ) : (
+          partnersWithSettings.map((partner, index) => (
+            <motion.div
+              key={partner.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <Card className="border-border/50">
+                <CardContent className="pt-4">
+                  {/* Partner Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        {partner.logo_url ? (
+                          <AvatarImage src={partner.logo_url} alt={partner.name} />
+                        ) : null}
+                        <AvatarFallback className="bg-primary/10">
+                          {partner.organization_type === 'generator' ? (
+                            <Building2 className="w-5 h-5 text-primary" />
+                          ) : (
+                            <Recycle className="w-5 h-5 text-green-600" />
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-medium">{partner.name}</h4>
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            partner.organization_type === 'generator' 
+                              ? 'border-primary/30 text-primary' 
+                              : 'border-green-600/30 text-green-600'
+                          }`}
+                        >
+                          {partner.organization_type === 'generator' ? 'جهة مولدة' : 'جهة تدوير'}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    {/* Quick Toggle All */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleAll(partner.id, false)}
+                        className="gap-1 text-xs text-destructive hover:text-destructive"
+                        disabled={isUpdating}
+                      >
+                        <Lock className="w-3 h-3" />
+                        إغلاق الكل
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleAll(partner.id, true)}
+                        className="gap-1 text-xs text-green-600 hover:text-green-600"
+                        disabled={isUpdating}
+                      >
+                        <Unlock className="w-3 h-3" />
+                        فتح الكل
+                      </Button>
+                    </div>
+                  </div>
+
+                  <Separator className="mb-4" />
+
+                  {/* Visibility Toggles */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {/* Maps */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_maps') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <Map className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">رؤية الخرائط</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_maps')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_maps', getSettingValue(partner, 'can_view_maps'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Tracking */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_tracking') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <Navigation className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">التتبع المباشر</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_tracking')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_tracking', getSettingValue(partner, 'can_view_tracking'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Routes */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_routes') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <Route className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">مسارات الشحنات</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_routes')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_routes', getSettingValue(partner, 'can_view_routes'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Driver Location */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_driver_location') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <Eye className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">موقع السائق</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_driver_location')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_driver_location', getSettingValue(partner, 'can_view_driver_location'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Status indicator */}
+                  {partner.hasCustomSettings && (
+                    <div className="mt-3 flex items-center gap-1 text-xs text-muted-foreground">
+                      <Settings2 className="w-3 h-3" />
+                      <span>إعدادات مخصصة</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))
+        )}
+
+        {/* Info Box */}
+        <div className="mt-4 p-4 bg-muted/30 rounded-lg border border-border/50">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+              <Shield className="w-4 h-4 text-primary" />
+            </div>
+            <div className="text-sm text-muted-foreground">
+              <p className="font-medium text-foreground mb-1">ملاحظة هامة</p>
+              <p>
+                عند إغلاق صلاحية معينة، لن يتمكن الشريك من رؤية تلك الميزة في الشحنات المشتركة معكم.
+                يمكنك تغيير هذه الإعدادات في أي وقت.
+              </p>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default PartnerVisibilitySettings;
