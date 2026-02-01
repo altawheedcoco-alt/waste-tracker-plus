@@ -3,7 +3,6 @@ import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLoca
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Search, 
@@ -138,28 +137,6 @@ const SmartLocationSearch = ({
     );
   };
 
-  const getTypeIcon = (type: SearchResult['type']) => {
-    switch (type) {
-      case 'saved':
-        return <MapPin className="w-4 h-4 text-primary" />;
-      case 'organization':
-        return <Building2 className="w-4 h-4 text-secondary-foreground" />;
-      case 'nominatim':
-        return <Globe className="w-4 h-4 text-muted-foreground" />;
-    }
-  };
-
-  const getTypeBadge = (type: SearchResult['type']) => {
-    switch (type) {
-      case 'saved':
-        return <Badge variant="default" className="text-[10px] px-1.5 py-0">محفوظ</Badge>;
-      case 'organization':
-        return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">منظمة</Badge>;
-      case 'nominatim':
-        return <Badge variant="outline" className="text-[10px] px-1.5 py-0">عام</Badge>;
-    }
-  };
-
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <div className="flex gap-2">
@@ -208,56 +185,105 @@ const SmartLocationSearch = ({
         )}
       </div>
 
-      {/* Search Results Dropdown */}
+      {/* Search Results Dropdown - Google Style */}
       {showResults && (results.length > 0 || loading) && (
-        <Card className="absolute z-50 top-full mt-1 w-full shadow-lg border">
-          <ScrollArea className="max-h-[300px]">
+        <Card className="absolute z-50 top-full mt-2 w-full shadow-xl border-0 rounded-xl overflow-hidden bg-background">
+          <ScrollArea className="max-h-[400px]">
             {loading && results.length === 0 ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                <span className="mr-2 text-sm text-muted-foreground">جاري البحث...</span>
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                <span className="mr-3 text-sm text-muted-foreground">جاري البحث...</span>
               </div>
             ) : results.length === 0 ? (
-              <div className="p-4 text-center text-sm text-muted-foreground">
-                لا توجد نتائج
+              <div className="p-8 text-center">
+                <Globe className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+                <p className="text-sm text-muted-foreground">لا توجد نتائج لـ "{query}"</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">جرب البحث بكلمات مختلفة</p>
               </div>
             ) : (
-              <div className="py-1">
+              <div className="divide-y divide-border/50">
                 {results.map((result) => (
                   <button
                     key={result.id}
                     type="button"
-                    className="w-full px-3 py-2.5 text-right hover:bg-muted/50 transition-colors flex items-start gap-3"
+                    className="w-full px-4 py-3 text-right hover:bg-muted/30 transition-all duration-150 flex items-start gap-3 group"
                     onClick={() => handleSelect(result)}
                   >
-                    <div className="mt-1 flex-shrink-0">
-                      {getTypeIcon(result.type)}
+                    {/* Icon Container - Google Style */}
+                    <div className={cn(
+                      "mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                      result.type === 'saved' && "bg-primary/10 text-primary",
+                      result.type === 'organization' && "bg-blue-500/10 text-blue-600",
+                      result.type === 'nominatim' && "bg-muted text-muted-foreground"
+                    )}>
+                      {result.type === 'saved' && <MapPin className="w-4 h-4" />}
+                      {result.type === 'organization' && <Building2 className="w-4 h-4" />}
+                      {result.type === 'nominatim' && <Globe className="w-4 h-4" />}
                     </div>
+                    
+                    {/* Content - Google Style */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm truncate">{result.name}</span>
-                        {getTypeBadge(result.type)}
+                      {/* Title Row */}
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                          {result.name}
+                        </span>
+                        {result.type === 'saved' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                            محفوظ
+                          </span>
+                        )}
+                        {result.type === 'organization' && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 font-medium">
+                            منظمة
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                        {result.address}
-                      </p>
+                      
+                      {/* URL/Category Line - Like Google */}
                       {result.organizationName && result.type === 'saved' && (
-                        <p className="text-xs text-primary mt-0.5">
+                        <p className="text-xs text-primary/80 mb-0.5 flex items-center gap-1">
+                          <Building2 className="w-3 h-3" />
                           {result.organizationName}
                         </p>
                       )}
+                      
+                      {/* Address - Like Google Description */}
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {result.address}
+                      </p>
+                      
+                      {/* Distance Badge - Bottom Right */}
                       {result.distance !== undefined && (
-                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                          <Navigation className="w-3 h-3" />
-                          {result.distance < 1 
-                            ? `${Math.round(result.distance * 1000)} م`
-                            : `${result.distance.toFixed(1)} كم`
-                          }
-                        </p>
+                        <div className="flex items-center gap-1 mt-1.5">
+                          <div className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground">
+                            <Navigation className="w-3 h-3" />
+                            <span>
+                              {result.distance < 1 
+                                ? `${Math.round(result.distance * 1000)} متر`
+                                : `${result.distance.toFixed(1)} كم`
+                              }
+                            </span>
+                          </div>
+                        </div>
                       )}
+                    </div>
+                    
+                    {/* Arrow indicator on hover */}
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center">
+                      <svg className="w-4 h-4 text-muted-foreground rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </button>
                 ))}
+                
+                {/* Footer hint */}
+                <div className="px-4 py-2 bg-muted/20 text-center">
+                  <p className="text-[11px] text-muted-foreground">
+                    اضغط على نتيجة لاختيار الموقع
+                  </p>
+                </div>
               </div>
             )}
           </ScrollArea>
