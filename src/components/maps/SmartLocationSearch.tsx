@@ -64,7 +64,7 @@ const SmartLocationSearch = ({
     }
   }, []);
 
-  // Debounced search
+  // Debounced search - 500ms delay to reduce API calls
   useEffect(() => {
     const timer = setTimeout(() => {
       if (query.length >= 1) {
@@ -74,7 +74,7 @@ const SmartLocationSearch = ({
         clearResults();
         setShowResults(false);
       }
-    }, 300);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [query, search, clearResults]);
