@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import SmartLocationSearch from '@/components/maps/SmartLocationSearch';
 import { 
   MapPin, 
@@ -27,6 +33,9 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+// Lazy load map component
+const InteractiveMapPicker = lazy(() => import('@/components/maps/InteractiveMapPicker'));
 
 interface EnhancedDestinationPickerProps {
   driverId: string;
@@ -85,6 +94,8 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
   const [activeShipments, setActiveShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [mapPickerTarget, setMapPickerTarget] = useState<'from' | 'to'>('from');
 
   // Check if cities are different
   const citiesAreDifferent = useMemo(() => {
@@ -336,16 +347,35 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
           </Alert>
         )}
 
-        {/* Drop Pin on Map option */}
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground h-12 border border-dashed"
-        >
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-            <MapPin className="h-4 w-4" />
-          </div>
-          ضع الدبوس على موقعك بالخريطة
-        </Button>
+        {/* Drop Pin on Map options */}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1 justify-start gap-2 text-muted-foreground hover:text-foreground h-11 border-dashed hover:border-primary/50"
+            onClick={() => {
+              setMapPickerTarget('from');
+              setShowMapPicker(true);
+            }}
+          >
+            <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
+              <MapPin className="h-3 w-3 text-emerald-600" />
+            </div>
+            <span className="text-xs">حدد نقطة الاستلام</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1 justify-start gap-2 text-muted-foreground hover:text-foreground h-11 border-dashed hover:border-primary/50"
+            onClick={() => {
+              setMapPickerTarget('to');
+              setShowMapPicker(true);
+            }}
+          >
+            <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <Map className="h-3 w-3 text-amber-600" />
+            </div>
+            <span className="text-xs">حدد نقطة التسليم</span>
+          </Button>
+        </div>
 
         {/* Shipment Selection */}
         <div className="space-y-2 pt-2 border-t">
@@ -408,6 +438,68 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
           💡 اختر شحنة نشطة ثم حدد نقطتي الانطلاق والوصول
         </p>
       </CardContent>
+
+      {/* Map Picker Dialog */}
+      <Dialog open={showMapPicker} onOpenChange={setShowMapPicker}>
+        <DialogContent className="max-w-3xl h-[85vh] flex flex-col p-0">
+          <DialogHeader className="p-4 pb-2 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              {mapPickerTarget === 'from' ? 'تحديد نقطة الاستلام' : 'تحديد نقطة التسليم'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 p-4">
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <InteractiveMapPicker
+                value={mapPickerTarget === 'from' ? fromLocation.coords : toLocation.coords}
+                onChange={(coords, address) => {
+                  if (mapPickerTarget === 'from') {
+                    setFromLocation({
+                      address: address || `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`,
+                      coords,
+                      city: extractCity(address || '')
+                    });
+                  } else {
+                    setToLocation({
+                      address: address || `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`,
+                      coords,
+                      city: extractCity(address || '')
+                    });
+                  }
+                }}
+                height="100%"
+                showSearch={true}
+                markerColor={mapPickerTarget === 'from' ? 'green' : 'red'}
+                label={mapPickerTarget === 'from' ? 'اضغط على الخريطة لتحديد نقطة الاستلام' : 'اضغط على الخريطة لتحديد نقطة التسليم'}
+              />
+            </Suspense>
+          </div>
+          <div className="p-4 border-t flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setShowMapPicker(false)}
+            >
+              إلغاء
+            </Button>
+            <Button
+              className="flex-1 gap-2"
+              onClick={() => {
+                setShowMapPicker(false);
+                toast.success(mapPickerTarget === 'from' ? 'تم تحديد نقطة الاستلام' : 'تم تحديد نقطة التسليم');
+              }}
+              disabled={mapPickerTarget === 'from' ? !fromLocation.address : !toLocation.address}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              تأكيد الموقع
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

@@ -335,20 +335,22 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
         }
       });
 
-      // 4. Search using Nominatim API with enhanced queries (Arabic + English)
-      const enhancedQueries = [
-        `${query} industrial Egypt`,
-        `${query} factory Egypt`,
-        `مصنع ${query} مصر`,
-        `${query}, Egypt`,
-        `${query}, مصر`,
-        query,
+      // 5. Search using Nominatim API - EXPANDED SEARCH (no country restriction initially)
+      // First try Egypt-specific, then global search for better coverage
+      const searchStrategies = [
+        // Egypt-specific searches
+        { query: `${query}`, countrycodes: 'eg', limit: 10 },
+        { query: `${query} industrial`, countrycodes: 'eg', limit: 5 },
+        { query: `مصنع ${query}`, countrycodes: 'eg', limit: 5 },
+        // Global search for broader results
+        { query: `${query}`, countrycodes: '', limit: 10 },
       ];
 
-      for (const searchQuery of enhancedQueries.slice(0, 3)) { // Limit API calls
+      for (const strategy of searchStrategies) {
         try {
+          const countryParam = strategy.countrycodes ? `&countrycodes=${strategy.countrycodes}` : '';
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=eg&limit=5&accept-language=ar,en&addressdetails=1`
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(strategy.query)}${countryParam}&limit=${strategy.limit}&accept-language=ar,en&addressdetails=1`
           );
           
           if (!response.ok) continue;
@@ -360,11 +362,18 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
               // Avoid duplicates
               const exists = allResults.some(r => 
                 r.address === item.display_name ||
-                (r.latitude === parseFloat(item.lat) && r.longitude === parseFloat(item.lon))
+                (r.latitude && Math.abs(r.latitude - parseFloat(item.lat)) < 0.0001 && 
+                 r.longitude && Math.abs(r.longitude - parseFloat(item.lon)) < 0.0001)
               );
               
               if (!exists) {
                 const matchScore = calculateSimilarity(query, item.display_name);
+                
+                // Extract city and region from address details
+                const addressDetails = item.address || {};
+                const cityName = addressDetails.city || addressDetails.town || addressDetails.village || 
+                                 addressDetails.county || addressDetails.state || '';
+                const regionName = addressDetails.state || addressDetails.region || addressDetails.country || '';
 
                 const result: SearchResult = {
                   id: `nominatim-${item.place_id}`,
@@ -373,7 +382,9 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
                   type: 'nominatim',
                   latitude: parseFloat(item.lat),
                   longitude: parseFloat(item.lon),
-                  matchScore,
+                  matchScore: matchScore + 0.1, // Slight boost for external results
+                  city: cityName,
+                  region: regionName,
                 };
 
                 // Calculate distance if reference point is available
@@ -389,7 +400,11 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
                 allResults.push(result);
               }
             });
-            break; // Stop if we found results
+            
+            // If we have enough results from Egypt, don't do global search
+            if (strategy.countrycodes === 'eg' && allResults.filter(r => r.type === 'nominatim').length >= 8) {
+              break;
+            }
           }
         } catch (err) {
           console.error('Nominatim search error:', err);
@@ -426,7 +441,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
         )
       );
 
-      setResults(uniqueResults.slice(0, 20)); // Limit total results
+      setResults(uniqueResults.slice(0, 30)); // Increased limit for broader results
     } catch (err) {
       console.error('Enhanced search error:', err);
       setError('خطأ في البحث');
