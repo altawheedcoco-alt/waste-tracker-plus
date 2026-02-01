@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,56 @@ import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check } from
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix default marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+// Custom marker icon
+const locationMarkerIcon = new L.DivIcon({
+  className: 'location-marker',
+  html: `<div style="
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border: 4px solid white;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+  "></div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+});
+
+// Map click handler component
+const MapClickHandler = ({ onLocationSelect }: { onLocationSelect: (latlng: L.LatLng) => void }) => {
+  useMapEvents({
+    click(e) {
+      onLocationSelect(e.latlng);
+    },
+  });
+  return null;
+};
+
+// Map center updater component
+const MapCenterUpdater = ({ center }: { center: [number, number] | null }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (center) {
+      map.flyTo(center, 15, { duration: 0.5 });
+    }
+  }, [center, map]);
+  
+  return null;
+};
 
 interface OrganizationLocation {
   id: string;
@@ -65,6 +115,7 @@ const EnhancedLocationPicker = ({
   // Map picker state
   const [showMapDialog, setShowMapDialog] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapKey, setMapKey] = useState(0);
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,6 +132,10 @@ const EnhancedLocationPicker = ({
   });
   const [saving, setSaving] = useState(false);
 
+  // Map search state
+  const [mapSearchQuery, setMapSearchQuery] = useState('');
+  const [mapSearchLoading, setMapSearchLoading] = useState(false);
+
   const primaryAddress = `${organizationAddress}, ${organizationCity}`;
 
   useEffect(() => {
@@ -88,6 +143,13 @@ const EnhancedLocationPicker = ({
       fetchLocations();
     }
   }, [organizationId]);
+
+  // Reset map when dialog opens
+  useEffect(() => {
+    if (showMapDialog) {
+      setMapKey(prev => prev + 1);
+    }
+  }, [showMapDialog]);
 
   const fetchLocations = async () => {
     setLoading(true);
@@ -123,7 +185,6 @@ const EnhancedLocationPicker = ({
         const { latitude, longitude } = position.coords;
         
         try {
-          // Reverse geocoding to get address
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ar`
           );
@@ -247,10 +308,61 @@ const EnhancedLocationPicker = ({
     }
   };
 
+  // Handle map click
+  const handleMapClick = (latlng: L.LatLng) => {
+    setMapCoordinates({ lat: latlng.lat, lng: latlng.lng });
+  };
+
+  // Search on map
+  const handleMapSearch = async () => {
+    if (!mapSearchQuery.trim()) return;
+
+    setMapSearchLoading(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mapSearchQuery)}&countrycodes=eg&limit=1&accept-language=ar`
+      );
+      const data = await response.json();
+      
+      if (data?.[0]) {
+        setMapCoordinates({
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon)
+        });
+        toast.success('تم العثور على الموقع');
+      } else {
+        toast.error('لم يتم العثور على نتائج');
+      }
+    } catch {
+      toast.error('خطأ في البحث');
+    } finally {
+      setMapSearchLoading(false);
+    }
+  };
+
+  // Get current location for map
+  const getMapCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('المتصفح لا يدعم تحديد الموقع');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setMapCoordinates({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        toast.success('تم تحديد موقعك الحالي');
+      },
+      () => toast.error('فشل في تحديد الموقع'),
+      { enableHighAccuracy: true }
+    );
+  };
+
   // Handle map coordinate selection
   const handleMapSelect = () => {
     if (mapCoordinates) {
-      // Get address from coordinates
       fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapCoordinates.lat}&lon=${mapCoordinates.lng}&accept-language=ar`
       )
@@ -270,6 +382,12 @@ const EnhancedLocationPicker = ({
         });
     }
   };
+
+  // Default center (Egypt)
+  const defaultCenter: [number, number] = [26.8206, 30.8025];
+  const mapCenter: [number, number] = mapCoordinates 
+    ? [mapCoordinates.lat, mapCoordinates.lng] 
+    : defaultCenter;
 
   return (
     <div className="space-y-3">
@@ -458,7 +576,7 @@ const EnhancedLocationPicker = ({
         </TabsContent>
       </Tabs>
 
-      {/* Map Picker Button - Optional */}
+      {/* Map Picker Button */}
       <Button 
         variant="outline" 
         className="w-full"
@@ -468,64 +586,124 @@ const EnhancedLocationPicker = ({
         تحديد الموقع على الخريطة
       </Button>
 
-      {/* Map Dialog */}
+      {/* Interactive Map Dialog */}
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
-        <DialogContent className="max-w-3xl" dir="rtl">
+        <DialogContent className="max-w-4xl max-h-[90vh]" dir="rtl">
           <DialogHeader>
-            <DialogTitle>تحديد الموقع على الخريطة</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Map className="w-5 h-5 text-primary" />
+              تحديد الموقع على الخريطة
+            </DialogTitle>
           </DialogHeader>
-          <div className="h-[400px] bg-muted rounded-lg overflow-hidden relative">
-            <iframe
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=25.0,22.0,35.0,32.0&layer=mapnik&marker=${mapCoordinates?.lat || 26.8206},${mapCoordinates?.lng || 30.8025}`}
-              allowFullScreen
-            />
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="bg-background/90 backdrop-blur-sm p-4 rounded-lg text-center">
-                <p className="text-sm text-muted-foreground mb-2">
-                  للتحديد الدقيق على الخريطة، استخدم البحث بالاسم
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  أو أدخل الإحداثيات يدوياً
-                </p>
+          <div className="space-y-4">
+            {/* Search Bar */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={mapSearchQuery}
+                  onChange={(e) => setMapSearchQuery(e.target.value)}
+                  placeholder="ابحث عن موقع..."
+                  className="pr-10"
+                  onKeyDown={(e) => e.key === 'Enter' && handleMapSearch()}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleMapSearch}
+                disabled={mapSearchLoading}
+              >
+                {mapSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'بحث'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={getMapCurrentLocation}
+                title="موقعي الحالي"
+              >
+                <Navigation className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Interactive Map */}
+            <div className="h-[400px] rounded-lg overflow-hidden border relative">
+              {showMapDialog && (
+                <MapContainer
+                  key={mapKey}
+                  center={mapCenter}
+                  zoom={mapCoordinates ? 15 : 6}
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={true}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  
+                  <MapClickHandler onLocationSelect={handleMapClick} />
+                  <MapCenterUpdater center={mapCoordinates ? [mapCoordinates.lat, mapCoordinates.lng] : null} />
+                  
+                  {mapCoordinates && (
+                    <Marker 
+                      position={[mapCoordinates.lat, mapCoordinates.lng]} 
+                      icon={locationMarkerIcon}
+                    />
+                  )}
+                </MapContainer>
+              )}
+              
+              {/* Instruction overlay */}
+              {!mapCoordinates && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-lg border shadow-lg">
+                  <p className="text-sm text-muted-foreground">اضغط على الخريطة لتحديد الموقع</p>
+                </div>
+              )}
+            </div>
+
+            {/* Coordinates Input */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs">خط العرض (Latitude)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  placeholder="30.0444"
+                  value={mapCoordinates?.lat || ''}
+                  onChange={(e) => setMapCoordinates(prev => ({
+                    lat: parseFloat(e.target.value) || 0,
+                    lng: prev?.lng || 0
+                  }))}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">خط الطول (Longitude)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  placeholder="31.2357"
+                  value={mapCoordinates?.lng || ''}
+                  onChange={(e) => setMapCoordinates(prev => ({
+                    lat: prev?.lat || 0,
+                    lng: parseFloat(e.target.value) || 0
+                  }))}
+                />
               </div>
             </div>
+
+            {/* Selected coordinates display */}
+            {mapCoordinates && (
+              <p className="text-xs text-center text-muted-foreground" dir="ltr">
+                {mapCoordinates.lat.toFixed(6)}, {mapCoordinates.lng.toFixed(6)}
+              </p>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>خط العرض (Latitude)</Label>
-              <Input
-                type="number"
-                step="any"
-                placeholder="مثال: 30.0444"
-                value={mapCoordinates?.lat || ''}
-                onChange={(e) => setMapCoordinates(prev => ({
-                  lat: parseFloat(e.target.value) || 0,
-                  lng: prev?.lng || 0
-                }))}
-              />
-            </div>
-            <div>
-              <Label>خط الطول (Longitude)</Label>
-              <Input
-                type="number"
-                step="any"
-                placeholder="مثال: 31.2357"
-                value={mapCoordinates?.lng || ''}
-                onChange={(e) => setMapCoordinates(prev => ({
-                  lat: prev?.lat || 0,
-                  lng: parseFloat(e.target.value) || 0
-                }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setShowMapDialog(false)}>
               إلغاء
             </Button>
             <Button variant="eco" onClick={handleMapSelect} disabled={!mapCoordinates}>
+              <Check className="w-4 h-4 ml-2" />
               تأكيد الموقع
             </Button>
           </DialogFooter>
