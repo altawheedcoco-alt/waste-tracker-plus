@@ -106,7 +106,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
   const [error, setError] = useState<string | null>(null);
 
   const search = useCallback(async (query: string) => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 1) {
       setResults([]);
       return;
     }
