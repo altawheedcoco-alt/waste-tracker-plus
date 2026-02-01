@@ -24,6 +24,8 @@ import ShipmentDetails from "./pages/dashboard/ShipmentDetails";
 import TransporterShipments from "./pages/dashboard/TransporterShipments";
 import TransporterDrivers from "./pages/dashboard/TransporterDrivers";
 import AITools from "./pages/dashboard/AITools";
+import RecyclerAITools from "./pages/dashboard/RecyclerAITools";
+import TransporterAITools from "./pages/dashboard/TransporterAITools";
 import Notifications from "./pages/dashboard/Notifications";
 import OrganizationProfile from "./pages/dashboard/OrganizationProfile";
 import OrganizationDocuments from "./pages/dashboard/OrganizationDocuments";
@@ -90,6 +92,8 @@ const App = () => (
                 <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
                 <Route path="/dashboard/environmental-sustainability" element={<EnvironmentalSustainability />} />
                 <Route path="/dashboard/ai-tools" element={<AITools />} />
+                <Route path="/dashboard/recycler-ai-tools" element={<RecyclerAITools />} />
+                <Route path="/dashboard/transporter-ai-tools" element={<TransporterAITools />} />
                 <Route path="/dashboard/notifications" element={<Notifications />} />
                 <Route path="/dashboard/organization-profile" element={<OrganizationProfile />} />
                 <Route path="/dashboard/organization-documents" element={<OrganizationDocuments />} />
