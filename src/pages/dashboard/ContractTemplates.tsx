@@ -28,8 +28,11 @@ import {
   FileSignature,
   Stamp,
   Image as ImageIcon,
-  Users
+  Users,
+  Download,
+  Sparkles
 } from 'lucide-react';
+import { allGeneratorTemplates, allRecyclerTemplates } from '@/data/contractTemplatesData';
 import { 
   useContractTemplates, 
   ContractTemplate, 
@@ -39,13 +42,16 @@ import {
 } from '@/hooks/useContractTemplates';
 
 const ContractTemplates = () => {
-  const { templates, loading, createTemplate, updateTemplate, deleteTemplate } = useContractTemplates();
+  const { templates, loading, createTemplate, updateTemplate, deleteTemplate, fetchTemplates } = useContractTemplates();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
 
   const [formData, setFormData] = useState<CreateContractTemplateInput>({
     name: '',
@@ -164,6 +170,57 @@ const ContractTemplates = () => {
     setIsEditing(false);
     setSelectedTemplate(null);
     setShowCreateDialog(true);
+  };
+
+  // Import pre-built templates
+  const handleImportTemplates = async (type: 'generator' | 'recycler' | 'all') => {
+    setImporting(true);
+    setImportProgress(0);
+    
+    try {
+      const templatesToImport = type === 'generator' 
+        ? allGeneratorTemplates 
+        : type === 'recycler' 
+          ? allRecyclerTemplates 
+          : [...allGeneratorTemplates, ...allRecyclerTemplates];
+      
+      const total = templatesToImport.length;
+      let imported = 0;
+      
+      for (const template of templatesToImport) {
+        await createTemplate({
+          name: template.name,
+          description: template.description,
+          partner_type: template.partner_type,
+          contract_category: template.contract_category,
+          header_text: template.header_text,
+          introduction_text: template.introduction_text,
+          terms_template: template.terms_template,
+          obligations_party_one: template.obligations_party_one,
+          obligations_party_two: template.obligations_party_two,
+          payment_terms_template: template.payment_terms_template,
+          duration_clause: template.duration_clause,
+          termination_clause: template.termination_clause,
+          dispute_resolution: template.dispute_resolution,
+          closing_text: template.closing_text,
+          include_stamp: true,
+          include_signature: true,
+          include_header_logo: true,
+        });
+        imported++;
+        setImportProgress(Math.round((imported / total) * 100));
+      }
+      
+      toast.success(`تم استيراد ${imported} قالب بنجاح`);
+      setShowImportDialog(false);
+      fetchTemplates();
+    } catch (error) {
+      console.error('Error importing templates:', error);
+      toast.error('حدث خطأ أثناء استيراد القوالب');
+    } finally {
+      setImporting(false);
+      setImportProgress(0);
+    }
   };
 
   // Filter templates by partner type
@@ -304,12 +361,18 @@ const ContractTemplates = () => {
               <FileText className="w-6 h-6" />
               قوالب العقود
             </h1>
-            <p className="text-muted-foreground">إنشاء وإدارة صيغ عقود الجمع والنقل</p>
+            <p className="text-muted-foreground">إنشاء وإدارة صيغ عقود الجمع والنقل ({allGeneratorTemplates.length + allRecyclerTemplates.length} قالب جاهز)</p>
           </div>
-          <Button onClick={() => { resetForm(); setShowCreateDialog(true); }} className="gap-2">
-            <Plus className="w-4 h-4" />
-            إنشاء قالب جديد
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowImportDialog(true)} className="gap-2">
+              <Download className="w-4 h-4" />
+              استيراد قوالب جاهزة
+            </Button>
+            <Button onClick={() => { resetForm(); setShowCreateDialog(true); }} className="gap-2">
+              <Plus className="w-4 h-4" />
+              إنشاء قالب جديد
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -777,6 +840,111 @@ const ContractTemplates = () => {
                   تعديل
                 </Button>
               )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Templates Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                استيراد قوالب العقود الجاهزة
+              </DialogTitle>
+              <DialogDescription>
+                اختر نوع القوالب التي تريد استيرادها - جميع القوالب تحتوي على 30+ بند قانوني
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              {importing ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>جاري الاستيراد...</span>
+                      <span>{importProgress}%</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary transition-all duration-300"
+                        style={{ width: `${importProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  <Card 
+                    className="cursor-pointer hover:border-primary transition-colors"
+                    onClick={() => handleImportTemplates('generator')}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <Building2 className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">قوالب الجهات المولدة</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {allGeneratorTemplates.length} قالب - عقود جمع ونقل
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card 
+                    className="cursor-pointer hover:border-primary transition-colors"
+                    onClick={() => handleImportTemplates('recycler')}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-500/10 rounded-lg">
+                          <Recycle className="w-6 h-6 text-green-500" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">قوالب جهات التدوير</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {allRecyclerTemplates.length} قالب - عقود توريد وتدوير
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Separator />
+
+                  <Card 
+                    className="cursor-pointer hover:border-primary transition-colors bg-gradient-to-r from-primary/5 to-green-500/5"
+                    onClick={() => handleImportTemplates('all')}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-r from-primary/20 to-green-500/20 rounded-lg">
+                          <FileText className="w-6 h-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">استيراد جميع القوالب</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {allGeneratorTemplates.length + allRecyclerTemplates.length} قالب شامل
+                          </p>
+                        </div>
+                        <Badge variant="secondary">موصى به</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)} disabled={importing}>
+                إغلاق
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
