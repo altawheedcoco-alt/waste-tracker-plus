@@ -42,6 +42,7 @@ import {
 import TemplateCard from '@/components/contracts/TemplateCard';
 import TemplatePreviewDialog from '@/components/contracts/TemplatePreviewDialog';
 import WasteTypeCategoryView from '@/components/contracts/WasteTypeCategoryView';
+import ContractTemplateFormDialog from '@/components/contracts/ContractTemplateFormDialog';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,93 +63,17 @@ const ContractTemplates = () => {
   const [generatingSystemTemplates, setGeneratingSystemTemplates] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'category'>('category');
 
-  const [formData, setFormData] = useState<CreateContractTemplateInput>({
-    name: '',
-    description: '',
-    partner_type: 'generator',
-    contract_category: 'collection_transport',
-    header_text: '',
-    introduction_text: '',
-    terms_template: '',
-    obligations_party_one: '',
-    obligations_party_two: '',
-    payment_terms_template: '',
-    duration_clause: '',
-    termination_clause: '',
-    dispute_resolution: '',
-    closing_text: '',
-    include_stamp: true,
-    include_signature: true,
-    include_header_logo: true,
-  });
+  // Form data is now managed inside ContractTemplateFormDialog
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      partner_type: 'generator',
-      contract_category: 'collection_transport',
-      header_text: '',
-      introduction_text: '',
-      terms_template: '',
-      obligations_party_one: '',
-      obligations_party_two: '',
-      payment_terms_template: '',
-      duration_clause: '',
-      termination_clause: '',
-      dispute_resolution: '',
-      closing_text: '',
-      include_stamp: true,
-      include_signature: true,
-      include_header_logo: true,
-    });
     setSelectedTemplate(null);
     setIsEditing(false);
   };
 
   const handleEdit = (template: ContractTemplate) => {
     setSelectedTemplate(template);
-    setFormData({
-      name: template.name,
-      description: template.description || '',
-      partner_type: template.partner_type,
-      contract_category: template.contract_category,
-      header_text: template.header_text || '',
-      introduction_text: template.introduction_text || '',
-      terms_template: template.terms_template || '',
-      obligations_party_one: template.obligations_party_one || '',
-      obligations_party_two: template.obligations_party_two || '',
-      payment_terms_template: template.payment_terms_template || '',
-      duration_clause: template.duration_clause || '',
-      termination_clause: template.termination_clause || '',
-      dispute_resolution: template.dispute_resolution || '',
-      closing_text: template.closing_text || '',
-      include_stamp: template.include_stamp,
-      include_signature: template.include_signature,
-      include_header_logo: template.include_header_logo,
-    });
     setIsEditing(true);
     setShowCreateDialog(true);
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.name.trim()) {
-      toast.error('يرجى إدخال اسم القالب');
-      return;
-    }
-
-    setSaving(true);
-    try {
-      if (isEditing && selectedTemplate) {
-        await updateTemplate(selectedTemplate.id, formData);
-      } else {
-        await createTemplate(formData);
-      }
-      setShowCreateDialog(false);
-      resetForm();
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleDelete = async (id: string) => {
@@ -157,27 +82,12 @@ const ContractTemplates = () => {
   };
 
   const handleDuplicate = (template: ContractTemplate) => {
-    setFormData({
+    // Set the template as selected but with modified name
+    setSelectedTemplate({
+      ...template,
       name: template.name + ' (نسخة)',
-      description: template.description || '',
-      partner_type: template.partner_type,
-      contract_category: template.contract_category,
-      header_text: template.header_text || '',
-      introduction_text: template.introduction_text || '',
-      terms_template: template.terms_template || '',
-      obligations_party_one: template.obligations_party_one || '',
-      obligations_party_two: template.obligations_party_two || '',
-      payment_terms_template: template.payment_terms_template || '',
-      duration_clause: template.duration_clause || '',
-      termination_clause: template.termination_clause || '',
-      dispute_resolution: template.dispute_resolution || '',
-      closing_text: template.closing_text || '',
-      include_stamp: template.include_stamp,
-      include_signature: template.include_signature,
-      include_header_logo: template.include_header_logo,
     });
     setIsEditing(false);
-    setSelectedTemplate(null);
     setShowCreateDialog(true);
   };
 
@@ -500,257 +410,28 @@ const ContractTemplates = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Create/Edit Dialog */}
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogContent className="max-w-3xl max-h-[90vh]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Plus className="w-5 h-5 text-primary" />
-                {isEditing ? 'تعديل قالب العقد' : 'إنشاء قالب عقد جديد'}
-              </DialogTitle>
-              <DialogDescription>
-                أنشئ صيغة عقد جديدة لاستخدامها مع الشركاء
-              </DialogDescription>
-            </DialogHeader>
-
-            <ScrollArea className="h-[60vh] px-1">
-              <div className="space-y-6 py-4">
-                {/* Basic Info */}
-                <div className="space-y-4">
-                  <h4 className="font-medium border-b pb-2">المعلومات الأساسية</h4>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>اسم القالب *</Label>
-                      <Input
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="مثال: عقد جمع النفايات الصناعية"
-                        dir="rtl"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label>نوع الشريك</Label>
-                      <Select
-                        value={formData.partner_type}
-                        onValueChange={(value: any) => setFormData({ ...formData, partner_type: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="generator">جهات مولدة</SelectItem>
-                          <SelectItem value="recycler">جهات تدوير</SelectItem>
-                          <SelectItem value="both">جميع الجهات</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>تصنيف العقد</Label>
-                      <Select
-                        value={formData.contract_category}
-                        onValueChange={(value: any) => setFormData({ ...formData, contract_category: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="collection">عقد جمع</SelectItem>
-                          <SelectItem value="transport">عقد نقل</SelectItem>
-                          <SelectItem value="collection_transport">عقد جمع ونقل</SelectItem>
-                          <SelectItem value="recycling">عقد تدوير</SelectItem>
-                          <SelectItem value="other">أخرى</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>وصف القالب</Label>
-                      <Input
-                        value={formData.description || ''}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="وصف مختصر للقالب..."
-                        dir="rtl"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Contract Content */}
-                <div className="space-y-4">
-                  <h4 className="font-medium border-b pb-2">محتوى العقد</h4>
-
-                  <div className="space-y-2">
-                    <Label>ترويسة العقد</Label>
-                    <Textarea
-                      value={formData.header_text || ''}
-                      onChange={(e) => setFormData({ ...formData, header_text: e.target.value })}
-                      placeholder="عنوان وترويسة العقد الرسمية..."
-                      className="min-h-[60px]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>المقدمة والتمهيد</Label>
-                    <Textarea
-                      value={formData.introduction_text || ''}
-                      onChange={(e) => setFormData({ ...formData, introduction_text: e.target.value })}
-                      placeholder="تمهيد العقد وبيان أطرافه..."
-                      className="min-h-[80px]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>البنود والشروط العامة</Label>
-                    <Textarea
-                      value={formData.terms_template || ''}
-                      onChange={(e) => setFormData({ ...formData, terms_template: e.target.value })}
-                      placeholder="البنود والشروط العامة للعقد..."
-                      className="min-h-[100px]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>التزامات الطرف الأول (الناقل)</Label>
-                      <Textarea
-                        value={formData.obligations_party_one || ''}
-                        onChange={(e) => setFormData({ ...formData, obligations_party_one: e.target.value })}
-                        placeholder="التزامات شركة النقل..."
-                        className="min-h-[100px]"
-                        dir="rtl"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>التزامات الطرف الثاني (الشريك)</Label>
-                      <Textarea
-                        value={formData.obligations_party_two || ''}
-                        onChange={(e) => setFormData({ ...formData, obligations_party_two: e.target.value })}
-                        placeholder="التزامات الطرف الآخر..."
-                        className="min-h-[100px]"
-                        dir="rtl"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>شروط الدفع والمقابل المادي</Label>
-                    <Textarea
-                      value={formData.payment_terms_template || ''}
-                      onChange={(e) => setFormData({ ...formData, payment_terms_template: e.target.value })}
-                      placeholder="شروط وطريقة الدفع..."
-                      className="min-h-[80px]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>مدة العقد</Label>
-                      <Textarea
-                        value={formData.duration_clause || ''}
-                        onChange={(e) => setFormData({ ...formData, duration_clause: e.target.value })}
-                        placeholder="مدة سريان العقد وشروط التجديد..."
-                        className="min-h-[80px]"
-                        dir="rtl"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>شروط الإنهاء</Label>
-                      <Textarea
-                        value={formData.termination_clause || ''}
-                        onChange={(e) => setFormData({ ...formData, termination_clause: e.target.value })}
-                        placeholder="شروط وإجراءات إنهاء العقد..."
-                        className="min-h-[80px]"
-                        dir="rtl"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>حل النزاعات</Label>
-                    <Textarea
-                      value={formData.dispute_resolution || ''}
-                      onChange={(e) => setFormData({ ...formData, dispute_resolution: e.target.value })}
-                      placeholder="آلية حل النزاعات والاختصاص القضائي..."
-                      className="min-h-[60px]"
-                      dir="rtl"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>الختام والتوقيعات</Label>
-                    <Textarea
-                      value={formData.closing_text || ''}
-                      onChange={(e) => setFormData({ ...formData, closing_text: e.target.value })}
-                      placeholder="نص الختام قبل التوقيعات..."
-                      className="min-h-[60px]"
-                      dir="rtl"
-                    />
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Settings */}
-                <div className="space-y-4 bg-muted/50 rounded-lg p-4">
-                  <h4 className="font-medium">إعدادات العرض</h4>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="flex items-center justify-between">
-                      <Label>شعار الشركة</Label>
-                      <Switch
-                        checked={formData.include_header_logo}
-                        onCheckedChange={(checked) => setFormData({ ...formData, include_header_logo: checked })}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <Label>الختم</Label>
-                      <Switch
-                        checked={formData.include_stamp}
-                        onCheckedChange={(checked) => setFormData({ ...formData, include_stamp: checked })}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <Label>التوقيع</Label>
-                      <Switch
-                        checked={formData.include_signature}
-                        onCheckedChange={(checked) => setFormData({ ...formData, include_signature: checked })}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }} disabled={saving}>
-                إلغاء
-              </Button>
-              <Button onClick={handleSubmit} disabled={saving} className="gap-2">
-                {saving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <FileText className="w-4 h-4" />
-                )}
-                {isEditing ? 'تحديث القالب' : 'إنشاء القالب'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Create/Edit Dialog - Using New Component */}
+        <ContractTemplateFormDialog
+          open={showCreateDialog}
+          onOpenChange={setShowCreateDialog}
+          template={selectedTemplate}
+          isEditing={isEditing}
+          onSubmit={async (data) => {
+            setSaving(true);
+            try {
+              if (isEditing && selectedTemplate) {
+                await updateTemplate(selectedTemplate.id, data);
+              } else {
+                await createTemplate(data);
+              }
+              setShowCreateDialog(false);
+              resetForm();
+            } finally {
+              setSaving(false);
+            }
+          }}
+          saving={saving}
+        />
 
         {/* Template Preview Dialog */}
         <TemplatePreviewDialog
