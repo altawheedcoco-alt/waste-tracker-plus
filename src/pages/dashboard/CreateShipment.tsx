@@ -108,7 +108,34 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
   const prefilledGovernorate = searchParams.get('governorate') || '';
   const prefilledNotes = searchParams.get('notes') || '';
   const prefilledTicketNumber = searchParams.get('ticket_number') || '';
-  const prefilledWeightDate = searchParams.get('weight_date') || '';
+  const rawWeightDate = searchParams.get('weight_date') || '';
+  
+  // Convert date from DD/MM/YYYY or other formats to YYYY-MM-DD for HTML date input
+  const parseAndFormatDate = (dateStr: string): string => {
+    if (!dateStr) return '';
+    
+    // Try DD/MM/YYYY format
+    const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (ddmmyyyy) {
+      const [, day, month, year] = ddmmyyyy;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    
+    // Try YYYY-MM-DD format (already correct)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      return dateStr;
+    }
+    
+    // Try to parse as date
+    const parsed = new Date(dateStr);
+    if (!isNaN(parsed.getTime())) {
+      return parsed.toISOString().split('T')[0];
+    }
+    
+    return '';
+  };
+  
+  const prefilledWeightDate = parseAndFormatDate(rawWeightDate);
 
   // Combine notes with ticket number if available
   const combinedNotes = [
