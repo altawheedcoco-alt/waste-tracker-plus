@@ -246,81 +246,87 @@ const Notifications = () => {
 
   return (
     <DashboardLayout>
-      <ResponsivePageContainer
-        title="الإشعارات"
-        subtitle="جميع الإشعارات والتنبيهات الخاصة بك"
-        actions={
-          <div className="flex flex-wrap gap-2">
-            <Button
-              onClick={handleTestSound}
-              variant="outline"
-              size={isMobile ? 'sm' : 'default'}
-              className="gap-2"
-              disabled={!soundEnabled}
-            >
-              <Volume2 className="w-4 h-4" />
-              {!isMobile && 'اختبار الصوت'}
-            </Button>
-            {unreadCount > 0 && (
-              <Button 
-                onClick={markAllAsRead} 
-                variant="outline" 
-                size={isMobile ? 'sm' : 'default'}
-                className="gap-2"
+      <div className="w-full max-w-full overflow-x-hidden px-1">
+        <ResponsivePageContainer
+          title="الإشعارات"
+          subtitle="جميع الإشعارات والتنبيهات الخاصة بك"
+          actions={
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <Button
+                onClick={handleTestSound}
+                variant="outline"
+                size="sm"
+                className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
+                disabled={!soundEnabled}
               >
-                <CheckCheck className="w-4 h-4" />
-                {isMobile ? `(${unreadCount})` : `تحديد الكل كمقروء (${unreadCount})`}
+                <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                {!isMobile && 'اختبار الصوت'}
               </Button>
-            )}
-          </div>
-        }
-      >
-        {/* Back Button */}
-        <BackButton />
-
-        {/* Category Cards - Responsive Grid */}
-        <ResponsiveGrid cols={{ mobile: 2, tablet: 3, desktop: 6 }} gap="sm">
-          {categories.map((category) => {
-            const CategoryIcon = category.icon;
-            const count = getCategoryCount(category.id);
-            const unreadCategoryCount = getUnreadCategoryCount(category.id);
-            const isActive = activeCategory === category.id;
-
-            return (
-              <motion.div
-                key={category.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Card 
-                  className={`cursor-pointer transition-all ${
-                    isActive 
-                      ? 'ring-2 ring-primary border-primary shadow-md' 
-                      : 'hover:shadow-md hover:border-primary/50'
-                  }`}
-                  onClick={() => setActiveCategory(category.id)}
+              {unreadCount > 0 && (
+                <Button 
+                  onClick={markAllAsRead} 
+                  variant="outline" 
+                  size="sm"
+                  className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                 >
-                  <CardContent className={isMobile ? 'p-2' : 'p-3'}>
-                    <div className="flex flex-col items-center text-center gap-1.5">
-                      <div className={`${iconSize} rounded-full ${category.bgColor} flex items-center justify-center relative`}>
-                        <CategoryIcon className={`${iconInnerSize} ${category.color}`} />
-                        {unreadCategoryCount > 0 && (
-                          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-medium">
-                            {unreadCategoryCount > 9 ? '9+' : unreadCategoryCount}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-medium truncate`}>{category.label}</p>
-                        <p className={`${isMobile ? 'text-base' : 'text-lg'} font-bold`}>{count}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </ResponsiveGrid>
+                  <CheckCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  {isMobile ? `(${unreadCount})` : `تحديد الكل كمقروء (${unreadCount})`}
+                </Button>
+              )}
+            </div>
+          }
+        >
+          {/* Back Button */}
+          <BackButton />
+
+          {/* Category Cards - Responsive Grid with horizontal scroll on mobile */}
+          <div className={isMobile ? 'overflow-x-auto pb-2 -mx-1' : ''}>
+            <div className={isMobile 
+              ? 'flex gap-2 px-1 min-w-max' 
+              : 'grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3'
+            }>
+              {categories.map((category) => {
+                const CategoryIcon = category.icon;
+                const count = getCategoryCount(category.id);
+                const unreadCategoryCount = getUnreadCategoryCount(category.id);
+                const isActive = activeCategory === category.id;
+
+                return (
+                  <motion.div
+                    key={category.id}
+                    whileTap={{ scale: 0.95 }}
+                    className={isMobile ? 'flex-shrink-0 w-[100px]' : ''}
+                  >
+                    <Card 
+                      className={`cursor-pointer transition-all h-full ${
+                        isActive 
+                          ? 'ring-2 ring-primary border-primary shadow-md' 
+                          : 'hover:shadow-md hover:border-primary/50'
+                      }`}
+                      onClick={() => setActiveCategory(category.id)}
+                    >
+                      <CardContent className="p-2 sm:p-3">
+                        <div className="flex flex-col items-center text-center gap-1">
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${category.bgColor} flex items-center justify-center relative`}>
+                            <CategoryIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${category.color}`} />
+                            {unreadCategoryCount > 0 && (
+                              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-destructive text-destructive-foreground text-[8px] sm:text-[10px] flex items-center justify-center font-medium">
+                                {unreadCategoryCount > 9 ? '9+' : unreadCategoryCount}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-[9px] sm:text-xs font-medium truncate max-w-[80px] sm:max-w-none">{category.label}</p>
+                            <p className="text-sm sm:text-lg font-bold">{count}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
 
         {/* Notifications List */}
         <Card>
@@ -521,6 +527,7 @@ const Notifications = () => {
           onNavigateToCarbonFootprint={handleNavigateToCarbonFootprint}
         />
       </ResponsivePageContainer>
+      </div>
     </DashboardLayout>
   );
 };
