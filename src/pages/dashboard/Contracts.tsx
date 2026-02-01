@@ -32,8 +32,10 @@ import {
   Edit,
   Eye,
   FileCheck,
-  Loader2
+  Loader2,
+  Wand2
 } from 'lucide-react';
+import ContractGeneratorDialog from '@/components/contracts/ContractGeneratorDialog';
 
 interface Contract {
   id: string;
@@ -64,6 +66,7 @@ const Contracts = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showGeneratorDialog, setShowGeneratorDialog] = useState(false);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -383,10 +386,16 @@ const Contracts = () => {
             </h1>
             <p className="text-muted-foreground">إدارة العقود والاتفاقيات مع الشركاء</p>
           </div>
-          <Button onClick={() => { resetForm(); setShowAddDialog(true); }} className="gap-2">
-            <Plus className="w-4 h-4" />
-            إضافة عقد جديد
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowGeneratorDialog(true)} className="gap-2">
+              <Wand2 className="w-4 h-4" />
+              إنشاء عقد أوتوماتيكي
+            </Button>
+            <Button onClick={() => { resetForm(); setShowAddDialog(true); }} className="gap-2">
+              <Plus className="w-4 h-4" />
+              إضافة عقد يدوي
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -738,6 +747,13 @@ const Contracts = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Contract Generator Dialog */}
+        <ContractGeneratorDialog
+          open={showGeneratorDialog}
+          onOpenChange={setShowGeneratorDialog}
+          onContractGenerated={fetchContracts}
+        />
       </div>
     </DashboardLayout>
   );
