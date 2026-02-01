@@ -5,7 +5,7 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck } from 'lucide-react';
+import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
@@ -211,6 +211,7 @@ const GeneratorDashboard = () => {
   ];
 
   const quickActions: QuickAction[] = [
+    { title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
     { title: 'التحقق من الوثائق', subtitle: 'التحقق من صحة وثائق الشحنات', icon: FileCheck, onClick: () => setShowDocumentVerification(true), iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600' },
     { title: 'شهادات إعادة التدوير', subtitle: 'تقارير جهات التدوير المستلمة', icon: FolderCheck, path: '/dashboard/recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
     { title: 'تحليل المخلفات بالذكاء الاصطناعي', subtitle: 'تحليلات دقيقة وتوصيات للحد من المخلفات', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },

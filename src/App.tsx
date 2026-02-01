@@ -56,6 +56,7 @@ import AboutPlatform from "./pages/dashboard/AboutPlatform";
 import DriverProfile from "./pages/dashboard/DriverProfile";
 import DriverData from "./pages/dashboard/DriverData";
 import ExternalRecords from "./pages/dashboard/ExternalRecords";
+import Contracts from "./pages/dashboard/Contracts";
 import AIChatbot from "./components/ai/AIChatbot";
 import ChatWidget from "./components/chat/ChatWidget";
 import NotFound from "./pages/NotFound";
@@ -125,6 +126,7 @@ const App = () => (
                 <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
                 <Route path="/dashboard/driver-data" element={<DriverData />} />
                 <Route path="/dashboard/external-records" element={<ExternalRecords />} />
+                <Route path="/dashboard/contracts" element={<Contracts />} />
                 <Route path="/dashboard/*" element={<Dashboard />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
