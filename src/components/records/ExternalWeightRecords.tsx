@@ -1,0 +1,508 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "sonner";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
+import { Plus, CalendarIcon, Link2, Link2Off, Trash2, Edit, Scale, Building2, Filter } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { wasteTypeLabels } from "@/lib/wasteClassification";
+
+interface ExternalRecord {
+  id: string;
+  company_name: string;
+  company_id: string | null;
+  quantity: number;
+  unit: string;
+  waste_type: string;
+  waste_description: string | null;
+  record_date: string;
+  is_linked_to_system: boolean;
+  linked_at: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+interface Props {
+  organizationType: 'recycler' | 'transporter';
+}
+
+const units = ['كجم', 'طن', 'متر مكعب', 'وحدة'];
+
+export default function ExternalWeightRecords({ organizationType }: Props) {
+  const { profile } = useAuth();
+  const queryClient = useQueryClient();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<ExternalRecord | null>(null);
+  const [filterLinked, setFilterLinked] = useState<'all' | 'linked' | 'unlinked'>('all');
+  
+  // Form state
+  const [formData, setFormData] = useState({
+    company_name: '',
+    quantity: '',
+    unit: 'كجم',
+    waste_type: '',
+    waste_description: '',
+    record_date: new Date(),
+    notes: ''
+  });
+
+  const { data: records = [], isLoading } = useQuery({
+    queryKey: ['external-weight-records', profile?.organization_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('external_weight_records')
+        .select('*')
+        .eq('organization_id', profile?.organization_id)
+        .order('record_date', { ascending: false });
+      
+      if (error) throw error;
+      return data as ExternalRecord[];
+    },
+    enabled: !!profile?.organization_id
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const { error } = await supabase
+        .from('external_weight_records')
+        .insert({
+          organization_id: profile?.organization_id,
+          company_name: data.company_name,
+          quantity: parseFloat(data.quantity),
+          unit: data.unit,
+          waste_type: data.waste_type,
+          waste_description: data.waste_description || null,
+          record_date: format(data.record_date, 'yyyy-MM-dd'),
+          notes: data.notes || null,
+          created_by: profile?.id
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['external-weight-records'] });
+      toast.success('تم إضافة السجل بنجاح');
+      resetForm();
+      setIsDialogOpen(false);
+    },
+    onError: () => toast.error('حدث خطأ أثناء إضافة السجل')
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: typeof formData }) => {
+      const { error } = await supabase
+        .from('external_weight_records')
+        .update({
+          company_name: data.company_name,
+          quantity: parseFloat(data.quantity),
+          unit: data.unit,
+          waste_type: data.waste_type,
+          waste_description: data.waste_description || null,
+          record_date: format(data.record_date, 'yyyy-MM-dd'),
+          notes: data.notes || null
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['external-weight-records'] });
+      toast.success('تم تحديث السجل بنجاح');
+      resetForm();
+      setIsDialogOpen(false);
+      setEditingRecord(null);
+    },
+    onError: () => toast.error('حدث خطأ أثناء تحديث السجل')
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('external_weight_records')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['external-weight-records'] });
+      toast.success('تم حذف السجل');
+    },
+    onError: () => toast.error('حدث خطأ أثناء حذف السجل')
+  });
+
+  const toggleLinkMutation = useMutation({
+    mutationFn: async ({ id, link }: { id: string; link: boolean }) => {
+      const { error } = await supabase
+        .from('external_weight_records')
+        .update({
+          is_linked_to_system: link,
+          linked_at: link ? new Date().toISOString() : null,
+          linked_by: link ? profile?.id : null
+        })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { link }) => {
+      queryClient.invalidateQueries({ queryKey: ['external-weight-records'] });
+      toast.success(link ? 'تم ربط السجل بالنظام' : 'تم إلغاء ربط السجل');
+    },
+    onError: () => toast.error('حدث خطأ')
+  });
+
+  const resetForm = () => {
+    setFormData({
+      company_name: '',
+      quantity: '',
+      unit: 'كجم',
+      waste_type: '',
+      waste_description: '',
+      record_date: new Date(),
+      notes: ''
+    });
+  };
+
+  const handleEdit = (record: ExternalRecord) => {
+    setEditingRecord(record);
+    setFormData({
+      company_name: record.company_name,
+      quantity: record.quantity.toString(),
+      unit: record.unit,
+      waste_type: record.waste_type,
+      waste_description: record.waste_description || '',
+      record_date: new Date(record.record_date),
+      notes: record.notes || ''
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingRecord) {
+      updateMutation.mutate({ id: editingRecord.id, data: formData });
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  const filteredRecords = records.filter(r => {
+    if (filterLinked === 'linked') return r.is_linked_to_system;
+    if (filterLinked === 'unlinked') return !r.is_linked_to_system;
+    return true;
+  });
+
+  const stats = {
+    total: records.length,
+    linked: records.filter(r => r.is_linked_to_system).length,
+    unlinked: records.filter(r => !r.is_linked_to_system).length,
+    totalQuantity: records.reduce((sum, r) => sum + (r.unit === 'طن' ? r.quantity * 1000 : r.quantity), 0),
+    linkedQuantity: records.filter(r => r.is_linked_to_system).reduce((sum, r) => sum + (r.unit === 'طن' ? r.quantity * 1000 : r.quantity), 0)
+  };
+
+  const roleLabel = organizationType === 'recycler' ? 'المستلمة' : 'المنقولة';
+
+  return (
+    <div className="space-y-6">
+      {/* Header Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Scale className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-xs text-muted-foreground">إجمالي الكميات</p>
+                <p className="text-lg font-bold">{(stats.totalQuantity / 1000).toFixed(2)} طن</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="text-xs text-muted-foreground">مرتبطة بالنظام</p>
+                <p className="text-lg font-bold">{stats.linked} سجل</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Link2Off className="h-5 w-5 text-orange-500" />
+              <div>
+                <p className="text-xs text-muted-foreground">غير مرتبطة</p>
+                <p className="text-lg font-bold">{stats.unlinked} سجل</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-xs text-muted-foreground">الكمية المرتبطة</p>
+                <p className="text-lg font-bold">{(stats.linkedQuantity / 1000).toFixed(2)} طن</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Scale className="h-5 w-5" />
+            سجل الكميات {roleLabel} الخارجية
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Select value={filterLinked} onValueChange={(v: any) => setFilterLinked(v)}>
+              <SelectTrigger className="w-[140px]">
+                <Filter className="h-4 w-4 ml-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">الكل</SelectItem>
+                <SelectItem value="linked">مرتبطة</SelectItem>
+                <SelectItem value="unlinked">غير مرتبطة</SelectItem>
+              </SelectContent>
+            </Select>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) {
+                setEditingRecord(null);
+                resetForm();
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 ml-2" />
+                  إضافة سجل
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>{editingRecord ? 'تعديل السجل' : 'إضافة سجل جديد'}</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>اسم الشركة / الجهة</Label>
+                    <Input
+                      value={formData.company_name}
+                      onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+                      placeholder="أدخل اسم الشركة"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>الكمية</Label>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={formData.quantity}
+                        onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                        placeholder="0.00"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>الوحدة</Label>
+                      <Select value={formData.unit} onValueChange={(v) => setFormData({ ...formData, unit: v })}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map(u => (
+                            <SelectItem key={u} value={u}>{u}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>نوع المخلف</Label>
+                    <Select value={formData.waste_type} onValueChange={(v) => setFormData({ ...formData, waste_type: v })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر نوع المخلف" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(wasteTypeLabels).map(([key, label]) => (
+                          <SelectItem key={key} value={key}>{label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>وصف المخلف (اختياري)</Label>
+                    <Input
+                      value={formData.waste_description}
+                      onChange={(e) => setFormData({ ...formData, waste_description: e.target.value })}
+                      placeholder="وصف إضافي للمخلف"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>تاريخ التسجيل</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start text-right">
+                          <CalendarIcon className="ml-2 h-4 w-4" />
+                          {format(formData.record_date, 'PPP', { locale: ar })}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.record_date}
+                          onSelect={(date) => date && setFormData({ ...formData, record_date: date })}
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>ملاحظات (اختياري)</Label>
+                    <Textarea
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder="أي ملاحظات إضافية..."
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <Button type="submit" className="flex-1" disabled={createMutation.isPending || updateMutation.isPending}>
+                      {editingRecord ? 'تحديث' : 'إضافة'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      إلغاء
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
+          ) : filteredRecords.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              لا توجد سجلات {filterLinked !== 'all' ? (filterLinked === 'linked' ? 'مرتبطة' : 'غير مرتبطة') : ''}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>الشركة</TableHead>
+                    <TableHead>نوع المخلف</TableHead>
+                    <TableHead>الكمية</TableHead>
+                    <TableHead>التاريخ</TableHead>
+                    <TableHead>الحالة</TableHead>
+                    <TableHead>ربط بالنظام</TableHead>
+                    <TableHead>إجراءات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredRecords.map((record) => (
+                    <TableRow key={record.id}>
+                      <TableCell className="font-medium">{record.company_name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {wasteTypeLabels[record.waste_type as keyof typeof wasteTypeLabels] || record.waste_type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{record.quantity} {record.unit}</TableCell>
+                      <TableCell>{format(new Date(record.record_date), 'yyyy/MM/dd')}</TableCell>
+                      <TableCell>
+                        {record.is_linked_to_system ? (
+                          <Badge className="bg-green-100 text-green-800">
+                            <Link2 className="h-3 w-3 ml-1" />
+                            مرتبط
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            <Link2Off className="h-3 w-3 ml-1" />
+                            غير مرتبط
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={record.is_linked_to_system}
+                          onCheckedChange={(checked) => toggleLinkMutation.mutate({ id: record.id, link: checked })}
+                          disabled={toggleLinkMutation.isPending}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(record)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive"
+                            onClick={() => {
+                              if (confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+                                deleteMutation.mutate(record.id);
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Info Card */}
+      <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200">
+        <CardContent className="pt-4">
+          <div className="flex gap-3">
+            <div className="shrink-0">
+              <Link2 className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="text-sm">
+              <p className="font-medium text-blue-800 dark:text-blue-200">ما معنى الربط بالنظام؟</p>
+              <p className="text-blue-700 dark:text-blue-300 mt-1">
+                السجلات <strong>غير المرتبطة</strong> تبقى منفصلة ولا تؤثر على إحصائيات وتقارير النظام الأساسية.
+                عند تفعيل <strong>الربط بالنظام</strong>، ستُحتسب هذه الكميات ضمن التحليلات والتقارير الرسمية.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

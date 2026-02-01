@@ -412,6 +412,92 @@ export type Database = {
           },
         ]
       }
+      external_weight_records: {
+        Row: {
+          company_id: string | null
+          company_name: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_linked_to_system: boolean
+          linked_at: string | null
+          linked_by: string | null
+          notes: string | null
+          organization_id: string
+          quantity: number
+          record_date: string
+          unit: string
+          updated_at: string
+          waste_description: string | null
+          waste_type: string
+        }
+        Insert: {
+          company_id?: string | null
+          company_name: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_linked_to_system?: boolean
+          linked_at?: string | null
+          linked_by?: string | null
+          notes?: string | null
+          organization_id: string
+          quantity: number
+          record_date: string
+          unit?: string
+          updated_at?: string
+          waste_description?: string | null
+          waste_type: string
+        }
+        Update: {
+          company_id?: string | null
+          company_name?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_linked_to_system?: boolean
+          linked_at?: string | null
+          linked_by?: string | null
+          notes?: string | null
+          organization_id?: string
+          quantity?: number
+          record_date?: string
+          unit?: string
+          updated_at?: string
+          waste_description?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_weight_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_linked_by_fkey"
+            columns: ["linked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null
