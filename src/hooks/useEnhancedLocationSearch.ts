@@ -100,6 +100,64 @@ const EGYPTIAN_INDUSTRIAL_ZONES = [
   { name: 'المنطقة الصناعية بأسيوط', nameEn: 'Assiut Industrial Zone', city: 'أسيوط', lat: 27.1783, lng: 31.1859 },
 ];
 
+// Major Egyptian factories and companies with their locations
+const MAJOR_EGYPTIAN_FACTORIES = [
+  // Nestle Factories
+  { name: 'مصنع نستلة بنها للمياه', nameEn: 'Nestle Waters Benha Factory', city: 'بنها', region: 'القليوبية', lat: 30.4580, lng: 31.1850, category: 'مياه معدنية' },
+  { name: 'مصنع نستلة مصر للأغذية', nameEn: 'Nestle Egypt Food Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2850, lng: 31.7350, category: 'أغذية' },
+  { name: 'نستلة بيور لايف', nameEn: 'Nestle Pure Life', city: 'بنها', region: 'القليوبية', lat: 30.4600, lng: 31.1870, category: 'مياه معدنية' },
+  
+  // PepsiCo & Coca-Cola
+  { name: 'مصنع بيبسيكو مصر', nameEn: 'PepsiCo Egypt Factory', city: 'العبور', region: 'القليوبية', lat: 30.2200, lng: 31.4800, category: 'مشروبات' },
+  { name: 'مصنع كوكاكولا مصر', nameEn: 'Coca-Cola Egypt Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2800, lng: 31.7400, category: 'مشروبات' },
+  { name: 'مصنع شيبسي', nameEn: 'Chipsy Factory', city: 'العبور', region: 'القليوبية', lat: 30.2250, lng: 31.4850, category: 'أغذية' },
+  
+  // Dairy & Food
+  { name: 'مصنع جهينة للألبان', nameEn: 'Juhayna Dairy Factory', city: 'السادس من أكتوبر', region: 'الجيزة', lat: 29.9300, lng: 30.9200, category: 'ألبان' },
+  { name: 'مصنع دومتي للجبن', nameEn: 'Domty Cheese Factory', city: 'السادس من أكتوبر', region: 'الجيزة', lat: 29.9350, lng: 30.9250, category: 'ألبان' },
+  { name: 'مصنع إيديتا للأغذية', nameEn: 'Edita Food Industries', city: 'بلبيس', region: 'الشرقية', lat: 30.4200, lng: 31.5600, category: 'أغذية' },
+  { name: 'مصنع فرونتو للبسكويت', nameEn: 'Fronteau Biscuit Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2900, lng: 31.7500, category: 'أغذية' },
+  
+  // Cement & Building Materials
+  { name: 'مصنع السويس للأسمنت', nameEn: 'Suez Cement Factory', city: 'السويس', region: 'السويس', lat: 29.9700, lng: 32.5300, category: 'أسمنت' },
+  { name: 'مصنع لافارج مصر للأسمنت', nameEn: 'Lafarge Egypt Cement', city: 'العين السخنة', region: 'السويس', lat: 29.6000, lng: 32.3500, category: 'أسمنت' },
+  { name: 'مصنع حديد عز', nameEn: 'Ezz Steel Factory', city: 'الدخيلة', region: 'الإسكندرية', lat: 31.1200, lng: 29.8400, category: 'حديد وصلب' },
+  { name: 'مصنع السويدى للكابلات', nameEn: 'El Sewedy Cables Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2950, lng: 31.7600, category: 'كابلات' },
+  
+  // Pharmaceuticals
+  { name: 'مصنع أدوية الحكمة', nameEn: 'Hikma Pharma Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2880, lng: 31.7420, category: 'أدوية' },
+  { name: 'مصنع إيبيكو للأدوية', nameEn: 'EIPICO Pharma Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2870, lng: 31.7410, category: 'أدوية' },
+  { name: 'مصنع أمون للأدوية', nameEn: 'Amoun Pharma Factory', city: 'العبور', region: 'القليوبية', lat: 30.2180, lng: 31.4780, category: 'أدوية' },
+  { name: 'مصنع فاركو للأدوية', nameEn: 'Pharco Pharma Factory', city: 'برج العرب', region: 'الإسكندرية', lat: 30.8400, lng: 29.5700, category: 'أدوية' },
+  
+  // Textiles & Clothing
+  { name: 'مصنع غزل المحلة', nameEn: 'El Mahalla Spinning Factory', city: 'المحلة الكبرى', region: 'الغربية', lat: 30.9700, lng: 31.1700, category: 'نسيج' },
+  { name: 'مصنع دلتا للغزل', nameEn: 'Delta Spinning Factory', city: 'طنطا', region: 'الغربية', lat: 30.7900, lng: 31.0050, category: 'نسيج' },
+  
+  // Automotive
+  { name: 'مصنع جنرال موتورز مصر', nameEn: 'General Motors Egypt', city: 'السادس من أكتوبر', region: 'الجيزة', lat: 29.9400, lng: 30.9300, category: 'سيارات' },
+  { name: 'مصنع نيسان مصر', nameEn: 'Nissan Egypt Factory', city: 'السادس من أكتوبر', region: 'الجيزة', lat: 29.9420, lng: 30.9320, category: 'سيارات' },
+  
+  // Electronics & Appliances
+  { name: 'مصنع توشيبا العربي', nameEn: 'Toshiba El Araby Factory', city: 'بنها', region: 'القليوبية', lat: 30.4700, lng: 31.1900, category: 'أجهزة كهربائية' },
+  { name: 'مصنع فريش للأجهزة', nameEn: 'Fresh Electronics Factory', city: 'بنها', region: 'القليوبية', lat: 30.4650, lng: 31.1850, category: 'أجهزة كهربائية' },
+  { name: 'مصنع يونيون إير', nameEn: 'Unionaire Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2920, lng: 31.7550, category: 'أجهزة كهربائية' },
+  
+  // Chemicals & Fertilizers
+  { name: 'مصنع أبو قير للأسمدة', nameEn: 'Abu Qir Fertilizers Factory', city: 'أبو قير', region: 'الإسكندرية', lat: 31.3200, lng: 30.0600, category: 'أسمدة' },
+  { name: 'مصنع موبكو للأسمدة', nameEn: 'MOPCO Fertilizers Factory', city: 'دمياط', region: 'دمياط', lat: 31.4200, lng: 31.8200, category: 'أسمدة' },
+  { name: 'مصنع سيدي كرير للبتروكيماويات', nameEn: 'SIDPEC Petrochemicals', city: 'برج العرب', region: 'الإسكندرية', lat: 30.8500, lng: 29.5800, category: 'بتروكيماويات' },
+  
+  // Paper & Packaging
+  { name: 'مصنع راية للورق', nameEn: 'Raya Paper Factory', city: 'السادس من أكتوبر', region: 'الجيزة', lat: 29.9450, lng: 30.9350, category: 'ورق' },
+  { name: 'مصنع إنتربرايز للتغليف', nameEn: 'Enterprise Packaging Factory', city: 'العبور', region: 'القليوبية', lat: 30.2220, lng: 31.4820, category: 'تغليف' },
+  
+  // Recycling & Waste Management
+  { name: 'مصنع الأهرام للتدوير', nameEn: 'Al Ahram Recycling Factory', city: 'السادس من أكتوبر', region: 'الجيزة', lat: 29.9500, lng: 30.9400, category: 'تدوير' },
+  { name: 'مصنع جرين تك للتدوير', nameEn: 'GreenTech Recycling Factory', city: 'العاشر من رمضان', region: 'الشرقية', lat: 30.2960, lng: 31.7650, category: 'تدوير' },
+  { name: 'مصنع إيكو سيرف للتدوير', nameEn: 'EcoServ Recycling Factory', city: 'بدر', region: 'القاهرة', lat: 30.1350, lng: 31.7200, category: 'تدوير' },
+];
+
 export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOptions = {}) => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -210,7 +268,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
           calculateSimilarity(query, zone.city)
         );
 
-        if (matchScore >= 0.4) {
+        if (matchScore >= 0.3) {
           const result: SearchResult = {
             id: `zone-${zone.nameEn.replace(/\s+/g, '-').toLowerCase()}`,
             name: zone.name,
@@ -227,6 +285,42 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
               options.referencePoint.lng,
               zone.lat,
               zone.lng
+            );
+          }
+
+          allResults.push(result);
+        }
+      });
+
+      // 4. Search in major Egyptian factories
+      MAJOR_EGYPTIAN_FACTORIES.forEach((factory) => {
+        const matchScore = Math.max(
+          calculateSimilarity(query, factory.name),
+          calculateSimilarity(query, factory.nameEn),
+          calculateSimilarity(query, factory.city),
+          calculateSimilarity(query, factory.category),
+          calculateSimilarity(query, `${factory.name} ${factory.city}`),
+          calculateSimilarity(query, `مصنع ${factory.city}`)
+        );
+
+        if (matchScore >= 0.3) {
+          const result: SearchResult = {
+            id: `factory-${factory.nameEn.replace(/\s+/g, '-').toLowerCase()}`,
+            name: factory.name,
+            address: `${factory.nameEn} - ${factory.city}, ${factory.region}`,
+            type: 'saved',
+            latitude: factory.lat,
+            longitude: factory.lng,
+            organizationName: factory.category,
+            matchScore,
+          };
+
+          if (options.referencePoint) {
+            result.distance = calculateDistance(
+              options.referencePoint.lat,
+              options.referencePoint.lng,
+              factory.lat,
+              factory.lng
             );
           }
 
