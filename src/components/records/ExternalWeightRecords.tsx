@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,7 +20,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { Plus, CalendarIcon, Link2, Link2Off, Trash2, Edit, Scale, Building2, Filter, Check, ChevronsUpDown, Factory, Truck, Printer, Download, FileText } from "lucide-react";
+import { Plus, CalendarIcon, Link2, Link2Off, Trash2, Edit, Scale, Building2, Filter, Check, ChevronsUpDown, Factory, Truck, Printer, Download, FileText, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { wasteTypeLabels } from "@/lib/wasteClassification";
 import html2canvas from "html2canvas";
@@ -67,6 +68,7 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const printRef = useRef<HTMLDivElement>(null);
   
   // Form state
@@ -276,6 +278,34 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
   };
 
   const roleLabel = organizationType === 'recycler' ? 'المستلمة' : 'المنقولة';
+
+  // Get records to print - either selected ones or all filtered records
+  const recordsToPrint = selectedIds.size > 0 
+    ? filteredRecords.filter(r => selectedIds.has(r.id))
+    : filteredRecords;
+
+  // Selection handlers
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredRecords.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredRecords.map(r => r.id)));
+    }
+  };
+
+  const toggleSelectRecord = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
@@ -493,26 +523,39 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
             سجل الكميات {roleLabel} الخارجية
           </CardTitle>
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Selection info */}
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <CheckSquare className="h-3 w-3" />
+                  {selectedIds.size} محدد
+                </Badge>
+                <Button variant="ghost" size="sm" onClick={clearSelection}>
+                  إلغاء التحديد
+                </Button>
+              </div>
+            )}
+
             {/* Export Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" disabled={isExporting || filteredRecords.length === 0}>
                   <FileText className="h-4 w-4 ml-2" />
-                  تصدير
+                  تصدير {selectedIds.size > 0 ? `(${selectedIds.size})` : ''}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-background z-50">
                 <DropdownMenuItem onClick={handlePrint}>
                   <Printer className="h-4 w-4 ml-2" />
-                  طباعة
+                  طباعة {selectedIds.size > 0 ? `(${selectedIds.size} محدد)` : '(الكل)'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleOpenPDF}>
                   <FileText className="h-4 w-4 ml-2" />
-                  معاينة PDF
+                  معاينة PDF {selectedIds.size > 0 ? `(${selectedIds.size} محدد)` : '(الكل)'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleDownloadPDF}>
                   <Download className="h-4 w-4 ml-2" />
-                  تحميل PDF
+                  تحميل PDF {selectedIds.size > 0 ? `(${selectedIds.size} محدد)` : '(الكل)'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -807,6 +850,13 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={filteredRecords.length > 0 && selectedIds.size === filteredRecords.length}
+                        onCheckedChange={toggleSelectAll}
+                        aria-label="تحديد الكل"
+                      />
+                    </TableHead>
                     <TableHead>الجهة المولدة</TableHead>
                     <TableHead>{partnerLabel}</TableHead>
                     <TableHead>نوع المخلف</TableHead>
@@ -819,7 +869,14 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
                 </TableHeader>
                 <TableBody>
                   {filteredRecords.map((record) => (
-                    <TableRow key={record.id}>
+                    <TableRow key={record.id} className={selectedIds.has(record.id) ? 'bg-muted/50' : ''}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(record.id)}
+                          onCheckedChange={() => toggleSelectRecord(record.id)}
+                          aria-label={`تحديد سجل ${record.company_name}`}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <Factory className="h-4 w-4 text-muted-foreground" />
@@ -923,10 +980,11 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
       <div className="hidden">
         <ExternalRecordsPrint
           ref={printRef}
-          records={filteredRecords}
+          records={recordsToPrint}
           organizationType={organizationType}
           organizationName={organization?.name || ''}
           filterType={filterLinked}
+          selectedCount={selectedIds.size > 0 ? selectedIds.size : undefined}
         />
       </div>
     </div>

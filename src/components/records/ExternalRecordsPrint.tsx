@@ -23,10 +23,11 @@ interface Props {
   organizationType: 'recycler' | 'transporter';
   organizationName: string;
   filterType: 'all' | 'linked' | 'unlinked';
+  selectedCount?: number;
 }
 
 const ExternalRecordsPrint = forwardRef<HTMLDivElement, Props>(
-  ({ records, organizationType, organizationName, filterType }, ref) => {
+  ({ records, organizationType, organizationName, filterType, selectedCount }, ref) => {
     const roleLabel = organizationType === 'recycler' ? 'المستلمة' : 'المنقولة';
     const partnerLabel = organizationType === 'recycler' ? 'الجهة الناقلة' : 'جهة التدوير';
     
@@ -39,6 +40,8 @@ const ExternalRecordsPrint = forwardRef<HTMLDivElement, Props>(
 
     const filterLabel = filterType === 'all' ? 'جميع السجلات' : 
                         filterType === 'linked' ? 'السجلات المرتبطة فقط' : 'السجلات غير المرتبطة فقط';
+
+    const selectionLabel = selectedCount ? `${selectedCount} سجل محدد` : null;
 
     return (
       <div ref={ref} className="bg-white text-black p-6 min-h-[297mm] w-[210mm] mx-auto" dir="rtl">
@@ -72,9 +75,12 @@ const ExternalRecordsPrint = forwardRef<HTMLDivElement, Props>(
         </div>
 
         {/* Filter indicator */}
-        <div className="mb-3 text-xs text-gray-600 flex items-center gap-2">
+        <div className="mb-3 text-xs text-gray-600 flex items-center gap-2 flex-wrap">
           <span className="font-medium">الفلتر المطبق:</span>
           <span className="px-2 py-0.5 bg-gray-100 rounded">{filterLabel}</span>
+          {selectionLabel && (
+            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded">{selectionLabel}</span>
+          )}
         </div>
 
         {/* Records Table */}
