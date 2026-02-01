@@ -234,6 +234,105 @@ export type Database = {
           },
         ]
       }
+      contract_templates: {
+        Row: {
+          closing_text: string | null
+          contract_category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          dispute_resolution: string | null
+          duration_clause: string | null
+          header_text: string | null
+          id: string
+          include_header_logo: boolean | null
+          include_signature: boolean | null
+          include_stamp: boolean | null
+          introduction_text: string | null
+          is_active: boolean | null
+          name: string
+          obligations_party_one: string | null
+          obligations_party_two: string | null
+          organization_id: string
+          partner_type: string
+          payment_terms_template: string | null
+          template_type: string
+          termination_clause: string | null
+          terms_template: string | null
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          closing_text?: string | null
+          contract_category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          dispute_resolution?: string | null
+          duration_clause?: string | null
+          header_text?: string | null
+          id?: string
+          include_header_logo?: boolean | null
+          include_signature?: boolean | null
+          include_stamp?: boolean | null
+          introduction_text?: string | null
+          is_active?: boolean | null
+          name: string
+          obligations_party_one?: string | null
+          obligations_party_two?: string | null
+          organization_id: string
+          partner_type?: string
+          payment_terms_template?: string | null
+          template_type?: string
+          termination_clause?: string | null
+          terms_template?: string | null
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          closing_text?: string | null
+          contract_category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          dispute_resolution?: string | null
+          duration_clause?: string | null
+          header_text?: string | null
+          id?: string
+          include_header_logo?: boolean | null
+          include_signature?: boolean | null
+          include_stamp?: boolean | null
+          introduction_text?: string | null
+          is_active?: boolean | null
+          name?: string
+          obligations_party_one?: string | null
+          obligations_party_two?: string | null
+          organization_id?: string
+          partner_type?: string
+          payment_terms_template?: string | null
+          template_type?: string
+          termination_clause?: string | null
+          terms_template?: string | null
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           attachment_url: string | null
