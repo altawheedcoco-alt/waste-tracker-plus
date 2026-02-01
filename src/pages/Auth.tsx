@@ -300,22 +300,40 @@ const Auth = () => {
     try {
       driverSignupSchema.parse(driverData);
       
-      const { error } = await signUpDriver(driverData);
+      // Use Edge Function for external driver registration to bypass RLS
+      const response = await supabase.functions.invoke('register-driver-external', {
+        body: {
+          email: driverData.email,
+          password: driverData.password,
+          full_name: driverData.fullName,
+          phone: driverData.phone,
+          license_number: driverData.licenseNumber,
+          vehicle_type: driverData.vehicleType,
+          vehicle_plate: driverData.vehiclePlate,
+          license_expiry: driverData.licenseExpiry || null,
+        },
+      });
+
+      if (response.error) {
+        const errorMessage = response.data?.error || response.error?.message || 'حدث خطأ أثناء التسجيل';
+        throw new Error(errorMessage);
+      }
+
+      if (!response.data?.success) {
+        const errorMessage = response.data?.error || 'فشل تسجيل السائق';
+        throw new Error(errorMessage);
+      }
+
+      // Auto login after registration
+      const { error: signInError } = await signIn(driverData.email, driverData.password);
       
-      if (error) {
-        if (error.message.includes('already registered')) {
-          toast({
-            title: 'خطأ في التسجيل',
-            description: 'هذا البريد الإلكتروني مسجل بالفعل',
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: 'خطأ',
-            description: error.message,
-            variant: 'destructive',
-          });
-        }
+      if (signInError) {
+        // Registration succeeded but login failed - still show success
+        toast({
+          title: 'تم التسجيل بنجاح',
+          description: 'سيتم مراجعة طلبك من قبل الإدارة. يمكنك تسجيل الدخول الآن.',
+        });
+        setAuthMode('login');
       } else {
         toast({
           title: 'تم التسجيل بنجاح',
@@ -323,7 +341,8 @@ const Auth = () => {
         });
         navigate('/dashboard');
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Driver registration error:', error);
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
@@ -332,6 +351,12 @@ const Auth = () => {
           }
         });
         setErrors(newErrors);
+      } else {
+        toast({
+          title: 'خطأ في التسجيل',
+          description: error?.message || 'حدث خطأ أثناء التسجيل',
+          variant: 'destructive',
+        });
       }
     } finally {
       setLoading(false);
