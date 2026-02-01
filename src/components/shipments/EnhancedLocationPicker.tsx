@@ -571,7 +571,7 @@ const EnhancedLocationPicker = ({
           </Card>
         </TabsContent>
 
-        {/* Search Tab - Enhanced with smart search */}
+        {/* Search Tab - Enhanced with Google-style smart search */}
         <TabsContent value="search" className="mt-3">
           <div className="relative">
             <div className="relative">
@@ -580,79 +580,155 @@ const EnhancedLocationPicker = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="ابحث عن موقع (مثال: نستلة بنها، المنطقة الصناعية...)"
-                className="pr-10"
+                className="pr-10 pl-10"
                 onFocus={() => (enhancedResults.length > 0 || suggestions.length > 0) && setShowSuggestions(true)}
               />
-              {(searchLoading || enhancedSearchLoading) && (
+              {(searchLoading || enhancedSearchLoading) ? (
                 <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+              ) : searchQuery && (
+                <button
+                  type="button"
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  onClick={() => {
+                    setSearchQuery('');
+                    clearEnhancedResults();
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <svg className="w-4 h-4 text-muted-foreground hover:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               )}
             </div>
 
-            {/* Enhanced Search Results Dropdown */}
-            {showSuggestions && (enhancedResults.length > 0 || suggestions.length > 0) && (
-              <Card className="absolute z-50 w-full mt-1 shadow-lg border">
-                <ScrollArea className="max-h-[300px]">
-                  <div className="py-1">
-                    {/* Enhanced results (saved locations + organizations) */}
-                    {enhancedResults.map((result) => (
-                      <button
-                        key={result.id}
-                        type="button"
-                        className="w-full px-3 py-2.5 text-right hover:bg-muted/50 transition-colors flex items-start gap-3"
-                        onClick={() => handleEnhancedResultSelect(result)}
-                      >
-                        <div className="mt-1 flex-shrink-0">
-                          {getResultTypeIcon(result.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm truncate">{result.name}</span>
-                            {getResultTypeBadge(result.type)}
+            {/* Google-Style Search Results Dropdown */}
+            {showSuggestions && (enhancedResults.length > 0 || suggestions.length > 0 || (searchLoading || enhancedSearchLoading)) && (
+              <Card className="absolute z-50 top-full mt-2 w-full shadow-xl border-0 rounded-xl overflow-hidden bg-background">
+                <ScrollArea className="max-h-[400px]">
+                  {(searchLoading || enhancedSearchLoading) && enhancedResults.length === 0 && suggestions.length === 0 ? (
+                    <div className="flex items-center justify-center py-10">
+                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                      <span className="mr-3 text-sm text-muted-foreground">جاري البحث...</span>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border/50">
+                      {/* Enhanced results (saved locations + organizations) */}
+                      {enhancedResults.map((result) => (
+                        <button
+                          key={result.id}
+                          type="button"
+                          className="w-full px-4 py-3 text-right hover:bg-muted/30 transition-all duration-150 flex items-start gap-3 group"
+                          onClick={() => handleEnhancedResultSelect(result)}
+                        >
+                          {/* Icon Container - Google Style */}
+                          <div className={cn(
+                            "mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                            result.type === 'saved' && "bg-primary/10 text-primary",
+                            result.type === 'organization' && "bg-secondary/50 text-secondary-foreground",
+                            result.type === 'nominatim' && "bg-muted text-muted-foreground"
+                          )}>
+                            {result.type === 'saved' && <MapPin className="w-4 h-4" />}
+                            {result.type === 'organization' && <Building2 className="w-4 h-4" />}
+                            {result.type === 'nominatim' && <Globe className="w-4 h-4" />}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                            {result.address}
-                          </p>
-                          {result.organizationName && result.type === 'saved' && (
-                            <p className="text-xs text-primary mt-0.5">
-                              {result.organizationName}
+                          
+                          {/* Content - Google Style */}
+                          <div className="flex-1 min-w-0">
+                            {/* Title Row */}
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                                {result.name}
+                              </span>
+                              {result.type === 'saved' && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                                  محفوظ
+                                </span>
+                              )}
+                              {result.type === 'organization' && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-secondary/50 text-secondary-foreground font-medium">
+                                  منظمة
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* URL/Category Line - Like Google */}
+                            {result.organizationName && result.type === 'saved' && (
+                              <p className="text-xs text-primary/80 mb-0.5 flex items-center gap-1">
+                                <Building2 className="w-3 h-3" />
+                                {result.organizationName}
+                              </p>
+                            )}
+                            
+                            {/* Address - Like Google Description */}
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                              {result.address}
                             </p>
-                          )}
-                          {result.distance !== undefined && (
-                            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                              <Navigation className="w-3 h-3" />
-                              {result.distance < 1 
-                                ? `${Math.round(result.distance * 1000)} م`
-                                : `${result.distance.toFixed(1)} كم`
-                              }
-                            </p>
-                          )}
-                        </div>
-                      </button>
-                    ))}
-                    
-                    {/* Fallback Nominatim suggestions */}
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={`nom-${index}`}
-                        type="button"
-                        className="w-full px-3 py-2.5 text-right hover:bg-muted/50 transition-colors flex items-start gap-3"
-                        onClick={() => handleSuggestionSelect(suggestion)}
-                      >
-                        <Globe className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm truncate">
-                              {suggestion.display_name.split(',')[0]}
-                            </span>
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">عام</Badge>
+                            
+                            {/* Distance Badge - Bottom Right */}
+                            {result.distance !== undefined && (
+                              <div className="flex items-center gap-1 mt-1.5">
+                                <div className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground">
+                                  <Navigation className="w-3 h-3" />
+                                  <span>
+                                    {result.distance < 1 
+                                      ? `${Math.round(result.distance * 1000)} متر`
+                                      : `${result.distance.toFixed(1)} كم`
+                                    }
+                                  </span>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                            {suggestion.display_name}
+                          
+                          {/* Arrow indicator on hover */}
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center">
+                            <svg className="w-4 h-4 text-muted-foreground rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </button>
+                      ))}
+                      
+                      {/* Fallback Nominatim suggestions */}
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={`nom-${index}`}
+                          type="button"
+                          className="w-full px-4 py-3 text-right hover:bg-muted/30 transition-all duration-150 flex items-start gap-3 group"
+                          onClick={() => handleSuggestionSelect(suggestion)}
+                        >
+                          <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
+                            <Globe className="w-4 h-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                                {suggestion.display_name.split(',')[0]}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                              {suggestion.display_name}
+                            </p>
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center">
+                            <svg className="w-4 h-4 text-muted-foreground rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </button>
+                      ))}
+                      
+                      {/* Footer hint */}
+                      {(enhancedResults.length > 0 || suggestions.length > 0) && (
+                        <div className="px-4 py-2 bg-muted/20 text-center">
+                          <p className="text-[11px] text-muted-foreground">
+                            اضغط على نتيجة لاختيار الموقع
                           </p>
                         </div>
-                      </button>
-                    ))}
-                  </div>
+                      )}
+                    </div>
+                  )}
                 </ScrollArea>
               </Card>
             )}
@@ -664,8 +740,9 @@ const EnhancedLocationPicker = ({
             </p>
           )}
           
-          <p className="text-xs text-muted-foreground mt-2">
-            💡 يبحث في المواقع المحفوظة والمنظمات المسجلة أولاً، ثم في الأماكن العامة
+          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+            <span className="inline-block w-4 h-4 text-center">💡</span>
+            يبحث في المواقع المحفوظة والمنظمات المسجلة أولاً، ثم في الأماكن العامة
           </p>
         </TabsContent>
       </Tabs>
