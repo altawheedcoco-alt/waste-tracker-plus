@@ -3,159 +3,107 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ContractTemplate } from '@/hooks/useContractTemplates';
 import TemplateCard from './TemplateCard';
+import AIContractGenerator from './AIContractGenerator';
 import { 
   ChevronDown, 
   ChevronUp,
   Factory,
   Recycle,
   Leaf,
-  Zap,
   Pill,
   Cpu,
   TreePine,
   Droplets,
-  Fuel,
   Package,
-  Trash2,
   FlaskConical,
   Building,
-  Car,
-  Shirt,
-  UtensilsCrossed,
-  Construction,
-  Atom,
   FileText,
-  Layers
+  Layers,
+  Sparkles,
+  AlertTriangle
 } from 'lucide-react';
+import { 
+  hazardousWasteCategories, 
+  nonHazardousWasteCategories,
+  type WasteCategoryInfo 
+} from '@/lib/wasteClassification';
 
-// تصنيفات أنواع المخلفات مع الأيقونات
-const wasteTypeCategories = [
-  { 
-    id: 'industrial', 
-    label: 'مخلفات صناعية', 
-    icon: Factory, 
-    color: 'bg-orange-500',
-    keywords: ['صناعي', 'صناعية', 'مصنع', 'industrial']
-  },
-  { 
-    id: 'plastic', 
-    label: 'مخلفات بلاستيكية', 
-    icon: Package, 
-    color: 'bg-blue-500',
-    keywords: ['بلاستيك', 'plastic', 'بوليمر', 'polymer']
-  },
-  { 
-    id: 'electronic', 
-    label: 'مخلفات إلكترونية', 
-    icon: Cpu, 
-    color: 'bg-purple-500',
-    keywords: ['إلكتروني', 'electronic', 'كهربائي', 'electrical', 'أجهزة']
-  },
-  { 
-    id: 'medical', 
-    label: 'مخلفات طبية', 
-    icon: Pill, 
-    color: 'bg-red-500',
-    keywords: ['طبي', 'medical', 'صحي', 'healthcare', 'مستشف', 'صيدل']
-  },
-  { 
-    id: 'wood', 
-    label: 'مخلفات خشبية', 
-    icon: TreePine, 
-    color: 'bg-amber-600',
-    keywords: ['خشب', 'wood', 'أخشاب', 'timber', 'أثاث']
-  },
-  { 
-    id: 'organic', 
-    label: 'مخلفات عضوية', 
-    icon: Leaf, 
-    color: 'bg-green-500',
-    keywords: ['عضوي', 'organic', 'زراعي', 'agricultural', 'حيوي', 'غذائي', 'طعام']
-  },
-  { 
-    id: 'chemical', 
-    label: 'مخلفات كيميائية', 
-    icon: FlaskConical, 
-    color: 'bg-yellow-500',
-    keywords: ['كيميائي', 'chemical', 'مذيب', 'solvent', 'حمض', 'قلوي']
-  },
-  { 
-    id: 'oil', 
-    label: 'زيوت ومشتقات بترولية', 
-    icon: Droplets, 
-    color: 'bg-gray-700',
-    keywords: ['زيت', 'oil', 'بترول', 'petroleum', 'شحم', 'وقود']
-  },
-  { 
-    id: 'metal', 
-    label: 'مخلفات معدنية', 
-    icon: Construction, 
-    color: 'bg-slate-500',
-    keywords: ['معدن', 'metal', 'حديد', 'iron', 'نحاس', 'ألومنيوم', 'خردة']
-  },
-  { 
-    id: 'textile', 
-    label: 'مخلفات نسيجية', 
-    icon: Shirt, 
-    color: 'bg-pink-500',
-    keywords: ['نسيج', 'textile', 'قماش', 'ملابس', 'fabric']
-  },
-  { 
-    id: 'construction', 
-    label: 'مخلفات البناء والهدم', 
-    icon: Building, 
-    color: 'bg-stone-500',
-    keywords: ['بناء', 'construction', 'هدم', 'demolition', 'إنشاء', 'خرسان']
-  },
-  { 
-    id: 'automotive', 
-    label: 'مخلفات السيارات', 
-    icon: Car, 
-    color: 'bg-indigo-500',
-    keywords: ['سيارات', 'automotive', 'مركبات', 'vehicle', 'إطارات', 'بطاريات']
-  },
-  { 
-    id: 'food', 
-    label: 'مخلفات غذائية', 
-    icon: UtensilsCrossed, 
-    color: 'bg-lime-500',
-    keywords: ['غذاء', 'food', 'مطاعم', 'restaurant', 'أغذية']
-  },
-  { 
-    id: 'hazardous', 
-    label: 'مخلفات خطرة', 
-    icon: Atom, 
-    color: 'bg-red-600',
-    keywords: ['خطر', 'hazardous', 'سام', 'toxic', 'مشع', 'radioactive']
-  },
-  { 
-    id: 'recycling', 
-    label: 'مخلفات قابلة للتدوير', 
-    icon: Recycle, 
-    color: 'bg-emerald-500',
-    keywords: ['تدوير', 'recycl', 'إعادة', 'استرداد']
-  },
-  { 
-    id: 'other', 
-    label: 'مخلفات أخرى', 
-    icon: Layers, 
-    color: 'bg-gray-500',
-    keywords: []
-  },
+// ربط تصنيفات المخلفات الرسمية بالأيقونات
+const categoryIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  chemical: FlaskConical,
+  electronic: Cpu,
+  medical: Pill,
+  industrial: Factory,
+  plastic: Package,
+  paper: FileText,
+  metal: Building,
+  glass: Layers,
+  organic: Leaf,
+  construction: Building,
+};
+
+const categoryColorMap: Record<string, string> = {
+  // Hazardous categories - red/orange tones
+  chemical: 'bg-yellow-500',
+  electronic: 'bg-purple-500',
+  medical: 'bg-red-500',
+  industrial: 'bg-orange-600',
+  // Non-hazardous categories - green/blue tones
+  plastic: 'bg-blue-500',
+  paper: 'bg-amber-600',
+  metal: 'bg-slate-500',
+  glass: 'bg-cyan-500',
+  organic: 'bg-green-500',
+  construction: 'bg-stone-500',
+};
+
+// دمج كل التصنيفات من wasteClassification.ts
+const allWasteCategories: WasteCategoryInfo[] = [
+  ...hazardousWasteCategories,
+  ...nonHazardousWasteCategories,
 ];
 
-// تصنيف القالب حسب نوع المخلف
+// تصنيف القالب حسب نوع المخلف - استخدام الكلمات المفتاحية من التصنيف الرسمي
 const categorizeTemplate = (template: ContractTemplate): string => {
   const searchText = `${template.name} ${template.description || ''} ${template.terms_template || ''}`.toLowerCase();
   
-  for (const category of wasteTypeCategories) {
-    if (category.id === 'other') continue;
-    if (category.keywords.some(keyword => searchText.includes(keyword.toLowerCase()))) {
+  // البحث في كل تصنيف وأنواعه الفرعية
+  for (const category of allWasteCategories) {
+    // البحث في اسم التصنيف
+    if (searchText.includes(category.name.toLowerCase()) || 
+        searchText.includes(category.id.toLowerCase())) {
       return category.id;
+    }
+    
+    // البحث في الأنواع الفرعية
+    for (const subcategory of category.subcategories) {
+      if (searchText.includes(subcategory.name.toLowerCase()) ||
+          searchText.includes(subcategory.code.toLowerCase())) {
+        return category.id;
+      }
+    }
+  }
+  
+  // كلمات مفتاحية إضافية للتصنيف
+  const keywordMap: Record<string, string[]> = {
+    chemical: ['كيميائي', 'مذيب', 'حمض', 'قلوي', 'سامة', 'زيت', 'شحم', 'طلاء'],
+    electronic: ['إلكتروني', 'بطارية', 'كهربائي', 'حاسوب', 'موبايل', 'شاشة'],
+    medical: ['طبي', 'صحي', 'مستشفى', 'صيدلي', 'إبر', 'أدوية'],
+    industrial: ['صناعي', 'مصنع', 'إنتاج', 'حمأة', 'رماد'],
+    plastic: ['بلاستيك', 'بوليمر', 'PET', 'PVC', 'أكياس'],
+    paper: ['ورق', 'كرتون', 'مستندات', 'صحف'],
+    metal: ['معدن', 'حديد', 'نحاس', 'ألومنيوم', 'خردة'],
+    glass: ['زجاج', 'عبوات زجاجية'],
+    organic: ['عضوي', 'غذائي', 'زراعي', 'حدائق', 'خشب', 'نسيج'],
+    construction: ['بناء', 'هدم', 'خرسانة', 'طوب', 'سيراميك'],
+  };
+  
+  for (const [categoryId, keywords] of Object.entries(keywordMap)) {
+    if (keywords.some(keyword => searchText.includes(keyword.toLowerCase()))) {
+      return categoryId;
     }
   }
   
@@ -179,7 +127,9 @@ const WasteTypeCategoryView = ({
   onDelete,
   searchQuery
 }: WasteTypeCategoryViewProps) => {
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['industrial', 'plastic', 'electronic']));
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
+  const [selectedCategoryForAI, setSelectedCategoryForAI] = useState<WasteCategoryInfo | null>(null);
 
   // تجميع القوالب حسب نوع المخلف
   const categorizedTemplates = templates.reduce((acc, template) => {
@@ -211,127 +161,224 @@ const WasteTypeCategoryView = ({
     });
   };
 
-  // عرض الفئات التي تحتوي على قوالب فقط
-  const activeCategories = wasteTypeCategories.filter(
-    cat => categorizedTemplates[cat.id]?.length > 0
+  // Handle AI generation for a category
+  const handleAIGenerate = (category: WasteCategoryInfo) => {
+    setSelectedCategoryForAI(category);
+    setShowAIGenerator(true);
+  };
+
+  // Separate hazardous and non-hazardous with templates
+  const hazardousCategoriesWithTemplates = hazardousWasteCategories.filter(
+    cat => (categorizedTemplates[cat.id]?.length || 0) > 0 || true // Show all categories
+  );
+  
+  const nonHazardousCategoriesWithTemplates = nonHazardousWasteCategories.filter(
+    cat => (categorizedTemplates[cat.id]?.length || 0) > 0 || true // Show all categories
   );
 
-  if (activeCategories.length === 0) {
+  const renderCategoryCard = (category: WasteCategoryInfo) => {
+    const Icon = categoryIconMap[category.id] || Layers;
+    const color = categoryColorMap[category.id] || 'bg-gray-500';
+    const count = categorizedTemplates[category.id]?.length || 0;
+    const isExpanded = expandedCategories.has(category.id);
+    const categoryTemplates = filterBySearch(categorizedTemplates[category.id] || []);
+    const isHazardous = category.category === 'hazardous';
+    
     return (
-      <div className="text-center py-12">
-        <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-        <p className="text-muted-foreground">لا توجد قوالب</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* نظرة عامة على الفئات */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-        {activeCategories.map(category => {
-          const Icon = category.icon;
-          const count = categorizedTemplates[category.id]?.length || 0;
-          const isExpanded = expandedCategories.has(category.id);
-          
-          return (
-            <motion.div
-              key={category.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Card 
-                className={`cursor-pointer transition-all ${isExpanded ? 'ring-2 ring-primary' : 'hover:border-primary/50'}`}
-                onClick={() => toggleCategory(category.id)}
-              >
-                <CardContent className="p-3 text-center">
-                  <div className={`w-10 h-10 mx-auto rounded-lg ${category.color} flex items-center justify-center mb-2`}>
+      <Collapsible 
+        key={category.id} 
+        open={isExpanded}
+        onOpenChange={() => toggleCategory(category.id)}
+      >
+        <Card className={isHazardous ? 'border-red-200 dark:border-red-800' : ''}>
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center`}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium line-clamp-2">{category.label}</p>
-                  <Badge variant="secondary" className="mt-1 text-xs">
-                    {count} قالب
+                  <div className="text-right">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      {category.name}
+                      {isHazardous && (
+                        <AlertTriangle className="w-4 h-4 text-red-500" />
+                      )}
+                    </CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      {count} قالب عقد • {category.subcategories.length} نوع فرعي
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAIGenerate(category);
+                    }}
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    إنشاء بالذكاء
+                  </Button>
+                  <Badge variant={isHazardous ? "destructive" : "secondary"}>
+                    {isHazardous ? 'خطرة' : 'غير خطرة'}
                   </Badge>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
+                  <Button variant="ghost" size="icon">
+                    {isExpanded ? (
+                      <ChevronUp className="w-5 h-5" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          
+          <AnimatePresence>
+            {isExpanded && (
+              <CollapsibleContent forceMount>
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <CardContent className="pt-0">
+                    {/* Subcategories Preview */}
+                    <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+                      <p className="text-xs font-medium mb-2">الأنواع الفرعية المشمولة:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {category.subcategories.slice(0, 8).map(sub => (
+                          <Badge key={sub.code} variant="outline" className="text-xs">
+                            {sub.code}: {sub.name}
+                          </Badge>
+                        ))}
+                        {category.subcategories.length > 8 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{category.subcategories.length - 8} المزيد
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Templates */}
+                    {categoryTemplates.length > 0 ? (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {categoryTemplates.map(template => (
+                          <TemplateCard
+                            key={template.id}
+                            template={template}
+                            onView={onView}
+                            onEdit={onEdit}
+                            onDuplicate={onDuplicate}
+                            onDelete={onDelete}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-6 text-muted-foreground">
+                        <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">لا توجد قوالب لهذا التصنيف</p>
+                        <Button 
+                          variant="link" 
+                          className="mt-2 gap-1"
+                          onClick={() => handleAIGenerate(category)}
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          أنشئ قالب بالذكاء الاصطناعي
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </motion.div>
+              </CollapsibleContent>
+            )}
+          </AnimatePresence>
+        </Card>
+      </Collapsible>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 border-red-200">
+          <CardContent className="p-3 text-center">
+            <AlertTriangle className="w-6 h-6 mx-auto text-red-500 mb-1" />
+            <p className="text-xs text-muted-foreground">مخلفات خطرة</p>
+            <p className="text-lg font-bold text-red-600">{hazardousWasteCategories.length} تصنيف</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200">
+          <CardContent className="p-3 text-center">
+            <Recycle className="w-6 h-6 mx-auto text-green-500 mb-1" />
+            <p className="text-xs text-muted-foreground">مخلفات غير خطرة</p>
+            <p className="text-lg font-bold text-green-600">{nonHazardousWasteCategories.length} تصنيف</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <FileText className="w-6 h-6 mx-auto text-primary mb-1" />
+            <p className="text-xs text-muted-foreground">إجمالي القوالب</p>
+            <p className="text-lg font-bold">{templates.length}</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 border-purple-200">
+          <CardContent className="p-3 text-center">
+            <Sparkles className="w-6 h-6 mx-auto text-purple-500 mb-1" />
+            <p className="text-xs text-muted-foreground">إنشاء بالذكاء</p>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="text-purple-600 p-0 h-auto"
+              onClick={() => setShowAIGenerator(true)}
+            >
+              ابدأ الآن
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* عرض القوالب المصنفة */}
-      <div className="space-y-4">
-        {activeCategories.map(category => {
-          const Icon = category.icon;
-          const categoryTemplates = filterBySearch(categorizedTemplates[category.id] || []);
-          const isExpanded = expandedCategories.has(category.id);
-          
-          if (categoryTemplates.length === 0) return null;
-          
-          return (
-            <Collapsible 
-              key={category.id} 
-              open={isExpanded}
-              onOpenChange={() => toggleCategory(category.id)}
-            >
-              <Card>
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg ${category.color} flex items-center justify-center`}>
-                          <Icon className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-base">{category.label}</CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            {categoryTemplates.length} قالب عقد
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="icon">
-                        {isExpanded ? (
-                          <ChevronUp className="w-5 h-5" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5" />
-                        )}
-                      </Button>
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-                
-                <AnimatePresence>
-                  {isExpanded && (
-                    <CollapsibleContent forceMount>
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <CardContent className="pt-0">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {categoryTemplates.map(template => (
-                              <TemplateCard
-                                key={template.id}
-                                template={template}
-                                onView={onView}
-                                onEdit={onEdit}
-                                onDuplicate={onDuplicate}
-                                onDelete={onDelete}
-                              />
-                            ))}
-                          </div>
-                        </CardContent>
-                      </motion.div>
-                    </CollapsibleContent>
-                  )}
-                </AnimatePresence>
-              </Card>
-            </Collapsible>
-          );
-        })}
+      {/* Hazardous Waste Section */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-lg font-semibold text-red-600">
+          <AlertTriangle className="w-5 h-5" />
+          <span>المخلفات الخطرة</span>
+          <Badge variant="destructive" className="text-xs">
+            {hazardousCategoriesWithTemplates.length} تصنيف
+          </Badge>
+        </div>
+        <div className="space-y-2">
+          {hazardousCategoriesWithTemplates.map(renderCategoryCard)}
+        </div>
       </div>
+
+      {/* Non-Hazardous Waste Section */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-lg font-semibold text-green-600">
+          <Recycle className="w-5 h-5" />
+          <span>المخلفات غير الخطرة</span>
+          <Badge className="bg-green-100 text-green-700 text-xs">
+            {nonHazardousCategoriesWithTemplates.length} تصنيف
+          </Badge>
+        </div>
+        <div className="space-y-2">
+          {nonHazardousCategoriesWithTemplates.map(renderCategoryCard)}
+        </div>
+      </div>
+
+      {/* AI Contract Generator Dialog */}
+      <AIContractGenerator
+        open={showAIGenerator}
+        onOpenChange={setShowAIGenerator}
+        selectedCategory={selectedCategoryForAI}
+        wasteCategories={allWasteCategories}
+      />
     </div>
   );
 };
