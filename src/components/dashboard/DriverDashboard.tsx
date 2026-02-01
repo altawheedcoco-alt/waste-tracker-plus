@@ -24,7 +24,7 @@ import DriverSettingsDialog from './DriverSettingsDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import QuickLocationButton from '@/components/tracking/QuickLocationButton';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
-import DestinationPicker from '@/components/driver/DestinationPicker';
+import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPicker';
 
 interface DriverInfo {
   id: string;
@@ -277,7 +277,7 @@ const DriverDashboard = () => {
 
       {/* Destination Picker Card */}
       {driverInfo && (
-        <DestinationPicker 
+        <EnhancedDestinationPicker 
           driverId={driverInfo.id} 
           onDestinationAdded={fetchDriverData}
         />

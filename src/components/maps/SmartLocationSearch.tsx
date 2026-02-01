@@ -221,27 +221,22 @@ const SmartLocationSearch = ({
                       {result.type === 'nominatim' && <Globe className="w-4 h-4" />}
                     </div>
                     
-                    {/* Content - Google Style */}
+                    {/* Content - Talabat Style */}
                     <div className="flex-1 min-w-0">
-                      {/* Title Row */}
-                      <div className="flex items-center gap-2 mb-0.5">
+                      {/* Title Row with City Badge */}
+                      <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
                           {result.name}
                         </span>
-                        {result.type === 'saved' && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                            محفوظ
-                          </span>
-                        )}
-                        {result.type === 'organization' && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 font-medium">
-                            منظمة
+                        {result.city && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium">
+                            {result.city}
                           </span>
                         )}
                       </div>
                       
-                      {/* URL/Category Line - Like Google */}
-                      {result.organizationName && result.type === 'saved' && (
+                      {/* Organization/Category Line */}
+                      {result.organizationName && (
                         <p className="text-xs text-primary/80 mb-0.5 flex items-center gap-1">
                           <Building2 className="w-3 h-3" />
                           {result.organizationName}
@@ -253,7 +248,7 @@ const SmartLocationSearch = ({
                         {result.address}
                       </p>
                       
-                      {/* Distance Badge - Bottom Right */}
+                      {/* Distance Badge - Bottom Right, Talabat Style */}
                       {result.distance !== undefined && (
                         <div className="flex items-center gap-1 mt-1.5">
                           <div className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground">
@@ -261,7 +256,9 @@ const SmartLocationSearch = ({
                             <span>
                               {result.distance < 1 
                                 ? `${Math.round(result.distance * 1000)} متر`
-                                : `${result.distance.toFixed(1)} كم`
+                                : result.distance > 100
+                                  ? `<100km`
+                                  : `${result.distance.toFixed(1)} كم`
                               }
                             </span>
                           </div>

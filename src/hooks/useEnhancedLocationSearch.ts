@@ -11,6 +11,8 @@ export interface SearchResult {
   distance?: number; // km from reference point
   organizationName?: string;
   matchScore?: number; // similarity score for sorting
+  city?: string; // city name for badge display
+  region?: string; // region/governorate
 }
 
 interface UseEnhancedLocationSearchOptions {
@@ -210,6 +212,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
             longitude: loc.longitude,
             organizationName: loc.organization?.name,
             matchScore,
+            city: loc.city,
           };
 
           // Calculate distance if reference point is available
@@ -255,6 +258,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
               type: 'organization',
               organizationName: org.name,
               matchScore,
+              city: org.city,
             });
           });
         }
@@ -277,6 +281,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
             latitude: zone.lat,
             longitude: zone.lng,
             matchScore,
+            city: zone.city,
           };
 
           if (options.referencePoint) {
@@ -313,6 +318,8 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
             longitude: factory.lng,
             organizationName: factory.category,
             matchScore,
+            city: factory.city,
+            region: factory.region,
           };
 
           if (options.referencePoint) {
