@@ -1,1 +1,28 @@
 project_id = "jejwizkssmqzxwseqsre"
+
+[functions.register-driver]
+verify_jwt = false
+
+[functions.register-company]
+verify_jwt = false
+
+[functions.register-employee]
+verify_jwt = false
+
+[functions.add-organization]
+verify_jwt = false
+
+[functions.admin-reset-password]
+verify_jwt = false
+
+[functions.admin-toggle-user]
+verify_jwt = false
+
+[functions.ai-assistant]
+verify_jwt = false
+
+[functions.generate-promo-video]
+verify_jwt = false
+
+[functions.seed-demo-data]
+verify_jwt = false

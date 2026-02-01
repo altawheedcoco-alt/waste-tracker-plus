@@ -1195,6 +1195,68 @@ export type Database = {
           },
         ]
       }
+      report_requests: {
+        Row: {
+          admin_notes: string | null
+          approved_at: string | null
+          approved_by: string | null
+          auto_approve_at: string
+          created_at: string
+          id: string
+          pdf_url: string | null
+          request_title: string
+          request_type: string
+          requester_organization_id: string | null
+          requester_user_id: string
+          status: string
+          target_resource_data: Json | null
+          target_resource_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_approve_at?: string
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          request_title: string
+          request_type: string
+          requester_organization_id?: string | null
+          requester_user_id: string
+          status?: string
+          target_resource_data?: Json | null
+          target_resource_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_approve_at?: string
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          request_title?: string
+          request_type?: string
+          requester_organization_id?: string | null
+          requester_user_id?: string
+          status?: string
+          target_resource_data?: Json | null
+          target_resource_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_requests_requester_organization_id_fkey"
+            columns: ["requester_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_templates: {
         Row: {
           closing_declaration: string | null
