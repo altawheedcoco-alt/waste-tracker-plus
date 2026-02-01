@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, memo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,23 +8,21 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { FocusMusicProvider } from "@/contexts/FocusMusicContext";
 
-// Loading component for lazy loaded pages
-const PageLoader = () => (
+// Minimal loading component - optimized for speed
+const PageLoader = memo(() => (
   <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-muted-foreground text-sm">جاري التحميل...</p>
-    </div>
+    <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
-);
+));
+PageLoader.displayName = 'PageLoader';
 
-// Eagerly loaded pages (critical path)
+// Eagerly loaded pages (critical path only)
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
-// Lazy loaded pages - Dashboard
+// Lazy loaded pages - Dashboard (with prefetch hints)
 const Drivers = lazy(() => import("./pages/Drivers"));
 const DriverDetails = lazy(() => import("./pages/DriverDetails"));
 const CompanyApprovals = lazy(() => import("./pages/dashboard/CompanyApprovals"));
@@ -78,104 +76,126 @@ const ContractVerificationPage = lazy(() => import("./components/contracts/Contr
 const TermsAcceptances = lazy(() => import("./pages/dashboard/TermsAcceptances"));
 const Verify = lazy(() => import("./pages/Verify"));
 
-// Lazy loaded components
+// Lazy loaded heavy components (deferred)
 const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
 const ChatWidget = lazy(() => import("./components/chat/ChatWidget"));
 const BetaBanner = lazy(() => import("./components/BetaBanner"));
 
+// Optimized QueryClient with aggressive caching
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30, // 30 minutes (garbage collection time)
+      staleTime: 1000 * 60 * 10, // 10 minutes - longer cache
+      gcTime: 1000 * 60 * 60, // 1 hour garbage collection
       refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
       retry: 1,
+      networkMode: 'offlineFirst',
+    },
+    mutations: {
+      networkMode: 'offlineFirst',
     },
   },
 });
 
-const App = () => (
+// Memoized providers wrapper for performance
+const Providers = memo(({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
     <ThemeSettingsProvider>
       <FocusMusicProvider>
-        <TooltipProvider>
+        <TooltipProvider delayDuration={300}>
           <AuthProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/verify" element={<Verify />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/dashboard/drivers" element={<Drivers />} />
-                  <Route path="/dashboard/drivers/:driverId" element={<DriverDetails />} />
-                  <Route path="/dashboard/company-approvals" element={<CompanyApprovals />} />
-                  <Route path="/dashboard/company-management" element={<CompanyManagement />} />
-                  <Route path="/dashboard/driver-approvals" element={<DriverApprovals />} />
-                  <Route path="/dashboard/shipments" element={<ShipmentManagement />} />
-                  <Route path="/dashboard/shipments/new" element={<CreateShipment />} />
-                  <Route path="/dashboard/shipments/:shipmentId" element={<ShipmentDetails />} />
-                  <Route path="/dashboard/transporter-shipments" element={<TransporterShipments />} />
-                  <Route path="/dashboard/transporter-drivers" element={<TransporterDrivers />} />
-                  <Route path="/dashboard/driver-tracking" element={<DriverTracking />} />
-                  <Route path="/dashboard/reports" element={<Reports />} />
-                  <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
-                  <Route path="/dashboard/environmental-sustainability" element={<EnvironmentalSustainability />} />
-                  <Route path="/dashboard/ai-tools" element={<AITools />} />
-                  <Route path="/dashboard/recycler-ai-tools" element={<RecyclerAITools />} />
-                  <Route path="/dashboard/transporter-ai-tools" element={<TransporterAITools />} />
-                  <Route path="/dashboard/notifications" element={<Notifications />} />
-                  <Route path="/dashboard/organization-profile" element={<OrganizationProfile />} />
-                  <Route path="/dashboard/organization-documents" element={<OrganizationDocuments />} />
-                  <Route path="/dashboard/system-overview" element={<AdminSystemOverview />} />
-                  <Route path="/dashboard/partners" element={<Partners />} />
-                  <Route path="/dashboard/employees" element={<EmployeeManagement />} />
-                  <Route path="/dashboard/organization/:organizationId" element={<OrganizationView />} />
-                  <Route path="/dashboard/aggregate-report" element={<AggregateShipmentReport />} />
-                  <Route path="/dashboard/non-hazardous-register" element={<NonHazardousWasteRegister />} />
-                  <Route path="/dashboard/hazardous-register" element={<HazardousWasteRegister />} />
-                  <Route path="/dashboard/waste-types" element={<WasteTypesClassification />} />
-                  <Route path="/dashboard/my-requests" element={<MyRequests />} />
-                  <Route path="/dashboard/regulatory-updates" element={<RegulatoryUpdates />} />
-                  <Route path="/dashboard/operational-plans" element={<OperationalPlans />} />
-                  <Route path="/dashboard/chat" element={<Chat />} />
-                  <Route path="/dashboard/team-credentials" element={<TeamCredentials />} />
-                  <Route path="/dashboard/partners-timeline" element={<PartnersTimeline />} />
-                  <Route path="/dashboard/add-organization" element={<AddOrganization />} />
-                  <Route path="/dashboard/shipment-reports" element={<ShipmentReports />} />
-                  <Route path="/dashboard/admin-drivers-map" element={<AdminDriversMap />} />
-                  <Route path="/dashboard/video-generator" element={<VideoGenerator />} />
-                  <Route path="/dashboard/my-location" element={<MyLocation />} />
-                  <Route path="/dashboard/recycling-certificates" element={<RecyclingCertificates />} />
-                  <Route path="/dashboard/issue-recycling-certificates" element={<IssueRecyclingCertificates />} />
-                  <Route path="/dashboard/settings" element={<Settings />} />
-                  <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
-                  <Route path="/dashboard/reports-guide" element={<ReportsGuide />} />
-                  <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
-                  <Route path="/dashboard/driver-data" element={<DriverData />} />
-                  <Route path="/dashboard/external-records" element={<ExternalRecords />} />
-                  <Route path="/dashboard/contracts" element={<Contracts />} />
-                  <Route path="/dashboard/contract-templates" element={<ContractTemplates />} />
-                  <Route path="/dashboard/verify-contract" element={<ContractVerificationPage />} />
-                  <Route path="/dashboard/terms-acceptances" element={<TermsAcceptances />} />
-                  <Route path="/dashboard/*" element={<Dashboard />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-              <Suspense fallback={null}>
-                <AIChatbot />
-                <ChatWidget />
-                <BetaBanner />
-              </Suspense>
-            </BrowserRouter>
+            {children}
           </AuthProvider>
         </TooltipProvider>
       </FocusMusicProvider>
     </ThemeSettingsProvider>
   </QueryClientProvider>
-);
+));
+Providers.displayName = 'Providers';
+
+// Route configuration for cleaner code
+const AppRoutes = memo(() => (
+  <Routes>
+    <Route path="/" element={<Index />} />
+    <Route path="/verify" element={<Verify />} />
+    <Route path="/auth" element={<Auth />} />
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/dashboard/drivers" element={<Drivers />} />
+    <Route path="/dashboard/drivers/:driverId" element={<DriverDetails />} />
+    <Route path="/dashboard/company-approvals" element={<CompanyApprovals />} />
+    <Route path="/dashboard/company-management" element={<CompanyManagement />} />
+    <Route path="/dashboard/driver-approvals" element={<DriverApprovals />} />
+    <Route path="/dashboard/shipments" element={<ShipmentManagement />} />
+    <Route path="/dashboard/shipments/new" element={<CreateShipment />} />
+    <Route path="/dashboard/shipments/:shipmentId" element={<ShipmentDetails />} />
+    <Route path="/dashboard/transporter-shipments" element={<TransporterShipments />} />
+    <Route path="/dashboard/transporter-drivers" element={<TransporterDrivers />} />
+    <Route path="/dashboard/driver-tracking" element={<DriverTracking />} />
+    <Route path="/dashboard/reports" element={<Reports />} />
+    <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
+    <Route path="/dashboard/environmental-sustainability" element={<EnvironmentalSustainability />} />
+    <Route path="/dashboard/ai-tools" element={<AITools />} />
+    <Route path="/dashboard/recycler-ai-tools" element={<RecyclerAITools />} />
+    <Route path="/dashboard/transporter-ai-tools" element={<TransporterAITools />} />
+    <Route path="/dashboard/notifications" element={<Notifications />} />
+    <Route path="/dashboard/organization-profile" element={<OrganizationProfile />} />
+    <Route path="/dashboard/organization-documents" element={<OrganizationDocuments />} />
+    <Route path="/dashboard/system-overview" element={<AdminSystemOverview />} />
+    <Route path="/dashboard/partners" element={<Partners />} />
+    <Route path="/dashboard/employees" element={<EmployeeManagement />} />
+    <Route path="/dashboard/organization/:organizationId" element={<OrganizationView />} />
+    <Route path="/dashboard/aggregate-report" element={<AggregateShipmentReport />} />
+    <Route path="/dashboard/non-hazardous-register" element={<NonHazardousWasteRegister />} />
+    <Route path="/dashboard/hazardous-register" element={<HazardousWasteRegister />} />
+    <Route path="/dashboard/waste-types" element={<WasteTypesClassification />} />
+    <Route path="/dashboard/my-requests" element={<MyRequests />} />
+    <Route path="/dashboard/regulatory-updates" element={<RegulatoryUpdates />} />
+    <Route path="/dashboard/operational-plans" element={<OperationalPlans />} />
+    <Route path="/dashboard/chat" element={<Chat />} />
+    <Route path="/dashboard/team-credentials" element={<TeamCredentials />} />
+    <Route path="/dashboard/partners-timeline" element={<PartnersTimeline />} />
+    <Route path="/dashboard/add-organization" element={<AddOrganization />} />
+    <Route path="/dashboard/shipment-reports" element={<ShipmentReports />} />
+    <Route path="/dashboard/admin-drivers-map" element={<AdminDriversMap />} />
+    <Route path="/dashboard/video-generator" element={<VideoGenerator />} />
+    <Route path="/dashboard/my-location" element={<MyLocation />} />
+    <Route path="/dashboard/recycling-certificates" element={<RecyclingCertificates />} />
+    <Route path="/dashboard/issue-recycling-certificates" element={<IssueRecyclingCertificates />} />
+    <Route path="/dashboard/settings" element={<Settings />} />
+    <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
+    <Route path="/dashboard/reports-guide" element={<ReportsGuide />} />
+    <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
+    <Route path="/dashboard/driver-data" element={<DriverData />} />
+    <Route path="/dashboard/external-records" element={<ExternalRecords />} />
+    <Route path="/dashboard/contracts" element={<Contracts />} />
+    <Route path="/dashboard/contract-templates" element={<ContractTemplates />} />
+    <Route path="/dashboard/verify-contract" element={<ContractVerificationPage />} />
+    <Route path="/dashboard/terms-acceptances" element={<TermsAcceptances />} />
+    <Route path="/dashboard/*" element={<Dashboard />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
+));
+AppRoutes.displayName = 'AppRoutes';
+
+// Main App with optimized structure
+const App = memo(() => (
+  <Providers>
+    <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
+        <AppRoutes />
+      </Suspense>
+      <Suspense fallback={null}>
+        <AIChatbot />
+        <ChatWidget />
+        <BetaBanner />
+      </Suspense>
+    </BrowserRouter>
+  </Providers>
+));
+App.displayName = 'App';
 
 export default App;
