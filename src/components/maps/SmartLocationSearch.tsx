@@ -67,7 +67,7 @@ const SmartLocationSearch = ({
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (query.length >= 2) {
+      if (query.length >= 1) {
         search(query);
         setShowResults(true);
       } else {
@@ -148,7 +148,7 @@ const SmartLocationSearch = ({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             className="pr-10 pl-10"
-            onFocus={() => query.length >= 2 && setShowResults(true)}
+            onFocus={() => query.length >= 1 && setShowResults(true)}
           />
           {loading ? (
             <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
