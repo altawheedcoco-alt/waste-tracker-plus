@@ -25,8 +25,9 @@ import {
   Download,
   Sparkles,
   LayoutGrid,
-  List,
-  Filter
+  Layers,
+  ToggleLeft,
+  ToggleRight
 } from 'lucide-react';
 import { allEgyptianGeneratorTemplates, allEgyptianRecyclerTemplates } from '@/data/egyptianLegalContractTemplates';
 import { 
@@ -38,6 +39,7 @@ import {
 } from '@/hooks/useContractTemplates';
 import TemplateCard from '@/components/contracts/TemplateCard';
 import TemplatePreviewDialog from '@/components/contracts/TemplatePreviewDialog';
+import WasteTypeCategoryView from '@/components/contracts/WasteTypeCategoryView';
 import { usePDFExport } from '@/hooks/usePDFExport';
 
 const ContractTemplates = () => {
@@ -51,6 +53,7 @@ const ContractTemplates = () => {
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
+  const [viewMode, setViewMode] = useState<'list' | 'category'>('category');
 
   const [formData, setFormData] = useState<CreateContractTemplateInput>({
     name: '',
@@ -326,15 +329,39 @@ const ContractTemplates = () => {
           </Card>
         </div>
 
-        {/* Search */}
-        <div className="relative max-w-md">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="بحث في القوالب..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10"
-          />
+        {/* Search and View Toggle */}
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="بحث في القوالب..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-10"
+            />
+          </div>
+          
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
+            <Button
+              variant={viewMode === 'category' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('category')}
+              className="gap-2"
+            >
+              <Layers className="w-4 h-4" />
+              تصنيف بالمخلفات
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('list')}
+              className="gap-2"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              عرض شبكي
+            </Button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -355,6 +382,18 @@ const ContractTemplates = () => {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
+            ) : viewMode === 'category' ? (
+              <WasteTypeCategoryView
+                templates={generatorTemplates}
+                onView={(t) => {
+                  setSelectedTemplate(t);
+                  setShowViewDialog(true);
+                }}
+                onEdit={handleEdit}
+                onDuplicate={handleDuplicate}
+                onDelete={handleDelete}
+                searchQuery={searchQuery}
+              />
             ) : (
               <TemplatesList 
                 templates={generatorTemplates} 
@@ -368,6 +407,18 @@ const ContractTemplates = () => {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-primary" />
               </div>
+            ) : viewMode === 'category' ? (
+              <WasteTypeCategoryView
+                templates={recyclerTemplates}
+                onView={(t) => {
+                  setSelectedTemplate(t);
+                  setShowViewDialog(true);
+                }}
+                onEdit={handleEdit}
+                onDuplicate={handleDuplicate}
+                onDelete={handleDelete}
+                searchQuery={searchQuery}
+              />
             ) : (
               <TemplatesList 
                 templates={recyclerTemplates} 
