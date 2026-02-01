@@ -160,7 +160,25 @@ const DriverDashboard = () => {
             مرحباً، {profile?.full_name}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Driver Status Indicators */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border">
+            {/* Tracking Status */}
+            <LiveLocationIndicator
+              isTracking={!!lastLocationUpdate}
+              lastUpdate={lastLocationUpdate}
+              signalStrength={lastLocationUpdate ? 'good' : 'offline'}
+            />
+            
+            {/* Availability Status */}
+            <div className="flex items-center gap-1.5 border-r pr-2 mr-1">
+              <div className={`w-2.5 h-2.5 rounded-full ${driverInfo?.is_available ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+              <span className="text-xs font-medium">
+                {driverInfo?.is_available ? 'نشط' : 'غير نشط'}
+              </span>
+            </div>
+          </div>
+
           {driverInfo && (
             <QuickLocationButton 
               driverId={driverInfo.id} 
