@@ -335,7 +335,6 @@ const DriverDashboard = () => {
                   key={shipment.id}
                   shipment={shipment}
                   onStatusChange={fetchDriverData}
-                  showAutoTimer={true}
                   variant="full"
                 />
               ))
@@ -358,7 +357,6 @@ const DriverDashboard = () => {
                   key={shipment.id}
                   shipment={shipment}
                   onStatusChange={fetchDriverData}
-                  showAutoTimer={false}
                   variant="full"
                 />
               ))

@@ -38,7 +38,7 @@ import BackButton from '@/components/ui/back-button';
 import ShipmentRouteMap from '@/components/shipments/ShipmentRouteMap';
 import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
-import { useShipmentAutoStatus } from '@/hooks/useShipmentAutoStatus';
+
 
 interface Shipment {
   id: string;
@@ -384,18 +384,6 @@ const ShipmentManagement = () => {
     completed: shipments.filter(s => s.status === 'confirmed').length,
   };
 
-  // Auto status hook
-  useShipmentAutoStatus(
-    shipments.map(s => ({
-      id: s.id,
-      status: s.status,
-      created_at: s.created_at,
-      expected_delivery_date: s.expected_delivery_date,
-      delivered_at: s.delivered_at,
-    })),
-    fetchData,
-    true
-  );
 
   return (
     <DashboardLayout>
@@ -645,7 +633,6 @@ const ShipmentManagement = () => {
                     key={shipment.id}
                     shipment={shipment}
                     onStatusChange={fetchData}
-                    showAutoTimer={true}
                   />
                 ))}
               </div>

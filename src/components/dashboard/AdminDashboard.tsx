@@ -685,7 +685,6 @@ const AdminDashboard = () => {
                       key={shipment.id}
                       shipment={shipment}
                       onStatusChange={fetchDashboardData}
-                      showAutoTimer={true}
                     />
                   ))}
                 </div>

@@ -19,7 +19,7 @@ import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimelin
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkStatusChangeDropdown from '@/components/shipments/BulkStatusChangeDropdown';
-import { useShipmentAutoStatus } from '@/hooks/useShipmentAutoStatus';
+
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
@@ -344,18 +344,6 @@ const TransporterDashboard = () => {
     }
   };
 
-  // Auto status hook
-  const { countdowns } = useShipmentAutoStatus(
-    recentShipments.map(s => ({
-      id: s.id,
-      status: s.status,
-      created_at: s.created_at,
-      expected_delivery_date: s.expected_delivery_date,
-      delivered_at: s.delivered_at,
-    })),
-    fetchDashboardData,
-    true
-  );
 
   const quickActions: QuickAction[] = [
     { title: 'أدوات الذكاء الاصطناعي', subtitle: 'استخراج بيانات الوزن والتصنيف', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },
@@ -542,7 +530,6 @@ const TransporterDashboard = () => {
                       key={shipment.id}
                       shipment={shipment}
                       onStatusChange={fetchDashboardData}
-                      showAutoTimer={true}
                     />
                   ))}
                 </div>
