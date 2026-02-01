@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ import {
   SignalMedium,
   SignalHigh,
   Building2,
-  Truck
+  Truck,
+  Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import DriverMiniMap from '@/components/maps/DriverMiniMap';

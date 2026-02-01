@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,12 +19,16 @@ import {
   Radio,
   Route,
   History,
+  RefreshCw,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import DriverTripTracker from '@/components/driver/DriverTripTracker';
 import TripHistoryView from '@/components/driver/TripHistoryView';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
+import TrackingStatsCard from '@/components/tracking/TrackingStatsCard';
+import QuickLocationButton from '@/components/tracking/QuickLocationButton';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle as LeafletCircle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
