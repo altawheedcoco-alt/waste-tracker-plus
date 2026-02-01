@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -8,10 +8,14 @@ import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimelin
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
 import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
+import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker';
+import { useGeofenceAutoStatus } from '@/hooks/useGeofenceAutoStatus';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Package,
   Printer,
@@ -31,10 +35,13 @@ import {
   Edit,
   Download,
   Map,
+  Zap,
+  Navigation,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { getCityById } from '@/lib/egyptianCities';
+import { toast } from 'sonner';
 
 interface ShipmentDetails {
   id: string;
@@ -129,12 +136,56 @@ const statusLabels: Record<string, { label: string; className: string }> = {
 const ShipmentDetailsPage = () => {
   const { shipmentId } = useParams();
   const navigate = useNavigate();
+  const { roles } = useAuth();
   const [shipment, setShipment] = useState<ShipmentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [generatorLocation, setGeneratorLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recyclerLocation, setRecyclerLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [autoStatusEnabled, setAutoStatusEnabled] = useState(false);
+
+  const isDriver = roles.includes('driver');
+
+  // Geofence auto-status hook for drivers
+  const shipmentForGeofence = shipment ? {
+    id: shipment.id,
+    status: shipment.status,
+    pickup_address: shipment.pickup_address,
+    delivery_address: shipment.delivery_address,
+    driver_id: shipment.driver_id,
+    pickup_location: generatorLocation,
+    delivery_location: recyclerLocation,
+  } : null;
+
+  const { checkGeofences } = useGeofenceAutoStatus(
+    shipmentForGeofence,
+    driverLocation,
+    isDriver && autoStatusEnabled,
+    () => fetchShipmentDetails()
+  );
+
+  // Watch driver's position if auto-status is enabled
+  useEffect(() => {
+    if (!isDriver || !autoStatusEnabled || !navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setDriverLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        toast.error('تعذر الوصول للموقع الجغرافي');
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [isDriver, autoStatusEnabled]);
 
   useEffect(() => {
     if (shipmentId) {
@@ -274,6 +325,23 @@ const ShipmentDetailsPage = () => {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
+            {/* Auto-status toggle for drivers */}
+            {isDriver && (
+              <Button
+                variant={autoStatusEnabled ? 'default' : 'outline'}
+                onClick={() => {
+                  setAutoStatusEnabled(!autoStatusEnabled);
+                  toast.success(
+                    autoStatusEnabled
+                      ? 'تم إيقاف التحديث التلقائي'
+                      : 'تم تفعيل التحديث التلقائي بناءً على الموقع'
+                  );
+                }}
+              >
+                <Zap className={`ml-2 h-4 w-4 ${autoStatusEnabled ? 'text-yellow-300' : ''}`} />
+                {autoStatusEnabled ? 'تحديث تلقائي: مفعّل' : 'تفعيل التحديث التلقائي'}
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setShowStatusDialog(true)}>
               <Edit className="ml-2 h-4 w-4" />
               تغيير الحالة
@@ -285,18 +353,49 @@ const ShipmentDetailsPage = () => {
           </div>
         </div>
 
+        {/* Auto-status indicator */}
+        {isDriver && autoStatusEnabled && (
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="py-3">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Navigation className="h-5 w-5 text-primary" />
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                  </span>
+                </div>
+                <div>
+                  <p className="font-medium text-sm">التحديث التلقائي مفعّل</p>
+                  <p className="text-xs text-muted-foreground">
+                    سيتم تحديث حالة الشحنة تلقائياً عند الوصول لموقع الاستلام أو التسليم
+                  </p>
+                </div>
+                {driverLocation && (
+                  <Badge variant="outline" className="mr-auto text-xs">
+                    <MapPin className="h-3 w-3 ml-1" />
+                    {driverLocation.lat.toFixed(4)}, {driverLocation.lng.toFixed(4)}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Status Timeline */}
         <ShipmentStatusTimeline shipment={shipment} />
 
-        {/* Tracking Map */}
-        {generatorLocation && recyclerLocation && (
-          <ShipmentTrackingMap
-            collectionPoint={{ ...generatorLocation, address: shipment.pickup_address }}
-            recyclingCenter={{ ...recyclerLocation, address: shipment.delivery_address }}
-            driverId={shipment.driver?.id || undefined}
-            showDriverTracking={['collecting', 'in_transit'].includes(shipment.status)}
-          />
-        )}
+        {/* Unified Tracker with Live Map */}
+        <UnifiedShipmentTracker
+          shipment={{
+            ...shipment,
+            generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city } : null,
+            transporter: shipment.transporter ? { name: shipment.transporter.name, phone: shipment.transporter.phone } : null,
+            recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city } : null,
+          }}
+          showMap={generatorLocation !== null && recyclerLocation !== null}
+          onStatusUpdate={fetchShipmentDetails}
+        />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Waste Details */}
