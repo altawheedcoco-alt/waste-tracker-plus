@@ -19,6 +19,8 @@ import RouteEstimation from '@/components/shipments/RouteEstimation';
 import { useAutoChat } from '@/hooks/useAutoChat';
 import WasteTypeCombobox, { isHazardousWasteType, getHazardLevelFromWasteType } from '@/components/shipments/WasteTypeCombobox';
 import { ComboboxWithInput, type ComboboxOption } from '@/components/ui/combobox-with-input';
+import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
+import { usePinnedParties } from '@/hooks/usePinnedParties';
 import type { Database } from '@/integrations/supabase/types';
 
 type WasteType = Database['public']['Enums']['waste_type'];
@@ -81,6 +83,7 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
   const navigate = useNavigate();
   const { profile, organization, roles } = useAuth();
   const { createShipmentChatRoom } = useAutoChat();
+  const { pinnedParties, isLoaded: pinnedLoaded, pinBothParties } = usePinnedParties();
   const [loading, setLoading] = useState(false);
   const [generators, setGenerators] = useState<Organization[]>([]);
   const [recyclers, setRecyclers] = useState<Organization[]>([]);
@@ -98,7 +101,20 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
   const prefilledNetWeight = searchParams.get('net_weight') || '';
   const prefilledUnit = searchParams.get('unit') || 'كجم';
   const prefilledVehiclePlate = searchParams.get('vehicle_plate') || '';
+  const prefilledDriverName = searchParams.get('driver_name') || '';
   const prefilledCompanyName = searchParams.get('company_name') || '';
+  const prefilledCustomerName = searchParams.get('customer_name') || '';
+  const prefilledMaterialType = searchParams.get('material_type') || '';
+  const prefilledGovernorate = searchParams.get('governorate') || '';
+  const prefilledNotes = searchParams.get('notes') || '';
+  const prefilledTicketNumber = searchParams.get('ticket_number') || '';
+  const prefilledWeightDate = searchParams.get('weight_date') || '';
+
+  // Combine notes with ticket number if available
+  const combinedNotes = [
+    prefilledNotes,
+    prefilledTicketNumber ? `رقم التذكرة: ${prefilledTicketNumber}` : '',
+  ].filter(Boolean).join(' | ');
 
   const [formData, setFormData] = useState({
     generator_id: '',
@@ -110,13 +126,13 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     unit: prefilledUnit,
     pickup_address: '',
     delivery_address: '',
-    waste_description: '',
-    notes: '',
-    pickup_date: '',
+    waste_description: prefilledMaterialType,
+    notes: combinedNotes,
+    pickup_date: prefilledWeightDate,
     expected_delivery_date: '',
     shipment_type: 'regular',
     disposal_method: '',
-    manual_driver_name: '',
+    manual_driver_name: prefilledDriverName,
     manual_vehicle_plate: prefilledVehiclePlate,
     packaging_method: '',
     hazard_level: '',
@@ -127,19 +143,59 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
 
   // If prefilled vehicle plate, switch to manual driver input
   useEffect(() => {
-    if (prefilledVehiclePlate) {
+    if (prefilledVehiclePlate || prefilledDriverName) {
       setDriverInputType('manual');
     }
-  }, [prefilledVehiclePlate]);
+  }, [prefilledVehiclePlate, prefilledDriverName]);
 
   // Show toast if data was prefilled from AI
   useEffect(() => {
-    if (prefilledNetWeight || prefilledVehiclePlate) {
+    const hasPrefilledData = prefilledNetWeight || prefilledVehiclePlate || prefilledDriverName || prefilledMaterialType;
+    if (hasPrefilledData) {
+      const details = [
+        prefilledNetWeight ? `الوزن: ${prefilledNetWeight} ${prefilledUnit}` : '',
+        prefilledVehiclePlate ? `المركبة: ${prefilledVehiclePlate}` : '',
+        prefilledDriverName ? `السائق: ${prefilledDriverName}` : '',
+        prefilledMaterialType ? `النوع: ${prefilledMaterialType}` : '',
+      ].filter(Boolean).join(' | ');
+      
       toast.success('تم تعبئة البيانات من صورة الوزنة تلقائياً', {
-        description: `الوزن: ${prefilledNetWeight} ${prefilledUnit}${prefilledVehiclePlate ? ` | المركبة: ${prefilledVehiclePlate}` : ''}`,
+        description: details,
+        duration: 5000,
       });
     }
   }, []);
+
+  // Apply pinned parties on load (only once)
+  useEffect(() => {
+    if (pinnedLoaded && pinnedParties.generator && !formData.generator_id) {
+      const generatorValue = pinnedParties.generator.isManual 
+        ? `manual:${pinnedParties.generator.name}` 
+        : pinnedParties.generator.id;
+      
+      setFormData(prev => ({
+        ...prev,
+        generator_id: generatorValue,
+        pickup_address: pinnedParties.generator?.address 
+          ? `${pinnedParties.generator.address}${pinnedParties.generator.city ? `, ${pinnedParties.generator.city}` : ''}`
+          : prev.pickup_address,
+      }));
+    }
+    
+    if (pinnedLoaded && pinnedParties.recycler && !formData.recycler_id) {
+      const recyclerValue = pinnedParties.recycler.isManual 
+        ? `manual:${pinnedParties.recycler.name}` 
+        : pinnedParties.recycler.id;
+      
+      setFormData(prev => ({
+        ...prev,
+        recycler_id: recyclerValue,
+        delivery_address: pinnedParties.recycler?.address 
+          ? `${pinnedParties.recycler.address}${pinnedParties.recycler.city ? `, ${pinnedParties.recycler.city}` : ''}`
+          : prev.delivery_address,
+      }));
+    }
+  }, [pinnedLoaded]);
 
   useEffect(() => {
     fetchOrganizationsAndDrivers();
@@ -437,8 +493,76 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     }
   };
 
+  // Helper to get current party info for pinning
+  const getCurrentGeneratorInfo = () => {
+    if (!formData.generator_id) return null;
+    if (formData.generator_id.startsWith('manual:')) {
+      return {
+        id: formData.generator_id,
+        name: formData.generator_id.replace('manual:', ''),
+        isManual: true,
+      };
+    }
+    const generator = generators.find(g => g.id === formData.generator_id);
+    return generator ? {
+      id: generator.id,
+      name: generator.name,
+      address: generator.address,
+      city: generator.city,
+      isManual: false,
+    } : null;
+  };
+
+  const getCurrentRecyclerInfo = () => {
+    if (!formData.recycler_id) return null;
+    if (formData.recycler_id.startsWith('manual:')) {
+      return {
+        id: formData.recycler_id,
+        name: formData.recycler_id.replace('manual:', ''),
+        isManual: true,
+      };
+    }
+    const recycler = recyclers.find(r => r.id === formData.recycler_id);
+    return recycler ? {
+      id: recycler.id,
+      name: recycler.name,
+      address: recycler.address,
+      city: recycler.city,
+      isManual: false,
+    } : null;
+  };
+
+  const handleApplyPinnedParties = (
+    generator: { id: string; name: string; address?: string } | null,
+    recycler: { id: string; name: string; address?: string } | null
+  ) => {
+    if (generator) {
+      setFormData(prev => ({
+        ...prev,
+        generator_id: generator.id,
+        pickup_address: generator.address || prev.pickup_address,
+      }));
+    }
+    if (recycler) {
+      setFormData(prev => ({
+        ...prev,
+        recycler_id: recycler.id,
+        delivery_address: recycler.address || prev.delivery_address,
+      }));
+    }
+  };
+
   const formContent = (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Pinned Parties Controls - for transporters */}
+      {organization?.organization_type === 'transporter' && (
+        <PinnedPartiesControls
+          currentGenerator={getCurrentGeneratorInfo()}
+          currentRecycler={getCurrentRecyclerInfo()}
+          onApplyPinned={handleApplyPinnedParties}
+        />
+      )}
+
       {/* Row 1: Generator, Transporter, Recycler */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>

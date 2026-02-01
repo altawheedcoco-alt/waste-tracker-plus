@@ -73,13 +73,39 @@ const SmartWeightUpload = ({ open, onOpenChange }: SmartWeightUploadProps) => {
     if (!extractedData) return;
     
     const params = new URLSearchParams();
+    
+    // Weight data
     const netWeight = extractedData.net_weight || extractedData.first_weight || extractedData.gross_weight;
     if (netWeight) params.set('net_weight', netWeight.replace(/[^\d.]/g, ''));
     if (extractedData.unit) params.set('unit', extractedData.unit === 'ton' ? 'طن' : 'كجم');
+    
+    // Vehicle and driver
     if (extractedData.vehicle_number) params.set('vehicle_plate', extractedData.vehicle_number);
     if (extractedData.driver_name) params.set('driver_name', extractedData.driver_name);
+    if (extractedData.trailer_number) params.set('trailer_number', extractedData.trailer_number);
+    
+    // Material/waste info
     if (extractedData.material_type) params.set('material_type', extractedData.material_type);
+    
+    // Company info - could be generator or customer
     if (extractedData.company_name) params.set('company_name', extractedData.company_name);
+    if (extractedData.customer_name) params.set('customer_name', extractedData.customer_name);
+    
+    // Location info
+    if (extractedData.governorate) params.set('governorate', extractedData.governorate);
+    
+    // Ticket/reference info
+    if (extractedData.ticket_number) params.set('ticket_number', extractedData.ticket_number);
+    
+    // Operation type
+    if (extractedData.operation_type) params.set('operation_type', extractedData.operation_type);
+    
+    // Date/time
+    const weightDate = extractedData.first_date || extractedData.date;
+    if (weightDate) params.set('weight_date', weightDate);
+    
+    // Notes
+    if (extractedData.notes) params.set('notes', extractedData.notes);
     
     onOpenChange(false);
     navigate(`/dashboard/shipments/new?${params.toString()}`);
