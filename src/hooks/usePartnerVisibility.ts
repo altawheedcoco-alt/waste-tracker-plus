@@ -12,6 +12,12 @@ export interface PartnerVisibilitySetting {
   can_view_tracking: boolean;
   can_view_routes: boolean;
   can_view_driver_location: boolean;
+  can_view_shipment_details: boolean;
+  can_view_driver_info: boolean;
+  can_view_vehicle_info: boolean;
+  can_view_estimated_arrival: boolean;
+  can_receive_notifications: boolean;
+  can_view_reports: boolean;
   created_at: string;
   updated_at: string;
   created_by: string | null;
@@ -29,6 +35,12 @@ export interface UpdateVisibilityInput {
   can_view_tracking?: boolean;
   can_view_routes?: boolean;
   can_view_driver_location?: boolean;
+  can_view_shipment_details?: boolean;
+  can_view_driver_info?: boolean;
+  can_view_vehicle_info?: boolean;
+  can_view_estimated_arrival?: boolean;
+  can_receive_notifications?: boolean;
+  can_view_reports?: boolean;
 }
 
 export const usePartnerVisibility = () => {
@@ -103,6 +115,12 @@ export const usePartnerVisibility = () => {
             can_view_tracking: true,
             can_view_routes: true,
             can_view_driver_location: true,
+            can_view_shipment_details: true,
+            can_view_driver_info: true,
+            can_view_vehicle_info: true,
+            can_view_estimated_arrival: true,
+            can_receive_notifications: true,
+            can_view_reports: true,
           },
           hasCustomSettings: !!existingSetting,
         };
@@ -133,6 +151,12 @@ export const usePartnerVisibility = () => {
             can_view_tracking: input.can_view_tracking,
             can_view_routes: input.can_view_routes,
             can_view_driver_location: input.can_view_driver_location,
+            can_view_shipment_details: input.can_view_shipment_details,
+            can_view_driver_info: input.can_view_driver_info,
+            can_view_vehicle_info: input.can_view_vehicle_info,
+            can_view_estimated_arrival: input.can_view_estimated_arrival,
+            can_receive_notifications: input.can_receive_notifications,
+            can_view_reports: input.can_view_reports,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id);
@@ -149,6 +173,12 @@ export const usePartnerVisibility = () => {
             can_view_tracking: input.can_view_tracking ?? true,
             can_view_routes: input.can_view_routes ?? true,
             can_view_driver_location: input.can_view_driver_location ?? true,
+            can_view_shipment_details: input.can_view_shipment_details ?? true,
+            can_view_driver_info: input.can_view_driver_info ?? true,
+            can_view_vehicle_info: input.can_view_vehicle_info ?? true,
+            can_view_estimated_arrival: input.can_view_estimated_arrival ?? true,
+            can_receive_notifications: input.can_receive_notifications ?? true,
+            can_view_reports: input.can_view_reports ?? true,
             created_by: profile.id,
           });
 

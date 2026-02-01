@@ -13,14 +13,19 @@ import {
   Navigation, 
   Route, 
   Eye, 
-  EyeOff, 
   Building2, 
   Recycle,
   Shield,
   Settings2,
   Lock,
   Unlock,
-  RefreshCw
+  RefreshCw,
+  FileText,
+  User,
+  Truck,
+  Clock,
+  Bell,
+  BarChart3
 } from 'lucide-react';
 import { usePartnerVisibility } from '@/hooks/usePartnerVisibility';
 
@@ -37,7 +42,7 @@ const PartnerVisibilitySettings = () => {
 
   const handleToggle = (
     partnerId: string, 
-    field: 'can_view_maps' | 'can_view_tracking' | 'can_view_routes' | 'can_view_driver_location',
+    field: 'can_view_maps' | 'can_view_tracking' | 'can_view_routes' | 'can_view_driver_location' | 'can_view_shipment_details' | 'can_view_driver_info' | 'can_view_vehicle_info' | 'can_view_estimated_arrival' | 'can_receive_notifications' | 'can_view_reports',
     currentValue: boolean
   ) => {
     const newValue = !currentValue;
@@ -73,6 +78,12 @@ const PartnerVisibilitySettings = () => {
         can_view_tracking: enable,
         can_view_routes: enable,
         can_view_driver_location: enable,
+        can_view_shipment_details: enable,
+        can_view_driver_info: enable,
+        can_view_vehicle_info: enable,
+        can_view_estimated_arrival: enable,
+        can_receive_notifications: enable,
+        can_view_reports: enable,
       }
     }));
 
@@ -82,6 +93,12 @@ const PartnerVisibilitySettings = () => {
       can_view_tracking: enable,
       can_view_routes: enable,
       can_view_driver_location: enable,
+      can_view_shipment_details: enable,
+      can_view_driver_info: enable,
+      can_view_vehicle_info: enable,
+      can_view_estimated_arrival: enable,
+      can_receive_notifications: enable,
+      can_view_reports: enable,
     });
   };
 
@@ -202,7 +219,7 @@ const PartnerVisibilitySettings = () => {
                   <Separator className="mb-4" />
 
                   {/* Visibility Toggles */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     {/* Maps */}
                     <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                       <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_maps') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
@@ -251,6 +268,84 @@ const PartnerVisibilitySettings = () => {
                       <Switch
                         checked={getSettingValue(partner, 'can_view_driver_location')}
                         onCheckedChange={() => handleToggle(partner.id, 'can_view_driver_location', getSettingValue(partner, 'can_view_driver_location'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Shipment Details */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_shipment_details') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <FileText className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">تفاصيل الشحنات</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_shipment_details')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_shipment_details', getSettingValue(partner, 'can_view_shipment_details'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Driver Info */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_driver_info') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <User className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">بيانات السائق</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_driver_info')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_driver_info', getSettingValue(partner, 'can_view_driver_info'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Vehicle Info */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_vehicle_info') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <Truck className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">بيانات المركبة</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_vehicle_info')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_vehicle_info', getSettingValue(partner, 'can_view_vehicle_info'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Estimated Arrival */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_estimated_arrival') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">وقت الوصول</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_estimated_arrival')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_estimated_arrival', getSettingValue(partner, 'can_view_estimated_arrival'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Notifications */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_receive_notifications') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <Bell className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">الإشعارات</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_receive_notifications')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_receive_notifications', getSettingValue(partner, 'can_receive_notifications'))}
+                        disabled={isUpdating}
+                      />
+                    </div>
+
+                    {/* Reports */}
+                    <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_reports') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                        <BarChart3 className="w-4 h-4" />
+                      </div>
+                      <Label className="text-xs text-center">التقارير</Label>
+                      <Switch
+                        checked={getSettingValue(partner, 'can_view_reports')}
+                        onCheckedChange={() => handleToggle(partner.id, 'can_view_reports', getSettingValue(partner, 'can_view_reports'))}
                         disabled={isUpdating}
                       />
                     </div>
