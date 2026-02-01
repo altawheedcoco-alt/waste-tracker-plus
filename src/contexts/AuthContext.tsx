@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback 
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { stopFocusMusicOnLogout } from './FocusMusicContext';
 
 interface Profile {
   id: string;
@@ -458,6 +459,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    // Stop focus music on logout
+    stopFocusMusicOnLogout();
+    
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

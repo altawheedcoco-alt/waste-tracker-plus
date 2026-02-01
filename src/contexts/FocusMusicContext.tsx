@@ -177,6 +177,15 @@ const focusTracks: FocusTrack[] = [
 
 const FocusMusicContext = createContext<FocusMusicContextType | undefined>(undefined);
 
+// Global function to stop music on logout - can be called from anywhere
+export const stopFocusMusicOnLogout = () => {
+  if (globalAudio) {
+    globalAudio.pause();
+    globalAudio.currentTime = 0;
+    globalAudio.src = '';
+  }
+};
+
 // Create a singleton audio element that persists across the app
 let globalAudio: HTMLAudioElement | null = null;
 
@@ -198,18 +207,8 @@ export const FocusMusicProvider = ({ children }: { children: ReactNode }) => {
     // Restore volume
     audioRef.current.volume = isMuted ? 0 : volume / 100;
 
-    // Cleanup only when app is fully unmounted (page close)
-    const handleBeforeUnload = () => {
-      if (globalAudio) {
-        globalAudio.pause();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
+    // No cleanup on navigation - music continues playing
+    // Music only stops on explicit logout via stopFocusMusicOnLogout()
   }, []);
 
   useEffect(() => {
