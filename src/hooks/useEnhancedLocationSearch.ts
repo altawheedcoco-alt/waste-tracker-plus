@@ -335,22 +335,25 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
         }
       });
 
-      // 5. Search using Nominatim API - EXPANDED SEARCH (no country restriction initially)
-      // First try Egypt-specific, then global search for better coverage
+      // 5. Search using Nominatim API - EGYPT ONLY (جمهورية مصر العربية)
+      // Comprehensive search within Egypt covering all location types
       const searchStrategies = [
-        // Egypt-specific searches
-        { query: `${query}`, countrycodes: 'eg', limit: 10 },
+        // Primary Egypt search - exact query
+        { query: `${query}`, countrycodes: 'eg', limit: 15 },
+        // Industrial/factory variations
         { query: `${query} industrial`, countrycodes: 'eg', limit: 5 },
         { query: `مصنع ${query}`, countrycodes: 'eg', limit: 5 },
-        // Global search for broader results
-        { query: `${query}`, countrycodes: '', limit: 10 },
+        { query: `شركة ${query}`, countrycodes: 'eg', limit: 5 },
+        // Location type variations
+        { query: `${query} مصر`, countrycodes: 'eg', limit: 5 },
+        { query: `منطقة ${query}`, countrycodes: 'eg', limit: 5 },
       ];
 
       for (const strategy of searchStrategies) {
         try {
-          const countryParam = strategy.countrycodes ? `&countrycodes=${strategy.countrycodes}` : '';
+          // Always search within Egypt only
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(strategy.query)}${countryParam}&limit=${strategy.limit}&accept-language=ar,en&addressdetails=1`
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(strategy.query)}&countrycodes=eg&limit=${strategy.limit}&accept-language=ar,en&addressdetails=1`
           );
           
           if (!response.ok) continue;
@@ -373,7 +376,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
                 const addressDetails = item.address || {};
                 const cityName = addressDetails.city || addressDetails.town || addressDetails.village || 
                                  addressDetails.county || addressDetails.state || '';
-                const regionName = addressDetails.state || addressDetails.region || addressDetails.country || '';
+                const regionName = addressDetails.state || addressDetails.region || 'مصر';
 
                 const result: SearchResult = {
                   id: `nominatim-${item.place_id}`,
@@ -382,7 +385,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
                   type: 'nominatim',
                   latitude: parseFloat(item.lat),
                   longitude: parseFloat(item.lon),
-                  matchScore: matchScore + 0.1, // Slight boost for external results
+                  matchScore: matchScore + 0.1,
                   city: cityName,
                   region: regionName,
                 };
@@ -401,8 +404,8 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
               }
             });
             
-            // If we have enough results from Egypt, don't do global search
-            if (strategy.countrycodes === 'eg' && allResults.filter(r => r.type === 'nominatim').length >= 8) {
+            // If we have enough results, we can stop searching
+            if (allResults.filter(r => r.type === 'nominatim').length >= 15) {
               break;
             }
           }
