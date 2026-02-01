@@ -27,7 +27,9 @@ import {
   LayoutGrid,
   Layers,
   ToggleLeft,
-  ToggleRight
+  ToggleRight,
+  Wand2,
+  Database
 } from 'lucide-react';
 import { allEgyptianGeneratorTemplates, allEgyptianRecyclerTemplates } from '@/data/egyptianLegalContractTemplates';
 import { 
@@ -41,8 +43,12 @@ import TemplateCard from '@/components/contracts/TemplateCard';
 import TemplatePreviewDialog from '@/components/contracts/TemplatePreviewDialog';
 import WasteTypeCategoryView from '@/components/contracts/WasteTypeCategoryView';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { generateSystemTemplates, getTemplatesSummary } from '@/data/systemContractTemplates';
 
 const ContractTemplates = () => {
+  const { organization } = useAuth();
   const { templates, loading, createTemplate, updateTemplate, deleteTemplate, fetchTemplates } = useContractTemplates();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -53,6 +59,7 @@ const ContractTemplates = () => {
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
+  const [generatingSystemTemplates, setGeneratingSystemTemplates] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'category'>('category');
 
   const [formData, setFormData] = useState<CreateContractTemplateInput>({
@@ -224,6 +231,71 @@ const ContractTemplates = () => {
       setImportProgress(0);
     }
   };
+
+  // Generate system templates for all waste categories
+  const handleGenerateSystemTemplates = async () => {
+    if (!organization?.id) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return;
+    }
+
+    setGeneratingSystemTemplates(true);
+    setImportProgress(0);
+
+    try {
+      const systemTemplates = generateSystemTemplates();
+      const total = systemTemplates.length;
+      let created = 0;
+
+      // Process in batches to avoid overwhelming the API
+      const batchSize = 10;
+      for (let i = 0; i < systemTemplates.length; i += batchSize) {
+        const batch = systemTemplates.slice(i, i + batchSize);
+        
+        await Promise.all(batch.map(async (template) => {
+          try {
+            await createTemplate({
+              name: template.name,
+              description: template.description,
+              partner_type: template.partner_type,
+              contract_category: template.contract_category,
+              header_text: template.header_text,
+              introduction_text: template.introduction_text,
+              terms_template: template.terms_template,
+              obligations_party_one: template.obligations_party_one,
+              obligations_party_two: template.obligations_party_two,
+              payment_terms_template: template.payment_terms_template,
+              duration_clause: template.duration_clause,
+              termination_clause: template.termination_clause,
+              dispute_resolution: template.dispute_resolution,
+              closing_text: template.closing_text,
+              include_stamp: true,
+              include_signature: true,
+              include_header_logo: true,
+            });
+            created++;
+          } catch (err) {
+            console.error('Error creating template:', err);
+          }
+        }));
+        
+        setImportProgress(Math.round(((i + batch.length) / total) * 100));
+      }
+
+      toast.success(`تم إنشاء ${created} قالب عقد بنجاح من أصل ${total}`);
+      setShowImportDialog(false);
+      fetchTemplates();
+    } catch (error) {
+      console.error('Error generating system templates:', error);
+      toast.error('حدث خطأ أثناء إنشاء القوالب');
+    } finally {
+      setGeneratingSystemTemplates(false);
+      setImportProgress(0);
+    }
+  };
+
+  // Get templates summary
+  const templatesSummary = getTemplatesSummary();
 
   // Filter templates by partner type
   const generatorTemplates = templates.filter(t => t.partner_type === 'generator' || t.partner_type === 'both');
@@ -702,14 +774,14 @@ const ContractTemplates = () => {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {importing ? (
+              {(importing || generatingSystemTemplates) ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>جاري الاستيراد...</span>
+                      <span>{generatingSystemTemplates ? 'جاري إنشاء القوالب...' : 'جاري الاستيراد...'}</span>
                       <span>{importProgress}%</span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -722,6 +794,38 @@ const ContractTemplates = () => {
                 </div>
               ) : (
                 <div className="grid gap-3">
+                  {/* System Templates - Main Feature */}
+                  <Card 
+                    className="cursor-pointer hover:border-primary transition-colors bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-200"
+                    onClick={handleGenerateSystemTemplates}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-500/20 rounded-lg">
+                          <Wand2 className="w-6 h-6 text-purple-500" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-purple-700">إنشاء قوالب لجميع تصنيفات المخلفات</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {templatesSummary.totalTemplates} قالب • 20 لكل تصنيف + قالب لكل نوع فرعي
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            <Badge variant="outline" className="text-xs">
+                              {templatesSummary.mainCategories} تصنيف رئيسي
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {templatesSummary.subcategories} نوع فرعي
+                            </Badge>
+                          </div>
+                        </div>
+                        <Badge className="bg-purple-500">جديد</Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Separator className="my-2" />
+                  <p className="text-sm text-muted-foreground text-center">أو استورد من القوالب المعدة مسبقاً</p>
+
                   <Card 
                     className="cursor-pointer hover:border-primary transition-colors"
                     onClick={() => handleImportTemplates('generator')}
@@ -760,10 +864,8 @@ const ContractTemplates = () => {
                     </CardContent>
                   </Card>
 
-                  <Separator />
-
                   <Card 
-                    className="cursor-pointer hover:border-primary transition-colors bg-gradient-to-r from-primary/5 to-primary/10"
+                    className="cursor-pointer hover:border-primary transition-colors"
                     onClick={() => handleImportTemplates('all')}
                   >
                     <CardContent className="p-4">
@@ -772,12 +874,11 @@ const ContractTemplates = () => {
                           <FileText className="w-6 h-6 text-primary" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium">استيراد جميع القوالب</h4>
+                          <h4 className="font-medium">استيراد جميع القوالب الجاهزة</h4>
                           <p className="text-sm text-muted-foreground">
                             {allEgyptianGeneratorTemplates.length + allEgyptianRecyclerTemplates.length} قالب شامل
                           </p>
                         </div>
-                        <Badge variant="secondary">موصى به</Badge>
                       </div>
                     </CardContent>
                   </Card>
