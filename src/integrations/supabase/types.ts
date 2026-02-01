@@ -1502,10 +1502,16 @@ export type Database = {
       }
       partner_visibility_settings: {
         Row: {
+          can_receive_notifications: boolean
+          can_view_driver_info: boolean
           can_view_driver_location: boolean
+          can_view_estimated_arrival: boolean
           can_view_maps: boolean
+          can_view_reports: boolean
           can_view_routes: boolean
+          can_view_shipment_details: boolean
           can_view_tracking: boolean
+          can_view_vehicle_info: boolean
           created_at: string
           created_by: string | null
           id: string
@@ -1514,10 +1520,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          can_receive_notifications?: boolean
+          can_view_driver_info?: boolean
           can_view_driver_location?: boolean
+          can_view_estimated_arrival?: boolean
           can_view_maps?: boolean
+          can_view_reports?: boolean
           can_view_routes?: boolean
+          can_view_shipment_details?: boolean
           can_view_tracking?: boolean
+          can_view_vehicle_info?: boolean
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1526,10 +1538,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          can_receive_notifications?: boolean
+          can_view_driver_info?: boolean
           can_view_driver_location?: boolean
+          can_view_estimated_arrival?: boolean
           can_view_maps?: boolean
+          can_view_reports?: boolean
           can_view_routes?: boolean
+          can_view_shipment_details?: boolean
           can_view_tracking?: boolean
+          can_view_vehicle_info?: boolean
           created_at?: string
           created_by?: string | null
           id?: string
