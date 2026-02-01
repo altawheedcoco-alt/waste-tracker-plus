@@ -372,31 +372,32 @@ const TransporterDashboard = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col gap-3">
         <div className="text-right">
-          <h1 className="text-2xl font-bold">لوحة تحكم الجهة الناقلة</h1>
-          <p className="text-primary">
+          <h1 className="text-xl sm:text-2xl font-bold">لوحة تحكم الجهة الناقلة</h1>
+          <p className="text-primary text-sm sm:text-base">
             مرحباً بعودتك، {organization?.name}
           </p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
           <Button 
             variant="outline" 
+            size="sm"
             onClick={() => setShowSmartWeightUpload(true)}
-            className="bg-gradient-to-r from-primary/10 to-green-500/10 border-primary/30 hover:border-primary"
+            className="bg-gradient-to-r from-primary/10 to-green-500/10 border-primary/30 hover:border-primary text-xs sm:text-sm"
           >
-            <Sparkles className="ml-2 h-4 w-4 text-primary" />
+            <Sparkles className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             رفع الوزنة الذكي
           </Button>
-          <Button variant="outline" onClick={() => navigate('/dashboard/transporter-shipments')}>
-            <FileText className="ml-2 h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/transporter-shipments')} className="text-xs sm:text-sm">
+            <FileText className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
             عرض شحنات الشركة
           </Button>
-          <Button variant="eco" onClick={() => navigate('/dashboard/shipments/new')}>
-            <Plus className="ml-2 h-4 w-4" />
+          <Button variant="eco" size="sm" onClick={() => navigate('/dashboard/shipments/new')} className="text-xs sm:text-sm">
+            <Plus className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
             إنشاء شحنة
           </Button>
         </div>
@@ -449,15 +450,15 @@ const TransporterDashboard = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
-        <TabsList>
-          <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="partners">الشركاء</TabsTrigger>
-          <TabsTrigger value="tracking">تتبع السائقين</TabsTrigger>
+        <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الشركاء</TabsTrigger>
+          <TabsTrigger value="tracking" className="text-xs sm:text-sm whitespace-nowrap">تتبع السائقين</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6 mt-6">
+        <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
             {statCards.map((stat, index) => (
               <motion.div
                 key={stat.title}
@@ -466,15 +467,15 @@ const TransporterDashboard = () => {
                 transition={{ delay: index * 0.1 }}
               >
                 <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <stat.icon className="w-5 h-5 text-primary" />
+                  <CardContent className="p-3 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-2">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">{stat.title}</p>
-                        <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                        <p className="text-xs text-muted-foreground">{stat.subtitle}</p>
+                      <div className="text-center sm:text-right">
+                        <p className="text-xs sm:text-sm text-muted-foreground">{stat.title}</p>
+                        <p className="text-xl sm:text-3xl font-bold mt-1">{stat.value}</p>
+                        <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">{stat.subtitle}</p>
                       </div>
                     </div>
                   </CardContent>

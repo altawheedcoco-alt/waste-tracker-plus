@@ -687,12 +687,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             {children}
           </main>
 
-          {/* Floating Create Shipment Button for Transporters/Drivers */}
+          {/* Floating Create Shipment Button for Transporters/Drivers - positioned to avoid chat widget */}
           {(isTransporter || isDriver) && (
             <motion.button
               onClick={() => navigate('/dashboard/shipments/new')}
-              className={`fixed z-50 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center touch-manipulation ${
-                isMobile ? 'bottom-4 left-4 w-12 h-12' : 'bottom-6 left-6 w-14 h-14'
+              className={`fixed z-30 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center touch-manipulation ${
+                isMobile ? 'bottom-4 right-4 w-12 h-12' : 'bottom-6 left-20 w-14 h-14'
               }`}
               whileHover={{ scale: 1.1, boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
               whileTap={{ scale: 0.9 }}
