@@ -3,6 +3,9 @@ project_id = "jejwizkssmqzxwseqsre"
 [functions.register-driver]
 verify_jwt = false
 
+[functions.register-driver-external]
+verify_jwt = false
+
 [functions.register-company]
 verify_jwt = false
 
