@@ -123,14 +123,14 @@ const ChatWidget = () => {
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Chat Button - Positioned to avoid overlap on mobile */}
       <motion.button
         onClick={handleOpen}
-        className="fixed bottom-24 left-6 z-50 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+        className="fixed bottom-4 left-4 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        <MessageCircle size={24} />
+        <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
       </motion.button>
 
       {/* Chat Window */}
@@ -140,7 +140,7 @@ const ChatWidget = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 left-6 z-50 w-80 sm:w-96 h-[500px] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            className="fixed bottom-20 left-4 right-4 sm:right-auto sm:left-4 z-50 sm:w-96 h-[60vh] sm:h-[500px] max-h-[500px] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between">
