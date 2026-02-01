@@ -234,6 +234,94 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          attachment_url: string | null
+          contract_number: string
+          contract_type: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          partner_name: string | null
+          partner_organization_id: string | null
+          start_date: string | null
+          status: string
+          terms: string | null
+          title: string
+          updated_at: string
+          value: number | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          contract_number: string
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          start_date?: string | null
+          status?: string
+          terms?: string | null
+          title: string
+          updated_at?: string
+          value?: number | null
+        }
+        Update: {
+          attachment_url?: string | null
+          contract_number?: string
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          start_date?: string | null
+          status?: string
+          terms?: string | null
+          title?: string
+          updated_at?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_messages: {
         Row: {
           content: string
