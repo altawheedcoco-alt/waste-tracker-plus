@@ -171,7 +171,7 @@ const ContractVerificationPage = () => {
             <CardContent className="space-y-4">
               <div className="flex gap-2">
                 <Input
-                  placeholder="مثال: EG-WMRA-XXXXX-XXXXXX-XX"
+                  placeholder="مثال: EG-I-RECYCLE-XXXXX-XXXXXX-XX"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.toUpperCase())}
                   className="text-center font-mono text-lg tracking-wider"
@@ -189,7 +189,7 @@ const ContractVerificationPage = () => {
               
               <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
                 <p className="font-medium mb-1">ملاحظة:</p>
-                <p>رمز التحقق يبدأ بـ EG-WMRA ويتكون من أحرف وأرقام مفصولة بشرطات.</p>
+                <p>رمز التحقق يبدأ بـ EG-I-RECYCLE ويتكون من أحرف وأرقام مفصولة بشرطات.</p>
                 <p>يمكنك إيجاد الرمز في أعلى العقد بجوار الباركود أو رمز QR.</p>
               </div>
             </CardContent>
