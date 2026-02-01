@@ -33,8 +33,10 @@ import {
   Eye,
   FileCheck,
   Loader2,
-  Wand2
+  Wand2,
+  ArrowRight
 } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import ContractGeneratorDialog from '@/components/contracts/ContractGeneratorDialog';
 
 interface Contract {
@@ -379,12 +381,15 @@ const Contracts = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="text-right">
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <FileCheck className="w-6 h-6" />
-              إدارة العقود
-            </h1>
-            <p className="text-muted-foreground">إدارة العقود والاتفاقيات مع الشركاء</p>
+          <div className="flex items-center gap-3">
+            <BackButton fallbackPath="/dashboard" />
+            <div className="text-right">
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <FileCheck className="w-6 h-6" />
+                إدارة العقود
+              </h1>
+              <p className="text-muted-foreground">إدارة العقود والاتفاقيات مع الشركاء</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setShowGeneratorDialog(true)} className="gap-2">
