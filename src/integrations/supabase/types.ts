@@ -1500,6 +1500,67 @@ export type Database = {
           },
         ]
       }
+      partner_visibility_settings: {
+        Row: {
+          can_view_driver_location: boolean
+          can_view_maps: boolean
+          can_view_routes: boolean
+          can_view_tracking: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          partner_organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          can_view_driver_location?: boolean
+          can_view_maps?: boolean
+          can_view_routes?: boolean
+          can_view_tracking?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          partner_organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          can_view_driver_location?: boolean
+          can_view_maps?: boolean
+          can_view_routes?: boolean
+          can_view_tracking?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          partner_organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_visibility_settings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_visibility_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_visibility_settings_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       password_change_logs: {
         Row: {
           change_type: string

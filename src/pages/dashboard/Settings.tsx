@@ -12,7 +12,8 @@ import {
   Check,
   Sparkles,
   Eye,
-  Volume2
+  Volume2,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -21,9 +22,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useThemeSettings, ThemeColor, FontFamily, DisplayMode } from '@/contexts/ThemeSettingsContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import BackButton from '@/components/ui/back-button';
 import NotificationSoundSettings from '@/components/settings/NotificationSoundSettings';
+import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -107,6 +110,9 @@ const Settings = () => {
     effectiveDisplayMode,
   } = useThemeSettings();
 
+  const { organization } = useAuth();
+  const isTransporter = organization?.organization_type === 'transporter';
+
   const applyPreset = (preset: typeof themePresets[0]) => {
     setThemeColor(preset.color);
     setFontFamily(preset.font);
@@ -132,7 +138,10 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="themes" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+        <TabsList className={cn(
+          "grid w-full lg:w-auto lg:inline-grid",
+          isTransporter ? "grid-cols-6" : "grid-cols-5"
+        )}>
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
             <span className="hidden sm:inline">ثيمات جاهزة</span>
@@ -153,6 +162,12 @@ const Settings = () => {
             <Volume2 className="h-4 w-4" />
             <span className="hidden sm:inline">الأصوات</span>
           </TabsTrigger>
+          {isTransporter && (
+            <TabsTrigger value="visibility" className="gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">الصلاحيات</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* Theme Presets Tab */}
@@ -525,6 +540,13 @@ const Settings = () => {
         <TabsContent value="sounds" className="space-y-6">
           <NotificationSoundSettings />
         </TabsContent>
+
+        {/* Partner Visibility Tab - Only for Transporters */}
+        {isTransporter && (
+          <TabsContent value="visibility" className="space-y-6">
+            <PartnerVisibilitySettings />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
