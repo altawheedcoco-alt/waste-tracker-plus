@@ -6,14 +6,16 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check } from 'lucide-react';
+import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
 // Fix default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -210,28 +212,29 @@ const EnhancedLocationPicker = ({
     );
   };
 
-  // Search for locations using Nominatim
+  // Enhanced location search hook
+  const { 
+    results: enhancedResults, 
+    loading: enhancedSearchLoading, 
+    search: performEnhancedSearch,
+    clearResults: clearEnhancedResults
+  } = useEnhancedLocationSearch({
+    includeAllOrganizations: true,
+  });
+
+  // Search for locations using enhanced search
   const searchLocations = useCallback(async (query: string) => {
-    if (!query || query.length < 3) {
+    if (!query || query.length < 2) {
       setSuggestions([]);
+      clearEnhancedResults();
       return;
     }
 
     setSearchLoading(true);
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=eg&limit=5&accept-language=ar`
-      );
-      const data = await response.json();
-      setSuggestions(data || []);
-      setShowSuggestions(true);
-    } catch (error) {
-      console.error('Error searching locations:', error);
-      setSuggestions([]);
-    } finally {
-      setSearchLoading(false);
-    }
-  }, []);
+    performEnhancedSearch(query);
+    setShowSuggestions(true);
+    setSearchLoading(false);
+  }, [performEnhancedSearch, clearEnhancedResults]);
 
   // Debounced search
   useEffect(() => {
@@ -252,7 +255,42 @@ const EnhancedLocationPicker = ({
     setSearchQuery('');
     setSuggestions([]);
     setShowSuggestions(false);
+    clearEnhancedResults();
     toast.success('تم اختيار الموقع');
+  };
+
+  // Handle enhanced search result selection
+  const handleEnhancedResultSelect = (result: SearchResult) => {
+    onChange(result.address, result.latitude && result.longitude 
+      ? { lat: result.latitude, lng: result.longitude }
+      : undefined
+    );
+    setSearchQuery('');
+    clearEnhancedResults();
+    setShowSuggestions(false);
+    toast.success('تم اختيار الموقع');
+  };
+
+  const getResultTypeIcon = (type: SearchResult['type']) => {
+    switch (type) {
+      case 'saved':
+        return <MapPin className="w-4 h-4 text-primary" />;
+      case 'organization':
+        return <Building2 className="w-4 h-4 text-secondary-foreground" />;
+      case 'nominatim':
+        return <Globe className="w-4 h-4 text-muted-foreground" />;
+    }
+  };
+
+  const getResultTypeBadge = (type: SearchResult['type']) => {
+    switch (type) {
+      case 'saved':
+        return <Badge variant="default" className="text-[10px] px-1.5 py-0">محفوظ</Badge>;
+      case 'organization':
+        return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">منظمة</Badge>;
+      case 'nominatim':
+        return <Badge variant="outline" className="text-[10px] px-1.5 py-0">عام</Badge>;
+    }
   };
 
   const handleSavedLocationSelect = (location: OrganizationLocation | 'primary') => {
@@ -533,7 +571,7 @@ const EnhancedLocationPicker = ({
           </Card>
         </TabsContent>
 
-        {/* Search Tab */}
+        {/* Search Tab - Enhanced with smart search */}
         <TabsContent value="search" className="mt-3">
           <div className="relative">
             <div className="relative">
@@ -541,38 +579,94 @@ const EnhancedLocationPicker = ({
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن عنوان أو مكان..."
+                placeholder="ابحث عن موقع (مثال: نستلة بنها، المنطقة الصناعية...)"
                 className="pr-10"
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                onFocus={() => (enhancedResults.length > 0 || suggestions.length > 0) && setShowSuggestions(true)}
               />
-              {searchLoading && (
+              {(searchLoading || enhancedSearchLoading) && (
                 <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
               )}
             </div>
 
-            {/* Suggestions Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    className="w-full p-3 text-right hover:bg-muted transition-colors flex items-start gap-2 border-b last:border-b-0"
-                    onClick={() => handleSuggestionSelect(suggestion)}
-                  >
-                    <MapPin className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm leading-relaxed">{suggestion.display_name}</span>
-                  </button>
-                ))}
-              </div>
+            {/* Enhanced Search Results Dropdown */}
+            {showSuggestions && (enhancedResults.length > 0 || suggestions.length > 0) && (
+              <Card className="absolute z-50 w-full mt-1 shadow-lg border">
+                <ScrollArea className="max-h-[300px]">
+                  <div className="py-1">
+                    {/* Enhanced results (saved locations + organizations) */}
+                    {enhancedResults.map((result) => (
+                      <button
+                        key={result.id}
+                        type="button"
+                        className="w-full px-3 py-2.5 text-right hover:bg-muted/50 transition-colors flex items-start gap-3"
+                        onClick={() => handleEnhancedResultSelect(result)}
+                      >
+                        <div className="mt-1 flex-shrink-0">
+                          {getResultTypeIcon(result.type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm truncate">{result.name}</span>
+                            {getResultTypeBadge(result.type)}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            {result.address}
+                          </p>
+                          {result.organizationName && result.type === 'saved' && (
+                            <p className="text-xs text-primary mt-0.5">
+                              {result.organizationName}
+                            </p>
+                          )}
+                          {result.distance !== undefined && (
+                            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                              <Navigation className="w-3 h-3" />
+                              {result.distance < 1 
+                                ? `${Math.round(result.distance * 1000)} م`
+                                : `${result.distance.toFixed(1)} كم`
+                              }
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                    
+                    {/* Fallback Nominatim suggestions */}
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={`nom-${index}`}
+                        type="button"
+                        className="w-full px-3 py-2.5 text-right hover:bg-muted/50 transition-colors flex items-start gap-3"
+                        onClick={() => handleSuggestionSelect(suggestion)}
+                      >
+                        <Globe className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm truncate">
+                              {suggestion.display_name.split(',')[0]}
+                            </span>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">عام</Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            {suggestion.display_name}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </Card>
             )}
           </div>
 
-          {searchQuery.length > 0 && searchQuery.length < 3 && (
+          {searchQuery.length > 0 && searchQuery.length < 2 && (
             <p className="text-xs text-muted-foreground mt-2">
-              اكتب 3 حروف على الأقل للبحث
+              اكتب حرفين على الأقل للبحث الشامل
             </p>
           )}
+          
+          <p className="text-xs text-muted-foreground mt-2">
+            💡 يبحث في المواقع المحفوظة والمنظمات المسجلة أولاً، ثم في الأماكن العامة
+          </p>
         </TabsContent>
       </Tabs>
 
