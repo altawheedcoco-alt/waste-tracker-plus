@@ -44,13 +44,13 @@ export function usePartnerAccounts() {
     
     switch (organization.organization_type) {
       case 'transporter':
-        return ['generator', 'recycler'];
+        return ['generator', 'recycler', 'guest'];
       case 'generator':
-        return ['transporter', 'recycler'];
+        return ['transporter', 'recycler', 'guest'];
       case 'recycler':
-        return ['transporter', 'generator'];
+        return ['transporter', 'generator', 'guest'];
       default:
-        return ['generator', 'recycler', 'transporter'];
+        return ['generator', 'recycler', 'transporter', 'guest'];
     }
   };
 
