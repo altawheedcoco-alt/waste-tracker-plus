@@ -295,6 +295,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
+    { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
     { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
