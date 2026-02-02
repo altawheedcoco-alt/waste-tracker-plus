@@ -2395,6 +2395,9 @@ export type Database = {
           organization_id: string
           partner_organization_id: string | null
           price_per_unit: number | null
+          tax_included: boolean | null
+          tax_rate: number | null
+          tax_type: string | null
           unit: string | null
           updated_at: string
           waste_code: string | null
@@ -2409,6 +2412,9 @@ export type Database = {
           organization_id: string
           partner_organization_id?: string | null
           price_per_unit?: number | null
+          tax_included?: boolean | null
+          tax_rate?: number | null
+          tax_type?: string | null
           unit?: string | null
           updated_at?: string
           waste_code?: string | null
@@ -2423,6 +2429,9 @@ export type Database = {
           organization_id?: string
           partner_organization_id?: string | null
           price_per_unit?: number | null
+          tax_included?: boolean | null
+          tax_rate?: number | null
+          tax_type?: string | null
           unit?: string | null
           updated_at?: string
           waste_code?: string | null

@@ -42,7 +42,11 @@ import {
   ChevronsUpDown,
   Check,
   PenLine,
+  Percent,
+  Receipt,
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -67,7 +71,17 @@ interface PartnerWasteType {
   unit: string;
   notes: string | null;
   is_active: boolean;
+  tax_included: boolean;
+  tax_type: string;
+  tax_rate: number;
 }
+
+const TAX_TYPES = [
+  { value: 'none', label: 'بدون ضريبة' },
+  { value: 'vat', label: 'ضريبة القيمة المضافة' },
+  { value: 'sales', label: 'ضريبة مبيعات' },
+  { value: 'other', label: 'ضريبة أخرى' },
+];
 
 export default function PartnerWasteTypes({ partnerId, isExternal = false }: PartnerWasteTypesProps) {
   const { organization } = useAuth();
@@ -81,6 +95,9 @@ export default function PartnerWasteTypes({ partnerId, isExternal = false }: Par
   const [isCustomEntry, setIsCustomEntry] = useState(false);
   const [pricePerUnit, setPricePerUnit] = useState('');
   const [unit, setUnit] = useState('كجم');
+  const [taxIncluded, setTaxIncluded] = useState(false);
+  const [taxType, setTaxType] = useState('none');
+  const [taxRate, setTaxRate] = useState('');
 
   // Combine all waste types
   const allWasteCategories: WasteCategoryInfo[] = [
@@ -174,6 +191,9 @@ export default function PartnerWasteTypes({ partnerId, isExternal = false }: Par
         waste_code: wasteCode || null,
         price_per_unit: parseFloat(pricePerUnit) || 0,
         unit: unit,
+        tax_included: taxIncluded,
+        tax_type: taxType === 'none' ? null : taxType,
+        tax_rate: taxType === 'none' ? 0 : (parseFloat(taxRate) || 0),
       };
 
       if (isExternal) {
@@ -229,6 +249,9 @@ export default function PartnerWasteTypes({ partnerId, isExternal = false }: Par
     setCustomInput('');
     setIsCustomEntry(false);
     setPricePerUnit('');
+    setTaxIncluded(false);
+    setTaxType('none');
+    setTaxRate('');
   };
 
   const handleSelectWasteType = (code: string, name: string) => {
@@ -419,6 +442,47 @@ export default function PartnerWasteTypes({ partnerId, isExternal = false }: Par
               </Select>
             </div>
 
+            {/* Tax Settings */}
+            <div className="flex gap-2 items-center">
+              <Select value={taxType} onValueChange={setTaxType}>
+                <SelectTrigger className="w-36 bg-background">
+                  <SelectValue placeholder="نوع الضريبة" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {TAX_TYPES.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {taxType !== 'none' && (
+                <>
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      placeholder="%"
+                      value={taxRate}
+                      onChange={(e) => setTaxRate(e.target.value)}
+                      className="w-16 bg-background"
+                      min="0"
+                      max="100"
+                    />
+                    <Percent className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="tax-included" 
+                      checked={taxIncluded}
+                      onCheckedChange={(checked) => setTaxIncluded(checked === true)}
+                    />
+                    <Label htmlFor="tax-included" className="text-xs whitespace-nowrap cursor-pointer">
+                      شامل الضريبة
+                    </Label>
+                  </div>
+                </>
+              )}
+            </div>
+
             <Button 
               onClick={handleAddWasteType} 
               disabled={addWasteTypeMutation.isPending || (!selectedWasteType && !isCustomEntry) || (isCustomEntry && !customInput.trim())}
@@ -461,6 +525,7 @@ export default function PartnerWasteTypes({ partnerId, isExternal = false }: Par
                   <TableHead className="font-bold">الكود</TableHead>
                   <TableHead className="font-bold">نوع المخلف</TableHead>
                   <TableHead className="text-center font-bold">السعر</TableHead>
+                  <TableHead className="text-center font-bold">الضريبة</TableHead>
                   <TableHead className="text-center font-bold">الوحدة</TableHead>
                   <TableHead className="text-center font-bold">التصنيف</TableHead>
                   <TableHead className="w-12"></TableHead>
@@ -491,11 +556,29 @@ export default function PartnerWasteTypes({ partnerId, isExternal = false }: Par
                       <TableCell className="font-medium">{wt.waste_type}</TableCell>
                       <TableCell className="text-center">
                         {wt.price_per_unit > 0 ? (
-                          <span className="text-green-600 font-medium">
-                            {wt.price_per_unit.toLocaleString('ar-EG')} ج.م
-                          </span>
+                          <div className="flex flex-col items-center">
+                            <span className="text-green-600 font-medium">
+                              {wt.price_per_unit.toLocaleString('ar-EG')} ج.م
+                            </span>
+                            {wt.tax_included && (
+                              <span className="text-xs text-muted-foreground">شامل الضريبة</span>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {wt.tax_type && wt.tax_rate > 0 ? (
+                          <Badge variant="outline" className="gap-1">
+                            <Receipt className="h-3 w-3" />
+                            {wt.tax_rate}%
+                            <span className="text-xs">
+                              {wt.tax_type === 'vat' ? 'ق.م' : wt.tax_type === 'sales' ? 'مبيعات' : ''}
+                            </span>
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-xs">بدون</span>
                         )}
                       </TableCell>
                       <TableCell className="text-center">{wt.unit}</TableCell>
