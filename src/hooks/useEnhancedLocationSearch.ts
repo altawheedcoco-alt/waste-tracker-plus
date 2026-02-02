@@ -5,7 +5,7 @@ export interface SearchResult {
   id: string;
   name: string;
   address: string;
-  type: 'saved' | 'nominatim' | 'organization';
+  type: 'saved' | 'nominatim' | 'organization' | 'ai';
   latitude?: number;
   longitude?: number;
   distance?: number; // km from reference point
@@ -13,6 +13,13 @@ export interface SearchResult {
   matchScore?: number; // similarity score for sorting
   city?: string; // city name for badge display
   region?: string; // region/governorate
+  isAISuggestion?: boolean; // mark AI-generated suggestions
+}
+
+export interface AISearchSuggestion {
+  name: string;
+  type: string;
+  city: string;
 }
 
 interface UseEnhancedLocationSearchOptions {
@@ -454,6 +461,41 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
     }
   }, [options.referencePoint, options.includeAllOrganizations]);
 
+  // AI-powered search expansion
+  const searchWithAI = useCallback(async (query: string): Promise<{
+    alternativeQueries: string[];
+    suggestedLocations: AISearchSuggestion[];
+    correctedQuery: string | null;
+  }> => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-location-search`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ query }),
+        }
+      );
+
+      if (!response.ok) {
+        return { alternativeQueries: [], suggestedLocations: [], correctedQuery: null };
+      }
+
+      const data = await response.json();
+      return {
+        alternativeQueries: data.alternativeQueries || [],
+        suggestedLocations: data.suggestedLocations || [],
+        correctedQuery: data.correctedQuery || null,
+      };
+    } catch (err) {
+      console.error('AI search error:', err);
+      return { alternativeQueries: [], suggestedLocations: [], correctedQuery: null };
+    }
+  }, []);
+
   const clearResults = useCallback(() => {
     setResults([]);
     setError(null);
@@ -464,6 +506,7 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
     loading,
     error,
     search,
+    searchWithAI,
     clearResults,
   };
 };
