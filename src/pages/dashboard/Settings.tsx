@@ -13,8 +13,7 @@ import {
   Sparkles,
   Eye,
   Volume2,
-  Shield,
-  Database
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -28,7 +27,6 @@ import { cn } from '@/lib/utils';
 import BackButton from '@/components/ui/back-button';
 import NotificationSoundSettings from '@/components/settings/NotificationSoundSettings';
 import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
-import SeedDataSettings from '@/components/settings/SeedDataSettings';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -142,7 +140,7 @@ const Settings = () => {
       <Tabs defaultValue="themes" className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid",
-          isTransporter ? "grid-cols-7" : "grid-cols-6"
+          isTransporter ? "grid-cols-6" : "grid-cols-5"
         )}>
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
@@ -163,10 +161,6 @@ const Settings = () => {
           <TabsTrigger value="sounds" className="gap-2">
             <Volume2 className="h-4 w-4" />
             <span className="hidden sm:inline">الأصوات</span>
-          </TabsTrigger>
-          <TabsTrigger value="seeddata" className="gap-2">
-            <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">بيانات تجريبية</span>
           </TabsTrigger>
           {isTransporter && (
             <TabsTrigger value="visibility" className="gap-2">
@@ -545,11 +539,6 @@ const Settings = () => {
         {/* Sounds Tab */}
         <TabsContent value="sounds" className="space-y-6">
           <NotificationSoundSettings />
-        </TabsContent>
-
-        {/* Seed Data Tab */}
-        <TabsContent value="seeddata" className="space-y-6">
-          <SeedDataSettings />
         </TabsContent>
 
         {/* Partner Visibility Tab - Only for Transporters */}
