@@ -84,17 +84,27 @@ export default function PartnerHeader({
 
       {/* Partner Info */}
       <div className="flex items-start gap-4 flex-1">
-        <div className={cn('p-4 rounded-2xl', typeConfig.bgColor, typeConfig.color)}>
-          <TypeIcon className="h-8 w-8" />
+        {/* Rectangular Company Name Box */}
+        <div className={cn(
+          'flex items-center gap-3 px-5 py-3 rounded-xl border-2 min-w-[200px]',
+          typeConfig.bgColor,
+          'border-current/20'
+        )}>
+          <div className={cn('p-2 rounded-lg bg-background/50', typeConfig.color)}>
+            <TypeIcon className="h-6 w-6" />
+          </div>
+          <div className="flex flex-col">
+            <h1 className={cn('text-lg font-bold leading-tight', typeConfig.color)}>
+              {partner.name}
+            </h1>
+            <span className={cn('text-xs font-medium opacity-80', typeConfig.color)}>
+              {typeConfig.label}
+            </span>
+          </div>
         </div>
         
         <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold">{partner.name}</h1>
-            <Badge variant="outline" className={cn('gap-1', typeConfig.color)}>
-              <TypeIcon className="h-3 w-3" />
-              {typeConfig.label}
-            </Badge>
+          <div className="flex items-center gap-2 flex-wrap">
             {isExternal && (
               <Badge variant="secondary">عميل خارجي</Badge>
             )}
