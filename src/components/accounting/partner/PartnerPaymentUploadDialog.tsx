@@ -30,6 +30,8 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   Receipt,
+  Sparkles,
+  ScanLine,
 } from "lucide-react";
 
 interface PartnerPaymentUploadDialogProps {
@@ -50,8 +52,10 @@ const PartnerPaymentUploadDialog = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [isUploading, setIsUploading] = useState(false);
+  const [isExtracting, setIsExtracting] = useState(false);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [extractionConfidence, setExtractionConfidence] = useState<number | null>(null);
   
   const [formData, setFormData] = useState({
     payment_type: "outgoing" as "incoming" | "outgoing",
@@ -64,7 +68,53 @@ const PartnerPaymentUploadDialog = ({
     notes: "",
   });
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Extract receipt data using AI
+  const extractReceiptData = async (base64Image: string) => {
+    setIsExtracting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('extract-receipt-data', {
+        body: { imageBase64: base64Image }
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.data) {
+        const extracted = data.data;
+        setFormData(prev => ({
+          ...prev,
+          amount: extracted.amount || prev.amount,
+          payment_date: extracted.payment_date || prev.payment_date,
+          bank_name: extracted.bank_name || prev.bank_name,
+          reference_number: extracted.reference_number || prev.reference_number,
+          check_number: extracted.check_number || prev.check_number,
+          payment_method: extracted.payment_method || prev.payment_method,
+          notes: extracted.notes ? `${prev.notes}\n${extracted.notes}`.trim() : prev.notes,
+        }));
+        setExtractionConfidence(extracted.confidence || 0);
+        
+        if (extracted.confidence > 0.7) {
+          toast.success("تم قراءة الإيصال بنجاح", {
+            description: `الثقة: ${Math.round(extracted.confidence * 100)}%`
+          });
+        } else if (extracted.confidence > 0.4) {
+          toast.warning("تم قراءة الإيصال جزئياً", {
+            description: "يرجى مراجعة البيانات المستخرجة"
+          });
+        } else {
+          toast.info("تعذر قراءة الإيصال بشكل كامل", {
+            description: "يرجى إدخال البيانات يدوياً"
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Extraction error:', error);
+      toast.error("فشل في قراءة الإيصال");
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
@@ -77,8 +127,11 @@ const PartnerPaymentUploadDialog = ({
       }
       setReceiptFile(file);
       const reader = new FileReader();
-      reader.onload = (ev) => {
-        setReceiptPreview(ev.target?.result as string);
+      reader.onload = async (ev) => {
+        const base64 = ev.target?.result as string;
+        setReceiptPreview(base64);
+        // Auto-extract data from receipt
+        await extractReceiptData(base64);
       };
       reader.readAsDataURL(file);
     }
@@ -374,11 +427,15 @@ const PartnerPaymentUploadDialog = ({
             </div>
           )}
 
-          {/* Receipt Upload */}
+          {/* Receipt Upload with AI Extraction */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
+              <ScanLine className="h-4 w-4" />
               صورة إيصال الإيداع البنكي
+              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Sparkles className="h-3 w-3" />
+                قراءة تلقائية
+              </span>
             </Label>
             <input
               type="file"
@@ -389,16 +446,35 @@ const PartnerPaymentUploadDialog = ({
             />
             {receiptPreview ? (
               <div className="relative border rounded-lg p-2 bg-muted/30">
+                {isExtracting && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center z-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                    <p className="text-sm font-medium">جاري قراءة الإيصال...</p>
+                    <p className="text-xs text-muted-foreground">يتم استخراج البيانات تلقائياً</p>
+                  </div>
+                )}
                 <img
                   src={receiptPreview}
                   alt="معاينة الإيصال"
                   className="w-full max-h-48 object-contain rounded"
                 />
+                {extractionConfidence !== null && !isExtracting && (
+                  <div className={`absolute bottom-3 right-3 text-xs px-2 py-1 rounded-full ${
+                    extractionConfidence > 0.7 
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      : extractionConfidence > 0.4
+                      ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                  }`}>
+                    دقة القراءة: {Math.round(extractionConfidence * 100)}%
+                  </div>
+                )}
                 <Button
                   variant="destructive"
                   size="icon"
                   className="absolute top-3 left-3 h-7 w-7"
                   onClick={removeReceipt}
+                  disabled={isExtracting}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -406,14 +482,17 @@ const PartnerPaymentUploadDialog = ({
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                className="border-2 border-dashed border-primary/30 rounded-lg p-6 text-center cursor-pointer hover:bg-primary/5 hover:border-primary/50 transition-colors"
               >
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  انقر لرفع صورة إيصال الإيداع
+                <div className="relative inline-block">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-primary/60" />
+                  <Sparkles className="h-4 w-4 absolute -top-1 -right-1 text-primary" />
+                </div>
+                <p className="text-sm font-medium text-foreground">
+                  ارفع صورة الإيصال للقراءة التلقائية
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  PNG, JPG حتى 5 ميجابايت
+                  سيتم ملء الحقول تلقائياً بالذكاء الاصطناعي
                 </p>
               </div>
             )}
