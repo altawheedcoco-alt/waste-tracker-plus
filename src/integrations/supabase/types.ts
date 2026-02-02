@@ -1907,6 +1907,69 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_account_settings: {
+        Row: {
+          account_status: string | null
+          auto_invoice: boolean | null
+          billing_cycle: string | null
+          created_at: string
+          credit_limit: number | null
+          discount_percentage: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          partner_organization_id: string
+          payment_terms_days: number | null
+          tax_rate: number | null
+          updated_at: string
+        }
+        Insert: {
+          account_status?: string | null
+          auto_invoice?: boolean | null
+          billing_cycle?: string | null
+          created_at?: string
+          credit_limit?: number | null
+          discount_percentage?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          partner_organization_id: string
+          payment_terms_days?: number | null
+          tax_rate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          account_status?: string | null
+          auto_invoice?: boolean | null
+          billing_cycle?: string | null
+          created_at?: string
+          credit_limit?: number | null
+          discount_percentage?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          partner_organization_id?: string
+          payment_terms_days?: number | null
+          tax_rate?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_account_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_account_settings_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_balances: {
         Row: {
           balance: number | null
@@ -2016,6 +2079,93 @@ export type Database = {
           {
             foreignKeyName: "partner_notes_sender_organization_id_fkey"
             columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_price_items: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          is_active: boolean | null
+          item_code: string | null
+          item_description: string | null
+          item_name: string
+          max_quantity: number | null
+          min_quantity: number | null
+          notes: string | null
+          organization_id: string
+          partner_name: string | null
+          partner_organization_id: string | null
+          price_type: string | null
+          unit: string | null
+          unit_price: number
+          updated_at: string
+          waste_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          item_code?: string | null
+          item_description?: string | null
+          item_name: string
+          max_quantity?: number | null
+          min_quantity?: number | null
+          notes?: string | null
+          organization_id: string
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          price_type?: string | null
+          unit?: string | null
+          unit_price?: number
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          item_code?: string | null
+          item_description?: string | null
+          item_name?: string
+          max_quantity?: number | null
+          min_quantity?: number | null
+          notes?: string | null
+          organization_id?: string
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          price_type?: string | null
+          unit?: string | null
+          unit_price?: number
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_price_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_price_items_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
