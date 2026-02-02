@@ -217,12 +217,13 @@ export default function CreateExpenseDialog({ open, onOpenChange }: CreateExpens
               <div className="space-y-2">
                 <Label>السائق (اختياري)</Label>
                 <Select
-                  value={formData.driver_id}
+                  value={formData.driver_id || 'none'}
                   onValueChange={(value) => {
-                    const driver = drivers.find(d => d.id === value);
+                    const actualValue = value === 'none' ? '' : value;
+                    const driver = drivers.find(d => d.id === actualValue);
                     setFormData({ 
                       ...formData, 
-                      driver_id: value,
+                      driver_id: actualValue,
                       vehicle_plate: driver?.vehicle_plate || formData.vehicle_plate
                     });
                   }}
@@ -231,7 +232,7 @@ export default function CreateExpenseDialog({ open, onOpenChange }: CreateExpens
                     <SelectValue placeholder="اختر السائق" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">بدون</SelectItem>
+                    <SelectItem value="none">بدون</SelectItem>
                     {drivers.map(driver => (
                       <SelectItem key={driver.id} value={driver.id}>
                         {(driver.profiles as any)?.full_name || 'سائق'}
@@ -246,14 +247,14 @@ export default function CreateExpenseDialog({ open, onOpenChange }: CreateExpens
               <div className="space-y-2">
                 <Label>الشحنة (اختياري)</Label>
                 <Select
-                  value={formData.shipment_id}
-                  onValueChange={(value) => setFormData({ ...formData, shipment_id: value })}
+                  value={formData.shipment_id || 'none'}
+                  onValueChange={(value) => setFormData({ ...formData, shipment_id: value === 'none' ? '' : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="اختر الشحنة" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">بدون</SelectItem>
+                    <SelectItem value="none">بدون</SelectItem>
                     {shipments.map(shipment => (
                       <SelectItem key={shipment.id} value={shipment.id}>
                         {shipment.shipment_number}

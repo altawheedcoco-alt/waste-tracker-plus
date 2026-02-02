@@ -184,12 +184,13 @@ export default function CreatePaymentDialog({ open, onOpenChange }: CreatePaymen
             <div className="space-y-2">
               <Label>ربط بفاتورة (اختياري)</Label>
               <Select
-                value={formData.invoice_id}
+                value={formData.invoice_id || 'none'}
                 onValueChange={(value) => {
-                  const invoice = invoices.find(i => i.id === value);
+                  const actualValue = value === 'none' ? '' : value;
+                  const invoice = invoices.find(i => i.id === actualValue);
                   setFormData({ 
                     ...formData, 
-                    invoice_id: value,
+                    invoice_id: actualValue,
                     amount: invoice?.remaining_amount || formData.amount 
                   });
                 }}
@@ -198,7 +199,7 @@ export default function CreatePaymentDialog({ open, onOpenChange }: CreatePaymen
                   <SelectValue placeholder="اختر فاتورة" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">بدون ربط</SelectItem>
+                  <SelectItem value="none">بدون ربط</SelectItem>
                   {availableInvoices.map(inv => (
                     <SelectItem key={inv.id} value={inv.id}>
                       {inv.invoice_number} - المتبقي: {formatCurrency(inv.remaining_amount)}
