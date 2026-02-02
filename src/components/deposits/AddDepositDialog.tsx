@@ -36,6 +36,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Calendar as CalendarIcon, 
   Upload, 
@@ -51,7 +52,11 @@ import {
   Receipt,
   FileImage,
   Wand2,
-  AlertCircle
+  AlertCircle,
+  UserCircle,
+  Save,
+  Download,
+  Trash2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -114,7 +119,12 @@ export default function AddDepositDialog({
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [aiExtracted, setAiExtracted] = useState(false);
   const [aiConfidence, setAiConfidence] = useState<number | null>(null);
+  const [saveForFuture, setSaveForFuture] = useState(false);
+  const [hasSavedData, setHasSavedData] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Storage key for saved depositor data
+  const SAVED_DATA_KEY = `deposit_saved_data_${profile?.organization_id}`;
 
   const form = useForm<DepositFormData>({
     resolver: zodResolver(depositSchema),
@@ -135,6 +145,73 @@ export default function AddDepositDialog({
       notes: '',
     },
   });
+
+  // Check for saved data on mount
+  useEffect(() => {
+    if (profile?.organization_id) {
+      const savedData = localStorage.getItem(SAVED_DATA_KEY);
+      if (savedData) {
+        setHasSavedData(true);
+      }
+    }
+  }, [profile?.organization_id, SAVED_DATA_KEY]);
+
+  // Fill depositor data from logged-in user's profile
+  const fillFromProfile = () => {
+    if (profile) {
+      form.setValue('depositorName', profile.full_name || '');
+      form.setValue('depositorPhone', profile.phone || '');
+      toast.success('تم تعبئة بيانات المودع من حسابك');
+    }
+  };
+
+  // Load saved depositor data
+  const loadSavedData = () => {
+    try {
+      const savedData = localStorage.getItem(SAVED_DATA_KEY);
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        if (parsed.depositorName) form.setValue('depositorName', parsed.depositorName);
+        if (parsed.depositorTitle) form.setValue('depositorTitle', parsed.depositorTitle);
+        if (parsed.depositorPosition) form.setValue('depositorPosition', parsed.depositorPosition);
+        if (parsed.depositorPhone) form.setValue('depositorPhone', parsed.depositorPhone);
+        if (parsed.bankName) form.setValue('bankName', parsed.bankName);
+        if (parsed.accountNumber) form.setValue('accountNumber', parsed.accountNumber);
+        if (parsed.branchName) form.setValue('branchName', parsed.branchName);
+        if (parsed.transferMethod) form.setValue('transferMethod', parsed.transferMethod);
+        toast.success('تم تحميل البيانات المحفوظة');
+      }
+    } catch (error) {
+      console.error('Error loading saved data:', error);
+    }
+  };
+
+  // Save depositor data for future use
+  const saveDepositorData = (data: DepositFormData) => {
+    try {
+      const dataToSave = {
+        depositorName: data.depositorName,
+        depositorTitle: data.depositorTitle,
+        depositorPosition: data.depositorPosition,
+        depositorPhone: data.depositorPhone,
+        bankName: data.bankName,
+        accountNumber: data.accountNumber,
+        branchName: data.branchName,
+        transferMethod: data.transferMethod,
+      };
+      localStorage.setItem(SAVED_DATA_KEY, JSON.stringify(dataToSave));
+      setHasSavedData(true);
+    } catch (error) {
+      console.error('Error saving data:', error);
+    }
+  };
+
+  // Clear saved data
+  const clearSavedData = () => {
+    localStorage.removeItem(SAVED_DATA_KEY);
+    setHasSavedData(false);
+    toast.success('تم حذف البيانات المحفوظة');
+  };
 
   // Load partners
   useEffect(() => {
@@ -311,6 +388,11 @@ export default function AddDepositDialog({
         .insert(insertData);
 
       if (error) throw error;
+
+      // Save data for future if checkbox is checked
+      if (saveForFuture) {
+        saveDepositorData(data);
+      }
 
       toast.success('تم تسجيل الإيداع بنجاح!');
       form.reset();
@@ -542,11 +624,50 @@ export default function AddDepositDialog({
 
               {/* Depositor Info */}
               <div className="space-y-4">
-                <h4 className="font-medium flex items-center gap-2 text-sm text-muted-foreground">
-                  <User className="h-4 w-4" />
-                  بيانات المودع
-                </h4>
-                
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium flex items-center gap-2 text-sm text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    بيانات المودع
+                  </h4>
+                  
+                  {/* Quick Fill Buttons */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={fillFromProfile}
+                      className="gap-1.5 h-8 text-xs"
+                    >
+                      <UserCircle className="h-3.5 w-3.5" />
+                      من حسابي
+                    </Button>
+                    
+                    {hasSavedData && (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={loadSavedData}
+                          className="gap-1.5 h-8 text-xs"
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          المحفوظة
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearSavedData}
+                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -726,6 +847,22 @@ export default function AddDepositDialog({
                   </FormItem>
                 )}
               />
+
+              {/* Save for future checkbox */}
+              <div className="flex items-center space-x-2 space-x-reverse p-3 rounded-lg bg-muted/50 border">
+                <Checkbox
+                  id="saveForFuture"
+                  checked={saveForFuture}
+                  onCheckedChange={(checked) => setSaveForFuture(checked as boolean)}
+                />
+                <label
+                  htmlFor="saveForFuture"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2 cursor-pointer"
+                >
+                  <Save className="h-4 w-4 text-muted-foreground" />
+                  حفظ بيانات المودع للاستخدام المستقبلي
+                </label>
+              </div>
 
               {/* Submit */}
               <div className="flex gap-3 pt-4">
