@@ -957,6 +957,72 @@ export type Database = {
           },
         ]
       }
+      employee_partner_access: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          external_partner_id: string | null
+          id: string
+          organization_id: string
+          partner_organization_id: string | null
+          profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          external_partner_id?: string | null
+          id?: string
+          organization_id: string
+          partner_organization_id?: string | null
+          profile_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          external_partner_id?: string | null
+          id?: string
+          organization_id?: string
+          partner_organization_id?: string | null
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_partner_access_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_partner_access_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_partner_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_partner_access_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_partner_access_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_permissions: {
         Row: {
           created_at: string | null
@@ -979,6 +1045,55 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "employee_permissions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_waste_access: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          profile_id: string
+          waste_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          profile_id: string
+          waste_type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          profile_id?: string
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_waste_access_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_waste_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_waste_access_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -2743,13 +2858,18 @@ export type Database = {
       }
       profiles: {
         Row: {
+          access_all_partners: boolean | null
+          access_all_waste_types: boolean | null
           active_organization_id: string | null
           avatar_url: string | null
           created_at: string | null
           department: string | null
           email: string
+          employee_type: string | null
           full_name: string
           id: string
+          invitation_date: string | null
+          invited_by: string | null
           is_active: boolean | null
           organization_id: string | null
           phone: string | null
@@ -2758,13 +2878,18 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          access_all_partners?: boolean | null
+          access_all_waste_types?: boolean | null
           active_organization_id?: string | null
           avatar_url?: string | null
           created_at?: string | null
           department?: string | null
           email: string
+          employee_type?: string | null
           full_name: string
           id?: string
+          invitation_date?: string | null
+          invited_by?: string | null
           is_active?: boolean | null
           organization_id?: string | null
           phone?: string | null
@@ -2773,13 +2898,18 @@ export type Database = {
           user_id: string
         }
         Update: {
+          access_all_partners?: boolean | null
+          access_all_waste_types?: boolean | null
           active_organization_id?: string | null
           avatar_url?: string | null
           created_at?: string | null
           department?: string | null
           email?: string
+          employee_type?: string | null
           full_name?: string
           id?: string
+          invitation_date?: string | null
+          invited_by?: string | null
           is_active?: boolean | null
           organization_id?: string | null
           phone?: string | null
@@ -2793,6 +2923,13 @@ export type Database = {
             columns: ["active_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3397,11 +3534,27 @@ export type Database = {
           role_in_organization: string
         }[]
       }
+      has_employee_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
+      }
+      has_partner_access: {
+        Args: {
+          _external_partner_id?: string
+          _partner_org_id?: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_waste_access: {
+        Args: { _user_id: string; _waste_type: string }
         Returns: boolean
       }
       switch_organization: {
@@ -3411,6 +3564,28 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "company_admin" | "employee" | "driver"
+      employee_permission_type:
+        | "create_deposits"
+        | "view_deposits"
+        | "manage_deposits"
+        | "create_shipments"
+        | "view_shipments"
+        | "manage_shipments"
+        | "cancel_shipments"
+        | "view_accounts"
+        | "view_account_details"
+        | "export_accounts"
+        | "view_partners"
+        | "manage_partners"
+        | "create_external_partners"
+        | "view_reports"
+        | "create_reports"
+        | "export_reports"
+        | "view_drivers"
+        | "manage_drivers"
+        | "view_settings"
+        | "manage_settings"
+        | "full_access"
       organization_type: "generator" | "transporter" | "recycler"
       shipment_status:
         | "new"
@@ -3558,6 +3733,29 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "company_admin", "employee", "driver"],
+      employee_permission_type: [
+        "create_deposits",
+        "view_deposits",
+        "manage_deposits",
+        "create_shipments",
+        "view_shipments",
+        "manage_shipments",
+        "cancel_shipments",
+        "view_accounts",
+        "view_account_details",
+        "export_accounts",
+        "view_partners",
+        "manage_partners",
+        "create_external_partners",
+        "view_reports",
+        "create_reports",
+        "export_reports",
+        "view_drivers",
+        "manage_drivers",
+        "view_settings",
+        "manage_settings",
+        "full_access",
+      ],
       organization_type: ["generator", "transporter", "recycler"],
       shipment_status: [
         "new",
