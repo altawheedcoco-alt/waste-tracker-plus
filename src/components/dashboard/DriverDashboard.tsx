@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import {
   Clock,
   Loader2,
   Shield,
+  Map,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +27,9 @@ import QuickLocationButton from '@/components/tracking/QuickLocationButton';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 import TrackingWatcherIndicator from '@/components/tracking/TrackingWatcherIndicator';
 import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPicker';
+
+// Lazy load the map dialog for better performance
+const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 
 interface DriverInfo {
   id: string;
@@ -71,9 +75,20 @@ const DriverDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [lastLocationUpdate, setLastLocationUpdate] = useState<Date | null>(null);
+  const [showLiveMapDialog, setShowLiveMapDialog] = useState(false);
+  const [selectedShipmentForMap, setSelectedShipmentForMap] = useState<Shipment | null>(null);
 
   const handleLocationSuccess = (location: { lat: number; lng: number }) => {
     setLastLocationUpdate(new Date());
+  };
+
+  const handleOpenLiveMap = (shipment?: Shipment) => {
+    if (shipment) {
+      setSelectedShipmentForMap(shipment);
+    } else {
+      setSelectedShipmentForMap(null);
+    }
+    setShowLiveMapDialog(true);
   };
 
   useEffect(() => {
@@ -186,11 +201,22 @@ const DriverDashboard = () => {
           )}
 
           {driverInfo && (
-            <QuickLocationButton 
-              driverId={driverInfo.id} 
-              variant="icon"
-              onSuccess={handleLocationSuccess}
-            />
+            <>
+              <QuickLocationButton 
+                driverId={driverInfo.id} 
+                variant="icon"
+                onSuccess={handleLocationSuccess}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleOpenLiveMap()}
+                className="gap-2 bg-primary/5 hover:bg-primary/10 border-primary/20"
+              >
+                <Map className="h-4 w-4 text-primary" />
+                <span className="hidden sm:inline">عرض موقعي</span>
+              </Button>
+            </>
           )}
           <CreateShipmentButton 
             variant="eco" 
@@ -372,6 +398,25 @@ const DriverDashboard = () => {
         driverId={driverInfo?.id || ''}
         onUpdate={fetchDriverData}
       />
+
+      {/* Live Tracking Map Dialog */}
+      {showLiveMapDialog && driverInfo && (
+        <Suspense fallback={
+          <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        }>
+          <LiveTrackingMapDialog
+            isOpen={showLiveMapDialog}
+            onClose={() => setShowLiveMapDialog(false)}
+            driverId={driverInfo.id}
+            shipmentNumber={selectedShipmentForMap?.shipment_number || ''}
+            pickupAddress={selectedShipmentForMap?.pickup_address || ''}
+            deliveryAddress={selectedShipmentForMap?.delivery_address || ''}
+            shipmentStatus={selectedShipmentForMap?.status}
+          />
+        </Suspense>
+      )}
 
       {/* Floating Action Button for Quick Location */}
       {driverInfo && (
