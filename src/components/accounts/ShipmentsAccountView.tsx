@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -11,8 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Package, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Package, CheckCircle2, AlertCircle, Clock, XCircle, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ShipmentWithPricing {
   id: string;
@@ -33,6 +36,7 @@ interface ShipmentWithPricing {
 interface ShipmentsAccountViewProps {
   shipments: ShipmentWithPricing[];
   isLoading?: boolean;
+  onRefresh?: () => void;
 }
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
@@ -45,8 +49,13 @@ const statusConfig: Record<string, { label: string; icon: any; color: string }> 
   cancelled: { label: 'ملغاة', icon: AlertCircle, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
 };
 
-export default function ShipmentsAccountView({ shipments, isLoading }: ShipmentsAccountViewProps) {
+export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }: ShipmentsAccountViewProps) {
   const navigate = useNavigate();
+  const { organization, roles } = useAuth();
+
+  // Check if user can cancel shipments (transporter or admin)
+  const isAdmin = roles?.includes('admin');
+  const canCancel = isAdmin || organization?.organization_type === 'transporter';
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-EG', {
@@ -144,6 +153,11 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
               <TableHead className="text-center font-bold">الإجمالي</TableHead>
               <TableHead className="text-center font-bold">الحالة</TableHead>
               <TableHead className="text-center font-bold">التاريخ</TableHead>
+              {canCancel && <TableHead className="w-12"></TableHead>}
+              <TableHead className="text-center font-bold">سعر الوحدة</TableHead>
+              <TableHead className="text-center font-bold">الإجمالي</TableHead>
+              <TableHead className="text-center font-bold">الحالة</TableHead>
+              <TableHead className="text-center font-bold">التاريخ</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -229,6 +243,33 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
                   <TableCell className="text-center text-sm text-muted-foreground">
                     {formatDate(shipment.created_at)}
                   </TableCell>
+                  {canCancel && (
+                    <TableCell className="text-center" onClick={(e) => e.stopPropagation()}>
+                      {!isCancelled && (
+                        <div className="flex items-center justify-center gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={() => navigate(`/dashboard/s/${shipment.shipment_number}`)}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                          <CancelShipmentDialog
+                            shipmentId={shipment.id}
+                            shipmentNumber={shipment.shipment_number}
+                            currentStatus={shipment.status}
+                            onSuccess={onRefresh}
+                            trigger={
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50">
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
+                        </div>
+                      )}
+                    </TableCell>
+                  )}
                 </TableRow>
               );
             })}
@@ -246,6 +287,7 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
           </div>
         </div>
       )}
+
     </div>
   );
 }

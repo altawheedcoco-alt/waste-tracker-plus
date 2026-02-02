@@ -411,6 +411,9 @@ export default function PartnerAccountDetails() {
                 <ShipmentsAccountView 
                   shipments={shipmentsWithPricing}
                   isLoading={shipmentsLoading}
+                  onRefresh={() => {
+                    queryClient.invalidateQueries({ queryKey: ['partner-shipments', partnerId] });
+                  }}
                 />
               </CardContent>
             </Card>
