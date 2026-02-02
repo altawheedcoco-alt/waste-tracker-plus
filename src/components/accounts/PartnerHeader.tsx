@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -10,10 +12,13 @@ import {
   Phone, 
   MapPin,
   Mail,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 import PrintExportActions from './PrintExportActions';
 import { LedgerEntry } from './AccountLedger';
+import TermsDocumentDialog from '@/components/terms/TermsDocumentDialog';
 
 interface PartnerHeaderProps {
   partner: {
@@ -65,6 +70,27 @@ export default function PartnerHeader({
   organizationName,
 }: PartnerHeaderProps) {
   const navigate = useNavigate();
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
+  
+  // Fetch terms acceptance for partner organization (only for non-external partners)
+  const { data: termsAcceptance } = useQuery({
+    queryKey: ['partner-terms-acceptance', partner.id],
+    queryFn: async () => {
+      if (isExternal) return null;
+      
+      const { data, error } = await supabase
+        .from('terms_acceptances')
+        .select('*')
+        .eq('organization_id', partner.id)
+        .order('accepted_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !isExternal,
+  });
   
   const typeConfig = partnerTypeConfig[partner.organization_type as keyof typeof partnerTypeConfig] 
     || partnerTypeConfig.guest;
@@ -139,8 +165,22 @@ export default function PartnerHeader({
         </div>
       </div>
 
-      {/* Print/Export Actions */}
-      <div className="self-start sm:self-center">
+      {/* Actions */}
+      <div className="flex items-center gap-2 self-start sm:self-center">
+        {/* Terms Button - only for non-external partners with accepted terms */}
+        {!isExternal && termsAcceptance && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTermsDialog(true)}
+            className="gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">الشروط والأحكام</span>
+          </Button>
+        )}
+        
+        {/* Print/Export Actions */}
         <PrintExportActions
           partnerName={partner.name}
           partnerType={partner.organization_type || 'guest'}
@@ -149,6 +189,23 @@ export default function PartnerHeader({
           organizationName={organizationName}
         />
       </div>
+      
+      {/* Terms Document Dialog */}
+      {termsAcceptance && (
+        <TermsDocumentDialog
+          open={showTermsDialog}
+          onOpenChange={setShowTermsDialog}
+          acceptance={{
+            id: termsAcceptance.id,
+            full_name: termsAcceptance.full_name,
+            organization_name: partner.name,
+            organization_type: partner.organization_type || 'guest',
+            terms_version: termsAcceptance.terms_version,
+            accepted_at: termsAcceptance.accepted_at,
+            ip_address: termsAcceptance.ip_address,
+          }}
+        />
+      )}
     </div>
   );
 }
