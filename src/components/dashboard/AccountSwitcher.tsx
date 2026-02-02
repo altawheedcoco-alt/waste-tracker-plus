@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 import { 
   Building2, 
   ChevronDown, 
@@ -9,7 +10,8 @@ import {
   Factory, 
   Recycle,
   Plus,
-  Loader2
+  Loader2,
+  FileText
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -23,6 +25,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import TermsDocumentDialog from '@/components/terms/TermsDocumentDialog';
 
 const getOrganizationIcon = (type: string) => {
   switch (type) {
@@ -77,6 +81,27 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
   } = useAuth();
   
   const [open, setOpen] = useState(false);
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
+
+  // Fetch terms acceptance for current organization
+  const { data: termsAcceptance } = useQuery({
+    queryKey: ['org-terms-acceptance', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return null;
+      
+      const { data, error } = await supabase
+        .from('terms_acceptances')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .order('accepted_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!organization?.id,
+  });
 
   if (!organization) return null;
 
@@ -236,6 +261,25 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
           })}
         </AnimatePresence>
         
+        {/* Terms and Conditions option */}
+        {termsAcceptance && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              className="flex items-center gap-3 p-3 cursor-pointer"
+              onClick={() => {
+                setShowTermsDialog(true);
+                setOpen(false);
+              }}
+            >
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-blue-500/10 text-blue-600 shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <span className="font-medium text-sm">الشروط والأحكام</span>
+            </DropdownMenuItem>
+          </>
+        )}
+        
         {/* Only show add organization option for admins or if no organization exists */}
         {!hasOrganization && (
           <>
@@ -254,6 +298,23 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
           </>
         )}
       </DropdownMenuContent>
+      
+      {/* Terms Document Dialog */}
+      {termsAcceptance && (
+        <TermsDocumentDialog
+          open={showTermsDialog}
+          onOpenChange={setShowTermsDialog}
+          acceptance={{
+            id: termsAcceptance.id,
+            full_name: termsAcceptance.full_name,
+            organization_name: organization.name,
+            organization_type: organization.organization_type,
+            terms_version: termsAcceptance.terms_version,
+            accepted_at: termsAcceptance.accepted_at,
+            ip_address: termsAcceptance.ip_address,
+          }}
+        />
+      )}
     </DropdownMenu>
   );
 };
