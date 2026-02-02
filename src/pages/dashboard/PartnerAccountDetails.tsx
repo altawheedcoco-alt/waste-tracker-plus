@@ -3,43 +3,33 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { 
-  ArrowRight, 
-  Building2, 
-  Factory,
-  Recycle,
-  Truck,
-  FileText,
-  CreditCard,
-  ArrowUpRight,
-  ArrowDownRight,
-  Phone,
-  MapPin,
-  Package,
-  Scale,
-} from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { 
+  Building2, 
+  Package,
+  FileText,
+  BookOpen,
+  ArrowRight,
+  Settings2,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+
+// Import new account components
+import PartnerHeader from '@/components/accounts/PartnerHeader';
+import PartnerQuickStats from '@/components/accounts/PartnerQuickStats';
+import ShipmentsAccountView from '@/components/accounts/ShipmentsAccountView';
+import InvoicesAccountView from '@/components/accounts/InvoicesAccountView';
+import AccountLedger, { LedgerEntry } from '@/components/accounts/AccountLedger';
 import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
   const navigate = useNavigate();
   const { organization } = useAuth();
+  const [activeTab, setActiveTab] = useState('overview');
 
   // Fetch partner organization details
   const { data: partner, isLoading: partnerLoading } = useQuery({
@@ -66,7 +56,6 @@ export default function PartnerAccountDetails() {
       
       let query = supabase.from('shipments').select('*');
       
-      // Filter based on organization type and partner relationship
       if (organization?.organization_type === 'transporter') {
         query = query.eq('transporter_id', organization.id).or(`generator_id.eq.${partnerId},recycler_id.eq.${partnerId}`);
       } else if (organization?.organization_type === 'generator') {
@@ -122,11 +111,9 @@ export default function PartnerAccountDetails() {
   // Calculate shipment totals with pricing
   const shipmentsWithPricing = useMemo(() => {
     return shipments.map(shipment => {
-      // Find matching waste type price
       const wastePrice = partnerWasteTypes.find(wt => {
-        // Match by waste_description or waste_type
-        const wasteDesc = shipment.waste_description?.toLowerCase() || '';
-        const wasteTypeName = wt.waste_type?.toLowerCase() || '';
+        const wasteDesc = (shipment.waste_description || '').toLowerCase();
+        const wasteTypeName = (wt.waste_type || '').toLowerCase();
         return wasteDesc.includes(wasteTypeName) || wasteTypeName.includes(wasteDesc);
       });
       
@@ -143,59 +130,65 @@ export default function PartnerAccountDetails() {
     });
   }, [shipments, partnerWasteTypes]);
 
+  // Calculate totals
   const totalShipmentValue = shipmentsWithPricing.reduce((sum, s) => sum + s.calculatedTotal, 0);
   const totalQuantity = shipmentsWithPricing.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-EG', {
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (dateStr: string) => {
-    return format(new Date(dateStr), 'dd MMM yyyy', { locale: ar });
-  };
-
-  const getPartnerTypeInfo = (type: string) => {
-    switch (type) {
-      case 'generator':
-        return { label: 'مولد', icon: Factory, color: 'text-amber-600', bgColor: 'bg-amber-100 dark:bg-amber-900/30' };
-      case 'recycler':
-        return { label: 'مدور', icon: Recycle, color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' };
-      case 'transporter':
-        return { label: 'ناقل', icon: Truck, color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
-      default:
-        return { label: 'شريك', icon: Building2, color: 'text-muted-foreground', bgColor: 'bg-muted' };
-    }
-  };
-
-  const getInvoiceStatusBadge = (status: string) => {
-    switch (status) {
-      case 'paid':
-        return <Badge className="bg-green-100 text-green-700">مدفوعة</Badge>;
-      case 'partial':
-        return <Badge className="bg-yellow-100 text-yellow-700">مدفوعة جزئياً</Badge>;
-      case 'pending':
-        return <Badge className="bg-blue-100 text-blue-700">معلقة</Badge>;
-      case 'overdue':
-        return <Badge className="bg-red-100 text-red-700">متأخرة</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  // Calculate totals
   const totalInvoiced = invoices.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0);
   const totalPaid = invoices.reduce((sum, inv) => sum + (Number(inv.paid_amount) || 0), 0);
   const balance = totalInvoiced - totalPaid;
+
+  // Generate ledger entries
+  const ledgerEntries: LedgerEntry[] = useMemo(() => {
+    const entries: LedgerEntry[] = [];
+
+    // Add shipments as entries
+    shipmentsWithPricing.forEach(shipment => {
+      if (shipment.hasPrice && shipment.calculatedTotal > 0) {
+        entries.push({
+          id: `shipment-${shipment.id}`,
+          date: shipment.created_at,
+          type: 'shipment',
+          description: shipment.waste_description || shipment.waste_type || 'شحنة',
+          quantity: Number(shipment.quantity) || 0,
+          unit: shipment.unit || 'وحدة',
+          unitPrice: shipment.pricePerUnit,
+          debit: shipment.calculatedTotal, // مدين - مستحق علينا للشريك
+          credit: 0,
+          reference: shipment.shipment_number,
+        });
+      }
+    });
+
+    // Add invoices as entries (when paid)
+    invoices.forEach(invoice => {
+      if (Number(invoice.paid_amount) > 0) {
+        entries.push({
+          id: `payment-${invoice.id}`,
+          date: invoice.issue_date,
+          type: 'payment',
+          description: `دفعة - ${invoice.invoice_number}`,
+          debit: 0,
+          credit: Number(invoice.paid_amount) || 0, // دائن - تم الدفع
+          reference: invoice.invoice_number,
+        });
+      }
+    });
+
+    // Sort by date
+    return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [shipmentsWithPricing, invoices]);
 
   if (partnerLoading) {
     return (
       <DashboardLayout>
         <div className="space-y-6">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <Skeleton key={i} className="h-24" />
+            ))}
+          </div>
+          <Skeleton className="h-96 w-full" />
         </div>
       </DashboardLayout>
     );
@@ -204,296 +197,133 @@ export default function PartnerAccountDetails() {
   if (!partner) {
     return (
       <DashboardLayout>
-        <div className="text-center py-12">
-          <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <Building2 className="h-16 w-16 mb-4 opacity-30" />
           <p className="text-lg font-medium">لم يتم العثور على الشريك</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate(-1)}>
-            <ArrowRight className="h-4 w-4 ml-2" />
-            العودة
+          <Button 
+            variant="outline" 
+            className="mt-4 gap-2" 
+            onClick={() => navigate('/dashboard/partner-accounts')}
+          >
+            <ArrowRight className="h-4 w-4" />
+            العودة لقائمة الشركاء
           </Button>
         </div>
       </DashboardLayout>
     );
   }
 
-  const typeInfo = getPartnerTypeInfo(partner.organization_type);
-  const TypeIcon = typeInfo.icon;
-
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/partner-accounts')}>
-            <ArrowRight className="h-5 w-5" />
-          </Button>
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <div className={`p-3 rounded-xl ${typeInfo.bgColor} ${typeInfo.color}`}>
-                <TypeIcon className="h-6 w-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">{partner.name}</h1>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                  <Badge variant="outline">{typeInfo.label}</Badge>
-                  {partner.city && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {partner.city}
-                    </span>
-                  )}
-                  {partner.phone && (
-                    <span className="flex items-center gap-1">
-                      <Phone className="h-3 w-3" />
-                      {partner.phone}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PartnerHeader partner={partner} />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-blue-600" />
-                <span className="text-sm text-blue-700 dark:text-blue-400">إجمالي الفواتير</span>
-              </div>
-              <p className="text-2xl font-bold text-blue-700 dark:text-blue-300 mt-2">
-                {formatCurrency(totalInvoiced)} ج.م
-              </p>
-              <p className="text-xs text-blue-600 mt-1">{invoices.length} فاتورة</p>
-            </CardContent>
-          </Card>
+        {/* Quick Stats */}
+        <PartnerQuickStats
+          totalShipments={shipments.length}
+          totalShipmentValue={totalShipmentValue}
+          totalInvoiced={totalInvoiced}
+          totalPaid={totalPaid}
+          balance={balance}
+          totalQuantity={totalQuantity}
+        />
 
-          <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-700 dark:text-green-400">المدفوع</span>
-              </div>
-              <p className="text-2xl font-bold text-green-700 dark:text-green-300 mt-2">
-                {formatCurrency(totalPaid)} ج.م
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className={balance >= 0 
-            ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800'
-            : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
-          }>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                {balance >= 0 ? (
-                  <ArrowUpRight className="h-4 w-4 text-amber-600" />
-                ) : (
-                  <ArrowDownRight className="h-4 w-4 text-red-600" />
-                )}
-                <span className={`text-sm ${balance >= 0 ? 'text-amber-700 dark:text-amber-400' : 'text-red-700 dark:text-red-400'}`}>
-                  الرصيد المتبقي
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-6">
+            <TabsTrigger value="overview" className="gap-2">
+              <BookOpen className="h-4 w-4" />
+              كشف الحساب
+            </TabsTrigger>
+            <TabsTrigger value="shipments" className="gap-2">
+              <Package className="h-4 w-4" />
+              الشحنات
+              {shipments.length > 0 && (
+                <span className="bg-primary/20 text-primary text-xs px-1.5 rounded-full">
+                  {shipments.length}
                 </span>
-              </div>
-              <p className={`text-2xl font-bold mt-2 ${balance >= 0 ? 'text-amber-700 dark:text-amber-300' : 'text-red-700 dark:text-red-300'}`}>
-                {formatCurrency(Math.abs(balance))} ج.م
-              </p>
-              <p className={`text-xs mt-1 ${balance >= 0 ? 'text-amber-600' : 'text-red-600'}`}>
-                {balance > 0 ? 'لنا' : balance < 0 ? 'علينا' : 'مسدد'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="invoices" className="gap-2">
+              <FileText className="h-4 w-4" />
+              الفواتير
+              {invoices.length > 0 && (
+                <span className="bg-primary/20 text-primary text-xs px-1.5 rounded-full">
+                  {invoices.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings2 className="h-4 w-4" />
+              الإعدادات
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Shipments & Invoices Tabs */}
-        <Card>
-          <Tabs defaultValue="shipments" dir="rtl">
-            <CardHeader className="pb-0">
-              <TabsList className="w-full justify-start">
-                <TabsTrigger value="shipments" className="gap-2">
-                  <Package className="h-4 w-4" />
-                  الشحنات
-                  {shipments.length > 0 && (
-                    <Badge variant="secondary" className="h-5 min-w-5 px-1.5">
-                      {shipments.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="invoices" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  الفواتير
-                  {invoices.length > 0 && (
-                    <Badge variant="secondary" className="h-5 min-w-5 px-1.5">
-                      {invoices.length}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              </TabsList>
-            </CardHeader>
-            <CardContent className="pt-4">
-              {/* Shipments Tab */}
-              <TabsContent value="shipments" className="mt-0">
-                {shipmentsLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map(i => (
-                      <Skeleton key={i} className="h-14 w-full" />
-                    ))}
-                  </div>
-                ) : shipments.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>لا توجد شحنات مع هذا الشريك</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="border rounded-lg overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-muted/50">
-                            <TableHead className="font-bold">رقم الشحنة</TableHead>
-                            <TableHead className="font-bold">نوع المخلف</TableHead>
-                            <TableHead className="text-center font-bold">الكمية</TableHead>
-                            <TableHead className="text-center font-bold">السعر/وحدة</TableHead>
-                            <TableHead className="text-center font-bold">الإجمالي</TableHead>
-                            <TableHead className="text-center font-bold">الحالة</TableHead>
-                            <TableHead className="text-center font-bold">التاريخ</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {shipmentsWithPricing.map((shipment) => (
-                            <TableRow 
-                              key={shipment.id}
-                              className="cursor-pointer hover:bg-muted/50"
-                              onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
-                            >
-                              <TableCell className="font-medium font-mono">
-                                {shipment.shipment_number}
-                              </TableCell>
-                              <TableCell>
-                                {shipment.waste_description || shipment.waste_type}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <span className="font-medium">{formatCurrency(Number(shipment.quantity) || 0)}</span>
-                                <span className="text-muted-foreground text-xs mr-1">{shipment.unit}</span>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {shipment.hasPrice ? (
-                                  <span className="text-green-600 font-medium">
-                                    {formatCurrency(shipment.pricePerUnit)} ج.م
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground text-xs">غير محدد</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {shipment.hasPrice ? (
-                                  <span className="font-bold text-primary">
-                                    {formatCurrency(shipment.calculatedTotal)} ج.م
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground">-</span>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <Badge variant={shipment.status === 'confirmed' ? 'default' : 'outline'}>
-                                  {shipment.status === 'new' && 'جديدة'}
-                                  {shipment.status === 'approved' && 'موافق عليها'}
-                                  {shipment.status === 'collecting' && 'قيد التجميع'}
-                                  {shipment.status === 'in_transit' && 'قيد النقل'}
-                                  {shipment.status === 'delivered' && 'تم التسليم'}
-                                  {shipment.status === 'confirmed' && 'مؤكدة'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-center text-sm text-muted-foreground">
-                                {formatDate(shipment.created_at)}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    
-                    {/* Shipments Summary */}
-                    <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                        <div>
-                          <p className="text-xs text-muted-foreground">عدد الشحنات</p>
-                          <p className="text-lg font-bold">{shipments.length}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">إجمالي الكمية</p>
-                          <p className="text-lg font-bold">{formatCurrency(totalQuantity)} <span className="text-xs font-normal">وحدة</span></p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">شحنات بسعر محدد</p>
-                          <p className="text-lg font-bold">{shipmentsWithPricing.filter(s => s.hasPrice).length}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">إجمالي القيمة</p>
-                          <p className="text-lg font-bold text-primary">{formatCurrency(totalShipmentValue)} ج.م</p>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </TabsContent>
+          {/* Overview - Account Ledger */}
+          <TabsContent value="overview" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  كشف حساب الشريك
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AccountLedger 
+                  entries={ledgerEntries}
+                  onEntryClick={(entry) => {
+                    if (entry.type === 'shipment') {
+                      const shipmentId = entry.id.replace('shipment-', '');
+                      navigate(`/dashboard/shipments/${shipmentId}`);
+                    }
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              {/* Invoices Tab */}
-              <TabsContent value="invoices" className="mt-0">
-                {invoicesLoading ? (
-                  <div className="space-y-3">
-                    {[1, 2, 3].map(i => (
-                      <Skeleton key={i} className="h-14 w-full" />
-                    ))}
-                  </div>
-                ) : invoices.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>لا توجد فواتير لهذا الشريك</p>
-                  </div>
-                ) : (
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="bg-muted/50">
-                          <TableHead className="font-bold">رقم الفاتورة</TableHead>
-                          <TableHead className="text-center font-bold">التاريخ</TableHead>
-                          <TableHead className="text-center font-bold">المبلغ</TableHead>
-                          <TableHead className="text-center font-bold">المدفوع</TableHead>
-                          <TableHead className="text-center font-bold">المتبقي</TableHead>
-                          <TableHead className="text-center font-bold">الحالة</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {invoices.map((invoice) => {
-                          const remaining = (Number(invoice.total_amount) || 0) - (Number(invoice.paid_amount) || 0);
-                          return (
-                            <TableRow key={invoice.id}>
-                              <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
-                              <TableCell className="text-center">{formatDate(invoice.issue_date)}</TableCell>
-                              <TableCell className="text-center">{formatCurrency(Number(invoice.total_amount) || 0)} ج.م</TableCell>
-                              <TableCell className="text-center text-green-600">{formatCurrency(Number(invoice.paid_amount) || 0)} ج.م</TableCell>
-                              <TableCell className={`text-center ${remaining > 0 ? 'text-amber-600' : 'text-muted-foreground'}`}>
-                                {formatCurrency(remaining)} ج.م
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {getInvoiceStatusBadge(invoice.status)}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </TabsContent>
-            </CardContent>
-          </Tabs>
-        </Card>
+          {/* Shipments Tab */}
+          <TabsContent value="shipments" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  شحنات الشريك
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ShipmentsAccountView 
+                  shipments={shipmentsWithPricing}
+                  isLoading={shipmentsLoading}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Waste Types Section */}
-        <PartnerWasteTypes partnerId={partnerId!} isExternal={false} />
+          {/* Invoices Tab */}
+          <TabsContent value="invoices" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  فواتير الشريك
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <InvoicesAccountView 
+                  invoices={invoices}
+                  isLoading={invoicesLoading}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab - Waste Types */}
+          <TabsContent value="settings" className="mt-0">
+            <PartnerWasteTypes partnerId={partnerId!} isExternal={false} />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
