@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Route, Clock, Navigation, Maximize2 } from 'lucide-react';
+import { Loader2, Route, Clock, Navigation, Maximize2, List, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import RouteMapDialog from '@/components/maps/RouteMapDialog';
+import { Badge } from '@/components/ui/badge';
+import EnhancedRouteMap from '@/components/maps/EnhancedRouteMap';
+import { fetchRouteAlternatives, formatDistanceArabic, formatDurationArabic, calculateETA } from '@/lib/routingUtils';
+import { geocodeAddress } from '@/lib/mapUtils';
 
 interface RouteEstimationProps {
   pickupAddress: string;
@@ -17,11 +20,8 @@ interface RouteInfo {
   duration: string;
   distanceKm: number;
   durationMinutes: number;
-}
-
-interface Coordinates {
-  lat: number;
-  lng: number;
+  eta: string;
+  alternativesCount: number;
 }
 
 const RouteEstimation = ({ 
@@ -34,32 +34,9 @@ const RouteEstimation = ({
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pickupCoords, setPickupCoords] = useState<Coordinates | null>(null);
-  const [deliveryCoords, setDeliveryCoords] = useState<Coordinates | null>(null);
   const [showFullMap, setShowFullMap] = useState(false);
 
-  // Geocode an address using Nominatim
-  const geocodeAddress = async (address: string): Promise<Coordinates | null> => {
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&accept-language=ar`
-      );
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        };
-      }
-      return null;
-    } catch (err) {
-      console.error('Geocoding error:', err);
-      return null;
-    }
-  };
-
-  // Calculate route using OSRM
+  // Calculate route using enhanced routing
   const calculateRoute = useCallback(async () => {
     if (!pickupAddress || !deliveryAddress) {
       setRouteInfo(null);
@@ -70,6 +47,7 @@ const RouteEstimation = ({
     setError(null);
 
     try {
+      // Geocode addresses
       const [pickup, delivery] = await Promise.all([
         geocodeAddress(pickupAddress),
         geocodeAddress(deliveryAddress)
@@ -81,57 +59,25 @@ const RouteEstimation = ({
         return;
       }
 
-      setPickupCoords(pickup);
-      setDeliveryCoords(delivery);
+      // Fetch route with alternatives
+      const routeResult = await fetchRouteAlternatives(
+        { lat: pickup.lat, lng: pickup.lng },
+        { lat: delivery.lat, lng: delivery.lng }
+      );
 
-      // Try OSRM for route calculation
-      try {
-        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pickup.lng},${pickup.lat};${delivery.lng},${delivery.lat}?overview=false`;
-        const response = await fetch(osrmUrl);
-        const data = await response.json();
-
-        if (data.code === 'Ok' && data.routes?.length > 0) {
-          const route = data.routes[0];
-          const distanceKm = route.distance / 1000;
-          const durationMinutes = route.duration / 60;
-
-          setRouteInfo({
-            distance: distanceKm >= 1 ? `${distanceKm.toFixed(1)} كم` : `${Math.round(route.distance)} م`,
-            duration: durationMinutes >= 60
-              ? `${Math.floor(durationMinutes / 60)} ساعة ${Math.round(durationMinutes % 60)} دقيقة`
-              : `${Math.round(durationMinutes)} دقيقة`,
-            distanceKm,
-            durationMinutes
-          });
-          setLoading(false);
-          return;
-        }
-      } catch {
-        // OSRM failed, use fallback
+      if (routeResult.success && routeResult.alternatives.length > 0) {
+        const bestRoute = routeResult.alternatives[0];
+        setRouteInfo({
+          distance: formatDistanceArabic(bestRoute.distance),
+          duration: formatDurationArabic(bestRoute.duration),
+          distanceKm: bestRoute.distance / 1000,
+          durationMinutes: bestRoute.duration / 60,
+          eta: calculateETA(bestRoute.duration),
+          alternativesCount: routeResult.alternatives.length,
+        });
+      } else {
+        setError('تعذر حساب المسار');
       }
-
-      // Fallback: Calculate straight-line distance
-      const R = 6371;
-      const dLat = (delivery.lat - pickup.lat) * Math.PI / 180;
-      const dLon = (delivery.lng - pickup.lng) * Math.PI / 180;
-      const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(pickup.lat * Math.PI / 180) * Math.cos(delivery.lat * Math.PI / 180) *
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      const straightLineDistance = R * c;
-      
-      const estimatedRoadDistance = straightLineDistance * 1.3;
-      const estimatedMinutes = (estimatedRoadDistance / 50) * 60;
-
-      setRouteInfo({
-        distance: `~${estimatedRoadDistance.toFixed(1)} كم`,
-        duration: estimatedMinutes >= 60
-          ? `~${Math.floor(estimatedMinutes / 60)} ساعة ${Math.round(estimatedMinutes % 60)} دقيقة`
-          : `~${Math.round(estimatedMinutes)} دقيقة`,
-        distanceKm: estimatedRoadDistance,
-        durationMinutes: estimatedMinutes
-      });
     } catch (err) {
       console.error('Route calculation error:', err);
       setError('تعذر حساب المسار');
@@ -161,18 +107,21 @@ const RouteEstimation = ({
             <div className="flex items-center gap-2">
               <Route className="w-5 h-5 text-primary" />
               <span className="font-semibold text-sm">تقدير المسار</span>
+              {routeInfo && routeInfo.alternativesCount > 1 && (
+                <Badge variant="secondary" className="text-[10px]">
+                  {routeInfo.alternativesCount} مسارات
+                </Badge>
+              )}
             </div>
-            {pickupCoords && deliveryCoords && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 px-2"
-                onClick={() => setShowFullMap(true)}
-              >
-                <Maximize2 className="w-4 h-4 ml-1" />
-                <span className="text-xs">خريطة المسار</span>
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-2 gap-1"
+              onClick={() => setShowFullMap(true)}
+            >
+              <Maximize2 className="w-4 h-4" />
+              <span className="text-xs">خريطة تفصيلية</span>
+            </Button>
           </div>
 
           {loading ? (
@@ -185,50 +134,59 @@ const RouteEstimation = ({
           ) : routeInfo ? (
             <div className="space-y-3">
               {/* Route Stats */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Navigation className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">المسافة الكلية</p>
-                    <p className="font-bold">{routeInfo.distance}</p>
-                  </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="flex flex-col items-center p-2 bg-background/60 rounded-lg">
+                  <Navigation className="w-4 h-4 text-primary mb-1" />
+                  <p className="font-bold text-sm">{routeInfo.distance}</p>
+                  <p className="text-[10px] text-muted-foreground">المسافة</p>
                 </div>
-                <div className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">الوقت المتوقع للوصول</p>
-                    <p className="font-bold">{routeInfo.duration}</p>
-                  </div>
+                <div className="flex flex-col items-center p-2 bg-background/60 rounded-lg">
+                  <Clock className="w-4 h-4 text-primary mb-1" />
+                  <p className="font-bold text-sm">{routeInfo.duration}</p>
+                  <p className="text-[10px] text-muted-foreground">المدة</p>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200">
+                  <MapPin className="w-4 h-4 text-green-600 mb-1" />
+                  <p className="font-bold text-sm text-green-700">{routeInfo.eta}</p>
+                  <p className="text-[10px] text-muted-foreground">الوصول</p>
                 </div>
               </div>
 
               {/* Route Summary */}
-              <div className="pt-3 border-t border-primary/10">
+              <div className="pt-2 border-t border-primary/10">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <div className="w-2 h-2 rounded-full bg-blue-500" />
                   <span className="truncate flex-1">{pickupAddress.split(',')[0]}</span>
                   <span className="text-primary font-bold">→</span>
-                  <div className="w-3 h-3 rounded-full bg-primary" />
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
                   <span className="truncate flex-1">{deliveryAddress.split(',')[0]}</span>
                 </div>
               </div>
+
+              {/* View alternatives hint */}
+              {routeInfo.alternativesCount > 1 && (
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="w-full text-xs h-6 text-primary"
+                  onClick={() => setShowFullMap(true)}
+                >
+                  <List className="w-3 h-3 ml-1" />
+                  عرض {routeInfo.alternativesCount} مسارات بديلة مع تعليمات الملاحة
+                </Button>
+              )}
             </div>
           ) : null}
         </CardContent>
       </Card>
 
-      {/* Full Map Dialog */}
-      <RouteMapDialog
+      {/* Enhanced Route Map Dialog */}
+      <EnhancedRouteMap
         isOpen={showFullMap}
         onClose={() => setShowFullMap(false)}
         pickupAddress={pickupAddress}
         deliveryAddress={deliveryAddress}
         shipmentNumber={shipmentNumber}
-        driverId={driverId}
       />
     </>
   );
