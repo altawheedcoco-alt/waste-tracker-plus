@@ -156,9 +156,11 @@ export default function PartnerAccountDetails() {
 
   // Calculate totals - exclude cancelled shipments
   const activeShipments = shipmentsWithPricing.filter(s => !s.cancelled_at);
+  const cancelledShipments = shipmentsWithPricing.filter(s => !!s.cancelled_at);
 
   // Calculate totals
   const totalShipmentValue = activeShipments.reduce((sum, s) => sum + s.calculatedTotal, 0);
+  const cancelledShipmentsValue = cancelledShipments.reduce((sum, s) => sum + (s.pricePerUnit * (Number(s.quantity) || 0)), 0);
   const totalQuantity = activeShipments.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
   const totalInvoiced = invoices.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0);
   const totalPaidInvoices = invoices.reduce((sum, inv) => sum + (Number(inv.paid_amount) || 0), 0);
@@ -302,6 +304,11 @@ export default function PartnerAccountDetails() {
           balance={balance}
           totalQuantity={totalQuantity}
           isGenerator={isGeneratorOrg}
+          totalDeposits={totalDeposits}
+          totalPaidInvoices={totalPaidInvoices}
+          cancelledShipmentsCount={cancelledShipments.length}
+          cancelledShipmentsValue={cancelledShipmentsValue}
+          activeShipmentsCount={activeShipments.length}
         />
 
         {/* Main Content Tabs */}

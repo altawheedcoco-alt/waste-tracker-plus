@@ -1,5 +1,12 @@
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface AccountSummaryCardProps {
   title: string;
@@ -8,6 +15,12 @@ interface AccountSummaryCardProps {
   icon: LucideIcon;
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info';
   formatValue?: (value: number) => string;
+  details?: {
+    label: string;
+    value: string | number;
+    isHighlighted?: boolean;
+  }[];
+  detailsTitle?: string;
 }
 
 const variantStyles = {
@@ -60,14 +73,17 @@ export default function AccountSummaryCard({
   icon: Icon,
   variant = 'default',
   formatValue = (v) => new Intl.NumberFormat('ar-EG').format(v),
+  details,
+  detailsTitle,
 }: AccountSummaryCardProps) {
   const styles = variantStyles[variant];
 
-  return (
+  const CardContent = (
     <div className={cn(
-      'rounded-xl border p-4 transition-all hover:shadow-md',
+      'rounded-xl border p-4 transition-all hover:shadow-md cursor-pointer',
       styles.bg,
-      styles.border
+      styles.border,
+      details && 'hover:scale-[1.02]'
     )}>
       <div className="flex items-start justify-between">
         <div className="space-y-1">
@@ -88,5 +104,50 @@ export default function AccountSummaryCard({
         </div>
       </div>
     </div>
+  );
+
+  if (!details || details.length === 0) {
+    return CardContent;
+  }
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        {CardContent}
+      </DialogTrigger>
+      <DialogContent className="max-w-md" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <div className={cn('p-2 rounded-lg', styles.iconBg)}>
+              <Icon className={cn('h-5 w-5', styles.iconColor)} />
+            </div>
+            {detailsTitle || title}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 mt-4">
+          {details.map((detail, index) => (
+            <div 
+              key={index} 
+              className={cn(
+                'flex justify-between items-center p-3 rounded-lg',
+                detail.isHighlighted 
+                  ? 'bg-primary/10 border border-primary/20' 
+                  : 'bg-muted/50'
+              )}
+            >
+              <span className="text-sm text-muted-foreground">{detail.label}</span>
+              <span className={cn(
+                'font-semibold',
+                detail.isHighlighted && 'text-primary'
+              )}>
+                {typeof detail.value === 'number' 
+                  ? `${formatValue(detail.value)} ج.م` 
+                  : detail.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
