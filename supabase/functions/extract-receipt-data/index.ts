@@ -3,7 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 serve(async (req) => {
@@ -24,7 +24,7 @@ serve(async (req) => {
     }
 
     // Use Lovable AI to extract receipt data
-    const response = await fetch('https://ai.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${lovableApiKey}`,
@@ -38,21 +38,27 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `أنت مساعد متخصص في قراءة إيصالات الإيداع البنكي. 
-                
+                text: `أنت مساعد متخصص في قراءة إيصالات الإيداع البنكي العربية والإنجليزية.
+
 قم بتحليل هذه الصورة لإيصال إيداع بنكي واستخرج المعلومات التالية:
 1. المبلغ المودع (رقم فقط بدون عملة)
 2. تاريخ الإيداع (بصيغة YYYY-MM-DD)
 3. اسم البنك
-4. رقم المرجع أو رقم الإيصال
-5. رقم الشيك (إن وجد)
-6. طريقة الدفع (cash, bank_transfer, check, card, other)
+4. فرع البنك
+5. رقم الحساب المودع فيه
+6. اسم المودع (صاحب الحساب أو المستفيد)
+7. رقم المرجع أو رقم الإيصال
+8. رقم الشيك (إن وجد)
+9. طريقة الدفع (cash, bank_transfer, check, card, other)
 
 أجب بصيغة JSON فقط بدون أي نص إضافي:
 {
   "amount": 0,
   "payment_date": "YYYY-MM-DD",
   "bank_name": "",
+  "bank_branch": "",
+  "account_number": "",
+  "depositor_name": "",
   "reference_number": "",
   "check_number": "",
   "payment_method": "bank_transfer",
@@ -72,7 +78,7 @@ serve(async (req) => {
             ]
           }
         ],
-        max_tokens: 1000,
+        max_tokens: 1500,
         temperature: 0.1
       }),
     });
@@ -86,11 +92,19 @@ serve(async (req) => {
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content || '';
     
-    // Parse the JSON response
+    // Parse the JSON response - clean up common issues
     let extractedData;
     try {
+      // Clean the content before parsing
+      let cleanedContent = content
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .replace(/,\s*}/g, '}')
+        .replace(/,\s*]/g, ']')
+        .trim();
+      
       // Try to extract JSON from the response
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         extractedData = JSON.parse(jsonMatch[0]);
       } else {
@@ -102,6 +116,9 @@ serve(async (req) => {
         amount: 0,
         payment_date: new Date().toISOString().split('T')[0],
         bank_name: '',
+        bank_branch: '',
+        account_number: '',
+        depositor_name: '',
         reference_number: '',
         check_number: '',
         payment_method: 'bank_transfer',
