@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { MapContainer, TileLayer, Marker, Polyline, useMap, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,6 @@ import {
   Play, 
   Pause, 
   RotateCcw, 
-  MapPin, 
   Clock, 
   Gauge, 
   Route,
@@ -21,12 +20,12 @@ import {
   Volume2,
   VolumeX,
   Maximize2,
-  ChevronLeft,
-  ChevronRight,
   Factory,
   Truck,
   CheckCircle2,
-  AlertTriangle
+  Loader2,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import BackButton from '@/components/ui/back-button';
@@ -39,46 +38,30 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Nestlé Water Factory, Banha
-const ORIGIN = { lat: 30.4667, lng: 31.1833, name: 'مصنع نستله للمياه - بنها' };
-// PepsiCo Factory, 6th of October
-const DESTINATION = { lat: 29.9667, lng: 30.9167, name: 'مصنع بيبسي - السادس من أكتوبر' };
+// Nestlé Water Factory, Banha (more precise coordinates)
+const ORIGIN = { lat: 30.4628, lng: 31.1837, name: 'مصنع نستله للمياه - بنها' };
+// PepsiCo Factory, 6th of October (more precise coordinates)
+const DESTINATION = { lat: 29.9285, lng: 30.8365, name: 'مصنع بيبسي - السادس من أكتوبر' };
 
-// Simulated route points (realistic path from Banha to 6th October)
-const ROUTE_POINTS: [number, number][] = [
-  [30.4667, 31.1833], // Start - Nestlé Banha
-  [30.4550, 31.1750],
-  [30.4400, 31.1600],
-  [30.4200, 31.1400],
-  [30.3900, 31.1200],
-  [30.3600, 31.1000],
-  [30.3300, 31.0800],
-  [30.3000, 31.0600],
-  [30.2700, 31.0400],
-  [30.2400, 31.0200],
-  [30.2100, 31.0000],
-  [30.1800, 30.9800],
-  [30.1500, 30.9600],
-  [30.1200, 30.9500],
-  [30.0900, 30.9400],
-  [30.0600, 30.9300],
-  [30.0300, 30.9200],
-  [30.0000, 30.9167],
-  [29.9667, 30.9167], // End - PepsiCo 6th October
-];
+interface RouteStep {
+  distance: number;
+  duration: number;
+  instruction: string;
+  type: string;
+  name: string;
+  maneuver: {
+    type: string;
+    modifier?: string;
+    location: [number, number];
+  };
+}
 
-// Navigation instructions
-const NAVIGATION_STEPS = [
-  { distance: 0, instruction: 'ابدأ الرحلة من مصنع نستله للمياه - بنها', type: 'depart' },
-  { distance: 5, instruction: 'استمر في الطريق الرئيسي نحو القاهرة', type: 'straight' },
-  { distance: 12, instruction: 'انعطف يميناً نحو الطريق الدائري', type: 'right' },
-  { distance: 25, instruction: 'استمر على الطريق الدائري', type: 'straight' },
-  { distance: 40, instruction: 'انعطف يساراً نحو طريق الواحات', type: 'left' },
-  { distance: 55, instruction: 'استمر على طريق الواحات', type: 'straight' },
-  { distance: 70, instruction: 'اقترب من المدينة الصناعية - السادس من أكتوبر', type: 'straight' },
-  { distance: 82, instruction: 'انعطف يميناً نحو مصنع بيبسي', type: 'right' },
-  { distance: 85, instruction: 'لقد وصلت إلى الوجهة - مصنع بيبسي', type: 'arrive' },
-];
+interface RouteData {
+  coordinates: [number, number][];
+  distance: number;
+  duration: number;
+  steps: RouteStep[];
+}
 
 // Custom truck icon
 const createTruckIcon = (heading: number) => {
@@ -156,11 +139,104 @@ const MapController = ({ position, isPlaying }: { position: [number, number]; is
   
   useEffect(() => {
     if (isPlaying && position) {
-      map.flyTo(position, 12, { duration: 0.5 });
+      map.flyTo(position, 14, { duration: 0.5 });
     }
   }, [position, isPlaying, map]);
   
   return null;
+};
+
+// Translate OSRM maneuver to Arabic
+const translateManeuver = (step: any): string => {
+  const maneuverType = step.maneuver?.type || '';
+  const modifier = step.maneuver?.modifier || '';
+  const streetName = step.name || 'الطريق';
+  
+  const translations: Record<string, Record<string, string>> = {
+    'turn': {
+      'left': `انعطف يساراً إلى ${streetName}`,
+      'right': `انعطف يميناً إلى ${streetName}`,
+      'slight left': `انحرف قليلاً يساراً نحو ${streetName}`,
+      'slight right': `انحرف قليلاً يميناً نحو ${streetName}`,
+      'sharp left': `انعطف بحدة يساراً إلى ${streetName}`,
+      'sharp right': `انعطف بحدة يميناً إلى ${streetName}`,
+      'uturn': `استدر للخلف في ${streetName}`,
+      'straight': `استمر مباشرة على ${streetName}`,
+    },
+    'new name': {
+      'default': `استمر على ${streetName}`,
+    },
+    'depart': {
+      'default': `ابدأ الرحلة من ${ORIGIN.name}`,
+    },
+    'arrive': {
+      'default': `لقد وصلت إلى ${DESTINATION.name}`,
+    },
+    'merge': {
+      'left': `اندمج يساراً في ${streetName}`,
+      'right': `اندمج يميناً في ${streetName}`,
+      'default': `اندمج في ${streetName}`,
+    },
+    'on ramp': {
+      'left': `ادخل المنحدر يساراً نحو ${streetName}`,
+      'right': `ادخل المنحدر يميناً نحو ${streetName}`,
+      'default': `ادخل ${streetName}`,
+    },
+    'off ramp': {
+      'left': `اخرج يساراً من ${streetName}`,
+      'right': `اخرج يميناً من ${streetName}`,
+      'default': `اخرج من الطريق السريع`,
+    },
+    'fork': {
+      'left': `اتجه يساراً عند المفترق نحو ${streetName}`,
+      'right': `اتجه يميناً عند المفترق نحو ${streetName}`,
+      'default': `تابع عند المفترق نحو ${streetName}`,
+    },
+    'end of road': {
+      'left': `انعطف يساراً في نهاية الطريق إلى ${streetName}`,
+      'right': `انعطف يميناً في نهاية الطريق إلى ${streetName}`,
+      'default': `نهاية الطريق، تابع إلى ${streetName}`,
+    },
+    'continue': {
+      'default': `استمر على ${streetName}`,
+    },
+    'roundabout': {
+      'default': `ادخل الدوار واخرج نحو ${streetName}`,
+    },
+    'rotary': {
+      'default': `ادخل الميدان واخرج نحو ${streetName}`,
+    },
+    'roundabout turn': {
+      'left': `في الدوار، انعطف يساراً نحو ${streetName}`,
+      'right': `في الدوار، انعطف يميناً نحو ${streetName}`,
+      'default': `في الدوار، تابع نحو ${streetName}`,
+    },
+    'notification': {
+      'default': `${streetName}`,
+    },
+    'exit roundabout': {
+      'default': `اخرج من الدوار إلى ${streetName}`,
+    },
+  };
+  
+  const typeTranslations = translations[maneuverType];
+  if (typeTranslations) {
+    return typeTranslations[modifier] || typeTranslations['default'] || `تابع على ${streetName}`;
+  }
+  
+  return `تابع على ${streetName}`;
+};
+
+const getManeuverType = (step: any): string => {
+  const maneuverType = step.maneuver?.type || '';
+  const modifier = step.maneuver?.modifier || '';
+  
+  if (maneuverType === 'arrive') return 'arrive';
+  if (maneuverType === 'depart') return 'depart';
+  if (modifier.includes('left')) return 'left';
+  if (modifier.includes('right')) return 'right';
+  if (maneuverType === 'roundabout' || maneuverType === 'rotary') return 'roundabout';
+  return 'straight';
 };
 
 const NavigationDemo = () => {
@@ -172,14 +248,71 @@ const NavigationDemo = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [routeData, setRouteData] = useState<RouteData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastAnnouncedStepRef = useRef<number>(-1);
 
-  const totalDistance = 85; // km
-  const estimatedDuration = 75; // minutes
+  // Fetch real route from OSRM
+  const fetchRoute = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${ORIGIN.lng},${ORIGIN.lat};${DESTINATION.lng},${DESTINATION.lat}?overview=full&geometries=geojson&steps=true&annotations=true`
+      );
+      
+      if (!response.ok) {
+        throw new Error('فشل في جلب المسار');
+      }
+      
+      const data = await response.json();
+      
+      if (data.code !== 'Ok' || !data.routes || data.routes.length === 0) {
+        throw new Error('لم يتم العثور على مسار');
+      }
+      
+      const route = data.routes[0];
+      const coordinates: [number, number][] = route.geometry.coordinates.map(
+        (coord: [number, number]) => [coord[1], coord[0]] // Swap lng,lat to lat,lng for Leaflet
+      );
+      
+      // Process steps
+      const steps: RouteStep[] = route.legs[0].steps.map((step: any) => ({
+        distance: step.distance / 1000, // Convert to km
+        duration: step.duration / 60, // Convert to minutes
+        instruction: translateManeuver(step),
+        type: getManeuverType(step),
+        name: step.name || 'طريق غير مسمى',
+        maneuver: step.maneuver,
+      }));
+      
+      setRouteData({
+        coordinates,
+        distance: route.distance / 1000, // km
+        duration: route.duration / 60, // minutes
+        steps,
+      });
+      
+    } catch (err) {
+      console.error('Error fetching route:', err);
+      setError(err instanceof Error ? err.message : 'حدث خطأ في جلب المسار');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoute();
+  }, []);
+
+  const totalDistance = routeData?.distance || 0;
+  const estimatedDuration = Math.round(routeData?.duration || 0);
   const currentDistance = (progress / 100) * totalDistance;
   const remainingDistance = totalDistance - currentDistance;
-  const remainingTime = Math.round((remainingDistance / totalDistance) * estimatedDuration);
+  const remainingTime = Math.round((remainingDistance / totalDistance) * estimatedDuration) || 0;
 
   // Calculate heading based on current and next point
   const calculateHeading = (current: [number, number], next: [number, number]) => {
@@ -189,8 +322,9 @@ const NavigationDemo = () => {
     return angle;
   };
 
-  const currentPosition = ROUTE_POINTS[currentPointIndex];
-  const nextPosition = ROUTE_POINTS[Math.min(currentPointIndex + 1, ROUTE_POINTS.length - 1)];
+  const coordinates = routeData?.coordinates || [[ORIGIN.lat, ORIGIN.lng]];
+  const currentPosition = coordinates[currentPointIndex] || coordinates[0];
+  const nextPosition = coordinates[Math.min(currentPointIndex + 1, coordinates.length - 1)];
   const heading = calculateHeading(currentPosition, nextPosition);
 
   // Speak navigation instruction
@@ -204,26 +338,38 @@ const NavigationDemo = () => {
     window.speechSynthesis.speak(utterance);
   };
 
+  // Find current step based on distance
+  const findCurrentStep = (distance: number): number => {
+    if (!routeData?.steps) return 0;
+    
+    let cumulativeDistance = 0;
+    for (let i = 0; i < routeData.steps.length; i++) {
+      cumulativeDistance += routeData.steps[i].distance;
+      if (distance < cumulativeDistance) {
+        return i;
+      }
+    }
+    return routeData.steps.length - 1;
+  };
+
   // Update current navigation step
   useEffect(() => {
-    const stepIndex = NAVIGATION_STEPS.findIndex((step, index) => {
-      const nextStep = NAVIGATION_STEPS[index + 1];
-      if (!nextStep) return true;
-      return currentDistance >= step.distance && currentDistance < nextStep.distance;
-    });
+    if (!routeData?.steps) return;
     
-    if (stepIndex !== -1 && stepIndex !== currentStep) {
+    const stepIndex = findCurrentStep(currentDistance);
+    
+    if (stepIndex !== currentStep) {
       setCurrentStep(stepIndex);
       if (stepIndex !== lastAnnouncedStepRef.current && isPlaying) {
         lastAnnouncedStepRef.current = stepIndex;
-        speakInstruction(NAVIGATION_STEPS[stepIndex].instruction);
+        speakInstruction(routeData.steps[stepIndex].instruction);
       }
     }
-  }, [currentDistance, isPlaying, isMuted]);
+  }, [currentDistance, isPlaying, isMuted, routeData]);
 
   // Simulation loop
   useEffect(() => {
-    if (isPlaying) {
+    if (isPlaying && routeData) {
       intervalRef.current = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
@@ -231,13 +377,13 @@ const NavigationDemo = () => {
             speakInstruction('لقد وصلت إلى وجهتك. مصنع بيبسي - السادس من أكتوبر');
             return 100;
           }
-          return prev + 0.5;
+          return prev + 0.15; // Slower for smoother animation
         });
         
         setCurrentPointIndex(prev => {
           const newIndex = Math.min(
-            Math.floor((progress / 100) * (ROUTE_POINTS.length - 1)),
-            ROUTE_POINTS.length - 1
+            Math.floor((progress / 100) * (coordinates.length - 1)),
+            coordinates.length - 1
           );
           return newIndex;
         });
@@ -246,7 +392,7 @@ const NavigationDemo = () => {
         setSpeed(60 + Math.random() * 40);
         
         setElapsedTime(prev => prev + 1);
-      }, 200);
+      }, 150);
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -258,7 +404,7 @@ const NavigationDemo = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, progress]);
+  }, [isPlaying, progress, routeData, coordinates.length]);
 
   const handleRestart = () => {
     setIsPlaying(false);
@@ -277,6 +423,7 @@ const NavigationDemo = () => {
       case 'right': return <ArrowRight className="w-6 h-6" />;
       case 'arrive': return <CheckCircle2 className="w-6 h-6" />;
       case 'depart': return <Truck className="w-6 h-6" />;
+      case 'roundabout': return <RefreshCw className="w-6 h-6" />;
       default: return <ArrowUp className="w-6 h-6" />;
     }
   };
@@ -287,8 +434,42 @@ const NavigationDemo = () => {
     return 'text-green-500';
   };
 
-  const completedRoute = ROUTE_POINTS.slice(0, currentPointIndex + 1);
-  const remainingRoute = ROUTE_POINTS.slice(currentPointIndex);
+  const completedRoute = coordinates.slice(0, currentPointIndex + 1);
+  const remainingRoute = coordinates.slice(currentPointIndex);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
+        <Card className="p-8">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <p className="text-lg font-medium">جاري تحميل المسار الفعلي...</p>
+            <p className="text-sm text-muted-foreground">من بنها إلى السادس من أكتوبر</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
+        <Card className="p-8">
+          <div className="flex flex-col items-center gap-4">
+            <AlertTriangle className="w-12 h-12 text-destructive" />
+            <p className="text-lg font-medium">{error}</p>
+            <Button onClick={fetchRoute}>
+              <RefreshCw className="w-4 h-4 ml-2" />
+              إعادة المحاولة
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const steps = routeData?.steps || [];
+  const currentStepData = steps[currentStep];
 
   return (
     <div className={`min-h-screen bg-background ${showFullscreen ? 'fixed inset-0 z-50' : ''}`} dir="rtl">
@@ -298,7 +479,9 @@ const NavigationDemo = () => {
             <BackButton />
             <div>
               <h1 className="text-2xl font-bold">عرض توضيحي للملاحة</h1>
-              <p className="text-muted-foreground">محاكاة رحلة من مصنع نستله ببنها إلى مصنع بيبسي بالسادس من أكتوبر</p>
+              <p className="text-muted-foreground">
+                محاكاة رحلة حقيقية ({totalDistance.toFixed(1)} كم عبر {steps.length} نقطة ملاحية)
+              </p>
             </div>
           </div>
         </div>
@@ -321,21 +504,25 @@ const NavigationDemo = () => {
             <MapController position={currentPosition} isPlaying={isPlaying} />
             
             {/* Completed route (green) */}
-            <Polyline 
-              positions={completedRoute}
-              color="#22c55e"
-              weight={6}
-              opacity={0.9}
-            />
+            {completedRoute.length > 1 && (
+              <Polyline 
+                positions={completedRoute}
+                color="#22c55e"
+                weight={6}
+                opacity={0.9}
+              />
+            )}
             
-            {/* Remaining route (gray) */}
-            <Polyline 
-              positions={remainingRoute}
-              color="#9ca3af"
-              weight={4}
-              opacity={0.6}
-              dashArray="10, 10"
-            />
+            {/* Remaining route (blue dashed) */}
+            {remainingRoute.length > 1 && (
+              <Polyline 
+                positions={remainingRoute}
+                color="#3b82f6"
+                weight={5}
+                opacity={0.7}
+                dashArray="10, 10"
+              />
+            )}
             
             {/* Origin marker */}
             <Marker position={[ORIGIN.lat, ORIGIN.lng]} icon={originIcon}>
@@ -372,22 +559,20 @@ const NavigationDemo = () => {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   {/* Current instruction */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                      {getDirectionIcon(NAVIGATION_STEPS[currentStep]?.type || 'straight')}
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      {getDirectionIcon(currentStepData?.type || 'straight')}
                     </div>
-                    <div>
-                      <p className="font-bold text-lg">{NAVIGATION_STEPS[currentStep]?.instruction}</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-lg truncate">{currentStepData?.instruction || 'جاري التحميل...'}</p>
                       <p className="text-white/70 text-sm">
-                        {currentStep < NAVIGATION_STEPS.length - 1 
-                          ? `${Math.round(NAVIGATION_STEPS[currentStep + 1]?.distance - currentDistance)} كم للتعليمات القادمة`
-                          : 'الوجهة النهائية'}
+                        {currentStepData?.name || ''}
                       </p>
                     </div>
                   </div>
                   
                   {/* Speed */}
-                  <div className="text-center">
+                  <div className="text-center flex-shrink-0 mr-4">
                     <p className={`text-4xl font-bold ${getSpeedColor(speed)}`}>
                       {Math.round(speed)}
                     </p>
@@ -462,13 +647,22 @@ const NavigationDemo = () => {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-center p-3 bg-muted rounded-lg">
-                    <p className="text-2xl font-bold">{totalDistance}</p>
+                    <p className="text-2xl font-bold">{totalDistance.toFixed(1)}</p>
                     <p className="text-xs text-muted-foreground">كم إجمالي</p>
                   </div>
                   <div className="text-center p-3 bg-muted rounded-lg">
                     <p className="text-2xl font-bold">{estimatedDuration}</p>
                     <p className="text-xs text-muted-foreground">دقيقة تقديرية</p>
                   </div>
+                </div>
+
+                <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                    ✓ مسار حقيقي من OSRM
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {coordinates.length} نقطة GPS | {steps.length} تعليمات ملاحية
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -535,17 +729,17 @@ const NavigationDemo = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Route className="w-5 h-5" />
-                  خطوات الملاحة
+                  خطوات الملاحة ({steps.length})
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                  {NAVIGATION_STEPS.map((step, index) => (
+                  {steps.map((step, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: Math.min(index * 0.02, 1) }}
                       className={`flex items-center gap-3 p-2 rounded-lg transition-all ${
                         index === currentStep 
                           ? 'bg-primary/10 border border-primary' 
@@ -554,7 +748,7 @@ const NavigationDemo = () => {
                             : 'bg-muted/50'
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
                         index === currentStep 
                           ? 'bg-primary text-primary-foreground' 
                           : index < currentStep 
@@ -567,11 +761,13 @@ const NavigationDemo = () => {
                           getDirectionIcon(step.type)
                         )}
                       </div>
-                      <div className="flex-1">
-                        <p className={`text-sm ${index === currentStep ? 'font-bold' : ''}`}>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm truncate ${index === currentStep ? 'font-bold' : ''}`}>
                           {step.instruction}
                         </p>
-                        <p className="text-xs text-muted-foreground">{step.distance} كم</p>
+                        <p className="text-xs text-muted-foreground">
+                          {step.distance.toFixed(1)} كم
+                        </p>
                       </div>
                     </motion.div>
                   ))}
