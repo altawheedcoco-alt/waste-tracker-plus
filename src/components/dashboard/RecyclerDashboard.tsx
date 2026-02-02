@@ -13,6 +13,7 @@ import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
+import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
 import {
   Package,
@@ -32,6 +33,7 @@ import {
   Sparkles,
   Scale,
   FileSignature,
+  Banknote,
 } from 'lucide-react';
 
 interface ShipmentStats {
@@ -90,6 +92,7 @@ const RecyclerDashboard = () => {
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
+  const [showDepositDialog, setShowDepositDialog] = useState(false);
 
   useEffect(() => {
     if (organization?.id) {
@@ -269,6 +272,7 @@ const RecyclerDashboard = () => {
       {/* Quick Actions Grid */}
       <QuickActionsGrid
         actions={[
+          { title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: () => setShowDepositDialog(true), iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
           { title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
           { title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600' },
           { title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: () => setShowSmartWeightUpload(true), iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600' },
@@ -371,6 +375,12 @@ const RecyclerDashboard = () => {
 
       {/* Chat Widget */}
       <ChatWidget />
+
+      {/* Deposit Dialog */}
+      <AddDepositDialog
+        open={showDepositDialog}
+        onOpenChange={setShowDepositDialog}
+      />
     </div>
   );
 };
