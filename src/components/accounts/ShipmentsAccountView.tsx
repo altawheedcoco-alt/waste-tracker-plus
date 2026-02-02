@@ -26,6 +26,8 @@ interface ShipmentWithPricing {
   pricePerUnit: number;
   calculatedTotal: number;
   hasPrice: boolean;
+  cancelled_at?: string;
+  cancellation_reason?: string;
 }
 
 interface ShipmentsAccountViewProps {
@@ -40,6 +42,7 @@ const statusConfig: Record<string, { label: string; icon: any; color: string }> 
   in_transit: { label: 'قيد النقل', icon: Package, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
   delivered: { label: 'تم التسليم', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
   confirmed: { label: 'مؤكدة', icon: CheckCircle2, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+  cancelled: { label: 'ملغاة', icon: AlertCircle, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
 };
 
 export default function ShipmentsAccountView({ shipments, isLoading }: ShipmentsAccountViewProps) {
@@ -57,13 +60,17 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
 
   // Summary calculations
   const summary = useMemo(() => {
-    const pricedShipments = shipments.filter(s => s.hasPrice);
-    const unpricedShipments = shipments.filter(s => !s.hasPrice);
-    const totalValue = shipments.reduce((sum, s) => sum + s.calculatedTotal, 0);
-    const totalQuantity = shipments.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
+    const activeShipments = shipments.filter(s => !s.cancelled_at);
+    const cancelledShipments = shipments.filter(s => !!s.cancelled_at);
+    const pricedShipments = activeShipments.filter(s => s.hasPrice);
+    const unpricedShipments = activeShipments.filter(s => !s.hasPrice);
+    const totalValue = activeShipments.reduce((sum, s) => sum + s.calculatedTotal, 0);
+    const totalQuantity = activeShipments.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
     
     return {
       total: shipments.length,
+      active: activeShipments.length,
+      cancelled: cancelledShipments.length,
       priced: pricedShipments.length,
       unpriced: unpricedShipments.length,
       totalValue,
@@ -94,11 +101,17 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
   return (
     <div className="space-y-4">
       {/* Quick Summary */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-muted/30 rounded-xl">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-muted/30 rounded-xl">
         <div className="text-center">
-          <p className="text-2xl font-bold text-primary">{summary.total}</p>
-          <p className="text-xs text-muted-foreground">إجمالي الشحنات</p>
+          <p className="text-2xl font-bold text-primary">{summary.active}</p>
+          <p className="text-xs text-muted-foreground">شحنات نشطة</p>
         </div>
+        {summary.cancelled > 0 && (
+          <div className="text-center">
+            <p className="text-2xl font-bold text-red-500">{summary.cancelled}</p>
+            <p className="text-xs text-muted-foreground">ملغاة</p>
+          </div>
+        )}
         <div className="text-center">
           <p className="text-2xl font-bold">{formatCurrency(summary.totalQuantity)}</p>
           <p className="text-xs text-muted-foreground">إجمالي الكمية</p>
@@ -106,9 +119,9 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
         <div className="text-center">
           <p className={cn(
             'text-2xl font-bold',
-            summary.priced === summary.total ? 'text-emerald-600' : 'text-amber-600'
+            summary.priced === summary.active ? 'text-emerald-600' : 'text-amber-600'
           )}>
-            {summary.priced}/{summary.total}
+            {summary.priced}/{summary.active}
           </p>
           <p className="text-xs text-muted-foreground">شحنات مسعّرة</p>
         </div>
@@ -135,36 +148,57 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
           </TableHeader>
           <TableBody>
             {shipments.map((shipment, index) => {
-              const status = statusConfig[shipment.status] || statusConfig.new;
+              const isCancelled = !!shipment.cancelled_at;
+              const status = isCancelled 
+                ? statusConfig.cancelled 
+                : (statusConfig[shipment.status] || statusConfig.new);
               const StatusIcon = status.icon;
               
               return (
                 <TableRow 
                   key={shipment.id}
-                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  className={cn(
+                    "cursor-pointer hover:bg-muted/50 transition-colors",
+                    isCancelled && "opacity-60 bg-red-50/50 dark:bg-red-950/10"
+                  )}
                   onClick={() => navigate(`/dashboard/s/${shipment.shipment_number}`)}
                 >
                   <TableCell className="text-center text-muted-foreground font-medium">
                     {index + 1}
                   </TableCell>
                   <TableCell>
-                    <span className="font-mono font-medium text-primary">
+                    <span className={cn(
+                      "font-mono font-medium",
+                      isCancelled ? "text-muted-foreground line-through" : "text-primary"
+                    )}>
                       {shipment.shipment_number}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="font-medium">
+                    <span className={cn(
+                      "font-medium",
+                      isCancelled && "line-through text-muted-foreground"
+                    )}>
                       {shipment.waste_description || shipment.waste_type || '-'}
                     </span>
+                    {isCancelled && shipment.cancellation_reason && (
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                        سبب الإلغاء: {shipment.cancellation_reason}
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
-                    <span className="font-bold">{formatCurrency(Number(shipment.quantity) || 0)}</span>
+                    <span className={cn("font-bold", isCancelled && "line-through text-muted-foreground")}>
+                      {formatCurrency(Number(shipment.quantity) || 0)}
+                    </span>
                     {shipment.unit && (
                       <span className="text-muted-foreground text-xs mr-1">{shipment.unit}</span>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
-                    {shipment.hasPrice ? (
+                    {isCancelled ? (
+                      <span className="text-muted-foreground line-through">-</span>
+                    ) : shipment.hasPrice ? (
                       <span className="text-emerald-600 font-medium">
                         {formatCurrency(shipment.pricePerUnit)} ج.م
                       </span>
@@ -176,7 +210,9 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
                     )}
                   </TableCell>
                   <TableCell className="text-center">
-                    {shipment.hasPrice ? (
+                    {isCancelled ? (
+                      <span className="text-red-500 font-bold">0 ج.م</span>
+                    ) : shipment.hasPrice ? (
                       <span className="font-bold text-lg text-primary">
                         {formatCurrency(shipment.calculatedTotal)} ج.م
                       </span>

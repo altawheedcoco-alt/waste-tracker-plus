@@ -3085,6 +3085,9 @@ export type Database = {
         Row: {
           approved_at: string | null
           auto_approve_at: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           collection_started_at: string | null
           confirmed_at: string | null
           created_at: string | null
@@ -3124,6 +3127,9 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           auto_approve_at?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           collection_started_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null
@@ -3163,6 +3169,9 @@ export type Database = {
         Update: {
           approved_at?: string | null
           auto_approve_at?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           collection_started_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null

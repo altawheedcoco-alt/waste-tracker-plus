@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 export interface LedgerEntry {
   id: string;
   date: string;
-  type: 'shipment' | 'invoice' | 'payment' | 'deposit';
+  type: 'shipment' | 'invoice' | 'payment' | 'deposit' | 'cancellation';
   description: string;
   quantity?: number;
   unit?: string;
@@ -24,6 +24,7 @@ export interface LedgerEntry {
   debit: number;  // ما علينا (مدين)
   credit: number; // ما لنا (دائن)
   reference?: string;
+  isCancelled?: boolean;
 }
 
 interface AccountLedgerProps {
@@ -63,7 +64,10 @@ export default function AccountLedger({
   const totalCredit = entries.reduce((sum, e) => sum + e.credit, 0);
   const finalBalance = previousBalance + totalDebit - totalCredit;
 
-  const getTypeIcon = (type: string) => {
+  const getTypeIcon = (type: string, isCancelled?: boolean) => {
+    if (isCancelled) {
+      return <Package className="h-4 w-4 line-through opacity-50" />;
+    }
     switch (type) {
       case 'shipment':
         return <Package className="h-4 w-4" />;
@@ -73,12 +77,17 @@ export default function AccountLedger({
         return <CreditCard className="h-4 w-4" />;
       case 'deposit':
         return <Banknote className="h-4 w-4" />;
+      case 'cancellation':
+        return <Package className="h-4 w-4 text-destructive" />;
       default:
         return null;
     }
   };
 
-  const getTypeLabel = (type: string) => {
+  const getTypeLabel = (type: string, isCancelled?: boolean) => {
+    if (isCancelled) {
+      return 'ملغاة';
+    }
     switch (type) {
       case 'shipment':
         return 'شحنة';
@@ -88,12 +97,17 @@ export default function AccountLedger({
         return 'دفعة';
       case 'deposit':
         return 'إيداع';
+      case 'cancellation':
+        return 'إلغاء';
       default:
         return type;
     }
   };
 
-  const getTypeBadgeVariant = (type: string) => {
+  const getTypeBadgeVariant = (type: string, isCancelled?: boolean) => {
+    if (isCancelled) {
+      return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 line-through';
+    }
     switch (type) {
       case 'shipment':
         return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
@@ -103,6 +117,8 @@ export default function AccountLedger({
         return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
       case 'deposit':
         return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
+      case 'cancellation':
+        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
       default:
         return '';
     }
@@ -168,9 +184,9 @@ export default function AccountLedger({
                   {formatDate(entry.date)}
                 </TableCell>
                 <TableCell className="text-center">
-                  <Badge variant="secondary" className={cn('gap-1', getTypeBadgeVariant(entry.type))}>
-                    {getTypeIcon(entry.type)}
-                    {getTypeLabel(entry.type)}
+                  <Badge variant="secondary" className={cn('gap-1', getTypeBadgeVariant(entry.type, entry.isCancelled))}>
+                    {getTypeIcon(entry.type, entry.isCancelled)}
+                    {getTypeLabel(entry.type, entry.isCancelled)}
                   </Badge>
                 </TableCell>
                 <TableCell>
