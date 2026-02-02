@@ -22,11 +22,13 @@ import {
   Globe,
   Briefcase,
   FileText,
-  Newspaper
+  Newspaper,
+  Target
 } from 'lucide-react';
 import ProfileHeader from '@/components/organization/ProfileHeader';
 import BackButton from '@/components/ui/back-button';
 import OrganizationPosts from '@/components/organization/OrganizationPosts';
+import OrganizationPortfolio from '@/components/organization/OrganizationPortfolio';
 
 interface OrganizationData {
   id: string;
@@ -53,6 +55,13 @@ interface OrganizationData {
   representative_email: string | null;
   representative_national_id: string | null;
   client_code: string | null;
+  // Portfolio fields
+  description: string | null;
+  vision: string | null;
+  policy: string | null;
+  headquarters: string | null;
+  branches: any[] | null;
+  field_of_work: string | null;
 }
 
 const OrganizationView = () => {
@@ -184,8 +193,12 @@ const OrganizationView = () => {
         )}
 
         {/* Organization Details */}
-        <Tabs defaultValue="posts" className="space-y-4" dir="rtl">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="portfolio" className="space-y-4" dir="rtl">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="portfolio">
+              <Target className="w-4 h-4 ml-2" />
+              البورتفوليو
+            </TabsTrigger>
             <TabsTrigger value="posts">
               <Newspaper className="w-4 h-4 ml-2" />
               المنشورات
@@ -203,6 +216,28 @@ const OrganizationView = () => {
               الممثل القانوني
             </TabsTrigger>
           </TabsList>
+
+          {/* Portfolio Tab */}
+          <TabsContent value="portfolio">
+            <OrganizationPortfolio
+              organizationId={orgData.id}
+              organizationName={orgData.name}
+              organizationType={orgData.organization_type}
+              currentData={{
+                description: orgData.description,
+                vision: orgData.vision,
+                policy: orgData.policy,
+                headquarters: orgData.headquarters,
+                branches: orgData.branches,
+                field_of_work: orgData.field_of_work,
+                address: orgData.address,
+                city: orgData.city,
+                activity_type: orgData.activity_type,
+              }}
+              isEditable={false}
+              onUpdate={() => {}}
+            />
+          </TabsContent>
 
           {/* Posts Tab */}
           <TabsContent value="posts">

@@ -28,12 +28,14 @@ import {
   CheckCircle,
   XCircle,
   Stamp,
-  PenSquare
+  PenSquare,
+  Target
 } from 'lucide-react';
 import OrganizationPosts from '@/components/organization/OrganizationPosts';
 import StampSignatureUpload from '@/components/organization/StampSignatureUpload';
 import ProfileHeader from '@/components/organization/ProfileHeader';
 import BackButton from '@/components/ui/back-button';
+import OrganizationPortfolio from '@/components/organization/OrganizationPortfolio';
 
 interface OrganizationDocument {
   id: string;
@@ -331,8 +333,12 @@ const OrganizationProfile = () => {
           />
         </Card>
 
-        <Tabs defaultValue="posts" className="space-y-4" dir="rtl">
-          <TabsList className="grid w-full grid-cols-6">
+        <Tabs defaultValue="portfolio" className="space-y-4" dir="rtl">
+          <TabsList className="grid w-full grid-cols-7">
+            <TabsTrigger value="portfolio">
+              <Target className="w-4 h-4 ml-2" />
+              البورتفوليو
+            </TabsTrigger>
             <TabsTrigger value="posts">
               <PenSquare className="w-4 h-4 ml-2" />
               المنشورات
@@ -358,6 +364,28 @@ const OrganizationProfile = () => {
               التواصل
             </TabsTrigger>
           </TabsList>
+
+          {/* Portfolio Tab */}
+          <TabsContent value="portfolio">
+            <OrganizationPortfolio
+              organizationId={organization.id}
+              organizationName={organization.name}
+              organizationType={organization.organization_type}
+              currentData={{
+                description: orgData?.description,
+                vision: orgData?.vision,
+                policy: orgData?.policy,
+                headquarters: orgData?.headquarters,
+                branches: orgData?.branches,
+                field_of_work: orgData?.field_of_work,
+                address: orgData?.address,
+                city: orgData?.city,
+                activity_type: orgData?.activity_type,
+              }}
+              isEditable={isCompanyAdmin}
+              onUpdate={fetchOrganizationData}
+            />
+          </TabsContent>
 
           {/* Posts Tab */}
           <TabsContent value="posts">
