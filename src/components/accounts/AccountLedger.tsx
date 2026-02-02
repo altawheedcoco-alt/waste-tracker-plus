@@ -10,7 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Package, FileText, CreditCard, ArrowUpRight, ArrowDownRight, Banknote } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Package, FileText, CreditCard, ArrowUpRight, ArrowDownRight, Banknote, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface LedgerEntry {
@@ -190,12 +196,35 @@ export default function AccountLedger({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div>
-                    <p className="font-medium text-sm">{entry.description}</p>
-                    {entry.reference && (
-                      <p className="text-xs text-muted-foreground font-mono">{entry.reference}</p>
-                    )}
-                  </div>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="cursor-help">
+                          <p className="font-medium text-sm">{entry.description}</p>
+                          {entry.reference && (
+                            <p className="text-xs text-muted-foreground font-mono">{entry.reference}</p>
+                          )}
+                          {entry.type === 'shipment' && entry.quantity && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {formatCurrency(entry.quantity)} {entry.unit || 'كجم'} × {entry.unitPrice ? `${formatCurrency(entry.unitPrice)} ج.م` : '-'}
+                            </p>
+                          )}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <div className="space-y-1 text-sm">
+                          <p className="font-bold">{entry.description}</p>
+                          {entry.type === 'shipment' && (
+                            <>
+                              <p className="text-xs">الكمية: {entry.quantity ? `${formatCurrency(entry.quantity)} ${entry.unit || 'كجم'}` : '-'}</p>
+                              <p className="text-xs">سعر الوحدة: {entry.unitPrice ? `${formatCurrency(entry.unitPrice)} ج.م` : 'غير محدد'}</p>
+                            </>
+                          )}
+                          {entry.reference && <p className="text-xs text-muted-foreground">المرجع: {entry.reference}</p>}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </TableCell>
                 <TableCell className="text-center">
                   {entry.quantity ? (
