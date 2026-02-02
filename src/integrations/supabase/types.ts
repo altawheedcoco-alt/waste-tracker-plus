@@ -1300,6 +1300,7 @@ export type Database = {
           agent_name: string | null
           agent_national_id: string | null
           agent_phone: string | null
+          branches: Json | null
           city: string
           client_code: string | null
           commercial_register: string | null
@@ -1309,10 +1310,13 @@ export type Database = {
           delegate_name: string | null
           delegate_national_id: string | null
           delegate_phone: string | null
+          description: string | null
           email: string
           environmental_approval_number: string | null
           environmental_license: string | null
           establishment_registration: string | null
+          field_of_work: string | null
+          headquarters: string | null
           id: string
           ida_license: string | null
           industrial_registry: string | null
@@ -1325,6 +1329,7 @@ export type Database = {
           name_en: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
           phone: string
+          policy: string | null
           production_capacity: string | null
           region: string | null
           registered_activity: string | null
@@ -1338,6 +1343,7 @@ export type Database = {
           stamp_url: string | null
           tax_card: string | null
           updated_at: string | null
+          vision: string | null
           wmra_license: string | null
         }
         Insert: {
@@ -1347,6 +1353,7 @@ export type Database = {
           agent_name?: string | null
           agent_national_id?: string | null
           agent_phone?: string | null
+          branches?: Json | null
           city: string
           client_code?: string | null
           commercial_register?: string | null
@@ -1356,10 +1363,13 @@ export type Database = {
           delegate_name?: string | null
           delegate_national_id?: string | null
           delegate_phone?: string | null
+          description?: string | null
           email: string
           environmental_approval_number?: string | null
           environmental_license?: string | null
           establishment_registration?: string | null
+          field_of_work?: string | null
+          headquarters?: string | null
           id?: string
           ida_license?: string | null
           industrial_registry?: string | null
@@ -1372,6 +1382,7 @@ export type Database = {
           name_en?: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
           phone: string
+          policy?: string | null
           production_capacity?: string | null
           region?: string | null
           registered_activity?: string | null
@@ -1385,6 +1396,7 @@ export type Database = {
           stamp_url?: string | null
           tax_card?: string | null
           updated_at?: string | null
+          vision?: string | null
           wmra_license?: string | null
         }
         Update: {
@@ -1394,6 +1406,7 @@ export type Database = {
           agent_name?: string | null
           agent_national_id?: string | null
           agent_phone?: string | null
+          branches?: Json | null
           city?: string
           client_code?: string | null
           commercial_register?: string | null
@@ -1403,10 +1416,13 @@ export type Database = {
           delegate_name?: string | null
           delegate_national_id?: string | null
           delegate_phone?: string | null
+          description?: string | null
           email?: string
           environmental_approval_number?: string | null
           environmental_license?: string | null
           establishment_registration?: string | null
+          field_of_work?: string | null
+          headquarters?: string | null
           id?: string
           ida_license?: string | null
           industrial_registry?: string | null
@@ -1419,6 +1435,7 @@ export type Database = {
           name_en?: string | null
           organization_type?: Database["public"]["Enums"]["organization_type"]
           phone?: string
+          policy?: string | null
           production_capacity?: string | null
           region?: string | null
           registered_activity?: string | null
@@ -1432,6 +1449,7 @@ export type Database = {
           stamp_url?: string | null
           tax_card?: string | null
           updated_at?: string | null
+          vision?: string | null
           wmra_license?: string | null
         }
         Relationships: []
