@@ -9,6 +9,7 @@ import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
 import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
 import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker';
+import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
 
 // Lazy load the live tracking dialog
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -40,6 +41,7 @@ import {
   Map,
   Zap,
   Navigation,
+  XCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -316,6 +318,13 @@ const ShipmentDetailsPage = () => {
               <Printer className="ml-2 h-4 w-4" />
               طباعة / تحميل PDF
             </Button>
+            {/* Cancel Shipment Button */}
+            <CancelShipmentDialog
+              shipmentId={shipment.id}
+              shipmentNumber={shipment.shipment_number}
+              currentStatus={shipment.status}
+              onSuccess={fetchShipmentDetails}
+            />
           </div>
         </div>
 

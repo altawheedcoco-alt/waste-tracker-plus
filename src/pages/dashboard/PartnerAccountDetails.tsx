@@ -129,7 +129,7 @@ export default function PartnerAccountDetails() {
     enabled: !!partnerId && !!organization?.id,
   });
 
-  // Calculate shipment totals with pricing
+  // Calculate shipment totals with pricing - exclude cancelled
   const shipmentsWithPricing = useMemo(() => {
     return shipments.map(shipment => {
       const wastePrice = partnerWasteTypes.find(wt => {
@@ -140,20 +140,26 @@ export default function PartnerAccountDetails() {
       
       const pricePerUnit = wastePrice?.price_per_unit || 0;
       const quantity = Number(shipment.quantity) || 0;
-      const total = pricePerUnit * quantity;
+      const isCancelled = !!(shipment as any).cancelled_at;
+      const total = isCancelled ? 0 : pricePerUnit * quantity; // إذا ملغاة = 0
       
       return {
         ...shipment,
         pricePerUnit,
         calculatedTotal: total,
         hasPrice: pricePerUnit > 0,
+        cancelled_at: (shipment as any).cancelled_at,
+        cancellation_reason: (shipment as any).cancellation_reason,
       };
     });
   }, [shipments, partnerWasteTypes]);
 
+  // Calculate totals - exclude cancelled shipments
+  const activeShipments = shipmentsWithPricing.filter(s => !s.cancelled_at);
+
   // Calculate totals
-  const totalShipmentValue = shipmentsWithPricing.reduce((sum, s) => sum + s.calculatedTotal, 0);
-  const totalQuantity = shipmentsWithPricing.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
+  const totalShipmentValue = activeShipments.reduce((sum, s) => sum + s.calculatedTotal, 0);
+  const totalQuantity = activeShipments.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
   const totalInvoiced = invoices.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0);
   const totalPaidInvoices = invoices.reduce((sum, inv) => sum + (Number(inv.paid_amount) || 0), 0);
   const totalDeposits = deposits.reduce((sum, dep) => sum + (Number(dep.amount) || 0), 0);
@@ -169,20 +175,25 @@ export default function PartnerAccountDetails() {
   const ledgerEntries: LedgerEntry[] = useMemo(() => {
     const entries: LedgerEntry[] = [];
 
-    // Add shipments as entries
+    // Add shipments as entries - check if cancelled
     shipmentsWithPricing.forEach(shipment => {
+      const isCancelled = !!shipment.cancelled_at;
+      
       if (shipment.hasPrice && shipment.calculatedTotal > 0) {
         entries.push({
           id: `shipment-${shipment.id}`,
           date: shipment.created_at,
           type: 'shipment',
-          description: shipment.waste_description || shipment.waste_type || 'شحنة',
+          description: isCancelled 
+            ? `[ملغاة] ${shipment.waste_description || shipment.waste_type || 'شحنة'}`
+            : (shipment.waste_description || shipment.waste_type || 'شحنة'),
           quantity: Number(shipment.quantity) || 0,
           unit: shipment.unit || 'وحدة',
           unitPrice: shipment.pricePerUnit,
-          debit: shipment.calculatedTotal, // مدين - مستحق علينا للشريك
+          debit: isCancelled ? 0 : shipment.calculatedTotal, // إذا ملغاة = 0
           credit: 0,
           reference: shipment.shipment_number,
+          isCancelled,
         });
       }
     });

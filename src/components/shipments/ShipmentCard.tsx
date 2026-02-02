@@ -34,6 +34,7 @@ import {
   FileCheck,
   Navigation,
   Eye,
+  XCircle,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -49,6 +50,7 @@ import StatusChangeDialog from './StatusChangeDialog';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import ShipmentQuickPrint from './ShipmentQuickPrint';
 import ShipmentRouteMap from './ShipmentRouteMap';
+import CancelShipmentDialog from './CancelShipmentDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -217,18 +219,35 @@ const ShipmentCard = ({
                   >
                     <Printer className="w-3 h-3" />
                   </Button>
-                    {/* Show recycling certificate button for recycler (to issue) or transporter (to view) */}
-                    {(isRecycler || isTransporter) && (
+                  {/* Show recycling certificate button for recycler (to issue) or transporter (to view) */}
+                  {(isRecycler || isTransporter) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleReportButtonClick}
+                      className="gap-1 text-xs"
+                    >
+                      <FileText className="w-3 h-3" />
+                      {isRecycler ? 'إصدار' : 'شهادة'}
+                    </Button>
+                  )}
+                  {/* Cancel Shipment Button */}
+                  <CancelShipmentDialog
+                    shipmentId={shipment.id}
+                    shipmentNumber={shipment.shipment_number}
+                    currentStatus={shipment.status}
+                    onSuccess={onStatusChange}
+                    trigger={
                       <Button
                         size="sm"
-                        variant="outline"
-                        onClick={handleReportButtonClick}
-                        className="gap-1 text-xs"
+                        variant="ghost"
+                        className="gap-1 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <FileText className="w-3 h-3" />
-                        {isRecycler ? 'إصدار' : 'شهادة'}
+                        <XCircle className="w-3 h-3" />
                       </Button>
-                    )}
+                    }
+                  />
                   {canChange && !isCompleted && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -559,6 +578,25 @@ const ShipmentCard = ({
                         مكتملة
                       </Badge>
                     ) : null}
+
+                    {/* Cancel Shipment Button - Full View */}
+                    <CancelShipmentDialog
+                      shipmentId={shipment.id}
+                      shipmentNumber={shipment.shipment_number}
+                      currentStatus={shipment.status}
+                      onSuccess={onStatusChange}
+                      trigger={
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2 text-destructive border-destructive/50 hover:bg-destructive/10"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <XCircle className="w-4 h-4" />
+                          إلغاء
+                        </Button>
+                      }
+                    />
                   </div>
                 </div>
               </div>
