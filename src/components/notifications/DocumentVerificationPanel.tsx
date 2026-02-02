@@ -360,12 +360,12 @@ const DocumentVerificationPanel = ({
         .insert([{
           document_id: docId,
           organization_id: doc?.organization_id,
-          verification_type: 'manual_from_notification',
+          verification_type: 'ai_assisted',
           verification_action: status === 'verified' ? 'verify' : 'reject',
           previous_status: doc?.verification_status || 'pending',
           new_status: status,
           verified_by: user.id,
-          notes: rejectionReason || `تم ${status === 'verified' ? 'القبول' : 'الرفض'} من الإشعارات`,
+          notes: rejectionReason || `تم ${status === 'verified' ? 'القبول' : 'الرفض'} من لوحة الإشعارات`,
           ai_analysis: analyses[docId] as any,
         }]);
 

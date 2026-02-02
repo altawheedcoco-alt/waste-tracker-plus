@@ -423,12 +423,12 @@ const DocumentVerification = () => {
         .insert([{
           document_id: doc.id,
           organization_id: doc.organization_id,
-          verification_type: 'ai_analysis',
-          verification_action: 'analyze',
+          verification_type: 'ai_assisted',
+          verification_action: 'verify',
           previous_status: doc.verification_status || 'pending',
           new_status: doc.verification_status || 'pending',
           verified_by: user?.id,
-          notes: analysis.summary,
+          notes: 'تحليل قانوني بالذكاء الاصطناعي: ' + analysis.summary,
           ai_analysis: analysis as any,
         }]);
 
@@ -583,11 +583,11 @@ const DocumentVerification = () => {
             document_id: doc.id,
             organization_id: doc.organization_id,
             verification_type: 'auto',
-            verification_action: newStatus === 'verified' ? 'auto_verify' : newStatus === 'rejected' ? 'auto_reject' : 'auto_review',
+            verification_action: newStatus === 'verified' ? 'verify' : newStatus === 'rejected' ? 'reject' : 'request_revision',
             previous_status: 'pending',
             new_status: newStatus,
             verified_by: user?.id,
-            notes: analysis.summary,
+            notes: 'تحقق تلقائي: ' + analysis.summary,
             ai_analysis: analysis as any,
           }]);
       }
