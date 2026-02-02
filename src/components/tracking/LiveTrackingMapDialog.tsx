@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useEffect, useState, useCallback, memo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,12 +11,9 @@ import {
   Truck, 
   RefreshCw, 
   Clock, 
-  Maximize2,
+  Eye,
   Signal,
-  Activity,
-  User,
-  Phone,
-  Eye
+  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +23,17 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewerPresence } from '@/hooks/useDriverPresence';
+import { 
+  fetchRoadRoute, 
+  geocodeAddress, 
+  formatDistance, 
+  formatDuration,
+  calculateHaversineDistance,
+  pickupMarkerIcon,
+  deliveryMarkerIcon,
+  createDriverMarkerIcon,
+  RouteResult
+} from '@/lib/mapUtils';
 
 // Fix for default marker icons in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -33,78 +41,6 @@ L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
-
-// Custom icons
-const pickupIcon = new L.DivIcon({
-  className: 'pickup-marker',
-  html: `<div style="
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    border: 4px solid white;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  "><span style="transform: rotate(45deg); color: white; font-size: 16px;">📍</span></div>`,
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-});
-
-const deliveryIcon = new L.DivIcon({
-  className: 'delivery-marker',
-  html: `<div style="
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #22c55e, #15803d);
-    border: 4px solid white;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  "><span style="transform: rotate(45deg); color: white; font-size: 16px;">🏁</span></div>`,
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-});
-
-const createDriverIcon = (isOnline: boolean) => new L.DivIcon({
-  className: 'driver-marker',
-  html: `<div style="
-    position: relative;
-    width: 52px;
-    height: 52px;
-  ">
-    <div style="
-      position: absolute;
-      width: 52px;
-      height: 52px;
-      background: radial-gradient(circle, ${isOnline ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.3)'} 0%, transparent 70%);
-      border-radius: 50%;
-      animation: driverPulse 2s infinite;
-    "></div>
-    <div style="
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 34px;
-      height: 34px;
-      background: linear-gradient(135deg, ${isOnline ? '#22c55e' : '#ef4444'}, ${isOnline ? '#15803d' : '#dc2626'});
-      border: 4px solid white;
-      border-radius: 50%;
-      box-shadow: 0 4px 15px ${isOnline ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    "><span style="color: white; font-size: 16px;">🚛</span></div>
-  </div>`,
-  iconSize: [52, 52],
-  iconAnchor: [26, 26],
 });
 
 interface DriverLocation {
@@ -158,24 +94,6 @@ const MapBoundsAdjuster = ({ bounds, centerOnDriver, driverPosition }: {
   return null;
 };
 
-// Geocode address to coordinates
-const geocodeAddress = async (address: string): Promise<[number, number] | null> => {
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&accept-language=ar`
-    );
-    const data = await response.json();
-    
-    if (data && data.length > 0) {
-      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
-    }
-    return null;
-  } catch (error) {
-    console.error('Geocoding error:', error);
-    return null;
-  }
-};
-
 const LiveTrackingMapDialog = memo(({
   isOpen,
   onClose,
@@ -191,14 +109,16 @@ const LiveTrackingMapDialog = memo(({
   const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
   const [driverInfo, setDriverInfo] = useState<DriverInfo | null>(null);
   const [driverPath, setDriverPath] = useState<[number, number][]>([]);
+  const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pickupCoords, setPickupCoords] = useState<[number, number] | null>(null);
   const [deliveryCoords, setDeliveryCoords] = useState<[number, number] | null>(null);
   const [mapKey, setMapKey] = useState(0);
   const [centerOnDriver, setCenterOnDriver] = useState(false);
   const [isDriverOnline, setIsDriverOnline] = useState(false);
+  const [routeLoadFailed, setRouteLoadFailed] = useState(false);
 
-  // Live tracking presence - announce to driver when watching
+  // Live tracking presence
   const { isConnected: isPresenceConnected } = useViewerPresence(
     isOpen && driverId ? driverId : '',
     profile?.full_name || 'مستخدم',
@@ -246,7 +166,7 @@ const LiveTrackingMapDialog = memo(({
         .eq('driver_id', driverId)
         .order('recorded_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!error && data) {
         setDriverLocation(data);
@@ -277,62 +197,55 @@ const LiveTrackingMapDialog = memo(({
     toast.success('تم تحديث موقع السائق');
   };
 
-  // Initialize geocoding when dialog opens
+  // Initialize map with real routing
   useEffect(() => {
     if (!isOpen) return;
 
     const initializeMap = async () => {
       setIsLoading(true);
       setMapKey(prev => prev + 1);
+      setRouteLoadFailed(false);
 
       try {
-        const [pickup, delivery] = await Promise.all([
+        // Geocode addresses
+        const [pickupResult, deliveryResult] = await Promise.all([
           geocodeAddress(pickupAddress),
           geocodeAddress(deliveryAddress),
         ]);
+
+        const pickup = pickupResult ? [pickupResult.lat, pickupResult.lng] as [number, number] : null;
+        const delivery = deliveryResult ? [deliveryResult.lat, deliveryResult.lng] as [number, number] : null;
 
         setPickupCoords(pickup);
         setDeliveryCoords(delivery);
 
         if (pickup && delivery) {
-          // Use OSRM for route calculation
-          try {
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${pickup[1]},${pickup[0]};${delivery[1]},${delivery[0]}?overview=false`;
-            const response = await fetch(osrmUrl);
-            const data = await response.json();
+          // Fetch real road route
+          const routeResult = await fetchRoadRoute(
+            { lat: pickup[0], lng: pickup[1] },
+            { lat: delivery[0], lng: delivery[1] }
+          );
 
-            if (data.code === 'Ok' && data.routes?.length > 0) {
-              const route = data.routes[0];
-              const distanceKm = route.distance / 1000;
-              const durationMinutes = route.duration / 60;
-
-              setRouteInfo({
-                distance: distanceKm >= 1 
-                  ? `${distanceKm.toFixed(1)} كم` 
-                  : `${Math.round(route.distance)} م`,
-                duration: durationMinutes >= 60
-                  ? `${Math.floor(durationMinutes / 60)} ساعة ${Math.round(durationMinutes % 60)} دقيقة`
-                  : `${Math.round(durationMinutes)} دقيقة`,
-                distanceKm,
-              });
-            }
-          } catch {
-            // Fallback calculation
-            const R = 6371;
-            const dLat = (delivery[0] - pickup[0]) * Math.PI / 180;
-            const dLon = (delivery[1] - pickup[1]) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(pickup[0] * Math.PI / 180) * Math.cos(delivery[0] * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            const distance = R * c * 1.3; // Add 30% for road distance
-            
+          if (routeResult.success) {
+            setRouteCoords(routeResult.coordinates);
+            setRouteInfo({
+              distance: formatDistance(routeResult.distance),
+              duration: formatDuration(routeResult.duration),
+              distanceKm: routeResult.distance / 1000,
+            });
+          } else {
+            setRouteLoadFailed(true);
+            // Fallback to Haversine distance
+            const distance = calculateHaversineDistance(pickup[0], pickup[1], delivery[0], delivery[1]);
             setRouteInfo({
               distance: `~${distance.toFixed(1)} كم`,
               duration: `~${Math.round((distance / 50) * 60)} دقيقة`,
               distanceKm: distance,
             });
+            setRouteCoords([pickup, delivery]);
           }
+        } else {
+          toast.info('تعذر تحديد بعض المواقع بدقة');
         }
       } catch (error) {
         console.error('Map initialization error:', error);
@@ -366,7 +279,6 @@ const LiveTrackingMapDialog = memo(({
           setDriverLocation(newLocation);
           setIsDriverOnline(true);
           
-          // Add to path
           setDriverPath(prev => {
             const newPath = [...prev, [Number(newLocation.latitude), Number(newLocation.longitude)] as [number, number]];
             return newPath.slice(-50);
@@ -387,6 +299,11 @@ const LiveTrackingMapDialog = memo(({
     if (deliveryCoords) points.push(deliveryCoords);
     if (driverLocation) points.push([driverLocation.latitude, driverLocation.longitude]);
     
+    // Add route points for better bounds
+    if (routeCoords.length > 0) {
+      routeCoords.forEach(coord => points.push(coord));
+    }
+    
     return points.length >= 2 ? L.latLngBounds(points) : null;
   };
 
@@ -394,14 +311,12 @@ const LiveTrackingMapDialog = memo(({
   const calculateRemainingDistance = (): string | null => {
     if (!driverLocation || !deliveryCoords) return null;
     
-    const R = 6371;
-    const dLat = (deliveryCoords[0] - driverLocation.latitude) * Math.PI / 180;
-    const dLon = (deliveryCoords[1] - driverLocation.longitude) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(driverLocation.latitude * Math.PI / 180) * Math.cos(deliveryCoords[0] * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c;
+    const distance = calculateHaversineDistance(
+      driverLocation.latitude,
+      driverLocation.longitude,
+      deliveryCoords[0],
+      deliveryCoords[1]
+    );
     
     return distance >= 1 ? `${distance.toFixed(1)} كم` : `${Math.round(distance * 1000)} م`;
   };
@@ -495,119 +410,121 @@ const LiveTrackingMapDialog = memo(({
                       </p>
                     </div>
                   </div>
-                  
                   {driverInfo.vehicle_plate && (
-                    <div className="mt-3 flex items-center gap-2 text-sm">
-                      <Badge variant="outline">{driverInfo.vehicle_plate}</Badge>
-                      <span className="text-muted-foreground">{driverInfo.vehicle_type || 'مركبة'}</span>
+                    <div className="mt-3 pt-3 border-t flex items-center gap-2 text-sm text-muted-foreground">
+                      <Truck className="w-4 h-4" />
+                      <span>{driverInfo.vehicle_plate}</span>
                     </div>
                   )}
-
-                  {driverInfo.phone && (
-                    <Button variant="outline" size="sm" className="w-full mt-3" asChild>
-                      <a href={`tel:${driverInfo.phone}`}>
-                        <Phone className="w-4 h-4 ml-2" />
-                        اتصال بالسائق
-                      </a>
-                    </Button>
-                  )}
-                </Card>
-              )}
-
-              {/* Live Stats */}
-              {driverLocation && (
-                <Card className="p-4 space-y-3">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-primary" />
-                    البيانات اللحظية
-                  </h4>
-                  
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="p-2 rounded-lg bg-muted/50">
-                      <p className="text-muted-foreground text-xs">السرعة</p>
-                      <p className="font-bold">
-                        {driverLocation.speed ? `${Math.round(driverLocation.speed)} كم/س` : '-'}
-                      </p>
-                    </div>
-                    <div className="p-2 rounded-lg bg-muted/50">
-                      <p className="text-muted-foreground text-xs">الدقة</p>
-                      <p className="font-bold">
-                        {driverLocation.accuracy ? `± ${Math.round(driverLocation.accuracy)} م` : '-'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-2 rounded-lg bg-primary/5 border border-primary/20">
-                    <p className="text-muted-foreground text-xs">المتبقي للوجهة</p>
-                    <p className="font-bold text-primary text-lg">
-                      {calculateRemainingDistance() || '-'}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    <span>آخر تحديث: {new Date(driverLocation.recorded_at).toLocaleTimeString('ar-SA')}</span>
-                  </div>
                 </Card>
               )}
 
               {/* Route Info */}
               {routeInfo && (
-                <Card className="p-4 space-y-3">
-                  <h4 className="font-semibold flex items-center gap-2">
-                    <Route className="w-4 h-4 text-primary" />
-                    معلومات المسار
-                  </h4>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">المسافة الكلية</span>
-                      <span className="font-bold">{routeInfo.distance}</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                      <Route className="w-5 h-5 text-blue-600" />
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">الوقت المتوقع</span>
-                      <span className="font-bold">{routeInfo.duration}</span>
+                    <div>
+                      <p className="text-xs text-muted-foreground">المسافة الكلية</p>
+                      <p className="font-bold text-lg">{routeInfo.distance}</p>
+                      {routeLoadFailed && (
+                        <p className="text-[10px] text-amber-600">تقريبية</p>
+                      )}
                     </div>
                   </div>
+                  
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200">
+                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">الوقت المتوقع</p>
+                      <p className="font-bold text-lg">{routeInfo.duration}</p>
+                    </div>
+                  </div>
+
+                  {calculateRemainingDistance() && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200">
+                      <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                        <Navigation className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">المتبقي للوجهة</p>
+                        <p className="font-bold text-lg">{calculateRemainingDistance()}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Driver Speed & Accuracy */}
+              {driverLocation && (
+                <Card className="p-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">
+                        {driverLocation.speed ? Math.round(driverLocation.speed) : 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground">كم/س</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold">
+                        {driverLocation.accuracy ? `±${Math.round(driverLocation.accuracy)}` : '-'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">متر دقة</p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground text-center mt-2">
+                    آخر تحديث: {new Date(driverLocation.recorded_at).toLocaleTimeString('ar-SA')}
+                  </p>
                 </Card>
               )}
 
               {/* Legend */}
-              <Card className="p-4">
-                <h4 className="font-semibold mb-3 text-sm">دليل الخريطة</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-blue-500" />
-                    <span>نقطة الاستلام</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-500" />
-                    <span>نقطة التسليم</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-red-500 animate-pulse" />
-                    <span>موقع السائق</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-1 bg-indigo-500 rounded" />
-                    <span>المسار المخطط</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-1 bg-orange-500 rounded" />
-                    <span>مسار السائق</span>
-                  </div>
+              <div className="text-xs space-y-2 p-3 bg-muted/50 rounded-lg">
+                <p className="font-medium mb-2">دليل الخريطة</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500" />
+                  <span>نقطة الاستلام</span>
                 </div>
-              </Card>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
+                  <span>نقطة التسليم</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-primary animate-pulse" />
+                  <span>موقع السائق</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-0.5 bg-indigo-500" style={{ borderStyle: 'dashed' }} />
+                  <span>المسار المخطط</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-0.5 bg-cyan-500" />
+                  <span>مسار السائق</span>
+                </div>
+              </div>
             </div>
 
-            {/* Map Container */}
+            {/* Map Area */}
             <div className="flex-1 relative">
               {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-muted/80 z-10">
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                    <span className="text-muted-foreground">جاري تحميل الخريطة...</span>
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <span className="text-sm text-muted-foreground">جاري تحميل الخريطة والمسار...</span>
                   </div>
+                </div>
+              )}
+
+              {routeLoadFailed && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000]">
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    المسار تقريبي - تعذر تحميل مسار الطريق الحقيقي
+                  </Badge>
                 </div>
               )}
               
@@ -615,7 +532,7 @@ const LiveTrackingMapDialog = memo(({
                 <MapContainer
                   key={mapKey}
                   center={mapCenter}
-                  zoom={12}
+                  zoom={10}
                   style={{ height: '100%', width: '100%' }}
                   scrollWheelZoom={true}
                 >
@@ -630,9 +547,34 @@ const LiveTrackingMapDialog = memo(({
                     driverPosition={driverPosition}
                   />
                   
+                  {/* Real road route */}
+                  {routeCoords.length > 1 && (
+                    <Polyline
+                      positions={routeCoords}
+                      pathOptions={{
+                        color: '#6366f1',
+                        weight: 5,
+                        opacity: 0.8,
+                        dashArray: routeLoadFailed ? '12, 8' : undefined,
+                      }}
+                    />
+                  )}
+                  
+                  {/* Driver path trail */}
+                  {driverPath.length > 1 && (
+                    <Polyline
+                      positions={driverPath}
+                      pathOptions={{
+                        color: '#06b6d4',
+                        weight: 4,
+                        opacity: 0.9,
+                      }}
+                    />
+                  )}
+                  
                   {/* Pickup marker */}
                   {pickupCoords && (
-                    <Marker position={pickupCoords} icon={pickupIcon}>
+                    <Marker position={pickupCoords} icon={pickupMarkerIcon}>
                       <Popup>
                         <div className="text-right min-w-[180px]" dir="rtl">
                           <p className="font-bold text-blue-600 mb-1">📍 نقطة الاستلام</p>
@@ -644,7 +586,7 @@ const LiveTrackingMapDialog = memo(({
                   
                   {/* Delivery marker */}
                   {deliveryCoords && (
-                    <Marker position={deliveryCoords} icon={deliveryIcon}>
+                    <Marker position={deliveryCoords} icon={deliveryMarkerIcon}>
                       <Popup>
                         <div className="text-right min-w-[180px]" dir="rtl">
                           <p className="font-bold text-green-600 mb-1">🏁 نقطة التسليم</p>
@@ -654,54 +596,23 @@ const LiveTrackingMapDialog = memo(({
                     </Marker>
                   )}
                   
-                  {/* Planned route line */}
-                  {pickupCoords && deliveryCoords && (
-                    <Polyline
-                      positions={[pickupCoords, deliveryCoords]}
-                      pathOptions={{ 
-                        color: '#6366f1', 
-                        weight: 4, 
-                        opacity: 0.7, 
-                        dashArray: '12, 8' 
-                      }}
-                    />
-                  )}
-
-                  {/* Driver path trail */}
-                  {driverPath.length > 1 && (
-                    <Polyline
-                      positions={driverPath}
-                      pathOptions={{ 
-                        color: '#f97316', 
-                        weight: 3, 
-                        opacity: 0.8
-                      }}
-                    />
-                  )}
-                  
                   {/* Driver marker */}
-                  {driverLocation && (
+                  {driverPosition && (
                     <Marker 
-                      position={[driverLocation.latitude, driverLocation.longitude]} 
-                      icon={createDriverIcon(isDriverOnline)}
+                      position={driverPosition} 
+                      icon={createDriverMarkerIcon(isDriverOnline)}
                     >
                       <Popup>
-                        <div className="text-right min-w-[200px]" dir="rtl">
-                          <p className="font-bold text-lg mb-2">
+                        <div className="text-right min-w-[180px]" dir="rtl">
+                          <p className="font-bold text-primary mb-1">
                             🚛 {driverInfo?.full_name || 'السائق'}
                           </p>
                           <div className="space-y-1 text-sm">
-                            <p>
-                              <strong>السرعة:</strong>{' '}
-                              {driverLocation.speed ? `${Math.round(driverLocation.speed)} كم/س` : 'متوقف'}
-                            </p>
-                            <p>
-                              <strong>الدقة:</strong>{' '}
-                              {driverLocation.accuracy ? `± ${Math.round(driverLocation.accuracy)} م` : '-'}
-                            </p>
-                            <p className="text-muted-foreground pt-2 text-xs">
-                              آخر تحديث: {new Date(driverLocation.recorded_at).toLocaleTimeString('ar-SA')}
-                            </p>
+                            <p>السرعة: {driverLocation?.speed ? `${Math.round(driverLocation.speed)} كم/س` : 'غير محددة'}</p>
+                            <p>الدقة: ±{Math.round(driverLocation?.accuracy || 0)} متر</p>
+                            {driverInfo?.vehicle_plate && (
+                              <p>اللوحة: {driverInfo.vehicle_plate}</p>
+                            )}
                           </div>
                         </div>
                       </Popup>
