@@ -294,7 +294,12 @@ export default function PartnerAccountDetails() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <PartnerHeader partner={partner} />
+        <PartnerHeader 
+          partner={partner} 
+          ledgerEntries={ledgerEntries}
+          shipments={shipmentsWithPricing}
+          organizationName={organization?.name}
+        />
 
         {/* Quick Stats */}
         <PartnerQuickStats

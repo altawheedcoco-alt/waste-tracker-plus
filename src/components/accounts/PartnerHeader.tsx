@@ -10,10 +10,10 @@ import {
   Phone, 
   MapPin,
   Mail,
-  FileText,
-  Printer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import PrintExportActions from './PrintExportActions';
+import { LedgerEntry } from './AccountLedger';
 
 interface PartnerHeaderProps {
   partner: {
@@ -25,6 +25,9 @@ interface PartnerHeaderProps {
     email?: string;
   };
   isExternal?: boolean;
+  ledgerEntries?: LedgerEntry[];
+  shipments?: any[];
+  organizationName?: string;
 }
 
 const partnerTypeConfig = {
@@ -54,7 +57,13 @@ const partnerTypeConfig = {
   },
 };
 
-export default function PartnerHeader({ partner, isExternal = false }: PartnerHeaderProps) {
+export default function PartnerHeader({ 
+  partner, 
+  isExternal = false,
+  ledgerEntries = [],
+  shipments = [],
+  organizationName,
+}: PartnerHeaderProps) {
   const navigate = useNavigate();
   
   const typeConfig = partnerTypeConfig[partner.organization_type as keyof typeof partnerTypeConfig] 
@@ -120,16 +129,15 @@ export default function PartnerHeader({ partner, isExternal = false }: PartnerHe
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-2 self-start sm:self-center">
-        <Button variant="outline" size="sm" className="gap-2">
-          <Printer className="h-4 w-4" />
-          طباعة كشف
-        </Button>
-        <Button variant="outline" size="sm" className="gap-2">
-          <FileText className="h-4 w-4" />
-          إنشاء فاتورة
-        </Button>
+      {/* Print/Export Actions */}
+      <div className="self-start sm:self-center">
+        <PrintExportActions
+          partnerName={partner.name}
+          partnerType={partner.organization_type || 'guest'}
+          ledgerEntries={ledgerEntries}
+          shipments={shipments}
+          organizationName={organizationName}
+        />
       </div>
     </div>
   );
