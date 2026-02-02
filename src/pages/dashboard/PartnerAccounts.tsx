@@ -281,10 +281,16 @@ export default function PartnerAccounts() {
               {partnerTypes.map((type) => {
                 const typeInfo = getPartnerTypeInfo(type);
                 const Icon = typeInfo.icon;
+                const count = filteredBalances(type).length;
                 return (
                   <TabsTrigger key={type} value={type} className="gap-2">
                     <Icon className="h-4 w-4" />
                     {typeInfo.label}
+                    {count > 0 && (
+                      <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">
+                        {count}
+                      </Badge>
+                    )}
                   </TabsTrigger>
                 );
               })}
