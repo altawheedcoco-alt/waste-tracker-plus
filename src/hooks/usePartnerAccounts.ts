@@ -79,9 +79,116 @@ export function usePartnerAccounts() {
     enabled: !!organization?.id,
   });
 
+  // Fetch partners from shipments (auto-detected partners)
+  const { data: shipmentPartners = [], isLoading: shipmentsLoading } = useQuery({
+    queryKey: ['shipment-partners', organization?.id, organization?.organization_type],
+    queryFn: async () => {
+      if (!organization?.id || !organization?.organization_type) return [];
+
+      const orgType = organization.organization_type;
+      let partnerIds: { id: string; type: string; org: any }[] = [];
+
+      // Fetch shipments based on organization type
+      if (orgType === 'transporter') {
+        // Transporter sees generators and recyclers
+        const { data: shipments, error } = await supabase
+          .from('shipments')
+          .select(`
+            generator_id,
+            recycler_id,
+            generator:organizations!shipments_generator_id_fkey(id, name, organization_type, city, phone),
+            recycler:organizations!shipments_recycler_id_fkey(id, name, organization_type, city, phone)
+          `)
+          .eq('transporter_id', organization.id);
+
+        if (!error && shipments) {
+          for (const s of shipments) {
+            if (s.generator_id && s.generator) {
+              partnerIds.push({ id: s.generator_id, type: 'generator', org: s.generator });
+            }
+            if (s.recycler_id && s.recycler) {
+              partnerIds.push({ id: s.recycler_id, type: 'recycler', org: s.recycler });
+            }
+          }
+        }
+      } else if (orgType === 'generator') {
+        // Generator sees transporters and recyclers
+        const { data: shipments, error } = await supabase
+          .from('shipments')
+          .select(`
+            transporter_id,
+            recycler_id,
+            transporter:organizations!shipments_transporter_id_fkey(id, name, organization_type, city, phone),
+            recycler:organizations!shipments_recycler_id_fkey(id, name, organization_type, city, phone)
+          `)
+          .eq('generator_id', organization.id);
+
+        if (!error && shipments) {
+          for (const s of shipments) {
+            if (s.transporter_id && s.transporter) {
+              partnerIds.push({ id: s.transporter_id, type: 'transporter', org: s.transporter });
+            }
+            if (s.recycler_id && s.recycler) {
+              partnerIds.push({ id: s.recycler_id, type: 'recycler', org: s.recycler });
+            }
+          }
+        }
+      } else if (orgType === 'recycler') {
+        // Recycler sees transporters and generators
+        const { data: shipments, error } = await supabase
+          .from('shipments')
+          .select(`
+            transporter_id,
+            generator_id,
+            transporter:organizations!shipments_transporter_id_fkey(id, name, organization_type, city, phone),
+            generator:organizations!shipments_generator_id_fkey(id, name, organization_type, city, phone)
+          `)
+          .eq('recycler_id', organization.id);
+
+        if (!error && shipments) {
+          for (const s of shipments) {
+            if (s.transporter_id && s.transporter) {
+              partnerIds.push({ id: s.transporter_id, type: 'transporter', org: s.transporter });
+            }
+            if (s.generator_id && s.generator) {
+              partnerIds.push({ id: s.generator_id, type: 'generator', org: s.generator });
+            }
+          }
+        }
+      }
+
+      // Deduplicate by partner id
+      const uniquePartners = new Map<string, PartnerBalance>();
+      for (const p of partnerIds) {
+        if (!uniquePartners.has(p.id)) {
+          uniquePartners.set(p.id, {
+            id: p.id,
+            partner_organization_id: p.id,
+            external_partner_id: null,
+            isExternal: false,
+            partner_organization: p.org ? {
+              id: p.org.id,
+              name: p.org.name,
+              organization_type: p.org.organization_type || p.type,
+              city: p.org.city,
+              phone: p.org.phone,
+            } : null,
+            total_invoiced: 0,
+            total_paid: 0,
+            balance: 0,
+            last_transaction_date: undefined,
+          });
+        }
+      }
+
+      return Array.from(uniquePartners.values());
+    },
+    enabled: !!organization?.id && !!organization?.organization_type,
+  });
+
   // Fetch partner balances from invoices and payments
-  const { data: partnerBalances = [], isLoading: balancesLoading } = useQuery({
-    queryKey: ['partner-accounts', organization?.id],
+  const { data: invoiceBalances = [], isLoading: balancesLoading } = useQuery({
+    queryKey: ['partner-invoices', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
 
@@ -114,7 +221,7 @@ export function usePartnerAccounts() {
       }
 
       // Group by partner organization
-      const partnerMap = new Map<string, PartnerBalance>();
+      const partnerMap = new Map<string, { total_invoiced: number; total_paid: number; last_date?: string }>();
 
       for (const invoice of invoices || []) {
         if (!invoice.partner_organization_id) continue;
@@ -125,35 +232,33 @@ export function usePartnerAccounts() {
         if (existing) {
           existing.total_invoiced += Number(invoice.total_amount) || 0;
           existing.total_paid += Number(invoice.paid_amount) || 0;
-          existing.balance = existing.total_invoiced - existing.total_paid;
-          if (invoice.issue_date && (!existing.last_transaction_date || invoice.issue_date > existing.last_transaction_date)) {
-            existing.last_transaction_date = invoice.issue_date;
+          if (invoice.issue_date && (!existing.last_date || invoice.issue_date > existing.last_date)) {
+            existing.last_date = invoice.issue_date;
           }
         } else {
-          const partnerOrg = invoice.partner_organization as any;
           partnerMap.set(partnerId, {
-            id: partnerId,
-            partner_organization_id: partnerId,
-            external_partner_id: null,
-            isExternal: false,
-            partner_organization: partnerOrg ? {
-              id: partnerOrg.id,
-              name: partnerOrg.name,
-              organization_type: partnerOrg.organization_type,
-              city: partnerOrg.city,
-              phone: partnerOrg.phone,
-            } : null,
             total_invoiced: Number(invoice.total_amount) || 0,
             total_paid: Number(invoice.paid_amount) || 0,
-            balance: (Number(invoice.total_amount) || 0) - (Number(invoice.paid_amount) || 0),
-            last_transaction_date: invoice.issue_date,
+            last_date: invoice.issue_date,
           });
         }
       }
 
-      return Array.from(partnerMap.values());
+      return partnerMap;
     },
     enabled: !!organization?.id,
+  });
+
+  // Merge shipment partners with invoice balances
+  const partnerBalances: PartnerBalance[] = shipmentPartners.map((partner) => {
+    const invoiceData = invoiceBalances instanceof Map ? invoiceBalances.get(partner.id) : null;
+    return {
+      ...partner,
+      total_invoiced: invoiceData?.total_invoiced || 0,
+      total_paid: invoiceData?.total_paid || 0,
+      balance: (invoiceData?.total_invoiced || 0) - (invoiceData?.total_paid || 0),
+      last_transaction_date: invoiceData?.last_date,
+    };
   });
 
   // Combine registered and external partners
@@ -211,7 +316,7 @@ export function usePartnerAccounts() {
   return {
     partnerBalances,
     externalPartners,
-    balancesLoading: balancesLoading || externalLoading,
+    balancesLoading: balancesLoading || externalLoading || shipmentsLoading,
     partnerTypes,
     filteredBalances,
     calculateTotals,
