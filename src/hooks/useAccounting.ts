@@ -91,7 +91,7 @@ export interface PartnerBalance {
   total_paid: number;
   balance: number;
   last_transaction_date?: string;
-  partner_organization?: { name: string; };
+  partner_organization?: { name: string; organization_type: string; };
 }
 
 export interface FinancialSummary {
@@ -179,7 +179,7 @@ export const useAccounting = () => {
         .from('partner_balances')
         .select(`
           *,
-          partner_organization:organizations!partner_balances_partner_organization_id_fkey(name)
+          partner_organization:organizations!partner_balances_partner_organization_id_fkey(name, organization_type)
         `)
         .eq('organization_id', orgId);
       
