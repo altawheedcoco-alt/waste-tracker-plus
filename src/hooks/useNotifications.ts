@@ -14,6 +14,8 @@ interface Notification {
   shipment_id: string | null;
   request_id: string | null;
   pdf_url: string | null;
+  organization_id?: string | null;
+  document_id?: string | null;
 }
 
 export const useNotifications = () => {
@@ -58,12 +60,51 @@ export const useNotifications = () => {
         }
       }
 
-      // Merge pdf_urls into notifications
-      const enrichedNotifications = (data || []).map((n: Notification) => {
-        if (n.type === 'recycling_report' && !n.pdf_url && n.shipment_id && pdfUrlMap[n.shipment_id]) {
-          return { ...n, pdf_url: pdfUrlMap[n.shipment_id] };
+      // Get organization IDs for document_uploaded notifications
+      const documentNotifications = (data || [])
+        .filter((n: Notification) => n.type === 'document_uploaded');
+
+      let documentOrgMap: Record<string, { org_id: string; doc_id?: string }> = {};
+
+      // For document notifications, extract org info from approval_requests
+      if (documentNotifications.length > 0) {
+        const requestIds = documentNotifications
+          .filter((n: Notification) => n.request_id)
+          .map((n: Notification) => n.request_id);
+
+        if (requestIds.length > 0) {
+          const { data: requests } = await supabase
+            .from('approval_requests')
+            .select('id, requester_organization_id, target_resource_id')
+            .in('id', requestIds);
+
+          if (requests) {
+            requests.forEach((req: { id: string; requester_organization_id: string; target_resource_id?: string }) => {
+              documentOrgMap[req.id] = {
+                org_id: req.requester_organization_id,
+                doc_id: req.target_resource_id,
+              };
+            });
+          }
         }
-        return n;
+      }
+
+      // Merge pdf_urls and org info into notifications
+      const enrichedNotifications = (data || []).map((n: Notification) => {
+        let enriched = { ...n };
+        
+        // Add pdf_url for recycling reports
+        if (n.type === 'recycling_report' && !n.pdf_url && n.shipment_id && pdfUrlMap[n.shipment_id]) {
+          enriched.pdf_url = pdfUrlMap[n.shipment_id];
+        }
+        
+        // Add organization_id for document notifications
+        if (n.type === 'document_uploaded' && n.request_id && documentOrgMap[n.request_id]) {
+          enriched.organization_id = documentOrgMap[n.request_id].org_id;
+          enriched.document_id = documentOrgMap[n.request_id].doc_id;
+        }
+        
+        return enriched;
       });
 
       setNotifications(enrichedNotifications as Notification[]);
