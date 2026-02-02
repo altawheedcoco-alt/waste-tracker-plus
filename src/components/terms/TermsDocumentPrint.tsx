@@ -12,6 +12,12 @@ interface TermsDocumentPrintProps {
     terms_version: string;
     accepted_at: string;
     ip_address: string | null;
+    signer_national_id?: string | null;
+    signer_phone?: string | null;
+    signer_position?: string | null;
+    signer_id_front_url?: string | null;
+    signer_id_back_url?: string | null;
+    verified_match?: boolean;
   };
 }
 
@@ -52,11 +58,23 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
 
         {/* Acceptance Info */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6 border">
-          <h2 className="font-bold text-lg mb-3 text-gray-800">بيانات الموافقة</h2>
+          <h2 className="font-bold text-lg mb-3 text-gray-800">بيانات الموقّع القانونية</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
               <span className="text-gray-500">اسم الموقّع:</span>
               <span className="font-medium mr-2">{acceptance.full_name || 'غير محدد'}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">الرقم القومي:</span>
+              <span className="font-medium mr-2 font-mono">{acceptance.signer_national_id || 'غير محدد'}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">المسمى الوظيفي:</span>
+              <span className="font-medium mr-2">{acceptance.signer_position || 'غير محدد'}</span>
+            </div>
+            <div>
+              <span className="text-gray-500">رقم الهاتف:</span>
+              <span className="font-medium mr-2">{acceptance.signer_phone || 'غير محدد'}</span>
             </div>
             <div>
               <span className="text-gray-500">اسم الجهة:</span>
@@ -82,8 +100,43 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
                 TA-{acceptance.id.slice(0, 8).toUpperCase()}
               </span>
             </div>
+            <div>
+              <span className="text-gray-500">حالة التحقق:</span>
+              <span className={`font-medium mr-2 ${acceptance.verified_match ? 'text-green-600' : 'text-amber-600'}`}>
+                {acceptance.verified_match ? '✓ تم التحقق' : '⚠ قيد المراجعة'}
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* ID Card Images */}
+        {(acceptance.signer_id_front_url || acceptance.signer_id_back_url) && (
+          <div className="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200">
+            <h2 className="font-bold text-lg mb-3 text-gray-800">صور إثبات الهوية</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {acceptance.signer_id_front_url && (
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">وجه البطاقة الشخصية</p>
+                  <img 
+                    src={acceptance.signer_id_front_url} 
+                    alt="وجه البطاقة" 
+                    className="max-h-40 mx-auto rounded border border-gray-300"
+                  />
+                </div>
+              )}
+              {acceptance.signer_id_back_url && (
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">ظهر البطاقة الشخصية</p>
+                  <img 
+                    src={acceptance.signer_id_back_url} 
+                    alt="ظهر البطاقة" 
+                    className="max-h-40 mx-auto rounded border border-gray-300"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Terms Content */}
         <div className="mb-6">
@@ -110,7 +163,8 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
               <p className="text-sm text-gray-600 mb-2">توقيع الموافق</p>
               <div className="border-b-2 border-gray-400 h-16 mb-2"></div>
               <p className="font-medium text-sm">{acceptance.full_name || 'غير محدد'}</p>
-              <p className="text-xs text-gray-500">{acceptance.organization_name}</p>
+              <p className="text-xs text-gray-500">{acceptance.signer_position || ''}</p>
+              <p className="text-xs text-gray-400 mt-1">الرقم القومي: {acceptance.signer_national_id || 'غير محدد'}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-2">ختم المنصة</p>

@@ -19,6 +19,12 @@ interface TermsAcceptanceData {
   terms_version: string;
   accepted_at: string;
   ip_address: string | null;
+  signer_national_id?: string | null;
+  signer_phone?: string | null;
+  signer_position?: string | null;
+  signer_id_front_url?: string | null;
+  signer_id_back_url?: string | null;
+  verified_match?: boolean;
 }
 
 interface TermsDocumentDialogProps {

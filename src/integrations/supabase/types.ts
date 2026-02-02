@@ -2868,9 +2868,12 @@ export type Database = {
           employee_type: string | null
           full_name: string
           id: string
+          id_card_back_url: string | null
+          id_card_front_url: string | null
           invitation_date: string | null
           invited_by: string | null
           is_active: boolean | null
+          national_id: string | null
           organization_id: string | null
           phone: string | null
           position: string | null
@@ -2888,9 +2891,12 @@ export type Database = {
           employee_type?: string | null
           full_name: string
           id?: string
+          id_card_back_url?: string | null
+          id_card_front_url?: string | null
           invitation_date?: string | null
           invited_by?: string | null
           is_active?: boolean | null
+          national_id?: string | null
           organization_id?: string | null
           phone?: string | null
           position?: string | null
@@ -2908,9 +2914,12 @@ export type Database = {
           employee_type?: string | null
           full_name?: string
           id?: string
+          id_card_back_url?: string | null
+          id_card_front_url?: string | null
           invitation_date?: string | null
           invited_by?: string | null
           is_active?: boolean | null
+          national_id?: string | null
           organization_id?: string | null
           phone?: string | null
           position?: string | null
@@ -3393,9 +3402,15 @@ export type Database = {
           organization_id: string | null
           organization_name: string
           organization_type: string
+          signer_id_back_url: string | null
+          signer_id_front_url: string | null
+          signer_national_id: string | null
+          signer_phone: string | null
+          signer_position: string | null
           terms_version: string
           user_agent: string | null
           user_id: string
+          verified_match: boolean | null
         }
         Insert: {
           accepted_at?: string
@@ -3406,9 +3421,15 @@ export type Database = {
           organization_id?: string | null
           organization_name: string
           organization_type: string
+          signer_id_back_url?: string | null
+          signer_id_front_url?: string | null
+          signer_national_id?: string | null
+          signer_phone?: string | null
+          signer_position?: string | null
           terms_version?: string
           user_agent?: string | null
           user_id: string
+          verified_match?: boolean | null
         }
         Update: {
           accepted_at?: string
@@ -3419,9 +3440,15 @@ export type Database = {
           organization_id?: string | null
           organization_name?: string
           organization_type?: string
+          signer_id_back_url?: string | null
+          signer_id_front_url?: string | null
+          signer_national_id?: string | null
+          signer_phone?: string | null
+          signer_position?: string | null
           terms_version?: string
           user_agent?: string | null
           user_id?: string
+          verified_match?: boolean | null
         }
         Relationships: [
           {
