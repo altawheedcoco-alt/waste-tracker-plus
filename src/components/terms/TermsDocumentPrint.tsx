@@ -20,10 +20,11 @@ interface TermsDocumentPrintProps {
     signer_signature_url?: string | null;
     verified_match?: boolean;
   };
+  showSignature?: boolean; // Only true for admin view
 }
 
 const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
-  ({ acceptance }, ref) => {
+  ({ acceptance, showSignature = false }, ref) => {
     const sections = getTermsSections(acceptance.organization_type as OrganizationType);
     
     const getOrgTypeLabel = (type: string) => {
@@ -231,14 +232,16 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
             <div className="text-center border rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-2">توقيع الموافق</p>
               <div className="border-b-2 border-gray-400 min-h-16 mb-2 flex items-center justify-center bg-gray-50 rounded">
-                {acceptance.signer_signature_url ? (
+                {showSignature && acceptance.signer_signature_url ? (
                   <img 
                     src={acceptance.signer_signature_url} 
                     alt="توقيع الموقّع" 
                     className="max-h-14 mx-auto"
                   />
                 ) : (
-                  <span className="text-lg font-bold text-gray-600 italic">{acceptance.full_name || ''}</span>
+                  <span className="text-xs text-gray-400">
+                    {showSignature ? 'لا يوجد توقيع' : 'التوقيع محفوظ لدى الإدارة'}
+                  </span>
                 )}
               </div>
               <p className="font-medium text-sm">{acceptance.full_name || 'غير محدد'}</p>

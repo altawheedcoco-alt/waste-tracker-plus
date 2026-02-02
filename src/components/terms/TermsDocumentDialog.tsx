@@ -32,9 +32,10 @@ interface TermsDocumentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   acceptance: TermsAcceptanceData | null;
+  showSignature?: boolean; // Only true for admin view
 }
 
-const TermsDocumentDialog = ({ open, onOpenChange, acceptance }: TermsDocumentDialogProps) => {
+const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = false }: TermsDocumentDialogProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const { exportToPDF, printContent, isExporting } = usePDFExport({
     filename: `terms-acceptance-${acceptance?.id?.slice(0, 8) || 'document'}`,
@@ -94,7 +95,7 @@ const TermsDocumentDialog = ({ open, onOpenChange, acceptance }: TermsDocumentDi
           </div>
         </DialogHeader>
         <ScrollArea className="max-h-[calc(90vh-80px)]">
-          <TermsDocumentPrint ref={printRef} acceptance={acceptance} />
+          <TermsDocumentPrint ref={printRef} acceptance={acceptance} showSignature={showSignature} />
         </ScrollArea>
       </DialogContent>
     </Dialog>
