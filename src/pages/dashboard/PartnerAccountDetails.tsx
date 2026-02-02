@@ -5,7 +5,6 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -32,6 +31,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
@@ -290,6 +290,9 @@ export default function PartnerAccountDetails() {
             )}
           </CardContent>
         </Card>
+
+        {/* Waste Types Section */}
+        <PartnerWasteTypes partnerId={partnerId!} isExternal={false} />
       </div>
     </DashboardLayout>
   );
