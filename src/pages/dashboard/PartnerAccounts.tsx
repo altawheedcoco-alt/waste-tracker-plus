@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -22,9 +23,12 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Users,
+  UserPlus,
+  ExternalLink,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePartnerAccounts, type PartnerBalance } from '@/hooks/usePartnerAccounts';
+import CreateExternalPartnerDialog from '@/components/partners/CreateExternalPartnerDialog';
 
 export default function PartnerAccounts() {
   const navigate = useNavigate();
@@ -37,6 +41,8 @@ export default function PartnerAccounts() {
     organizationType 
   } = usePartnerAccounts();
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [createDialogType, setCreateDialogType] = useState<'generator' | 'recycler'>('generator');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-EG', {
@@ -70,8 +76,17 @@ export default function PartnerAccounts() {
     }
   };
 
-  const handleViewPartnerAccount = (partnerId: string) => {
-    navigate(`/dashboard/partner-account/${partnerId}`);
+  const handleViewPartnerAccount = (balance: PartnerBalance) => {
+    if (balance.isExternal) {
+      navigate(`/dashboard/external-partner/${balance.external_partner_id}`);
+    } else {
+      navigate(`/dashboard/partner-account/${balance.partner_organization_id}`);
+    }
+  };
+
+  const handleCreatePartner = (type: 'generator' | 'recycler') => {
+    setCreateDialogType(type);
+    setShowCreateDialog(true);
   };
 
   const renderPartnerTable = (balances: PartnerBalance[], type: string) => {
@@ -88,16 +103,6 @@ export default function PartnerAccounts() {
           {[1, 2, 3, 4, 5].map(i => (
             <Skeleton key={i} className="h-14 w-full" />
           ))}
-        </div>
-      );
-    }
-
-    if (filtered.length === 0) {
-      return (
-        <div className="text-center py-12 text-muted-foreground">
-          <Icon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p className="font-medium">لا توجد حسابات {typeInfo.label}</p>
-          <p className="text-sm">ستظهر الحسابات هنا بعد إنشاء الفواتير والمعاملات</p>
         </div>
       );
     }
@@ -132,73 +137,108 @@ export default function PartnerAccounts() {
         </div>
 
         {/* Table */}
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="text-center font-bold w-16">م</TableHead>
-                <TableHead className="font-bold">اسم الشريك</TableHead>
-                <TableHead className="text-center font-bold">المدينة</TableHead>
-                <TableHead className="text-center font-bold">إجمالي الفواتير</TableHead>
-                <TableHead className="text-center font-bold">المدفوع</TableHead>
-                <TableHead className="text-center font-bold">الرصيد</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((balance, index) => {
-                const balanceAmount = balance.balance || 0;
-                const isCreditor = balanceAmount > 0;
-                const isZero = balanceAmount === 0;
-                
-                return (
-                  <TableRow 
-                    key={balance.id} 
-                    className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => handleViewPartnerAccount(balance.partner_organization_id)}
-                  >
-                    <TableCell className="text-center font-medium text-muted-foreground">
-                      {index + 1}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${typeInfo.bgColor} ${typeInfo.color}`}>
-                          <Icon className="h-4 w-4" />
+        {filtered.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground border rounded-lg">
+            <Icon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p className="font-medium">لا يوجد {typeInfo.label} حالياً</p>
+            <p className="text-sm mb-4">أضف عميل جديد أو ستظهر الحسابات تلقائياً بعد إنشاء الفواتير</p>
+            <Button 
+              variant="outline" 
+              onClick={() => handleCreatePartner(type as 'generator' | 'recycler')}
+              className="gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              إضافة {typeInfo.singularLabel} خارجي
+            </Button>
+          </div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="text-center font-bold w-16">م</TableHead>
+                  <TableHead className="font-bold">اسم الشريك</TableHead>
+                  <TableHead className="text-center font-bold">النوع</TableHead>
+                  <TableHead className="text-center font-bold">المدينة</TableHead>
+                  <TableHead className="text-center font-bold">إجمالي الفواتير</TableHead>
+                  <TableHead className="text-center font-bold">المدفوع</TableHead>
+                  <TableHead className="text-center font-bold">الرصيد</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((balance, index) => {
+                  const balanceAmount = balance.balance || 0;
+                  const isCreditor = balanceAmount > 0;
+                  const isZero = balanceAmount === 0;
+                  
+                  return (
+                    <TableRow 
+                      key={balance.id} 
+                      className="cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => handleViewPartnerAccount(balance)}
+                    >
+                      <TableCell className="text-center font-medium text-muted-foreground">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${typeInfo.bgColor} ${typeInfo.color}`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <span className="font-medium">
+                              {balance.partner_organization?.name || 'غير محدد'}
+                            </span>
+                            {balance.isExternal && (
+                              <Badge variant="outline" className="mr-2 text-xs">
+                                <ExternalLink className="h-3 w-3 ml-1" />
+                                خارجي
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        <span className="font-medium">
-                          {balance.partner_organization?.name || 'غير محدد'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center text-muted-foreground">
-                      {balance.partner_organization?.city || '-'}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {formatCurrency(balance.total_invoiced)} ج.م
-                    </TableCell>
-                    <TableCell className="text-center text-green-600">
-                      {formatCurrency(balance.total_paid)} ج.م
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className={`font-bold ${isCreditor ? 'text-green-600' : isZero ? 'text-muted-foreground' : 'text-red-600'}`}>
-                        {formatCurrency(Math.abs(balanceAmount))} ج.م
-                      </span>
-                      {!isZero && (
-                        <Badge variant="outline" className={`mr-2 text-xs ${isCreditor ? 'border-green-300 text-green-600' : 'border-red-300 text-red-600'}`}>
-                          {isCreditor ? 'لنا' : 'علينا'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge variant="outline" className="text-xs">
+                          {balance.isExternal ? 'عميل خارجي' : 'مسجل'}
                         </Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                      </TableCell>
+                      <TableCell className="text-center text-muted-foreground">
+                        {balance.partner_organization?.city || '-'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatCurrency(balance.total_invoiced)} ج.م
+                      </TableCell>
+                      <TableCell className="text-center text-green-600">
+                        {formatCurrency(balance.total_paid)} ج.م
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className={`font-bold ${isCreditor ? 'text-green-600' : isZero ? 'text-muted-foreground' : 'text-red-600'}`}>
+                          {formatCurrency(Math.abs(balanceAmount))} ج.م
+                        </span>
+                        {!isZero && (
+                          <Badge variant="outline" className={`mr-2 text-xs ${isCreditor ? 'border-green-300 text-green-600' : 'border-red-300 text-red-600'}`}>
+                            {isCreditor ? 'لنا' : 'علينا'}
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
         {/* Summary */}
-        <div className="flex items-center justify-between pt-2 text-sm text-muted-foreground">
-          <span>إجمالي {typeInfo.label}: {filtered.length}</span>
-        </div>
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-between pt-2 text-sm text-muted-foreground">
+            <span>إجمالي {typeInfo.label}: {filtered.length}</span>
+            <span className="text-xs">
+              ({filtered.filter(b => b.isExternal).length} خارجي، {filtered.filter(b => !b.isExternal).length} مسجل)
+            </span>
+          </div>
+        )}
       </div>
     );
   };
@@ -207,12 +247,18 @@ export default function PartnerAccounts() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="h-6 w-6" />
-            {getPageTitle()}
-          </h1>
-          <p className="text-muted-foreground">متابعة أرصدة الشركاء والمعاملات المالية</p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Users className="h-6 w-6" />
+              {getPageTitle()}
+            </h1>
+            <p className="text-muted-foreground">متابعة أرصدة الشركاء والمعاملات المالية</p>
+          </div>
+          <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            إضافة عميل خارجي
+          </Button>
         </div>
 
         {/* Search */}
@@ -246,18 +292,31 @@ export default function PartnerAccounts() {
               <TabsContent key={type} value={type} className="mt-6">
                 <Card>
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      {(() => {
-                        const typeInfo = getPartnerTypeInfo(type);
-                        const Icon = typeInfo.icon;
-                        return (
-                          <>
-                            <Icon className={`h-5 w-5 ${typeInfo.color}`} />
-                            حسابات {typeInfo.label}
-                          </>
-                        );
-                      })()}
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        {(() => {
+                          const typeInfo = getPartnerTypeInfo(type);
+                          const Icon = typeInfo.icon;
+                          return (
+                            <>
+                              <Icon className={`h-5 w-5 ${typeInfo.color}`} />
+                              حسابات {typeInfo.label}
+                            </>
+                          );
+                        })()}
+                      </CardTitle>
+                      {(type === 'generator' || type === 'recycler') && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleCreatePartner(type as 'generator' | 'recycler')}
+                          className="gap-2"
+                        >
+                          <UserPlus className="h-4 w-4" />
+                          إضافة {getPartnerTypeInfo(type).singularLabel}
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {renderPartnerTable(filteredBalances(type), type)}
@@ -277,6 +336,13 @@ export default function PartnerAccounts() {
           </Card>
         )}
       </div>
+
+      {/* Create External Partner Dialog */}
+      <CreateExternalPartnerDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        defaultType={createDialogType}
+      />
     </DashboardLayout>
   );
 }

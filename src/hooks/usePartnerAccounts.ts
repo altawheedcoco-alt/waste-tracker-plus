@@ -4,7 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export interface PartnerBalance {
   id: string;
-  partner_organization_id: string;
+  partner_organization_id: string | null;
+  external_partner_id: string | null;
+  isExternal: boolean;
   partner_organization: {
     id: string;
     name: string;
@@ -16,6 +18,21 @@ export interface PartnerBalance {
   total_paid: number;
   balance: number;
   last_transaction_date?: string;
+}
+
+export interface ExternalPartner {
+  id: string;
+  name: string;
+  partner_type: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  tax_number?: string;
+  commercial_register?: string;
+  notes?: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 export function usePartnerAccounts() {
@@ -38,6 +55,29 @@ export function usePartnerAccounts() {
   };
 
   const partnerTypes = getPartnerTypes();
+
+  // Fetch external partners
+  const { data: externalPartners = [], isLoading: externalLoading } = useQuery({
+    queryKey: ['external-partners', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+
+      const { data, error } = await supabase
+        .from('external_partners')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .eq('is_active', true)
+        .order('name');
+
+      if (error) {
+        console.error('Error fetching external partners:', error);
+        return [];
+      }
+
+      return data as ExternalPartner[];
+    },
+    enabled: !!organization?.id,
+  });
 
   // Fetch partner balances from invoices and payments
   const { data: partnerBalances = [], isLoading: balancesLoading } = useQuery({
@@ -94,6 +134,8 @@ export function usePartnerAccounts() {
           partnerMap.set(partnerId, {
             id: partnerId,
             partner_organization_id: partnerId,
+            external_partner_id: null,
+            isExternal: false,
             partner_organization: partnerOrg ? {
               id: partnerOrg.id,
               name: partnerOrg.name,
@@ -114,11 +156,43 @@ export function usePartnerAccounts() {
     enabled: !!organization?.id,
   });
 
-  // Filter by partner type
-  const filteredBalances = (type: string) => {
-    return partnerBalances.filter(
+  // Combine registered and external partners
+  const getAllPartners = (type: string): PartnerBalance[] => {
+    // Registered partners
+    const registered = partnerBalances.filter(
       (b) => b.partner_organization?.organization_type === type
     );
+
+    // External partners of this type
+    const external: PartnerBalance[] = externalPartners
+      .filter((ep) => ep.partner_type === type)
+      .map((ep) => ({
+        id: ep.id,
+        partner_organization_id: null,
+        external_partner_id: ep.id,
+        isExternal: true,
+        partner_organization: {
+          id: ep.id,
+          name: ep.name,
+          organization_type: ep.partner_type,
+          city: ep.city,
+          phone: ep.phone,
+        },
+        total_invoiced: 0,
+        total_paid: 0,
+        balance: 0,
+        last_transaction_date: undefined,
+      }));
+
+    // Combine and sort by name
+    return [...registered, ...external].sort((a, b) => 
+      (a.partner_organization?.name || '').localeCompare(b.partner_organization?.name || '')
+    );
+  };
+
+  // Filter by partner type
+  const filteredBalances = (type: string) => {
+    return getAllPartners(type);
   };
 
   // Calculate totals
@@ -136,7 +210,8 @@ export function usePartnerAccounts() {
 
   return {
     partnerBalances,
-    balancesLoading,
+    externalPartners,
+    balancesLoading: balancesLoading || externalLoading,
     partnerTypes,
     filteredBalances,
     calculateTotals,
