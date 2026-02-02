@@ -76,6 +76,7 @@ const ContractVerificationPage = lazy(() => import("./components/contracts/Contr
 const TermsAcceptances = lazy(() => import("./pages/dashboard/TermsAcceptances"));
 const PartnerAccounts = lazy(() => import("./pages/dashboard/PartnerAccounts"));
 const PartnerAccountDetails = lazy(() => import("./pages/dashboard/PartnerAccountDetails"));
+const ExternalPartnerDetails = lazy(() => import("./pages/dashboard/ExternalPartnerDetails"));
 const Verify = lazy(() => import("./pages/Verify"));
 
 // Lazy loaded heavy components (deferred)
@@ -179,6 +180,7 @@ const AppRoutes = memo(() => (
     <Route path="/dashboard/terms-acceptances" element={<TermsAcceptances />} />
     <Route path="/dashboard/partner-accounts" element={<PartnerAccounts />} />
     <Route path="/dashboard/partner-account/:partnerId" element={<PartnerAccountDetails />} />
+    <Route path="/dashboard/external-partner/:partnerId" element={<ExternalPartnerDetails />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
