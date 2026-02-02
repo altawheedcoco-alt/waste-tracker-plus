@@ -24,6 +24,7 @@ import PartnerQuickStats from '@/components/accounts/PartnerQuickStats';
 import ShipmentsAccountView from '@/components/accounts/ShipmentsAccountView';
 import InvoicesAccountView from '@/components/accounts/InvoicesAccountView';
 import AccountLedger, { LedgerEntry } from '@/components/accounts/AccountLedger';
+import DetailedAccountLedger from '@/components/accounts/DetailedAccountLedger';
 import WasteTypeAccountBreakdown from '@/components/accounts/WasteTypeAccountBreakdown';
 import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 import DepositButton from '@/components/deposits/DepositButton';
@@ -357,31 +358,33 @@ export default function PartnerAccountDetails() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview - Account Ledger */}
+          {/* Overview - Detailed Account Ledger */}
           <TabsContent value="overview" className="mt-0">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
-                  كشف حساب الشريك
-                </CardTitle>
+                  سجل حساب الشريك المفصل
+                </h3>
                 <DepositButton
                   preselectedPartnerId={partnerId}
                   preselectedPartnerType="organization"
                   onSuccess={refreshDeposits}
                 />
-              </CardHeader>
-              <CardContent>
-                <AccountLedger 
-                  entries={ledgerEntries}
-                  onEntryClick={(entry) => {
-                    if (entry.type === 'shipment' && entry.reference) {
-                      navigate(`/dashboard/s/${entry.reference}`);
-                    }
-                  }}
-                />
-              </CardContent>
-            </Card>
+              </div>
+              <DetailedAccountLedger
+                partnerName={partner.name}
+                partnerType={partner.organization_type || 'guest'}
+                entries={ledgerEntries}
+                organizationName={organization?.name}
+                isGenerator={isGeneratorOrg}
+                onEntryClick={(entry) => {
+                  if (entry.type === 'shipment' && entry.reference) {
+                    navigate(`/dashboard/s/${entry.reference}`);
+                  }
+                }}
+              />
+            </div>
           </TabsContent>
 
           {/* Waste Types Breakdown Tab */}
