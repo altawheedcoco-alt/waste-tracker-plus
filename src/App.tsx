@@ -135,6 +135,7 @@ const AppRoutes = memo(() => (
     <Route path="/dashboard/shipments" element={<ShipmentManagement />} />
     <Route path="/dashboard/shipments/new" element={<CreateShipment />} />
     <Route path="/dashboard/shipments/:shipmentId" element={<ShipmentDetails />} />
+    <Route path="/dashboard/s/:shipmentId" element={<ShipmentDetails />} />
     <Route path="/dashboard/transporter-shipments" element={<TransporterShipments />} />
     <Route path="/dashboard/transporter-drivers" element={<TransporterDrivers />} />
     <Route path="/dashboard/driver-tracking" element={<DriverTracking />} />

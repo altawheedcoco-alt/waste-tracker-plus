@@ -158,7 +158,10 @@ const ShipmentDetailsPage = () => {
 
   const fetchShipmentDetails = async () => {
     try {
-      const { data, error } = await supabase
+      // التحقق من نوع المعرف - UUID أو رقم الشحنة
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(shipmentId || '');
+      
+      let query = supabase
         .from('shipments')
         .select(`
           id,
@@ -193,9 +196,16 @@ const ShipmentDetailsPage = () => {
           recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, representative_name),
           transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, representative_name),
           driver:drivers(id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
-        `)
-        .eq('id', shipmentId)
-        .single();
+        `);
+      
+      // البحث بـ UUID أو رقم الشحنة
+      if (isUUID) {
+        query = query.eq('id', shipmentId);
+      } else {
+        query = query.eq('shipment_number', shipmentId);
+      }
+      
+      const { data, error } = await query.single();
 
       if (error) throw error;
       const shipmentData = data as unknown as ShipmentDetails;

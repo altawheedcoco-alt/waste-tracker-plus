@@ -142,7 +142,7 @@ export default function ShipmentsAccountView({ shipments, isLoading }: Shipments
                 <TableRow 
                   key={shipment.id}
                   className="cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+                  onClick={() => navigate(`/dashboard/s/${shipment.shipment_number}`)}
                 >
                   <TableCell className="text-center text-muted-foreground font-medium">
                     {index + 1}

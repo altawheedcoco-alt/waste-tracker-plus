@@ -307,7 +307,7 @@ const TransporterShipments = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+                          onClick={() => navigate(`/dashboard/s/${shipment.shipment_number}`)}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
