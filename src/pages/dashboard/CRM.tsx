@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { useCustomers, Customer, CustomerFormData } from "@/hooks/useCustomers";
 import { CustomerDialog } from "@/components/crm/CustomerDialog";
@@ -39,7 +38,6 @@ import {
   Edit,
   Trash2,
   Phone,
-  Handshake,
   Mail,
   Building2,
   UserCheck,
@@ -51,7 +49,6 @@ import { ar } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CRM() {
-  const navigate = useNavigate();
   const { customers, isLoading, stats, createCustomer, updateCustomer, deleteCustomer } = useCustomers();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -154,20 +151,10 @@ export default function CRM() {
             </h1>
             <p className="text-muted-foreground">نظام بسيط لإدارة العملاء والمتابعة</p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={handleAddCustomer} className="gap-2">
-              <UserPlus className="h-4 w-4" />
-              إضافة عميل
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/dashboard/partners")} 
-              className="gap-2"
-            >
-              <Handshake className="h-4 w-4" />
-              الشركاء
-            </Button>
-          </div>
+          <Button onClick={handleAddCustomer} className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            إضافة عميل
+          </Button>
         </div>
 
         {/* Stats */}
