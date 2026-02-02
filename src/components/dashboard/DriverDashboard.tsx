@@ -220,6 +220,15 @@ const DriverDashboard = () => {
                 <Map className="h-4 w-4 text-primary" />
                 <span className="hidden sm:inline">عرض موقعي</span>
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/dashboard/navigation-demo')}
+                className="gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30"
+              >
+                <Navigation className="h-4 w-4 text-emerald-600" />
+                <span className="hidden sm:inline">عرض توضيحي</span>
+              </Button>
             </>
           )}
           <CreateShipmentButton 
