@@ -859,6 +859,63 @@ export type Database = {
           },
         ]
       }
+      document_verifications: {
+        Row: {
+          ai_analysis: Json | null
+          created_at: string | null
+          document_id: string | null
+          id: string
+          new_status: string
+          notes: string | null
+          organization_id: string | null
+          previous_status: string | null
+          verification_action: string
+          verification_type: string
+          verified_by: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          new_status: string
+          notes?: string | null
+          organization_id?: string | null
+          previous_status?: string | null
+          verification_action: string
+          verification_type: string
+          verified_by?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          created_at?: string | null
+          document_id?: string | null
+          id?: string
+          new_status?: string
+          notes?: string | null
+          organization_id?: string | null
+          previous_status?: string | null
+          verification_action?: string
+          verification_type?: string
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_verifications_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "organization_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_verifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_location_logs: {
         Row: {
           accuracy: number | null
@@ -1878,6 +1935,9 @@ export type Database = {
       }
       organization_documents: {
         Row: {
+          ai_confidence_score: number | null
+          ai_verification_result: Json | null
+          auto_verified: boolean | null
           created_at: string | null
           document_type: string
           file_name: string
@@ -1885,10 +1945,18 @@ export type Database = {
           file_size: number | null
           id: string
           organization_id: string
+          rejection_reason: string | null
           updated_at: string | null
           uploaded_by: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
+          ai_confidence_score?: number | null
+          ai_verification_result?: Json | null
+          auto_verified?: boolean | null
           created_at?: string | null
           document_type: string
           file_name: string
@@ -1896,10 +1964,18 @@ export type Database = {
           file_size?: number | null
           id?: string
           organization_id: string
+          rejection_reason?: string | null
           updated_at?: string | null
           uploaded_by?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
+          ai_confidence_score?: number | null
+          ai_verification_result?: Json | null
+          auto_verified?: boolean | null
           created_at?: string | null
           document_type?: string
           file_name?: string
@@ -1907,8 +1983,13 @@ export type Database = {
           file_size?: number | null
           id?: string
           organization_id?: string
+          rejection_reason?: string | null
           updated_at?: string | null
           uploaded_by?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
