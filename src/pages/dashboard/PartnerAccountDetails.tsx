@@ -273,9 +273,8 @@ export default function PartnerAccountDetails() {
                 <AccountLedger 
                   entries={ledgerEntries}
                   onEntryClick={(entry) => {
-                    if (entry.type === 'shipment') {
-                      const shipmentId = entry.id.replace('shipment-', '');
-                      navigate(`/dashboard/shipments/${shipmentId}`);
+                    if (entry.type === 'shipment' && entry.reference) {
+                      navigate(`/dashboard/s/${entry.reference}`);
                     }
                   }}
                 />

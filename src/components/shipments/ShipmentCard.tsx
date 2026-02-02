@@ -114,7 +114,7 @@ const ShipmentCard = ({
   const currentStatusIndex = allStatuses.findIndex(s => s.key === mappedStatus);
 
   const handleCardClick = () => {
-    navigate(`/dashboard/shipments/${shipment.id}`);
+    navigate(`/dashboard/s/${shipment.shipment_number}`);
   };
 
   const handleStatusButtonClick = (e: React.MouseEvent) => {
