@@ -74,13 +74,6 @@ const Contracts = lazy(() => import("./pages/dashboard/Contracts"));
 const ContractTemplates = lazy(() => import("./pages/dashboard/ContractTemplates"));
 const ContractVerificationPage = lazy(() => import("./components/contracts/ContractVerificationPage"));
 const TermsAcceptances = lazy(() => import("./pages/dashboard/TermsAcceptances"));
-const Accounting = lazy(() => import("./pages/dashboard/Accounting"));
-const AccountingInvoices = lazy(() => import("./pages/dashboard/AccountingInvoices"));
-const AccountingPayments = lazy(() => import("./pages/dashboard/AccountingPayments"));
-const AccountingExpenses = lazy(() => import("./pages/dashboard/AccountingExpenses"));
-const AccountingPartners = lazy(() => import("./pages/dashboard/AccountingPartners"));
-const AccountingReports = lazy(() => import("./pages/dashboard/AccountingReports"));
-const PartnerAccountDetails = lazy(() => import("./pages/dashboard/PartnerAccountDetails"));
 const Verify = lazy(() => import("./pages/Verify"));
 
 // Lazy loaded heavy components (deferred)
@@ -182,13 +175,6 @@ const AppRoutes = memo(() => (
     <Route path="/dashboard/contract-templates" element={<ContractTemplates />} />
     <Route path="/dashboard/verify-contract" element={<ContractVerificationPage />} />
     <Route path="/dashboard/terms-acceptances" element={<TermsAcceptances />} />
-        <Route path="/dashboard/accounting" element={<Accounting />} />
-        <Route path="/dashboard/accounting/invoices" element={<AccountingInvoices />} />
-        <Route path="/dashboard/accounting/payments" element={<AccountingPayments />} />
-        <Route path="/dashboard/accounting/expenses" element={<AccountingExpenses />} />
-        <Route path="/dashboard/accounting/partners" element={<AccountingPartners />} />
-        <Route path="/dashboard/accounting/reports" element={<AccountingReports />} />
-        <Route path="/dashboard/partner-account/:partnerId" element={<PartnerAccountDetails />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
