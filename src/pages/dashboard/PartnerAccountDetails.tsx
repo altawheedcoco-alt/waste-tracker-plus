@@ -383,6 +383,7 @@ export default function PartnerAccountDetails() {
                     navigate(`/dashboard/s/${entry.reference}`);
                   }
                 }}
+                onDepositUpdated={refreshDeposits}
               />
             </div>
           </TabsContent>

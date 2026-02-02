@@ -45,6 +45,7 @@ import {
   Eye,
   Loader2,
   Info,
+  Pencil,
 } from 'lucide-react';
 import { LedgerEntry } from './AccountLedger';
 import { cn } from '@/lib/utils';
@@ -68,6 +69,28 @@ import {
   TableHeader as DetailTableHeader,
   TableRow as DetailTableRow,
 } from '@/components/ui/table';
+import EditDepositDialog from '@/components/deposits/EditDepositDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+
+interface Deposit {
+  id: string;
+  amount: number;
+  deposit_date: string;
+  depositor_name: string;
+  depositor_title?: string;
+  depositor_position?: string;
+  depositor_phone?: string;
+  transfer_method: string;
+  bank_name?: string;
+  account_number?: string;
+  branch_name?: string;
+  reference_number?: string;
+  notes?: string;
+  receipt_url?: string;
+  partner_organization_id?: string;
+  external_partner_id?: string;
+}
 
 interface DetailedAccountLedgerProps {
   partnerName: string;
@@ -76,6 +99,7 @@ interface DetailedAccountLedgerProps {
   organizationName?: string;
   isGenerator?: boolean;
   onEntryClick?: (entry: LedgerEntry) => void;
+  onDepositUpdated?: () => void;
 }
 
 export default function DetailedAccountLedger({
@@ -85,17 +109,51 @@ export default function DetailedAccountLedger({
   organizationName,
   isGenerator = false,
   onEntryClick,
+  onDepositUpdated,
 }: DetailedAccountLedgerProps) {
+  const queryClient = useQueryClient();
+  
   // Date filters
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [isExporting, setIsExporting] = useState(false);
+  
+  // Edit deposit state
+  const [editDepositOpen, setEditDepositOpen] = useState(false);
+  const [selectedDeposit, setSelectedDeposit] = useState<Deposit | null>(null);
+  const [loadingDepositId, setLoadingDepositId] = useState<string | null>(null);
 
   const { exportToPDF, previewPDF } = usePDFExport({
     filename: `سجل-حساب-${partnerName}`,
     orientation: 'portrait',
   });
+  
+  // Function to load deposit details and open edit dialog
+  const handleEditDeposit = async (depositId: string) => {
+    setLoadingDepositId(depositId);
+    try {
+      const { data, error } = await supabase
+        .from('deposits')
+        .select('*')
+        .eq('id', depositId)
+        .single();
+      
+      if (error) throw error;
+      
+      setSelectedDeposit(data);
+      setEditDepositOpen(true);
+    } catch (error) {
+      console.error('Error loading deposit:', error);
+    } finally {
+      setLoadingDepositId(null);
+    }
+  };
+  
+  const handleDepositUpdated = () => {
+    queryClient.invalidateQueries({ queryKey: ['partner-deposits'] });
+    onDepositUpdated?.();
+  };
 
   // Filter entries by date range and type
   const filteredEntries = useMemo(() => {
@@ -465,16 +523,40 @@ export default function DetailedAccountLedger({
               
               {depositEntries.length > 0 ? (
                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {depositEntries.map((entry, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <p className="text-sm font-medium">{entry.description}</p>
-                        <p className="text-xs text-muted-foreground">{formatDate(entry.date)}</p>
-                        {entry.reference && <p className="text-xs font-mono text-muted-foreground">{entry.reference}</p>}
+                  {depositEntries.map((entry, idx) => {
+                    // Extract deposit ID from entry.id (format: deposit-{uuid})
+                    const depositId = entry.id.replace('deposit-', '');
+                    const isLoading = loadingDepositId === depositId;
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{entry.description}</p>
+                          <p className="text-xs text-muted-foreground">{formatDate(entry.date)}</p>
+                          {entry.reference && <p className="text-xs font-mono text-muted-foreground">{entry.reference}</p>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-lg font-bold text-purple-600">{formatCurrency(Math.max(entry.debit, entry.credit))} ج.م</p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditDeposit(depositId);
+                            }}
+                            disabled={isLoading}
+                          >
+                            {isLoading ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Pencil className="h-4 w-4 text-amber-600" />
+                            )}
+                          </Button>
+                        </div>
                       </div>
-                      <p className="text-lg font-bold text-purple-600">{formatCurrency(Math.max(entry.debit, entry.credit))} ج.م</p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-center text-muted-foreground py-8">لا توجد إيداعات</p>
@@ -958,6 +1040,14 @@ export default function DetailedAccountLedger({
           )}
         </CardContent>
       </Card>
+      
+      {/* Edit Deposit Dialog */}
+      <EditDepositDialog
+        open={editDepositOpen}
+        onOpenChange={setEditDepositOpen}
+        deposit={selectedDeposit}
+        onSuccess={handleDepositUpdated}
+      />
     </div>
   );
 }
