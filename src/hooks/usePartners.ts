@@ -42,6 +42,7 @@ interface UsePartnersResult {
   transporters: Partner[];
   recyclers: Partner[];
   allPartners: Partner[];
+  partners: Partner[]; // Alias for allPartners
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
@@ -157,6 +158,7 @@ export const usePartners = (): UsePartnersResult => {
     transporters,
     recyclers,
     allPartners,
+    partners: allPartners, // Alias for convenience
     loading,
     error,
     refetch: fetchPartners,
