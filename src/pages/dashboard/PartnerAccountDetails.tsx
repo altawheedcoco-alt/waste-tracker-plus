@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -25,6 +26,8 @@ import {
   ArrowDownRight,
   Phone,
   MapPin,
+  Package,
+  Scale,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,6 +58,49 @@ export default function PartnerAccountDetails() {
     enabled: !!partnerId,
   });
 
+  // Fetch shipments with this partner
+  const { data: shipments = [], isLoading: shipmentsLoading } = useQuery({
+    queryKey: ['partner-shipments', partnerId, organization?.id, organization?.organization_type],
+    queryFn: async () => {
+      if (!partnerId || !organization?.id) return [];
+      
+      let query = supabase.from('shipments').select('*');
+      
+      // Filter based on organization type and partner relationship
+      if (organization?.organization_type === 'transporter') {
+        query = query.eq('transporter_id', organization.id).or(`generator_id.eq.${partnerId},recycler_id.eq.${partnerId}`);
+      } else if (organization?.organization_type === 'generator') {
+        query = query.eq('generator_id', organization.id).or(`transporter_id.eq.${partnerId},recycler_id.eq.${partnerId}`);
+      } else if (organization?.organization_type === 'recycler') {
+        query = query.eq('recycler_id', organization.id).or(`generator_id.eq.${partnerId},transporter_id.eq.${partnerId}`);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!partnerId && !!organization?.id,
+  });
+
+  // Fetch partner waste types (for pricing)
+  const { data: partnerWasteTypes = [] } = useQuery({
+    queryKey: ['partner-waste-types-pricing', partnerId, organization?.id],
+    queryFn: async () => {
+      if (!partnerId || !organization?.id) return [];
+      
+      const { data, error } = await supabase
+        .from('partner_waste_types')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .eq('partner_organization_id', partnerId)
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!partnerId && !!organization?.id,
+  });
+
   // Fetch invoices for this partner
   const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
     queryKey: ['partner-invoices', partnerId, organization?.id],
@@ -72,6 +118,33 @@ export default function PartnerAccountDetails() {
     },
     enabled: !!partnerId && !!organization?.id,
   });
+
+  // Calculate shipment totals with pricing
+  const shipmentsWithPricing = useMemo(() => {
+    return shipments.map(shipment => {
+      // Find matching waste type price
+      const wastePrice = partnerWasteTypes.find(wt => {
+        // Match by waste_description or waste_type
+        const wasteDesc = shipment.waste_description?.toLowerCase() || '';
+        const wasteTypeName = wt.waste_type?.toLowerCase() || '';
+        return wasteDesc.includes(wasteTypeName) || wasteTypeName.includes(wasteDesc);
+      });
+      
+      const pricePerUnit = wastePrice?.price_per_unit || 0;
+      const quantity = Number(shipment.quantity) || 0;
+      const total = pricePerUnit * quantity;
+      
+      return {
+        ...shipment,
+        pricePerUnit,
+        calculatedTotal: total,
+        hasPrice: pricePerUnit > 0,
+      };
+    });
+  }, [shipments, partnerWasteTypes]);
+
+  const totalShipmentValue = shipmentsWithPricing.reduce((sum, s) => sum + s.calculatedTotal, 0);
+  const totalQuantity = shipmentsWithPricing.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-EG', {
@@ -233,62 +306,190 @@ export default function PartnerAccountDetails() {
           </Card>
         </div>
 
-        {/* Invoices */}
+        {/* Shipments & Invoices Tabs */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              الفواتير
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {invoicesLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map(i => (
-                  <Skeleton key={i} className="h-14 w-full" />
-                ))}
-              </div>
-            ) : invoices.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>لا توجد فواتير لهذا الشريك</p>
-              </div>
-            ) : (
-              <div className="border rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/50">
-                      <TableHead className="font-bold">رقم الفاتورة</TableHead>
-                      <TableHead className="text-center font-bold">التاريخ</TableHead>
-                      <TableHead className="text-center font-bold">المبلغ</TableHead>
-                      <TableHead className="text-center font-bold">المدفوع</TableHead>
-                      <TableHead className="text-center font-bold">المتبقي</TableHead>
-                      <TableHead className="text-center font-bold">الحالة</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invoices.map((invoice) => {
-                      const remaining = (Number(invoice.total_amount) || 0) - (Number(invoice.paid_amount) || 0);
-                      return (
-                        <TableRow key={invoice.id}>
-                          <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
-                          <TableCell className="text-center">{formatDate(invoice.issue_date)}</TableCell>
-                          <TableCell className="text-center">{formatCurrency(Number(invoice.total_amount) || 0)} ج.م</TableCell>
-                          <TableCell className="text-center text-green-600">{formatCurrency(Number(invoice.paid_amount) || 0)} ج.م</TableCell>
-                          <TableCell className={`text-center ${remaining > 0 ? 'text-amber-600' : 'text-muted-foreground'}`}>
-                            {formatCurrency(remaining)} ج.م
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {getInvoiceStatusBadge(invoice.status)}
-                          </TableCell>
+          <Tabs defaultValue="shipments" dir="rtl">
+            <CardHeader className="pb-0">
+              <TabsList className="w-full justify-start">
+                <TabsTrigger value="shipments" className="gap-2">
+                  <Package className="h-4 w-4" />
+                  الشحنات
+                  {shipments.length > 0 && (
+                    <Badge variant="secondary" className="h-5 min-w-5 px-1.5">
+                      {shipments.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="invoices" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  الفواتير
+                  {invoices.length > 0 && (
+                    <Badge variant="secondary" className="h-5 min-w-5 px-1.5">
+                      {invoices.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </CardHeader>
+            <CardContent className="pt-4">
+              {/* Shipments Tab */}
+              <TabsContent value="shipments" className="mt-0">
+                {shipmentsLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <Skeleton key={i} className="h-14 w-full" />
+                    ))}
+                  </div>
+                ) : shipments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>لا توجد شحنات مع هذا الشريك</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="border rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-muted/50">
+                            <TableHead className="font-bold">رقم الشحنة</TableHead>
+                            <TableHead className="font-bold">نوع المخلف</TableHead>
+                            <TableHead className="text-center font-bold">الكمية</TableHead>
+                            <TableHead className="text-center font-bold">السعر/وحدة</TableHead>
+                            <TableHead className="text-center font-bold">الإجمالي</TableHead>
+                            <TableHead className="text-center font-bold">الحالة</TableHead>
+                            <TableHead className="text-center font-bold">التاريخ</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {shipmentsWithPricing.map((shipment) => (
+                            <TableRow 
+                              key={shipment.id}
+                              className="cursor-pointer hover:bg-muted/50"
+                              onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+                            >
+                              <TableCell className="font-medium font-mono">
+                                {shipment.shipment_number}
+                              </TableCell>
+                              <TableCell>
+                                {shipment.waste_description || shipment.waste_type}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <span className="font-medium">{formatCurrency(Number(shipment.quantity) || 0)}</span>
+                                <span className="text-muted-foreground text-xs mr-1">{shipment.unit}</span>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {shipment.hasPrice ? (
+                                  <span className="text-green-600 font-medium">
+                                    {formatCurrency(shipment.pricePerUnit)} ج.م
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">غير محدد</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {shipment.hasPrice ? (
+                                  <span className="font-bold text-primary">
+                                    {formatCurrency(shipment.calculatedTotal)} ج.م
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">-</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant={shipment.status === 'confirmed' ? 'default' : 'outline'}>
+                                  {shipment.status === 'new' && 'جديدة'}
+                                  {shipment.status === 'approved' && 'موافق عليها'}
+                                  {shipment.status === 'collecting' && 'قيد التجميع'}
+                                  {shipment.status === 'in_transit' && 'قيد النقل'}
+                                  {shipment.status === 'delivered' && 'تم التسليم'}
+                                  {shipment.status === 'confirmed' && 'مؤكدة'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center text-sm text-muted-foreground">
+                                {formatDate(shipment.created_at)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                    
+                    {/* Shipments Summary */}
+                    <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div>
+                          <p className="text-xs text-muted-foreground">عدد الشحنات</p>
+                          <p className="text-lg font-bold">{shipments.length}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">إجمالي الكمية</p>
+                          <p className="text-lg font-bold">{formatCurrency(totalQuantity)} <span className="text-xs font-normal">وحدة</span></p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">شحنات بسعر محدد</p>
+                          <p className="text-lg font-bold">{shipmentsWithPricing.filter(s => s.hasPrice).length}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">إجمالي القيمة</p>
+                          <p className="text-lg font-bold text-primary">{formatCurrency(totalShipmentValue)} ج.م</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </TabsContent>
+
+              {/* Invoices Tab */}
+              <TabsContent value="invoices" className="mt-0">
+                {invoicesLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <Skeleton key={i} className="h-14 w-full" />
+                    ))}
+                  </div>
+                ) : invoices.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>لا توجد فواتير لهذا الشريك</p>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="font-bold">رقم الفاتورة</TableHead>
+                          <TableHead className="text-center font-bold">التاريخ</TableHead>
+                          <TableHead className="text-center font-bold">المبلغ</TableHead>
+                          <TableHead className="text-center font-bold">المدفوع</TableHead>
+                          <TableHead className="text-center font-bold">المتبقي</TableHead>
+                          <TableHead className="text-center font-bold">الحالة</TableHead>
                         </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
+                      </TableHeader>
+                      <TableBody>
+                        {invoices.map((invoice) => {
+                          const remaining = (Number(invoice.total_amount) || 0) - (Number(invoice.paid_amount) || 0);
+                          return (
+                            <TableRow key={invoice.id}>
+                              <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
+                              <TableCell className="text-center">{formatDate(invoice.issue_date)}</TableCell>
+                              <TableCell className="text-center">{formatCurrency(Number(invoice.total_amount) || 0)} ج.م</TableCell>
+                              <TableCell className="text-center text-green-600">{formatCurrency(Number(invoice.paid_amount) || 0)} ج.م</TableCell>
+                              <TableCell className={`text-center ${remaining > 0 ? 'text-amber-600' : 'text-muted-foreground'}`}>
+                                {formatCurrency(remaining)} ج.م
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {getInvoiceStatusBadge(invoice.status)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </TabsContent>
+            </CardContent>
+          </Tabs>
         </Card>
 
         {/* Waste Types Section */}
