@@ -205,8 +205,8 @@ export default function PartnerAccounts() {
               <TableRow className="bg-muted/50 hover:bg-muted/50">
                 <TableHead className="text-center font-bold w-12">#</TableHead>
                 <TableHead className="font-bold">اسم الشريك</TableHead>
-                <TableHead className="text-center font-bold">المدينة</TableHead>
-                <TableHead className="text-center font-bold">إجمالي الفواتير</TableHead>
+                <TableHead className="text-center font-bold">الشحنات</TableHead>
+                <TableHead className="text-center font-bold">قيمة الشحنات</TableHead>
                 <TableHead className="text-center font-bold">المدفوع</TableHead>
                 <TableHead className="text-center font-bold">الرصيد</TableHead>
               </TableRow>
@@ -244,11 +244,13 @@ export default function PartnerAccounts() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-center text-muted-foreground">
-                      {balance.partner_organization?.city || '-'}
+                    <TableCell className="text-center">
+                      <Badge variant="outline" className="font-medium">
+                        {balance.shipments_count || 0}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-center font-medium">
-                      {formatCurrency(balance.total_invoiced)} ج.م
+                      {formatCurrency(balance.total_shipment_value || 0)} ج.م
                     </TableCell>
                     <TableCell className="text-center text-emerald-600 font-medium">
                       {formatCurrency(balance.total_paid)} ج.م
