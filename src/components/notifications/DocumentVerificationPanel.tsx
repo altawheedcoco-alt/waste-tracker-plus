@@ -213,6 +213,37 @@ const DocumentVerificationPanel = ({
     });
     if (isRecentUpload) baseConfidence += 5;
 
+    // Check 8: Document name vs Organization name matching
+    const orgName = orgData?.name?.toLowerCase().trim() || '';
+    const fileName = doc.file_name?.toLowerCase().trim() || '';
+    
+    // Check if organization name appears in the file name or if they have common significant words
+    const orgNameWords = orgName.split(/\s+/).filter(word => word.length > 2);
+    const fileNameWords = fileName.split(/[\s_\-\.]+/).filter(word => word.length > 2);
+    
+    const commonWords = orgNameWords.filter(word => 
+      fileNameWords.some(fw => fw.includes(word) || word.includes(fw))
+    );
+    
+    const nameMatchScore = orgNameWords.length > 0 
+      ? (commonWords.length / orgNameWords.length) * 100 
+      : 0;
+    
+    const hasNameMatch = nameMatchScore >= 30 || orgName === '' || fileName.includes(orgName);
+    const nameMatchDetails = orgName === '' 
+      ? 'لم يتم التحقق - اسم الجهة غير متوفر'
+      : hasNameMatch 
+        ? `تطابق اسم الجهة مع المستند (${Math.round(nameMatchScore)}%)`
+        : `⚠️ تحذير: اسم الملف "${doc.file_name}" قد لا يتطابق مع اسم الجهة "${orgData?.name}"`;
+    
+    legalChecks.push({
+      name: 'مطابقة اسم الجهة',
+      passed: hasNameMatch,
+      details: nameMatchDetails,
+    });
+    if (hasNameMatch) baseConfidence += 5;
+    else baseConfidence -= 15; // Significant penalty for name mismatch
+
     // Calculate final confidence
     const passedChecks = legalChecks.filter(c => c.passed).length;
     const totalChecks = legalChecks.length;
