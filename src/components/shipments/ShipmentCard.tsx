@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,6 +32,8 @@ import {
   Loader2,
   BadgeCheck,
   FileCheck,
+  Navigation,
+  Eye,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -49,6 +51,9 @@ import ShipmentQuickPrint from './ShipmentQuickPrint';
 import ShipmentRouteMap from './ShipmentRouteMap';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+// Lazy load the live tracking map dialog
+const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 
 interface ShipmentCardProps {
   shipment: {
@@ -89,6 +94,7 @@ const ShipmentCard = ({
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
+  const [isLiveTrackingOpen, setIsLiveTrackingOpen] = useState(false);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
 
   // Map legacy status to new status
@@ -159,6 +165,11 @@ const ShipmentCard = ({
     setIsMapDialogOpen(true);
   };
 
+  const handleLiveTrackingClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsLiveTrackingOpen(true);
+  };
+
   if (variant === 'compact') {
     return (
       <>
@@ -175,6 +186,19 @@ const ShipmentCard = ({
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
+                  {/* Live tracking button - only show if driver is assigned */}
+                  {shipment.driver_id && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={handleLiveTrackingClick}
+                      className="gap-1 text-xs bg-green-600 hover:bg-green-700 text-white"
+                      title="التتبع المباشر"
+                    >
+                      <Navigation className="w-3 h-3" />
+                      مباشر
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="ghost"
@@ -332,6 +356,25 @@ const ShipmentCard = ({
           driverId={shipment.driver_id}
           shipmentStatus={shipment.status}
         />
+
+        {/* Live Tracking Map Dialog */}
+        {isLiveTrackingOpen && shipment.driver_id && (
+          <Suspense fallback={
+            <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          }>
+            <LiveTrackingMapDialog
+              isOpen={isLiveTrackingOpen}
+              onClose={() => setIsLiveTrackingOpen(false)}
+              driverId={shipment.driver_id}
+              shipmentNumber={shipment.shipment_number}
+              pickupAddress={shipment.pickup_address || 'غير محدد'}
+              deliveryAddress={shipment.delivery_address || 'غير محدد'}
+              shipmentStatus={shipment.status}
+            />
+          </Suspense>
+        )}
       </>
     );
   }
@@ -402,6 +445,18 @@ const ShipmentCard = ({
                 {/* Left Side - Action Buttons */}
                 <div className="flex flex-col items-start gap-2 order-2 sm:order-1 w-full sm:w-auto">
                   <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+                    {/* Live Tracking Button - shows when driver is assigned */}
+                    {shipment.driver_id && (
+                      <Button
+                        size="sm"
+                        onClick={handleLiveTrackingClick}
+                        className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+                        title="التتبع المباشر للسائق"
+                      >
+                        <Navigation className="w-4 h-4" />
+                        تتبع مباشر
+                      </Button>
+                    )}
                     <Button
                       variant="outline"
                       size="sm"
@@ -410,7 +465,7 @@ const ShipmentCard = ({
                       title="تتبع على الخريطة"
                     >
                       <MapPin className="w-4 h-4" />
-                      تتبع الخريطة
+                      الخريطة
                     </Button>
                     <Button
                       variant="ghost"
@@ -591,6 +646,25 @@ const ShipmentCard = ({
         driverId={shipment.driver_id}
         shipmentStatus={shipment.status}
       />
+
+      {/* Live Tracking Map Dialog */}
+      {isLiveTrackingOpen && shipment.driver_id && (
+        <Suspense fallback={
+          <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        }>
+          <LiveTrackingMapDialog
+            isOpen={isLiveTrackingOpen}
+            onClose={() => setIsLiveTrackingOpen(false)}
+            driverId={shipment.driver_id}
+            shipmentNumber={shipment.shipment_number}
+            pickupAddress={shipment.pickup_address || 'غير محدد'}
+            deliveryAddress={shipment.delivery_address || 'غير محدد'}
+            shipmentStatus={shipment.status}
+          />
+        </Suspense>
+      )}
     </>
   );
 };
