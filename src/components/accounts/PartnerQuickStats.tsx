@@ -1,4 +1,4 @@
-import { Package, FileText, CreditCard, TrendingUp, TrendingDown, Scale } from 'lucide-react';
+import { Package, FileText, CreditCard, TrendingUp, TrendingDown, Scale, Banknote } from 'lucide-react';
 import AccountSummaryCard from './AccountSummaryCard';
 
 interface PartnerQuickStatsProps {
@@ -8,6 +8,7 @@ interface PartnerQuickStatsProps {
   totalPaid: number;
   balance: number;
   totalQuantity: number;
+  isGenerator?: boolean; // إذا كانت الجهة الحالية مولد
 }
 
 export default function PartnerQuickStats({
@@ -17,11 +18,38 @@ export default function PartnerQuickStats({
   totalPaid,
   balance,
   totalQuantity,
+  isGenerator = false,
 }: PartnerQuickStatsProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-EG', {
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  // للمولد: الشحنة = لنا (ننتظر الدفع)، الإيداع = علينا (تم استلامه)
+  // للناقل/المدور: الشحنة = علينا (مستحق للشريك)، الإيداع = لنا (تم الدفع)
+  
+  const netBalance = totalShipmentValue - totalPaid;
+  
+  // تحديد اتجاه الرصيد بناءً على نوع الجهة
+  const getBalanceLabel = () => {
+    if (balance === 0) return 'الرصيد';
+    if (isGenerator) {
+      // للمولد: الباقي = لنا (مستحق من الناقل)
+      return balance > 0 ? 'لنا (مستحق)' : 'علينا';
+    } else {
+      // للناقل/المدور: الباقي = علينا (مستحق للشريك) أو لنا (دفعنا أكثر)
+      return balance > 0 ? 'علينا (مطلوب)' : 'لنا (فائض)';
+    }
+  };
+
+  const getBalanceVariant = () => {
+    if (balance === 0) return 'default';
+    if (isGenerator) {
+      return balance > 0 ? 'success' : 'danger';
+    } else {
+      return balance > 0 ? 'danger' : 'success';
+    }
   };
 
   return (
@@ -36,11 +64,11 @@ export default function PartnerQuickStats({
       />
       
       <AccountSummaryCard
-        title="قيمة الشحنات"
+        title={isGenerator ? 'قيمة المستحق' : 'قيمة الشحنات'}
         value={totalShipmentValue}
-        subtitle="حسب الأسعار المحددة"
+        subtitle={isGenerator ? 'المبلغ المستحق من الناقل' : 'حسب الأسعار المحددة'}
         icon={Scale}
-        variant="default"
+        variant={isGenerator ? 'success' : 'default'}
       />
       
       <AccountSummaryCard
@@ -51,26 +79,35 @@ export default function PartnerQuickStats({
       />
       
       <AccountSummaryCard
-        title="المدفوع"
+        title={isGenerator ? 'المستلم (إيداعات)' : 'المدفوع'}
         value={totalPaid}
-        icon={CreditCard}
-        variant="success"
+        subtitle={isGenerator ? 'ما تم استلامه' : 'ما تم دفعه للشريك'}
+        icon={isGenerator ? Banknote : CreditCard}
+        variant={isGenerator ? 'info' : 'success'}
       />
       
       <AccountSummaryCard
-        title={balance > 0 ? 'لنا (مستحق)' : balance < 0 ? 'علينا (مطلوب)' : 'الرصيد'}
+        title={getBalanceLabel()}
         value={Math.abs(balance)}
         icon={balance >= 0 ? TrendingUp : TrendingDown}
-        variant={balance > 0 ? 'success' : balance < 0 ? 'danger' : 'default'}
+        variant={getBalanceVariant()}
         subtitle={balance === 0 ? 'مسدد بالكامل' : undefined}
       />
       
       <AccountSummaryCard
-        title="الصافي"
-        value={totalShipmentValue - totalPaid}
-        icon={balance >= 0 ? TrendingUp : TrendingDown}
-        variant={totalShipmentValue - totalPaid > 0 ? 'warning' : 'success'}
-        subtitle="القيمة - المدفوع"
+        title="صافي الحساب"
+        value={Math.abs(netBalance)}
+        icon={netBalance >= 0 ? TrendingUp : TrendingDown}
+        variant={
+          isGenerator 
+            ? (netBalance > 0 ? 'success' : 'danger')
+            : (netBalance > 0 ? 'warning' : 'success')
+        }
+        subtitle={
+          isGenerator 
+            ? (netBalance > 0 ? 'باقي لنا' : netBalance < 0 ? 'فائض مدفوع' : 'مسدد')
+            : (netBalance > 0 ? 'باقي علينا' : netBalance < 0 ? 'فائض لنا' : 'مسدد')
+        }
       />
     </div>
   );

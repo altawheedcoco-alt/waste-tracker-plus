@@ -164,12 +164,24 @@ export default function PartnerAccountDetails() {
   const totalPaidInvoices = invoices.reduce((sum, inv) => sum + (Number(inv.paid_amount) || 0), 0);
   const totalDeposits = deposits.reduce((sum, dep) => sum + (Number(dep.amount) || 0), 0);
   const totalPaid = totalPaidInvoices + totalDeposits;
-  const balance = totalInvoiced - totalPaid;
+  
+  // Balance calculation depends on organization type
+  // Generator: shipment value is what they should receive, deposits are what they received
+  // Transporter/Recycler: shipment value is what they owe, deposits are what they paid
+  const isGeneratorOrg = organization?.organization_type === 'generator';
+  const balance = isGeneratorOrg 
+    ? totalShipmentValue - totalPaid  // للمولد: القيمة المستحقة - المدفوع = الباقي لنا
+    : totalInvoiced - totalPaid;       // للناقل/المدور: المفوتر - المدفوع = الباقي علينا
 
   // Refresh deposits callback
   const refreshDeposits = () => {
     queryClient.invalidateQueries({ queryKey: ['partner-deposits', partnerId, organization?.id] });
   };
+
+  // Determine accounting direction based on organization type
+  // Generator: pays for waste removal → shipment is CREDIT (لنا - they owe us), deposit is DEBIT (علينا - we received)
+  // Transporter/Recycler: receives waste → shipment is DEBIT (علينا - we owe them), deposit is CREDIT (لنا - we paid)
+  const isGenerator = organization?.organization_type === 'generator';
 
   // Generate ledger entries
   const ledgerEntries: LedgerEntry[] = useMemo(() => {
@@ -180,6 +192,8 @@ export default function PartnerAccountDetails() {
       const isCancelled = !!shipment.cancelled_at;
       
       if (shipment.hasPrice && shipment.calculatedTotal > 0) {
+        const amount = isCancelled ? 0 : shipment.calculatedTotal;
+        
         entries.push({
           id: `shipment-${shipment.id}`,
           date: shipment.created_at,
@@ -190,8 +204,10 @@ export default function PartnerAccountDetails() {
           quantity: Number(shipment.quantity) || 0,
           unit: shipment.unit || 'وحدة',
           unitPrice: shipment.pricePerUnit,
-          debit: isCancelled ? 0 : shipment.calculatedTotal, // إذا ملغاة = 0
-          credit: 0,
+          // للمولد: الشحنة = لنا (دائن) - ننتظر الدفع من الناقل
+          // للناقل/المدور: الشحنة = علينا (مدين) - مستحق للشريك
+          debit: isGenerator ? 0 : amount,
+          credit: isGenerator ? amount : 0,
           reference: shipment.shipment_number,
           isCancelled,
         });
@@ -201,13 +217,16 @@ export default function PartnerAccountDetails() {
     // Add invoices as entries (when paid)
     invoices.forEach(invoice => {
       if (Number(invoice.paid_amount) > 0) {
+        const amount = Number(invoice.paid_amount) || 0;
         entries.push({
           id: `payment-${invoice.id}`,
           date: invoice.issue_date,
           type: 'payment',
           description: `دفعة فاتورة - ${invoice.invoice_number}`,
-          debit: 0,
-          credit: Number(invoice.paid_amount) || 0, // دائن - تم الدفع
+          // للمولد: الدفعة = علينا (مدين) - تم استلام الدفع
+          // للناقل/المدور: الدفعة = لنا (دائن) - تم الدفع للشريك
+          debit: isGenerator ? amount : 0,
+          credit: isGenerator ? 0 : amount,
           reference: invoice.invoice_number,
         });
       }
@@ -215,20 +234,23 @@ export default function PartnerAccountDetails() {
 
     // Add deposits as entries
     deposits.forEach(deposit => {
+      const amount = Number(deposit.amount) || 0;
       entries.push({
         id: `deposit-${deposit.id}`,
         date: deposit.deposit_date,
         type: 'deposit',
         description: `إيداع - ${deposit.depositor_name}`,
-        debit: 0,
-        credit: Number(deposit.amount) || 0, // دائن - تم الإيداع
+        // للمولد: الإيداع = علينا (مدين) - تم استلام المبلغ
+        // للناقل/المدور: الإيداع = لنا (دائن) - تم الدفع للشريك
+        debit: isGenerator ? amount : 0,
+        credit: isGenerator ? 0 : amount,
         reference: deposit.reference_number || '-',
       });
     });
 
     // Sort by date
     return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [shipmentsWithPricing, invoices, deposits]);
+  }, [shipmentsWithPricing, invoices, deposits, isGenerator]);
 
   if (partnerLoading) {
     return (
@@ -279,6 +301,7 @@ export default function PartnerAccountDetails() {
           totalPaid={totalPaid}
           balance={balance}
           totalQuantity={totalQuantity}
+          isGenerator={isGeneratorOrg}
         />
 
         {/* Main Content Tabs */}
