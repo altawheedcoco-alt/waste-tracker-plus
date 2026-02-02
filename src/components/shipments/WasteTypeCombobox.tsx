@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Check, ChevronsUpDown, Search, Star, AlertTriangle, Leaf } from 'lucide-react';
+import { Check, ChevronsUpDown, Search, Star, AlertTriangle, Leaf, PenLine, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Command,
   CommandEmpty,
@@ -15,7 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { getStoredCustomWasteTypes, CustomWasteType } from '@/hooks/useCustomWasteTypes';
+import { getStoredCustomWasteTypes, useCustomWasteTypes, CustomWasteType } from '@/hooks/useCustomWasteTypes';
+import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
 type WasteType = Database['public']['Enums']['waste_type'];
@@ -331,6 +333,9 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [customWasteTypes, setCustomWasteTypes] = useState<CustomWasteType[]>([]);
+  const [isManualEntry, setIsManualEntry] = useState(false);
+  const [manualInput, setManualInput] = useState('');
+  const { addCustomWasteType } = useCustomWasteTypes();
 
   useEffect(() => {
     setCustomWasteTypes(getStoredCustomWasteTypes());
@@ -339,6 +344,49 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleManualEntry = () => {
+    setIsManualEntry(true);
+    setOpen(false);
+  };
+
+  const handleSaveManualEntry = () => {
+    if (!manualInput.trim()) {
+      toast.error('يرجى إدخال اسم المخلف');
+      return;
+    }
+
+    const customCode = `CUSTOM-${Date.now()}`;
+    const customName = manualInput.trim();
+
+    // Save to custom waste types for reuse
+    const newType = addCustomWasteType({
+      name: customName,
+      code: customCode,
+      category: 'non-hazardous',
+      parentCategory: 'other',
+    });
+
+    // Update local state
+    setCustomWasteTypes(prev => [...prev, newType]);
+
+    // Select the new type
+    const wasteLabel = `${customCode} - مخلف ${customName}`;
+    onChange('other', 'non_hazardous', wasteLabel);
+
+    toast.success('تم إضافة نوع المخلف إلى القائمة', {
+      description: 'يمكنك استخدامه مع جميع الشركاء والشحنات',
+    });
+
+    // Reset
+    setManualInput('');
+    setIsManualEntry(false);
+  };
+
+  const handleCancelManualEntry = () => {
+    setManualInput('');
+    setIsManualEntry(false);
+  };
 
   // Build flat list of all waste items for searching
   const allWasteItems = useMemo(() => {
@@ -435,6 +483,35 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
     setSearchQuery('');
   };
 
+  // If in manual entry mode, show input field
+  if (isManualEntry) {
+    return (
+      <div className="flex gap-2" dir="rtl">
+        <Input
+          placeholder="أدخل اسم المخلف..."
+          value={manualInput}
+          onChange={(e) => setManualInput(e.target.value)}
+          className="flex-1"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleSaveManualEntry();
+            } else if (e.key === 'Escape') {
+              handleCancelManualEntry();
+            }
+          }}
+        />
+        <Button onClick={handleSaveManualEntry} size="icon" className="shrink-0">
+          <Plus className="h-4 w-4" />
+        </Button>
+        <Button onClick={handleCancelManualEntry} variant="outline" size="icon" className="shrink-0">
+          <ChevronsUpDown className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -477,9 +554,30 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
           </div>
           <CommandList className="max-h-[300px] overflow-y-auto">
             {filteredItems.length === 0 ? (
-              <CommandEmpty>لا توجد نتائج مطابقة</CommandEmpty>
+              <CommandEmpty>
+                <div className="py-2 text-center">
+                  <p className="text-sm text-muted-foreground mb-2">لا توجد نتائج مطابقة</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleManualEntry}
+                    className="gap-2"
+                  >
+                    <PenLine className="h-4 w-4" />
+                    إضافة "{searchQuery}" كنوع جديد
+                  </Button>
+                </div>
+              </CommandEmpty>
             ) : (
               <>
+                {/* Manual Entry Option */}
+                <CommandGroup heading="خيارات إضافية">
+                  <CommandItem onSelect={handleManualEntry} className="cursor-pointer gap-2">
+                    <PenLine className="h-4 w-4 text-primary" />
+                    إدخال نوع مخلف يدوياً
+                  </CommandItem>
+                </CommandGroup>
+
                 {/* Custom Waste Types */}
                 {Object.entries(groupedItems)
                   .filter(([key]) => key.startsWith('custom'))
