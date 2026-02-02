@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,9 @@ import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
 import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
 import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker';
+
+// Lazy load the live tracking dialog
+const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -141,6 +144,7 @@ const ShipmentDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showLiveTracking, setShowLiveTracking] = useState(false);
   const [generatorLocation, setGeneratorLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recyclerLocation, setRecyclerLocation] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -284,6 +288,16 @@ const ShipmentDetailsPage = () => {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
+            {/* Live Tracking Button - only show if driver is assigned */}
+            {shipment.driver_id && (
+              <Button 
+                onClick={() => setShowLiveTracking(true)}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Navigation className="ml-2 h-4 w-4" />
+                التتبع المباشر
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setShowStatusDialog(true)}>
               <Edit className="ml-2 h-4 w-4" />
               تغيير الحالة
@@ -588,6 +602,25 @@ const ShipmentDetailsPage = () => {
           shipment={shipment}
           onStatusChanged={fetchShipmentDetails}
         />
+
+        {/* Live Tracking Dialog */}
+        {showLiveTracking && shipment.driver_id && (
+          <Suspense fallback={
+            <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          }>
+            <LiveTrackingMapDialog
+              isOpen={showLiveTracking}
+              onClose={() => setShowLiveTracking(false)}
+              driverId={shipment.driver_id}
+              shipmentNumber={shipment.shipment_number}
+              pickupAddress={shipment.pickup_address}
+              deliveryAddress={shipment.delivery_address}
+              shipmentStatus={shipment.status}
+            />
+          </Suspense>
+        )}
       </div>
     </DashboardLayout>
   );
