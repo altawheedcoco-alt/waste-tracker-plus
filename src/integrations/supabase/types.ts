@@ -64,6 +64,45 @@ export type Database = {
           },
         ]
       }
+      aggregate_invoices: {
+        Row: {
+          created_at: string
+          id: string
+          invoice_id: string
+          shipment_amount: number
+          shipment_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invoice_id: string
+          shipment_amount?: number
+          shipment_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          shipment_amount?: number
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aggregate_invoices_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "aggregate_invoices_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_requests: {
         Row: {
           admin_notes: string | null
@@ -775,6 +814,114 @@ export type Database = {
           },
         ]
       }
+      expenses: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          category: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          description: string
+          driver_id: string | null
+          expense_date: string
+          expense_number: string
+          id: string
+          is_recurring: boolean | null
+          organization_id: string
+          payment_method: string | null
+          receipt_url: string | null
+          recurring_frequency: string | null
+          shipment_id: string | null
+          status: string
+          subcategory: string | null
+          updated_at: string
+          vehicle_plate: string | null
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          category: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description: string
+          driver_id?: string | null
+          expense_date?: string
+          expense_number: string
+          id?: string
+          is_recurring?: boolean | null
+          organization_id: string
+          payment_method?: string | null
+          receipt_url?: string | null
+          recurring_frequency?: string | null
+          shipment_id?: string | null
+          status?: string
+          subcategory?: string | null
+          updated_at?: string
+          vehicle_plate?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          description?: string
+          driver_id?: string | null
+          expense_date?: string
+          expense_number?: string
+          id?: string
+          is_recurring?: boolean | null
+          organization_id?: string
+          payment_method?: string | null
+          receipt_url?: string | null
+          recurring_frequency?: string | null
+          shipment_id?: string | null
+          status?: string
+          subcategory?: string | null
+          updated_at?: string
+          vehicle_plate?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_weight_records: {
         Row: {
           company_id: string | null
@@ -884,6 +1031,312 @@ export type Database = {
           {
             foreignKeyName: "external_weight_records_partner_company_id_fkey"
             columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_accounts: {
+        Row: {
+          account_name: string
+          account_number: string | null
+          account_type: string
+          balance: number
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number?: string | null
+          account_type?: string
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string | null
+          account_type?: string
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_transactions: {
+        Row: {
+          account_id: string | null
+          balance_after: number | null
+          created_at: string
+          created_by: string | null
+          credit_amount: number | null
+          debit_amount: number | null
+          description: string
+          id: string
+          organization_id: string
+          partner_organization_id: string | null
+          reference_id: string | null
+          reference_type: string | null
+          transaction_category: string | null
+          transaction_date: string
+          transaction_number: string
+          transaction_type: string
+        }
+        Insert: {
+          account_id?: string | null
+          balance_after?: number | null
+          created_at?: string
+          created_by?: string | null
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description: string
+          id?: string
+          organization_id: string
+          partner_organization_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_category?: string | null
+          transaction_date?: string
+          transaction_number: string
+          transaction_type: string
+        }
+        Update: {
+          account_id?: string | null
+          balance_after?: number | null
+          created_at?: string
+          created_by?: string | null
+          credit_amount?: number | null
+          debit_amount?: number | null
+          description?: string
+          id?: string
+          organization_id?: string
+          partner_organization_id?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_category?: string | null
+          transaction_date?: string
+          transaction_number?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "financial_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          quantity: number
+          shipment_id: string | null
+          total_price: number
+          unit: string | null
+          unit_price: number
+          waste_quantity: number | null
+          waste_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          quantity?: number
+          shipment_id?: string | null
+          total_price?: number
+          unit?: string | null
+          unit_price?: number
+          waste_quantity?: number | null
+          waste_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          shipment_id?: string | null
+          total_price?: number
+          unit?: string | null
+          unit_price?: number
+          waste_quantity?: number | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          discount_amount: number | null
+          due_date: string | null
+          id: string
+          invoice_category: string
+          invoice_number: string
+          invoice_type: string
+          issue_date: string
+          notes: string | null
+          organization_id: string
+          paid_amount: number | null
+          partner_name: string | null
+          partner_organization_id: string | null
+          remaining_amount: number | null
+          status: string
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          terms: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount_amount?: number | null
+          due_date?: string | null
+          id?: string
+          invoice_category?: string
+          invoice_number: string
+          invoice_type?: string
+          issue_date?: string
+          notes?: string | null
+          organization_id: string
+          paid_amount?: number | null
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          remaining_amount?: number | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount_amount?: number | null
+          due_date?: string | null
+          id?: string
+          invoice_category?: string
+          invoice_number?: string
+          invoice_type?: string
+          issue_date?: string
+          notes?: string | null
+          organization_id?: string
+          paid_amount?: number | null
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          remaining_amount?: number | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -1454,6 +1907,57 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_balances: {
+        Row: {
+          balance: number | null
+          created_at: string
+          id: string
+          last_transaction_date: string | null
+          organization_id: string
+          partner_organization_id: string
+          total_invoiced: number | null
+          total_paid: number | null
+          updated_at: string
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string
+          id?: string
+          last_transaction_date?: string | null
+          organization_id: string
+          partner_organization_id: string
+          total_invoiced?: number | null
+          total_paid?: number | null
+          updated_at?: string
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string
+          id?: string
+          last_transaction_date?: string | null
+          organization_id?: string
+          partner_organization_id?: string
+          total_invoiced?: number | null
+          total_paid?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_balances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_balances_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_notes: {
         Row: {
           content: string
@@ -1623,6 +2127,152 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      payment_reminders: {
+        Row: {
+          created_at: string
+          id: string
+          invoice_id: string
+          is_sent: boolean | null
+          organization_id: string
+          reminder_date: string
+          reminder_type: string
+          sent_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invoice_id: string
+          is_sent?: boolean | null
+          organization_id: string
+          reminder_date: string
+          reminder_type?: string
+          sent_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invoice_id?: string
+          is_sent?: boolean | null
+          organization_id?: string
+          reminder_date?: string
+          reminder_type?: string
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          bank_name: string | null
+          check_number: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          organization_id: string
+          partner_name: string | null
+          partner_organization_id: string | null
+          payment_date: string
+          payment_method: string
+          payment_number: string
+          payment_type: string
+          receipt_url: string | null
+          reference_number: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_name?: string | null
+          check_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          organization_id: string
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_number: string
+          payment_type?: string
+          receipt_url?: string | null
+          reference_number?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_name?: string | null
+          check_number?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          partner_name?: string | null
+          partner_organization_id?: string | null
+          payment_date?: string
+          payment_method?: string
+          payment_number?: string
+          payment_type?: string
+          receipt_url?: string | null
+          reference_number?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
