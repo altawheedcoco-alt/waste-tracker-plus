@@ -64,6 +64,9 @@ const PartnerPaymentUploadDialog = ({
     payment_date: new Date().toISOString().split("T")[0],
     reference_number: "",
     bank_name: "",
+    bank_branch: "",
+    account_number: "",
+    depositor_name: "",
     check_number: "",
     notes: "",
   });
@@ -85,6 +88,9 @@ const PartnerPaymentUploadDialog = ({
           amount: extracted.amount || prev.amount,
           payment_date: extracted.payment_date || prev.payment_date,
           bank_name: extracted.bank_name || prev.bank_name,
+          bank_branch: extracted.bank_branch || prev.bank_branch,
+          account_number: extracted.account_number || prev.account_number,
+          depositor_name: extracted.depositor_name || prev.depositor_name,
           reference_number: extracted.reference_number || prev.reference_number,
           check_number: extracted.check_number || prev.check_number,
           payment_method: extracted.payment_method || prev.payment_method,
@@ -260,6 +266,9 @@ const PartnerPaymentUploadDialog = ({
       payment_date: new Date().toISOString().split("T")[0],
       reference_number: "",
       bank_name: "",
+      bank_branch: "",
+      account_number: "",
+      depositor_name: "",
       check_number: "",
       notes: "",
     });
@@ -401,27 +410,63 @@ const PartnerPaymentUploadDialog = ({
           {/* Bank/Check Details */}
           {(formData.payment_method === "bank_transfer" ||
             formData.payment_method === "check") && (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>اسم البنك</Label>
-                <Input
-                  value={formData.bank_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bank_name: e.target.value })
-                  }
-                  placeholder="مثال: البنك الأهلي"
-                />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>اسم البنك</Label>
+                  <Input
+                    value={formData.bank_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bank_name: e.target.value })
+                    }
+                    placeholder="مثال: البنك الأهلي"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>فرع البنك</Label>
+                  <Input
+                    value={formData.bank_branch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bank_branch: e.target.value })
+                    }
+                    placeholder="مثال: فرع المعادي"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>رقم الحساب</Label>
+                  <Input
+                    value={formData.account_number}
+                    onChange={(e) =>
+                      setFormData({ ...formData, account_number: e.target.value })
+                    }
+                    placeholder="رقم الحساب المودع فيه"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>اسم المودع</Label>
+                  <Input
+                    value={formData.depositor_name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, depositor_name: e.target.value })
+                    }
+                    placeholder="اسم صاحب الحساب"
+                  />
+                </div>
               </div>
               {formData.payment_method === "check" && (
-                <div className="space-y-2">
-                  <Label>رقم الشيك</Label>
-                  <Input
-                    value={formData.check_number}
-                    onChange={(e) =>
-                      setFormData({ ...formData, check_number: e.target.value })
-                    }
-                    placeholder="رقم الشيك"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>رقم الشيك</Label>
+                    <Input
+                      value={formData.check_number}
+                      onChange={(e) =>
+                        setFormData({ ...formData, check_number: e.target.value })
+                      }
+                      placeholder="رقم الشيك"
+                    />
+                  </div>
                 </div>
               )}
             </div>
