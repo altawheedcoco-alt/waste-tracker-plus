@@ -14,27 +14,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileText, Printer, Calendar, Package, CreditCard, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { FileText, Printer, Calendar, TrendingUp, TrendingDown } from "lucide-react";
 import { format } from "date-fns";
-import { ar } from "date-fns/locale";
 
 interface PartnerStatementTabProps {
   partnerId: string;
   partnerName: string;
 }
 
-interface StatementEntry {
+interface LedgerEntry {
   id: string;
+  serial: number;
   date: string;
   type: "invoice" | "payment" | "shipment";
-  reference: string;
-  description: string;
-  debit: number;
-  credit: number;
-  balance: number;
-  wasteType?: string;
-  quantity?: number;
-  unit?: string;
+  typeLabel: string;
+  currentDebt: number;
+  goods: number;
+  paid: number;
+  productName: string;
+  price: number;
+  quantity: number;
+  total: number;
 }
 
 const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProps) => {
@@ -44,14 +44,14 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
 
   // Fetch invoices
   const { data: invoices = [] } = useQuery({
-    queryKey: ["partner-statement-invoices", organization?.id, partnerId, dateFrom, dateTo],
+    queryKey: ["partner-ledger-invoices", organization?.id, partnerId, dateFrom, dateTo],
     queryFn: async () => {
       if (!organization?.id) return [];
       let query = supabase
         .from("invoices")
         .select(`
-          id, invoice_number, issue_date, total_amount, notes, invoice_type,
-          invoice_items(shipment_id, waste_type, waste_quantity, description)
+          id, invoice_number, issue_date, total_amount, paid_amount, remaining_amount, notes, invoice_type,
+          invoice_items(shipment_id, waste_type, waste_quantity, unit_price, total_price, quantity)
         `)
         .eq("organization_id", organization.id)
         .eq("partner_organization_id", partnerId);
@@ -68,7 +68,7 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
 
   // Fetch payments
   const { data: payments = [] } = useQuery({
-    queryKey: ["partner-statement-payments", organization?.id, partnerId, dateFrom, dateTo],
+    queryKey: ["partner-ledger-payments", organization?.id, partnerId, dateFrom, dateTo],
     queryFn: async () => {
       if (!organization?.id) return [];
       let query = supabase
@@ -88,48 +88,33 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
     enabled: !!organization?.id && !!partnerId,
   });
 
-  // Fetch shipments related to this partner
-  const { data: shipments = [] } = useQuery({
-    queryKey: ["partner-statement-shipments", organization?.id, partnerId, dateFrom, dateTo],
-    queryFn: async () => {
-      if (!organization?.id) return [];
-      let query = supabase
-        .from("shipments")
-        .select("id, shipment_number, created_at, pickup_date, waste_type, quantity, unit, waste_description, status")
-        .or(`generator_id.eq.${partnerId},recycler_id.eq.${partnerId}`)
-        .eq("transporter_id", organization.id);
+  // Build ledger entries
+  const buildLedger = (): LedgerEntry[] => {
+    const entries: { date: string; data: Omit<LedgerEntry, 'serial' | 'currentDebt'> }[] = [];
 
-      if (dateFrom) query = query.gte("created_at", dateFrom);
-      if (dateTo) query = query.lte("created_at", dateTo);
-
-      const { data, error } = await query.order("created_at", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!organization?.id && !!partnerId,
-  });
-
-  // Build statement entries
-  const buildStatement = (): StatementEntry[] => {
-    const entries: StatementEntry[] = [];
-
-    // Add invoices as debit entries (what they owe us)
+    // Add invoices
     invoices.forEach((inv: any) => {
       const isReceivable = inv.invoice_type === 'sales';
       const items = inv.invoice_items || [];
-      const wasteInfo = items.length > 0 ? items[0] : null;
+      const firstItem = items.length > 0 ? items[0] : null;
+      
+      const totalQty = items.reduce((sum: number, item: any) => sum + (item.quantity || item.waste_quantity || 0), 0);
+      const avgPrice = totalQty > 0 ? (inv.total_amount / totalQty) : 0;
       
       entries.push({
-        id: inv.id,
         date: inv.issue_date,
-        type: "invoice",
-        reference: inv.invoice_number,
-        description: inv.notes || `فاتورة ${isReceivable ? 'مبيعات' : 'مشتريات'}`,
-        debit: isReceivable ? (inv.total_amount || 0) : 0,
-        credit: isReceivable ? 0 : (inv.total_amount || 0),
-        balance: 0,
-        wasteType: wasteInfo?.waste_type,
-        quantity: wasteInfo?.waste_quantity,
+        data: {
+          id: inv.id,
+          date: inv.issue_date,
+          type: "invoice",
+          typeLabel: isReceivable ? 'فاتورة مبيعات' : 'فاتورة مشتريات',
+          goods: isReceivable ? inv.total_amount : 0,
+          paid: inv.paid_amount || 0,
+          productName: firstItem?.waste_type || 'خدمة',
+          price: avgPrice,
+          quantity: totalQty,
+          total: inv.total_amount || 0,
+        }
       });
     });
 
@@ -137,28 +122,42 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
     payments.forEach((pay: any) => {
       const isIncoming = pay.payment_type === "incoming";
       entries.push({
-        id: pay.id,
         date: pay.payment_date,
-        type: "payment",
-        reference: pay.payment_number,
-        description: `${isIncoming ? 'دفعة واردة' : 'دفعة صادرة'} - ${getPaymentMethodLabel(pay.payment_method)}`,
-        debit: isIncoming ? 0 : (pay.amount || 0),
-        credit: isIncoming ? (pay.amount || 0) : 0,
-        balance: 0,
+        data: {
+          id: pay.id,
+          date: pay.payment_date,
+          type: "payment",
+          typeLabel: isIncoming ? 'دفعة واردة' : 'دفعة صادرة',
+          goods: 0,
+          paid: pay.amount || 0,
+          productName: getPaymentMethodLabel(pay.payment_method),
+          price: 0,
+          quantity: 0,
+          total: pay.amount || 0,
+        }
       });
     });
 
     // Sort by date
     entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Calculate running balance
-    let runningBalance = 0;
-    entries.forEach((entry) => {
-      runningBalance += entry.debit - entry.credit;
-      entry.balance = runningBalance;
+    // Calculate running debt and add serial numbers
+    let runningDebt = 0;
+    return entries.map((entry, index) => {
+      // For invoices: goods increase debt, payments decrease debt
+      if (entry.data.type === 'invoice') {
+        runningDebt += entry.data.goods;
+      }
+      if (entry.data.type === 'payment') {
+        runningDebt -= entry.data.paid;
+      }
+      
+      return {
+        ...entry.data,
+        serial: index + 1,
+        currentDebt: runningDebt,
+      };
     });
-
-    return entries;
   };
 
   const getPaymentMethodLabel = (method: string) => {
@@ -172,17 +171,17 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
     return methods[method] || method;
   };
 
-  const statement = buildStatement();
-  const totalDebit = statement.reduce((sum, e) => sum + e.debit, 0);
-  const totalCredit = statement.reduce((sum, e) => sum + e.credit, 0);
-  const finalBalance = totalDebit - totalCredit;
-
-  // Calculate shipment stats
-  const totalShipments = shipments.length;
-  const totalQuantity = shipments.reduce((sum: number, s: any) => sum + (s.quantity || 0), 0);
+  const ledger = buildLedger();
+  const totalGoods = ledger.reduce((sum, e) => sum + e.goods, 0);
+  const totalPaid = ledger.reduce((sum, e) => sum + e.paid, 0);
+  const finalDebt = ledger.length > 0 ? ledger[ledger.length - 1].currentDebt : 0;
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('ar-EG');
   };
 
   return (
@@ -191,7 +190,7 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
-            كشف حساب {partnerName}
+            دفتر حساب: {partnerName}
           </CardTitle>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
@@ -221,152 +220,119 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-muted/50 rounded-lg p-4 text-center">
-            <p className="text-xs text-muted-foreground">الحركات</p>
-            <p className="text-xl font-bold">{statement.length}</p>
+            <p className="text-xs text-muted-foreground">عدد الحركات</p>
+            <p className="text-xl font-bold">{ledger.length}</p>
           </div>
           <div className="bg-blue-500/10 rounded-lg p-4 text-center">
-            <Package className="h-4 w-4 mx-auto mb-1 text-blue-500" />
-            <p className="text-xs text-muted-foreground">الشحنات</p>
-            <p className="text-xl font-bold text-blue-600">{totalShipments}</p>
-            <p className="text-xs text-muted-foreground">{totalQuantity.toLocaleString()} كجم</p>
-          </div>
-          <div className="bg-red-500/10 rounded-lg p-4 text-center">
-            <ArrowUpRight className="h-4 w-4 mx-auto mb-1 text-red-500" />
-            <p className="text-xs text-muted-foreground">مدين (لنا)</p>
-            <p className="text-xl font-bold text-red-600">{totalDebit.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">إجمالي البضاعة</p>
+            <p className="text-xl font-bold text-blue-600">{formatCurrency(totalGoods)} ج.م</p>
           </div>
           <div className="bg-green-500/10 rounded-lg p-4 text-center">
-            <ArrowDownRight className="h-4 w-4 mx-auto mb-1 text-green-500" />
-            <p className="text-xs text-muted-foreground">دائن (منهم)</p>
-            <p className="text-xl font-bold text-green-600">{totalCredit.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">إجمالي المدفوع</p>
+            <p className="text-xl font-bold text-green-600">{formatCurrency(totalPaid)} ج.م</p>
           </div>
-          <div className={`${finalBalance >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'} rounded-lg p-4 text-center col-span-2 sm:col-span-1`}>
-            {finalBalance >= 0 ? (
-              <TrendingUp className="h-4 w-4 mx-auto mb-1 text-green-500" />
+          <div className={`${finalDebt >= 0 ? 'bg-red-500/10' : 'bg-green-500/10'} rounded-lg p-4 text-center`}>
+            {finalDebt >= 0 ? (
+              <TrendingUp className="h-4 w-4 mx-auto mb-1 text-red-500" />
             ) : (
-              <TrendingDown className="h-4 w-4 mx-auto mb-1 text-red-500" />
+              <TrendingDown className="h-4 w-4 mx-auto mb-1 text-green-500" />
             )}
-            <p className="text-xs text-muted-foreground">الرصيد</p>
-            <p className={`text-xl font-bold ${finalBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {Math.abs(finalBalance).toLocaleString()} ج.م
+            <p className="text-xs text-muted-foreground">الدين الحالي</p>
+            <p className={`text-xl font-bold ${finalDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+              {formatCurrency(Math.abs(finalDebt))} ج.م
             </p>
             <p className="text-xs text-muted-foreground">
-              {finalBalance >= 0 ? "مستحق لنا" : "مستحق علينا"}
+              {finalDebt >= 0 ? "مستحق لنا" : "مستحق علينا"}
             </p>
-          </div>
-          <div className="bg-purple-500/10 rounded-lg p-4 text-center">
-            <CreditCard className="h-4 w-4 mx-auto mb-1 text-purple-500" />
-            <p className="text-xs text-muted-foreground">المدفوعات</p>
-            <p className="text-xl font-bold text-purple-600">{payments.length}</p>
           </div>
         </div>
 
-        {/* Shipments Summary */}
-        {shipments.length > 0 && (
-          <Card className="border-blue-500/30 bg-blue-500/5">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                ملخص الشحنات مع هذا الشريك
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-                {Object.entries(
-                  shipments.reduce((acc: Record<string, number>, s: any) => {
-                    const type = s.waste_type || 'أخرى';
-                    acc[type] = (acc[type] || 0) + (s.quantity || 0);
-                    return acc;
-                  }, {})
-                ).map(([type, qty]) => (
-                  <div key={type} className="flex justify-between">
-                    <span className="text-muted-foreground">{type}:</span>
-                    <span className="font-medium">{(qty as number).toLocaleString()} كجم</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Statement Table */}
-        {statement.length === 0 ? (
+        {/* Ledger Table */}
+        {ledger.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>لا توجد حركات في هذه الفترة</p>
           </div>
         ) : (
-          <div className="overflow-x-auto print:overflow-visible">
+          <div className="overflow-x-auto print:overflow-visible border rounded-lg">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/30">
-                  <TableHead className="w-[100px]">التاريخ</TableHead>
-                  <TableHead>النوع</TableHead>
-                  <TableHead>المرجع</TableHead>
-                  <TableHead>البيان</TableHead>
-                  <TableHead className="text-left">مدين (لنا)</TableHead>
-                  <TableHead className="text-left">دائن (علينا)</TableHead>
-                  <TableHead className="text-left">الرصيد</TableHead>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="text-center font-bold">التسلسل</TableHead>
+                  <TableHead className="text-center font-bold">التاريخ</TableHead>
+                  <TableHead className="text-center font-bold">النوع</TableHead>
+                  <TableHead className="text-center font-bold">الدين الحالي</TableHead>
+                  <TableHead className="text-center font-bold">البضاعة</TableHead>
+                  <TableHead className="text-center font-bold">المدفوع</TableHead>
+                  <TableHead className="text-center font-bold">اسم المنتج</TableHead>
+                  <TableHead className="text-center font-bold">السعر</TableHead>
+                  <TableHead className="text-center font-bold">الكمية</TableHead>
+                  <TableHead className="text-center font-bold">الإجمالي</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {statement.map((entry) => (
-                  <TableRow key={`${entry.type}-${entry.id}`} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">
+                {ledger.map((entry) => (
+                  <TableRow key={`${entry.type}-${entry.id}`} className="hover:bg-muted/30">
+                    <TableCell className="text-center font-medium">
+                      {entry.serial}
+                    </TableCell>
+                    <TableCell className="text-center">
                       {format(new Date(entry.date), "dd/MM/yyyy")}
                     </TableCell>
-                    <TableCell>
-                      <Badge variant={entry.type === 'invoice' ? 'default' : entry.type === 'payment' ? 'secondary' : 'outline'}>
-                        {entry.type === 'invoice' && <FileText className="h-3 w-3 ml-1" />}
-                        {entry.type === 'payment' && <CreditCard className="h-3 w-3 ml-1" />}
-                        {entry.type === 'shipment' && <Package className="h-3 w-3 ml-1" />}
-                        {entry.type === 'invoice' ? 'فاتورة' : entry.type === 'payment' ? 'دفعة' : 'شحنة'}
+                    <TableCell className="text-center">
+                      <Badge 
+                        variant={entry.type === 'invoice' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {entry.typeLabel}
                       </Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-sm">{entry.reference}</TableCell>
-                    <TableCell>
-                      <div>
-                        {entry.description}
-                        {entry.wasteType && (
-                          <span className="text-xs text-muted-foreground block">
-                            {entry.wasteType} {entry.quantity && `- ${entry.quantity} ${entry.unit || 'كجم'}`}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-left">
-                      {entry.debit > 0 ? (
-                        <span className="text-green-600 font-medium">{entry.debit.toLocaleString()}</span>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell className="text-left">
-                      {entry.credit > 0 ? (
-                        <span className="text-red-600 font-medium">{entry.credit.toLocaleString()}</span>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell className={`text-left font-bold ${entry.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {Math.abs(entry.balance).toLocaleString()}
+                    <TableCell className={`text-center font-bold ${entry.currentDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {formatCurrency(Math.abs(entry.currentDebt))}
                       <span className="text-xs mr-1 font-normal">
-                        {entry.balance >= 0 ? "لنا" : "علينا"}
+                        {entry.currentDebt >= 0 ? "لنا" : "علينا"}
                       </span>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {entry.goods > 0 ? (
+                        <span className="text-blue-600">{formatCurrency(entry.goods)}</span>
+                      ) : '-'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {entry.paid > 0 ? (
+                        <span className="text-green-600">{formatCurrency(entry.paid)}</span>
+                      ) : '-'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {entry.productName || '-'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {entry.price > 0 ? formatCurrency(entry.price) : '-'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {entry.quantity > 0 ? formatCurrency(entry.quantity) : '-'}
+                    </TableCell>
+                    <TableCell className="text-center font-bold">
+                      {formatCurrency(entry.total)}
                     </TableCell>
                   </TableRow>
                 ))}
                 {/* Totals Row */}
                 <TableRow className="bg-muted/50 font-bold border-t-2">
-                  <TableCell colSpan={4} className="text-left">الإجمالي</TableCell>
-                  <TableCell className="text-left text-green-600">
-                    {totalDebit.toLocaleString()}
+                  <TableCell colSpan={4} className="text-center">الإجمالي</TableCell>
+                  <TableCell className="text-center text-blue-600">
+                    {formatCurrency(totalGoods)}
                   </TableCell>
-                  <TableCell className="text-left text-red-600">
-                    {totalCredit.toLocaleString()}
+                  <TableCell className="text-center text-green-600">
+                    {formatCurrency(totalPaid)}
                   </TableCell>
-                  <TableCell className={`text-left ${finalBalance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {Math.abs(finalBalance).toLocaleString()}
+                  <TableCell colSpan={3}></TableCell>
+                  <TableCell className={`text-center ${finalDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    {formatCurrency(Math.abs(finalDebt))}
                     <span className="text-xs mr-1 font-normal">
-                      {finalBalance >= 0 ? "لنا" : "علينا"}
+                      {finalDebt >= 0 ? "لنا" : "علينا"}
                     </span>
                   </TableCell>
                 </TableRow>
