@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileText, Printer, Calendar, TrendingUp, TrendingDown } from "lucide-react";
+import { Printer, Calendar } from "lucide-react";
 import { format } from "date-fns";
 
 interface PartnerStatementTabProps {
@@ -26,7 +26,7 @@ interface LedgerEntry {
   id: string;
   serial: number;
   date: string;
-  type: "invoice" | "payment" | "shipment";
+  type: "invoice" | "payment";
   typeLabel: string;
   currentDebt: number;
   goods: number;
@@ -107,9 +107,9 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
           id: inv.id,
           date: inv.issue_date,
           type: "invoice",
-          typeLabel: isReceivable ? 'فاتورة مبيعات' : 'فاتورة مشتريات',
+          typeLabel: `فاتورة بيع رقم: ${inv.invoice_number}`,
           goods: isReceivable ? inv.total_amount : 0,
-          paid: inv.paid_amount || 0,
+          paid: 0,
           productName: firstItem?.waste_type || 'خدمة',
           price: avgPrice,
           quantity: totalQty,
@@ -120,14 +120,13 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
 
     // Add payments
     payments.forEach((pay: any) => {
-      const isIncoming = pay.payment_type === "incoming";
       entries.push({
         date: pay.payment_date,
         data: {
           id: pay.id,
           date: pay.payment_date,
           type: "payment",
-          typeLabel: isIncoming ? 'دفعة واردة' : 'دفعة صادرة',
+          typeLabel: `دفعة رقم: ${pay.payment_number}`,
           goods: 0,
           paid: pay.amount || 0,
           productName: getPaymentMethodLabel(pay.payment_method),
@@ -144,7 +143,6 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
     // Calculate running debt and add serial numbers
     let runningDebt = 0;
     return entries.map((entry, index) => {
-      // For invoices: goods increase debt, payments decrease debt
       if (entry.data.type === 'invoice') {
         runningDebt += entry.data.goods;
       }
@@ -184,14 +182,29 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
     return amount.toLocaleString('ar-EG');
   };
 
+  const periodLabel = dateFrom && dateTo 
+    ? `عن فترة تبدأ من: ${dateFrom} إلى: ${dateTo}`
+    : dateFrom 
+    ? `من تاريخ: ${dateFrom}`
+    : dateTo 
+    ? `حتى تاريخ: ${dateTo}`
+    : '';
+
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            دفتر حساب: {partnerName}
-          </CardTitle>
+    <Card className="print:shadow-none print:border-none">
+      <CardHeader className="print:pb-2">
+        {/* Print Header */}
+        <div className="text-center print:block hidden mb-4">
+          <h1 className="text-xl font-bold">كشف حساب المورد: {partnerName}</h1>
+          {periodLabel && <p className="text-sm text-muted-foreground">{periodLabel}</p>}
+        </div>
+        
+        {/* Screen Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 print:hidden">
+          <div>
+            <CardTitle className="text-lg">كشف حساب: {partnerName}</CardTitle>
+            {periodLabel && <p className="text-sm text-muted-foreground">{periodLabel}</p>}
+          </div>
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -199,145 +212,119 @@ const PartnerStatementTab = ({ partnerId, partnerName }: PartnerStatementTabProp
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-40"
-                placeholder="من تاريخ"
+                className="w-36 h-9"
               />
-              <span className="text-muted-foreground">إلى</span>
+              <span className="text-muted-foreground text-sm">إلى</span>
               <Input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-40"
-                placeholder="إلى تاريخ"
+                className="w-36 h-9"
               />
             </div>
-            <Button variant="outline" onClick={handlePrint}>
+            <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="h-4 w-4 ml-2" />
               طباعة
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="bg-muted/50 rounded-lg p-4 text-center">
-            <p className="text-xs text-muted-foreground">عدد الحركات</p>
-            <p className="text-xl font-bold">{ledger.length}</p>
-          </div>
-          <div className="bg-blue-500/10 rounded-lg p-4 text-center">
-            <p className="text-xs text-muted-foreground">إجمالي البضاعة</p>
-            <p className="text-xl font-bold text-blue-600">{formatCurrency(totalGoods)} ج.م</p>
-          </div>
-          <div className="bg-green-500/10 rounded-lg p-4 text-center">
-            <p className="text-xs text-muted-foreground">إجمالي المدفوع</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(totalPaid)} ج.م</p>
-          </div>
-          <div className={`${finalDebt >= 0 ? 'bg-red-500/10' : 'bg-green-500/10'} rounded-lg p-4 text-center`}>
-            {finalDebt >= 0 ? (
-              <TrendingUp className="h-4 w-4 mx-auto mb-1 text-red-500" />
-            ) : (
-              <TrendingDown className="h-4 w-4 mx-auto mb-1 text-green-500" />
-            )}
-            <p className="text-xs text-muted-foreground">الدين الحالي</p>
-            <p className={`text-xl font-bold ${finalDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {formatCurrency(Math.abs(finalDebt))} ج.م
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {finalDebt >= 0 ? "مستحق لنا" : "مستحق علينا"}
-            </p>
-          </div>
-        </div>
-
-        {/* Ledger Table */}
+      
+      <CardContent className="space-y-4">
+        {/* Ledger Table - Excel Style */}
         {ledger.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>لا توجد حركات في هذه الفترة</p>
+          <div className="text-center py-12 text-muted-foreground print:hidden">
+            <p className="font-medium">لا توجد حركات في هذه الفترة</p>
           </div>
         ) : (
-          <div className="overflow-x-auto print:overflow-visible border rounded-lg">
+          <div className="border rounded-lg overflow-x-auto print:overflow-visible print:border-2 print:border-black">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="text-center font-bold">التسلسل</TableHead>
-                  <TableHead className="text-center font-bold">التاريخ</TableHead>
-                  <TableHead className="text-center font-bold">النوع</TableHead>
-                  <TableHead className="text-center font-bold">الدين الحالي</TableHead>
-                  <TableHead className="text-center font-bold">البضاعة</TableHead>
-                  <TableHead className="text-center font-bold">المدفوع</TableHead>
-                  <TableHead className="text-center font-bold">اسم المنتج</TableHead>
-                  <TableHead className="text-center font-bold">السعر</TableHead>
-                  <TableHead className="text-center font-bold">الكمية</TableHead>
-                  <TableHead className="text-center font-bold">الإجمالي</TableHead>
+                <TableRow className="bg-muted/50 print:bg-gray-100">
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">التسلسل</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">التاريخ</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs min-w-[140px]">النوع</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">الدين الحالي</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">البضاعة</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">المدفوع</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">اسم المنتج</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">السعر</TableHead>
+                  <TableHead className="text-center font-bold border-l print:border-black text-xs">الكمية</TableHead>
+                  <TableHead className="text-center font-bold text-xs">الإجمالي</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {ledger.map((entry) => (
-                  <TableRow key={`${entry.type}-${entry.id}`} className="hover:bg-muted/30">
-                    <TableCell className="text-center font-medium">
+                  <TableRow key={`${entry.type}-${entry.id}`} className="print:border-b print:border-black">
+                    <TableCell className="text-center font-medium border-l print:border-black text-sm py-2">
                       {entry.serial}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {format(new Date(entry.date), "dd/MM/yyyy")}
+                    <TableCell className="text-center border-l print:border-black text-sm py-2">
+                      {format(new Date(entry.date), "yyyy/MM/dd")}
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Badge 
-                        variant={entry.type === 'invoice' ? 'default' : 'secondary'}
-                        className="text-xs"
-                      >
+                    <TableCell className="text-center border-l print:border-black text-sm py-2">
+                      <span className={entry.type === 'invoice' ? 'text-blue-600' : 'text-green-600'}>
                         {entry.typeLabel}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className={`text-center font-bold ${entry.currentDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {formatCurrency(Math.abs(entry.currentDebt))}
-                      <span className="text-xs mr-1 font-normal">
-                        {entry.currentDebt >= 0 ? "لنا" : "علينا"}
                       </span>
                     </TableCell>
-                    <TableCell className="text-center">
-                      {entry.goods > 0 ? (
-                        <span className="text-blue-600">{formatCurrency(entry.goods)}</span>
-                      ) : '-'}
+                    <TableCell className={`text-center font-bold border-l print:border-black text-sm py-2 ${entry.currentDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {formatCurrency(Math.abs(entry.currentDebt))}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {entry.paid > 0 ? (
-                        <span className="text-green-600">{formatCurrency(entry.paid)}</span>
-                      ) : '-'}
+                    <TableCell className="text-center border-l print:border-black text-sm py-2">
+                      {entry.goods > 0 ? formatCurrency(entry.goods) : ''}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {entry.productName || '-'}
+                    <TableCell className="text-center border-l print:border-black text-sm py-2">
+                      {entry.paid > 0 ? formatCurrency(entry.paid) : ''}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {entry.price > 0 ? formatCurrency(entry.price) : '-'}
+                    <TableCell className="text-center border-l print:border-black text-sm py-2">
+                      {entry.productName || ''}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {entry.quantity > 0 ? formatCurrency(entry.quantity) : '-'}
+                    <TableCell className="text-center border-l print:border-black text-sm py-2">
+                      {entry.price > 0 ? formatCurrency(entry.price) : ''}
                     </TableCell>
-                    <TableCell className="text-center font-bold">
+                    <TableCell className="text-center border-l print:border-black text-sm py-2">
+                      {entry.quantity > 0 ? formatCurrency(entry.quantity) : ''}
+                    </TableCell>
+                    <TableCell className="text-center font-medium text-sm py-2">
                       {formatCurrency(entry.total)}
                     </TableCell>
                   </TableRow>
                 ))}
-                {/* Totals Row */}
-                <TableRow className="bg-muted/50 font-bold border-t-2">
-                  <TableCell colSpan={4} className="text-center">الإجمالي</TableCell>
-                  <TableCell className="text-center text-blue-600">
-                    {formatCurrency(totalGoods)}
-                  </TableCell>
-                  <TableCell className="text-center text-green-600">
-                    {formatCurrency(totalPaid)}
-                  </TableCell>
-                  <TableCell colSpan={3}></TableCell>
-                  <TableCell className={`text-center ${finalDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    {formatCurrency(Math.abs(finalDebt))}
-                    <span className="text-xs mr-1 font-normal">
-                      {finalDebt >= 0 ? "لنا" : "علينا"}
-                    </span>
-                  </TableCell>
-                </TableRow>
               </TableBody>
             </Table>
+          </div>
+        )}
+
+        {/* Summary - Excel Style */}
+        {ledger.length > 0 && (
+          <div className="flex justify-end print:mt-8">
+            <div className="border rounded-lg overflow-hidden print:border-2 print:border-black w-72">
+              <Table>
+                <TableBody>
+                  <TableRow className="print:border-b print:border-black">
+                    <TableCell className="font-medium border-l print:border-black py-2 text-sm">الدين السابق</TableCell>
+                    <TableCell className="text-center font-bold py-2 text-sm">0</TableCell>
+                  </TableRow>
+                  <TableRow className="print:border-b print:border-black">
+                    <TableCell className="font-medium border-l print:border-black py-2 text-sm">إجمالي المشتريات</TableCell>
+                    <TableCell className="text-center font-bold text-blue-600 py-2 text-sm">{formatCurrency(totalGoods)}</TableCell>
+                  </TableRow>
+                  <TableRow className="print:border-b print:border-black">
+                    <TableCell className="font-medium border-l print:border-black py-2 text-sm">إجمالي المدفوعات</TableCell>
+                    <TableCell className="text-center font-bold text-green-600 py-2 text-sm">{formatCurrency(totalPaid)}</TableCell>
+                  </TableRow>
+                  <TableRow className="bg-muted/50 print:bg-gray-100">
+                    <TableCell className="font-bold border-l print:border-black py-2 text-sm">إجمالي الدين</TableCell>
+                    <TableCell className={`text-center font-bold py-2 text-sm ${finalDebt >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {formatCurrency(Math.abs(finalDebt))}
+                      <span className="text-xs mr-1 font-normal">
+                        {finalDebt >= 0 ? "(لنا)" : "(علينا)"}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
           </div>
         )}
       </CardContent>
