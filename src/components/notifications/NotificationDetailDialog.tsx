@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 import {
   Package,
   Truck,
@@ -28,9 +29,11 @@ import {
   Download,
   Printer,
   Eye,
+  Scale,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import DocumentVerificationPanel from './DocumentVerificationPanel';
 
 interface Notification {
   id: string;
@@ -42,6 +45,8 @@ interface Notification {
   shipment_id: string | null;
   request_id: string | null;
   pdf_url?: string | null;
+  organization_id?: string | null;
+  document_id?: string | null;
 }
 
 interface SenderReceiverInfo {
@@ -157,6 +162,7 @@ const NotificationDetailDialog = ({
   const { profile } = useAuth();
   const [senderReceiverInfo, setSenderReceiverInfo] = useState<SenderReceiverInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [documentOrgId, setDocumentOrgId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSenderReceiverInfo = async () => {
@@ -251,11 +257,50 @@ const NotificationDetailDialog = ({
           }
         }
 
+        // For document uploaded notifications, get organization ID
+        if (notification.type === 'document_uploaded') {
+          // Try to extract organization_id from notification data
+          if (notification.organization_id) {
+            setDocumentOrgId(notification.organization_id);
+          } else if (notification.request_id) {
+            // Get from approval request
+            const { data: request } = await supabase
+              .from('approval_requests')
+              .select('requester_organization_id')
+              .eq('id', notification.request_id)
+              .single();
+            
+            if (request?.requester_organization_id) {
+              setDocumentOrgId(request.requester_organization_id);
+              info.senderType = 'organization';
+            }
+          } else {
+            // Try to find recent documents from message parsing
+            const orgNameMatch = notification.message.match(/من جهة (.+)/);
+            if (orgNameMatch) {
+              const { data: org } = await supabase
+                .from('organizations')
+                .select('id, name, organization_type, logo_url')
+                .ilike('name', `%${orgNameMatch[1]}%`)
+                .limit(1)
+                .single();
+              
+              if (org) {
+                setDocumentOrgId(org.id);
+                info.senderName = org.name;
+                info.senderType = org.organization_type;
+                info.senderLogo = org.logo_url;
+              }
+            }
+          }
+        }
+
         // For approval requests, get the requester organization
         if (notification.request_id) {
           const { data: request } = await supabase
             .from('approval_requests')
             .select(`
+              requester_organization_id,
               requester_organization:organizations!approval_requests_requester_organization_id_fkey(name, organization_type, logo_url)
             `)
             .eq('id', notification.request_id)
@@ -265,6 +310,11 @@ const NotificationDetailDialog = ({
             info.senderName = request.requester_organization.name;
             info.senderType = request.requester_organization.organization_type;
             info.senderLogo = request.requester_organization.logo_url;
+            
+            // For document-related approval requests
+            if (notification.type === 'document_uploaded' && request.requester_organization_id) {
+              setDocumentOrgId(request.requester_organization_id);
+            }
           }
         }
 
@@ -441,6 +491,26 @@ const NotificationDetailDialog = ({
                 </Button>
               </div>
             </div>
+          )}
+
+          {/* Document Verification Panel for Admin */}
+          {notification.type === 'document_uploaded' && documentOrgId && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Scale className="w-4 h-4 text-primary" />
+                  <span>التحقق القانوني من المستندات</span>
+                </div>
+                <DocumentVerificationPanel
+                  organizationId={documentOrgId}
+                  documentId={notification.document_id || undefined}
+                  onVerificationComplete={() => {
+                    // Optionally refresh or show success
+                  }}
+                />
+              </div>
+            </>
           )}
 
           {/* Timestamp */}
