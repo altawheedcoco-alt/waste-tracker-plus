@@ -79,6 +79,7 @@ const PartnerAccountDetails = lazy(() => import("./pages/dashboard/PartnerAccoun
 const ExternalPartnerDetails = lazy(() => import("./pages/dashboard/ExternalPartnerDetails"));
 const DocumentVerification = lazy(() => import("./pages/dashboard/DocumentVerification"));
 const Verify = lazy(() => import("./pages/Verify"));
+const NavigationDemo = lazy(() => import("./pages/dashboard/NavigationDemo"));
 
 // Lazy loaded heavy components (deferred)
 const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
@@ -183,7 +184,8 @@ const AppRoutes = memo(() => (
     <Route path="/dashboard/partner-accounts" element={<PartnerAccounts />} />
     <Route path="/dashboard/partner-account/:partnerId" element={<PartnerAccountDetails />} />
     <Route path="/dashboard/external-partner/:partnerId" element={<ExternalPartnerDetails />} />
-    <Route path="/dashboard/document-verification" element={<DocumentVerification />} />
+        <Route path="/dashboard/document-verification" element={<DocumentVerification />} />
+        <Route path="/dashboard/navigation-demo" element={<NavigationDemo />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
