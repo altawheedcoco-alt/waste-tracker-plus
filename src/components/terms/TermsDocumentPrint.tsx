@@ -156,22 +156,93 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
           ))}
         </div>
 
-        {/* Signature Section */}
+        {/* Electronic Signature Section */}
         <div className="border-t-2 border-gray-300 pt-6 mt-6">
+          <h2 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
+            <span>✍️</span> التوقيع الإلكتروني والموافقة
+          </h2>
+          
+          {/* Electronic Signature Box */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">اسم الموقّع الإلكتروني:</p>
+                <p className="font-bold text-lg text-blue-800">{acceptance.full_name || 'غير محدد'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">الرقم القومي:</p>
+                <p className="font-bold text-lg text-blue-800 font-mono">{acceptance.signer_national_id || 'غير محدد'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">المسمى الوظيفي:</p>
+                <p className="font-medium">{acceptance.signer_position || 'غير محدد'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">رقم الهاتف:</p>
+                <p className="font-medium">{acceptance.signer_phone || 'غير محدد'}</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-blue-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">تاريخ ووقت التوقيع الإلكتروني:</p>
+                  <p className="font-bold text-blue-800">
+                    {format(new Date(acceptance.accepted_at), 'dd MMMM yyyy - hh:mm:ss a', { locale: ar })}
+                  </p>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm text-gray-600">عنوان IP:</p>
+                  <p className="font-mono text-sm">{acceptance.ip_address || 'غير متاح'}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 bg-white rounded p-3 border border-blue-100">
+              <p className="text-xs text-gray-600 text-center">
+                🔐 تم التوقيع إلكترونياً وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004
+              </p>
+              <p className="text-xs text-gray-500 text-center mt-1">
+                هذا التوقيع الإلكتروني له نفس الحجية القانونية للتوقيع الخطي
+              </p>
+            </div>
+          </div>
+
+          {/* Verification Status */}
+          <div className={`rounded-lg p-3 mb-6 ${acceptance.verified_match ? 'bg-green-50 border border-green-200' : 'bg-amber-50 border border-amber-200'}`}>
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{acceptance.verified_match ? '✅' : '⚠️'}</span>
+              <div>
+                <p className={`font-bold ${acceptance.verified_match ? 'text-green-700' : 'text-amber-700'}`}>
+                  {acceptance.verified_match ? 'تم التحقق من تطابق الهوية' : 'قيد المراجعة والتحقق'}
+                </p>
+                <p className="text-xs text-gray-600">
+                  {acceptance.verified_match 
+                    ? 'بيانات الموقّع متطابقة مع بيانات الحساب المسجل'
+                    : 'يرجى مراجعة البيانات والتأكد من صحتها'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Official Signatures Grid */}
           <div className="grid grid-cols-2 gap-8">
-            <div className="text-center">
+            <div className="text-center border rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-2">توقيع الموافق</p>
-              <div className="border-b-2 border-gray-400 h-16 mb-2"></div>
+              <div className="border-b-2 border-gray-400 h-12 mb-2 flex items-center justify-center">
+                <span className="text-lg font-bold text-gray-600 italic">{acceptance.full_name || ''}</span>
+              </div>
               <p className="font-medium text-sm">{acceptance.full_name || 'غير محدد'}</p>
               <p className="text-xs text-gray-500">{acceptance.signer_position || ''}</p>
               <p className="text-xs text-gray-400 mt-1">الرقم القومي: {acceptance.signer_national_id || 'غير محدد'}</p>
             </div>
-            <div className="text-center">
+            <div className="text-center border rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-2">ختم المنصة</p>
-              <div className="border-2 border-dashed border-gray-300 h-16 mb-2 flex items-center justify-center">
-                <span className="text-xs text-gray-400">موثق إلكترونياً</span>
+              <div className="border-2 border-dashed border-primary/30 h-12 mb-2 flex items-center justify-center bg-primary/5 rounded">
+                <span className="text-xs text-primary font-bold">✓ موثق إلكترونياً من I-Recycle</span>
               </div>
               <p className="font-medium text-sm">منصة I-Recycle</p>
+              <p className="text-xs text-gray-500">لإدارة المخلفات الصناعية</p>
             </div>
           </div>
         </div>
