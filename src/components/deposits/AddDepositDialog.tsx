@@ -218,43 +218,32 @@ export default function AddDepositDialog({
 
       // Call AI extraction edge function
       const { data, error } = await supabase.functions.invoke('extract-receipt-data', {
-        body: { image: base64 },
+        body: { imageBase64: base64 },
       });
 
       if (error) throw error;
 
-      if (data?.extracted) {
-        const extracted = data.extracted;
+      if (data?.success && data?.data) {
+        const extracted = data.data;
         
         // Apply extracted data to form
         if (extracted.amount) form.setValue('amount', String(extracted.amount));
-        if (extracted.depositorName) form.setValue('depositorName', extracted.depositorName);
-        if (extracted.bankName) form.setValue('bankName', extracted.bankName);
-        if (extracted.accountNumber) form.setValue('accountNumber', extracted.accountNumber);
-        if (extracted.branchName) form.setValue('branchName', extracted.branchName);
-        if (extracted.referenceNumber) form.setValue('referenceNumber', extracted.referenceNumber);
-        if (extracted.depositDate) {
-          form.setValue('depositDate', new Date(extracted.depositDate));
+        if (extracted.depositor_name) form.setValue('depositorName', extracted.depositor_name);
+        if (extracted.bank_name) form.setValue('bankName', extracted.bank_name);
+        if (extracted.account_number) form.setValue('accountNumber', extracted.account_number);
+        if (extracted.bank_branch) form.setValue('branchName', extracted.bank_branch);
+        if (extracted.reference_number) form.setValue('referenceNumber', extracted.reference_number);
+        if (extracted.payment_date) {
+          form.setValue('depositDate', new Date(extracted.payment_date));
         }
         
         // Detect transfer method
-        if (extracted.transferMethod) {
-          const methodMap: Record<string, string> = {
-            'bank': 'bank_transfer',
-            'instapay': 'instapay',
-            'wallet': 'wallet',
-            'vodafone cash': 'wallet',
-            'cash': 'cash',
-            'check': 'check',
-          };
-          const method = Object.entries(methodMap).find(([key]) => 
-            extracted.transferMethod.toLowerCase().includes(key)
-          );
-          if (method) form.setValue('transferMethod', method[1]);
+        if (extracted.payment_method) {
+          form.setValue('transferMethod', extracted.payment_method);
         }
 
         setAiExtracted(true);
-        setAiConfidence(data.confidence || 0.85);
+        setAiConfidence(extracted.confidence || 0.85);
         toast.success('تم استخراج البيانات بنجاح!');
       }
     } catch (error) {
