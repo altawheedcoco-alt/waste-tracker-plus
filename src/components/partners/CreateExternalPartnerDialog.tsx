@@ -26,7 +26,7 @@ import { toast } from 'sonner';
 interface CreateExternalPartnerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultType?: 'generator' | 'recycler';
+  defaultType?: 'generator' | 'recycler' | 'guest';
 }
 
 export default function CreateExternalPartnerDialog({
@@ -36,7 +36,17 @@ export default function CreateExternalPartnerDialog({
 }: CreateExternalPartnerDialogProps) {
   const { organization, profile } = useAuth();
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    partner_type: 'generator' | 'recycler' | 'guest';
+    phone: string;
+    email: string;
+    address: string;
+    city: string;
+    tax_number: string;
+    commercial_register: string;
+    notes: string;
+  }>({
     name: '',
     partner_type: defaultType,
     phone: '',
@@ -128,8 +138,8 @@ export default function CreateExternalPartnerDialog({
             <Label>نوع العميل *</Label>
             <Select
               value={formData.partner_type}
-              onValueChange={(value) =>
-                setFormData({ ...formData, partner_type: value as 'generator' | 'recycler' })
+              onValueChange={(value: 'generator' | 'recycler' | 'guest') =>
+                setFormData({ ...formData, partner_type: value })
               }
             >
               <SelectTrigger>
@@ -146,6 +156,12 @@ export default function CreateExternalPartnerDialog({
                   <div className="flex items-center gap-2">
                     <Recycle className="h-4 w-4 text-green-600" />
                     مدور (جهة إعادة تدوير)
+                  </div>
+                </SelectItem>
+                <SelectItem value="guest">
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="h-4 w-4 text-purple-600" />
+                    عميل خارجي (ضيف)
                   </div>
                 </SelectItem>
               </SelectContent>

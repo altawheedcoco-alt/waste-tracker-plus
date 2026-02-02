@@ -42,7 +42,7 @@ export default function PartnerAccounts() {
   } = usePartnerAccounts();
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [createDialogType, setCreateDialogType] = useState<'generator' | 'recycler'>('generator');
+  const [createDialogType, setCreateDialogType] = useState<'generator' | 'recycler' | 'guest'>('generator');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ar-EG', {
@@ -58,6 +58,8 @@ export default function PartnerAccounts() {
         return { label: 'المدورين', singularLabel: 'مدور', icon: Recycle, color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900/30' };
       case 'transporter':
         return { label: 'الناقلين', singularLabel: 'ناقل', icon: Truck, color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
+      case 'guest':
+        return { label: 'العملاء الخارجيين', singularLabel: 'عميل خارجي', icon: UserPlus, color: 'text-purple-600', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
       default:
         return { label: 'الشركاء', singularLabel: 'شريك', icon: Building2, color: 'text-muted-foreground', bgColor: 'bg-muted' };
     }
@@ -84,7 +86,7 @@ export default function PartnerAccounts() {
     }
   };
 
-  const handleCreatePartner = (type: 'generator' | 'recycler') => {
+  const handleCreatePartner = (type: 'generator' | 'recycler' | 'guest') => {
     setCreateDialogType(type);
     setShowCreateDialog(true);
   };
@@ -144,11 +146,11 @@ export default function PartnerAccounts() {
             <p className="text-sm mb-4">أضف عميل جديد أو ستظهر الحسابات تلقائياً بعد إنشاء الفواتير</p>
             <Button 
               variant="outline" 
-              onClick={() => handleCreatePartner(type as 'generator' | 'recycler')}
+              onClick={() => handleCreatePartner(type as 'generator' | 'recycler' | 'guest')}
               className="gap-2"
             >
               <UserPlus className="h-4 w-4" />
-              إضافة {typeInfo.singularLabel} خارجي
+              إضافة {typeInfo.singularLabel}
             </Button>
           </div>
         ) : (
@@ -305,17 +307,15 @@ export default function PartnerAccounts() {
                           );
                         })()}
                       </CardTitle>
-                      {(type === 'generator' || type === 'recycler') && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleCreatePartner(type as 'generator' | 'recycler')}
-                          className="gap-2"
-                        >
-                          <UserPlus className="h-4 w-4" />
-                          إضافة {getPartnerTypeInfo(type).singularLabel}
-                        </Button>
-                      )}
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleCreatePartner(type as 'generator' | 'recycler' | 'guest')}
+                        className="gap-2"
+                      >
+                        <UserPlus className="h-4 w-4" />
+                        إضافة {getPartnerTypeInfo(type).singularLabel}
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
