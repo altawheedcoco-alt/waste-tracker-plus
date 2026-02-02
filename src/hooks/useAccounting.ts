@@ -105,9 +105,10 @@ export interface FinancialSummary {
 }
 
 export const useAccounting = () => {
-  const { organization } = useAuth();
+  const { organization, profile } = useAuth();
   const queryClient = useQueryClient();
   const orgId = organization?.id;
+  const profileId = profile?.id;
 
   // Fetch invoices
   const { data: invoices = [], isLoading: invoicesLoading, refetch: refetchInvoices } = useQuery({
@@ -269,6 +270,7 @@ export const useAccounting = () => {
         check_number: paymentData.check_number || null,
         status: paymentData.status || 'completed',
         notes: paymentData.notes || null,
+        created_by: profileId || null,
       };
       
       const { data, error } = await supabase
