@@ -59,6 +59,13 @@ interface TermsAcceptance {
   organization_name: string | null;
   profile_email?: string;
   profile_phone?: string;
+  signer_national_id?: string | null;
+  signer_phone?: string | null;
+  signer_position?: string | null;
+  signer_id_front_url?: string | null;
+  signer_id_back_url?: string | null;
+  signer_signature_url?: string | null;
+  verified_match?: boolean;
 }
 
 interface AcceptanceStats {
@@ -489,17 +496,18 @@ const TermsAcceptances = () => {
         </CardContent>
       </Card>
 
-      {/* Document View Dialog */}
+      {/* Document View Dialog - Admin sees signature */}
       <TermsDocumentDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         acceptance={selectedAcceptance}
+        showSignature={true}
       />
 
-      {/* Hidden Print Component */}
+      {/* Hidden Print Component - Admin version with signature */}
       <div className="hidden">
         {selectedAcceptance && (
-          <TermsDocumentPrint ref={printRef} acceptance={selectedAcceptance} />
+          <TermsDocumentPrint ref={printRef} acceptance={selectedAcceptance} showSignature={true} />
         )}
       </div>
     </motion.div>
