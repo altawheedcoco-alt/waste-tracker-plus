@@ -18,10 +18,12 @@ import {
   SignalHigh,
   Building2,
   Truck,
-  Activity
+  Activity,
+  Gauge
 } from 'lucide-react';
 import { toast } from 'sonner';
 import DriverMiniMap from '@/components/maps/DriverMiniMap';
+import TrackingStatsCard from '@/components/tracking/TrackingStatsCard';
 
 interface OrganizationInfo {
   id: string;
@@ -46,6 +48,12 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
   const [organization, setOrganization] = useState<OrganizationInfo | null>(null);
   const [loadingOrg, setLoadingOrg] = useState(true);
   const [watchId, setWatchId] = useState<number | null>(null);
+  const [currentSpeed, setCurrentSpeed] = useState<number>(0);
+  const [totalDistance, setTotalDistance] = useState<number>(0);
+  const [trackingDuration, setTrackingDuration] = useState<number>(0);
+  const [locationCount, setLocationCount] = useState<number>(0);
+  const [lastPosition, setLastPosition] = useState<{ lat: number; lng: number } | null>(null);
+  const [trackingStartTime, setTrackingStartTime] = useState<Date | null>(null);
 
   // Fetch organization info
   useEffect(() => {
@@ -80,6 +88,21 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
     }
   }, [driverId]);
 
+  // Calculate Haversine distance
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371; // Earth's radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
   const saveLocationToDb = useCallback(async (position: GeolocationPosition) => {
     try {
       const { error: dbError } = await supabase
@@ -96,18 +119,43 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
 
       if (dbError) throw dbError;
 
-      setCurrentLocation({
+      const newLocation = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
-      });
+      };
+
+      // Calculate distance from last position
+      if (lastPosition) {
+        const dist = calculateDistance(
+          lastPosition.lat, lastPosition.lng,
+          newLocation.lat, newLocation.lng
+        );
+        setTotalDistance(prev => prev + dist);
+      }
+      setLastPosition(newLocation);
+      setLocationCount(prev => prev + 1);
+
+      setCurrentLocation(newLocation);
       setAccuracy(position.coords.accuracy);
+      setCurrentSpeed((position.coords.speed || 0) * 3.6); // Convert m/s to km/h
       setLastUpdate(new Date());
       setError(null);
     } catch (err: any) {
       console.error('Error saving location:', err);
       setError('فشل في حفظ الموقع');
     }
-  }, [driverId]);
+  }, [driverId, lastPosition]);
+
+  // Update tracking duration
+  useEffect(() => {
+    if (!isTracking || !trackingStartTime) return;
+    
+    const interval = setInterval(() => {
+      setTrackingDuration(Math.floor((Date.now() - trackingStartTime.getTime()) / 1000));
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [isTracking, trackingStartTime]);
 
   const startTracking = useCallback(() => {
     if (!navigator.geolocation) {
@@ -117,6 +165,10 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
 
     setIsTracking(true);
     setError(null);
+    setTotalDistance(0);
+    setLocationCount(0);
+    setTrackingStartTime(new Date());
+    setLastPosition(null);
 
     // Get initial position
     navigator.geolocation.getCurrentPosition(
@@ -175,6 +227,7 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
       setWatchId(null);
     }
     setIsTracking(false);
+    setTrackingStartTime(null);
   }, [watchId]);
 
   const getErrorMessage = (error: GeolocationPositionError): string => {
@@ -329,6 +382,17 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
               </div>
             </div>
             
+            {/* Speed display */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border border-green-200">
+              <div className="flex items-center gap-2">
+                <Gauge className="h-5 w-5 text-green-600" />
+                <span className="font-medium">السرعة الحالية</span>
+              </div>
+              <span className="text-2xl font-bold text-green-600">
+                {Math.round(currentSpeed)} <span className="text-sm font-normal">كم/س</span>
+              </span>
+            </div>
+
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 {getSignalIcon()}
@@ -349,6 +413,17 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
                   {lastUpdate.toLocaleTimeString('ar-EG')}
                 </span>
               </div>
+            )}
+
+            {/* Tracking Stats */}
+            {isTracking && (
+              <TrackingStatsCard
+                distance={totalDistance}
+                duration={trackingDuration}
+                speed={currentSpeed}
+                locations={locationCount}
+                isActive={isTracking}
+              />
             )}
           </div>
         ) : isTracking ? (

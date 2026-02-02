@@ -17,6 +17,7 @@ import {
   Loader2,
   Shield,
   Map,
+  Navigation,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -28,8 +29,9 @@ import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 import TrackingWatcherIndicator from '@/components/tracking/TrackingWatcherIndicator';
 import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPicker';
 
-// Lazy load the map dialog for better performance
+// Lazy load components for better performance
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
+const FullNavigationView = lazy(() => import('@/components/driver/FullNavigationView'));
 
 interface DriverInfo {
   id: string;
@@ -77,6 +79,8 @@ const DriverDashboard = () => {
   const [lastLocationUpdate, setLastLocationUpdate] = useState<Date | null>(null);
   const [showLiveMapDialog, setShowLiveMapDialog] = useState(false);
   const [selectedShipmentForMap, setSelectedShipmentForMap] = useState<Shipment | null>(null);
+  const [showNavigationView, setShowNavigationView] = useState(false);
+  const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<Shipment | null>(null);
 
   const handleLocationSuccess = (location: { lat: number; lng: number }) => {
     setLastLocationUpdate(new Date());
@@ -414,6 +418,24 @@ const DriverDashboard = () => {
             pickupAddress={selectedShipmentForMap?.pickup_address || ''}
             deliveryAddress={selectedShipmentForMap?.delivery_address || ''}
             shipmentStatus={selectedShipmentForMap?.status}
+          />
+        </Suspense>
+      )}
+
+      {/* Full Navigation View */}
+      {showNavigationView && driverInfo && selectedShipmentForNav && (
+        <Suspense fallback={
+          <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        }>
+          <FullNavigationView
+            isOpen={showNavigationView}
+            onClose={() => setShowNavigationView(false)}
+            pickupAddress={selectedShipmentForNav.pickup_address}
+            deliveryAddress={selectedShipmentForNav.delivery_address}
+            shipmentId={selectedShipmentForNav.id}
+            driverId={driverInfo.id}
           />
         </Suspense>
       )}
