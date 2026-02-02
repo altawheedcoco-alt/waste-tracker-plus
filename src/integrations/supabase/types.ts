@@ -2385,6 +2385,73 @@ export type Database = {
           },
         ]
       }
+      partner_waste_types: {
+        Row: {
+          created_at: string
+          external_partner_id: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          organization_id: string
+          partner_organization_id: string | null
+          price_per_unit: number | null
+          unit: string | null
+          updated_at: string
+          waste_code: string | null
+          waste_type: string
+        }
+        Insert: {
+          created_at?: string
+          external_partner_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          organization_id: string
+          partner_organization_id?: string | null
+          price_per_unit?: number | null
+          unit?: string | null
+          updated_at?: string
+          waste_code?: string | null
+          waste_type: string
+        }
+        Update: {
+          created_at?: string
+          external_partner_id?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          organization_id?: string
+          partner_organization_id?: string | null
+          price_per_unit?: number | null
+          unit?: string | null
+          updated_at?: string
+          waste_code?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_waste_types_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_waste_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_waste_types_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       password_change_logs: {
         Row: {
           change_type: string
