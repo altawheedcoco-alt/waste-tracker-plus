@@ -5,7 +5,7 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature } from 'lucide-react';
+import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
@@ -15,6 +15,7 @@ import ShipmentCard from '@/components/shipments/ShipmentCard';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
+import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 
 interface ShipmentStats {
   total: number;
@@ -210,7 +211,11 @@ const GeneratorDashboard = () => {
     },
   ];
 
+  // State for deposit dialog
+  const [showDepositDialog, setShowDepositDialog] = useState(false);
+
   const quickActions: QuickAction[] = [
+    { title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: () => setShowDepositDialog(true), iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
     { title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
     { title: 'التحقق من الوثائق', subtitle: 'التحقق من صحة وثائق الشحنات', icon: FileCheck, onClick: () => setShowDocumentVerification(true), iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600' },
     { title: 'شهادات إعادة التدوير', subtitle: 'تقارير جهات التدوير المستلمة', icon: FolderCheck, path: '/dashboard/recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
@@ -321,6 +326,12 @@ const GeneratorDashboard = () => {
       <DocumentVerificationWidget
         open={showDocumentVerification}
         onOpenChange={setShowDocumentVerification}
+      />
+
+      {/* Deposit Dialog */}
+      <AddDepositDialog
+        open={showDepositDialog}
+        onOpenChange={setShowDepositDialog}
       />
 
       {/* Chat Widget */}

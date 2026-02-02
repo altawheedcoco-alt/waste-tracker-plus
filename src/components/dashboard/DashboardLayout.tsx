@@ -41,6 +41,7 @@ import {
   Video,
   Info,
   BookOpen,
+  Banknote,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -66,6 +67,7 @@ import { initNotificationAudio, ensureSoundsEnabled } from '@/hooks/useNotificat
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
+import DepositButton from '@/components/deposits/DepositButton';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -443,6 +445,16 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             ) : (
               <div className="text-center py-4 text-sm text-muted-foreground">
                 لا توجد نتائج
+              </div>
+            )}
+            
+            {/* Deposit Button in Sidebar */}
+            {isSidebarOpen && !isDriver && (
+              <div className="pt-3 mt-3 border-t border-border">
+                <DepositButton 
+                  variant="outline" 
+                  className="w-full justify-start gap-3 h-10"
+                />
               </div>
             )}
           </nav>

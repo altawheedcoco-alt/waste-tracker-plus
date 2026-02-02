@@ -701,6 +701,113 @@ export type Database = {
           },
         ]
       }
+      deposits: {
+        Row: {
+          account_number: string | null
+          ai_confidence_score: number | null
+          ai_extracted_data: Json | null
+          amount: number
+          bank_name: string | null
+          branch_name: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          deposit_date: string
+          depositor_name: string
+          depositor_phone: string | null
+          depositor_position: string | null
+          depositor_title: string | null
+          external_partner_id: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          partner_organization_id: string | null
+          receipt_url: string | null
+          reference_number: string | null
+          transfer_method: string
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          ai_confidence_score?: number | null
+          ai_extracted_data?: Json | null
+          amount: number
+          bank_name?: string | null
+          branch_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deposit_date?: string
+          depositor_name: string
+          depositor_phone?: string | null
+          depositor_position?: string | null
+          depositor_title?: string | null
+          external_partner_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          partner_organization_id?: string | null
+          receipt_url?: string | null
+          reference_number?: string | null
+          transfer_method?: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          ai_confidence_score?: number | null
+          ai_extracted_data?: Json | null
+          amount?: number
+          bank_name?: string | null
+          branch_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          deposit_date?: string
+          depositor_name?: string
+          depositor_phone?: string | null
+          depositor_position?: string | null
+          depositor_title?: string | null
+          external_partner_id?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          partner_organization_id?: string | null
+          receipt_url?: string | null
+          reference_number?: string | null
+          transfer_method?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_messages: {
         Row: {
           content: string

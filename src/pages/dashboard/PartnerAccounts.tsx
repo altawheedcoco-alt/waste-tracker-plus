@@ -33,6 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { usePartnerAccounts, type PartnerBalance } from '@/hooks/usePartnerAccounts';
 import CreateExternalPartnerDialog from '@/components/partners/CreateExternalPartnerDialog';
 import AccountSummaryCard from '@/components/accounts/AccountSummaryCard';
+import DepositButton from '@/components/deposits/DepositButton';
 import { cn } from '@/lib/utils';
 
 const partnerTypeConfig = {
@@ -305,10 +306,13 @@ export default function PartnerAccounts() {
             </h1>
             <p className="text-muted-foreground mt-1">متابعة أرصدة الشركاء والمعاملات المالية</p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)} className="gap-2 self-start lg:self-center">
-            <UserPlus className="h-4 w-4" />
-            إضافة عميل خارجي
-          </Button>
+          <div className="flex gap-2 self-start lg:self-center">
+            <DepositButton />
+            <Button onClick={() => setShowCreateDialog(true)} variant="outline" className="gap-2">
+              <UserPlus className="h-4 w-4" />
+              إضافة عميل خارجي
+            </Button>
+          </div>
         </div>
 
         {/* Global Stats */}

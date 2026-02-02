@@ -24,6 +24,7 @@ import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
+import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import {
   Package,
   Truck,
@@ -54,6 +55,7 @@ import {
   Sparkles,
   Send,
   FileSignature,
+  Banknote,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -131,6 +133,7 @@ const TransporterDashboard = () => {
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [statusShipment, setStatusShipment] = useState<RecentShipment | null>(null);
+  const [showDepositDialog, setShowDepositDialog] = useState(false);
 
   useEffect(() => {
     if (organization?.id) {
@@ -347,6 +350,7 @@ const TransporterDashboard = () => {
 
 
   const quickActions: QuickAction[] = [
+    { title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: () => setShowDepositDialog(true), iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
     { title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
     { title: 'قوالب العقود', subtitle: 'إنشاء صيغ عقود الجمع والنقل', icon: FileText, path: '/dashboard/contract-templates', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600' },
     { title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600' },
@@ -738,6 +742,12 @@ const TransporterDashboard = () => {
 
       {/* Chat Widget */}
       <ChatWidget />
+
+      {/* Deposit Dialog */}
+      <AddDepositDialog
+        open={showDepositDialog}
+        onOpenChange={setShowDepositDialog}
+      />
     </div>
   );
 };
