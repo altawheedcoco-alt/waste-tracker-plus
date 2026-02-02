@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -10,16 +10,17 @@ import {
 import { 
   Printer, 
   Download, 
-  FileText, 
   BookOpen, 
   Package, 
   ChevronDown,
   Eye,
-  Loader2
+  Loader2,
+  Filter,
 } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import AccountLedgerPrint from './AccountLedgerPrint';
 import ShipmentsAccountPrint from './ShipmentsAccountPrint';
+import AccountLedgerFilterDialog from './AccountLedgerFilterDialog';
 import { LedgerEntry } from './AccountLedger';
 import { createRoot } from 'react-dom/client';
 
@@ -139,6 +140,20 @@ export default function PrintExportActions({
 
   return (
     <div className="flex items-center gap-2">
+      {/* Filter Dialog - Advanced */}
+      <AccountLedgerFilterDialog
+        entries={ledgerEntries}
+        partnerName={partnerName}
+        partnerType={partnerType}
+        organizationName={organizationName}
+        trigger={
+          <Button variant="outline" size="sm" className="gap-2" disabled={isLoading}>
+            <Filter className="h-4 w-4" />
+            فلترة وطباعة
+          </Button>
+        }
+      />
+
       {/* Ledger Actions */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
