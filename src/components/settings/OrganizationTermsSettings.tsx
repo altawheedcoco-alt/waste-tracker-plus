@@ -1,7 +1,19 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { FileText, Calendar, User, Globe, CheckCircle2, Printer, Download, ExternalLink } from 'lucide-react';
+import { 
+  FileText, 
+  Calendar, 
+  User, 
+  Globe, 
+  CheckCircle2, 
+  ExternalLink, 
+  CreditCard, 
+  Phone, 
+  Briefcase,
+  Shield,
+  Image
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -88,8 +100,8 @@ const OrganizationTermsSettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Status Badge */}
-          <div className="flex items-center gap-3">
+          {/* Status Badges */}
+          <div className="flex items-center gap-3 flex-wrap">
             <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-700">
               <CheckCircle2 className="h-3.5 w-3.5" />
               تم الموافقة على الشروط
@@ -97,19 +109,55 @@ const OrganizationTermsSettings = () => {
             <Badge variant="outline">
               الإصدار {termsAcceptance.terms_version}
             </Badge>
+            {termsAcceptance.verified_match && (
+              <Badge variant="default" className="gap-1 bg-blue-600 hover:bg-blue-700">
+                <Shield className="h-3.5 w-3.5" />
+                تم التحقق من الهوية
+              </Badge>
+            )}
           </div>
 
-          {/* Acceptance Details */}
+          {/* Signer Details */}
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
             <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border">
               <User className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <p className="text-sm text-muted-foreground">الموقّع</p>
                 <p className="font-medium">{termsAcceptance.full_name || 'غير محدد'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border">
+              <CreditCard className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">الرقم القومي</p>
+                <p className="font-medium font-mono text-sm">
+                  {termsAcceptance.signer_national_id || 'غير محدد'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border">
+              <Briefcase className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">المسمى الوظيفي</p>
+                <p className="font-medium">
+                  {termsAcceptance.signer_position || 'غير محدد'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border">
+              <Phone className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">رقم الهاتف</p>
+                <p className="font-medium">
+                  {termsAcceptance.signer_phone || 'غير محدد'}
+                </p>
               </div>
             </div>
 
@@ -135,17 +183,50 @@ const OrganizationTermsSettings = () => {
                 </p>
               </div>
             </div>
+          </motion.div>
 
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border">
-              <FileText className="h-5 w-5 text-primary mt-0.5" />
-              <div>
-                <p className="text-sm text-muted-foreground">معرّف الوثيقة</p>
-                <p className="font-medium font-mono text-xs">
-                  {termsAcceptance.id.slice(0, 8).toUpperCase()}
-                </p>
+          {/* ID Card Images */}
+          {(termsAcceptance.signer_id_front_url || termsAcceptance.signer_id_back_url) && (
+            <div className="border rounded-lg p-4 bg-blue-50/50 dark:bg-blue-950/20">
+              <h4 className="font-semibold mb-4 flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                صور إثبات الهوية
+              </h4>
+              <div className="grid grid-cols-2 gap-4">
+                {termsAcceptance.signer_id_front_url && (
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-2">وجه البطاقة</p>
+                    <img 
+                      src={termsAcceptance.signer_id_front_url} 
+                      alt="وجه البطاقة" 
+                      className="max-h-32 mx-auto rounded-lg border shadow-sm"
+                    />
+                  </div>
+                )}
+                {termsAcceptance.signer_id_back_url && (
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-2">ظهر البطاقة</p>
+                    <img 
+                      src={termsAcceptance.signer_id_back_url} 
+                      alt="ظهر البطاقة" 
+                      className="max-h-32 mx-auto rounded-lg border shadow-sm"
+                    />
+                  </div>
+                )}
               </div>
             </div>
-          </motion.div>
+          )}
+
+          {/* Document ID */}
+          <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+            <FileText className="h-5 w-5 text-primary mt-0.5" />
+            <div>
+              <p className="text-sm text-muted-foreground">معرّف الوثيقة</p>
+              <p className="font-medium font-mono text-sm">
+                EG-I-RECYCLE-TA-{termsAcceptance.id.slice(0, 8).toUpperCase()}
+              </p>
+            </div>
+          </div>
 
           {/* View Full Document Button */}
           <div className="pt-4 border-t">
@@ -175,6 +256,12 @@ const OrganizationTermsSettings = () => {
           terms_version: termsAcceptance.terms_version,
           accepted_at: termsAcceptance.accepted_at,
           ip_address: termsAcceptance.ip_address,
+          signer_national_id: termsAcceptance.signer_national_id,
+          signer_phone: termsAcceptance.signer_phone,
+          signer_position: termsAcceptance.signer_position,
+          signer_id_front_url: termsAcceptance.signer_id_front_url,
+          signer_id_back_url: termsAcceptance.signer_id_back_url,
+          verified_match: termsAcceptance.verified_match,
         }}
       />
     </>
