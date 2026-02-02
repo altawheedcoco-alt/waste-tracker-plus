@@ -13,7 +13,8 @@ import {
   Sparkles,
   Eye,
   Volume2,
-  Shield
+  Shield,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -27,6 +28,7 @@ import { cn } from '@/lib/utils';
 import BackButton from '@/components/ui/back-button';
 import NotificationSoundSettings from '@/components/settings/NotificationSoundSettings';
 import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
+import OrganizationTermsSettings from '@/components/settings/OrganizationTermsSettings';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -140,7 +142,7 @@ const Settings = () => {
       <Tabs defaultValue="themes" className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid",
-          isTransporter ? "grid-cols-6" : "grid-cols-5"
+          isTransporter ? "grid-cols-7" : "grid-cols-6"
         )}>
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
@@ -168,6 +170,10 @@ const Settings = () => {
               <span className="hidden sm:inline">الصلاحيات</span>
             </TabsTrigger>
           )}
+          <TabsTrigger value="terms" className="gap-2">
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">الشروط والأحكام</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Theme Presets Tab */}
@@ -547,6 +553,11 @@ const Settings = () => {
             <PartnerVisibilitySettings />
           </TabsContent>
         )}
+
+        {/* Terms and Conditions Tab */}
+        <TabsContent value="terms" className="space-y-6">
+          <OrganizationTermsSettings />
+        </TabsContent>
       </Tabs>
     </div>
   );
