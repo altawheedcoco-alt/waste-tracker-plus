@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +24,8 @@ import {
 import { FileText, Search, Eye, Printer, Download } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import InvoiceDetailDialog from "./InvoiceDetailDialog";
+import { usePDFExport } from "@/hooks/usePDFExport";
 
 interface PartnerInvoicesTabProps {
   partnerId: string;
@@ -34,6 +36,14 @@ const PartnerInvoicesTab = ({ partnerId, partnerName }: PartnerInvoicesTabProps)
   const { organization } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, isExporting } = usePDFExport({
+    filename: 'invoice',
+    orientation: 'portrait',
+    format: 'a4',
+  });
 
   const { data: invoices = [], isLoading } = useQuery({
     queryKey: ["partner-invoices", organization?.id, partnerId],
@@ -189,11 +199,28 @@ const PartnerInvoicesTab = ({ partnerId, partnerName }: PartnerInvoicesTabProps)
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" title="عرض">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="عرض"
+                            onClick={() => {
+                              setSelectedInvoice(invoice);
+                              setShowDetailDialog(true);
+                            }}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" title="طباعة">
-                            <Printer className="h-4 w-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="تحميل PDF"
+                            disabled={isExporting}
+                            onClick={() => {
+                              setSelectedInvoice(invoice);
+                              setShowDetailDialog(true);
+                            }}
+                          >
+                            <Download className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -204,6 +231,14 @@ const PartnerInvoicesTab = ({ partnerId, partnerName }: PartnerInvoicesTabProps)
             </Table>
           </div>
         )}
+
+        {/* Invoice Detail Dialog */}
+        <InvoiceDetailDialog
+          open={showDetailDialog}
+          onOpenChange={setShowDetailDialog}
+          invoice={selectedInvoice}
+          partnerName={partnerName}
+        />
       </CardContent>
     </Card>
   );
