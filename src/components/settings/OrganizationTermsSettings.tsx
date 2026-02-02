@@ -261,6 +261,7 @@ const OrganizationTermsSettings = () => {
           signer_position: termsAcceptance.signer_position,
           signer_id_front_url: termsAcceptance.signer_id_front_url,
           signer_id_back_url: termsAcceptance.signer_id_back_url,
+          signer_signature_url: termsAcceptance.signer_signature_url,
           verified_match: termsAcceptance.verified_match,
         }}
       />

@@ -3407,6 +3407,7 @@ export type Database = {
           signer_national_id: string | null
           signer_phone: string | null
           signer_position: string | null
+          signer_signature_url: string | null
           terms_version: string
           user_agent: string | null
           user_id: string
@@ -3426,6 +3427,7 @@ export type Database = {
           signer_national_id?: string | null
           signer_phone?: string | null
           signer_position?: string | null
+          signer_signature_url?: string | null
           terms_version?: string
           user_agent?: string | null
           user_id: string
@@ -3445,6 +3447,7 @@ export type Database = {
           signer_national_id?: string | null
           signer_phone?: string | null
           signer_position?: string | null
+          signer_signature_url?: string | null
           terms_version?: string
           user_agent?: string | null
           user_id?: string

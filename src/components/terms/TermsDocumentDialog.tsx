@@ -24,6 +24,7 @@ interface TermsAcceptanceData {
   signer_position?: string | null;
   signer_id_front_url?: string | null;
   signer_id_back_url?: string | null;
+  signer_signature_url?: string | null;
   verified_match?: boolean;
 }
 
