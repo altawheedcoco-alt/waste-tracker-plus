@@ -21,9 +21,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreditCard, Search, Eye, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CreditCard, Search, Eye, ArrowUpCircle, ArrowDownCircle, Plus, Image as ImageIcon, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import PartnerPaymentUploadDialog from "./PartnerPaymentUploadDialog";
 
 interface PartnerPaymentsTabProps {
   partnerId: string;
@@ -34,6 +41,8 @@ const PartnerPaymentsTab = ({ partnerId, partnerName }: PartnerPaymentsTabProps)
   const { organization } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [receiptViewUrl, setReceiptViewUrl] = useState<string | null>(null);
 
   const { data: payments = [], isLoading } = useQuery({
     queryKey: ["partner-payments", organization?.id, partnerId],
@@ -120,6 +129,10 @@ const PartnerPaymentsTab = ({ partnerId, partnerName }: PartnerPaymentsTabProps)
                 <SelectItem value="outgoing">صادرة</SelectItem>
               </SelectContent>
             </Select>
+            <Button onClick={() => setShowUploadDialog(true)}>
+              <Plus className="h-4 w-4 ml-2" />
+              إيداع جديد
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -167,6 +180,7 @@ const PartnerPaymentsTab = ({ partnerId, partnerName }: PartnerPaymentsTabProps)
                   <TableHead>المبلغ</TableHead>
                   <TableHead>رقم الفاتورة</TableHead>
                   <TableHead>المرجع</TableHead>
+                  <TableHead>الإيصال</TableHead>
                   <TableHead>الحالة</TableHead>
                 </TableRow>
               </TableHeader>
@@ -199,6 +213,21 @@ const PartnerPaymentsTab = ({ partnerId, partnerName }: PartnerPaymentsTabProps)
                       </TableCell>
                       <TableCell>{payment.reference_number || "-"}</TableCell>
                       <TableCell>
+                        {payment.receipt_url ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setReceiptViewUrl(payment.receipt_url)}
+                            className="text-primary"
+                          >
+                            <ImageIcon className="h-4 w-4 ml-1" />
+                            عرض
+                          </Button>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <Badge variant={statusBadge.variant}>{statusBadge.label}</Badge>
                       </TableCell>
                     </TableRow>
@@ -209,6 +238,44 @@ const PartnerPaymentsTab = ({ partnerId, partnerName }: PartnerPaymentsTabProps)
           </div>
         )}
       </CardContent>
+
+      {/* Receipt View Dialog */}
+      <Dialog open={!!receiptViewUrl} onOpenChange={() => setReceiptViewUrl(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ImageIcon className="h-5 w-5" />
+              إيصال الإيداع البنكي
+            </DialogTitle>
+          </DialogHeader>
+          {receiptViewUrl && (
+            <div className="space-y-4">
+              <img
+                src={receiptViewUrl}
+                alt="إيصال الإيداع"
+                className="w-full max-h-[60vh] object-contain rounded-lg border"
+              />
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(receiptViewUrl, "_blank")}
+                >
+                  <ExternalLink className="h-4 w-4 ml-2" />
+                  فتح في نافذة جديدة
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Upload Dialog */}
+      <PartnerPaymentUploadDialog
+        open={showUploadDialog}
+        onOpenChange={setShowUploadDialog}
+        partnerId={partnerId}
+        partnerName={partnerName}
+      />
     </Card>
   );
 };
