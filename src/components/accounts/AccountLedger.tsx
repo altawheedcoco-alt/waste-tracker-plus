@@ -10,13 +10,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Package, FileText, CreditCard, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Package, FileText, CreditCard, ArrowUpRight, ArrowDownRight, Banknote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface LedgerEntry {
   id: string;
   date: string;
-  type: 'shipment' | 'invoice' | 'payment';
+  type: 'shipment' | 'invoice' | 'payment' | 'deposit';
   description: string;
   quantity?: number;
   unit?: string;
@@ -71,6 +71,8 @@ export default function AccountLedger({
         return <FileText className="h-4 w-4" />;
       case 'payment':
         return <CreditCard className="h-4 w-4" />;
+      case 'deposit':
+        return <Banknote className="h-4 w-4" />;
       default:
         return null;
     }
@@ -84,6 +86,8 @@ export default function AccountLedger({
         return 'فاتورة';
       case 'payment':
         return 'دفعة';
+      case 'deposit':
+        return 'إيداع';
       default:
         return type;
     }
@@ -97,6 +101,8 @@ export default function AccountLedger({
         return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
       case 'payment':
         return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+      case 'deposit':
+        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400';
       default:
         return '';
     }

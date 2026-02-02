@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,7 @@ import {
   BookOpen,
   ArrowRight,
   Settings2,
+  Banknote,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,10 +25,12 @@ import ShipmentsAccountView from '@/components/accounts/ShipmentsAccountView';
 import InvoicesAccountView from '@/components/accounts/InvoicesAccountView';
 import AccountLedger, { LedgerEntry } from '@/components/accounts/AccountLedger';
 import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
+import DepositButton from '@/components/deposits/DepositButton';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { organization } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -108,6 +111,24 @@ export default function PartnerAccountDetails() {
     enabled: !!partnerId && !!organization?.id,
   });
 
+  // Fetch deposits for this partner
+  const { data: deposits = [], isLoading: depositsLoading } = useQuery({
+    queryKey: ['partner-deposits', partnerId, organization?.id],
+    queryFn: async () => {
+      if (!partnerId || !organization?.id) return [];
+      const { data, error } = await supabase
+        .from('deposits')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .eq('partner_organization_id', partnerId)
+        .order('deposit_date', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!partnerId && !!organization?.id,
+  });
+
   // Calculate shipment totals with pricing
   const shipmentsWithPricing = useMemo(() => {
     return shipments.map(shipment => {
@@ -134,8 +155,15 @@ export default function PartnerAccountDetails() {
   const totalShipmentValue = shipmentsWithPricing.reduce((sum, s) => sum + s.calculatedTotal, 0);
   const totalQuantity = shipmentsWithPricing.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
   const totalInvoiced = invoices.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0);
-  const totalPaid = invoices.reduce((sum, inv) => sum + (Number(inv.paid_amount) || 0), 0);
+  const totalPaidInvoices = invoices.reduce((sum, inv) => sum + (Number(inv.paid_amount) || 0), 0);
+  const totalDeposits = deposits.reduce((sum, dep) => sum + (Number(dep.amount) || 0), 0);
+  const totalPaid = totalPaidInvoices + totalDeposits;
   const balance = totalInvoiced - totalPaid;
+
+  // Refresh deposits callback
+  const refreshDeposits = () => {
+    queryClient.invalidateQueries({ queryKey: ['partner-deposits', partnerId, organization?.id] });
+  };
 
   // Generate ledger entries
   const ledgerEntries: LedgerEntry[] = useMemo(() => {
@@ -166,7 +194,7 @@ export default function PartnerAccountDetails() {
           id: `payment-${invoice.id}`,
           date: invoice.issue_date,
           type: 'payment',
-          description: `دفعة - ${invoice.invoice_number}`,
+          description: `دفعة فاتورة - ${invoice.invoice_number}`,
           debit: 0,
           credit: Number(invoice.paid_amount) || 0, // دائن - تم الدفع
           reference: invoice.invoice_number,
@@ -174,9 +202,22 @@ export default function PartnerAccountDetails() {
       }
     });
 
+    // Add deposits as entries
+    deposits.forEach(deposit => {
+      entries.push({
+        id: `deposit-${deposit.id}`,
+        date: deposit.deposit_date,
+        type: 'deposit',
+        description: `إيداع - ${deposit.depositor_name}`,
+        debit: 0,
+        credit: Number(deposit.amount) || 0, // دائن - تم الإيداع
+        reference: deposit.reference_number || '-',
+      });
+    });
+
     // Sort by date
     return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [shipmentsWithPricing, invoices]);
+  }, [shipmentsWithPricing, invoices, deposits]);
 
   if (partnerLoading) {
     return (
@@ -263,11 +304,16 @@ export default function PartnerAccountDetails() {
           {/* Overview - Account Ledger */}
           <TabsContent value="overview" className="mt-0">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
                   كشف حساب الشريك
                 </CardTitle>
+                <DepositButton
+                  preselectedPartnerId={partnerId}
+                  preselectedPartnerType="organization"
+                  onSuccess={refreshDeposits}
+                />
               </CardHeader>
               <CardContent>
                 <AccountLedger 
