@@ -41,7 +41,6 @@ import {
   Video,
   Info,
   BookOpen,
-  Calculator,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -296,7 +295,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
-    { icon: Calculator, label: 'الحسابات المالية', path: '/dashboard/accounting', key: 'accounting' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
     { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
