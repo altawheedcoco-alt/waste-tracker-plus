@@ -31,7 +31,8 @@ import {
   CreditCard,
   User,
   Phone,
-  Briefcase
+  Briefcase,
+  PenTool
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -44,6 +45,7 @@ import {
   CURRENT_TERMS_VERSION,
   OrganizationType
 } from '@/data/organizationTermsContent';
+import SignaturePad, { SignaturePadRef } from '@/components/signature/SignaturePad';
 
 interface OrganizationTermsDialogProps {
   open: boolean;
@@ -66,9 +68,11 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   const [idFrontPreview, setIdFrontPreview] = useState<string | null>(null);
   const [idBackPreview, setIdBackPreview] = useState<string | null>(null);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   
   const idFrontInputRef = useRef<HTMLInputElement>(null);
   const idBackInputRef = useRef<HTMLInputElement>(null);
+  const signaturePadRef = useRef<SignaturePadRef>(null);
 
   const termsSections = getTermsSections(organizationType);
   const termsTitle = getTermsTitle(organizationType);
@@ -194,6 +198,11 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       return;
     }
 
+    if (!signatureDataUrl || signaturePadRef.current?.isEmpty()) {
+      toast.error('يرجى التوقيع في خانة التوقيع اليدوي');
+      return;
+    }
+
     if (!user || !profile || !organization) {
       toast.error('حدث خطأ في بيانات المستخدم');
       return;
@@ -210,6 +219,14 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       
       if (!idFrontUrl || !idBackUrl) {
         throw new Error('فشل في رفع صور البطاقة');
+      }
+      
+      // Upload signature image
+      let signatureUrl: string | null = null;
+      if (signatureDataUrl) {
+        const signatureBlob = await fetch(signatureDataUrl).then(r => r.blob());
+        const signatureFile = new File([signatureBlob], 'signature.png', { type: 'image/png' });
+        signatureUrl = await uploadImage(signatureFile, `${organization.id}/${user.id}/signature-${timestamp}`);
       }
       
       setUploadingImages(false);
@@ -233,6 +250,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
           signer_position: signerPosition,
           signer_id_front_url: idFrontUrl,
           signer_id_back_url: idBackUrl,
+          signer_signature_url: signatureUrl,
           verified_match: verifiedMatch,
         });
 
@@ -594,6 +612,22 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
 
             {/* Terms Footer */}
             <div className="border-t bg-muted/30 p-6 space-y-4">
+              {/* Signature Pad */}
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2 text-base font-semibold">
+                  <PenTool className="w-4 h-4" />
+                  التوقيع اليدوي *
+                </Label>
+                <SignaturePad 
+                  ref={signaturePadRef}
+                  onSignatureChange={setSignatureDataUrl}
+                  width={500}
+                  height={120}
+                />
+              </div>
+
+              <Separator />
+
               <div className="flex items-start gap-3">
                 <Checkbox
                   id="terms-agree"
@@ -619,7 +653,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                 </Button>
                 <Button
                   onClick={handleAcceptTerms}
-                  disabled={!agreed || submitting}
+                  disabled={!agreed || submitting || !signatureDataUrl}
                   className="flex-1 gap-2"
                   size="lg"
                 >

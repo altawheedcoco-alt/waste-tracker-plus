@@ -17,6 +17,7 @@ interface TermsDocumentPrintProps {
     signer_position?: string | null;
     signer_id_front_url?: string | null;
     signer_id_back_url?: string | null;
+    signer_signature_url?: string | null;
     verified_match?: boolean;
   };
 }
@@ -229,8 +230,16 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
           <div className="grid grid-cols-2 gap-8">
             <div className="text-center border rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-2">توقيع الموافق</p>
-              <div className="border-b-2 border-gray-400 h-12 mb-2 flex items-center justify-center">
-                <span className="text-lg font-bold text-gray-600 italic">{acceptance.full_name || ''}</span>
+              <div className="border-b-2 border-gray-400 min-h-16 mb-2 flex items-center justify-center bg-gray-50 rounded">
+                {acceptance.signer_signature_url ? (
+                  <img 
+                    src={acceptance.signer_signature_url} 
+                    alt="توقيع الموقّع" 
+                    className="max-h-14 mx-auto"
+                  />
+                ) : (
+                  <span className="text-lg font-bold text-gray-600 italic">{acceptance.full_name || ''}</span>
+                )}
               </div>
               <p className="font-medium text-sm">{acceptance.full_name || 'غير محدد'}</p>
               <p className="text-xs text-gray-500">{acceptance.signer_position || ''}</p>
@@ -238,7 +247,7 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
             </div>
             <div className="text-center border rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-2">ختم المنصة</p>
-              <div className="border-2 border-dashed border-primary/30 h-12 mb-2 flex items-center justify-center bg-primary/5 rounded">
+              <div className="border-2 border-dashed border-primary/30 h-16 mb-2 flex items-center justify-center bg-primary/5 rounded">
                 <span className="text-xs text-primary font-bold">✓ موثق إلكترونياً من I-Recycle</span>
               </div>
               <p className="font-medium text-sm">منصة I-Recycle</p>
