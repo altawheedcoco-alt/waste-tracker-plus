@@ -23,6 +23,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewerPresence } from '@/hooks/useDriverPresence';
+import GoogleMapsNavigationButton from '@/components/navigation/GoogleMapsNavigationButton';
 import { 
   fetchRoadRoute, 
   geocodeAddress, 
@@ -349,13 +350,22 @@ const LiveTrackingMapDialog = memo(({
                   <p className="text-sm text-muted-foreground font-normal">الشحنة {shipmentNumber}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 {isPresenceConnected && (
                   <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                     <Eye className="w-3 h-3 mr-1" />
                     متصل بالسائق
                   </Badge>
                 )}
+                {/* Google Maps Navigation Button */}
+                <GoogleMapsNavigationButton
+                  pickupAddress={pickupAddress}
+                  deliveryAddress={deliveryAddress}
+                  pickupCoords={pickupCoords ? { lat: pickupCoords[0], lng: pickupCoords[1] } : null}
+                  deliveryCoords={deliveryCoords ? { lat: deliveryCoords[0], lng: deliveryCoords[1] } : null}
+                  variant="default"
+                  size="sm"
+                />
                 <Button
                   variant="outline"
                   size="sm"
