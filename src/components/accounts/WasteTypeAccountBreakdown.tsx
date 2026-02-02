@@ -3,6 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { 
   Package, 
   ChevronDown, 
@@ -13,8 +19,70 @@ import {
   Scale,
   LayoutGrid,
   List,
+  Recycle,
+  AlertTriangle,
+  Leaf,
+  Beaker,
+  Cpu,
+  Stethoscope,
+  Factory,
+  FileText,
+  Layers,
+  FlaskConical,
+  Hammer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { 
+  wasteTypeLabels, 
+  getWasteTypeCode, 
+  isHazardousWasteType,
+  getAllWasteCategories,
+} from '@/lib/wasteClassification';
+
+// Get icon for waste type
+const getWasteTypeIcon = (wasteType: string) => {
+  const desc = wasteType.toLowerCase();
+  
+  if (desc.includes('بلاستيك') || desc.includes('plastic')) return Recycle;
+  if (desc.includes('ورق') || desc.includes('كرتون') || desc.includes('paper')) return FileText;
+  if (desc.includes('معادن') || desc.includes('حديد') || desc.includes('metal')) return Layers;
+  if (desc.includes('زجاج') || desc.includes('glass')) return FlaskConical;
+  if (desc.includes('إلكتروني') || desc.includes('electronic') || desc.includes('بطاري')) return Cpu;
+  if (desc.includes('عضوي') || desc.includes('organic') || desc.includes('طعام')) return Leaf;
+  if (desc.includes('كيميائ') || desc.includes('chemical')) return Beaker;
+  if (desc.includes('طبي') || desc.includes('medical')) return Stethoscope;
+  if (desc.includes('بناء') || desc.includes('construction')) return Hammer;
+  if (desc.includes('صناع') || desc.includes('industrial')) return Factory;
+  
+  return Package;
+};
+
+// Get badge color for waste type based on detection
+const getWasteTypeBadgeColor = (wasteType: string) => {
+  const desc = wasteType.toLowerCase();
+  
+  // Check if hazardous
+  if (desc.includes('كيميائ') || desc.includes('طبي') || desc.includes('إلكتروني') || 
+      desc.includes('خطر') || desc.includes('سام')) {
+    return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700';
+  }
+  
+  if (desc.includes('بلاستيك')) return 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30';
+  if (desc.includes('ورق') || desc.includes('كرتون')) return 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30';
+  if (desc.includes('معادن') || desc.includes('حديد')) return 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/30';
+  if (desc.includes('زجاج')) return 'bg-cyan-100 text-cyan-800 border-cyan-300 dark:bg-cyan-900/30';
+  if (desc.includes('عضوي') || desc.includes('طعام')) return 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30';
+  if (desc.includes('بناء')) return 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/30';
+  
+  return 'bg-muted text-muted-foreground border-border';
+};
+
+// Check if waste type is hazardous
+const isHazardousFromDescription = (wasteType: string) => {
+  const desc = wasteType.toLowerCase();
+  return desc.includes('كيميائ') || desc.includes('طبي') || desc.includes('إلكتروني') || 
+         desc.includes('خطر') || desc.includes('سام') || desc.includes('مبيدات');
+};
 
 interface ShipmentWithPricing {
   id: string;
@@ -179,11 +247,31 @@ export default function WasteTypeAccountBreakdown({
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Package className="h-4 w-4 text-primary" />
-                          {summary.wasteType}
+                          {(() => {
+                            const Icon = getWasteTypeIcon(summary.wasteType);
+                            return <Icon className="h-4 w-4 text-primary" />;
+                          })()}
+                          <span className="max-w-[200px] truncate">{summary.wasteType}</span>
+                          {isHazardousFromDescription(summary.wasteType) && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>مخلفات خطرة - تتطلب معاملة خاصة</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </CardTitle>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>{summary.shipmentsCount} شحنة</span>
+                          <Badge 
+                            variant="outline" 
+                            className={cn('text-[10px] border', getWasteTypeBadgeColor(summary.wasteType))}
+                          >
+                            {summary.shipmentsCount} شحنة
+                          </Badge>
                           {summary.cancelledCount > 0 && (
                             <Badge variant="destructive" className="text-[10px] px-1">
                               {summary.cancelledCount} ملغاة

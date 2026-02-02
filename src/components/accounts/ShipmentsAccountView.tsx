@@ -17,6 +17,7 @@ import { Package, CheckCircle2, AlertCircle, Clock, XCircle, ExternalLink, Ban }
 import { cn } from '@/lib/utils';
 import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { WasteTypeInline } from './WasteTypeDetailsBadge';
 
 interface ShipmentWithPricing {
   id: string;
@@ -163,12 +164,12 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
                   </span>
                 </TableCell>
                 <TableCell>
-                  <span className={cn(
-                    "font-medium",
-                    isCancelled && "line-through text-muted-foreground"
-                  )}>
-                    {shipment.waste_description || shipment.waste_type || '-'}
-                  </span>
+                  <div className={cn(isCancelled && "opacity-50")}>
+                    <WasteTypeInline
+                      wasteDescription={shipment.waste_description}
+                      wasteType={shipment.waste_type}
+                    />
+                  </div>
                 </TableCell>
                 <TableCell className="text-center">
                   <span className={cn("font-bold", isCancelled && "line-through text-muted-foreground")}>

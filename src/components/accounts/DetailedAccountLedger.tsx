@@ -23,6 +23,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
   Calendar,
   Package,
   CreditCard,
@@ -38,12 +44,15 @@ import {
   Download,
   Eye,
   Loader2,
+  Info,
 } from 'lucide-react';
 import { LedgerEntry } from './AccountLedger';
 import { cn } from '@/lib/utils';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import AccountLedgerPrint from './AccountLedgerPrint';
 import { createRoot } from 'react-dom/client';
+import { WasteTypeInline } from './WasteTypeDetailsBadge';
+import { wasteTypeLabels, getWasteTypeCode, isHazardousWasteType } from '@/lib/wasteClassification';
 
 interface DetailedAccountLedgerProps {
   partnerName: string;
@@ -461,10 +470,38 @@ export default function DetailedAccountLedger({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <p className={cn('text-sm', entry.isCancelled && 'line-through')}>{entry.description}</p>
-                        {entry.reference && (
-                          <p className="text-xs text-muted-foreground font-mono">{entry.reference}</p>
-                        )}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className={cn('cursor-help', entry.isCancelled && 'line-through opacity-60')}>
+                                <p className="text-sm font-medium">{entry.description}</p>
+                                {entry.reference && (
+                                  <p className="text-xs text-muted-foreground font-mono">{entry.reference}</p>
+                                )}
+                                {entry.type === 'shipment' && entry.quantity && (
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    {new Intl.NumberFormat('ar-EG').format(entry.quantity)} {entry.unit || 'كجم'} × {entry.unitPrice ? `${new Intl.NumberFormat('ar-EG').format(entry.unitPrice)} ج.م` : '-'}
+                                  </p>
+                                )}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <div className="space-y-1 text-sm">
+                                <p className="font-bold">{entry.description}</p>
+                                {entry.type === 'shipment' && (
+                                  <>
+                                    <p className="text-xs">الكمية: {entry.quantity ? `${new Intl.NumberFormat('ar-EG').format(entry.quantity)} ${entry.unit || 'كجم'}` : '-'}</p>
+                                    <p className="text-xs">سعر الوحدة: {entry.unitPrice ? `${new Intl.NumberFormat('ar-EG').format(entry.unitPrice)} ج.م` : 'غير محدد'}</p>
+                                    {entry.debit > 0 && <p className="text-xs text-red-400">المبلغ: {new Intl.NumberFormat('ar-EG').format(entry.debit)} ج.م (مدين)</p>}
+                                    {entry.credit > 0 && <p className="text-xs text-emerald-400">المبلغ: {new Intl.NumberFormat('ar-EG').format(entry.credit)} ج.م (دائن)</p>}
+                                  </>
+                                )}
+                                {entry.reference && <p className="text-xs text-muted-foreground">المرجع: {entry.reference}</p>}
+                                {entry.isCancelled && <p className="text-xs text-red-400">⚠️ هذه الحركة ملغاة</p>}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </TableCell>
                       <TableCell className="text-center text-sm">
                         {entry.quantity ? `${formatCurrency(entry.quantity)} ${entry.unit || ''}` : '-'}
