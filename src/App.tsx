@@ -81,6 +81,7 @@ const AccountingExpenses = lazy(() => import("./pages/dashboard/AccountingExpens
 const AccountingPartners = lazy(() => import("./pages/dashboard/AccountingPartners"));
 const AccountingReports = lazy(() => import("./pages/dashboard/AccountingReports"));
 const PartnerAccountDetails = lazy(() => import("./pages/dashboard/PartnerAccountDetails"));
+const CRM = lazy(() => import("./pages/dashboard/CRM"));
 const Verify = lazy(() => import("./pages/Verify"));
 
 // Lazy loaded heavy components (deferred)
@@ -189,6 +190,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/accounting/partners" element={<AccountingPartners />} />
         <Route path="/dashboard/accounting/reports" element={<AccountingReports />} />
         <Route path="/dashboard/partner-account/:partnerId" element={<PartnerAccountDetails />} />
+        <Route path="/dashboard/crm" element={<CRM />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
