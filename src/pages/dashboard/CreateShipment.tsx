@@ -17,6 +17,7 @@ import LocationPicker from '@/components/maps/LocationPicker';
 import EnhancedLocationPicker from '@/components/shipments/EnhancedLocationPicker';
 import RouteEstimation from '@/components/shipments/RouteEstimation';
 import { useAutoChat } from '@/hooks/useAutoChat';
+import { useAutoInvoice } from '@/hooks/useAutoInvoice';
 import WasteTypeCombobox, { isHazardousWasteType, getHazardLevelFromWasteType } from '@/components/shipments/WasteTypeCombobox';
 import { ComboboxWithInput, type ComboboxOption } from '@/components/ui/combobox-with-input';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
@@ -83,6 +84,7 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
   const navigate = useNavigate();
   const { profile, organization, roles } = useAuth();
   const { createShipmentChatRoom } = useAutoChat();
+  const { createInvoiceForShipment } = useAutoInvoice();
   const { pinnedParties, isLoaded: pinnedLoaded, pinBothParties } = usePinnedParties();
   const [loading, setLoading] = useState(false);
   const [generators, setGenerators] = useState<Organization[]>([]);
@@ -502,6 +504,21 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
           generatorId: generatorId,
           transporterId: transporterId,
           recyclerId: recyclerId,
+        });
+      }
+
+      // Create automatic invoice for the generator
+      if (shipmentData && (generatorId || manualGeneratorName)) {
+        await createInvoiceForShipment({
+          id: shipmentData.id,
+          shipment_number: shipmentData.shipment_number,
+          generator_id: generatorId,
+          generator_name: manualGeneratorName || undefined,
+          waste_type: formData.waste_type,
+          waste_description: formData.waste_description,
+          quantity: parseFloat(formData.quantity),
+          unit: formData.unit,
+          pickup_date: formData.pickup_date,
         });
       }
 
