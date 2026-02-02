@@ -13,7 +13,7 @@ import {
   BookOpen,
   ArrowRight,
   Settings2,
-  Banknote,
+  Layers,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,6 +24,7 @@ import PartnerQuickStats from '@/components/accounts/PartnerQuickStats';
 import ShipmentsAccountView from '@/components/accounts/ShipmentsAccountView';
 import InvoicesAccountView from '@/components/accounts/InvoicesAccountView';
 import AccountLedger, { LedgerEntry } from '@/components/accounts/AccountLedger';
+import WasteTypeAccountBreakdown from '@/components/accounts/WasteTypeAccountBreakdown';
 import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 import DepositButton from '@/components/deposits/DepositButton';
 
@@ -313,10 +314,19 @@ export default function PartnerAccountDetails() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-6">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5 mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <BookOpen className="h-4 w-4" />
               كشف الحساب
+            </TabsTrigger>
+            <TabsTrigger value="waste-types" className="gap-2">
+              <Layers className="h-4 w-4" />
+              حسب المخلف
+              {shipmentsWithPricing.length > 0 && (
+                <span className="bg-primary/20 text-primary text-xs px-1.5 rounded-full">
+                  {new Set(shipmentsWithPricing.map(s => s.waste_description || s.waste_type || 'غير محدد')).size}
+                </span>
+              )}
             </TabsTrigger>
             <TabsTrigger value="shipments" className="gap-2">
               <Package className="h-4 w-4" />
@@ -364,6 +374,25 @@ export default function PartnerAccountDetails() {
                       navigate(`/dashboard/s/${entry.reference}`);
                     }
                   }}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Waste Types Breakdown Tab */}
+          <TabsContent value="waste-types" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  حسابات المخلفات حسب النوع
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <WasteTypeAccountBreakdown
+                  shipments={shipmentsWithPricing}
+                  deposits={deposits}
+                  isGenerator={isGeneratorOrg}
                 />
               </CardContent>
             </Card>
