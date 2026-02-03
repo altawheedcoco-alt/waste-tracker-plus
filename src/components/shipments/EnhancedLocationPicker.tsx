@@ -178,7 +178,16 @@ const EnhancedLocationPicker = ({
     location_name: '',
     address: '',
     city: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
   });
+  
+  // State to track last selected location for save prompt
+  const [lastSelectedLocation, setLastSelectedLocation] = useState<{
+    address: string;
+    coords?: { lat: number; lng: number };
+  } | null>(null);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // Map search state
@@ -370,6 +379,8 @@ const EnhancedLocationPicker = ({
           location_name: newLocation.location_name,
           address: newLocation.address,
           city: newLocation.city || null,
+          latitude: newLocation.latitude,
+          longitude: newLocation.longitude,
           created_by: profile?.id,
         });
 
@@ -380,17 +391,39 @@ const EnhancedLocationPicker = ({
       const fullAddress = newLocation.city 
         ? `${newLocation.address}, ${newLocation.city}` 
         : newLocation.address;
-      onChange(fullAddress);
+      onChange(fullAddress, newLocation.latitude && newLocation.longitude 
+        ? { lat: newLocation.latitude, lng: newLocation.longitude }
+        : undefined
+      );
       
       await fetchLocations();
-      setNewLocation({ location_name: '', address: '', city: '' });
+      setNewLocation({ location_name: '', address: '', city: '', latitude: null, longitude: null });
       setShowAddDialog(false);
+      setShowSavePrompt(false);
+      setLastSelectedLocation(null);
     } catch (error: any) {
       console.error('Error saving location:', error);
       toast.error(error.message || 'فشل في حفظ الموقع');
     } finally {
       setSaving(false);
     }
+  };
+  
+  // Function to prepare save dialog with selected location
+  const prepareToSaveLocation = (address: string, coords?: { lat: number; lng: number }) => {
+    // Extract city from address if possible
+    const addressParts = address.split(',').map(s => s.trim());
+    const city = addressParts.length > 1 ? addressParts[addressParts.length - 2] || '' : '';
+    
+    setNewLocation({
+      location_name: '',
+      address: address,
+      city: city,
+      latitude: coords?.lat || null,
+      longitude: coords?.lng || null,
+    });
+    setShowAddDialog(true);
+    setShowSavePrompt(false);
   };
 
   // Handle map click
@@ -574,12 +607,42 @@ const EnhancedLocationPicker = ({
                 onChange={(address, coords) => {
                   onChange(address, coords);
                   if (address) {
+                    setLastSelectedLocation({ address, coords });
+                    setShowSavePrompt(true);
                     toast.success('تم اختيار الموقع من Google Maps');
                   }
                 }}
                 placeholder="ابحث عن عنوان، مصنع، شركة..."
                 showCurrentLocation={true}
               />
+              
+              {/* Save Location Prompt */}
+              {showSavePrompt && lastSelectedLocation && (
+                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
+                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-sm flex-1">هل تريد حفظ هذا الموقع لاستخدامه لاحقاً؟</span>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => prepareToSaveLocation(lastSelectedLocation.address, lastSelectedLocation.coords)}
+                  >
+                    <Plus className="w-3 h-3" />
+                    حفظ
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowSavePrompt(false);
+                      setLastSelectedLocation(null);
+                    }}
+                  >
+                    لا
+                  </Button>
+                </div>
+              )}
+              
               <p className="text-xs text-muted-foreground">
                 💡 استخدم Google Maps للحصول على دقة أعلى في تحديد المواقع
               </p>
@@ -634,6 +697,8 @@ const EnhancedLocationPicker = ({
                     onClick={() => {
                       if (searchQuery.trim()) {
                         onChange(searchQuery.trim());
+                        setLastSelectedLocation({ address: searchQuery.trim() });
+                        setShowSavePrompt(true);
                         toast.success('تم تحديد العنوان');
                         setSearchQuery('');
                       }
@@ -643,6 +708,33 @@ const EnhancedLocationPicker = ({
                   </Button>
                 </div>
               </div>
+
+              {/* Save Location Prompt for Waze */}
+              {showSavePrompt && lastSelectedLocation && (
+                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
+                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-sm flex-1">هل تريد حفظ هذا الموقع لاستخدامه لاحقاً؟</span>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="gap-1"
+                    onClick={() => prepareToSaveLocation(lastSelectedLocation.address, lastSelectedLocation.coords)}
+                  >
+                    <Plus className="w-3 h-3" />
+                    حفظ
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setShowSavePrompt(false);
+                      setLastSelectedLocation(null);
+                    }}
+                  >
+                    لا
+                  </Button>
+                </div>
+              )}
 
               <p className="text-xs text-muted-foreground">
                 🚗 Waze يوفر معلومات المرور الحية وأفضل المسارات
