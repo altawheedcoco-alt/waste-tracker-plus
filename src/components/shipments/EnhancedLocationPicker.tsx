@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
 import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
-import FreeInteractiveMap from '@/components/maps/FreeInteractiveMap';
+import MapboxInteractiveMap from '@/components/maps/MapboxInteractiveMap';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -356,9 +356,12 @@ const EnhancedLocationPicker = ({
     setShowSavePrompt(false);
   };
 
-  // Handle map position select
+  // Handle map position select from Mapbox
   const handleMapPositionSelect = (position: { lat: number; lng: number }, address?: string) => {
     setMapCoordinates(position);
+    if (address) {
+      setSearchQuery(address);
+    }
   };
 
   // Handle map coordinate selection
@@ -724,15 +727,15 @@ const EnhancedLocationPicker = ({
             <DialogTitle className="flex items-center gap-2">
               <Map className="w-5 h-5 text-primary" />
               تحديد الموقع على الخريطة
-              <Badge variant="secondary" className="text-[10px]">مجاني</Badge>
+              <Badge variant="secondary" className="text-[10px]">Mapbox</Badge>
             </DialogTitle>
             <DialogDescription>
               ابحث عن موقع أو اضغط على الخريطة لتحديد الإحداثيات
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Free Interactive Map */}
-            <FreeInteractiveMap
+            {/* Mapbox Interactive Map */}
+            <MapboxInteractiveMap
               center={coordinates || defaultMapCenter}
               zoom={coordinates ? 15 : 6}
               selectedPosition={mapCoordinates}
