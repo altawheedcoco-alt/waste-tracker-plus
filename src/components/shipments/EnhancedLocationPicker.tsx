@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check, Globe, ExternalLink } from 'lucide-react';
@@ -1078,6 +1078,9 @@ const EnhancedLocationPicker = ({
               <Map className="w-5 h-5 text-primary" />
               تحديد الموقع على الخريطة
             </DialogTitle>
+            <DialogDescription>
+              ابحث عن موقع أو اضغط على الخريطة لتحديد الإحداثيات
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {/* Search Bar with Results */}
@@ -1239,6 +1242,9 @@ const EnhancedLocationPicker = ({
         <DialogContent dir="rtl">
           <DialogHeader>
             <DialogTitle>إضافة موقع جديد لـ {organizationName}</DialogTitle>
+            <DialogDescription>
+              أدخل تفاصيل الموقع الجديد لحفظه في المواقع المحفوظة
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
