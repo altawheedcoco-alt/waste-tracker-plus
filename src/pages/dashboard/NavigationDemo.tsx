@@ -44,7 +44,8 @@ import {
   Info,
   SkipForward,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import BackButton from '@/components/ui/back-button';
@@ -868,6 +869,45 @@ const NavigationDemo = () => {
                       <p className="text-xs text-muted-foreground mt-1 mr-7">
                         {coordinates.length} نقطة GPS • {steps.length} تعليمات ملاحية
                       </p>
+                    </div>
+
+                    {/* External Navigation Buttons */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">فتح المسار في تطبيق خارجي</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          className="h-12 gap-2"
+                          onClick={() => {
+                            const url = `https://www.google.com/maps/dir/${ORIGIN.lat},${ORIGIN.lng}/${DESTINATION.lat},${DESTINATION.lng}`;
+                            window.open(url, '_blank');
+                          }}
+                        >
+                          <img 
+                            src="https://www.google.com/images/branding/product/1x/maps_64dp.png" 
+                            alt="Google Maps" 
+                            className="w-5 h-5"
+                          />
+                          <span>Google Maps</span>
+                          <ExternalLink className="w-3 h-3 opacity-50" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="h-12 gap-2"
+                          onClick={() => {
+                            const url = `https://waze.com/ul?ll=${DESTINATION.lat},${DESTINATION.lng}&navigate=yes&from=${ORIGIN.lat},${ORIGIN.lng}`;
+                            window.open(url, '_blank');
+                          }}
+                        >
+                          <img 
+                            src="https://www.waze.com/favicon.ico" 
+                            alt="Waze" 
+                            className="w-5 h-5"
+                          />
+                          <span>Waze</span>
+                          <ExternalLink className="w-3 h-3 opacity-50" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
