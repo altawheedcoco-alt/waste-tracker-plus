@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Map, { Marker, NavigationControl, GeolocateControl } from 'react-map-gl';
+import Map, { Marker, NavigationControl, GeolocateControl, Source, Layer } from 'react-map-gl';
+import type { MapRef, MapLayerMouseEvent } from 'react-map-gl';
+import type { SymbolLayout, SymbolPaint, CircleLayout, CirclePaint } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
   MapPin, Search, Crosshair, Info, Loader2, X, Sparkles, 
@@ -17,7 +19,6 @@ import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { useMultiSourceSearch, SearchResult, EGYPTIAN_INDUSTRIAL_DATA } from '@/hooks/useMultiSourceSearch';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
@@ -43,6 +44,25 @@ const MAP_STYLES = {
 type MapStyleKey = keyof typeof MAP_STYLES;
 
 
+// تحويل بيانات المصانع إلى GeoJSON
+const industrialGeoJSON: GeoJSON.FeatureCollection = {
+  type: 'FeatureCollection',
+  features: EGYPTIAN_INDUSTRIAL_DATA.map((location, index) => ({
+    type: 'Feature' as const,
+    id: index,
+    properties: {
+      name: location.name,
+      city: location.city,
+      type: location.type,
+      typeLabel: location.type === 'factory' ? 'مصنع' : location.type === 'zone' ? 'منطقة صناعية' : 'منشأة',
+    },
+    geometry: {
+      type: 'Point' as const,
+      coordinates: [location.lng, location.lat],
+    },
+  })),
+};
+
 const MapExplorer = () => {
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
@@ -51,6 +71,7 @@ const MapExplorer = () => {
   const [mapStyle, setMapStyle] = useState<MapStyleKey>('streets');
   const [showFactoryMarkers, setShowFactoryMarkers] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MapRef>(null);
   
   const { search, results, aiSuggestions, isSearching, clearResults } = useMultiSourceSearch();
 
@@ -59,6 +80,70 @@ const MapExplorer = () => {
     latitude: 30.0444,
     zoom: 10,
   });
+
+  // معالجة النقر على علامات المصانع
+  const handleFactoryClick = useCallback((e: MapLayerMouseEvent) => {
+    if (e.features && e.features.length > 0) {
+      const feature = e.features[0];
+      const coords = (feature.geometry as GeoJSON.Point).coordinates;
+      const props = feature.properties;
+      
+      setSelectedPosition({ lat: coords[1], lng: coords[0] });
+      setSelectedAddress(`${props?.name} - ${props?.city}`);
+      setViewState(prev => ({
+        ...prev,
+        longitude: coords[0],
+        latitude: coords[1],
+        zoom: 14,
+      }));
+      toast.success('تم تحديد الموقع');
+    }
+  }, []);
+
+  // إعداد تفاعلية الخريطة
+  const onMapLoad = useCallback(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    // تغيير المؤشر عند المرور فوق المصانع
+    map.on('mouseenter', 'industrial-circles', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+    map.on('mouseleave', 'industrial-circles', () => {
+      map.getCanvas().style.cursor = '';
+    });
+    
+    // تعريب جميع التسميات على الخريطة
+    const arabicLayers = [
+      'country-label',
+      'state-label', 
+      'settlement-label',
+      'settlement-subdivision-label',
+      'settlement-minor-label',
+      'airport-label',
+      'poi-label',
+      'transit-label',
+      'road-label',
+      'road-number-shield',
+      'natural-point-label',
+      'natural-line-label',
+      'waterway-label',
+      'water-point-label',
+      'water-line-label',
+      'place-city-label',
+      'place-town-label',
+      'place-village-label',
+      'place-neighborhood-label'
+    ];
+    
+    arabicLayers.forEach(layerId => {
+      try {
+        if (map.getLayer(layerId)) {
+          map.setLayoutProperty(layerId, 'text-field', ['coalesce', ['get', 'name_ar'], ['get', 'name']]);
+        }
+      } catch {}
+    });
+  }, []);
 
   // Close results on outside click
   useEffect(() => {
@@ -368,13 +453,23 @@ const MapExplorer = () => {
             </div>
             
             <Map
+              ref={mapRef}
               {...viewState}
               onMove={evt => setViewState(evt.viewState)}
-              onClick={handleMapClick}
+              onClick={(e) => {
+                // التحقق من النقر على المصانع
+                const features = e.features;
+                if (features && features.length > 0 && features[0].layer?.id === 'industrial-circles') {
+                  handleFactoryClick(e);
+                } else {
+                  handleMapClick(e);
+                }
+              }}
               mapboxAccessToken={MAPBOX_TOKEN}
               mapStyle={MAP_STYLES[mapStyle].url}
               style={{ width: '100%', height: '100%' }}
               attributionControl={false}
+              interactiveLayerIds={showFactoryMarkers ? ['industrial-circles'] : []}
               locale={{ 
                 'NavigationControl.ZoomIn': 'تكبير', 
                 'NavigationControl.ZoomOut': 'تصغير', 
@@ -382,39 +477,7 @@ const MapExplorer = () => {
                 'GeolocateControl.FindMyLocation': 'موقعي', 
                 'GeolocateControl.LocationNotAvailable': 'الموقع غير متاح' 
               }}
-              onLoad={(e) => {
-                const map = e.target;
-                // تعريب جميع التسميات على الخريطة
-                const arabicLayers = [
-                  'country-label',
-                  'state-label', 
-                  'settlement-label',
-                  'settlement-subdivision-label',
-                  'settlement-minor-label',
-                  'airport-label',
-                  'poi-label',
-                  'transit-label',
-                  'road-label',
-                  'road-number-shield',
-                  'natural-point-label',
-                  'natural-line-label',
-                  'waterway-label',
-                  'water-point-label',
-                  'water-line-label',
-                  'place-city-label',
-                  'place-town-label',
-                  'place-village-label',
-                  'place-neighborhood-label'
-                ];
-                
-                arabicLayers.forEach(layerId => {
-                  try {
-                    if (map.getLayer(layerId)) {
-                      map.setLayoutProperty(layerId, 'text-field', ['coalesce', ['get', 'name_ar'], ['get', 'name']]);
-                    }
-                  } catch {}
-                });
-              }}
+              onLoad={onMapLoad}
             >
               <NavigationControl position="bottom-right" />
               <GeolocateControl
@@ -430,94 +493,68 @@ const MapExplorer = () => {
                 }}
               />
               
-              {/* Factory/Zone Markers */}
-              {showFactoryMarkers && viewState.zoom >= 8 && (
-                <TooltipProvider>
-                  {EGYPTIAN_INDUSTRIAL_DATA.map((location, index) => {
-                    const isFactory = location.type === 'factory';
-                    const isZone = location.type === 'zone';
-                    const isFacility = location.type === 'facility';
-                    
-                    // Get color based on type
-                    const bgColor = isFactory 
-                      ? '#ef4444' // red for factories
-                      : isZone 
-                        ? '#3b82f6' // blue for zones
-                        : '#22c55e'; // green for facilities
-                    
-                    return (
-                      <Marker
-                        key={`marker-${index}`}
-                        longitude={location.lng}
-                        latitude={location.lat}
-                        anchor="bottom"
-                        onClick={(e) => {
-                          e.originalEvent.stopPropagation();
-                          const position = { lat: location.lat, lng: location.lng };
-                          setSelectedPosition(position);
-                          setSelectedAddress(`${location.name} - ${location.city}`);
-                          setViewState(prev => ({
-                            ...prev,
-                            longitude: location.lng,
-                            latitude: location.lat,
-                            zoom: 14,
-                          }));
-                          toast.success('تم تحديد الموقع');
-                        }}
-                      >
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div 
-                              className="cursor-pointer transition-transform hover:scale-125"
-                              style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                              }}
-                            >
-                              <div
-                                style={{
-                                  width: viewState.zoom >= 11 ? '28px' : '20px',
-                                  height: viewState.zoom >= 11 ? '28px' : '20px',
-                                  background: bgColor,
-                                  border: '2px solid white',
-                                  borderRadius: '50%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                                }}
-                              >
-                                {isFactory && <Factory className="w-3 h-3 text-white" />}
-                                {isZone && <Building2 className="w-3 h-3 text-white" />}
-                                {isFacility && <MapPin className="w-3 h-3 text-white" />}
-                              </div>
-                              {viewState.zoom >= 11 && (
-                                <div
-                                  className="mt-1 px-1.5 py-0.5 bg-background/95 backdrop-blur-sm rounded text-[10px] font-medium shadow-md whitespace-nowrap max-w-[120px] truncate border"
-                                  style={{ direction: 'rtl' }}
-                                >
-                                  {location.name.length > 20 
-                                    ? location.name.substring(0, 20) + '...' 
-                                    : location.name}
-                                </div>
-                              )}
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="max-w-[200px]">
-                            <div className="text-right" dir="rtl">
-                              <p className="font-semibold text-sm">{location.name}</p>
-                              <p className="text-xs text-muted-foreground">{location.city}</p>
-                              <Badge variant="secondary" className="text-[10px] mt-1">
-                                {isFactory ? 'مصنع' : isZone ? 'منطقة صناعية' : 'منشأة'}
-                              </Badge>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </Marker>
-                    );
-                  })}
-                </TooltipProvider>
+              {/* GeoJSON Source للمصانع والمناطق الصناعية */}
+              {showFactoryMarkers && (
+                <Source id="industrial-data" type="geojson" data={industrialGeoJSON}>
+                  {/* طبقة الدوائر (الأيقونات) */}
+                  <Layer
+                    id="industrial-circles"
+                    type="circle"
+                    paint={{
+                      'circle-radius': [
+                        'interpolate', ['linear'], ['zoom'],
+                        8, 6,
+                        12, 10,
+                        16, 14
+                      ],
+                      'circle-color': [
+                        'match', ['get', 'type'],
+                        'factory', '#ef4444',
+                        'zone', '#3b82f6',
+                        'facility', '#22c55e',
+                        '#6b7280'
+                      ],
+                      'circle-stroke-width': 2,
+                      'circle-stroke-color': '#ffffff',
+                      'circle-opacity': 0.9,
+                    }}
+                  />
+                  
+                  {/* طبقة النصوص (أسماء المصانع) */}
+                  <Layer
+                    id="industrial-labels"
+                    type="symbol"
+                    layout={{
+                      'text-field': ['get', 'name'],
+                      'text-font': ['Noto Sans Arabic Regular', 'Arial Unicode MS Regular'],
+                      'text-size': [
+                        'interpolate', ['linear'], ['zoom'],
+                        8, 10,
+                        12, 12,
+                        16, 14
+                      ],
+                      'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+                      'text-radial-offset': 0.5,
+                      'text-justify': 'auto',
+                      'text-allow-overlap': true,
+                      'text-ignore-placement': false,
+                      'text-max-width': 12,
+                      'icon-allow-overlap': true,
+                    } as SymbolLayout}
+                    paint={{
+                      'text-color': [
+                        'match', ['get', 'type'],
+                        'factory', '#b91c1c',
+                        'zone', '#1d4ed8',
+                        'facility', '#15803d',
+                        '#374151'
+                      ],
+                      'text-halo-color': 'rgba(255, 255, 255, 0.95)',
+                      'text-halo-width': 2,
+                      'text-halo-blur': 0.5,
+                    } as SymbolPaint}
+                  />
+                </Source>
               )}
               
               {/* Selected Position Marker */}
