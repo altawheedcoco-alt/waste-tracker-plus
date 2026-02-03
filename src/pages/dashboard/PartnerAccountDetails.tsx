@@ -434,16 +434,21 @@ export default function PartnerAccountDetails() {
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="mt-0">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
                   فواتير الشريك
                 </CardTitle>
+                <Button onClick={() => setShowCreateInvoice(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  إنشاء فاتورة
+                </Button>
               </CardHeader>
               <CardContent>
                 <InvoicesAccountView 
                   invoices={invoices}
                   isLoading={invoicesLoading}
+                  onCreateInvoice={() => setShowCreateInvoice(true)}
                 />
               </CardContent>
             </Card>
