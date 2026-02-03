@@ -4,13 +4,15 @@ import Map, { Marker, NavigationControl, GeolocateControl } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
   MapPin, Search, Crosshair, Info, Loader2, X, Sparkles, 
-  Building2, Factory, MapPinned, Globe, Lightbulb, Navigation 
+  Building2, Factory, MapPinned, Globe, Lightbulb, Navigation,
+  Layers, Map as MapIcon, Satellite
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { useMultiSourceSearch, SearchResult } from '@/hooks/useMultiSourceSearch';
@@ -18,11 +20,34 @@ import { cn } from '@/lib/utils';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
+// أنماط الخريطة المتاحة
+const MAP_STYLES = {
+  streets: {
+    url: 'mapbox://styles/mapbox/streets-v12',
+    label: 'شوارع',
+    icon: MapIcon,
+  },
+  satellite: {
+    url: 'mapbox://styles/mapbox/satellite-streets-v12',
+    label: 'قمر صناعي',
+    icon: Satellite,
+  },
+  outdoors: {
+    url: 'mapbox://styles/mapbox/outdoors-v12',
+    label: 'طبوغرافي',
+    icon: Layers,
+  },
+} as const;
+
+type MapStyleKey = keyof typeof MAP_STYLES;
+
+
 const MapExplorer = () => {
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>('streets');
   const searchRef = useRef<HTMLDivElement>(null);
   
   const { search, results, aiSuggestions, isSearching, clearResults } = useMultiSourceSearch();
@@ -304,12 +329,37 @@ const MapExplorer = () => {
       <Card className="overflow-hidden">
         <CardContent className="p-0">
           <div className="relative" style={{ height: 'calc(100vh - 400px)', minHeight: '400px' }}>
+            {/* Map Style Switcher */}
+            <div className="absolute top-3 right-3 z-10">
+              <ToggleGroup 
+                type="single" 
+                value={mapStyle} 
+                onValueChange={(value) => value && setMapStyle(value as MapStyleKey)}
+                className="bg-background/95 backdrop-blur-sm shadow-lg rounded-lg border p-1"
+              >
+                {Object.entries(MAP_STYLES).map(([key, style]) => {
+                  const IconComponent = style.icon;
+                  return (
+                    <ToggleGroupItem
+                      key={key}
+                      value={key}
+                      aria-label={style.label}
+                      className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 py-2 gap-1.5"
+                    >
+                      <IconComponent className="w-4 h-4" />
+                      <span className="text-xs hidden sm:inline">{style.label}</span>
+                    </ToggleGroupItem>
+                  );
+                })}
+              </ToggleGroup>
+            </div>
+            
             <Map
               {...viewState}
               onMove={evt => setViewState(evt.viewState)}
               onClick={handleMapClick}
               mapboxAccessToken={MAPBOX_TOKEN}
-              mapStyle="mapbox://styles/mapbox/streets-v12"
+              mapStyle={MAP_STYLES[mapStyle].url}
               style={{ width: '100%', height: '100%' }}
               attributionControl={false}
               locale={{ 
