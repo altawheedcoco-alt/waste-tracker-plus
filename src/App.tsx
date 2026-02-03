@@ -82,6 +82,12 @@ const Verify = lazy(() => import("./pages/Verify"));
 const NavigationDemo = lazy(() => import("./pages/dashboard/NavigationDemo"));
 const MapExplorer = lazy(() => import("./pages/dashboard/MapExplorer"));
 
+// Guide pages
+const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
+const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
+const RecyclerGuide = lazy(() => import("./pages/guide/RecyclerGuide"));
+const DriverGuide = lazy(() => import("./pages/guide/DriverGuide"));
+
 // Lazy loaded heavy components (deferred)
 const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
 const ChatWidget = lazy(() => import("./components/chat/ChatWidget"));
@@ -129,6 +135,11 @@ const AppRoutes = memo(() => (
     <Route path="/" element={<Index />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/auth" element={<Auth />} />
+    {/* Guide Routes */}
+    <Route path="/guide/generator" element={<GeneratorGuide />} />
+    <Route path="/guide/transporter" element={<TransporterGuide />} />
+    <Route path="/guide/recycler" element={<RecyclerGuide />} />
+    <Route path="/guide/driver" element={<DriverGuide />} />
     <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/dashboard/drivers" element={<Drivers />} />
     <Route path="/dashboard/drivers/:driverId" element={<DriverDetails />} />
