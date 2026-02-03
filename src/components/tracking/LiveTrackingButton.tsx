@@ -117,26 +117,14 @@ const LiveTrackingButton = ({
     if (isMobile) {
       window.open(`google.navigation:q=${lat},${lng}`, '_blank');
     } else {
-      window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
     }
-  };
-
-  const openInWaze = () => {
-    if (!driverLocation) return;
-    const { lat, lng } = driverLocation;
-    window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`, '_blank');
   };
 
   const viewInGoogleMaps = () => {
     if (!driverLocation) return;
     const { lat, lng } = driverLocation;
     window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
-  };
-
-  const viewInWaze = () => {
-    if (!driverLocation) return;
-    const { lat, lng } = driverLocation;
-    window.open(`https://waze.com/ul?ll=${lat},${lng}`, '_blank');
   };
 
   useEffect(() => {
@@ -177,7 +165,7 @@ const LiveTrackingButton = ({
           )}
         </Button>
 
-        {/* External Navigation Dropdown */}
+        {/* Google Maps Navigation Buttons */}
         {driverLocation && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -187,11 +175,11 @@ const LiveTrackingButton = ({
                 className="gap-1 bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20"
               >
                 <Navigation className="w-4 h-4" />
-                <span className="hidden sm:inline">تتبع خارجي</span>
+                <span className="hidden sm:inline">خرائط جوجل</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel className="text-right">فتح موقع السائق في</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-right">موقع السائق</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={viewInGoogleMaps} className="gap-2 cursor-pointer">
                 <img 
@@ -199,29 +187,12 @@ const LiveTrackingButton = ({
                   alt="Google Maps" 
                   className="w-5 h-5"
                 />
-                <span>Google Maps</span>
+                <span>عرض الموقع</span>
                 <ExternalLink className="w-3 h-3 mr-auto opacity-50" />
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={viewInWaze} className="gap-2 cursor-pointer">
-                <img 
-                  src="https://www.waze.com/favicon.ico" 
-                  alt="Waze" 
-                  className="w-5 h-5"
-                />
-                <span>Waze</span>
-                <ExternalLink className="w-3 h-3 mr-auto opacity-50" />
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className="text-right text-xs text-muted-foreground">
-                ابدأ الملاحة إلى السائق
-              </DropdownMenuLabel>
               <DropdownMenuItem onClick={openInGoogleMaps} className="gap-2 cursor-pointer">
                 <Navigation className="w-4 h-4 text-green-600" />
-                <span>ملاحة Google</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={openInWaze} className="gap-2 cursor-pointer">
-                <Navigation className="w-4 h-4 text-blue-600" />
-                <span>ملاحة Waze</span>
+                <span>بدء الملاحة</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
