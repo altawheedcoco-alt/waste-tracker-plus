@@ -17,7 +17,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SmartLocationSearch from '@/components/maps/SmartLocationSearch';
+import GooglePlacesSearch from '@/components/maps/GooglePlacesSearch';
 import { 
   MapPin, 
   Navigation, 
@@ -28,7 +30,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Map,
-  X
+  X,
+  Search
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -96,6 +99,7 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
   const [saving, setSaving] = useState(false);
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [mapPickerTarget, setMapPickerTarget] = useState<'from' | 'to'>('from');
+  const [searchMode, setSearchMode] = useState<'google' | 'smart'>('google');
 
   // Check if cities are different
   const citiesAreDifferent = useMemo(() => {
@@ -234,17 +238,36 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-4">
+        {/* Search Mode Tabs */}
+        <Tabs value={searchMode} onValueChange={(v) => setSearchMode(v as 'google' | 'smart')} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 h-9">
+            <TabsTrigger value="google" className="flex items-center gap-1.5 text-xs">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              </svg>
+              Google Maps
+            </TabsTrigger>
+            <TabsTrigger value="smart" className="flex items-center gap-1.5 text-xs">
+              <Search className="w-3.5 h-3.5" />
+              بحث ذكي
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {/* From Location - Talabat Style */}
         <div className="space-y-2">
           <div className={cn(
             "relative rounded-xl border-2 p-3 transition-all",
             fromLocation.address 
-              ? "border-green-500/30 bg-green-50/50 dark:bg-green-950/20" 
+              ? "border-primary/30 bg-primary/5" 
               : "border-border bg-muted/30"
           )}>
             <div className="flex items-center gap-3">
               {/* Green dot indicator */}
-              <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
+              <div className="w-3 h-3 rounded-full bg-primary flex-shrink-0" />
               
               <div className="flex-1 min-w-0">
                 {fromLocation.address ? (
@@ -252,7 +275,7 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm truncate">{fromLocation.address.split(',')[0]}</p>
                       {fromLocation.city && (
-                        <Badge variant="outline" className="mt-1 text-xs bg-green-100 text-green-700 border-green-200">
+                        <Badge variant="outline" className="mt-1 text-xs bg-primary/10 text-primary border-primary/30">
                           {fromLocation.city}
                         </Badge>
                       )}
@@ -266,6 +289,14 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
+                ) : searchMode === 'google' ? (
+                  <GooglePlacesSearch
+                    value=""
+                    onChange={handleFromChange}
+                    placeholder="من أين؟ (نقطة الاستلام)"
+                    showCurrentLocation={true}
+                    className="border-0 shadow-none"
+                  />
                 ) : (
                   <SmartLocationSearch
                     value=""
@@ -294,12 +325,12 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
           <div className={cn(
             "relative rounded-xl border-2 p-3 transition-all",
             toLocation.address 
-              ? "border-orange-500/30 bg-orange-50/50 dark:bg-orange-950/20" 
+              ? "border-destructive/30 bg-destructive/5" 
               : "border-border bg-muted/30"
           )}>
             <div className="flex items-center gap-3">
-              {/* Orange dot indicator */}
-              <div className="w-3 h-3 rounded-full bg-orange-500 flex-shrink-0" />
+              {/* Red dot indicator */}
+              <div className="w-3 h-3 rounded-full bg-destructive flex-shrink-0" />
               
               <div className="flex-1 min-w-0">
                 {toLocation.address ? (
@@ -307,7 +338,7 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-sm truncate">{toLocation.address.split(',')[0]}</p>
                       {toLocation.city && (
-                        <Badge variant="outline" className="mt-1 text-xs bg-orange-100 text-orange-700 border-orange-200">
+                        <Badge variant="outline" className="mt-1 text-xs bg-destructive/10 text-destructive border-destructive/30">
                           {toLocation.city}
                         </Badge>
                       )}
@@ -321,6 +352,14 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
+                ) : searchMode === 'google' ? (
+                  <GooglePlacesSearch
+                    value=""
+                    onChange={handleToChange}
+                    placeholder="إلى أين؟ (نقطة التسليم)"
+                    showCurrentLocation={false}
+                    className="border-0 shadow-none"
+                  />
                 ) : (
                   <SmartLocationSearch
                     value=""
@@ -337,9 +376,9 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
 
         {/* Warning when cities are different */}
         {citiesAreDifferent && (
-          <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-700 dark:text-amber-400 text-sm">
+          <Alert className="border-warning bg-warning/10">
+            <AlertTriangle className="h-4 w-4 text-warning" />
+            <AlertDescription className="text-warning-foreground text-sm">
               بعض العناوين التالية موجودة في دولة أو مدينة مختلفة.
               <br />
               يرجى تحديد العنوان بعناية
@@ -357,8 +396,8 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
               setShowMapPicker(true);
             }}
           >
-            <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
-              <MapPin className="h-3 w-3 text-emerald-600" />
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <MapPin className="h-3 w-3 text-primary" />
             </div>
             <span className="text-xs">حدد نقطة الاستلام</span>
           </Button>
@@ -370,8 +409,8 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
               setShowMapPicker(true);
             }}
           >
-            <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center">
-              <Map className="h-3 w-3 text-amber-600" />
+            <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
+              <Map className="h-3 w-3 text-destructive" />
             </div>
             <span className="text-xs">حدد نقطة التسليم</span>
           </Button>
@@ -380,8 +419,8 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
         {/* Shipment Selection */}
         <div className="space-y-2 pt-2 border-t">
           <Label className="flex items-center gap-2 text-sm font-medium">
-            <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-              <Truck className="h-3 w-3 text-blue-600" />
+            <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center">
+              <Truck className="h-3 w-3 text-secondary-foreground" />
             </div>
             ربط بشحنة
           </Label>
