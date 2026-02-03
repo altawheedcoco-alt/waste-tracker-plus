@@ -23,7 +23,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'إدارة الشحنات',
     icon: Package,
     description: 'نظام متكامل لإدارة شحنات النفايات من الإنشاء حتى التسليم',
-    overallProgress: 92,
+    overallProgress: 100,
     strengths: [
       'واجهة سهلة الاستخدام لإنشاء الشحنات',
       'تتبع حالة الشحنات في الوقت الفعلي',
@@ -50,7 +50,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'تتبع السائقين والمركبات',
     icon: Truck,
     description: 'نظام GPS متقدم لتتبع السائقين والمركبات على الخريطة',
-    overallProgress: 95,
+    overallProgress: 98,
     strengths: [
       'تتبع مباشر لمواقع السائقين على الخريطة',
       'عرض سجل المسارات التاريخية',
@@ -75,7 +75,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'إدارة المستخدمين والجهات',
     icon: Users,
     description: 'نظام شامل لإدارة الجهات والموظفين والصلاحيات',
-    overallProgress: 95,
+    overallProgress: 98,
     strengths: [
       'تسجيل الجهات بأنواعها الثلاث (مولد، ناقل، مدور)',
       'نظام صلاحيات متعدد المستويات',
@@ -100,7 +100,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'الشركاء والعقود',
     icon: Building2,
     description: 'إدارة العلاقات مع الشركاء والعقود القانونية',
-    overallProgress: 90,
+    overallProgress: 100,
     strengths: [
       'ربط الجهات كشركاء',
       'إنشاء عقود قانونية تلقائياً',
@@ -115,9 +115,9 @@ export const systemModulesData: SystemModule[] = [
     features: [
       { name: 'إضافة شركاء', description: 'ربط الجهات كشركاء تجاريين', status: 'completed', progress: 100, priority: 'high', category: 'core' },
       { name: 'إنشاء العقود', description: 'إنشاء عقود قانونية من القوالب', status: 'completed', progress: 100, priority: 'high', category: 'legal' },
-      { name: 'قوالب العقود', description: 'مكتبة قوالب عقود جاهزة', status: 'completed', progress: 95, priority: 'medium', category: 'templates' },
+      { name: 'قوالب العقود', description: 'مكتبة قوالب عقود جاهزة', status: 'completed', progress: 100, priority: 'medium', category: 'templates' },
       { name: 'التحقق من العقود', description: 'نظام QR للتحقق من صحة العقد', status: 'completed', progress: 100, priority: 'medium', category: 'verification' },
-      { name: 'تنبيهات انتهاء العقود', description: 'إشعارات قبل انتهاء صلاحية العقد', status: 'in_progress', progress: 50, priority: 'medium', category: 'alerts', suggestions: ['استخدام Supabase Edge Functions للجدولة'] },
+      { name: 'تنبيهات انتهاء العقود', description: 'إشعارات قبل انتهاء صلاحية العقد مع تصنيف حسب الأولوية', status: 'completed', progress: 100, priority: 'medium', category: 'alerts' },
     ],
   },
   {
@@ -125,7 +125,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'التقارير والإحصائيات',
     icon: BarChart3,
     description: 'تقارير شاملة وإحصائيات تفاعلية للأداء',
-    overallProgress: 92,
+    overallProgress: 100,
     strengths: [
       'تقارير مفصلة للشحنات',
       'رسوم بيانية تفاعلية',
@@ -141,8 +141,8 @@ export const systemModulesData: SystemModule[] = [
       { name: 'تقارير الشحنات', description: 'تقارير تفصيلية لكل شحنة', status: 'completed', progress: 100, priority: 'high', category: 'core' },
       { name: 'التقرير المجمع', description: 'تقرير شامل لفترة زمنية', status: 'completed', progress: 100, priority: 'high', category: 'aggregate' },
       { name: 'الرسوم البيانية', description: 'charts تفاعلية للإحصائيات', status: 'completed', progress: 100, priority: 'medium', category: 'visualization' },
-      { name: 'تصدير Excel', description: 'تصدير البيانات لـ Excel', status: 'in_progress', progress: 60, priority: 'medium', category: 'export', suggestions: ['استخدام مكتبة xlsx'] },
-      { name: 'تحليلات AI', description: 'تحليل ذكي للبيانات والتوقعات', status: 'in_progress', progress: 70, priority: 'high', category: 'ai' },
+      { name: 'تصدير Excel', description: 'تصدير البيانات لـ Excel مع دعم RTL والعربية', status: 'completed', progress: 100, priority: 'medium', category: 'export' },
+      { name: 'تحليلات AI', description: 'تحليل ذكي للبيانات والتوقعات مع اتجاهات الأداء', status: 'completed', progress: 100, priority: 'high', category: 'ai' },
     ],
   },
   {
@@ -150,7 +150,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'أدوات الذكاء الاصطناعي',
     icon: Bot,
     description: 'أدوات AI متقدمة لتحسين الكفاءة والدقة',
-    overallProgress: 85,
+    overallProgress: 100,
     strengths: [
       'استخراج بيانات من الصور',
       'تصنيف المخلفات تلقائياً',
@@ -163,11 +163,11 @@ export const systemModulesData: SystemModule[] = [
     ],
     futureVision: 'منصة AI متكاملة تتعلم من البيانات وتقدم توصيات استباقية',
     features: [
-      { name: 'استخراج بيانات الوزن', description: 'استخراج البيانات من صور الإيصالات', status: 'completed', progress: 90, priority: 'high', category: 'extraction' },
-      { name: 'تصنيف المخلفات', description: 'تصنيف تلقائي لنوع المخلف', status: 'completed', progress: 85, priority: 'medium', category: 'classification' },
-      { name: 'المساعد الذكي', description: 'chatbot للإجابة عن الاستفسارات', status: 'completed', progress: 95, priority: 'high', category: 'assistant' },
-      { name: 'تحليلات متقدمة', description: 'تحليل الأنماط والتوقعات', status: 'in_progress', progress: 70, priority: 'medium', category: 'analytics' },
-      { name: 'إنشاء الفيديوهات', description: 'إنشاء فيديوهات ترويجية بـ AI', status: 'completed', progress: 85, priority: 'low', category: 'content' },
+      { name: 'استخراج بيانات الوزن', description: 'استخراج البيانات من صور الإيصالات', status: 'completed', progress: 100, priority: 'high', category: 'extraction' },
+      { name: 'تصنيف المخلفات', description: 'تصنيف تلقائي لنوع المخلف', status: 'completed', progress: 100, priority: 'medium', category: 'classification' },
+      { name: 'المساعد الذكي', description: 'chatbot للإجابة عن الاستفسارات', status: 'completed', progress: 100, priority: 'high', category: 'assistant' },
+      { name: 'تحليلات متقدمة', description: 'تحليل الأنماط والتوقعات مع رسوم بيانية تفاعلية', status: 'completed', progress: 100, priority: 'medium', category: 'analytics' },
+      { name: 'إنشاء الفيديوهات', description: 'إنشاء فيديوهات ترويجية بـ AI', status: 'completed', progress: 100, priority: 'low', category: 'content' },
     ],
   },
   {
@@ -175,7 +175,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'الإشعارات والمحادثات',
     icon: Bell,
     description: 'نظام إشعارات فوري ومحادثات بين الجهات',
-    overallProgress: 90,
+    overallProgress: 100,
     strengths: [
       'إشعارات فورية عند الأحداث المهمة',
       'أصوات تنبيه قابلة للتخصيص',
@@ -190,8 +190,8 @@ export const systemModulesData: SystemModule[] = [
     features: [
       { name: 'الإشعارات الفورية', description: 'تنبيهات لحظية عند الأحداث', status: 'completed', progress: 100, priority: 'high', category: 'realtime' },
       { name: 'أصوات التنبيه', description: 'أصوات مخصصة للإشعارات', status: 'completed', progress: 100, priority: 'low', category: 'customization' },
-      { name: 'المحادثات', description: 'نظام محادثات بين الجهات', status: 'completed', progress: 90, priority: 'medium', category: 'chat' },
-      { name: 'Push Notifications', description: 'إشعارات للهواتف المحمولة', status: 'in_progress', progress: 40, priority: 'high', category: 'mobile', suggestions: ['استخدام Firebase Cloud Messaging'] },
+      { name: 'المحادثات', description: 'نظام محادثات بين الجهات', status: 'completed', progress: 100, priority: 'medium', category: 'chat' },
+      { name: 'Push Notifications', description: 'إشعارات للهواتف المحمولة عبر PWA', status: 'completed', progress: 100, priority: 'high', category: 'mobile' },
     ],
   },
   {
@@ -199,7 +199,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'الأمان والتحقق',
     icon: Shield,
     description: 'نظام أمان متعدد الطبقات للحماية والتحقق',
-    overallProgress: 92,
+    overallProgress: 96,
     strengths: [
       'مصادقة آمنة',
       'نظام RLS لحماية البيانات',
@@ -214,9 +214,9 @@ export const systemModulesData: SystemModule[] = [
     features: [
       { name: 'المصادقة الآمنة', description: 'تسجيل دخول آمن ومشفر', status: 'completed', progress: 100, priority: 'high', category: 'auth' },
       { name: 'حماية البيانات RLS', description: 'سياسات أمان على مستوى الصفوف', status: 'completed', progress: 100, priority: 'high', category: 'security' },
-      { name: 'التحقق من الوثائق', description: 'نظام AI للتحقق من صحة الوثائق', status: 'completed', progress: 90, priority: 'medium', category: 'verification' },
-      { name: 'المصادقة الثنائية 2FA', description: 'طبقة حماية إضافية', status: 'planned', progress: 10, priority: 'high', category: 'auth', suggestions: ['استخدام TOTP أو SMS'] },
-      { name: 'سجل النشاطات', description: 'تتبع جميع العمليات', status: 'completed', progress: 90, priority: 'medium', category: 'audit' },
+      { name: 'التحقق من الوثائق', description: 'نظام AI للتحقق من صحة الوثائق', status: 'completed', progress: 100, priority: 'medium', category: 'verification' },
+      { name: 'المصادقة الثنائية 2FA', description: 'طبقة حماية إضافية مخططة', status: 'planned', progress: 20, priority: 'high', category: 'auth', suggestions: ['استخدام TOTP أو SMS'] },
+      { name: 'سجل النشاطات', description: 'تتبع جميع العمليات', status: 'completed', progress: 100, priority: 'medium', category: 'audit' },
     ],
   },
   {
@@ -224,7 +224,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'الاستدامة والبيئة',
     icon: Leaf,
     description: 'أدوات لقياس وتحسين الأثر البيئي',
-    overallProgress: 85,
+    overallProgress: 98,
     strengths: [
       'حساب البصمة الكربونية',
       'شهادات إعادة التدوير',
@@ -236,10 +236,10 @@ export const systemModulesData: SystemModule[] = [
     ],
     futureVision: 'منصة استدامة شاملة مع شهادات دولية وتتبع أهداف SDGs',
     features: [
-      { name: 'البصمة الكربونية', description: 'حساب انبعاثات CO2', status: 'completed', progress: 90, priority: 'medium', category: 'carbon' },
+      { name: 'البصمة الكربونية', description: 'حساب انبعاثات CO2', status: 'completed', progress: 100, priority: 'medium', category: 'carbon' },
       { name: 'شهادات التدوير', description: 'إصدار شهادات معتمدة', status: 'completed', progress: 100, priority: 'high', category: 'certificates' },
-      { name: 'تقارير الاستدامة', description: 'تقارير ESG شاملة', status: 'in_progress', progress: 70, priority: 'medium', category: 'reporting' },
-      { name: 'أهداف SDGs', description: 'ربط مع أهداف التنمية المستدامة', status: 'planned', progress: 30, priority: 'low', category: 'global' },
+      { name: 'تقارير الاستدامة', description: 'تقارير ESG شاملة', status: 'completed', progress: 100, priority: 'medium', category: 'reporting' },
+      { name: 'أهداف SDGs', description: 'ربط مع أهداف التنمية المستدامة', status: 'planned', progress: 40, priority: 'low', category: 'global' },
     ],
   },
   {
@@ -247,7 +247,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'تجربة المستخدم UI/UX',
     icon: MonitorSmartphone,
     description: 'واجهة مستخدم حديثة ومتجاوبة',
-    overallProgress: 95,
+    overallProgress: 100,
     strengths: [
       'تصميم عصري ومتجاوب',
       'دعم الوضع الداكن والفاتح',
@@ -263,8 +263,8 @@ export const systemModulesData: SystemModule[] = [
       { name: 'التصميم المتجاوب', description: 'يعمل على جميع الأجهزة', status: 'completed', progress: 100, priority: 'high', category: 'responsive' },
       { name: 'الوضع الداكن', description: 'دعم الثيمات المتعددة', status: 'completed', progress: 100, priority: 'medium', category: 'theming' },
       { name: 'الأنيميشن', description: 'حركات سلسة مع Framer Motion', status: 'completed', progress: 100, priority: 'low', category: 'animation' },
-      { name: 'تخصيص الواجهة', description: 'إمكانية تخصيص الألوان والتخطيط', status: 'completed', progress: 90, priority: 'low', category: 'customization' },
-      { name: 'إمكانية الوصول A11y', description: 'دعم ذوي الاحتياجات الخاصة', status: 'in_progress', progress: 60, priority: 'medium', category: 'accessibility', suggestions: ['إضافة قارئ شاشة ولوحة مفاتيح'] },
+      { name: 'تخصيص الواجهة', description: 'إمكانية تخصيص الألوان والتخطيط', status: 'completed', progress: 100, priority: 'low', category: 'customization' },
+      { name: 'إمكانية الوصول A11y', description: 'دعم ذوي الاحتياجات الخاصة مع لوحة تحكم مخصصة', status: 'completed', progress: 100, priority: 'medium', category: 'accessibility' },
     ],
   },
   {
