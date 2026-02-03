@@ -193,6 +193,8 @@ const EnhancedLocationPicker = ({
   // Map search state
   const [mapSearchQuery, setMapSearchQuery] = useState('');
   const [mapSearchLoading, setMapSearchLoading] = useState(false);
+  const [mapSearchResults, setMapSearchResults] = useState<LocationSuggestion[]>([]);
+  const [showMapSearchResults, setShowMapSearchResults] = useState(false);
 
   const primaryAddress = `${organizationAddress}, ${organizationCity}`;
 
@@ -431,32 +433,60 @@ const EnhancedLocationPicker = ({
     setMapCoordinates({ lat: latlng.lat, lng: latlng.lng });
   };
 
-  // Search on map
-  const handleMapSearch = async () => {
-    if (!mapSearchQuery.trim()) return;
+  // Search on map - now returns multiple results
+  const handleMapSearch = async (query?: string) => {
+    const searchText = query || mapSearchQuery;
+    if (!searchText.trim()) {
+      setMapSearchResults([]);
+      return;
+    }
 
     setMapSearchLoading(true);
+    setShowMapSearchResults(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(mapSearchQuery)}&countrycodes=eg&limit=1&accept-language=ar`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&countrycodes=eg&limit=5&accept-language=ar`
       );
       const data = await response.json();
       
-      if (data?.[0]) {
-        setMapCoordinates({
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
-        });
-        toast.success('تم العثور على الموقع');
+      if (data?.length > 0) {
+        setMapSearchResults(data);
       } else {
+        setMapSearchResults([]);
         toast.error('لم يتم العثور على نتائج');
       }
     } catch {
       toast.error('خطأ في البحث');
+      setMapSearchResults([]);
     } finally {
       setMapSearchLoading(false);
     }
   };
+  
+  // Select a search result on the map
+  const handleMapSearchResultSelect = (result: LocationSuggestion) => {
+    setMapCoordinates({
+      lat: parseFloat(result.lat),
+      lng: parseFloat(result.lon)
+    });
+    setMapSearchQuery(result.display_name.split(',')[0]);
+    setMapSearchResults([]);
+    setShowMapSearchResults(false);
+    toast.success('تم تحديد الموقع');
+  };
+  
+  // Debounced map search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (mapSearchQuery.trim().length >= 2) {
+        handleMapSearch(mapSearchQuery);
+      } else {
+        setMapSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [mapSearchQuery]);
 
   // Get current location for map
   const getMapCurrentLocation = () => {
@@ -1046,34 +1076,59 @@ const EnhancedLocationPicker = ({
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Search Bar */}
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  value={mapSearchQuery}
-                  onChange={(e) => setMapSearchQuery(e.target.value)}
-                  placeholder="ابحث عن موقع..."
-                  className="pr-10"
-                  onKeyDown={(e) => e.key === 'Enter' && handleMapSearch()}
-                />
+            {/* Search Bar with Results */}
+            <div className="relative">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={mapSearchQuery}
+                    onChange={(e) => setMapSearchQuery(e.target.value)}
+                    placeholder="ابحث عن موقع، مصنع، شركة..."
+                    className="pr-10"
+                    onKeyDown={(e) => e.key === 'Enter' && handleMapSearch()}
+                    onFocus={() => mapSearchResults.length > 0 && setShowMapSearchResults(true)}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleMapSearch()}
+                  disabled={mapSearchLoading}
+                >
+                  {mapSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'بحث'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={getMapCurrentLocation}
+                  title="موقعي الحالي"
+                >
+                  <Navigation className="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleMapSearch}
-                disabled={mapSearchLoading}
-              >
-                {mapSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'بحث'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={getMapCurrentLocation}
-                title="موقعي الحالي"
-              >
-                <Navigation className="w-4 h-4" />
-              </Button>
+              
+              {/* Search Results Dropdown */}
+              {showMapSearchResults && mapSearchResults.length > 0 && (
+                <Card className="absolute z-50 w-full mt-1 shadow-lg max-h-60 overflow-y-auto">
+                  <CardContent className="p-2 space-y-1">
+                    {mapSearchResults.map((result, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="w-full text-right p-2 hover:bg-muted rounded-md transition-colors flex items-start gap-2"
+                        onClick={() => handleMapSearchResultSelect(result)}
+                      >
+                        <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{result.display_name.split(',')[0]}</p>
+                          <p className="text-xs text-muted-foreground truncate">{result.display_name}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Interactive Map */}
