@@ -37,6 +37,7 @@ export default function PartnerAccountDetails() {
   const queryClient = useQueryClient();
   const { organization } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showCreateInvoice, setShowCreateInvoice] = useState(false);
 
   // Fetch partner organization details
   const { data: partner, isLoading: partnerLoading } = useQuery({
