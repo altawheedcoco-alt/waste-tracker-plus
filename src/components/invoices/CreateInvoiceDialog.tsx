@@ -604,13 +604,13 @@ export default function CreateInvoiceDialog({
                     <span>{formatCurrency(calculations.subtotal)} ج.م</span>
                   </div>
                   {calculations.taxAmount > 0 && (
-                    <div className="flex justify-between text-amber-600">
+                    <div className="flex justify-between text-warning">
                       <span>الضريبة ({form.watch('tax_rate')}%):</span>
                       <span>+ {formatCurrency(calculations.taxAmount)} ج.م</span>
                     </div>
                   )}
                   {calculations.discountAmount > 0 && (
-                    <div className="flex justify-between text-emerald-600">
+                    <div className="flex justify-between text-success">
                       <span>الخصم:</span>
                       <span>- {formatCurrency(calculations.discountAmount)} ج.م</span>
                     </div>
