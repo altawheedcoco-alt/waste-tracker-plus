@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
 // Egyptian industrial zones and factories database
-const EGYPTIAN_INDUSTRIAL_DATA = [
+export const EGYPTIAN_INDUSTRIAL_DATA = [
   // Industrial Zones
   { name: 'المنطقة الصناعية بالسادس من أكتوبر', type: 'zone', city: 'السادس من أكتوبر', lat: 29.9375, lng: 30.9278 },
   { name: 'المنطقة الصناعية بالعاشر من رمضان', type: 'zone', city: 'العاشر من رمضان', lat: 30.2833, lng: 31.7500 },
