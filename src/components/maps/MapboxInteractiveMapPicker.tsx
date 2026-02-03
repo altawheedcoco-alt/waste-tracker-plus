@@ -277,6 +277,22 @@ const MapboxInteractiveMapPicker = ({
           mapStyle="mapbox://styles/mapbox/streets-v12"
           style={{ width: '100%', height: '100%' }}
           attributionControl={false}
+          locale={{ 'NavigationControl.ZoomIn': 'تكبير', 'NavigationControl.ZoomOut': 'تصغير', 'NavigationControl.ResetBearing': 'إعادة الاتجاه', 'GeolocateControl.FindMyLocation': 'موقعي', 'GeolocateControl.LocationNotAvailable': 'الموقع غير متاح' }}
+          onLoad={(e) => {
+            const map = e.target;
+            map.setLayoutProperty('country-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('state-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('settlement-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('settlement-subdivision-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('airport-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('poi-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('road-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('natural-point-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('natural-line-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('waterway-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('water-point-label', 'text-field', ['get', 'name_ar']);
+            map.setLayoutProperty('water-line-label', 'text-field', ['get', 'name_ar']);
+          }}
         >
           <NavigationControl position="bottom-right" />
           {showCurrentLocation && (
