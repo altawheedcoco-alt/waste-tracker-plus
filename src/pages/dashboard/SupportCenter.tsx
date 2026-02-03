@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import TicketDetailDialog from '@/components/support/TicketDetailDialog';
 import CreateTicketDialog from '@/components/support/CreateTicketDialog';
+import BackButton from '@/components/ui/back-button';
 
 const statusConfig: Record<TicketStatus, { label: string; color: string; icon: React.ElementType }> = {
   open: { label: 'مفتوحة', color: 'bg-blue-500', icon: AlertCircle },
@@ -111,24 +112,27 @@ const SupportCenter = () => {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-white">
-            <Headphones className="w-8 h-8" />
+      <div className="flex flex-col gap-4">
+        <BackButton />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-white">
+              <Headphones className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                {isAdmin ? 'مركز الدعم الفني' : 'الدعم الفني'}
+              </h1>
+              <p className="text-muted-foreground">
+                {isAdmin ? 'إدارة ومتابعة جميع تذاكر الدعم' : 'تواصل معنا لحل مشكلاتك'}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">
-              {isAdmin ? 'مركز الدعم الفني' : 'الدعم الفني'}
-            </h1>
-            <p className="text-muted-foreground">
-              {isAdmin ? 'إدارة ومتابعة جميع تذاكر الدعم' : 'تواصل معنا لحل مشكلاتك'}
-            </p>
-          </div>
+          <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            تذكرة جديدة
+          </Button>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" />
-          تذكرة جديدة
-        </Button>
       </div>
 
       {/* Stats Cards - Admin Only */}
