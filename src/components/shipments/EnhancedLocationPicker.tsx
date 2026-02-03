@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
 import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
-import MapboxInteractiveMap from '@/components/maps/MapboxInteractiveMap';
+import MapboxInteractiveMapPicker from '@/components/maps/MapboxInteractiveMapPicker';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -734,15 +734,16 @@ const EnhancedLocationPicker = ({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Mapbox Interactive Map */}
-            <MapboxInteractiveMap
+            {/* Mapbox Interactive Map with Search */}
+            <MapboxInteractiveMapPicker
               center={coordinates || defaultMapCenter}
               zoom={coordinates ? 15 : 6}
               selectedPosition={mapCoordinates}
               onPositionSelect={handleMapPositionSelect}
               showSearch={true}
               showCurrentLocation={true}
-              height="400px"
+              height="450px"
+              label="ابحث عن موقع أو اضغط على الخريطة"
             />
 
             {/* Coordinates Input */}
