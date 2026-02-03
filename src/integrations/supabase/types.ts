@@ -3530,6 +3530,121 @@ export type Database = {
           },
         ]
       }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at: string
+          created_by: string | null
+          description: string
+          first_response_at: string | null
+          id: string
+          last_activity_at: string | null
+          organization_id: string | null
+          partner_organization_id: string | null
+          priority: Database["public"]["Enums"]["ticket_priority"]
+          related_shipment_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          satisfaction_feedback: string | null
+          satisfaction_rating: number | null
+          status: Database["public"]["Enums"]["ticket_status"]
+          ticket_number: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          created_by?: string | null
+          description: string
+          first_response_at?: string | null
+          id?: string
+          last_activity_at?: string | null
+          organization_id?: string | null
+          partner_organization_id?: string | null
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          related_shipment_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          satisfaction_feedback?: string | null
+          satisfaction_rating?: number | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          first_response_at?: string | null
+          id?: string
+          last_activity_at?: string | null
+          organization_id?: string | null
+          partner_organization_id?: string | null
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          related_shipment_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          satisfaction_feedback?: string | null
+          satisfaction_rating?: number | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_related_shipment_id_fkey"
+            columns: ["related_shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       terms_acceptances: {
         Row: {
           accepted_at: string
@@ -3597,6 +3712,116 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_messages: {
+        Row: {
+          attachment_name: string | null
+          attachment_url: string | null
+          created_at: string
+          id: string
+          is_from_admin: boolean | null
+          is_internal_note: boolean | null
+          message: string
+          read_at: string | null
+          sender_id: string | null
+          sender_organization_id: string | null
+          ticket_id: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          created_at?: string
+          id?: string
+          is_from_admin?: boolean | null
+          is_internal_note?: boolean | null
+          message: string
+          read_at?: string | null
+          sender_id?: string | null
+          sender_organization_id?: string | null
+          ticket_id: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          created_at?: string
+          id?: string
+          is_from_admin?: boolean | null
+          is_internal_note?: boolean | null
+          message?: string
+          read_at?: string | null
+          sender_id?: string | null
+          sender_organization_id?: string | null
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_messages_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ticket_watchers: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          ticket_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          ticket_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ticket_watchers_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_watchers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_watchers_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]
@@ -3762,6 +3987,21 @@ export type Database = {
         | "in_transit"
         | "delivered"
         | "confirmed"
+      ticket_category:
+        | "bug"
+        | "feature_request"
+        | "technical_issue"
+        | "billing"
+        | "general"
+        | "complaint"
+        | "suggestion"
+      ticket_priority: "low" | "medium" | "high" | "urgent"
+      ticket_status:
+        | "open"
+        | "in_progress"
+        | "waiting_response"
+        | "resolved"
+        | "closed"
       waste_type:
         | "plastic"
         | "paper"
@@ -3932,6 +4172,23 @@ export const Constants = {
         "in_transit",
         "delivered",
         "confirmed",
+      ],
+      ticket_category: [
+        "bug",
+        "feature_request",
+        "technical_issue",
+        "billing",
+        "general",
+        "complaint",
+        "suggestion",
+      ],
+      ticket_priority: ["low", "medium", "high", "urgent"],
+      ticket_status: [
+        "open",
+        "in_progress",
+        "waiting_response",
+        "resolved",
+        "closed",
       ],
       waste_type: [
         "plastic",

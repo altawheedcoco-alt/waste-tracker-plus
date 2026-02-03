@@ -43,6 +43,7 @@ import {
   BookOpen,
   Banknote,
   Activity,
+  Headphones,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -245,6 +246,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
+    { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'driver-support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'driver-about' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'driver-settings' },
@@ -302,6 +304,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
     { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
+    { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
     { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
