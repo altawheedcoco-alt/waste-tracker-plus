@@ -459,6 +459,19 @@ export default function PartnerAccountDetails() {
             <PartnerWasteTypes partnerId={partnerId!} isExternal={false} />
           </TabsContent>
         </Tabs>
+
+        {/* Create Invoice Dialog */}
+        <CreateInvoiceDialog
+          open={showCreateInvoice}
+          onOpenChange={setShowCreateInvoice}
+          partnerId={partnerId!}
+          partnerName={partner?.name || ''}
+          partnerType={partner?.organization_type}
+          availableShipments={shipmentsWithPricing}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['partner-invoices', partnerId] });
+          }}
+        />
       </div>
     </DashboardLayout>
   );
