@@ -10,9 +10,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { MapContainer, TileLayer, Polyline, Marker } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import Map, { Marker, Source, Layer, NavigationControl } from 'react-map-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   MapPin,
   Clock,
@@ -24,33 +23,12 @@ import {
   Loader2,
   Route,
   Calendar as CalendarIcon,
-  Activity,
   TrendingUp,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
 
-// Custom icons
-const startIcon = new L.DivIcon({
-  className: 'custom-marker',
-  html: `<div style="width:20px;height:20px;background:hsl(var(--primary));border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span style="color:white;font-size:10px;font-weight:bold;">S</span></div>`,
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-});
-
-const endIcon = new L.DivIcon({
-  className: 'custom-marker',
-  html: `<div style="width:20px;height:20px;background:hsl(var(--destructive));border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span style="color:white;font-size:10px;font-weight:bold;">E</span></div>`,
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
-});
-
-const currentIcon = new L.DivIcon({
-  className: 'custom-marker',
-  html: `<div style="width:24px;height:24px;background:hsl(var(--primary));border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3);animation:pulse 2s infinite;"></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-});
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
 interface LocationLog {
   id: string;
@@ -95,6 +73,12 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
   const [playbackIndex, setPlaybackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [weekSummary, setWeekSummary] = useState<{ date: string; distance: number; trips: number }[]>([]);
+
+  const [viewState, setViewState] = useState({
+    longitude: 31.2357,
+    latitude: 30.0444,
+    zoom: 12,
+  });
 
   useEffect(() => {
     if (driverId) {
@@ -289,9 +273,40 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
     setPlaybackIndex(0);
     setIsPlaying(false);
     setShowTripDialog(true);
+    
+    // Center map on trip
+    if (trip.locations.length > 0) {
+      const centerLat = (trip.start_location.lat + trip.end_location.lat) / 2;
+      const centerLng = (trip.start_location.lng + trip.end_location.lng) / 2;
+      setViewState({
+        longitude: centerLng,
+        latitude: centerLat,
+        zoom: 13,
+      });
+    }
   };
 
   const maxWeekDistance = Math.max(...weekSummary.map(d => d.distance), 1);
+
+  // GeoJSON for trip path
+  const tripPathGeoJSON = selectedTrip ? {
+    type: 'Feature' as const,
+    properties: {},
+    geometry: {
+      type: 'LineString' as const,
+      coordinates: selectedTrip.locations.map(l => [Number(l.longitude), Number(l.latitude)]),
+    },
+  } : null;
+
+  // GeoJSON for played path
+  const playedPathGeoJSON = selectedTrip ? {
+    type: 'Feature' as const,
+    properties: {},
+    geometry: {
+      type: 'LineString' as const,
+      coordinates: selectedTrip.locations.slice(0, playbackIndex + 1).map(l => [Number(l.longitude), Number(l.latitude)]),
+    },
+  } : null;
 
   return (
     <div className="space-y-6">
@@ -475,112 +490,138 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
                   <p className="text-xs text-muted-foreground">كم</p>
                 </div>
                 <div className="text-center p-3 rounded-lg bg-muted/50">
+                  <Route className="w-5 h-5 mx-auto mb-1 text-primary" />
+                  <p className="text-lg font-bold">{selectedTrip.avg_speed}</p>
+                  <p className="text-xs text-muted-foreground">كم/س</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-muted/50">
                   <MapPin className="w-5 h-5 mx-auto mb-1 text-primary" />
                   <p className="text-lg font-bold">{selectedTrip.locations.length}</p>
                   <p className="text-xs text-muted-foreground">نقطة</p>
                 </div>
-                <div className="text-center p-3 rounded-lg bg-muted/50">
-                  <Activity className="w-5 h-5 mx-auto mb-1 text-primary" />
-                  <p className="text-lg font-bold">{selectedTrip.avg_speed}</p>
-                  <p className="text-xs text-muted-foreground">كم/س</p>
+              </div>
+
+              {/* Playback Controls */}
+              <div className="p-4 rounded-lg bg-muted/30 border">
+                <div className="flex items-center justify-between gap-4 mb-3">
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(selectedTrip.start_time), 'HH:mm')}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setPlaybackIndex(0)}
+                      disabled={playbackIndex === 0}
+                    >
+                      <SkipBack className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="icon"
+                      onClick={() => setIsPlaying(!isPlaying)}
+                    >
+                      {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setPlaybackIndex(selectedTrip.locations.length - 1)}
+                      disabled={playbackIndex === selectedTrip.locations.length - 1}
+                    >
+                      <SkipForward className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(selectedTrip.end_time), 'HH:mm')}
+                  </span>
                 </div>
+                <Slider
+                  value={[playbackIndex]}
+                  onValueChange={([value]) => setPlaybackIndex(value)}
+                  max={selectedTrip.locations.length - 1}
+                  step={1}
+                  className="w-full"
+                />
+                <p className="text-center text-sm text-muted-foreground mt-2">
+                  {selectedTrip.locations[playbackIndex] && format(new Date(selectedTrip.locations[playbackIndex].recorded_at), 'HH:mm:ss')}
+                </p>
               </div>
 
-              {/* Time Info */}
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <Badge variant="outline" className="gap-1">
-                  <Clock className="h-3 w-3" />
-                  البداية: {format(new Date(selectedTrip.start_time), 'HH:mm:ss')}
-                </Badge>
-                <Badge variant="outline" className="gap-1">
-                  <Clock className="h-3 w-3" />
-                  النهاية: {format(new Date(selectedTrip.end_time), 'HH:mm:ss')}
-                </Badge>
-              </div>
-
-              {/* Playback Map */}
+              {/* Map */}
               <div className="h-[400px] rounded-lg overflow-hidden border">
-                <MapContainer
-                  center={[selectedTrip.start_location.lat, selectedTrip.start_location.lng]}
-                  zoom={14}
-                  style={{ height: '100%', width: '100%' }}
+                <Map
+                  {...viewState}
+                  onMove={evt => setViewState(evt.viewState)}
+                  mapboxAccessToken={MAPBOX_TOKEN}
+                  mapStyle="mapbox://styles/mapbox/streets-v12"
+                  style={{ width: '100%', height: '100%' }}
+                  attributionControl={false}
                 >
-                  <TileLayer
-                    attribution='&copy; OpenStreetMap'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
+                  <NavigationControl position="top-left" />
 
-                  {/* Full path (grey) */}
-                  <Polyline
-                    positions={selectedTrip.locations.map(l => [Number(l.latitude), Number(l.longitude)] as [number, number])}
-                    pathOptions={{ color: 'hsl(var(--muted-foreground))', weight: 3, opacity: 0.4 }}
-                  />
+                  {/* Full path */}
+                  {tripPathGeoJSON && (
+                    <Source id="full-path" type="geojson" data={tripPathGeoJSON}>
+                      <Layer
+                        id="full-path-line"
+                        type="line"
+                        paint={{
+                          'line-color': '#9ca3af',
+                          'line-width': 3,
+                          'line-opacity': 0.5,
+                        }}
+                      />
+                    </Source>
+                  )}
 
-                  {/* Played path (colored) */}
-                  <Polyline
-                    positions={selectedTrip.locations.slice(0, playbackIndex + 1).map(l => [Number(l.latitude), Number(l.longitude)] as [number, number])}
-                    pathOptions={{ color: 'hsl(var(--primary))', weight: 4 }}
-                  />
+                  {/* Played path */}
+                  {playedPathGeoJSON && (
+                    <Source id="played-path" type="geojson" data={playedPathGeoJSON}>
+                      <Layer
+                        id="played-path-line"
+                        type="line"
+                        paint={{
+                          'line-color': '#22c55e',
+                          'line-width': 4,
+                        }}
+                      />
+                    </Source>
+                  )}
 
                   {/* Start marker */}
                   <Marker
-                    position={[selectedTrip.start_location.lat, selectedTrip.start_location.lng]}
-                    icon={startIcon}
-                  />
+                    longitude={selectedTrip.start_location.lng}
+                    latitude={selectedTrip.start_location.lat}
+                    anchor="center"
+                  >
+                    <div className="w-6 h-6 bg-green-500 rounded-full border-2 border-white shadow flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">S</span>
+                    </div>
+                  </Marker>
 
                   {/* End marker */}
                   <Marker
-                    position={[selectedTrip.end_location.lat, selectedTrip.end_location.lng]}
-                    icon={endIcon}
-                  />
+                    longitude={selectedTrip.end_location.lng}
+                    latitude={selectedTrip.end_location.lat}
+                    anchor="center"
+                  >
+                    <div className="w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">E</span>
+                    </div>
+                  </Marker>
 
                   {/* Current playback position */}
                   {selectedTrip.locations[playbackIndex] && (
                     <Marker
-                      position={[
-                        Number(selectedTrip.locations[playbackIndex].latitude),
-                        Number(selectedTrip.locations[playbackIndex].longitude)
-                      ]}
-                      icon={currentIcon}
-                    />
+                      longitude={Number(selectedTrip.locations[playbackIndex].longitude)}
+                      latitude={Number(selectedTrip.locations[playbackIndex].latitude)}
+                      anchor="center"
+                    >
+                      <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow animate-pulse" />
+                    </Marker>
                   )}
-                </MapContainer>
-              </div>
-
-              {/* Playback Controls */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 justify-center">
-                  <Button variant="outline" size="icon" onClick={() => setPlaybackIndex(0)}>
-                    <SkipBack className="w-4 h-4" />
-                  </Button>
-                  <Button size="icon" onClick={() => setIsPlaying(!isPlaying)}>
-                    {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </Button>
-                  <Button variant="outline" size="icon" onClick={() => setPlaybackIndex(selectedTrip.locations.length - 1)}>
-                    <SkipForward className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground w-16">
-                    {selectedTrip.locations[playbackIndex] && 
-                      format(new Date(selectedTrip.locations[playbackIndex].recorded_at), 'HH:mm:ss')}
-                  </span>
-                  <Slider
-                    value={[playbackIndex]}
-                    onValueChange={([val]) => setPlaybackIndex(val)}
-                    max={selectedTrip.locations.length - 1}
-                    step={1}
-                    className="flex-1"
-                  />
-                  <span className="text-xs text-muted-foreground w-16 text-right">
-                    {format(new Date(selectedTrip.locations[selectedTrip.locations.length - 1].recorded_at), 'HH:mm:ss')}
-                  </span>
-                </div>
-
-                <p className="text-center text-xs text-muted-foreground">
-                  النقطة {playbackIndex + 1} من {selectedTrip.locations.length}
-                </p>
+                </Map>
               </div>
             </div>
           )}
