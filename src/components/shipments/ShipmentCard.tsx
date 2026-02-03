@@ -51,7 +51,7 @@ import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificat
 import ShipmentQuickPrint from './ShipmentQuickPrint';
 import ShipmentRouteMap from './ShipmentRouteMap';
 import CancelShipmentDialog from './CancelShipmentDialog';
-import GoogleMapsNavigationButton from '@/components/navigation/GoogleMapsNavigationButton';
+import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
