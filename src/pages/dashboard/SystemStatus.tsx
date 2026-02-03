@@ -33,12 +33,15 @@ import {
   Star,
   Activity,
   ExternalLink,
+  Link2,
+  Network,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSystemStats } from '@/hooks/useSystemStats';
-import { systemModulesData } from '@/components/system-status/systemModulesData';
+import { systemModulesData, systemIntegrationsData } from '@/components/system-status/systemModulesData';
 import { ModuleOverviewCard, StrengthsList, getStatusInfo, getPriorityVariant } from '@/components/system-status/ModuleComponents';
 import { LiveStatsGrid, OverallProgressCard } from '@/components/system-status/StatsComponents';
+import { IntegrationCard, IntegrationDetailView, IntegrationStatsGrid } from '@/components/system-status/IntegrationsComponents';
 
 // Calculate overall system progress
 const calculateOverallProgress = () => {
@@ -99,10 +102,14 @@ const SystemStatus = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">نظرة عامة</span>
+          </TabsTrigger>
+          <TabsTrigger value="integrations" className="flex items-center gap-2">
+            <Network className="w-4 h-4" />
+            <span className="hidden sm:inline">التكامل</span>
           </TabsTrigger>
           <TabsTrigger value="features" className="flex items-center gap-2">
             <Star className="w-4 h-4" />
@@ -128,6 +135,47 @@ const SystemStatus = () => {
             {systemModulesData.map((module) => (
               <ModuleOverviewCard key={module.id} module={module} />
             ))}
+          </div>
+        </TabsContent>
+
+        {/* Integrations Tab */}
+        <TabsContent value="integrations" className="mt-6">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Network className="w-5 h-5 text-primary" />
+                  تحليل الربط والتكامل في النظام
+                </CardTitle>
+                <CardDescription>
+                  تحليل مفصل لكيفية ترابط الجهات والشحنات والحسابات والتتبع والخرائط
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <IntegrationStatsGrid integrations={systemIntegrationsData} />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  {systemIntegrationsData.map((integration) => (
+                    <IntegrationCard key={integration.id} integration={integration} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Link2 className="w-5 h-5 text-blue-500" />
+                  تفاصيل الربط والعلاقات
+                </CardTitle>
+                <CardDescription>
+                  اضغط على أي منظومة لرؤية تفاصيل الربط بين الجداول وتدفق البيانات
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <IntegrationDetailView integrations={systemIntegrationsData} />
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 
