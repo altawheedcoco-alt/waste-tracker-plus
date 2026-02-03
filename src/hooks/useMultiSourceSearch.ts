@@ -42,6 +42,7 @@ export const EGYPTIAN_INDUSTRIAL_DATA = [
   { name: 'مصانع البترول - مسطرد', type: 'factory', city: 'مسطرد', lat: 30.1333, lng: 31.2833 },
   { name: 'مصنع الورق - قنا', type: 'factory', city: 'قنا', lat: 26.1667, lng: 32.7167 },
   { name: 'مجمع الصناعات الغذائية - أبو رواش', type: 'factory', city: 'أبو رواش', lat: 30.0600, lng: 31.0900 },
+  { name: 'مصنع التوحيد للأخشاب - السادس من أكتوبر', type: 'factory', city: 'السادس من أكتوبر', lat: 29.9375, lng: 30.9278 },
   // Waste Management Facilities
   { name: 'مدفن صحي - العاشر من رمضان', type: 'facility', city: 'العاشر من رمضان', lat: 30.3000, lng: 31.7700 },
   { name: 'محطة تدوير النفايات - السادس من أكتوبر', type: 'facility', city: 'السادس من أكتوبر', lat: 29.9200, lng: 30.9000 },
