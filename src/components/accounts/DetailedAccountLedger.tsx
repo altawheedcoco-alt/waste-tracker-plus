@@ -123,6 +123,11 @@ export default function DetailedAccountLedger({
   const [editDepositOpen, setEditDepositOpen] = useState(false);
   const [selectedDeposit, setSelectedDeposit] = useState<Deposit | null>(null);
   const [loadingDepositId, setLoadingDepositId] = useState<string | null>(null);
+  
+  // Notes editing state
+  const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
+  const [notesValue, setNotesValue] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const { exportToPDF, previewPDF } = usePDFExport({
     filename: `سجل-حساب-${partnerName}`,
@@ -153,6 +158,26 @@ export default function DetailedAccountLedger({
   const handleDepositUpdated = () => {
     queryClient.invalidateQueries({ queryKey: ['partner-deposits'] });
     onDepositUpdated?.();
+  };
+  
+  // Handle saving shipment notes
+  const handleSaveNotes = async (shipmentId: string, notes: string) => {
+    setSavingNotes(true);
+    try {
+      const { error } = await supabase
+        .from('shipments')
+        .update({ account_notes: notes })
+        .eq('id', shipmentId);
+      
+      if (error) throw error;
+      
+      queryClient.invalidateQueries({ queryKey: ['partner-shipments'] });
+      setEditingNotesId(null);
+    } catch (error) {
+      console.error('Error saving notes:', error);
+    } finally {
+      setSavingNotes(false);
+    }
   };
 
   // Filter entries by date range and type
@@ -900,12 +925,13 @@ export default function DetailedAccountLedger({
                   <TableHead className="text-center font-bold w-24">مدين</TableHead>
                   <TableHead className="text-center font-bold w-24">دائن</TableHead>
                   <TableHead className="text-center font-bold w-28">الرصيد</TableHead>
+                  <TableHead className="text-center font-bold w-40">ملاحظات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {entriesWithBalance.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
                       لا توجد حركات في الفترة المحددة
                     </TableCell>
                   </TableRow>
@@ -991,6 +1017,62 @@ export default function DetailedAccountLedger({
                             {formatCurrency(Math.abs(entry.balance))}
                           </span>
                         </div>
+                      </TableCell>
+                      {/* Notes Column */}
+                      <TableCell className="text-center">
+                        {entry.type === 'shipment' && entry.shipmentId ? (
+                          editingNotesId === entry.shipmentId ? (
+                            <div className="flex items-center gap-1">
+                              <Input
+                                value={notesValue}
+                                onChange={(e) => setNotesValue(e.target.value)}
+                                placeholder="أضف ملاحظة..."
+                                className="h-7 text-xs min-w-[120px]"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleSaveNotes(entry.shipmentId!, notesValue);
+                                  } else if (e.key === 'Escape') {
+                                    setEditingNotesId(null);
+                                  }
+                                }}
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={() => handleSaveNotes(entry.shipmentId!, notesValue)}
+                                disabled={savingNotes}
+                              >
+                                {savingNotes ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <ArrowUpRight className="h-3 w-3" />
+                                )}
+                              </Button>
+                            </div>
+                          ) : (
+                            <div 
+                              className="flex items-center justify-center gap-1 cursor-pointer hover:bg-muted/50 rounded px-2 py-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingNotesId(entry.shipmentId!);
+                                setNotesValue(entry.notes || '');
+                              }}
+                            >
+                              {entry.notes ? (
+                                <span className="text-xs text-muted-foreground max-w-[100px] truncate">
+                                  {entry.notes}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-muted-foreground/50">+ ملاحظة</span>
+                              )}
+                              <Pencil className="h-3 w-3 text-muted-foreground/50" />
+                            </div>
+                          )
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))

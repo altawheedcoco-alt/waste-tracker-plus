@@ -3310,6 +3310,7 @@ export type Database = {
       }
       shipments: {
         Row: {
+          account_notes: string | null
           approved_at: string | null
           auto_approve_at: string | null
           cancellation_reason: string | null
@@ -3352,6 +3353,7 @@ export type Database = {
           waste_type: Database["public"]["Enums"]["waste_type"]
         }
         Insert: {
+          account_notes?: string | null
           approved_at?: string | null
           auto_approve_at?: string | null
           cancellation_reason?: string | null
@@ -3394,6 +3396,7 @@ export type Database = {
           waste_type: Database["public"]["Enums"]["waste_type"]
         }
         Update: {
+          account_notes?: string | null
           approved_at?: string | null
           auto_approve_at?: string | null
           cancellation_reason?: string | null
