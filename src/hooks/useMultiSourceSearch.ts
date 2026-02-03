@@ -1,55 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { EGYPTIAN_INDUSTRIAL_DATA } from '@/data/egyptianIndustrialData';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
-
-// Egyptian industrial zones and factories database
-export const EGYPTIAN_INDUSTRIAL_DATA = [
-  // Industrial Zones
-  { name: 'المنطقة الصناعية بالسادس من أكتوبر', type: 'zone', city: 'السادس من أكتوبر', lat: 29.9375, lng: 30.9278 },
-  { name: 'المنطقة الصناعية بالعاشر من رمضان', type: 'zone', city: 'العاشر من رمضان', lat: 30.2833, lng: 31.7500 },
-  { name: 'المنطقة الصناعية ببرج العرب', type: 'zone', city: 'الإسكندرية', lat: 30.8575, lng: 29.5433 },
-  { name: 'المنطقة الصناعية بالسويس', type: 'zone', city: 'السويس', lat: 29.9833, lng: 32.5500 },
-  { name: 'المنطقة الصناعية ببنها', type: 'zone', city: 'بنها', lat: 30.4667, lng: 31.1833 },
-  { name: 'المنطقة الصناعية بالسادات', type: 'zone', city: 'مدينة السادات', lat: 30.3708, lng: 30.5106 },
-  { name: 'المنطقة الصناعية بقويسنا', type: 'zone', city: 'قويسنا', lat: 30.5583, lng: 31.1583 },
-  { name: 'المنطقة الصناعية بطنطا', type: 'zone', city: 'طنطا', lat: 30.7833, lng: 31.0000 },
-  { name: 'المنطقة الصناعية بدمياط', type: 'zone', city: 'دمياط', lat: 31.4175, lng: 31.8144 },
-  { name: 'المنطقة الصناعية بالمحلة الكبرى', type: 'zone', city: 'المحلة الكبرى', lat: 30.9667, lng: 31.1667 },
-  { name: 'المنطقة الصناعية بالفيوم', type: 'zone', city: 'الفيوم', lat: 29.3100, lng: 30.8417 },
-  { name: 'المنطقة الصناعية بأسيوط', type: 'zone', city: 'أسيوط', lat: 27.1833, lng: 31.1833 },
-  { name: 'المنطقة الصناعية بسوهاج', type: 'zone', city: 'سوهاج', lat: 26.5567, lng: 31.6950 },
-  { name: 'المنطقة الصناعية بأسوان', type: 'zone', city: 'أسوان', lat: 24.0875, lng: 32.8994 },
-  { name: 'المنطقة الصناعية بالإسماعيلية', type: 'zone', city: 'الإسماعيلية', lat: 30.6000, lng: 32.2667 },
-  { name: 'المنطقة الصناعية ببورسعيد', type: 'zone', city: 'بورسعيد', lat: 31.2589, lng: 32.2847 },
-  { name: 'المنطقة الحرة بالمنطقة الاقتصادية بقناة السويس', type: 'zone', city: 'العين السخنة', lat: 29.5500, lng: 32.3667 },
-  { name: 'المنطقة الصناعية بالروبيكي', type: 'zone', city: 'الروبيكي', lat: 30.0500, lng: 31.4500 },
-  { name: 'مدينة الأثاث بدمياط', type: 'zone', city: 'دمياط', lat: 31.4200, lng: 31.8200 },
-  { name: 'مجمع البتروكيماويات بالعين السخنة', type: 'zone', city: 'العين السخنة', lat: 29.5833, lng: 32.3500 },
-  // Major Factories
-  { name: 'مصنع حديد عز - السادس من أكتوبر', type: 'factory', city: 'السادس من أكتوبر', lat: 29.9600, lng: 30.9100 },
-  { name: 'مصنع السكر والصناعات التكاملية - الحوامدية', type: 'factory', city: 'الحوامدية', lat: 29.9000, lng: 31.2333 },
-  { name: 'مصنع الأسمنت - السويس', type: 'factory', city: 'السويس', lat: 29.9667, lng: 32.5333 },
-  { name: 'مصنع الأسمنت - طرة', type: 'factory', city: 'طرة', lat: 29.9333, lng: 31.2833 },
-  { name: 'مصانع النسيج - المحلة الكبرى', type: 'factory', city: 'المحلة الكبرى', lat: 30.9750, lng: 31.1667 },
-  { name: 'مصنع السيراميك - السويس', type: 'factory', city: 'السويس', lat: 29.9500, lng: 32.5500 },
-  { name: 'مصنع الزجاج - أبو رواش', type: 'factory', city: 'أبو رواش', lat: 30.0500, lng: 31.1000 },
-  { name: 'مصنع البلاستيك - العاشر من رمضان', type: 'factory', city: 'العاشر من رمضان', lat: 30.2900, lng: 31.7600 },
-  { name: 'مصانع الغزل والنسيج - كفر الدوار', type: 'factory', city: 'كفر الدوار', lat: 31.1333, lng: 30.1333 },
-  { name: 'مصنع الألومنيوم - نجع حمادي', type: 'factory', city: 'نجع حمادي', lat: 26.0500, lng: 32.2333 },
-  { name: 'مصنع الحديد والصلب - حلوان', type: 'factory', city: 'حلوان', lat: 29.8500, lng: 31.3000 },
-  { name: 'مصنع الأسمدة - طلخا', type: 'factory', city: 'طلخا', lat: 31.0667, lng: 31.3667 },
-  { name: 'مصانع البترول - مسطرد', type: 'factory', city: 'مسطرد', lat: 30.1333, lng: 31.2833 },
-  { name: 'مصنع الورق - قنا', type: 'factory', city: 'قنا', lat: 26.1667, lng: 32.7167 },
-  { name: 'مجمع الصناعات الغذائية - أبو رواش', type: 'factory', city: 'أبو رواش', lat: 30.0600, lng: 31.0900 },
-  { name: 'مصنع التوحيد للأخشاب - السادس من أكتوبر', type: 'factory', city: 'السادس من أكتوبر', lat: 29.9375, lng: 30.9278 },
-  // Waste Management Facilities
-  { name: 'مدفن صحي - العاشر من رمضان', type: 'facility', city: 'العاشر من رمضان', lat: 30.3000, lng: 31.7700 },
-  { name: 'محطة تدوير النفايات - السادس من أكتوبر', type: 'facility', city: 'السادس من أكتوبر', lat: 29.9200, lng: 30.9000 },
-  { name: 'مصنع تدوير البلاستيك - برج العرب', type: 'facility', city: 'برج العرب', lat: 30.8600, lng: 29.5500 },
-  { name: 'محطة معالجة النفايات - أبو رواش', type: 'facility', city: 'أبو رواش', lat: 30.0400, lng: 31.0800 },
-  { name: 'مصنع تدوير الورق - العبور', type: 'facility', city: 'العبور', lat: 30.2167, lng: 31.4667 },
-];
 
 export interface SearchResult {
   id: string;
@@ -74,13 +27,16 @@ export interface AISearchSuggestion {
   correctedQuery?: string;
 }
 
+// Re-export for backward compatibility
+export { EGYPTIAN_INDUSTRIAL_DATA };
+
 export const useMultiSourceSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<AISearchSuggestion | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get user location on first use
   const getUserLocation = useCallback(() => {
@@ -147,8 +103,8 @@ export const useMultiSourceSearch = () => {
         }));
       }
       return [];
-    } catch (error) {
-      console.error('Mapbox search error:', error);
+    } catch (err) {
+      console.error('Mapbox search error:', err);
       return [];
     }
   }, []);
@@ -156,7 +112,7 @@ export const useMultiSourceSearch = () => {
   // Search Google Places API (via Edge Function)
   const searchGooglePlaces = useCallback(async (query: string): Promise<SearchResult[]> => {
     try {
-      const { data, error } = await supabase.functions.invoke('google-places-search', {
+      const { data, error: fnError } = await supabase.functions.invoke('google-places-search', {
         body: { 
           query,
           userLat: userLocation?.lat || 30.0444,
@@ -165,8 +121,8 @@ export const useMultiSourceSearch = () => {
         }
       });
       
-      if (error) {
-        console.error('Google Places search error:', error);
+      if (fnError) {
+        console.error('Google Places search error:', fnError);
         return [];
       }
       
@@ -182,8 +138,8 @@ export const useMultiSourceSearch = () => {
         rank: place.rank,
         relevanceScore: place.rank ? 100 - place.rank : 50,
       }));
-    } catch (error) {
-      console.error('Google Places search error:', error);
+    } catch (err) {
+      console.error('Google Places search error:', err);
       return [];
     }
   }, [userLocation]);
@@ -191,18 +147,18 @@ export const useMultiSourceSearch = () => {
   // Search using AI assistant
   const searchWithAI = useCallback(async (query: string): Promise<AISearchSuggestion | null> => {
     try {
-      const { data, error } = await supabase.functions.invoke('ai-location-search', {
+      const { data, error: fnError } = await supabase.functions.invoke('ai-location-search', {
         body: { query }
       });
       
-      if (error) {
-        console.error('AI search error:', error);
+      if (fnError) {
+        console.error('AI search error:', fnError);
         return null;
       }
       
       return data;
-    } catch (error) {
-      console.error('AI search error:', error);
+    } catch (err) {
+      console.error('AI search error:', err);
       return null;
     }
   }, []);
