@@ -169,7 +169,10 @@ const mapOptions: google.maps.MapOptions = {
   ],
 };
 
+type NavigationMode = 'selection' | 'google' | 'waze';
+
 const NavigationDemo = () => {
+  const [navigationMode, setNavigationMode] = useState<NavigationMode>('selection');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -188,6 +191,19 @@ const NavigationDemo = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastAnnouncedStepRef = useRef<number>(-1);
   const mapRef = useRef<google.maps.Map | null>(null);
+
+  // URLs for external navigation
+  const googleMapsUrl = `https://www.google.com/maps/dir/${ORIGIN.lat},${ORIGIN.lng}/${DESTINATION.lat},${DESTINATION.lng}`;
+  const wazeUrl = `https://waze.com/ul?ll=${DESTINATION.lat},${DESTINATION.lng}&navigate=yes&from=${ORIGIN.lat},${ORIGIN.lng}`;
+
+  const handleSelectGoogle = () => {
+    setNavigationMode('google');
+  };
+
+  const handleSelectWaze = () => {
+    window.open(wazeUrl, '_blank');
+    setNavigationMode('waze');
+  };
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -379,6 +395,190 @@ const NavigationDemo = () => {
   // Convert coordinates for Google Maps
   const completedPath = completedRoute.map(coord => ({ lat: coord[0], lng: coord[1] }));
   const remainingPath = remainingRoute.map(coord => ({ lat: coord[0], lng: coord[1] }));
+
+  // Mode Selection Screen
+  if (navigationMode === 'selection') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4" dir="rtl">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-2xl"
+        >
+          <Card className="shadow-2xl overflow-hidden">
+            <CardHeader className="text-center bg-gradient-to-r from-primary/10 to-green-500/10 border-b">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <BackButton />
+                <div className="flex-1">
+                  <CardTitle className="text-2xl flex items-center justify-center gap-2">
+                    <Navigation className="w-7 h-7 text-primary" />
+                    العرض التوضيحي للملاحة
+                  </CardTitle>
+                </div>
+              </div>
+              <p className="text-muted-foreground">اختر طريقة عرض المسار من بنها إلى السادس من أكتوبر</p>
+            </CardHeader>
+            <CardContent className="p-6">
+              {/* Route Info */}
+              <div className="flex items-center justify-center gap-4 mb-8 text-sm">
+                <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 px-3 py-2 rounded-lg">
+                  <Factory className="w-5 h-5 text-blue-500" />
+                  <div>
+                    <p className="font-medium">{ORIGIN.name}</p>
+                    <p className="text-xs text-muted-foreground">{ORIGIN.city}</p>
+                  </div>
+                </div>
+                <ChevronLeft className="w-6 h-6 text-muted-foreground" />
+                <div className="flex items-center gap-2 bg-green-50 dark:bg-green-950/30 px-3 py-2 rounded-lg">
+                  <Factory className="w-5 h-5 text-green-500" />
+                  <div>
+                    <p className="font-medium">{DESTINATION.name}</p>
+                    <p className="text-xs text-muted-foreground">{DESTINATION.city}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Route Stats */}
+              {!loading && routeData && (
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <Route className="w-5 h-5 mx-auto mb-1 text-primary" />
+                    <p className="font-bold text-lg">{totalDistance.toFixed(1)} كم</p>
+                    <p className="text-xs text-muted-foreground">المسافة</p>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <Clock className="w-5 h-5 mx-auto mb-1 text-primary" />
+                    <p className="font-bold text-lg">{estimatedDuration} دقيقة</p>
+                    <p className="text-xs text-muted-foreground">الوقت التقديري</p>
+                  </div>
+                  <div className="text-center p-3 bg-muted/50 rounded-lg">
+                    <Milestone className="w-5 h-5 mx-auto mb-1 text-primary" />
+                    <p className="font-bold text-lg">{steps.length}</p>
+                    <p className="text-xs text-muted-foreground">نقطة ملاحية</p>
+                  </div>
+                </div>
+              )}
+
+              {loading && (
+                <div className="flex items-center justify-center gap-2 mb-8 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span>جاري تحميل بيانات المسار...</span>
+                </div>
+              )}
+
+              {/* Navigation Options */}
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Google Maps Option */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    variant="outline"
+                    className="w-full h-auto p-6 flex flex-col items-center gap-4 border-2 hover:border-primary hover:bg-primary/5 transition-all"
+                    onClick={handleSelectGoogle}
+                    disabled={loading}
+                  >
+                    <img 
+                      src="https://www.google.com/images/branding/product/1x/maps_64dp.png" 
+                      alt="Google Maps" 
+                      className="w-16 h-16"
+                    />
+                    <div className="text-center">
+                      <p className="font-bold text-lg">خرائط جوجل</p>
+                      <p className="text-sm text-muted-foreground">محاكاة تفاعلية داخل التطبيق</p>
+                    </div>
+                    <Badge variant="secondary" className="gap-1">
+                      <Play className="w-3 h-3" />
+                      محاكاة مباشرة
+                    </Badge>
+                  </Button>
+                </motion.div>
+
+                {/* Waze Option */}
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    variant="outline"
+                    className="w-full h-auto p-6 flex flex-col items-center gap-4 border-2 hover:border-purple-500 hover:bg-purple-500/5 transition-all"
+                    onClick={handleSelectWaze}
+                    disabled={loading}
+                  >
+                    <img 
+                      src="https://www.waze.com/favicon.ico" 
+                      alt="Waze" 
+                      className="w-16 h-16"
+                    />
+                    <div className="text-center">
+                      <p className="font-bold text-lg">Waze</p>
+                      <p className="text-sm text-muted-foreground">فتح المسار في تطبيق Waze</p>
+                    </div>
+                    <Badge variant="secondary" className="gap-1">
+                      <ExternalLink className="w-3 h-3" />
+                      تطبيق خارجي
+                    </Badge>
+                  </Button>
+                </motion.div>
+              </div>
+
+              {error && (
+                <div className="mt-6 p-4 bg-destructive/10 rounded-lg text-center">
+                  <AlertTriangle className="w-6 h-6 mx-auto mb-2 text-destructive" />
+                  <p className="text-destructive font-medium">{error}</p>
+                  <Button onClick={fetchRoute} variant="outline" size="sm" className="mt-2">
+                    <RefreshCw className="w-4 h-4 ml-1" />
+                    إعادة المحاولة
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // Waze redirect confirmation
+  if (navigationMode === 'waze') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4" dir="rtl">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="p-8 shadow-xl text-center">
+            <div className="flex flex-col items-center gap-6">
+              <img 
+                src="https://www.waze.com/favicon.ico" 
+                alt="Waze" 
+                className="w-20 h-20"
+              />
+              <div>
+                <h2 className="text-2xl font-bold mb-2">تم فتح Waze</h2>
+                <p className="text-muted-foreground">
+                  تم فتح تطبيق Waze للملاحة من {ORIGIN.name} إلى {DESTINATION.name}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button onClick={() => setNavigationMode('selection')} variant="outline">
+                  <ChevronLeft className="w-4 h-4 ml-1 rotate-180" />
+                  العودة للاختيار
+                </Button>
+                <Button onClick={() => window.open(wazeUrl, '_blank')}>
+                  <ExternalLink className="w-4 h-4 ml-1" />
+                  فتح Waze مرة أخرى
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
 
   if (loading || !isLoaded) {
     return (
