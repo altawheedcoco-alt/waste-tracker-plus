@@ -137,8 +137,17 @@ export const geocodeAddress = async (
   address: string,
   countryCode = 'eg'
 ): Promise<GeocodingResult | null> => {
+  // Guard against empty or placeholder addresses
+  const invalidAddresses = ['غير محدد', 'undefined', 'null', '', '-'];
+  const trimmedAddress = address?.trim();
+  
+  if (!trimmedAddress || invalidAddresses.includes(trimmedAddress.toLowerCase())) {
+    console.warn('Geocoding skipped: invalid or placeholder address provided:', address);
+    return null;
+  }
+  
   try {
-    const url = `${NOMINATIM_API}/search?format=json&q=${encodeURIComponent(address)}&countrycodes=${countryCode}&limit=1&accept-language=ar`;
+    const url = `${NOMINATIM_API}/search?format=json&q=${encodeURIComponent(trimmedAddress)}&countrycodes=${countryCode}&limit=1&accept-language=ar`;
     
     const response = await fetch(url, {
       headers: { 'Accept': 'application/json' },
