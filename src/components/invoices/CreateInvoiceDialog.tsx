@@ -209,10 +209,14 @@ export default function CreateInvoiceDialog({
       if (!organization?.id) throw new Error('لا توجد مؤسسة');
       if (items.length === 0) throw new Error('يجب إضافة بند واحد على الأقل');
 
+      // Generate invoice number
+      const invoiceNumber = `INV-${format(new Date(), 'yyyyMMdd')}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
       // Create invoice
       const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
         .insert({
+          invoice_number: invoiceNumber,
           organization_id: organization.id,
           partner_organization_id: partnerId,
           partner_name: partnerName,
