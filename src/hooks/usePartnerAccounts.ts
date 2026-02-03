@@ -103,7 +103,7 @@ export function usePartnerAccounts() {
     enabled: !!organization?.id,
   });
 
-  // Fetch partners from shipments with full data
+  // Fetch partners from shipments with full data - BIDIRECTIONAL
   const { data: shipmentPartners = [], isLoading: shipmentsLoading } = useQuery({
     queryKey: ['shipment-partners-full', organization?.id, organization?.organization_type, wasteTypePrices],
     queryFn: async () => {
@@ -111,33 +111,26 @@ export function usePartnerAccounts() {
 
       const orgType = organization.organization_type;
       
-      // Fetch all shipments for this organization
-      let shipmentsQuery = supabase.from('shipments').select(`
-        id,
-        shipment_number,
-        generator_id,
-        transporter_id,
-        recycler_id,
-        quantity,
-        unit,
-        waste_type,
-        waste_description,
-        created_at,
-        cancelled_at,
-        generator:organizations!shipments_generator_id_fkey(id, name, organization_type, city, phone),
-        transporter:organizations!shipments_transporter_id_fkey(id, name, organization_type, city, phone),
-        recycler:organizations!shipments_recycler_id_fkey(id, name, organization_type, city, phone)
-      `);
-
-      if (orgType === 'transporter') {
-        shipmentsQuery = shipmentsQuery.eq('transporter_id', organization.id);
-      } else if (orgType === 'generator') {
-        shipmentsQuery = shipmentsQuery.eq('generator_id', organization.id);
-      } else if (orgType === 'recycler') {
-        shipmentsQuery = shipmentsQuery.eq('recycler_id', organization.id);
-      }
-
-      const { data: shipments, error } = await shipmentsQuery;
+      // Fetch ALL shipments where this organization is involved (as ANY party)
+      const { data: shipments, error } = await supabase
+        .from('shipments')
+        .select(`
+          id,
+          shipment_number,
+          generator_id,
+          transporter_id,
+          recycler_id,
+          quantity,
+          unit,
+          waste_type,
+          waste_description,
+          created_at,
+          cancelled_at,
+          generator:organizations!shipments_generator_id_fkey(id, name, organization_type, city, phone),
+          transporter:organizations!shipments_transporter_id_fkey(id, name, organization_type, city, phone),
+          recycler:organizations!shipments_recycler_id_fkey(id, name, organization_type, city, phone)
+        `)
+        .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`);
 
       if (error) {
         console.error('Error fetching shipments:', error);
@@ -152,65 +145,25 @@ export function usePartnerAccounts() {
       }>();
 
       for (const shipment of shipments || []) {
-        // Determine partner based on org type
-        let partnerId: string | null = null;
-        let partnerOrg: any = null;
-        let partnerType = '';
+        // For each shipment, find all OTHER parties (partners)
+        const parties = [
+          { id: shipment.generator_id, org: shipment.generator, type: 'generator' },
+          { id: shipment.transporter_id, org: shipment.transporter, type: 'transporter' },
+          { id: shipment.recycler_id, org: shipment.recycler, type: 'recycler' },
+        ];
 
-        if (orgType === 'transporter') {
-          // Transporter sees generators and recyclers
-          if (shipment.generator_id && shipment.generator) {
-            partnerId = shipment.generator_id;
-            partnerOrg = shipment.generator;
-            partnerType = 'generator';
-          }
-          // Also add recycler as separate partner
-          if (shipment.recycler_id && shipment.recycler) {
-            const recyclerKey = shipment.recycler_id;
-            if (!partnerMap.has(recyclerKey)) {
-              partnerMap.set(recyclerKey, {
-                org: shipment.recycler,
-                type: 'recycler',
-                shipments: [],
-              });
-            }
-            partnerMap.get(recyclerKey)!.shipments.push(shipment);
-          }
-        } else if (orgType === 'generator') {
-          if (shipment.transporter_id && shipment.transporter) {
-            partnerId = shipment.transporter_id;
-            partnerOrg = shipment.transporter;
-            partnerType = 'transporter';
-          }
-        } else if (orgType === 'recycler') {
-          if (shipment.transporter_id && shipment.transporter) {
-            partnerId = shipment.transporter_id;
-            partnerOrg = shipment.transporter;
-            partnerType = 'transporter';
-          }
-          // Also add generator
-          if (shipment.generator_id && shipment.generator) {
-            const generatorKey = shipment.generator_id;
-            if (!partnerMap.has(generatorKey)) {
-              partnerMap.set(generatorKey, {
-                org: shipment.generator,
-                type: 'generator',
-                shipments: [],
-              });
-            }
-            partnerMap.get(generatorKey)!.shipments.push(shipment);
-          }
-        }
-
-        if (partnerId && partnerOrg) {
-          if (!partnerMap.has(partnerId)) {
-            partnerMap.set(partnerId, {
-              org: partnerOrg,
-              type: partnerType,
+        for (const party of parties) {
+          // Skip if this is our own organization or if party doesn't exist
+          if (!party.id || !party.org || party.id === organization.id) continue;
+          
+          if (!partnerMap.has(party.id)) {
+            partnerMap.set(party.id, {
+              org: party.org,
+              type: party.type,
               shipments: [],
             });
           }
-          partnerMap.get(partnerId)!.shipments.push(shipment);
+          partnerMap.get(party.id)!.shipments.push(shipment);
         }
       }
 
