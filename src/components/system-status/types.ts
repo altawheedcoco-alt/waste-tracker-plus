@@ -24,6 +24,31 @@ export interface SystemModule {
   futureVision: string;
 }
 
+// System Integration types for analyzing relationships
+export type IntegrationStatus = 'strong' | 'moderate' | 'weak' | 'planned';
+
+export interface IntegrationLink {
+  source: string;
+  target: string;
+  description: string;
+  dataFlow: string[];
+  status: IntegrationStatus;
+  tables?: string[];
+}
+
+export interface SystemIntegration {
+  id: string;
+  name: string;
+  icon: React.ElementType;
+  description: string;
+  links: IntegrationLink[];
+  overallStrength: number;
+  keyFeatures: string[];
+  dataFlowSummary: string;
+  technicalNotes: string[];
+  improvements: string[];
+}
+
 export interface SystemStats {
   totalShipments: number;
   totalOrganizations: number;
