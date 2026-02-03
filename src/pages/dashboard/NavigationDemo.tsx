@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapContainer, TileLayer, Marker, Polyline, useMap, Popup, Circle } from 'react-leaflet';
-import L from 'leaflet';
+import { GoogleMap, useJsApiLoader, Marker, Polyline, Circle, InfoWindow } from '@react-google-maps/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +30,6 @@ import {
   AlertTriangle,
   RefreshCw,
   MapPin,
-  Fuel,
   Timer,
   TrendingUp,
   Navigation2,
@@ -44,19 +42,9 @@ import {
   Info,
   SkipForward,
   ChevronLeft,
-  ChevronRight,
   ExternalLink
 } from 'lucide-react';
-import 'leaflet/dist/leaflet.css';
 import BackButton from '@/components/ui/back-button';
-
-// Fix leaflet icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
 
 // Real Egyptian industrial locations
 const ORIGIN = { lat: 30.4628, lng: 31.1837, name: 'مصنع نستله للمياه - بنها', city: 'بنها - القليوبية' };
@@ -81,123 +69,6 @@ interface RouteData {
   duration: number;
   steps: RouteStep[];
 }
-
-// Custom truck icon with glowing effect
-const createTruckIcon = (heading: number, isMoving: boolean) => {
-  return L.divIcon({
-    className: 'truck-marker',
-    html: `
-      <div style="
-        width: 56px;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #22c55e, #15803d);
-        border-radius: 50%;
-        box-shadow: 0 0 ${isMoving ? '20px' : '10px'} rgba(34, 197, 94, ${isMoving ? '0.7' : '0.4'}), 0 4px 15px rgba(0,0,0,0.3);
-        transform: rotate(${heading}deg);
-        border: 4px solid white;
-        transition: box-shadow 0.3s;
-        ${isMoving ? 'animation: pulse 1.5s infinite;' : ''}
-      ">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
-          <path d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
-        </svg>
-      </div>
-      <style>
-        @keyframes pulse {
-          0%, 100% { transform: rotate(${heading}deg) scale(1); }
-          50% { transform: rotate(${heading}deg) scale(1.05); }
-        }
-      </style>
-    `,
-    iconSize: [56, 56],
-    iconAnchor: [28, 28],
-  });
-};
-
-// Enhanced location markers
-const originIcon = L.divIcon({
-  className: 'origin-marker',
-  html: `
-    <div style="
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      border-radius: 50%;
-      box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), 0 4px 15px rgba(0,0,0,0.3);
-      border: 4px solid white;
-    ">
-      <span style="font-size: 24px;">🏭</span>
-    </div>
-  `,
-  iconSize: [48, 48],
-  iconAnchor: [24, 24],
-});
-
-const destinationIcon = L.divIcon({
-  className: 'destination-marker',
-  html: `
-    <div style="
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #ef4444, #b91c1c);
-      border-radius: 50%;
-      box-shadow: 0 0 15px rgba(239, 68, 68, 0.5), 0 4px 15px rgba(0,0,0,0.3);
-      border: 4px solid white;
-    ">
-      <span style="font-size: 24px;">🎯</span>
-    </div>
-  `,
-  iconSize: [48, 48],
-  iconAnchor: [24, 24],
-});
-
-// Waypoint marker for navigation steps
-const createWaypointIcon = (index: number, isCompleted: boolean, isCurrent: boolean) => {
-  const bg = isCurrent ? '#f59e0b' : isCompleted ? '#22c55e' : '#6b7280';
-  return L.divIcon({
-    className: 'waypoint-marker',
-    html: `
-      <div style="
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: ${bg};
-        border-radius: 50%;
-        border: 2px solid white;
-        color: white;
-        font-size: 10px;
-        font-weight: bold;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      ">${index + 1}</div>
-    `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-  });
-};
-
-// Map controller
-const MapController = ({ position, isPlaying, zoom }: { position: [number, number]; isPlaying: boolean; zoom?: number }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (isPlaying && position) {
-      map.flyTo(position, zoom || 14, { duration: 0.5 });
-    }
-  }, [position, isPlaying, map, zoom]);
-  
-  return null;
-};
 
 // Translate OSRM maneuver to Arabic
 const translateManeuver = (step: any): string => {
@@ -276,6 +147,28 @@ const getManeuverType = (step: any): string => {
   return 'straight';
 };
 
+const mapContainerStyle = {
+  width: '100%',
+  height: '100%',
+};
+
+const defaultCenter = { lat: 30.2, lng: 31.0 };
+
+const mapOptions: google.maps.MapOptions = {
+  disableDefaultUI: false,
+  zoomControl: true,
+  mapTypeControl: true,
+  streetViewControl: false,
+  fullscreenControl: false,
+  styles: [
+    {
+      featureType: 'poi',
+      elementType: 'labels',
+      stylers: [{ visibility: 'off' }],
+    },
+  ],
+};
+
 const NavigationDemo = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentPointIndex, setCurrentPointIndex] = useState(0);
@@ -291,8 +184,20 @@ const NavigationDemo = () => {
   const [activeTab, setActiveTab] = useState('map');
   const [simulationSpeed, setSimulationSpeed] = useState(1);
   const [showWaypoints, setShowWaypoints] = useState(true);
+  const [selectedWaypoint, setSelectedWaypoint] = useState<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastAnnouncedStepRef = useRef<number>(-1);
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+    language: 'ar',
+  });
+
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    mapRef.current = map;
+  }, []);
 
   // Fetch real route from OSRM
   const fetchRoute = async () => {
@@ -342,6 +247,16 @@ const NavigationDemo = () => {
   useEffect(() => {
     fetchRoute();
   }, []);
+
+  // Center map on truck when playing
+  useEffect(() => {
+    if (isPlaying && mapRef.current && routeData) {
+      const currentPos = routeData.coordinates[currentPointIndex];
+      if (currentPos) {
+        mapRef.current.panTo({ lat: currentPos[0], lng: currentPos[1] });
+      }
+    }
+  }, [currentPointIndex, isPlaying, routeData]);
 
   const totalDistance = routeData?.distance || 0;
   const estimatedDuration = Math.round(routeData?.duration || 0);
@@ -461,7 +376,11 @@ const NavigationDemo = () => {
   // Calculate average speed
   const avgSpeed = elapsedTime > 0 ? (currentDistance / (elapsedTime / 3600)).toFixed(0) : '0';
 
-  if (loading) {
+  // Convert coordinates for Google Maps
+  const completedPath = completedRoute.map(coord => ({ lat: coord[0], lng: coord[1] }));
+  const remainingPath = remainingRoute.map(coord => ({ lat: coord[0], lng: coord[1] }));
+
+  if (loading || !isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted" dir="rtl">
         <motion.div
@@ -476,7 +395,7 @@ const NavigationDemo = () => {
                 <Map className="w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold mb-2">جاري تحميل المسار الفعلي</p>
+                <p className="text-xl font-bold mb-2">جاري تحميل خرائط جوجل والمسار</p>
                 <p className="text-muted-foreground">من بنها إلى السادس من أكتوبر</p>
               </div>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -522,11 +441,15 @@ const NavigationDemo = () => {
               <BackButton />
               <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2">
-                  <Navigation2 className="w-6 h-6 text-primary" />
+                  <img 
+                    src="https://www.google.com/images/branding/product/1x/maps_64dp.png" 
+                    alt="Google Maps" 
+                    className="w-7 h-7"
+                  />
                   العرض التوضيحي للملاحة
                 </h1>
                 <p className="text-muted-foreground text-sm">
-                  محاكاة رحلة حقيقية • {totalDistance.toFixed(1)} كم • {steps.length} نقطة ملاحية
+                  محاكاة رحلة حقيقية بخرائط جوجل • {totalDistance.toFixed(1)} كم • {steps.length} نقطة ملاحية
                 </p>
               </div>
             </div>
@@ -553,114 +476,152 @@ const NavigationDemo = () => {
       <div className={`grid ${showFullscreen ? '' : 'lg:grid-cols-3'} gap-4 p-4`}>
         {/* Map Section */}
         <div className={`${showFullscreen ? 'h-screen' : 'lg:col-span-2 h-[650px]'} relative rounded-2xl overflow-hidden shadow-2xl border`}>
-          <MapContainer
-            center={[30.2, 31.0]}
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={defaultCenter}
             zoom={9}
-            className="h-full w-full"
-            zoomControl={false}
+            options={mapOptions}
+            onLoad={onMapLoad}
           >
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; OpenStreetMap'
-            />
-            
-            <MapController position={currentPosition} isPlaying={isPlaying} />
-            
-            {/* Completed route (gradient green) */}
-            {completedRoute.length > 1 && (
-              <Polyline 
-                positions={completedRoute}
-                pathOptions={{
-                  color: '#22c55e',
-                  weight: 7,
-                  opacity: 1,
-                  lineCap: 'round',
-                  lineJoin: 'round',
-                }}
-              />
-            )}
-            
-            {/* Remaining route (blue dashed) */}
-            {remainingRoute.length > 1 && (
-              <Polyline 
-                positions={remainingRoute}
-                pathOptions={{
-                  color: '#3b82f6',
-                  weight: 5,
-                  opacity: 0.7,
-                  dashArray: '12, 8',
-                  lineCap: 'round',
+            {/* Completed route (green) */}
+            {completedPath.length > 1 && (
+              <Polyline
+                path={completedPath}
+                options={{
+                  strokeColor: '#22c55e',
+                  strokeWeight: 6,
+                  strokeOpacity: 1,
                 }}
               />
             )}
 
-            {/* Waypoint markers for navigation steps */}
+            {/* Remaining route (blue dashed) */}
+            {remainingPath.length > 1 && (
+              <Polyline
+                path={remainingPath}
+                options={{
+                  strokeColor: '#3b82f6',
+                  strokeWeight: 5,
+                  strokeOpacity: 0.7,
+                  icons: [{
+                    icon: {
+                      path: 'M 0,-1 0,1',
+                      strokeOpacity: 1,
+                      scale: 4,
+                    },
+                    offset: '0',
+                    repeat: '20px',
+                  }],
+                }}
+              />
+            )}
+
+            {/* Accuracy circle around truck */}
+            {isPlaying && (
+              <Circle
+                center={{ lat: currentPosition[0], lng: currentPosition[1] }}
+                radius={200}
+                options={{
+                  strokeColor: '#22c55e',
+                  strokeWeight: 2,
+                  fillColor: '#22c55e',
+                  fillOpacity: 0.15,
+                }}
+              />
+            )}
+
+            {/* Waypoint markers */}
             {showWaypoints && steps.map((step, index) => {
               if (!step.maneuver?.location) return null;
-              const pos: [number, number] = [step.maneuver.location[1], step.maneuver.location[0]];
+              const pos = { lat: step.maneuver.location[1], lng: step.maneuver.location[0] };
+              const isCompleted = index < currentStep;
+              const isCurrent = index === currentStep;
+              
               return (
-                <Marker 
+                <Marker
                   key={index}
                   position={pos}
-                  icon={createWaypointIcon(index, index < currentStep, index === currentStep)}
-                >
-                  <Popup>
-                    <div className="text-center p-2 min-w-[200px]" dir="rtl">
-                      <div className={`w-8 h-8 rounded-full mx-auto mb-2 flex items-center justify-center ${
-                        index < currentStep ? 'bg-green-500' : index === currentStep ? 'bg-amber-500' : 'bg-gray-400'
-                      } text-white`}>
-                        {getDirectionIcon(step.type, 'w-4 h-4')}
-                      </div>
-                      <p className="font-bold text-sm">{step.instruction}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{step.distance.toFixed(1)} كم</p>
-                    </div>
-                  </Popup>
-                </Marker>
+                  onClick={() => setSelectedWaypoint(index)}
+                  icon={{
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: isCurrent ? '#f59e0b' : isCompleted ? '#22c55e' : '#6b7280',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2,
+                  }}
+                  label={{
+                    text: `${index + 1}`,
+                    color: '#ffffff',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                  }}
+                />
               );
             })}
-            
-            {/* Current position circle indicator */}
-            <Circle
-              center={currentPosition}
-              radius={isPlaying ? 200 : 100}
-              pathOptions={{
-                color: '#22c55e',
-                fillColor: '#22c55e',
-                fillOpacity: 0.15,
-                weight: 2,
+
+            {/* InfoWindow for selected waypoint */}
+            {selectedWaypoint !== null && steps[selectedWaypoint]?.maneuver?.location && (
+              <InfoWindow
+                position={{
+                  lat: steps[selectedWaypoint].maneuver.location[1],
+                  lng: steps[selectedWaypoint].maneuver.location[0],
+                }}
+                onCloseClick={() => setSelectedWaypoint(null)}
+              >
+                <div className="text-center p-2 min-w-[200px]" dir="rtl">
+                  <p className="font-bold text-sm">{steps[selectedWaypoint].instruction}</p>
+                  <p className="text-xs text-gray-500 mt-1">{steps[selectedWaypoint].distance.toFixed(1)} كم</p>
+                </div>
+              </InfoWindow>
+            )}
+
+            {/* Origin marker */}
+            <Marker
+              position={{ lat: ORIGIN.lat, lng: ORIGIN.lng }}
+              icon={{
+                url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                scaledSize: new google.maps.Size(48, 48),
+              }}
+              title={ORIGIN.name}
+            />
+
+            {/* Destination marker */}
+            <Marker
+              position={{ lat: DESTINATION.lat, lng: DESTINATION.lng }}
+              icon={{
+                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                scaledSize: new google.maps.Size(48, 48),
+              }}
+              title={DESTINATION.name}
+            />
+
+            {/* Truck marker with custom icon */}
+            <Marker
+              position={{ lat: currentPosition[0], lng: currentPosition[1] }}
+              icon={{
+                url: `data:image/svg+xml,${encodeURIComponent(`
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+                    <defs>
+                      <filter id="glow">
+                        <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                    </defs>
+                    <g transform="rotate(${heading}, 30, 30)" filter="url(#glow)">
+                      <circle cx="30" cy="30" r="25" fill="#22c55e" stroke="white" stroke-width="3"/>
+                      <path d="M20 35h20v-10h-3v-5h-14c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4h-3v-3h-10v7h-3v7z" fill="white" transform="translate(6, 16) scale(0.8)"/>
+                    </g>
+                  </svg>
+                `)}`,
+                scaledSize: new google.maps.Size(60, 60),
+                anchor: new google.maps.Point(30, 30),
               }}
             />
-            
-            {/* Origin marker */}
-            <Marker position={[ORIGIN.lat, ORIGIN.lng]} icon={originIcon}>
-              <Popup>
-                <div className="text-center p-3 min-w-[200px]" dir="rtl">
-                  <Factory className="w-8 h-8 mx-auto mb-2 text-blue-500" />
-                  <strong className="text-lg">{ORIGIN.name}</strong>
-                  <p className="text-sm text-muted-foreground mt-1">{ORIGIN.city}</p>
-                  <Badge className="mt-2 bg-blue-500">نقطة البداية</Badge>
-                </div>
-              </Popup>
-            </Marker>
-            
-            {/* Destination marker */}
-            <Marker position={[DESTINATION.lat, DESTINATION.lng]} icon={destinationIcon}>
-              <Popup>
-                <div className="text-center p-3 min-w-[200px]" dir="rtl">
-                  <Factory className="w-8 h-8 mx-auto mb-2 text-red-500" />
-                  <strong className="text-lg">{DESTINATION.name}</strong>
-                  <p className="text-sm text-muted-foreground mt-1">{DESTINATION.city}</p>
-                  <Badge className="mt-2 bg-red-500">نقطة الوصول</Badge>
-                </div>
-              </Popup>
-            </Marker>
-            
-            {/* Truck marker */}
-            <Marker 
-              position={currentPosition} 
-              icon={createTruckIcon(heading, isPlaying)}
-            />
-          </MapContainer>
+          </GoogleMap>
 
           {/* Navigation Overlay - Current Instruction */}
           <motion.div 
@@ -863,8 +824,12 @@ const NavigationDemo = () => {
 
                     <div className="p-3 bg-green-50 dark:bg-green-950 rounded-xl border border-green-200 dark:border-green-800">
                       <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <span className="font-medium">مسار حقيقي من OSRM</span>
+                        <img 
+                          src="https://www.google.com/images/branding/product/1x/maps_64dp.png" 
+                          alt="Google Maps" 
+                          className="w-5 h-5"
+                        />
+                        <span className="font-medium">خرائط جوجل + بيانات OSRM</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 mr-7">
                         {coordinates.length} نقطة GPS • {steps.length} تعليمات ملاحية
@@ -1137,40 +1102,35 @@ const NavigationDemo = () => {
                       <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
                         <span className="flex items-center gap-2 text-sm">
                           <Clock className="w-4 h-4 text-blue-500" />
-                          الوقت المتبقي المتوقع
+                          الوقت المتبقي
                         </span>
                         <span className="font-bold">{remainingTime} دقيقة</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                        <span className="flex items-center gap-2 text-sm">
-                          <Milestone className="w-4 h-4 text-green-500" />
-                          الخطوات المكتملة
-                        </span>
-                        <span className="font-bold">{currentStep}/{steps.length}</span>
                       </div>
                     </div>
 
                     <Separator />
 
-                    <div className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl border">
+                    <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">تقدم الرحلة</span>
-                        <span className="font-bold text-primary">{progress.toFixed(1)}%</span>
+                        <span className="text-sm font-medium">نسبة الإنجاز</span>
+                        <span className="text-2xl font-bold text-primary">{progress.toFixed(0)}%</span>
                       </div>
-                      <Progress value={progress} className="h-4" />
+                      <Progress value={progress} className="h-3" />
                     </div>
 
-                    <div className="p-3 bg-amber-50 dark:bg-amber-950/50 rounded-xl border border-amber-200 dark:border-amber-800">
-                      <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
-                        <Fuel className="w-5 h-5" />
-                        <span className="font-medium">تقدير استهلاك الوقود</span>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="p-2 bg-muted rounded-lg">
+                        <p className="text-xs text-muted-foreground">نقاط GPS</p>
+                        <p className="font-bold">{coordinates.length}</p>
                       </div>
-                      <p className="text-2xl font-bold mt-1">
-                        ~{(totalDistance * 0.08).toFixed(1)} لتر
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        بناءً على متوسط استهلاك 8 لتر/100كم
-                      </p>
+                      <div className="p-2 bg-muted rounded-lg">
+                        <p className="text-xs text-muted-foreground">خطوات ملاحية</p>
+                        <p className="font-bold">{steps.length}</p>
+                      </div>
+                      <div className="p-2 bg-muted rounded-lg">
+                        <p className="text-xs text-muted-foreground">سرعة المحاكاة</p>
+                        <p className="font-bold">{simulationSpeed}x</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
