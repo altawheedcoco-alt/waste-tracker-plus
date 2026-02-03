@@ -7,7 +7,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
   MapPin, Search, Crosshair, Info, Loader2, X, Sparkles, 
   Building2, Factory, MapPinned, Globe, Lightbulb, Navigation,
-  Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database
+  Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database,
+  Bot, MessageSquare
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import { toast } from 'sonner';
 import { useMultiSourceSearch, SearchResult } from '@/hooks/useMultiSourceSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import AILocationChat from '@/components/maps/AILocationChat';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
@@ -69,6 +71,8 @@ const MapExplorer = () => {
   const [isFetchingFromSource, setIsFetchingFromSource] = useState(false);
   const [fetchingSource, setFetchingSource] = useState<'google' | 'osm' | null>(null);
   const [facilitiesCount, setFacilitiesCount] = useState(0);
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [isAIChatExpanded, setIsAIChatExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapRef>(null);
   
@@ -79,6 +83,18 @@ const MapExplorer = () => {
     latitude: 30.0444,
     zoom: 10,
   });
+
+  // Handle AI location selection
+  const handleAILocationSelect = useCallback((location: { name: string; lat: number; lng: number; address?: string }) => {
+    setSelectedPosition({ lat: location.lat, lng: location.lng });
+    setSelectedAddress(location.address || location.name);
+    setViewState(prev => ({
+      ...prev,
+      longitude: location.lng,
+      latitude: location.lat,
+      zoom: 15,
+    }));
+  }, []);
 
   // جلب المنشآت من قاعدة البيانات
   const loadFacilities = useCallback(async () => {
@@ -550,10 +566,22 @@ const MapExplorer = () => {
         </CardContent>
       </Card>
 
-      {/* Map */}
-      <Card className="overflow-hidden">
-        <CardContent className="p-0">
-          <div className="relative" style={{ height: 'calc(100vh - 450px)', minHeight: '400px' }}>
+      {/* Map and AI Chat Container */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Map */}
+        <Card className={cn("overflow-hidden", showAIChat ? "lg:col-span-2" : "lg:col-span-3")}>
+          <CardContent className="p-0">
+            <div className="relative" style={{ height: 'calc(100vh - 450px)', minHeight: '400px' }}>
+              {/* AI Chat Toggle Button */}
+              <Button
+                variant={showAIChat ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowAIChat(!showAIChat)}
+                className="absolute top-3 left-3 z-10 gap-1.5 shadow-lg bg-background/95 backdrop-blur-sm"
+              >
+                <Bot className="w-4 h-4" />
+                <span className="hidden sm:inline">مساعد الذكاء الاصطناعي</span>
+              </Button>
             {/* Map Style Switcher */}
             <div className="absolute top-3 right-3 z-10 flex flex-col sm:flex-row gap-2">
               <ToggleGroup 
@@ -755,6 +783,18 @@ const MapExplorer = () => {
           </div>
         </CardContent>
       </Card>
+
+        {/* AI Chat Panel */}
+        {showAIChat && (
+          <div className="lg:col-span-1">
+            <AILocationChat 
+              onLocationSelect={handleAILocationSelect}
+              isExpanded={isAIChatExpanded}
+              onToggleExpand={() => setIsAIChatExpanded(!isAIChatExpanded)}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Selected Location Info */}
       <AnimatePresence>
