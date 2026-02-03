@@ -276,6 +276,23 @@ const InteractiveMapPicker = ({
           <div className="w-8 h-8 border-2 border-primary/30 rounded-full" />
         </div>
 
+        {/* My Location FAB on map */}
+        <Button
+          type="button"
+          variant="secondary"
+          size="icon"
+          onClick={getCurrentLocation}
+          disabled={gettingLocation}
+          className="absolute bottom-4 right-4 z-[1000] shadow-lg bg-background hover:bg-accent"
+          title="موقعي الحالي"
+        >
+          {gettingLocation ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Navigation className="w-5 h-5 text-primary" />
+          )}
+        </Button>
+
         {/* Loading overlay */}
         {!mapReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
