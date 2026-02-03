@@ -1,9 +1,18 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Radio, Map, Loader2 } from 'lucide-react';
+import { Eye, Radio, Map, Loader2, Navigation, ExternalLink } from 'lucide-react';
 import { useViewerPresence } from '@/hooks/useDriverPresence';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
+import { supabase } from '@/integrations/supabase/client';
 
 // Lazy load the map dialog for better performance
 const LiveTrackingMapDialog = lazy(() => import('./LiveTrackingMapDialog'));
@@ -32,6 +41,7 @@ const LiveTrackingButton = ({
   const { profile, organization } = useAuth();
   const [isLiveTracking, setIsLiveTracking] = useState(false);
   const [showMapDialog, setShowMapDialog] = useState(false);
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   // Only activate presence when tracking is enabled
   const { isConnected, viewerCount } = useViewerPresence(
@@ -39,6 +49,49 @@ const LiveTrackingButton = ({
     profile?.full_name || 'مستخدم',
     organization?.name
   );
+
+  // Fetch driver's latest location
+  useEffect(() => {
+    const fetchDriverLocation = async () => {
+      if (!driverId) return;
+      
+      const { data } = await supabase
+        .from('driver_location_logs')
+        .select('latitude, longitude')
+        .eq('driver_id', driverId)
+        .order('recorded_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (data) {
+        setDriverLocation({ lat: data.latitude, lng: data.longitude });
+      }
+    };
+
+    fetchDriverLocation();
+    
+    // Subscribe to realtime updates
+    const channel = supabase
+      .channel(`driver-location-${driverId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'driver_location_logs',
+          filter: `driver_id=eq.${driverId}`,
+        },
+        (payload) => {
+          const newLocation = payload.new as { latitude: number; longitude: number };
+          setDriverLocation({ lat: newLocation.latitude, lng: newLocation.longitude });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [driverId]);
 
   const handleToggleTracking = () => {
     const newState = !isLiveTracking;
@@ -54,6 +107,36 @@ const LiveTrackingButton = ({
 
   const handleCloseMap = () => {
     setShowMapDialog(false);
+  };
+
+  const openInGoogleMaps = () => {
+    if (!driverLocation) return;
+    const { lat, lng } = driverLocation;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      window.open(`google.navigation:q=${lat},${lng}`, '_blank');
+    } else {
+      window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+    }
+  };
+
+  const openInWaze = () => {
+    if (!driverLocation) return;
+    const { lat, lng } = driverLocation;
+    window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`, '_blank');
+  };
+
+  const viewInGoogleMaps = () => {
+    if (!driverLocation) return;
+    const { lat, lng } = driverLocation;
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
+  };
+
+  const viewInWaze = () => {
+    if (!driverLocation) return;
+    const { lat, lng } = driverLocation;
+    window.open(`https://waze.com/ul?ll=${lat},${lng}`, '_blank');
   };
 
   useEffect(() => {
@@ -93,6 +176,56 @@ const LiveTrackingButton = ({
             </>
           )}
         </Button>
+
+        {/* External Navigation Dropdown */}
+        {driverLocation && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1 bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/20"
+              >
+                <Navigation className="w-4 h-4" />
+                <span className="hidden sm:inline">تتبع خارجي</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="text-right">فتح موقع السائق في</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={viewInGoogleMaps} className="gap-2 cursor-pointer">
+                <img 
+                  src="https://www.google.com/images/branding/product/1x/maps_64dp.png" 
+                  alt="Google Maps" 
+                  className="w-5 h-5"
+                />
+                <span>Google Maps</span>
+                <ExternalLink className="w-3 h-3 mr-auto opacity-50" />
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={viewInWaze} className="gap-2 cursor-pointer">
+                <img 
+                  src="https://www.waze.com/favicon.ico" 
+                  alt="Waze" 
+                  className="w-5 h-5"
+                />
+                <span>Waze</span>
+                <ExternalLink className="w-3 h-3 mr-auto opacity-50" />
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className="text-right text-xs text-muted-foreground">
+                ابدأ الملاحة إلى السائق
+              </DropdownMenuLabel>
+              <DropdownMenuItem onClick={openInGoogleMaps} className="gap-2 cursor-pointer">
+                <Navigation className="w-4 h-4 text-green-600" />
+                <span>ملاحة Google</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={openInWaze} className="gap-2 cursor-pointer">
+                <Navigation className="w-4 h-4 text-blue-600" />
+                <span>ملاحة Waze</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {/* Map button - opens full tracking dialog */}
         {showMapButton && pickupAddress && deliveryAddress && (
