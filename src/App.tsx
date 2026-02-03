@@ -81,6 +81,7 @@ const DocumentVerification = lazy(() => import("./pages/dashboard/DocumentVerifi
 const Verify = lazy(() => import("./pages/Verify"));
 const NavigationDemo = lazy(() => import("./pages/dashboard/NavigationDemo"));
 const MapExplorer = lazy(() => import("./pages/dashboard/MapExplorer"));
+const SystemStatus = lazy(() => import("./pages/dashboard/SystemStatus"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
@@ -201,6 +202,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/document-verification" element={<DocumentVerification />} />
         <Route path="/dashboard/navigation-demo" element={<NavigationDemo />} />
         <Route path="/dashboard/map-explorer" element={<MapExplorer />} />
+        <Route path="/dashboard/system-status" element={<SystemStatus />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
