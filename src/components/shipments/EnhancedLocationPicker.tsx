@@ -13,16 +13,14 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
-import GooglePlacesSearch from '@/components/maps/GooglePlacesSearch';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
+import FreeInteractiveMap from '@/components/maps/FreeInteractiveMap';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
-const libraries: ("places")[] = ["places"];
 
 // Egypt center (Cairo)
 const defaultMapCenter = { lat: 30.0444, lng: 31.2357 };
@@ -75,7 +73,6 @@ const openInWaze = (address: string, coords?: { lat: number; lng: number } | nul
 const openInGoogleMaps = (address: string, coords?: { lat: number; lng: number } | null) => {
   let url: string;
   if (coords) {
-    // Check if mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (isMobile) {
       url = `google.navigation:q=${coords.lat},${coords.lng}`;
@@ -113,7 +110,7 @@ const EnhancedLocationPicker = ({
   const { profile } = useAuth();
   const [locations, setLocations] = useState<OrganizationLocation[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('google');
+  const [activeTab, setActiveTab] = useState<string>('search');
   
   // Current location state
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -121,7 +118,6 @@ const EnhancedLocationPicker = ({
   // Map picker state
   const [showMapDialog, setShowMapDialog] = useState(false);
   const [mapCoordinates, setMapCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  const [mapKey, setMapKey] = useState(0);
   
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -147,12 +143,6 @@ const EnhancedLocationPicker = ({
   const [showSavePrompt, setShowSavePrompt] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Map search state
-  const [mapSearchQuery, setMapSearchQuery] = useState('');
-  const [mapSearchLoading, setMapSearchLoading] = useState(false);
-  const [mapSearchResults, setMapSearchResults] = useState<LocationSuggestion[]>([]);
-  const [showMapSearchResults, setShowMapSearchResults] = useState(false);
-
   const primaryAddress = `${organizationAddress}, ${organizationCity}`;
 
   useEffect(() => {
@@ -160,13 +150,6 @@ const EnhancedLocationPicker = ({
       fetchLocations();
     }
   }, [organizationId]);
-
-  // Reset map when dialog opens
-  useEffect(() => {
-    if (showMapDialog) {
-      setMapKey(prev => prev + 1);
-    }
-  }, [showMapDialog]);
 
   const fetchLocations = async () => {
     setLoading(true);
@@ -297,17 +280,6 @@ const EnhancedLocationPicker = ({
     }
   };
 
-  const getResultTypeBadge = (type: SearchResult['type']) => {
-    switch (type) {
-      case 'saved':
-        return <Badge variant="default" className="text-[10px] px-1.5 py-0">محفوظ</Badge>;
-      case 'organization':
-        return <Badge variant="secondary" className="text-[10px] px-1.5 py-0">منظمة</Badge>;
-      case 'nominatim':
-        return <Badge variant="outline" className="text-[10px] px-1.5 py-0">عام</Badge>;
-    }
-  };
-
   const handleSavedLocationSelect = (location: OrganizationLocation | 'primary') => {
     if (location === 'primary') {
       onChange(primaryAddress);
@@ -370,7 +342,6 @@ const EnhancedLocationPicker = ({
   
   // Function to prepare save dialog with selected location
   const prepareToSaveLocation = (address: string, coords?: { lat: number; lng: number }) => {
-    // Extract city from address if possible
     const addressParts = address.split(',').map(s => s.trim());
     const city = addressParts.length > 1 ? addressParts[addressParts.length - 2] || '' : '';
     
@@ -385,136 +356,9 @@ const EnhancedLocationPicker = ({
     setShowSavePrompt(false);
   };
 
-  // Handle Google Map click
-  const handleGoogleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
-    if (!e.latLng) return;
-    setMapCoordinates({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-  }, []);
-
-  // Google Maps Autocomplete search
-  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
-  const [googleMapInstance, setGoogleMapInstance] = useState<google.maps.Map | null>(null);
-
-  const { isLoaded: isGoogleMapsLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
-    libraries,
-    language: 'ar',
-    region: 'EG',
-  });
-
-  // Initialize AutocompleteService as soon as Google Maps is loaded
-  useEffect(() => {
-    if (isGoogleMapsLoaded && !autocompleteServiceRef.current) {
-      autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
-    }
-  }, [isGoogleMapsLoaded]);
-
-  const onGoogleMapLoad = useCallback((map: google.maps.Map) => {
-    setGoogleMapInstance(map);
-    placesServiceRef.current = new google.maps.places.PlacesService(map);
-  }, []);
-
-  // Google Places search results for map dialog
-  const [googleMapSearchResults, setGoogleMapSearchResults] = useState<google.maps.places.AutocompletePrediction[]>([]);
-
-  // Search on map using Google Places
-  const handleMapSearch = useCallback(async (query?: string) => {
-    const searchText = query || mapSearchQuery;
-    if (!searchText.trim() || !autocompleteServiceRef.current) {
-      setGoogleMapSearchResults([]);
-      setMapSearchResults([]);
-      return;
-    }
-
-    setMapSearchLoading(true);
-    setShowMapSearchResults(true);
-    
-    autocompleteServiceRef.current.getPlacePredictions(
-      {
-        input: searchText,
-        componentRestrictions: { country: 'eg' },
-        language: 'ar',
-        types: ['establishment', 'geocode'],
-      },
-      (predictions, status) => {
-        setMapSearchLoading(false);
-        if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-          setGoogleMapSearchResults(predictions);
-        } else {
-          setGoogleMapSearchResults([]);
-          if (status !== google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-            toast.error('خطأ في البحث');
-          }
-        }
-      }
-    );
-  }, [mapSearchQuery]);
-  
-  // Select a search result on the map using Google Places
-  const handleGoogleMapSearchResultSelect = useCallback((prediction: google.maps.places.AutocompletePrediction) => {
-    if (!placesServiceRef.current) return;
-
-    placesServiceRef.current.getDetails(
-      {
-        placeId: prediction.place_id,
-        fields: ['geometry', 'formatted_address', 'name'],
-        language: 'ar',
-      },
-      (place, status) => {
-        if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
-          const coords = {
-            lat: place.geometry.location.lat(),
-            lng: place.geometry.location.lng(),
-          };
-          setMapCoordinates(coords);
-          setMapSearchQuery(prediction.structured_formatting.main_text);
-          setGoogleMapSearchResults([]);
-          setShowMapSearchResults(false);
-          
-          // Pan to location
-          if (googleMapInstance) {
-            googleMapInstance.panTo(coords);
-            googleMapInstance.setZoom(16);
-          }
-          
-          toast.success('تم تحديد الموقع');
-        }
-      }
-    );
-  }, [googleMapInstance]);
-  
-  // Debounced map search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (mapSearchQuery.trim().length >= 2) {
-        handleMapSearch(mapSearchQuery);
-      } else {
-        setMapSearchResults([]);
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [mapSearchQuery]);
-
-  // Get current location for map
-  const getMapCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('المتصفح لا يدعم تحديد الموقع');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setMapCoordinates({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        });
-        toast.success('تم تحديد موقعك الحالي');
-      },
-      () => toast.error('فشل في تحديد الموقع'),
-      { enableHighAccuracy: true }
-    );
+  // Handle map position select
+  const handleMapPositionSelect = (position: { lat: number; lng: number }, address?: string) => {
+    setMapCoordinates(position);
   };
 
   // Handle map coordinate selection
@@ -585,25 +429,14 @@ const EnhancedLocationPicker = ({
         </div>
       )}
 
-      {/* Location Selection Tabs - Google & Waze First */}
+      {/* Location Selection Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex items-center gap-2 mb-3">
-          <TabsList className="grid flex-1 grid-cols-5 h-auto">
-            <TabsTrigger value="google" className="flex items-center gap-1 text-xs py-2">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              <span className="hidden sm:inline">Google</span>
-              <span className="sm:hidden">جوجل</span>
-            </TabsTrigger>
-            <TabsTrigger value="waze" className="flex items-center gap-1 text-xs py-2">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.5 2 2 6.5 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10c0-5.5-4.5-10-10-10zm-2 15c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm3.5-5c-.3 0-.5-.2-.5-.5v-1c0-2.8-2.2-5-5-5s-5 2.2-5 5v1c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1c0 .3-.2.5-.5.5z" fill="#33CCFF"/>
-              </svg>
-              <span>Waze</span>
+          <TabsList className="grid flex-1 grid-cols-4 h-auto">
+            <TabsTrigger value="search" className="flex items-center gap-1 text-xs py-2">
+              <Search className="w-3 h-3" />
+              <span className="hidden sm:inline">بحث</span>
+              <span className="sm:hidden">بحث</span>
             </TabsTrigger>
             <TabsTrigger value="saved" className="flex items-center gap-1 text-xs py-2">
               <Building2 className="w-3 h-3" />
@@ -615,35 +448,31 @@ const EnhancedLocationPicker = ({
               <span className="hidden sm:inline">موقعي</span>
               <span className="sm:hidden">موقعي</span>
             </TabsTrigger>
-            <TabsTrigger value="search" className="flex items-center gap-1 text-xs py-2">
-              <Search className="w-3 h-3" />
-              <span className="hidden sm:inline">بحث</span>
-              <span className="sm:hidden">بحث</span>
+            <TabsTrigger value="external" className="flex items-center gap-1 text-xs py-2">
+              <ExternalLink className="w-3 h-3" />
+              <span className="hidden sm:inline">خارجي</span>
+              <span className="sm:hidden">خارجي</span>
             </TabsTrigger>
           </TabsList>
         </div>
 
-        {/* Google Places Tab */}
-        <TabsContent value="google" className="mt-3">
+        {/* Free Search Tab - Primary */}
+        <TabsContent value="search" className="mt-3">
           <Card>
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                <span>ابحث عن العناوين من Google Maps</span>
+                <Globe className="w-4 h-4 text-green-600" />
+                <span>بحث مجاني عن المواقع والعناوين</span>
+                <Badge variant="secondary" className="text-[10px]">OpenStreetMap</Badge>
               </div>
-              <GooglePlacesSearch
+              <FreeLocationSearch
                 value={value}
                 onChange={(address, coords) => {
                   onChange(address, coords);
                   if (address) {
                     setLastSelectedLocation({ address, coords });
                     setShowSavePrompt(true);
-                    toast.success('تم اختيار الموقع من Google Maps');
+                    toast.success('تم اختيار الموقع');
                   }
                 }}
                 placeholder="ابحث عن عنوان، مصنع، شركة..."
@@ -678,100 +507,7 @@ const EnhancedLocationPicker = ({
               )}
               
               <p className="text-xs text-muted-foreground">
-                💡 استخدم Google Maps للحصول على دقة أعلى في تحديد المواقع
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Waze Tab - NEW */}
-        <TabsContent value="waze" className="mt-3">
-          <Card>
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.5 2 2 6.5 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10c0-5.5-4.5-10-10-10zm-2 15c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm3.5-5c-.3 0-.5-.2-.5-.5v-1c0-2.8-2.2-5-5-5s-5 2.2-5 5v1c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1c0 .3-.2.5-.5.5z" fill="#33CCFF"/>
-                </svg>
-                <span>ابحث وحدد الموقع من Waze</span>
-              </div>
-              
-              {/* Waze Search Button */}
-              <Button 
-                variant="outline" 
-                className="w-full justify-center gap-2 h-12 text-base"
-                onClick={() => {
-                  const query = prompt('أدخل اسم المكان أو العنوان للبحث في Waze:');
-                  if (query) {
-                    searchInWaze(query);
-                    toast.info('سيتم فتح Waze للبحث عن الموقع');
-                  }
-                }}
-              >
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.5 2 2 6.5 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10c0-5.5-4.5-10-10-10zm-2 15c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm3.5-5c-.3 0-.5-.2-.5-.5v-1c0-2.8-2.2-5-5-5s-5 2.2-5 5v1c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1c0 .3-.2.5-.5.5z" fill="#33CCFF"/>
-                </svg>
-                افتح البحث في Waze
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-
-              {/* Manual Entry after Waze search */}
-              <div className="space-y-2 pt-2 border-t">
-                <Label className="text-xs text-muted-foreground">بعد تحديد الموقع في Waze، أدخل العنوان هنا:</Label>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="الصق العنوان من Waze..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1"
-                    dir="rtl"
-                  />
-                  <Button 
-                    variant="default"
-                    disabled={!searchQuery.trim()}
-                    onClick={() => {
-                      if (searchQuery.trim()) {
-                        onChange(searchQuery.trim());
-                        setLastSelectedLocation({ address: searchQuery.trim() });
-                        setShowSavePrompt(true);
-                        toast.success('تم تحديد العنوان');
-                        setSearchQuery('');
-                      }
-                    }}
-                  >
-                    <Check className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Save Location Prompt for Waze */}
-              {showSavePrompt && lastSelectedLocation && (
-                <div className="flex items-center gap-2 p-3 bg-primary/5 border border-primary/20 rounded-lg animate-in fade-in slide-in-from-top-2">
-                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span className="text-sm flex-1">هل تريد حفظ هذا الموقع لاستخدامه لاحقاً؟</span>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="gap-1"
-                    onClick={() => prepareToSaveLocation(lastSelectedLocation.address, lastSelectedLocation.coords)}
-                  >
-                    <Plus className="w-3 h-3" />
-                    حفظ
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setShowSavePrompt(false);
-                      setLastSelectedLocation(null);
-                    }}
-                  >
-                    لا
-                  </Button>
-                </div>
-              )}
-
-              <p className="text-xs text-muted-foreground">
-                🚗 Waze يوفر معلومات المرور الحية وأفضل المسارات
+                💡 بحث مجاني بالكامل يدعم الأماكن والعناوين والمباني
               </p>
             </CardContent>
           </Card>
@@ -884,179 +620,90 @@ const EnhancedLocationPicker = ({
           </Card>
         </TabsContent>
 
-        {/* Search Tab - Enhanced with Google-style smart search */}
-        <TabsContent value="search" className="mt-3">
-          <div className="relative">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن موقع (مثال: نستلة بنها، المنطقة الصناعية...)"
-                className="pr-10 pl-10"
-                onFocus={() => (enhancedResults.length > 0 || suggestions.length > 0) && setShowSuggestions(true)}
-              />
-              {(searchLoading || enhancedSearchLoading) ? (
-                <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
-              ) : searchQuery && (
-                <button
-                  type="button"
-                  className="absolute left-3 top-1/2 -translate-y-1/2"
+        {/* External Apps Tab */}
+        <TabsContent value="external" className="mt-3">
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <ExternalLink className="w-4 h-4" />
+                <span>ابحث في التطبيقات الخارجية</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                {/* Google Maps Search */}
+                <Button 
+                  variant="outline" 
+                  className="justify-center gap-2 h-12"
                   onClick={() => {
-                    setSearchQuery('');
-                    clearEnhancedResults();
-                    setShowSuggestions(false);
+                    const query = prompt('أدخل اسم المكان أو العنوان للبحث في Google Maps:');
+                    if (query) {
+                      searchInGoogleMaps(query);
+                      toast.info('سيتم فتح Google Maps للبحث عن الموقع');
+                    }
                   }}
                 >
-                  <svg className="w-4 h-4 text-muted-foreground hover:text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                   </svg>
-                </button>
-              )}
-            </div>
+                  Google
+                </Button>
+                
+                {/* Waze Search */}
+                <Button 
+                  variant="outline" 
+                  className="justify-center gap-2 h-12"
+                  onClick={() => {
+                    const query = prompt('أدخل اسم المكان أو العنوان للبحث في Waze:');
+                    if (query) {
+                      searchInWaze(query);
+                      toast.info('سيتم فتح Waze للبحث عن الموقع');
+                    }
+                  }}
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.5 2 2 6.5 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10c0-5.5-4.5-10-10-10zm-2 15c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm3.5-5c-.3 0-.5-.2-.5-.5v-1c0-2.8-2.2-5-5-5s-5 2.2-5 5v1c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1c0 .3-.2.5-.5.5z" fill="#33CCFF"/>
+                  </svg>
+                  Waze
+                </Button>
+              </div>
 
-            {/* Google-Style Search Results Dropdown */}
-            {showSuggestions && (enhancedResults.length > 0 || suggestions.length > 0 || (searchLoading || enhancedSearchLoading)) && (
-              <Card className="absolute z-50 top-full mt-2 w-full shadow-xl border-0 rounded-xl overflow-hidden bg-background">
-                <ScrollArea className="max-h-[400px]">
-                  {(searchLoading || enhancedSearchLoading) && enhancedResults.length === 0 && suggestions.length === 0 ? (
-                    <div className="flex items-center justify-center py-10">
-                      <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                      <span className="mr-3 text-sm text-muted-foreground">جاري البحث...</span>
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-border/50">
-                      {/* Enhanced results (saved locations + organizations) */}
-                      {enhancedResults.map((result) => (
-                        <button
-                          key={result.id}
-                          type="button"
-                          className="w-full px-4 py-3 text-right hover:bg-muted/30 transition-all duration-150 flex items-start gap-3 group"
-                          onClick={() => handleEnhancedResultSelect(result)}
-                        >
-                          {/* Icon Container - Google Style */}
-                          <div className={cn(
-                            "mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                            result.type === 'saved' && "bg-primary/10 text-primary",
-                            result.type === 'organization' && "bg-secondary/50 text-secondary-foreground",
-                            result.type === 'nominatim' && "bg-muted text-muted-foreground"
-                          )}>
-                            {result.type === 'saved' && <MapPin className="w-4 h-4" />}
-                            {result.type === 'organization' && <Building2 className="w-4 h-4" />}
-                            {result.type === 'nominatim' && <Globe className="w-4 h-4" />}
-                          </div>
-                          
-                          {/* Content - Google Style */}
-                          <div className="flex-1 min-w-0">
-                            {/* Title Row */}
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                                {result.name}
-                              </span>
-                              {result.type === 'saved' && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                                  محفوظ
-                                </span>
-                              )}
-                              {result.type === 'organization' && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-secondary/50 text-secondary-foreground font-medium">
-                                  منظمة
-                                </span>
-                              )}
-                            </div>
-                            
-                            {/* URL/Category Line - Like Google */}
-                            {result.organizationName && result.type === 'saved' && (
-                              <p className="text-xs text-primary/80 mb-0.5 flex items-center gap-1">
-                                <Building2 className="w-3 h-3" />
-                                {result.organizationName}
-                              </p>
-                            )}
-                            
-                            {/* Address - Like Google Description */}
-                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                              {result.address}
-                            </p>
-                            
-                            {/* Distance Badge - Bottom Right */}
-                            {result.distance !== undefined && (
-                              <div className="flex items-center gap-1 mt-1.5">
-                                <div className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground">
-                                  <Navigation className="w-3 h-3" />
-                                  <span>
-                                    {result.distance < 1 
-                                      ? `${Math.round(result.distance * 1000)} متر`
-                                      : `${result.distance.toFixed(1)} كم`
-                                    }
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Arrow indicator on hover */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center">
-                            <svg className="w-4 h-4 text-muted-foreground rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </button>
-                      ))}
-                      
-                      {/* Fallback Nominatim suggestions */}
-                      {suggestions.map((suggestion, index) => (
-                        <button
-                          key={`nom-${index}`}
-                          type="button"
-                          className="w-full px-4 py-3 text-right hover:bg-muted/30 transition-all duration-150 flex items-start gap-3 group"
-                          onClick={() => handleSuggestionSelect(suggestion)}
-                        >
-                          <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
-                            <Globe className="w-4 h-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                                {suggestion.display_name.split(',')[0]}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                              {suggestion.display_name}
-                            </p>
-                          </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center">
-                            <svg className="w-4 h-4 text-muted-foreground rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </button>
-                      ))}
-                      
-                      {/* Footer hint */}
-                      {(enhancedResults.length > 0 || suggestions.length > 0) && (
-                        <div className="px-4 py-2 bg-muted/20 text-center">
-                          <p className="text-[11px] text-muted-foreground">
-                            اضغط على نتيجة لاختيار الموقع
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </ScrollArea>
-              </Card>
-            )}
-          </div>
+              {/* Manual Entry after external search */}
+              <div className="space-y-2 pt-2 border-t">
+                <Label className="text-xs text-muted-foreground">بعد تحديد الموقع، أدخل العنوان هنا:</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="الصق العنوان من التطبيق الخارجي..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1"
+                    dir="rtl"
+                  />
+                  <Button 
+                    variant="default"
+                    disabled={!searchQuery.trim()}
+                    onClick={() => {
+                      if (searchQuery.trim()) {
+                        onChange(searchQuery.trim());
+                        setLastSelectedLocation({ address: searchQuery.trim() });
+                        setShowSavePrompt(true);
+                        toast.success('تم تحديد العنوان');
+                        setSearchQuery('');
+                      }
+                    }}
+                  >
+                    <Check className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
 
-          {searchQuery.length > 0 && searchQuery.length < 2 && (
-            <p className="text-xs text-muted-foreground mt-2">
-              اكتب حرفين على الأقل للبحث الشامل
-            </p>
-          )}
-          
-          <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-            <span className="inline-block w-4 h-4 text-center">💡</span>
-            يبحث في المواقع المحفوظة والمنظمات المسجلة أولاً، ثم في الأماكن العامة
-          </p>
+              <p className="text-xs text-muted-foreground">
+                🔗 يمكنك استخدام Google Maps أو Waze للبحث الدقيق ثم إدخال العنوان
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 
@@ -1070,123 +717,30 @@ const EnhancedLocationPicker = ({
         تحديد الموقع على الخريطة
       </Button>
 
-      {/* Interactive Map Dialog */}
+      {/* Interactive Map Dialog - Free Leaflet Map */}
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh]" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Map className="w-5 h-5 text-primary" />
               تحديد الموقع على الخريطة
+              <Badge variant="secondary" className="text-[10px]">مجاني</Badge>
             </DialogTitle>
             <DialogDescription>
               ابحث عن موقع أو اضغط على الخريطة لتحديد الإحداثيات
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Search Bar with Results */}
-            <div className="relative">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    value={mapSearchQuery}
-                    onChange={(e) => setMapSearchQuery(e.target.value)}
-                    placeholder="ابحث عن موقع، مصنع، شركة..."
-                    className="pr-10"
-                    onKeyDown={(e) => e.key === 'Enter' && handleMapSearch()}
-                    onFocus={() => mapSearchResults.length > 0 && setShowMapSearchResults(true)}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleMapSearch()}
-                  disabled={mapSearchLoading}
-                >
-                  {mapSearchLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'بحث'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={getMapCurrentLocation}
-                  title="موقعي الحالي"
-                >
-                  <Navigation className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              {/* Search Results Dropdown - Google Places */}
-              {showMapSearchResults && googleMapSearchResults.length > 0 && (
-                <Card className="absolute z-50 w-full mt-1 shadow-lg max-h-60 overflow-y-auto">
-                  <CardContent className="p-2 space-y-1">
-                    {googleMapSearchResults.map((result) => (
-                      <button
-                        key={result.place_id}
-                        type="button"
-                        className="w-full text-right p-2 hover:bg-muted rounded-md transition-colors flex items-start gap-2"
-                        onClick={() => handleGoogleMapSearchResultSelect(result)}
-                      >
-                        <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{result.structured_formatting.main_text}</p>
-                          <p className="text-xs text-muted-foreground truncate">{result.structured_formatting.secondary_text}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Interactive Google Map */}
-            <div className="h-[400px] rounded-lg overflow-hidden border relative">
-              {showMapDialog && isGoogleMapsLoaded ? (
-                <GoogleMap
-                  mapContainerStyle={{ width: '100%', height: '100%' }}
-                  center={mapCoordinates || defaultMapCenter}
-                  zoom={mapCoordinates ? 15 : 6}
-                  onClick={handleGoogleMapClick}
-                  onLoad={onGoogleMapLoad}
-                  options={{
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: false,
-                    zoomControl: true,
-                    gestureHandling: 'greedy',
-                  }}
-                >
-                  {mapCoordinates && (
-                    <Marker
-                      position={mapCoordinates}
-                      animation={google.maps.Animation.DROP}
-                    />
-                  )}
-                </GoogleMap>
-              ) : (
-                <div className="flex items-center justify-center h-full bg-muted">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              )}
-              
-              {/* Instruction overlay */}
-              {!mapCoordinates && isGoogleMapsLoaded && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-lg border shadow-lg">
-                  <p className="text-sm text-muted-foreground">اضغط على الخريطة لتحديد الموقع</p>
-                </div>
-              )}
-              
-              {/* My Location FAB */}
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                onClick={getMapCurrentLocation}
-                className="absolute bottom-4 right-4 z-10 shadow-lg bg-background hover:bg-accent"
-                title="موقعي الحالي"
-              >
-                <Navigation className="w-5 h-5 text-primary" />
-              </Button>
-            </div>
+            {/* Free Interactive Map */}
+            <FreeInteractiveMap
+              center={coordinates || defaultMapCenter}
+              zoom={coordinates ? 15 : 6}
+              selectedPosition={mapCoordinates}
+              onPositionSelect={handleMapPositionSelect}
+              showSearch={true}
+              showCurrentLocation={true}
+              height="400px"
+            />
 
             {/* Coordinates Input */}
             <div className="grid grid-cols-2 gap-4">
