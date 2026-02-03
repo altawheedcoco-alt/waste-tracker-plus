@@ -55,11 +55,13 @@ export interface SearchResult {
   id: string;
   name: string;
   address: string;
-  type: 'mapbox' | 'local' | 'ai';
+  type: 'mapbox' | 'local' | 'ai' | 'google';
   source: string;
   lat: number;
   lng: number;
   relevanceScore?: number;
+  distance?: number;
+  rank?: number;
 }
 
 export interface AISearchSuggestion {
@@ -77,7 +79,26 @@ export const useMultiSourceSearch = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<AISearchSuggestion | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
+
+  // Get user location on first use
+  const getUserLocation = useCallback(() => {
+    if (navigator.geolocation && !userLocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          // Default to Cairo
+          setUserLocation({ lat: 30.0444, lng: 31.2357 });
+        }
+      );
+    }
+  }, [userLocation]);
 
   // Search local database
   const searchLocalDatabase = useCallback((query: string): SearchResult[] => {
@@ -102,14 +123,14 @@ export const useMultiSourceSearch = () => {
         lng: item.lng,
         relevanceScore: item.name.includes(arabicQuery) ? 100 : 80,
       }))
-      .slice(0, 5);
+      .slice(0, 10);
   }, []);
 
   // Search Mapbox Geocoding
   const searchMapbox = useCallback(async (query: string): Promise<SearchResult[]> => {
     try {
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=eg&limit=5&types=address,place,locality,neighborhood,poi`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=eg&limit=10&types=address,place,locality,neighborhood,poi`
       );
       const data = await response.json();
       
@@ -132,6 +153,41 @@ export const useMultiSourceSearch = () => {
     }
   }, []);
 
+  // Search Google Places API (via Edge Function)
+  const searchGooglePlaces = useCallback(async (query: string): Promise<SearchResult[]> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('google-places-search', {
+        body: { 
+          query,
+          userLat: userLocation?.lat || 30.0444,
+          userLng: userLocation?.lng || 31.2357,
+          radius: 100000 // 100km radius
+        }
+      });
+      
+      if (error) {
+        console.error('Google Places search error:', error);
+        return [];
+      }
+      
+      return (data?.results || []).map((place: any) => ({
+        id: place.id,
+        name: place.name,
+        address: place.address,
+        type: 'google' as const,
+        source: 'Google Maps',
+        lat: place.lat,
+        lng: place.lng,
+        distance: place.distance,
+        rank: place.rank,
+        relevanceScore: place.rank ? 100 - place.rank : 50,
+      }));
+    } catch (error) {
+      console.error('Google Places search error:', error);
+      return [];
+    }
+  }, [userLocation]);
+
   // Search using AI assistant
   const searchWithAI = useCallback(async (query: string): Promise<AISearchSuggestion | null> => {
     try {
@@ -151,13 +207,17 @@ export const useMultiSourceSearch = () => {
     }
   }, []);
 
-  // Combined search
+  // Combined search - starts from 2 characters
   const search = useCallback(async (query: string) => {
+    // Start search from 2 characters
     if (!query || query.length < 2) {
       setResults([]);
       setAiSuggestions(null);
       return;
     }
+
+    // Get user location if not set
+    getUserLocation();
 
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -168,10 +228,11 @@ export const useMultiSourceSearch = () => {
       setError(null);
 
       try {
-        // Run all searches in parallel
-        const [localResults, mapboxResults, aiData] = await Promise.all([
+        // Run all searches in parallel - prioritize Google Places
+        const [localResults, mapboxResults, googleResults, aiData] = await Promise.all([
           Promise.resolve(searchLocalDatabase(query)),
           searchMapbox(query),
+          searchGooglePlaces(query),
           searchWithAI(query),
         ]);
 
@@ -179,7 +240,16 @@ export const useMultiSourceSearch = () => {
         const allResults: SearchResult[] = [];
         const seenNames = new Set<string>();
 
-        // Add local results first (higher priority)
+        // Add Google results first (highest priority - real-time data)
+        googleResults.forEach(result => {
+          const key = result.name.toLowerCase();
+          if (!seenNames.has(key)) {
+            seenNames.add(key);
+            allResults.push(result);
+          }
+        });
+
+        // Add local results (high priority)
         localResults.forEach(result => {
           const key = result.name.toLowerCase();
           if (!seenNames.has(key)) {
@@ -197,10 +267,16 @@ export const useMultiSourceSearch = () => {
           }
         });
 
-        // Sort by relevance
-        allResults.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+        // Sort by distance if available, then by relevance
+        allResults.sort((a, b) => {
+          if (a.distance !== undefined && b.distance !== undefined) {
+            return a.distance - b.distance;
+          }
+          return (b.relevanceScore || 0) - (a.relevanceScore || 0);
+        });
 
-        setResults(allResults.slice(0, 10));
+        // Take top 50 results
+        setResults(allResults.slice(0, 50));
         setAiSuggestions(aiData);
       } catch (err) {
         console.error('Search error:', err);
@@ -208,8 +284,8 @@ export const useMultiSourceSearch = () => {
       } finally {
         setIsSearching(false);
       }
-    }, 300);
-  }, [searchLocalDatabase, searchMapbox, searchWithAI]);
+    }, 200); // Faster debounce for better responsiveness
+  }, [searchLocalDatabase, searchMapbox, searchGooglePlaces, searchWithAI, getUserLocation]);
 
   const clearResults = useCallback(() => {
     setResults([]);
@@ -224,5 +300,6 @@ export const useMultiSourceSearch = () => {
     isSearching,
     error,
     clearResults,
+    userLocation,
   };
 };
