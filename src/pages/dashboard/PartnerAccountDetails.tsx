@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Settings2,
   Layers,
+  Plus,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +29,7 @@ import DetailedAccountLedger from '@/components/accounts/DetailedAccountLedger';
 import WasteTypeAccountBreakdown from '@/components/accounts/WasteTypeAccountBreakdown';
 import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 import DepositButton from '@/components/deposits/DepositButton';
+import CreateInvoiceDialog from '@/components/invoices/CreateInvoiceDialog';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
