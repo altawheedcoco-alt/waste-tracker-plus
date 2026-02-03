@@ -66,7 +66,8 @@ const MapExplorer = () => {
   const [showFactoryMarkers, setShowFactoryMarkers] = useState(true);
   const [facilities, setFacilities] = useState<IndustrialFacility[]>([]);
   const [isLoadingFacilities, setIsLoadingFacilities] = useState(false);
-  const [isFetchingFromOSM, setIsFetchingFromOSM] = useState(false);
+  const [isFetchingFromSource, setIsFetchingFromSource] = useState(false);
+  const [fetchingSource, setFetchingSource] = useState<'google' | 'osm' | null>(null);
   const [facilitiesCount, setFacilitiesCount] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapRef>(null);
@@ -99,13 +100,19 @@ const MapExplorer = () => {
     }
   }, []);
 
-  // جلب المنشآت من OpenStreetMap
-  const fetchFromOSM = async () => {
-    setIsFetchingFromOSM(true);
+  // جلب المنشآت من مصدر خارجي (Google أو OSM)
+  const fetchFromExternalSource = async (source: 'google' | 'osm') => {
+    setIsFetchingFromSource(true);
+    setFetchingSource(source);
+    
+    const sourceName = source === 'google' ? 'Google Maps' : 'OpenStreetMap';
+    
     try {
-      toast.info('جاري جلب المنشآت الصناعية من OpenStreetMap...', { duration: 5000 });
+      toast.info(`جاري جلب المنشآت الصناعية من ${sourceName}...`, { duration: 10000 });
       
-      const { data, error } = await supabase.functions.invoke('fetch-industrial-facilities');
+      const { data, error } = await supabase.functions.invoke('fetch-industrial-facilities', {
+        body: { source }
+      });
       
       if (error) throw error;
       
@@ -117,10 +124,11 @@ const MapExplorer = () => {
         throw new Error(data.error);
       }
     } catch (error) {
-      console.error('Error fetching from OSM:', error);
-      toast.error('فشل في جلب البيانات من OpenStreetMap');
+      console.error(`Error fetching from ${sourceName}:`, error);
+      toast.error(`فشل في جلب البيانات من ${sourceName}`);
     } finally {
-      setIsFetchingFromOSM(false);
+      setIsFetchingFromSource(false);
+      setFetchingSource(null);
     }
   };
 
@@ -487,18 +495,32 @@ const MapExplorer = () => {
 
           {/* Actions Row */}
           <div className="flex flex-wrap gap-2 items-center justify-between">
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button
-                variant="outline"
+                variant="default"
                 size="sm"
-                onClick={fetchFromOSM}
-                disabled={isFetchingFromOSM}
+                onClick={() => fetchFromExternalSource('google')}
+                disabled={isFetchingFromSource}
                 className="gap-2"
               >
-                {isFetchingFromOSM ? (
+                {fetchingSource === 'google' ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Download className="w-4 h-4" />
+                )}
+                جلب من Google Maps
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchFromExternalSource('osm')}
+                disabled={isFetchingFromSource}
+                className="gap-2"
+              >
+                {fetchingSource === 'osm' ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Globe className="w-4 h-4" />
                 )}
                 جلب من OpenStreetMap
               </Button>
