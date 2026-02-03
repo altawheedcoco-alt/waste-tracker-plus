@@ -7,7 +7,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
   MapPin, Search, Crosshair, Info, Loader2, X, Sparkles, 
   Building2, Factory, MapPinned, Globe, Lightbulb, Navigation,
-  Layers, Map as MapIcon, Satellite
+  Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
-import { useMultiSourceSearch, SearchResult, EGYPTIAN_INDUSTRIAL_DATA } from '@/hooks/useMultiSourceSearch';
+import { useMultiSourceSearch, SearchResult } from '@/hooks/useMultiSourceSearch';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
@@ -43,25 +44,18 @@ const MAP_STYLES = {
 
 type MapStyleKey = keyof typeof MAP_STYLES;
 
-
-// تحويل بيانات المصانع إلى GeoJSON
-const industrialGeoJSON: GeoJSON.FeatureCollection = {
-  type: 'FeatureCollection',
-  features: EGYPTIAN_INDUSTRIAL_DATA.map((location, index) => ({
-    type: 'Feature' as const,
-    id: index,
-    properties: {
-      name: location.name,
-      city: location.city,
-      type: location.type,
-      typeLabel: location.type === 'factory' ? 'مصنع' : location.type === 'zone' ? 'منطقة صناعية' : 'منشأة',
-    },
-    geometry: {
-      type: 'Point' as const,
-      coordinates: [location.lng, location.lat],
-    },
-  })),
-};
+interface IndustrialFacility {
+  id: string;
+  name: string;
+  name_ar: string | null;
+  facility_type: string;
+  address: string | null;
+  city: string | null;
+  governorate: string | null;
+  latitude: number;
+  longitude: number;
+  is_verified: boolean;
+}
 
 const MapExplorer = () => {
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(null);
@@ -70,6 +64,10 @@ const MapExplorer = () => {
   const [showResults, setShowResults] = useState(false);
   const [mapStyle, setMapStyle] = useState<MapStyleKey>('streets');
   const [showFactoryMarkers, setShowFactoryMarkers] = useState(true);
+  const [facilities, setFacilities] = useState<IndustrialFacility[]>([]);
+  const [isLoadingFacilities, setIsLoadingFacilities] = useState(false);
+  const [isFetchingFromOSM, setIsFetchingFromOSM] = useState(false);
+  const [facilitiesCount, setFacilitiesCount] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapRef>(null);
   
@@ -81,6 +79,82 @@ const MapExplorer = () => {
     zoom: 10,
   });
 
+  // جلب المنشآت من قاعدة البيانات
+  const loadFacilities = useCallback(async () => {
+    setIsLoadingFacilities(true);
+    try {
+      const { data, error, count } = await supabase
+        .from('industrial_facilities')
+        .select('*', { count: 'exact' })
+        .order('is_verified', { ascending: false });
+      
+      if (error) throw error;
+      setFacilities(data || []);
+      setFacilitiesCount(count || 0);
+    } catch (error) {
+      console.error('Error loading facilities:', error);
+      toast.error('فشل في تحميل المنشآت الصناعية');
+    } finally {
+      setIsLoadingFacilities(false);
+    }
+  }, []);
+
+  // جلب المنشآت من OpenStreetMap
+  const fetchFromOSM = async () => {
+    setIsFetchingFromOSM(true);
+    try {
+      toast.info('جاري جلب المنشآت الصناعية من OpenStreetMap...', { duration: 5000 });
+      
+      const { data, error } = await supabase.functions.invoke('fetch-industrial-facilities');
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        toast.success(data.message);
+        // إعادة تحميل البيانات
+        await loadFacilities();
+      } else {
+        throw new Error(data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching from OSM:', error);
+      toast.error('فشل في جلب البيانات من OpenStreetMap');
+    } finally {
+      setIsFetchingFromOSM(false);
+    }
+  };
+
+  // تحميل البيانات عند فتح الصفحة
+  useEffect(() => {
+    loadFacilities();
+  }, [loadFacilities]);
+
+  // تحويل بيانات المنشآت إلى GeoJSON
+  const industrialGeoJSON: GeoJSON.FeatureCollection = {
+    type: 'FeatureCollection',
+    features: facilities.map((facility) => ({
+      type: 'Feature' as const,
+      id: facility.id,
+      properties: {
+        name: facility.name_ar || facility.name,
+        city: facility.city || '',
+        governorate: facility.governorate || '',
+        type: facility.facility_type,
+        typeLabel: facility.facility_type === 'factory' ? 'مصنع' : 
+                   facility.facility_type === 'zone' ? 'منطقة صناعية' : 
+                   facility.facility_type === 'recycling' ? 'منشأة تدوير' :
+                   facility.facility_type === 'workshop' ? 'ورشة' :
+                   facility.facility_type === 'plant' ? 'مصنع كبير' : 'منشأة',
+        isVerified: facility.is_verified,
+        address: facility.address,
+      },
+      geometry: {
+        type: 'Point' as const,
+        coordinates: [facility.longitude, facility.latitude],
+      },
+    })),
+  };
+
   // معالجة النقر على علامات المصانع
   const handleFactoryClick = useCallback((e: MapLayerMouseEvent) => {
     if (e.features && e.features.length > 0) {
@@ -89,7 +163,8 @@ const MapExplorer = () => {
       const props = feature.properties;
       
       setSelectedPosition({ lat: coords[1], lng: coords[0] });
-      setSelectedAddress(`${props?.name} - ${props?.city}`);
+      const addressParts = [props?.name, props?.city, props?.governorate].filter(Boolean);
+      setSelectedAddress(addressParts.join(' - '));
       setViewState(prev => ({
         ...prev,
         longitude: coords[0],
@@ -270,6 +345,10 @@ const MapExplorer = () => {
         {/* Search Sources Badge */}
         <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline" className="gap-1">
+            <Database className="w-3 h-3" />
+            {facilitiesCount} منشأة
+          </Badge>
+          <Badge variant="outline" className="gap-1">
             <Sparkles className="w-3 h-3" />
             ذكاء اصطناعي
           </Badge>
@@ -277,16 +356,12 @@ const MapExplorer = () => {
             <Globe className="w-3 h-3" />
             خرائط عالمية
           </Badge>
-          <Badge variant="outline" className="gap-1">
-            <Factory className="w-3 h-3" />
-            قاعدة بيانات محلية
-          </Badge>
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar and Actions */}
       <Card>
-        <CardContent className="pt-4">
+        <CardContent className="pt-4 space-y-4">
           <div ref={searchRef} className="relative">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -409,13 +484,54 @@ const MapExplorer = () => {
               )}
             </AnimatePresence>
           </div>
+
+          {/* Actions Row */}
+          <div className="flex flex-wrap gap-2 items-center justify-between">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchFromOSM}
+                disabled={isFetchingFromOSM}
+                className="gap-2"
+              >
+                {isFetchingFromOSM ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                جلب من OpenStreetMap
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={loadFacilities}
+                disabled={isLoadingFacilities}
+                className="gap-2"
+              >
+                {isLoadingFacilities ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                تحديث
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {facilitiesCount > 0 ? (
+                <>عدد المنشآت المحفوظة: <strong>{facilitiesCount}</strong></>
+              ) : (
+                'لا توجد منشآت محفوظة - اضغط على "جلب من OpenStreetMap"'
+              )}
+            </p>
+          </div>
         </CardContent>
       </Card>
 
       {/* Map */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <div className="relative" style={{ height: 'calc(100vh - 400px)', minHeight: '400px' }}>
+          <div className="relative" style={{ height: 'calc(100vh - 450px)', minHeight: '400px' }}>
             {/* Map Style Switcher */}
             <div className="absolute top-3 right-3 z-10 flex flex-col sm:flex-row gap-2">
               <ToggleGroup 
@@ -448,7 +564,7 @@ const MapExplorer = () => {
                 className="gap-1.5 shadow-lg bg-background/95 backdrop-blur-sm"
               >
                 <Factory className="w-4 h-4" />
-                <span className="hidden sm:inline">المصانع</span>
+                <span className="hidden sm:inline">المصانع ({facilitiesCount})</span>
               </Button>
             </div>
             
@@ -494,7 +610,7 @@ const MapExplorer = () => {
               />
               
               {/* GeoJSON Source للمصانع والمناطق الصناعية */}
-              {showFactoryMarkers && (
+              {showFactoryMarkers && facilities.length > 0 && (
                 <Source id="industrial-data" type="geojson" data={industrialGeoJSON}>
                   {/* طبقة الدوائر (الأيقونات) */}
                   <Layer
@@ -511,11 +627,21 @@ const MapExplorer = () => {
                         'match', ['get', 'type'],
                         'factory', '#ef4444',
                         'zone', '#3b82f6',
-                        'facility', '#22c55e',
+                        'recycling', '#22c55e',
+                        'workshop', '#f59e0b',
+                        'plant', '#8b5cf6',
                         '#6b7280'
                       ],
-                      'circle-stroke-width': 2,
-                      'circle-stroke-color': '#ffffff',
+                      'circle-stroke-width': [
+                        'case',
+                        ['get', 'isVerified'], 3,
+                        2
+                      ],
+                      'circle-stroke-color': [
+                        'case',
+                        ['get', 'isVerified'], '#fbbf24',
+                        '#ffffff'
+                      ],
                       'circle-opacity': 0.9,
                     }}
                   />
@@ -546,7 +672,9 @@ const MapExplorer = () => {
                         'match', ['get', 'type'],
                         'factory', '#b91c1c',
                         'zone', '#1d4ed8',
-                        'facility', '#15803d',
+                        'recycling', '#15803d',
+                        'workshop', '#b45309',
+                        'plant', '#6d28d9',
                         '#374151'
                       ],
                       'text-halo-color': 'rgba(255, 255, 255, 0.95)',
@@ -585,12 +713,22 @@ const MapExplorer = () => {
               )}
             </Map>
             
+            {/* Loading Overlay */}
+            {isLoadingFacilities && (
+              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20">
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">جاري تحميل المنشآت...</p>
+                </div>
+              </div>
+            )}
+            
             {/* Map Attribution */}
             <Badge 
               variant="secondary" 
               className="absolute bottom-3 left-3 z-10 text-[10px] bg-background/80 backdrop-blur-sm"
             >
-              © Mapbox
+              © Mapbox | OpenStreetMap
             </Badge>
           </div>
         </CardContent>
@@ -738,6 +876,10 @@ const MapExplorer = () => {
         <CardContent>
           <ul className="text-sm text-muted-foreground space-y-2">
             <li className="flex items-center gap-2">
+              <Download className="w-4 h-4 text-primary" />
+              اضغط "جلب من OpenStreetMap" لتحميل كافة المنشآت الصناعية في مصر
+            </li>
+            <li className="flex items-center gap-2">
               <Search className="w-4 h-4 text-primary" />
               ابحث عن أي موقع باللغة العربية أو الإنجليزية
             </li>
@@ -747,7 +889,7 @@ const MapExplorer = () => {
             </li>
             <li className="flex items-center gap-2">
               <Factory className="w-4 h-4 text-primary" />
-              نتائج البحث تشمل المصانع والمناطق الصناعية في مصر
+              المنشآت الموثقة تظهر بإطار ذهبي
             </li>
             <li className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-primary" />

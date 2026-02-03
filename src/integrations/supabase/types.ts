@@ -1586,6 +1586,60 @@ export type Database = {
           },
         ]
       }
+      industrial_facilities: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          created_by: string | null
+          facility_type: string
+          governorate: string | null
+          id: string
+          is_verified: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          name_ar: string | null
+          osm_id: string | null
+          tags: Json | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          facility_type?: string
+          governorate?: string | null
+          id?: string
+          is_verified?: boolean | null
+          latitude: number
+          longitude: number
+          name: string
+          name_ar?: string | null
+          osm_id?: string | null
+          tags?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          facility_type?: string
+          governorate?: string | null
+          id?: string
+          is_verified?: boolean | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          name_ar?: string | null
+          osm_id?: string | null
+          tags?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       invoice_items: {
         Row: {
           created_at: string
