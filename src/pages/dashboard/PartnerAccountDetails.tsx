@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Settings2,
   Layers,
+  Plus,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +29,7 @@ import DetailedAccountLedger from '@/components/accounts/DetailedAccountLedger';
 import WasteTypeAccountBreakdown from '@/components/accounts/WasteTypeAccountBreakdown';
 import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 import DepositButton from '@/components/deposits/DepositButton';
+import CreateInvoiceDialog from '@/components/invoices/CreateInvoiceDialog';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
@@ -35,6 +37,7 @@ export default function PartnerAccountDetails() {
   const queryClient = useQueryClient();
   const { organization } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showCreateInvoice, setShowCreateInvoice] = useState(false);
 
   // Fetch partner organization details
   const { data: partner, isLoading: partnerLoading } = useQuery({
@@ -431,16 +434,21 @@ export default function PartnerAccountDetails() {
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="mt-0">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
                   فواتير الشريك
                 </CardTitle>
+                <Button onClick={() => setShowCreateInvoice(true)} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  إنشاء فاتورة
+                </Button>
               </CardHeader>
               <CardContent>
                 <InvoicesAccountView 
                   invoices={invoices}
                   isLoading={invoicesLoading}
+                  onCreateInvoice={() => setShowCreateInvoice(true)}
                 />
               </CardContent>
             </Card>
@@ -451,6 +459,19 @@ export default function PartnerAccountDetails() {
             <PartnerWasteTypes partnerId={partnerId!} isExternal={false} />
           </TabsContent>
         </Tabs>
+
+        {/* Create Invoice Dialog */}
+        <CreateInvoiceDialog
+          open={showCreateInvoice}
+          onOpenChange={setShowCreateInvoice}
+          partnerId={partnerId!}
+          partnerName={partner?.name || ''}
+          partnerType={partner?.organization_type}
+          availableShipments={shipmentsWithPricing}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['partner-invoices', partnerId] });
+          }}
+        />
       </div>
     </DashboardLayout>
   );
