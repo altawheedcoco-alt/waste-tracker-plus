@@ -31,6 +31,8 @@ export interface LedgerEntry {
   credit: number; // ما لنا (دائن)
   reference?: string;
   isCancelled?: boolean;
+  notes?: string; // ملاحظات الحساب
+  shipmentId?: string; // معرف الشحنة لتحديث الملاحظات
 }
 
 interface AccountLedgerProps {

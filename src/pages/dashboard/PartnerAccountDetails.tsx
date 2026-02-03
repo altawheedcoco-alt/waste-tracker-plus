@@ -56,25 +56,27 @@ export default function PartnerAccountDetails() {
     enabled: !!partnerId,
   });
 
-  // Fetch shipments with this partner
+  // Fetch shipments with this partner - BIDIRECTIONAL (works for all partners)
   const { data: shipments = [], isLoading: shipmentsLoading } = useQuery({
-    queryKey: ['partner-shipments', partnerId, organization?.id, organization?.organization_type],
+    queryKey: ['partner-shipments', partnerId, organization?.id],
     queryFn: async () => {
       if (!partnerId || !organization?.id) return [];
       
-      let query = supabase.from('shipments').select('*');
+      // Get all shipments where BOTH the current org AND the partner are involved
+      const { data, error } = await supabase
+        .from('shipments')
+        .select('*')
+        .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`)
+        .or(`generator_id.eq.${partnerId},transporter_id.eq.${partnerId},recycler_id.eq.${partnerId}`)
+        .order('created_at', { ascending: false });
       
-      if (organization?.organization_type === 'transporter') {
-        query = query.eq('transporter_id', organization.id).or(`generator_id.eq.${partnerId},recycler_id.eq.${partnerId}`);
-      } else if (organization?.organization_type === 'generator') {
-        query = query.eq('generator_id', organization.id).or(`transporter_id.eq.${partnerId},recycler_id.eq.${partnerId}`);
-      } else if (organization?.organization_type === 'recycler') {
-        query = query.eq('recycler_id', organization.id).or(`generator_id.eq.${partnerId},transporter_id.eq.${partnerId}`);
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
-      return data || [];
+      
+      // Filter to only shipments where BOTH orgs are involved
+      return (data || []).filter(shipment => {
+        const parties = [shipment.generator_id, shipment.transporter_id, shipment.recycler_id];
+        return parties.includes(organization.id) && parties.includes(partnerId);
+      });
     },
     enabled: !!partnerId && !!organization?.id,
   });
@@ -217,6 +219,8 @@ export default function PartnerAccountDetails() {
           credit: isGenerator ? amount : 0,
           reference: shipment.shipment_number,
           isCancelled,
+          notes: (shipment as any).account_notes || '',
+          shipmentId: shipment.id,
         });
       }
     });
