@@ -51,7 +51,7 @@ import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificat
 import ShipmentQuickPrint from './ShipmentQuickPrint';
 import ShipmentRouteMap from './ShipmentRouteMap';
 import CancelShipmentDialog from './CancelShipmentDialog';
-import GoogleMapsNavigationButton from '@/components/navigation/GoogleMapsNavigationButton';
+import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -465,11 +465,10 @@ const ShipmentCard = ({
                 {/* Left Side - Action Buttons */}
                 <div className="flex flex-col items-start gap-2 order-2 sm:order-1 w-full sm:w-auto">
                   <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-                    {/* Google Maps Navigation Button - for drivers */}
-                    <GoogleMapsNavigationButton
+                    {/* Navigation Button Group - Google Maps & Waze */}
+                    <NavigationButtonGroup
                       pickupAddress={shipment.pickup_address}
                       deliveryAddress={shipment.delivery_address}
-                      variant="default"
                       size="sm"
                     />
                     {/* Live Tracking Button - shows when driver is assigned */}
