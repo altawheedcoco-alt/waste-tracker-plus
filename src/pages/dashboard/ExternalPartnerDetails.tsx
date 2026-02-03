@@ -29,6 +29,9 @@ import CreateExternalInvoiceDialog from '@/components/invoices/CreateExternalInv
 export default function ExternalPartnerDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { organization } = useAuth();
+  const [showCreateInvoice, setShowCreateInvoice] = useState(false);
 
   // Fetch external partner details
   const { data: partner, isLoading: partnerLoading } = useQuery({
