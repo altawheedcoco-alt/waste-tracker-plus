@@ -3,6 +3,7 @@ import { Menu, X, LogIn, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import GuideButton from "@/components/guide/GuideButton";
 import logo from "@/assets/logo.png";
 
 const Header = () => {
@@ -46,6 +47,7 @@ const Header = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
+            <GuideButton />
             <Button 
               variant="outline" 
               size="default"
@@ -93,6 +95,7 @@ const Header = () => {
                 <NavLink href="#stats" mobile>الإحصائيات</NavLink>
                 <NavLink href="#contact" mobile>تواصل معنا</NavLink>
                 <div className="flex flex-col gap-3 pt-4">
+                  <GuideButton />
                   <Button 
                     variant="outline" 
                     className="w-full gap-2 h-11 touch-manipulation" 
