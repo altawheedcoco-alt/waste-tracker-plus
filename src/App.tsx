@@ -95,6 +95,7 @@ const AdminGuide = lazy(() => import("./pages/guide/AdminGuide"));
 const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
 const ChatWidget = lazy(() => import("./components/chat/ChatWidget"));
 const BetaBanner = lazy(() => import("./components/BetaBanner"));
+const AccessibilityPanel = lazy(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel })));
 
 // Optimized QueryClient with aggressive caching
 const queryClient = new QueryClient({
@@ -222,6 +223,7 @@ const App = memo(() => (
         <AIChatbot />
         <ChatWidget />
         <BetaBanner />
+        <AccessibilityPanel />
       </Suspense>
     </BrowserRouter>
   </Providers>
