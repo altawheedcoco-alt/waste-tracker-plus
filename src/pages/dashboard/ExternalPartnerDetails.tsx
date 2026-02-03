@@ -238,22 +238,41 @@ export default function ExternalPartnerDetails() {
           </Card>
         )}
 
-        {/* Financial Summary - Coming Soon */}
+        {/* Financial Summary */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-lg">
               <FileText className="h-5 w-5" />
-              الحركات المالية
+              الفواتير
             </CardTitle>
+            <Button onClick={() => setShowCreateInvoice(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              إنشاء فاتورة
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="text-center py-8 text-muted-foreground">
               <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p className="font-medium">لا توجد فواتير لهذا العميل بعد</p>
-              <p className="text-sm">ستظهر الحركات المالية هنا بعد إنشاء الفواتير</p>
+              <p className="text-sm mb-4">ستظهر الفواتير هنا بعد إنشائها</p>
+              <Button onClick={() => setShowCreateInvoice(true)} variant="outline" className="gap-2">
+                <Plus className="h-4 w-4" />
+                إنشاء فاتورة جديدة
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Create Invoice Dialog */}
+        <CreateExternalInvoiceDialog
+          open={showCreateInvoice}
+          onOpenChange={setShowCreateInvoice}
+          externalPartnerId={partnerId!}
+          partnerName={partner?.name || ''}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['external-partner-invoices', partnerId] });
+          }}
+        />
       </div>
     </DashboardLayout>
   );
