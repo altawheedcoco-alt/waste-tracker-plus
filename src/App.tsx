@@ -87,6 +87,7 @@ const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
 const RecyclerGuide = lazy(() => import("./pages/guide/RecyclerGuide"));
 const DriverGuide = lazy(() => import("./pages/guide/DriverGuide"));
+const AdminGuide = lazy(() => import("./pages/guide/AdminGuide"));
 
 // Lazy loaded heavy components (deferred)
 const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
@@ -140,6 +141,7 @@ const AppRoutes = memo(() => (
     <Route path="/guide/transporter" element={<TransporterGuide />} />
     <Route path="/guide/recycler" element={<RecyclerGuide />} />
     <Route path="/guide/driver" element={<DriverGuide />} />
+    <Route path="/guide/admin" element={<AdminGuide />} />
     <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/dashboard/drivers" element={<Drivers />} />
     <Route path="/dashboard/drivers/:driverId" element={<DriverDetails />} />
