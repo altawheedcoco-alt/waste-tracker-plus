@@ -459,13 +459,26 @@ const MapExplorer = () => {
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Button 
                     onClick={() => {
+                      const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedPosition.lat},${selectedPosition.lng}&travelmode=driving`;
+                      window.open(url, '_blank');
+                      toast.success('جاري فتح الملاحة...');
+                    }}
+                    className="flex-1 min-w-[160px] gap-2 bg-green-600 hover:bg-green-700"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    الذهاب إليه (ملاحة)
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
                       const url = `https://www.google.com/maps?q=${selectedPosition.lat},${selectedPosition.lng}`;
                       window.open(url, '_blank');
                     }}
                     className="flex-1 min-w-[140px] gap-2"
                   >
-                    <Navigation className="w-4 h-4" />
-                    فتح في خرائط جوجل
+                    <MapPin className="w-4 h-4" />
+                    عرض على الخريطة
                   </Button>
                   
                   <Button 
