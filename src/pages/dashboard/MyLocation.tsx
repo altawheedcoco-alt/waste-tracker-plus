@@ -28,34 +28,12 @@ import TripHistoryView from '@/components/driver/TripHistoryView';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 import TrackingStatsCard from '@/components/tracking/TrackingStatsCard';
 import QuickLocationButton from '@/components/tracking/QuickLocationButton';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle as LeafletCircle } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import Map, { Marker, NavigationControl } from 'react-map-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-// Fix for default marker icons in Leaflet with Vite
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
-const defaultCenter: [number, number] = [30.0444, 31.2357]; // Cairo, Egypt
-
-// Custom green marker icon for driver location
-const driverIcon = new L.DivIcon({
-  className: 'driver-marker',
-  html: `<div style="
-    width: 24px;
-    height: 24px;
-    background: #22c55e;
-    border: 3px solid white;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  "></div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-});
+const defaultCenter = { lat: 30.0444, lng: 31.2357 }; // Cairo, Egypt
 
 const MyLocation = () => {
   const { profile } = useAuth();
@@ -231,18 +209,7 @@ const MyLocation = () => {
     };
   }, [liveIntervalId]);
 
-  const mapCenter: [number, number] = currentLocation 
-    ? [currentLocation.latitude, currentLocation.longitude]
-    : defaultCenter;
-
-  // Component to recenter map when location changes
-  const MapRecenter = ({ center }: { center: [number, number] }) => {
-    const map = useMap();
-    useEffect(() => {
-      map.setView(center, 15);
-    }, [center, map]);
-    return null;
-  };
+  // Map center is now handled inside the Map component
 
   if (loading) {
     return (
@@ -414,38 +381,38 @@ const MyLocation = () => {
               </CardHeader>
               <CardContent>
                 <div className="h-[400px] rounded-lg overflow-hidden border">
-                  <MapContainer
-                    center={mapCenter}
-                    zoom={currentLocation ? 15 : 6}
-                    style={{ height: '100%', width: '100%' }}
-                    scrollWheelZoom={true}
+                  <Map
+                    initialViewState={{
+                      longitude: currentLocation?.longitude || defaultCenter.lng,
+                      latitude: currentLocation?.latitude || defaultCenter.lat,
+                      zoom: currentLocation ? 15 : 6,
+                    }}
+                    mapboxAccessToken={MAPBOX_TOKEN}
+                    mapStyle="mapbox://styles/mapbox/streets-v12"
+                    style={{ width: '100%', height: '100%' }}
+                    attributionControl={false}
+                    onLoad={(e) => {
+                      const map = e.target;
+                      const arabicLayers = ['country-label', 'state-label', 'settlement-label', 'poi-label', 'road-label'];
+                      arabicLayers.forEach(layer => {
+                        try { map.setLayoutProperty(layer, 'text-field', ['get', 'name_ar']); } catch {}
+                      });
+                    }}
                   >
-                    <TileLayer
-                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
+                    <NavigationControl position="bottom-right" />
                     {currentLocation && (
-                      <>
-                        <MapRecenter center={[currentLocation.latitude, currentLocation.longitude]} />
-                        <Marker 
-                          position={[currentLocation.latitude, currentLocation.longitude]}
-                          icon={driverIcon}
-                        >
-                          <Popup>
-                            <div className="text-right p-2" dir="rtl">
-                              <p className="font-bold">{profile?.full_name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {driverInfo.vehicle_plate}
-                              </p>
-                              <p className="text-xs mt-1">
-                                آخر تحديث: {new Date(currentLocation.recorded_at).toLocaleTimeString('ar-SA')}
-                              </p>
-                            </div>
-                          </Popup>
-                        </Marker>
-                      </>
+                      <Marker
+                        longitude={currentLocation.longitude}
+                        latitude={currentLocation.latitude}
+                        anchor="center"
+                      >
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping" style={{ width: '32px', height: '32px', marginLeft: '-4px', marginTop: '-4px' }} />
+                          <div className="w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg" />
+                        </div>
+                      </Marker>
                     )}
-                  </MapContainer>
+                  </Map>
                 </div>
 
                 {!currentLocation && (
