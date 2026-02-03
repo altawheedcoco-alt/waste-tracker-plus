@@ -15,8 +15,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
-import { useMultiSourceSearch, SearchResult } from '@/hooks/useMultiSourceSearch';
+import { useMultiSourceSearch, SearchResult, EGYPTIAN_INDUSTRIAL_DATA } from '@/hooks/useMultiSourceSearch';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
@@ -48,6 +49,7 @@ const MapExplorer = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [mapStyle, setMapStyle] = useState<MapStyleKey>('streets');
+  const [showFactoryMarkers, setShowFactoryMarkers] = useState(true);
   const searchRef = useRef<HTMLDivElement>(null);
   
   const { search, results, aiSuggestions, isSearching, clearResults } = useMultiSourceSearch();
@@ -330,7 +332,7 @@ const MapExplorer = () => {
         <CardContent className="p-0">
           <div className="relative" style={{ height: 'calc(100vh - 400px)', minHeight: '400px' }}>
             {/* Map Style Switcher */}
-            <div className="absolute top-3 right-3 z-10">
+            <div className="absolute top-3 right-3 z-10 flex flex-col sm:flex-row gap-2">
               <ToggleGroup 
                 type="single" 
                 value={mapStyle} 
@@ -352,6 +354,17 @@ const MapExplorer = () => {
                   );
                 })}
               </ToggleGroup>
+              
+              {/* Toggle Factory Markers */}
+              <Button
+                variant={showFactoryMarkers ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowFactoryMarkers(!showFactoryMarkers)}
+                className="gap-1.5 shadow-lg bg-background/95 backdrop-blur-sm"
+              >
+                <Factory className="w-4 h-4" />
+                <span className="hidden sm:inline">المصانع</span>
+              </Button>
             </div>
             
             <Map
@@ -417,6 +430,97 @@ const MapExplorer = () => {
                 }}
               />
               
+              {/* Factory/Zone Markers */}
+              {showFactoryMarkers && viewState.zoom >= 8 && (
+                <TooltipProvider>
+                  {EGYPTIAN_INDUSTRIAL_DATA.map((location, index) => {
+                    const isFactory = location.type === 'factory';
+                    const isZone = location.type === 'zone';
+                    const isFacility = location.type === 'facility';
+                    
+                    // Get color based on type
+                    const bgColor = isFactory 
+                      ? '#ef4444' // red for factories
+                      : isZone 
+                        ? '#3b82f6' // blue for zones
+                        : '#22c55e'; // green for facilities
+                    
+                    return (
+                      <Marker
+                        key={`marker-${index}`}
+                        longitude={location.lng}
+                        latitude={location.lat}
+                        anchor="bottom"
+                        onClick={(e) => {
+                          e.originalEvent.stopPropagation();
+                          const position = { lat: location.lat, lng: location.lng };
+                          setSelectedPosition(position);
+                          setSelectedAddress(`${location.name} - ${location.city}`);
+                          setViewState(prev => ({
+                            ...prev,
+                            longitude: location.lng,
+                            latitude: location.lat,
+                            zoom: 14,
+                          }));
+                          toast.success('تم تحديد الموقع');
+                        }}
+                      >
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div 
+                              className="cursor-pointer transition-transform hover:scale-125"
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: viewState.zoom >= 11 ? '28px' : '20px',
+                                  height: viewState.zoom >= 11 ? '28px' : '20px',
+                                  background: bgColor,
+                                  border: '2px solid white',
+                                  borderRadius: '50%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                }}
+                              >
+                                {isFactory && <Factory className="w-3 h-3 text-white" />}
+                                {isZone && <Building2 className="w-3 h-3 text-white" />}
+                                {isFacility && <MapPin className="w-3 h-3 text-white" />}
+                              </div>
+                              {viewState.zoom >= 11 && (
+                                <div
+                                  className="mt-1 px-1.5 py-0.5 bg-background/95 backdrop-blur-sm rounded text-[10px] font-medium shadow-md whitespace-nowrap max-w-[120px] truncate border"
+                                  style={{ direction: 'rtl' }}
+                                >
+                                  {location.name.length > 20 
+                                    ? location.name.substring(0, 20) + '...' 
+                                    : location.name}
+                                </div>
+                              )}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-[200px]">
+                            <div className="text-right" dir="rtl">
+                              <p className="font-semibold text-sm">{location.name}</p>
+                              <p className="text-xs text-muted-foreground">{location.city}</p>
+                              <Badge variant="secondary" className="text-[10px] mt-1">
+                                {isFactory ? 'مصنع' : isZone ? 'منطقة صناعية' : 'منشأة'}
+                              </Badge>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </Marker>
+                    );
+                  })}
+                </TooltipProvider>
+              )}
+              
+              {/* Selected Position Marker */}
               {selectedPosition && (
                 <Marker
                   longitude={selectedPosition.lng}
