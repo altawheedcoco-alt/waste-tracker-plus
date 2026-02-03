@@ -42,6 +42,7 @@ import {
   Info,
   BookOpen,
   Banknote,
+  Activity,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -279,6 +280,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     ] : []),
     ...(isAdmin
       ? [
+          { icon: Activity, label: 'حالة النظام', path: '/dashboard/system-status', key: 'system-status' },
           { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals', key: 'company-approvals' },
           { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals', key: 'driver-approvals' },
           { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents', key: 'org-docs' },
