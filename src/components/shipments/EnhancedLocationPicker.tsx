@@ -10,65 +10,22 @@ import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check, Globe
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
 import GooglePlacesSearch from '@/components/maps/GooglePlacesSearch';
+import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-// Fix default marker icons
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
 
-// Custom marker icon
-const locationMarkerIcon = new L.DivIcon({
-  className: 'location-marker',
-  html: `<div style="
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-    border: 4px solid white;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
-  "></div>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-});
+const libraries: ("places")[] = ["places"];
 
-// Map click handler component
-const MapClickHandler = ({ onLocationSelect }: { onLocationSelect: (latlng: L.LatLng) => void }) => {
-  useMapEvents({
-    click(e) {
-      onLocationSelect(e.latlng);
-    },
-  });
-  return null;
-};
-
-// Map center updater component
-const MapCenterUpdater = ({ center }: { center: [number, number] | null }) => {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (center) {
-      map.flyTo(center, 15, { duration: 0.5 });
-    }
-  }, [center, map]);
-  
-  return null;
-};
+// Egypt center (Cairo)
+const defaultMapCenter = { lat: 30.0444, lng: 31.2357 };
 
 interface OrganizationLocation {
   id: string;
@@ -428,52 +385,98 @@ const EnhancedLocationPicker = ({
     setShowSavePrompt(false);
   };
 
-  // Handle map click
-  const handleMapClick = (latlng: L.LatLng) => {
-    setMapCoordinates({ lat: latlng.lat, lng: latlng.lng });
-  };
+  // Handle Google Map click
+  const handleGoogleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
+    if (!e.latLng) return;
+    setMapCoordinates({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+  }, []);
 
-  // Search on map - now returns multiple results
-  const handleMapSearch = async (query?: string) => {
+  // Google Maps Autocomplete search
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  const [googleMapInstance, setGoogleMapInstance] = useState<google.maps.Map | null>(null);
+
+  const { isLoaded: isGoogleMapsLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+    libraries,
+    language: 'ar',
+    region: 'EG',
+  });
+
+  const onGoogleMapLoad = useCallback((map: google.maps.Map) => {
+    setGoogleMapInstance(map);
+    autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+    placesServiceRef.current = new google.maps.places.PlacesService(map);
+  }, []);
+
+  // Google Places search results for map dialog
+  const [googleMapSearchResults, setGoogleMapSearchResults] = useState<google.maps.places.AutocompletePrediction[]>([]);
+
+  // Search on map using Google Places
+  const handleMapSearch = useCallback(async (query?: string) => {
     const searchText = query || mapSearchQuery;
-    if (!searchText.trim()) {
+    if (!searchText.trim() || !autocompleteServiceRef.current) {
+      setGoogleMapSearchResults([]);
       setMapSearchResults([]);
       return;
     }
 
     setMapSearchLoading(true);
     setShowMapSearchResults(true);
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchText)}&countrycodes=eg&limit=5&accept-language=ar`
-      );
-      const data = await response.json();
-      
-      if (data?.length > 0) {
-        setMapSearchResults(data);
-      } else {
-        setMapSearchResults([]);
-        toast.error('لم يتم العثور على نتائج');
+    
+    autocompleteServiceRef.current.getPlacePredictions(
+      {
+        input: searchText,
+        componentRestrictions: { country: 'eg' },
+        language: 'ar',
+        types: ['establishment', 'geocode'],
+      },
+      (predictions, status) => {
+        setMapSearchLoading(false);
+        if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+          setGoogleMapSearchResults(predictions);
+        } else {
+          setGoogleMapSearchResults([]);
+          if (status !== google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+            toast.error('خطأ في البحث');
+          }
+        }
       }
-    } catch {
-      toast.error('خطأ في البحث');
-      setMapSearchResults([]);
-    } finally {
-      setMapSearchLoading(false);
-    }
-  };
+    );
+  }, [mapSearchQuery]);
   
-  // Select a search result on the map
-  const handleMapSearchResultSelect = (result: LocationSuggestion) => {
-    setMapCoordinates({
-      lat: parseFloat(result.lat),
-      lng: parseFloat(result.lon)
-    });
-    setMapSearchQuery(result.display_name.split(',')[0]);
-    setMapSearchResults([]);
-    setShowMapSearchResults(false);
-    toast.success('تم تحديد الموقع');
-  };
+  // Select a search result on the map using Google Places
+  const handleGoogleMapSearchResultSelect = useCallback((prediction: google.maps.places.AutocompletePrediction) => {
+    if (!placesServiceRef.current) return;
+
+    placesServiceRef.current.getDetails(
+      {
+        placeId: prediction.place_id,
+        fields: ['geometry', 'formatted_address', 'name'],
+        language: 'ar',
+      },
+      (place, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && place?.geometry?.location) {
+          const coords = {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          };
+          setMapCoordinates(coords);
+          setMapSearchQuery(prediction.structured_formatting.main_text);
+          setGoogleMapSearchResults([]);
+          setShowMapSearchResults(false);
+          
+          // Pan to location
+          if (googleMapInstance) {
+            googleMapInstance.panTo(coords);
+            googleMapInstance.setZoom(16);
+          }
+          
+          toast.success('تم تحديد الموقع');
+        }
+      }
+    );
+  }, [googleMapInstance]);
   
   // Debounced map search
   useEffect(() => {
@@ -531,11 +534,6 @@ const EnhancedLocationPicker = ({
     }
   };
 
-  // Default center (Egypt)
-  const defaultCenter: [number, number] = [26.8206, 30.8025];
-  const mapCenter: [number, number] = mapCoordinates 
-    ? [mapCoordinates.lat, mapCoordinates.lng] 
-    : defaultCenter;
 
   return (
     <div className="space-y-3">
@@ -1108,21 +1106,21 @@ const EnhancedLocationPicker = ({
                 </Button>
               </div>
               
-              {/* Search Results Dropdown */}
-              {showMapSearchResults && mapSearchResults.length > 0 && (
+              {/* Search Results Dropdown - Google Places */}
+              {showMapSearchResults && googleMapSearchResults.length > 0 && (
                 <Card className="absolute z-50 w-full mt-1 shadow-lg max-h-60 overflow-y-auto">
                   <CardContent className="p-2 space-y-1">
-                    {mapSearchResults.map((result, index) => (
+                    {googleMapSearchResults.map((result) => (
                       <button
-                        key={index}
+                        key={result.place_id}
                         type="button"
                         className="w-full text-right p-2 hover:bg-muted rounded-md transition-colors flex items-start gap-2"
-                        onClick={() => handleMapSearchResultSelect(result)}
+                        onClick={() => handleGoogleMapSearchResultSelect(result)}
                       >
                         <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{result.display_name.split(',')[0]}</p>
-                          <p className="text-xs text-muted-foreground truncate">{result.display_name}</p>
+                          <p className="text-sm font-medium truncate">{result.structured_formatting.main_text}</p>
+                          <p className="text-xs text-muted-foreground truncate">{result.structured_formatting.secondary_text}</p>
                         </div>
                       </button>
                     ))}
@@ -1131,39 +1129,54 @@ const EnhancedLocationPicker = ({
               )}
             </div>
 
-            {/* Interactive Map */}
+            {/* Interactive Google Map */}
             <div className="h-[400px] rounded-lg overflow-hidden border relative">
-              {showMapDialog && (
-                <MapContainer
-                  key={mapKey}
-                  center={mapCenter}
+              {showMapDialog && isGoogleMapsLoaded ? (
+                <GoogleMap
+                  mapContainerStyle={{ width: '100%', height: '100%' }}
+                  center={mapCoordinates || defaultMapCenter}
                   zoom={mapCoordinates ? 15 : 6}
-                  style={{ height: '100%', width: '100%' }}
-                  scrollWheelZoom={true}
+                  onClick={handleGoogleMapClick}
+                  onLoad={onGoogleMapLoad}
+                  options={{
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false,
+                    zoomControl: true,
+                    gestureHandling: 'greedy',
+                  }}
                 >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  
-                  <MapClickHandler onLocationSelect={handleMapClick} />
-                  <MapCenterUpdater center={mapCoordinates ? [mapCoordinates.lat, mapCoordinates.lng] : null} />
-                  
                   {mapCoordinates && (
-                    <Marker 
-                      position={[mapCoordinates.lat, mapCoordinates.lng]} 
-                      icon={locationMarkerIcon}
+                    <Marker
+                      position={mapCoordinates}
+                      animation={google.maps.Animation.DROP}
                     />
                   )}
-                </MapContainer>
+                </GoogleMap>
+              ) : (
+                <div className="flex items-center justify-center h-full bg-muted">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
               )}
               
               {/* Instruction overlay */}
-              {!mapCoordinates && (
+              {!mapCoordinates && isGoogleMapsLoaded && (
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-lg border shadow-lg">
                   <p className="text-sm text-muted-foreground">اضغط على الخريطة لتحديد الموقع</p>
                 </div>
               )}
+              
+              {/* My Location FAB */}
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                onClick={getMapCurrentLocation}
+                className="absolute bottom-4 right-4 z-10 shadow-lg bg-background hover:bg-accent"
+                title="موقعي الحالي"
+              >
+                <Navigation className="w-5 h-5 text-primary" />
+              </Button>
             </div>
 
             {/* Coordinates Input */}
