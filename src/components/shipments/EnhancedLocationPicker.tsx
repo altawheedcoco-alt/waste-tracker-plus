@@ -101,7 +101,35 @@ interface EnhancedLocationPickerProps {
   onChange: (address: string, coordinates?: { lat: number; lng: number }) => void;
   label?: string;
   placeholder?: string;
+  coordinates?: { lat: number; lng: number } | null;
 }
+
+// Helper function to open location in external navigation apps
+const openInWaze = (address: string, coords?: { lat: number; lng: number } | null) => {
+  let url: string;
+  if (coords) {
+    url = `https://waze.com/ul?ll=${coords.lat},${coords.lng}&navigate=yes`;
+  } else {
+    url = `https://waze.com/ul?q=${encodeURIComponent(address)}&navigate=yes`;
+  }
+  window.open(url, '_blank');
+};
+
+const openInGoogleMaps = (address: string, coords?: { lat: number; lng: number } | null) => {
+  let url: string;
+  if (coords) {
+    // Check if mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      url = `google.navigation:q=${coords.lat},${coords.lng}`;
+    } else {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`;
+    }
+  } else {
+    url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  }
+  window.open(url, '_blank');
+};
 
 const EnhancedLocationPicker = ({
   organizationId,
