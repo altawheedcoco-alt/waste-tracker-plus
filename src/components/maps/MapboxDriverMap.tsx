@@ -36,6 +36,13 @@ const MapboxDriverMap = ({ latitude, longitude, accuracy }: MapboxDriverMapProps
         style={{ width: '100%', height: '100%' }}
         interactive={false}
         attributionControl={false}
+        onLoad={(e) => {
+          const map = e.target;
+          const arabicLayers = ['country-label', 'state-label', 'settlement-label', 'settlement-subdivision-label', 'airport-label', 'poi-label', 'road-label', 'natural-point-label', 'natural-line-label', 'waterway-label', 'water-point-label', 'water-line-label'];
+          arabicLayers.forEach(layer => {
+            try { map.setLayoutProperty(layer, 'text-field', ['get', 'name_ar']); } catch {}
+          });
+        }}
       >
         <Marker longitude={longitude} latitude={latitude} anchor="center">
           <div className="relative">

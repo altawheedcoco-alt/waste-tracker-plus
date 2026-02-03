@@ -129,6 +129,14 @@ const MapboxDriverTrackingMap = ({
             mapStyle="mapbox://styles/mapbox/streets-v12"
             style={{ width: '100%', height: '100%' }}
             attributionControl={false}
+            locale={{ 'NavigationControl.ZoomIn': 'تكبير', 'NavigationControl.ZoomOut': 'تصغير', 'NavigationControl.ResetBearing': 'إعادة الاتجاه' }}
+            onLoad={(e) => {
+              const map = e.target;
+              const arabicLayers = ['country-label', 'state-label', 'settlement-label', 'settlement-subdivision-label', 'airport-label', 'poi-label', 'road-label', 'natural-point-label', 'natural-line-label', 'waterway-label', 'water-point-label', 'water-line-label'];
+              arabicLayers.forEach(layer => {
+                try { map.setLayoutProperty(layer, 'text-field', ['get', 'name_ar']); } catch {}
+              });
+            }}
           >
             <NavigationControl position="top-left" />
 
