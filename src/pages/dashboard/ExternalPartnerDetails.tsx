@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,11 +17,14 @@ import {
   Mail,
   Hash,
   ExternalLink,
+  Plus,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useAuth } from '@/contexts/AuthContext';
+import CreateExternalInvoiceDialog from '@/components/invoices/CreateExternalInvoiceDialog';
 
 export default function ExternalPartnerDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
