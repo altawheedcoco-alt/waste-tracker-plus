@@ -140,6 +140,7 @@ const EnhancedLocationPicker = ({
   onChange,
   label = 'الموقع',
   placeholder = 'اختر الموقع',
+  coordinates,
 }: EnhancedLocationPickerProps) => {
   const { profile } = useAuth();
   const [locations, setLocations] = useState<OrganizationLocation[]>([]);
