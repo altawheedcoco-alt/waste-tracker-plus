@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+/// <reference types="@types/google.maps" />
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useEnhancedLocationSearch, SearchResult, AISearchSuggestion } from '@/hooks/useEnhancedLocationSearch';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,15 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+interface GooglePlacePrediction {
+  place_id: string;
+  description: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+}
+
 interface SmartLocationSearchProps {
   value?: string;
   onChange: (address: string, coordinates?: { lat: number; lng: number }) => void;
@@ -29,6 +39,7 @@ interface SmartLocationSearchProps {
   showCurrentLocation?: boolean;
   includeAllOrganizations?: boolean;
   enableAI?: boolean;
+  enableGooglePlaces?: boolean;
 }
 
 const SmartLocationSearch = ({
@@ -39,6 +50,7 @@ const SmartLocationSearch = ({
   showCurrentLocation = true,
   includeAllOrganizations = true,
   enableAI = true,
+  enableGooglePlaces = true,
 }: SmartLocationSearchProps) => {
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -48,6 +60,14 @@ const SmartLocationSearch = ({
   const [alternativeQueries, setAlternativeQueries] = useState<string[]>([]);
   const [correctedQuery, setCorrectedQuery] = useState<string | null>(null);
   const [loadingAI, setLoadingAI] = useState(false);
+  
+  // Google Places state
+  const [googlePredictions, setGooglePredictions] = useState<GooglePlacePrediction[]>([]);
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
+  const [isGoogleReady, setIsGoogleReady] = useState(false);
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +75,64 @@ const SmartLocationSearch = ({
     referencePoint,
     includeAllOrganizations,
   });
+
+  // Initialize Google Places services
+  useEffect(() => {
+    if (!enableGooglePlaces) return;
+    
+    const initServices = () => {
+      if (typeof google !== 'undefined' && google.maps?.places) {
+        autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+        const dummyDiv = document.createElement('div');
+        placesServiceRef.current = new google.maps.places.PlacesService(dummyDiv);
+        setIsGoogleReady(true);
+      }
+    };
+
+    if (typeof google !== 'undefined' && google.maps?.places) {
+      initServices();
+    } else {
+      const checkInterval = setInterval(() => {
+        if (typeof google !== 'undefined' && google.maps?.places) {
+          initServices();
+          clearInterval(checkInterval);
+        }
+      }, 100);
+
+      const timeout = setTimeout(() => clearInterval(checkInterval), 10000);
+      return () => {
+        clearInterval(checkInterval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [enableGooglePlaces]);
+
+  // Google Places search function
+  const searchGooglePlaces = useCallback((searchQuery: string) => {
+    if (!autocompleteServiceRef.current || searchQuery.length < 2 || !enableGooglePlaces) {
+      setGooglePredictions([]);
+      return;
+    }
+
+    setLoadingGoogle(true);
+
+    autocompleteServiceRef.current.getPlacePredictions(
+      {
+        input: searchQuery,
+        componentRestrictions: { country: 'eg' },
+        types: ['geocode', 'establishment'],
+        language: 'ar',
+      },
+      (predictions, status) => {
+        setLoadingGoogle(false);
+        if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+          setGooglePredictions(predictions.slice(0, 5) as unknown as GooglePlacePrediction[]);
+        } else {
+          setGooglePredictions([]);
+        }
+      }
+    );
+  }, [enableGooglePlaces]);
 
   // Get user's current location for proximity sorting
   useEffect(() => {
@@ -81,6 +159,11 @@ const SmartLocationSearch = ({
         search(query);
         setShowResults(true);
         
+        // Search Google Places in parallel
+        if (enableGooglePlaces && isGoogleReady) {
+          searchGooglePlaces(query);
+        }
+        
         // Trigger AI search for expanded results
         if (enableAI && query.length >= 3) {
           setLoadingAI(true);
@@ -92,15 +175,16 @@ const SmartLocationSearch = ({
         }
       } else {
         clearResults();
+        setGooglePredictions([]);
         setAiSuggestions([]);
         setAlternativeQueries([]);
         setCorrectedQuery(null);
         setShowResults(false);
       }
-    }, 500);
+    }, 300); // Reduced debounce for faster response
 
     return () => clearTimeout(timer);
-  }, [query, search, searchWithAI, clearResults, enableAI]);
+  }, [query, search, searchWithAI, clearResults, enableAI, enableGooglePlaces, isGoogleReady, searchGooglePlaces]);
 
   // Close results when clicking outside
   useEffect(() => {
@@ -125,6 +209,40 @@ const SmartLocationSearch = ({
     setAiSuggestions([]);
     setAlternativeQueries([]);
     toast.success('تم اختيار الموقع');
+  };
+
+  // Handle Google Place selection
+  const handleGooglePlaceSelect = (prediction: GooglePlacePrediction) => {
+    if (!placesServiceRef.current) return;
+
+    setLoadingGoogle(true);
+    placesServiceRef.current.getDetails(
+      {
+        placeId: prediction.place_id,
+        fields: ['formatted_address', 'geometry', 'name'],
+      },
+      (place, status) => {
+        setLoadingGoogle(false);
+        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+          const address = place.formatted_address || prediction.description;
+          const coords = place.geometry?.location
+            ? {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              }
+            : undefined;
+
+          onChange(address, coords);
+          setQuery('');
+          setShowResults(false);
+          clearResults();
+          setGooglePredictions([]);
+          setAiSuggestions([]);
+          setAlternativeQueries([]);
+          toast.success('تم اختيار الموقع من Google Maps');
+        }
+      }
+    );
   };
 
   const handleAISuggestionClick = async (suggestion: AISearchSuggestion) => {
@@ -181,6 +299,10 @@ const SmartLocationSearch = ({
     );
   };
 
+  const isLoading = loading || loadingAI || loadingGoogle;
+  const hasGoogleResults = googlePredictions.length > 0;
+  const hasAnyResults = results.length > 0 || hasGoogleResults || aiSuggestions.length > 0 || alternativeQueries.length > 0;
+
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <div className="flex gap-2">
@@ -194,9 +316,10 @@ const SmartLocationSearch = ({
             className="pr-10 pl-10"
             onFocus={() => query.length >= 1 && setShowResults(true)}
           />
-          {loading || loadingAI ? (
+          {isLoading ? (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+              {loadingGoogle && <MapPin className="w-3 h-3 text-red-500 animate-pulse" />}
               {loadingAI && <Sparkles className="w-3 h-3 text-primary animate-pulse" />}
             </div>
           ) : query && (
@@ -206,6 +329,7 @@ const SmartLocationSearch = ({
               onClick={() => {
                 setQuery('');
                 clearResults();
+                setGooglePredictions([]);
                 setAiSuggestions([]);
                 setAlternativeQueries([]);
                 setCorrectedQuery(null);
@@ -235,20 +359,26 @@ const SmartLocationSearch = ({
         )}
       </div>
 
-      {/* AI Badge */}
-      {enableAI && (
-        <div className="flex items-center gap-1.5 mt-1.5">
+      {/* Search Source Badges */}
+      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        {enableGooglePlaces && isGoogleReady && (
+          <Badge variant="outline" className="text-[10px] gap-1 py-0 h-5 bg-red-500/10 text-red-600 border-red-200 dark:border-red-800">
+            <MapPin className="w-3 h-3" />
+            Google Maps
+          </Badge>
+        )}
+        {enableAI && (
           <Badge variant="secondary" className="text-[10px] gap-1 py-0 h-5 bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary border-0">
             <Wand2 className="w-3 h-3" />
-            بحث ذكي بالذكاء الاصطناعي
+            ذكاء اصطناعي
           </Badge>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Search Results Dropdown - Google Style */}
-      {showResults && (results.length > 0 || loading || loadingAI || aiSuggestions.length > 0 || alternativeQueries.length > 0) && (
+      {showResults && (hasAnyResults || isLoading) && (
         <Card className="absolute z-50 top-full mt-2 w-full shadow-xl border-0 rounded-xl overflow-hidden bg-background">
-          <ScrollArea className="max-h-[450px]">
+          <ScrollArea className="max-h-[500px]">
             {/* Corrected Query Suggestion */}
             {correctedQuery && correctedQuery !== query && (
               <button
@@ -282,6 +412,48 @@ const SmartLocationSearch = ({
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Google Places Results - Priority Section */}
+            {hasGoogleResults && (
+              <div className="border-b">
+                <div className="px-4 py-2 bg-gradient-to-r from-red-500/5 to-orange-500/5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-medium text-red-600 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      نتائج Google Maps
+                    </p>
+                    <img
+                      src="https://developers.google.com/static/maps/documentation/images/powered_by_google_on_white.png"
+                      alt="Powered by Google"
+                      className="h-3 opacity-60"
+                    />
+                  </div>
+                </div>
+                {googlePredictions.map((prediction) => (
+                  <button
+                    key={prediction.place_id}
+                    type="button"
+                    className="w-full px-4 py-2.5 text-right hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150 flex items-start gap-3 group"
+                    onClick={() => handleGooglePlaceSelect(prediction)}
+                  >
+                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-red-500/10 text-red-600">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-medium text-sm text-foreground group-hover:text-red-600 transition-colors block truncate">
+                        {prediction.structured_formatting.main_text}
+                      </span>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {prediction.structured_formatting.secondary_text}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-red-200 text-red-500 self-center">
+                      Google
+                    </Badge>
+                  </button>
+                ))}
               </div>
             )}
 
@@ -320,18 +492,18 @@ const SmartLocationSearch = ({
               </div>
             )}
 
-            {loading && results.length === 0 ? (
+            {isLoading && results.length === 0 && !hasGoogleResults ? (
               <div className="flex items-center justify-center py-10">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                <span className="mr-3 text-sm text-muted-foreground">جاري البحث...</span>
+                <span className="mr-3 text-sm text-muted-foreground">جاري البحث في Google Maps...</span>
               </div>
-            ) : results.length === 0 && aiSuggestions.length === 0 ? (
+            ) : results.length === 0 && aiSuggestions.length === 0 && !hasGoogleResults ? (
               <div className="p-8 text-center">
                 <Globe className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
                 <p className="text-sm text-muted-foreground">لا توجد نتائج لـ "{query}"</p>
                 <p className="text-xs text-muted-foreground/70 mt-1">جرب البحث بكلمات مختلفة</p>
               </div>
-            ) : (
+            ) : results.length > 0 && (
               <div className="divide-y divide-border/50">
                 {results.map((result) => (
                   <button
