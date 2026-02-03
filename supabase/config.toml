@@ -1,5 +1,8 @@
 project_id = "jejwizkssmqzxwseqsre"
 
+[functions.google-places-search]
+verify_jwt = false
+
 [functions.register-driver]
 verify_jwt = false
 
