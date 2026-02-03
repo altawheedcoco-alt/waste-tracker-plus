@@ -394,49 +394,109 @@ const MapExplorer = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="pt-4">
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Crosshair className="w-5 h-5 text-primary" />
+            <Card className="bg-gradient-to-l from-primary/10 to-primary/5 border-primary/30 shadow-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-3 text-lg">
+                  <div className="p-2.5 bg-primary rounded-xl shadow-md">
+                    <MapPin className="w-5 h-5 text-primary-foreground" />
                   </div>
-                  <div className="flex-1 space-y-2">
-                    <h3 className="font-semibold">الموقع المحدد</h3>
-                    
-                    {selectedAddress && (
-                      <div className="flex items-center justify-between gap-2 p-2 bg-background rounded-lg">
-                        <p className="text-sm text-muted-foreground line-clamp-2">{selectedAddress}</p>
-                        <Button variant="ghost" size="sm" onClick={handleCopyAddress}>
-                          نسخ
-                        </Button>
+                  <div>
+                    <span>الموقع المحدد</span>
+                    <p className="text-sm font-normal text-muted-foreground mt-0.5">
+                      تم تحديد الموقع بنجاح - يمكنك نسخ البيانات أو فتحه في خرائط جوجل
+                    </p>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Address */}
+                {selectedAddress && (
+                  <div className="p-4 bg-background rounded-xl border shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        <MapPinned className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">العنوان</p>
+                          <p className="text-sm leading-relaxed">{selectedAddress}</p>
+                        </div>
                       </div>
-                    )}
-                    
-                    <div className="flex items-center justify-between gap-2 p-2 bg-background rounded-lg">
-                      <p className="text-sm font-mono text-muted-foreground">
-                        {selectedPosition.lat.toFixed(6)}, {selectedPosition.lng.toFixed(6)}
-                      </p>
-                      <Button variant="ghost" size="sm" onClick={handleCopyCoordinates}>
-                        نسخ
-                      </Button>
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
                       <Button 
                         variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          window.open(
-                            `https://www.google.com/maps/search/?api=1&query=${selectedPosition.lat},${selectedPosition.lng}`,
-                            '_blank'
-                          );
-                        }}
+                        size="sm" 
+                        onClick={handleCopyAddress}
+                        className="shrink-0"
                       >
-                        <Navigation className="w-4 h-4 ml-1" />
-                        فتح في خرائط جوجل
+                        نسخ العنوان
                       </Button>
                     </div>
                   </div>
+                )}
+                
+                {/* Coordinates */}
+                <div className="p-4 bg-background rounded-xl border shadow-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <Crosshair className="w-5 h-5 text-primary shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">الإحداثيات</p>
+                        <p className="text-sm font-mono" dir="ltr">
+                          {selectedPosition.lat.toFixed(6)}, {selectedPosition.lng.toFixed(6)}
+                        </p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleCopyCoordinates}
+                      className="shrink-0"
+                    >
+                      نسخ الإحداثيات
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <Button 
+                    onClick={() => {
+                      const url = `https://www.google.com/maps?q=${selectedPosition.lat},${selectedPosition.lng}`;
+                      window.open(url, '_blank');
+                    }}
+                    className="flex-1 min-w-[140px] gap-2"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    فتح في خرائط جوجل
+                  </Button>
+                  
+                  <Button 
+                    variant="secondary"
+                    onClick={() => {
+                      const data = {
+                        lat: selectedPosition.lat,
+                        lng: selectedPosition.lng,
+                        address: selectedAddress
+                      };
+                      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+                      toast.success('تم نسخ بيانات الموقع الكاملة');
+                    }}
+                    className="flex-1 min-w-[140px] gap-2"
+                  >
+                    <Crosshair className="w-4 h-4" />
+                    نسخ البيانات الكاملة
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedPosition(null);
+                      setSelectedAddress('');
+                      toast.info('تم إلغاء تحديد الموقع');
+                    }}
+                    className="gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    إلغاء التحديد
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -445,17 +505,32 @@ const MapExplorer = () => {
       </AnimatePresence>
 
       {/* Info Card */}
-      <Card className="bg-muted/30">
-        <CardContent className="pt-4">
-          <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>• نتائج البحث مدمجة من الذكاء الاصطناعي، خرائط Mapbox، وقاعدة بيانات محلية</p>
-              <p>• قاعدة البيانات تشمل 50+ منطقة صناعية ومصنع في مصر</p>
-              <p>• الذكاء الاصطناعي يقترح تصحيحات إملائية ومواقع بديلة</p>
-              <p>• اضغط على أي نقطة على الخريطة لتحديد موقع يدوياً</p>
-            </div>
-          </div>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Info className="w-4 h-4 text-muted-foreground" />
+            نصائح الاستخدام
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="text-sm text-muted-foreground space-y-2">
+            <li className="flex items-center gap-2">
+              <Search className="w-4 h-4 text-primary" />
+              ابحث عن أي موقع باللغة العربية أو الإنجليزية
+            </li>
+            <li className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-primary" />
+              اضغط على الخريطة مباشرة لتحديد موقع
+            </li>
+            <li className="flex items-center gap-2">
+              <Factory className="w-4 h-4 text-primary" />
+              نتائج البحث تشمل المصانع والمناطق الصناعية في مصر
+            </li>
+            <li className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              الذكاء الاصطناعي يساعدك في تصحيح الأخطاء الإملائية
+            </li>
+          </ul>
         </CardContent>
       </Card>
     </div>
