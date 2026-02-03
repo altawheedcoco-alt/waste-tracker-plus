@@ -1,4 +1,3 @@
-/// <reference types="@types/google.maps" />
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useEnhancedLocationSearch, SearchResult, AISearchSuggestion } from '@/hooks/useEnhancedLocationSearch';
 import { Input } from '@/components/ui/input';
@@ -22,12 +21,21 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-interface GooglePlacePrediction {
-  place_id: string;
-  description: string;
-  structured_formatting: {
-    main_text: string;
-    secondary_text: string;
+interface PhotonResult {
+  type: string;
+  geometry: {
+    coordinates: [number, number];
+    type: string;
+  };
+  properties: {
+    osm_id: number;
+    name?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    street?: string;
+    housenumber?: string;
+    countrycode?: string;
   };
 }
 
@@ -39,8 +47,10 @@ interface SmartLocationSearchProps {
   showCurrentLocation?: boolean;
   includeAllOrganizations?: boolean;
   enableAI?: boolean;
-  enableGooglePlaces?: boolean;
 }
+
+// Photon API for free places search
+const PHOTON_API = 'https://photon.komoot.io/api';
 
 const SmartLocationSearch = ({
   value,
@@ -50,7 +60,6 @@ const SmartLocationSearch = ({
   showCurrentLocation = true,
   includeAllOrganizations = true,
   enableAI = true,
-  enableGooglePlaces = true,
 }: SmartLocationSearchProps) => {
   const [query, setQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
@@ -61,12 +70,9 @@ const SmartLocationSearch = ({
   const [correctedQuery, setCorrectedQuery] = useState<string | null>(null);
   const [loadingAI, setLoadingAI] = useState(false);
   
-  // Google Places state
-  const [googlePredictions, setGooglePredictions] = useState<GooglePlacePrediction[]>([]);
-  const [loadingGoogle, setLoadingGoogle] = useState(false);
-  const [isGoogleReady, setIsGoogleReady] = useState(false);
-  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
-  const placesServiceRef = useRef<google.maps.places.PlacesService | null>(null);
+  // Free Places search state (Photon/Nominatim)
+  const [photonResults, setPhotonResults] = useState<PhotonResult[]>([]);
+  const [loadingPhoton, setLoadingPhoton] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -76,63 +82,59 @@ const SmartLocationSearch = ({
     includeAllOrganizations,
   });
 
-  // Initialize Google Places services
-  useEffect(() => {
-    if (!enableGooglePlaces) return;
-    
-    const initServices = () => {
-      if (typeof google !== 'undefined' && google.maps?.places) {
-        autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
-        const dummyDiv = document.createElement('div');
-        placesServiceRef.current = new google.maps.places.PlacesService(dummyDiv);
-        setIsGoogleReady(true);
-      }
-    };
-
-    if (typeof google !== 'undefined' && google.maps?.places) {
-      initServices();
-    } else {
-      const checkInterval = setInterval(() => {
-        if (typeof google !== 'undefined' && google.maps?.places) {
-          initServices();
-          clearInterval(checkInterval);
-        }
-      }, 100);
-
-      const timeout = setTimeout(() => clearInterval(checkInterval), 10000);
-      return () => {
-        clearInterval(checkInterval);
-        clearTimeout(timeout);
-      };
-    }
-  }, [enableGooglePlaces]);
-
-  // Google Places search function
-  const searchGooglePlaces = useCallback((searchQuery: string) => {
-    if (!autocompleteServiceRef.current || searchQuery.length < 2 || !enableGooglePlaces) {
-      setGooglePredictions([]);
+  // Search using free Photon API
+  const searchPhoton = useCallback(async (searchQuery: string) => {
+    if (searchQuery.length < 2) {
+      setPhotonResults([]);
       return;
     }
 
-    setLoadingGoogle(true);
-
-    autocompleteServiceRef.current.getPlacePredictions(
-      {
-        input: searchQuery,
-        componentRestrictions: { country: 'eg' },
-        types: ['geocode', 'establishment'],
-        language: 'ar',
-      },
-      (predictions, status) => {
-        setLoadingGoogle(false);
-        if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-          setGooglePredictions(predictions.slice(0, 5) as unknown as GooglePlacePrediction[]);
-        } else {
-          setGooglePredictions([]);
-        }
+    setLoadingPhoton(true);
+    try {
+      const url = `${PHOTON_API}?q=${encodeURIComponent(searchQuery)}&limit=6&lang=ar&lat=30.0444&lon=31.2357`;
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.features) {
+        // Prioritize Egypt results
+        const filtered = data.features.filter((f: PhotonResult) => {
+          const cc = f.properties.countrycode?.toUpperCase();
+          return cc === 'EG' || !cc;
+        });
+        setPhotonResults(filtered.slice(0, 5));
       }
-    );
-  }, [enableGooglePlaces]);
+    } catch (error) {
+      console.error('Photon search error:', error);
+      // Fallback to Nominatim
+      try {
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=eg&limit=5&accept-language=ar`;
+        const response = await fetch(nominatimUrl);
+        const data = await response.json();
+        
+        if (data?.length > 0) {
+          const converted = data.map((item: any) => ({
+            type: 'Feature',
+            geometry: {
+              coordinates: [parseFloat(item.lon), parseFloat(item.lat)],
+              type: 'Point',
+            },
+            properties: {
+              osm_id: item.osm_id,
+              name: item.display_name.split(',')[0],
+              city: item.address?.city || item.address?.town,
+              state: item.address?.state,
+              country: item.address?.country,
+            },
+          }));
+          setPhotonResults(converted);
+        }
+      } catch {
+        setPhotonResults([]);
+      }
+    } finally {
+      setLoadingPhoton(false);
+    }
+  }, []);
 
   // Get user's current location for proximity sorting
   useEffect(() => {
@@ -152,17 +154,15 @@ const SmartLocationSearch = ({
     }
   }, []);
 
-  // Debounced search - 500ms delay to reduce API calls
+  // Debounced search
   useEffect(() => {
     const timer = setTimeout(async () => {
       if (query.length >= 1) {
         search(query);
         setShowResults(true);
         
-        // Search Google Places in parallel
-        if (enableGooglePlaces && isGoogleReady) {
-          searchGooglePlaces(query);
-        }
+        // Search free places in parallel
+        searchPhoton(query);
         
         // Trigger AI search for expanded results
         if (enableAI && query.length >= 3) {
@@ -175,16 +175,16 @@ const SmartLocationSearch = ({
         }
       } else {
         clearResults();
-        setGooglePredictions([]);
+        setPhotonResults([]);
         setAiSuggestions([]);
         setAlternativeQueries([]);
         setCorrectedQuery(null);
         setShowResults(false);
       }
-    }, 300); // Reduced debounce for faster response
+    }, 300);
 
     return () => clearTimeout(timer);
-  }, [query, search, searchWithAI, clearResults, enableAI, enableGooglePlaces, isGoogleReady, searchGooglePlaces]);
+  }, [query, search, searchWithAI, clearResults, enableAI, searchPhoton]);
 
   // Close results when clicking outside
   useEffect(() => {
@@ -211,42 +211,32 @@ const SmartLocationSearch = ({
     toast.success('تم اختيار الموقع');
   };
 
-  // Handle Google Place selection
-  const handleGooglePlaceSelect = (prediction: GooglePlacePrediction) => {
-    if (!placesServiceRef.current) return;
+  // Handle Photon result selection
+  const handlePhotonSelect = (result: PhotonResult) => {
+    const coords = {
+      lat: result.geometry.coordinates[1],
+      lng: result.geometry.coordinates[0],
+    };
 
-    setLoadingGoogle(true);
-    placesServiceRef.current.getDetails(
-      {
-        placeId: prediction.place_id,
-        fields: ['formatted_address', 'geometry', 'name'],
-      },
-      (place, status) => {
-        setLoadingGoogle(false);
-        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-          const address = place.formatted_address || prediction.description;
-          const coords = place.geometry?.location
-            ? {
-                lat: place.geometry.location.lat(),
-                lng: place.geometry.location.lng(),
-              }
-            : undefined;
+    // Build address
+    const parts: string[] = [];
+    if (result.properties.name) parts.push(result.properties.name);
+    if (result.properties.city) parts.push(result.properties.city);
+    if (result.properties.state) parts.push(result.properties.state);
+    if (result.properties.country) parts.push(result.properties.country);
+    const address = parts.join('، ');
 
-          onChange(address, coords);
-          setQuery('');
-          setShowResults(false);
-          clearResults();
-          setGooglePredictions([]);
-          setAiSuggestions([]);
-          setAlternativeQueries([]);
-          toast.success('تم اختيار الموقع من Google Maps');
-        }
-      }
-    );
+    onChange(address, coords);
+    setQuery('');
+    setShowResults(false);
+    clearResults();
+    setPhotonResults([]);
+    setAiSuggestions([]);
+    setAlternativeQueries([]);
+    toast.success('تم اختيار الموقع');
   };
 
   const handleAISuggestionClick = async (suggestion: AISearchSuggestion) => {
-    // Search for the AI suggestion using Nominatim
     const searchQuery = `${suggestion.name} ${suggestion.city}`;
     setQuery(searchQuery);
     search(searchQuery);
@@ -299,9 +289,9 @@ const SmartLocationSearch = ({
     );
   };
 
-  const isLoading = loading || loadingAI || loadingGoogle;
-  const hasGoogleResults = googlePredictions.length > 0;
-  const hasAnyResults = results.length > 0 || hasGoogleResults || aiSuggestions.length > 0 || alternativeQueries.length > 0;
+  const isLoading = loading || loadingAI || loadingPhoton;
+  const hasPhotonResults = photonResults.length > 0;
+  const hasAnyResults = results.length > 0 || hasPhotonResults || aiSuggestions.length > 0 || alternativeQueries.length > 0;
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -319,7 +309,7 @@ const SmartLocationSearch = ({
           {isLoading ? (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              {loadingGoogle && <MapPin className="w-3 h-3 text-red-500 animate-pulse" />}
+              {loadingPhoton && <Globe className="w-3 h-3 text-green-500 animate-pulse" />}
               {loadingAI && <Sparkles className="w-3 h-3 text-primary animate-pulse" />}
             </div>
           ) : query && (
@@ -329,7 +319,7 @@ const SmartLocationSearch = ({
               onClick={() => {
                 setQuery('');
                 clearResults();
-                setGooglePredictions([]);
+                setPhotonResults([]);
                 setAiSuggestions([]);
                 setAlternativeQueries([]);
                 setCorrectedQuery(null);
@@ -361,12 +351,10 @@ const SmartLocationSearch = ({
 
       {/* Search Source Badges */}
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        {enableGooglePlaces && isGoogleReady && (
-          <Badge variant="outline" className="text-[10px] gap-1 py-0 h-5 bg-red-500/10 text-red-600 border-red-200 dark:border-red-800">
-            <MapPin className="w-3 h-3" />
-            Google Maps
-          </Badge>
-        )}
+        <Badge variant="outline" className="text-[10px] gap-1 py-0 h-5 bg-green-500/10 text-green-600 border-green-200 dark:border-green-800">
+          <Globe className="w-3 h-3" />
+          OpenStreetMap (مجاني)
+        </Badge>
         {enableAI && (
           <Badge variant="secondary" className="text-[10px] gap-1 py-0 h-5 bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary border-0">
             <Wand2 className="w-3 h-3" />
@@ -375,7 +363,7 @@ const SmartLocationSearch = ({
         )}
       </div>
 
-      {/* Search Results Dropdown - Google Style */}
+      {/* Search Results Dropdown */}
       {showResults && (hasAnyResults || isLoading) && (
         <Card className="absolute z-50 top-full mt-2 w-full shadow-xl border-0 rounded-xl overflow-hidden bg-background">
           <ScrollArea className="max-h-[500px]">
@@ -415,42 +403,37 @@ const SmartLocationSearch = ({
               </div>
             )}
 
-            {/* Google Places Results - Priority Section */}
-            {hasGoogleResults && (
+            {/* Free OSM/Photon Results */}
+            {hasPhotonResults && (
               <div className="border-b">
-                <div className="px-4 py-2 bg-gradient-to-r from-red-500/5 to-orange-500/5">
+                <div className="px-4 py-2 bg-gradient-to-r from-green-500/5 to-emerald-500/5">
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-medium text-red-600 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      نتائج Google Maps
+                    <p className="text-[11px] font-medium text-green-600 flex items-center gap-1">
+                      <Globe className="w-3 h-3" />
+                      نتائج OpenStreetMap (مجاني)
                     </p>
-                    <img
-                      src="https://developers.google.com/static/maps/documentation/images/powered_by_google_on_white.png"
-                      alt="Powered by Google"
-                      className="h-3 opacity-60"
-                    />
                   </div>
                 </div>
-                {googlePredictions.map((prediction) => (
+                {photonResults.map((result, index) => (
                   <button
-                    key={prediction.place_id}
+                    key={`osm-${result.properties.osm_id}-${index}`}
                     type="button"
-                    className="w-full px-4 py-2.5 text-right hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150 flex items-start gap-3 group"
-                    onClick={() => handleGooglePlaceSelect(prediction)}
+                    className="w-full px-4 py-2.5 text-right hover:bg-green-50 dark:hover:bg-green-950/20 transition-all duration-150 flex items-start gap-3 group"
+                    onClick={() => handlePhotonSelect(result)}
                   >
-                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-red-500/10 text-red-600">
+                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-green-500/10 text-green-600">
                       <MapPin className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="font-medium text-sm text-foreground group-hover:text-red-600 transition-colors block truncate">
-                        {prediction.structured_formatting.main_text}
+                      <span className="font-medium text-sm text-foreground group-hover:text-green-600 transition-colors block truncate">
+                        {result.properties.name || result.properties.street || 'موقع'}
                       </span>
                       <p className="text-xs text-muted-foreground truncate">
-                        {prediction.structured_formatting.secondary_text}
+                        {[result.properties.city, result.properties.state].filter(Boolean).join('، ')}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-red-200 text-red-500 self-center">
-                      Google
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-green-200 text-green-500 self-center">
+                      OSM
                     </Badge>
                   </button>
                 ))}
@@ -492,12 +475,12 @@ const SmartLocationSearch = ({
               </div>
             )}
 
-            {isLoading && results.length === 0 && !hasGoogleResults ? (
+            {isLoading && results.length === 0 && !hasPhotonResults ? (
               <div className="flex items-center justify-center py-10">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                <span className="mr-3 text-sm text-muted-foreground">جاري البحث في Google Maps...</span>
+                <span className="mr-3 text-sm text-muted-foreground">جاري البحث...</span>
               </div>
-            ) : results.length === 0 && aiSuggestions.length === 0 && !hasGoogleResults ? (
+            ) : results.length === 0 && aiSuggestions.length === 0 && !hasPhotonResults ? (
               <div className="p-8 text-center">
                 <Globe className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
                 <p className="text-sm text-muted-foreground">لا توجد نتائج لـ "{query}"</p>
@@ -512,7 +495,7 @@ const SmartLocationSearch = ({
                     className="w-full px-4 py-3 text-right hover:bg-muted/30 transition-all duration-150 flex items-start gap-3 group"
                     onClick={() => handleSelect(result)}
                   >
-                    {/* Icon Container - Google Style */}
+                    {/* Icon Container */}
                     <div className={cn(
                       "mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
                       result.type === 'saved' && "bg-primary/10 text-primary",
@@ -526,9 +509,8 @@ const SmartLocationSearch = ({
                       {result.type === 'ai' && <Sparkles className="w-4 h-4" />}
                     </div>
                     
-                    {/* Content - Talabat Style */}
+                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      {/* Title Row with City Badge */}
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
                           {result.name}
@@ -546,7 +528,6 @@ const SmartLocationSearch = ({
                         )}
                       </div>
                       
-                      {/* Organization/Category Line */}
                       {result.organizationName && (
                         <p className="text-xs text-primary/80 mb-0.5 flex items-center gap-1">
                           <Building2 className="w-3 h-3" />
@@ -554,12 +535,10 @@ const SmartLocationSearch = ({
                         </p>
                       )}
                       
-                      {/* Address - Like Google Description */}
                       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                         {result.address}
                       </p>
                       
-                      {/* Distance Badge - Bottom Right, Talabat Style */}
                       {result.distance !== undefined && (
                         <div className="flex items-center gap-1 mt-1.5">
                           <div className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-muted/50 text-muted-foreground">
@@ -577,7 +556,6 @@ const SmartLocationSearch = ({
                       )}
                     </div>
                     
-                    {/* Arrow indicator on hover */}
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity self-center">
                       <svg className="w-4 h-4 text-muted-foreground rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -586,11 +564,10 @@ const SmartLocationSearch = ({
                   </button>
                 ))}
                 
-                {/* Footer hint */}
                 <div className="px-4 py-2 bg-muted/20 text-center">
                   <p className="text-[11px] text-muted-foreground flex items-center justify-center gap-1">
-                    <Sparkles className="w-3 h-3 text-primary" />
-                    مدعوم بالذكاء الاصطناعي للبحث الموسع
+                    <Globe className="w-3 h-3 text-green-500" />
+                    بحث مجاني بالكامل - OpenStreetMap
                   </p>
                 </div>
               </div>
