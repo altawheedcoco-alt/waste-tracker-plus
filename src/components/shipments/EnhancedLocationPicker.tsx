@@ -403,9 +403,15 @@ const EnhancedLocationPicker = ({
     region: 'EG',
   });
 
+  // Initialize AutocompleteService as soon as Google Maps is loaded
+  useEffect(() => {
+    if (isGoogleMapsLoaded && !autocompleteServiceRef.current) {
+      autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+    }
+  }, [isGoogleMapsLoaded]);
+
   const onGoogleMapLoad = useCallback((map: google.maps.Map) => {
     setGoogleMapInstance(map);
-    autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
     placesServiceRef.current = new google.maps.places.PlacesService(map);
   }, []);
 
