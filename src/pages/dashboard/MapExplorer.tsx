@@ -321,17 +321,36 @@ const MapExplorer = () => {
               }}
               onLoad={(e) => {
                 const map = e.target;
-                try {
-                  map.setLayoutProperty('country-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('state-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('settlement-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('settlement-subdivision-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('airport-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('poi-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('road-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('natural-point-label', 'text-field', ['get', 'name_ar']);
-                  map.setLayoutProperty('waterway-label', 'text-field', ['get', 'name_ar']);
-                } catch {}
+                // تعريب جميع التسميات على الخريطة
+                const arabicLayers = [
+                  'country-label',
+                  'state-label', 
+                  'settlement-label',
+                  'settlement-subdivision-label',
+                  'settlement-minor-label',
+                  'airport-label',
+                  'poi-label',
+                  'transit-label',
+                  'road-label',
+                  'road-number-shield',
+                  'natural-point-label',
+                  'natural-line-label',
+                  'waterway-label',
+                  'water-point-label',
+                  'water-line-label',
+                  'place-city-label',
+                  'place-town-label',
+                  'place-village-label',
+                  'place-neighborhood-label'
+                ];
+                
+                arabicLayers.forEach(layerId => {
+                  try {
+                    if (map.getLayer(layerId)) {
+                      map.setLayoutProperty(layerId, 'text-field', ['coalesce', ['get', 'name_ar'], ['get', 'name']]);
+                    }
+                  } catch {}
+                });
               }}
             >
               <NavigationControl position="bottom-right" />
