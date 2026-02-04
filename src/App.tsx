@@ -91,6 +91,7 @@ const SupportCenter = lazy(() => import("./pages/dashboard/SupportCenter"));
 const ApiManagement = lazy(() => import("./pages/dashboard/ApiManagement"));
 const AdvancedAnalytics = lazy(() => import("./pages/dashboard/AdvancedAnalytics"));
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
+const SavedLocationsPage = lazy(() => import("./pages/SavedLocationsPage"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
