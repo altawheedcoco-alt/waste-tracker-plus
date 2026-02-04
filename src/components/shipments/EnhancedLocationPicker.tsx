@@ -687,7 +687,6 @@ const EnhancedLocationPicker = ({
               </div>
             </ScrollArea>
           )}
-          )}
         </TabsContent>
 
         {/* Current Location Tab */}
