@@ -545,7 +545,7 @@ const MapExplorer = () => {
               {facilitiesCount > 0 ? (
                 <>عدد المنشآت المحفوظة: <strong>{facilitiesCount}</strong></>
               ) : (
-                'لا توجد منشآت محفوظة - اضغط على "جلب من OpenStreetMap"'
+                'لا توجد منشآت محفوظة - اضغط على "جلب المنشآت الصناعية"'
               )}
             </p>
           </div>

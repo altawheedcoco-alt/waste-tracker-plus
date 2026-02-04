@@ -849,7 +849,7 @@ const NavigationDemo = () => {
                           alt="Google Maps" 
                           className="w-5 h-5"
                         />
-                        <span className="font-medium">خرائط جوجل + بيانات OSRM</span>
+                        <span className="font-medium">خرائط جوجل + بيانات Mapbox</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 mr-7">
                         {coordinates.length} نقطة GPS • {steps.length} تعليمات ملاحية

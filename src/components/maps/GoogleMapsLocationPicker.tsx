@@ -13,7 +13,7 @@ interface GoogleMapsLocationPickerProps {
 
 /**
  * @deprecated Use FreeInteractiveMap directly instead.
- * This component now uses free OpenStreetMap/Leaflet.
+ * This component now uses Mapbox GL JS.
  */
 const GoogleMapsLocationPicker = ({
   value,
