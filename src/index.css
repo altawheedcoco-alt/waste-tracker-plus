@@ -919,3 +919,69 @@
 .skip-link:focus {
   top: 0;
 }
+
+/* Performance Optimizations */
+
+/* Reduce motion for slow connections */
+.reduce-motion,
+.reduce-motion * {
+  animation-duration: 0.1s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0.1s !important;
+}
+
+/* Data saver mode - reduce visual effects */
+.data-saver {
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-glow: none;
+}
+
+.data-saver .bg-gradient-to-r,
+.data-saver .bg-gradient-to-br,
+.data-saver .bg-gradient-to-b {
+  background: hsl(var(--primary)) !important;
+}
+
+/* Offline indicator support */
+.offline-mode {
+  filter: grayscale(0.3);
+}
+
+/* Touch optimizations for mobile */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-target {
+    padding: 12px;
+  }
+}
+
+/* Hardware acceleration hints */
+.will-change-transform {
+  will-change: transform;
+}
+
+.will-change-opacity {
+  will-change: opacity;
+}
+
+/* Smooth scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Optimize rendering */
+.optimize-rendering {
+  contain: layout style paint;
+}

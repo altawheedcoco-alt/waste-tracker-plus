@@ -8,6 +8,11 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { FocusMusicProvider } from "@/contexts/FocusMusicContext";
 
+// Offline & Performance components
+const OfflineIndicator = lazy(() => import("./components/offline/OfflineIndicator"));
+const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
+const PerformanceOptimizer = lazy(() => import("./components/performance/PerformanceOptimizer"));
+
 // Minimal loading component - optimized for speed
 const PageLoader = memo(() => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -226,6 +231,11 @@ const App = memo(() => (
         <ChatWidget />
         <BetaBanner />
         <AccessibilityPanel />
+        <OfflineIndicator />
+        <OfflineBanner />
+      </Suspense>
+      <Suspense fallback={null}>
+        <PerformanceOptimizer>{null}</PerformanceOptimizer>
       </Suspense>
     </BrowserRouter>
   </Providers>
