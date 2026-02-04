@@ -147,6 +147,6 @@ export const InvoicesRepository = {
       throw error;
     }
 
-    return (data || []) as Invoice[];
+    return (data || []) as unknown as Invoice[];
   },
 };

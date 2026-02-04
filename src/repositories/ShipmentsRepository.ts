@@ -76,8 +76,8 @@ export const ShipmentsRepository = {
       query = query.or(`organization_id.eq.${filters.organization_id},generator_id.eq.${filters.organization_id},transporter_id.eq.${filters.organization_id},recycler_id.eq.${filters.organization_id}`);
     }
 
-    if (filters.status) query = query.eq('status', filters.status);
-    if (filters.waste_type) query = query.eq('waste_type', filters.waste_type);
+    if (filters.status) query = query.eq('status', filters.status as any);
+    if (filters.waste_type) query = query.eq('waste_type', filters.waste_type as any);
     if (filters.generator_id) query = query.eq('generator_id', filters.generator_id);
     if (filters.transporter_id) query = query.eq('transporter_id', filters.transporter_id);
     if (filters.recycler_id) query = query.eq('recycler_id', filters.recycler_id);
@@ -96,7 +96,7 @@ export const ShipmentsRepository = {
       throw error;
     }
 
-    return (data || []) as Shipment[];
+    return (data || []) as unknown as Shipment[];
   },
 
   async updateStatus(id: string, status: string, userId?: string): Promise<Shipment> {

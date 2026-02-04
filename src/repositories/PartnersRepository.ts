@@ -119,7 +119,7 @@ export const PartnersRepository = {
       .or(`name.ilike.%${query}%,email.ilike.%${query}%,phone.ilike.%${query}%`);
 
     if (type) {
-      dbQuery = dbQuery.eq('organization_type', type);
+      dbQuery = dbQuery.eq('organization_type', type as any);
     }
 
     const { data, error } = await dbQuery.order('name', { ascending: true });
@@ -129,7 +129,7 @@ export const PartnersRepository = {
       throw error;
     }
 
-    return (data || []) as Partner[];
+    return (data || []) as unknown as Partner[];
   },
 
   async getStats(organizationId: string): Promise<{
