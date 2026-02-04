@@ -83,7 +83,7 @@ export const InvoicesRepository = {
       throw error;
     }
 
-    return (data || []) as Invoice[];
+    return (data || []) as unknown as Invoice[];
   },
 
   async findByPartner(partnerId: string, organizationId?: string): Promise<Invoice[]> {
