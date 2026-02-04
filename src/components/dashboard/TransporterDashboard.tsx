@@ -25,6 +25,7 @@ import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
+import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import {
   Package,
   Truck,
@@ -388,6 +389,7 @@ const TransporterDashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <AutomationSettingsDialog />
           <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
           <Button 
             variant="outline" 
