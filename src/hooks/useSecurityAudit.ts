@@ -71,7 +71,7 @@ export function useLatestSecurityAudit() {
         .single();
       
       if (error && error.code !== 'PGRST116') throw error;
-      return data as SecurityAudit | null;
+      return data as unknown as SecurityAudit | null;
     },
   });
 }
