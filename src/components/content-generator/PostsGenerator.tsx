@@ -28,7 +28,7 @@ interface PostsGeneratorProps {
   setSelectedOrganizationId: (id: string) => void;
   selectedOrg: Organization | null | undefined;
   targetOrganizationId: string | undefined;
-  profile: { id: string } | null;
+  profile: { id: string; user_id?: string } | null;
 }
 
 const PostsGenerator = ({
