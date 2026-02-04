@@ -6,13 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check, Globe, ExternalLink } from 'lucide-react';
+import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check, Globe, ExternalLink, Star, Bookmark } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
+import { useSavedLocations, SavedLocation } from '@/hooks/useSavedLocations';
 import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
 import MapboxInteractiveMapPicker from '@/components/maps/MapboxInteractiveMapPicker';
 import {
