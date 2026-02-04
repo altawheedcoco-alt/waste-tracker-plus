@@ -237,7 +237,7 @@ const App = memo(() => (
         <ChatWidget />
         <BetaBanner />
         <AccessibilityPanel />
-        <OfflineIndicator />
+        
         <OfflineBanner />
       </Suspense>
       <Suspense fallback={null}>
