@@ -71,6 +71,97 @@ export type Database = {
           },
         ]
       }
+      agent_performance: {
+        Row: {
+          agent_id: string
+          answered_calls: number | null
+          avg_duration_seconds: number | null
+          avg_kpi_score: number | null
+          avg_sentiment_score: number | null
+          avg_wait_time_seconds: number | null
+          created_at: string
+          customer_satisfaction: number | null
+          id: string
+          inbound_calls: number | null
+          kpi_breakdown: Json | null
+          missed_calls: number | null
+          organization_id: string
+          outbound_calls: number | null
+          period_date: string
+          period_type: string | null
+          rank_in_team: number | null
+          total_calls: number | null
+          total_duration_seconds: number | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          answered_calls?: number | null
+          avg_duration_seconds?: number | null
+          avg_kpi_score?: number | null
+          avg_sentiment_score?: number | null
+          avg_wait_time_seconds?: number | null
+          created_at?: string
+          customer_satisfaction?: number | null
+          id?: string
+          inbound_calls?: number | null
+          kpi_breakdown?: Json | null
+          missed_calls?: number | null
+          organization_id: string
+          outbound_calls?: number | null
+          period_date: string
+          period_type?: string | null
+          rank_in_team?: number | null
+          total_calls?: number | null
+          total_duration_seconds?: number | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          answered_calls?: number | null
+          avg_duration_seconds?: number | null
+          avg_kpi_score?: number | null
+          avg_sentiment_score?: number | null
+          avg_wait_time_seconds?: number | null
+          created_at?: string
+          customer_satisfaction?: number | null
+          id?: string
+          inbound_calls?: number | null
+          kpi_breakdown?: Json | null
+          missed_calls?: number | null
+          organization_id?: string
+          outbound_calls?: number | null
+          period_date?: string
+          period_type?: string | null
+          rank_in_team?: number | null
+          total_calls?: number | null
+          total_duration_seconds?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_performance_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_performance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "agent_performance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       aggregate_invoices: {
         Row: {
           created_at: string
@@ -466,6 +557,324 @@ export type Database = {
           retention_until?: string | null
         }
         Relationships: []
+      }
+      call_analysis: {
+        Row: {
+          action_items: Json | null
+          ai_summary: string | null
+          call_log_id: string
+          created_at: string
+          detected_issues: Json | null
+          escalation_required: boolean | null
+          id: string
+          keywords: Json | null
+          kpi_scores: Json | null
+          overall_score: number | null
+          predicted_satisfaction: number | null
+          sentiment: Database["public"]["Enums"]["call_sentiment"] | null
+          sentiment_breakdown: Json | null
+          sentiment_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json | null
+          ai_summary?: string | null
+          call_log_id: string
+          created_at?: string
+          detected_issues?: Json | null
+          escalation_required?: boolean | null
+          id?: string
+          keywords?: Json | null
+          kpi_scores?: Json | null
+          overall_score?: number | null
+          predicted_satisfaction?: number | null
+          sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          sentiment_breakdown?: Json | null
+          sentiment_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json | null
+          ai_summary?: string | null
+          call_log_id?: string
+          created_at?: string
+          detected_issues?: Json | null
+          escalation_required?: boolean | null
+          id?: string
+          keywords?: Json | null
+          kpi_scores?: Json | null
+          overall_score?: number | null
+          predicted_satisfaction?: number | null
+          sentiment?: Database["public"]["Enums"]["call_sentiment"] | null
+          sentiment_breakdown?: Json | null
+          sentiment_score?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_analysis_call_log_id_fkey"
+            columns: ["call_log_id"]
+            isOneToOne: false
+            referencedRelation: "call_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_center_settings: {
+        Row: {
+          analyze_all_calls: boolean | null
+          auto_link_by_active_shipment: boolean | null
+          auto_link_by_phone: boolean | null
+          created_at: string
+          id: string
+          kpi_thresholds: Json | null
+          organization_id: string
+          record_all_calls: boolean | null
+          tracked_keywords: string[] | null
+          transcribe_all_calls: boolean | null
+          twilio_configured: boolean | null
+          twilio_phone_number: string | null
+          updated_at: string
+          working_hours: Json | null
+        }
+        Insert: {
+          analyze_all_calls?: boolean | null
+          auto_link_by_active_shipment?: boolean | null
+          auto_link_by_phone?: boolean | null
+          created_at?: string
+          id?: string
+          kpi_thresholds?: Json | null
+          organization_id: string
+          record_all_calls?: boolean | null
+          tracked_keywords?: string[] | null
+          transcribe_all_calls?: boolean | null
+          twilio_configured?: boolean | null
+          twilio_phone_number?: string | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Update: {
+          analyze_all_calls?: boolean | null
+          auto_link_by_active_shipment?: boolean | null
+          auto_link_by_phone?: boolean | null
+          created_at?: string
+          id?: string
+          kpi_thresholds?: Json | null
+          organization_id?: string
+          record_all_calls?: boolean | null
+          tracked_keywords?: string[] | null
+          transcribe_all_calls?: boolean | null
+          twilio_configured?: boolean | null
+          twilio_phone_number?: string | null
+          updated_at?: string
+          working_hours?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_center_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "call_center_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_logs: {
+        Row: {
+          account_sid: string | null
+          agent_id: string | null
+          answered_at: string | null
+          auto_linked: boolean | null
+          call_sid: string | null
+          created_at: string
+          customer_id: string | null
+          direction: Database["public"]["Enums"]["call_direction"]
+          driver_id: string | null
+          duration_seconds: number | null
+          ended_at: string | null
+          external_weight_record_id: string | null
+          from_number: string
+          gps_snapshot: Json | null
+          id: string
+          link_confidence: number | null
+          notes: string | null
+          organization_id: string
+          parent_call_sid: string | null
+          recording_duration: number | null
+          recording_sid: string | null
+          recording_url: string | null
+          shipment_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["call_status"]
+          tags: string[] | null
+          to_number: string
+          updated_at: string
+        }
+        Insert: {
+          account_sid?: string | null
+          agent_id?: string | null
+          answered_at?: string | null
+          auto_linked?: boolean | null
+          call_sid?: string | null
+          created_at?: string
+          customer_id?: string | null
+          direction?: Database["public"]["Enums"]["call_direction"]
+          driver_id?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          external_weight_record_id?: string | null
+          from_number: string
+          gps_snapshot?: Json | null
+          id?: string
+          link_confidence?: number | null
+          notes?: string | null
+          organization_id: string
+          parent_call_sid?: string | null
+          recording_duration?: number | null
+          recording_sid?: string | null
+          recording_url?: string | null
+          shipment_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["call_status"]
+          tags?: string[] | null
+          to_number: string
+          updated_at?: string
+        }
+        Update: {
+          account_sid?: string | null
+          agent_id?: string | null
+          answered_at?: string | null
+          auto_linked?: boolean | null
+          call_sid?: string | null
+          created_at?: string
+          customer_id?: string | null
+          direction?: Database["public"]["Enums"]["call_direction"]
+          driver_id?: string | null
+          duration_seconds?: number | null
+          ended_at?: string | null
+          external_weight_record_id?: string | null
+          from_number?: string
+          gps_snapshot?: Json | null
+          id?: string
+          link_confidence?: number | null
+          notes?: string | null
+          organization_id?: string
+          parent_call_sid?: string | null
+          recording_duration?: number | null
+          recording_sid?: string | null
+          recording_url?: string | null
+          shipment_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["call_status"]
+          tags?: string[] | null
+          to_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_logs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_external_weight_record_id_fkey"
+            columns: ["external_weight_record_id"]
+            isOneToOne: false
+            referencedRelation: "external_weight_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "call_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_logs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      call_transcriptions: {
+        Row: {
+          call_log_id: string
+          confidence_score: number | null
+          created_at: string
+          error_message: string | null
+          full_text: string | null
+          id: string
+          language: string | null
+          processing_status: string | null
+          updated_at: string
+          words_with_timestamps: Json | null
+        }
+        Insert: {
+          call_log_id: string
+          confidence_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          full_text?: string | null
+          id?: string
+          language?: string | null
+          processing_status?: string | null
+          updated_at?: string
+          words_with_timestamps?: Json | null
+        }
+        Update: {
+          call_log_id?: string
+          confidence_score?: number | null
+          created_at?: string
+          error_message?: string | null
+          full_text?: string | null
+          id?: string
+          language?: string | null
+          processing_status?: string | null
+          updated_at?: string
+          words_with_timestamps?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_transcriptions_call_log_id_fkey"
+            columns: ["call_log_id"]
+            isOneToOne: false
+            referencedRelation: "call_logs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {
@@ -5657,6 +6066,17 @@ export type Database = {
         | "organizations:read"
         | "all"
       app_role: "admin" | "company_admin" | "employee" | "driver"
+      call_direction: "inbound" | "outbound"
+      call_sentiment: "positive" | "neutral" | "negative"
+      call_status:
+        | "initiated"
+        | "ringing"
+        | "in-progress"
+        | "completed"
+        | "busy"
+        | "no-answer"
+        | "failed"
+        | "canceled"
       employee_permission_type:
         | "create_deposits"
         | "view_deposits"
@@ -5850,6 +6270,18 @@ export const Constants = {
         "all",
       ],
       app_role: ["admin", "company_admin", "employee", "driver"],
+      call_direction: ["inbound", "outbound"],
+      call_sentiment: ["positive", "neutral", "negative"],
+      call_status: [
+        "initiated",
+        "ringing",
+        "in-progress",
+        "completed",
+        "busy",
+        "no-answer",
+        "failed",
+        "canceled",
+      ],
       employee_permission_type: [
         "create_deposits",
         "view_deposits",
