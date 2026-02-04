@@ -509,11 +509,11 @@ export const MapboxSearchBox = ({
                       <button
                         key={result.id}
                         type="button"
-                        className="w-full px-3 py-2.5 text-right hover:bg-accent rounded-md transition-colors flex items-start gap-3"
+                        className="w-full px-3 py-2.5 text-right hover:bg-accent rounded-md transition-colors flex items-center gap-3 group"
                         onClick={() => handleResultClick(result)}
                       >
                         <div className={cn(
-                          'p-2 rounded-lg shrink-0 mt-0.5',
+                          'p-2 rounded-lg shrink-0',
                           getResultBadgeColor(result)
                         )}>
                           <IconComponent className="h-4 w-4" />
@@ -534,6 +534,8 @@ export const MapboxSearchBox = ({
                             {result.source}
                           </Badge>
                         </div>
+                        {/* سهم للإشارة للتحديد */}
+                        <ChevronLeft className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                       </button>
                     );
                   })}
