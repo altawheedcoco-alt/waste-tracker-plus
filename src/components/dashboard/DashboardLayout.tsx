@@ -44,6 +44,7 @@ import {
   Banknote,
   Activity,
   Headphones,
+  Bookmark,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -243,6 +244,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Truck, label: 'بيانات السائق', path: '/dashboard/driver-data', key: 'driver-data' },
     { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments', key: 'driver-shipments' },
     { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location', key: 'driver-location' },
+    { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'driver-saved-locations' },
     { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
@@ -299,6 +301,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: AlertTriangle, label: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register', key: 'hazardous' },
     { icon: Layers, label: 'تصنيف أنواع المخلفات', path: '/dashboard/waste-types', key: 'waste-types' },
     { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'map-explorer' },
+    { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'saved-locations' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'my-requests' },
     { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
