@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -273,6 +274,7 @@ const getImpactColor = (impact: string) => {
 };
 
 const EngineerVisionSection = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('roadmap');
 
   const overallProgress = Math.round(
@@ -715,18 +717,20 @@ const EngineerVisionSection = () => {
                       طوّر
                     </Button>
                   </div>
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg group relative hover:shadow-md transition-all">
-                    <Server className="w-6 h-6 text-blue-500 mb-2" />
+                  <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg group relative hover:shadow-md transition-all border-2 border-green-300">
+                    <div className="absolute -top-2 -right-2">
+                      <Badge className="bg-green-500 text-white">✓ جاهز</Badge>
+                    </div>
+                    <Server className="w-6 h-6 text-green-600 mb-2" />
                     <h4 className="font-medium">API مفتوح</h4>
                     <p className="text-sm text-muted-foreground">تكامل مع أنظمة خارجية</p>
                     <Button
-                      variant="ghost"
+                      variant="default"
                       size="sm"
-                      className="absolute top-2 left-2 h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-600 hover:bg-blue-100"
-                      onClick={() => copyDevelopmentRequest('API مفتوح - تكامل مع أنظمة خارجية')}
+                      className="absolute top-2 left-2 h-7 px-3"
+                      onClick={() => navigate('/dashboard/api')}
                     >
-                      <Wand2 className="w-3 h-3 ml-1" />
-                      طوّر
+                      افتح
                     </Button>
                   </div>
                 </div>

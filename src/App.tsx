@@ -83,6 +83,7 @@ const NavigationDemo = lazy(() => import("./pages/dashboard/NavigationDemo"));
 const MapExplorer = lazy(() => import("./pages/dashboard/MapExplorer"));
 const SystemStatus = lazy(() => import("./pages/dashboard/SystemStatus"));
 const SupportCenter = lazy(() => import("./pages/dashboard/SupportCenter"));
+const ApiManagement = lazy(() => import("./pages/dashboard/ApiManagement"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
@@ -206,6 +207,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/map-explorer" element={<MapExplorer />} />
         <Route path="/dashboard/system-status" element={<SystemStatus />} />
         <Route path="/dashboard/support" element={<SupportCenter />} />
+        <Route path="/dashboard/api" element={<ApiManagement />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
