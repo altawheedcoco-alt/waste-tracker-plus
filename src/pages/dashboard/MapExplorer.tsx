@@ -458,7 +458,7 @@ const MapExplorer = () => {
               onClick={(e) => {
                 // التحقق من النقر على المصانع
                 const features = e.features;
-                if (features && features.length > 0 && features[0].layer?.id === 'industrial-circles') {
+                if (features && features.length > 0 && features[0].layer?.id === 'industrial-labels') {
                   handleFactoryClick(e);
                 } else {
                   handleMapClick(e);
