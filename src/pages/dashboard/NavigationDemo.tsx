@@ -69,7 +69,7 @@ interface RouteData {
   steps: RouteStep[];
 }
 
-// Translate OSRM maneuver to Arabic
+// Translate Mapbox maneuver to Arabic
 const translateManeuver = (step: any): string => {
   const maneuverType = step.maneuver?.type || '';
   const modifier = step.maneuver?.modifier || '';
