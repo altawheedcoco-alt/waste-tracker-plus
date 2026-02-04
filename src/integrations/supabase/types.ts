@@ -4079,6 +4079,105 @@ export type Database = {
           },
         ]
       }
+      security_audits: {
+        Row: {
+          audit_type: string
+          checks_failed: number | null
+          checks_passed: number | null
+          checks_warning: number | null
+          created_at: string
+          findings: Json
+          id: string
+          organization_id: string | null
+          run_duration_ms: number | null
+          status: string
+          summary: string | null
+          triggered_by: string | null
+        }
+        Insert: {
+          audit_type: string
+          checks_failed?: number | null
+          checks_passed?: number | null
+          checks_warning?: number | null
+          created_at?: string
+          findings?: Json
+          id?: string
+          organization_id?: string | null
+          run_duration_ms?: number | null
+          status: string
+          summary?: string | null
+          triggered_by?: string | null
+        }
+        Update: {
+          audit_type?: string
+          checks_failed?: number | null
+          checks_passed?: number | null
+          checks_warning?: number | null
+          created_at?: string
+          findings?: Json
+          id?: string
+          organization_id?: string | null
+          run_duration_ms?: number | null
+          status?: string
+          summary?: string | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_audits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "security_audits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_check_settings: {
+        Row: {
+          check_interval_hours: number | null
+          check_name: string
+          config: Json | null
+          created_at: string
+          id: string
+          is_enabled: boolean | null
+          last_run_at: string | null
+          next_run_at: string | null
+          severity: string
+          updated_at: string
+        }
+        Insert: {
+          check_interval_hours?: number | null
+          check_name: string
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          last_run_at?: string | null
+          next_run_at?: string | null
+          severity: string
+          updated_at?: string
+        }
+        Update: {
+          check_interval_hours?: number | null
+          check_name?: string
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean | null
+          last_run_at?: string | null
+          next_run_at?: string | null
+          severity?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       security_events: {
         Row: {
           created_at: string
@@ -5438,6 +5537,7 @@ export type Database = {
         Returns: boolean
       }
       run_full_archive: { Args: never; Returns: Json }
+      run_security_audit: { Args: never; Returns: Json }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
         Returns: boolean
