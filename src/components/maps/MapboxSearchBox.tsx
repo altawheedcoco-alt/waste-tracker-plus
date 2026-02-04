@@ -68,32 +68,76 @@ export const MapboxSearchBox = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Search factories from database
+  // Search factories from database - بحث عام يشمل جميع النتائج المتشابهة
   const searchFactories = useCallback(async (searchQuery: string): Promise<SearchResultItem[]> => {
     if (!includeFactories) return [];
     
     try {
+      // تقسيم الاستعلام إلى كلمات للبحث الموسع
+      const words = searchQuery.trim().split(/\s+/).filter(w => w.length >= 2);
+      
+      // بناء شروط البحث لكل كلمة
+      let orConditions: string[] = [];
+      
+      // البحث بالنص الكامل
+      orConditions.push(`name.ilike.%${searchQuery}%`);
+      orConditions.push(`name_ar.ilike.%${searchQuery}%`);
+      orConditions.push(`city.ilike.%${searchQuery}%`);
+      orConditions.push(`governorate.ilike.%${searchQuery}%`);
+      orConditions.push(`address.ilike.%${searchQuery}%`);
+      
+      // البحث بكل كلمة على حدة
+      words.forEach(word => {
+        orConditions.push(`name.ilike.%${word}%`);
+        orConditions.push(`name_ar.ilike.%${word}%`);
+        orConditions.push(`city.ilike.%${word}%`);
+        orConditions.push(`governorate.ilike.%${word}%`);
+      });
+
       const { data, error } = await supabase
         .from('industrial_facilities')
         .select('id, name, name_ar, facility_type, address, city, governorate, latitude, longitude, is_verified')
-        .or(`name.ilike.%${searchQuery}%,name_ar.ilike.%${searchQuery}%,city.ilike.%${searchQuery}%,governorate.ilike.%${searchQuery}%`)
-        .limit(15);
+        .or(orConditions.join(','))
+        .order('is_verified', { ascending: false })
+        .limit(50); // زيادة عدد النتائج
 
       if (error) throw error;
 
-      return (data || []).map((facility) => ({
-        id: `factory-${facility.id}`,
-        name: facility.name_ar || facility.name,
-        address: [facility.city, facility.governorate].filter(Boolean).join('، ') || facility.address || '',
-        type: 'factory' as const,
-        source: facility.facility_type === 'factory' ? 'مصنع' : 
-                facility.facility_type === 'zone' ? 'منطقة صناعية' : 
-                facility.facility_type === 'recycling' ? 'منشأة تدوير' : 'منشأة',
-        lat: facility.latitude,
-        lng: facility.longitude,
-        relevanceScore: facility.is_verified ? 100 : 80,
-        metadata: { isVerified: facility.is_verified, facilityType: facility.facility_type },
-      }));
+      // حساب درجة التطابق لكل نتيجة
+      return (data || []).map((facility) => {
+        const displayName = facility.name_ar || facility.name;
+        const searchLower = searchQuery.toLowerCase();
+        const nameLower = displayName.toLowerCase();
+        
+        // حساب درجة الصلة
+        let score = 50; // درجة أساسية
+        if (nameLower === searchLower) score = 100;
+        else if (nameLower.startsWith(searchLower)) score = 95;
+        else if (nameLower.includes(searchLower)) score = 90;
+        else {
+          // مطابقة الكلمات الفردية
+          words.forEach(word => {
+            if (nameLower.includes(word.toLowerCase())) score += 10;
+          });
+        }
+        if (facility.is_verified) score += 5;
+        
+        return {
+          id: `factory-${facility.id}`,
+          name: displayName,
+          address: [facility.address, facility.city, facility.governorate].filter(Boolean).join('، '),
+          type: 'factory' as const,
+          source: facility.facility_type === 'factory' ? 'مصنع' : 
+                  facility.facility_type === 'zone' ? 'منطقة صناعية' : 
+                  facility.facility_type === 'recycling' ? 'منشأة تدوير' :
+                  facility.facility_type === 'workshop' ? 'ورشة' :
+                  facility.facility_type === 'plant' ? 'مصنع كبير' : 'منشأة',
+          lat: facility.latitude,
+          lng: facility.longitude,
+          relevanceScore: score,
+          metadata: { isVerified: facility.is_verified, facilityType: facility.facility_type },
+        };
+      }).sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
     } catch (error) {
       console.error('Factory search error:', error);
       return [];
@@ -166,7 +210,7 @@ export const MapboxSearchBox = ({
     }
   }, [includeVehicles]);
 
-  // Search using Mapbox Geocoding API
+  // Search using Mapbox Geocoding API - بحث عام موسع
   const searchMapbox = useCallback(async (searchQuery: string): Promise<SearchResultItem[]> => {
     if (!includeMapbox) return [];
     
@@ -176,8 +220,9 @@ export const MapboxSearchBox = ({
         ? `&proximity=${userLocation.lng},${userLocation.lat}` 
         : '';
       
+      // البحث بدون تحديد نوع للحصول على جميع النتائج المتشابهة
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=eg&limit=10&types=address,place,locality,neighborhood,poi${proximityParam}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=eg&limit=20&fuzzyMatch=true${proximityParam}`
       );
       
       if (!response.ok) throw new Error('Mapbox API error');
@@ -189,7 +234,11 @@ export const MapboxSearchBox = ({
         name: feature.text || feature.place_name,
         address: feature.place_name,
         type: 'mapbox' as const,
-        source: 'Mapbox',
+        source: feature.place_type?.[0] === 'poi' ? 'نقطة اهتمام' :
+                feature.place_type?.[0] === 'address' ? 'عنوان' :
+                feature.place_type?.[0] === 'place' ? 'مدينة' :
+                feature.place_type?.[0] === 'locality' ? 'منطقة' :
+                feature.place_type?.[0] === 'neighborhood' ? 'حي' : 'موقع',
         lat: feature.center[1],
         lng: feature.center[0],
         relevanceScore: (feature.relevance || 0.7) * 100,
@@ -260,7 +309,7 @@ export const MapboxSearchBox = ({
         return (b.relevanceScore || 0) - (a.relevanceScore || 0);
       });
 
-      setResults(allResults.slice(0, 30));
+      setResults(allResults.slice(0, 50)); // زيادة عدد النتائج المعروضة
       setAiSuggestions(aiData);
     } catch (error) {
       console.error('Search error:', error);
