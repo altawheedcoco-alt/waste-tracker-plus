@@ -35,7 +35,9 @@ import {
   ExternalLink,
   Link2,
   Network,
+  Brain,
 } from 'lucide-react';
+import EngineerVisionSection from '@/components/system-status/EngineerVisionSection';
 import { useNavigate } from 'react-router-dom';
 import { useSystemStats } from '@/hooks/useSystemStats';
 import { systemModulesData, systemIntegrationsData } from '@/components/system-status/systemModulesData';
@@ -50,7 +52,7 @@ const calculateOverallProgress = () => {
 };
 
 const SystemStatus = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('engineer-vision');
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useSystemStats();
   const overallProgress = calculateOverallProgress();
@@ -102,7 +104,11 @@ const SystemStatus = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
-        <TabsList className="grid grid-cols-6 w-full">
+        <TabsList className="grid grid-cols-7 w-full">
+          <TabsTrigger value="engineer-vision" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            <span className="hidden sm:inline">رؤية المهندس</span>
+          </TabsTrigger>
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">نظرة عامة</span>
@@ -128,6 +134,11 @@ const SystemStatus = () => {
             <span className="hidden sm:inline">اقتراحات</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Engineer Vision Tab */}
+        <TabsContent value="engineer-vision" className="mt-6">
+          <EngineerVisionSection />
+        </TabsContent>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6 mt-6">
