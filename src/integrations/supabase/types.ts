@@ -4242,18 +4242,74 @@ export type Database = {
         Args: { _contract_id: string; _user_id: string }
         Returns: boolean
       }
+      can_access_deposit: {
+        Args: { _deposit_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_direct_message: {
+        Args: {
+          _receiver_org_id: string
+          _sender_org_id: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      can_access_document: {
+        Args: { _doc_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_expense: {
+        Args: { _expense_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_external_record: {
+        Args: { _record_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_access_invoice: {
         Args: { _invoice_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_invoice_by_id: {
+        Args: { _invoice_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_operational_plan: {
+        Args: { _plan_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_org_post: {
+        Args: { _post_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_partner_note: {
+        Args: { _note_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_recycling_report: {
+        Args: { _report_id: string; _user_id: string }
         Returns: boolean
       }
       can_access_shipment: {
         Args: { _shipment_id: string; _user_id: string }
         Returns: boolean
       }
+      can_access_shipment_chat: {
+        Args: { _room_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_ticket: {
+        Args: { _ticket_id: string; _user_id: string }
+        Returns: boolean
+      }
       check_api_rate_limit: { Args: { p_api_key_id: string }; Returns: boolean }
       count_recent_2fa_attempts: {
         Args: { _minutes?: number; _user_id: string }
         Returns: number
+      }
+      driver_belongs_to_user_org: {
+        Args: { _driver_id: string; _user_id: string }
+        Returns: boolean
       }
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
@@ -4273,6 +4329,7 @@ export type Database = {
           vehicle_type: string
         }[]
       }
+      get_user_driver_id: { Args: { _user_id: string }; Returns: string }
       get_user_org_id_safe: { Args: { _user_id: string }; Returns: string }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_organization_id: { Args: { _user_id: string }; Returns: string }
@@ -4310,6 +4367,18 @@ export type Database = {
       has_two_factor_enabled: { Args: { _user_id: string }; Returns: boolean }
       has_waste_access: {
         Args: { _user_id: string; _waste_type: string }
+        Returns: boolean
+      }
+      is_chat_participant: {
+        Args: { _room_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_company_or_system_admin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
+      is_user_driver: {
+        Args: { _driver_id: string; _user_id: string }
         Returns: boolean
       }
       switch_organization: {
