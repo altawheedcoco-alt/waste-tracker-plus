@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import {
   Brain,
   Rocket,
@@ -29,7 +31,18 @@ import {
   BarChart3,
   Cpu,
   Workflow,
+  Copy,
+  Wand2,
 } from 'lucide-react';
+
+// Helper function to copy development request to clipboard
+const copyDevelopmentRequest = (item: string) => {
+  const request = `طوّر: ${item}`;
+  navigator.clipboard.writeText(request);
+  toast.success('تم نسخ طلب التطوير', {
+    description: 'الصقه في المحادثة لبدء التطوير',
+  });
+};
 
 interface DevelopmentPhase {
   id: string;
@@ -374,16 +387,33 @@ const EngineerVisionSection = () => {
                       <span className="text-sm font-medium min-w-[45px]">{phase.progress}%</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {phase.items.map((item, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm">
-                          {item.includes('✓') ? (
-                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                          ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
-                          )}
-                          <span>{item.replace(' ✓', '')}</span>
-                        </div>
-                      ))}
+                      {phase.items.map((item, i) => {
+                        const isCompleted = item.includes('✓');
+                        const cleanItem = item.replace(' ✓', '');
+                        return (
+                          <div key={i} className="flex items-center justify-between gap-2 text-sm group p-1.5 rounded-md hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center gap-2">
+                              {isCompleted ? (
+                                <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                              ) : (
+                                <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+                              )}
+                              <span>{cleanItem}</span>
+                            </div>
+                            {!isCompleted && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10"
+                                onClick={() => copyDevelopmentRequest(cleanItem)}
+                              >
+                                <Wand2 className="w-3 h-3 ml-1" />
+                                طوّر
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </CardContent>
@@ -416,9 +446,20 @@ const EngineerVisionSection = () => {
                 <CardContent>
                   <ul className="space-y-2">
                     {rec.items.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <Zap className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <span>{item}</span>
+                      <li key={i} className="flex items-center justify-between gap-2 text-sm group p-1.5 rounded-md hover:bg-muted/50 transition-colors">
+                        <div className="flex items-start gap-2">
+                          <Zap className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                          <span>{item}</span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-primary hover:text-primary hover:bg-primary/10 shrink-0"
+                          onClick={() => copyDevelopmentRequest(item)}
+                        >
+                          <Wand2 className="w-3 h-3 ml-1" />
+                          طوّر
+                        </Button>
                       </li>
                     ))}
                   </ul>
@@ -512,26 +553,59 @@ const EngineerVisionSection = () => {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <Shield className="w-4 h-4 text-red-500 mt-1 shrink-0" />
-                    <div>
-                      <span className="font-medium">المصادقة الثنائية 2FA</span>
-                      <p className="text-sm text-muted-foreground">حماية أساسية للحسابات</p>
+                  <li className="flex items-center justify-between gap-2 group p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <Shield className="w-4 h-4 text-red-500 mt-1 shrink-0" />
+                      <div>
+                        <span className="font-medium">المصادقة الثنائية 2FA</span>
+                        <p className="text-sm text-muted-foreground">حماية أساسية للحسابات</p>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-600 hover:bg-red-50"
+                      onClick={() => copyDevelopmentRequest('المصادقة الثنائية 2FA - حماية أساسية للحسابات')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <Smartphone className="w-4 h-4 text-red-500 mt-1 shrink-0" />
-                    <div>
-                      <span className="font-medium">تحسين تجربة الموبايل</span>
-                      <p className="text-sm text-muted-foreground">وضع Offline وتحسين الأداء</p>
+                  <li className="flex items-center justify-between gap-2 group p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <Smartphone className="w-4 h-4 text-red-500 mt-1 shrink-0" />
+                      <div>
+                        <span className="font-medium">تحسين تجربة الموبايل</span>
+                        <p className="text-sm text-muted-foreground">وضع Offline وتحسين الأداء</p>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-600 hover:bg-red-50"
+                      onClick={() => copyDevelopmentRequest('تحسين تجربة الموبايل - وضع Offline وتحسين الأداء')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <Gauge className="w-4 h-4 text-red-500 mt-1 shrink-0" />
-                    <div>
-                      <span className="font-medium">تحسين أداء الاستعلامات</span>
-                      <p className="text-sm text-muted-foreground">فهارس وتحسين RLS</p>
+                  <li className="flex items-center justify-between gap-2 group p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <Gauge className="w-4 h-4 text-red-500 mt-1 shrink-0" />
+                      <div>
+                        <span className="font-medium">تحسين أداء الاستعلامات</span>
+                        <p className="text-sm text-muted-foreground">فهارس وتحسين RLS</p>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-red-600 hover:text-red-600 hover:bg-red-50"
+                      onClick={() => copyDevelopmentRequest('تحسين أداء الاستعلامات - فهارس وتحسين RLS')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </li>
                 </ul>
               </CardContent>
@@ -546,26 +620,59 @@ const EngineerVisionSection = () => {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <Brain className="w-4 h-4 text-yellow-500 mt-1 shrink-0" />
-                    <div>
-                      <span className="font-medium">توسيع قدرات AI</span>
-                      <p className="text-sm text-muted-foreground">تحليل المشاعر وتوقعات ذكية</p>
+                  <li className="flex items-center justify-between gap-2 group p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <Brain className="w-4 h-4 text-yellow-500 mt-1 shrink-0" />
+                      <div>
+                        <span className="font-medium">توسيع قدرات AI</span>
+                        <p className="text-sm text-muted-foreground">تحليل المشاعر وتوقعات ذكية</p>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-yellow-600 hover:text-yellow-600 hover:bg-yellow-50"
+                      onClick={() => copyDevelopmentRequest('توسيع قدرات AI - تحليل المشاعر وتوقعات ذكية')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <BarChart3 className="w-4 h-4 text-yellow-500 mt-1 shrink-0" />
-                    <div>
-                      <span className="font-medium">تقارير تحليلية متقدمة</span>
-                      <p className="text-sm text-muted-foreground">لوحات تحكم تفاعلية</p>
+                  <li className="flex items-center justify-between gap-2 group p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <BarChart3 className="w-4 h-4 text-yellow-500 mt-1 shrink-0" />
+                      <div>
+                        <span className="font-medium">تقارير تحليلية متقدمة</span>
+                        <p className="text-sm text-muted-foreground">لوحات تحكم تفاعلية</p>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-yellow-600 hover:text-yellow-600 hover:bg-yellow-50"
+                      onClick={() => copyDevelopmentRequest('تقارير تحليلية متقدمة - لوحات تحكم تفاعلية')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <Users className="w-4 h-4 text-yellow-500 mt-1 shrink-0" />
-                    <div>
-                      <span className="font-medium">نظام الدعوات</span>
-                      <p className="text-sm text-muted-foreground">دعوة موظفين عبر روابط</p>
+                  <li className="flex items-center justify-between gap-2 group p-2 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex items-start gap-2">
+                      <Users className="w-4 h-4 text-yellow-500 mt-1 shrink-0" />
+                      <div>
+                        <span className="font-medium">نظام الدعوات</span>
+                        <p className="text-sm text-muted-foreground">دعوة موظفين عبر روابط</p>
+                      </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-yellow-600 hover:text-yellow-600 hover:bg-yellow-50"
+                      onClick={() => copyDevelopmentRequest('نظام الدعوات - دعوة موظفين عبر روابط')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </li>
                 </ul>
               </CardContent>
@@ -580,20 +687,47 @@ const EngineerVisionSection = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg group relative hover:shadow-md transition-all">
                     <Globe className="w-6 h-6 text-blue-500 mb-2" />
                     <h4 className="font-medium">التوسع الإقليمي</h4>
                     <p className="text-sm text-muted-foreground">دعم دول الخليج والمغرب العربي</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 left-2 h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-600 hover:bg-blue-100"
+                      onClick={() => copyDevelopmentRequest('التوسع الإقليمي - دعم دول الخليج والمغرب العربي')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </div>
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg group relative hover:shadow-md transition-all">
                     <Lock className="w-6 h-6 text-blue-500 mb-2" />
                     <h4 className="font-medium">شهادات الأمان</h4>
                     <p className="text-sm text-muted-foreground">ISO 27001 و SOC 2</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 left-2 h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-600 hover:bg-blue-100"
+                      onClick={() => copyDevelopmentRequest('شهادات الأمان - ISO 27001 و SOC 2')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </div>
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg group relative hover:shadow-md transition-all">
                     <Server className="w-6 h-6 text-blue-500 mb-2" />
                     <h4 className="font-medium">API مفتوح</h4>
                     <p className="text-sm text-muted-foreground">تكامل مع أنظمة خارجية</p>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 left-2 h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-600 hover:bg-blue-100"
+                      onClick={() => copyDevelopmentRequest('API مفتوح - تكامل مع أنظمة خارجية')}
+                    >
+                      <Wand2 className="w-3 h-3 ml-1" />
+                      طوّر
+                    </Button>
                   </div>
                 </div>
               </CardContent>
