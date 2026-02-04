@@ -434,14 +434,33 @@ export const MapboxSearchBox = ({
         </Badge>
       </div>
 
+      {/* Results Dropdown Arrow Indicator */}
+      {query.length >= 2 && (
+        <div className="flex justify-center mt-1">
+          <motion.div
+            animate={{ y: showResults ? 0 : [0, 3, 0] }}
+            transition={{ repeat: showResults ? 0 : Infinity, duration: 1.5 }}
+          >
+            <ChevronDown 
+              className={cn(
+                "h-5 w-5 text-muted-foreground transition-transform duration-200 cursor-pointer",
+                showResults && "rotate-180"
+              )}
+              onClick={() => setShowResults(!showResults)}
+            />
+          </motion.div>
+        </div>
+      )}
+
       {/* Results Dropdown */}
       <AnimatePresence>
         {showResults && (results.length > 0 || aiSuggestions) && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute z-50 w-full mt-2 bg-background border rounded-lg shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute z-50 w-full mt-1 bg-background border rounded-lg shadow-xl overflow-hidden"
           >
             <ScrollArea className="max-h-[400px]">
               {/* AI Suggestions */}
