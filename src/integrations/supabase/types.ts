@@ -3843,6 +3843,84 @@ export type Database = {
           },
         ]
       }
+      system_health_metrics: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          metric_name: string
+          metric_type: string
+          metric_value: number
+          recorded_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          metric_name: string
+          metric_type: string
+          metric_value?: number
+          recorded_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          metric_name?: string
+          metric_type?: string
+          metric_value?: number
+          recorded_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      system_health_summary: {
+        Row: {
+          created_at: string
+          critical_checks: number
+          database_status: Json | null
+          edge_functions_status: Json | null
+          id: string
+          last_check_at: string
+          modules_status: Json | null
+          overall_health_score: number
+          passed_checks: number
+          total_checks: number
+          updated_at: string
+          warning_checks: number
+        }
+        Insert: {
+          created_at?: string
+          critical_checks?: number
+          database_status?: Json | null
+          edge_functions_status?: Json | null
+          id?: string
+          last_check_at?: string
+          modules_status?: Json | null
+          overall_health_score?: number
+          passed_checks?: number
+          total_checks?: number
+          updated_at?: string
+          warning_checks?: number
+        }
+        Update: {
+          created_at?: string
+          critical_checks?: number
+          database_status?: Json | null
+          edge_functions_status?: Json | null
+          id?: string
+          last_check_at?: string
+          modules_status?: Json | null
+          overall_health_score?: number
+          passed_checks?: number
+          total_checks?: number
+          updated_at?: string
+          warning_checks?: number
+        }
+        Relationships: []
+      }
       terms_acceptances: {
         Row: {
           accepted_at: string
