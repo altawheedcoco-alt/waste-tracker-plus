@@ -1,4 +1,4 @@
 export { SecurityDashboard } from './SecurityDashboard';
 export { SecurityEventsList } from './SecurityEventsList';
-export { TwoFactorSetup } from './TwoFactorSetup';
-export { TwoFactorVerifyDialog } from './TwoFactorVerifyDialog';
+export { default as TwoFactorSetup } from './TwoFactorSetup';
+export { default as TwoFactorVerifyDialog } from './TwoFactorVerifyDialog';
