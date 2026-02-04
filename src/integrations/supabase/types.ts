@@ -4079,6 +4079,97 @@ export type Database = {
           },
         ]
       }
+      saved_locations: {
+        Row: {
+          address: string
+          category: string | null
+          city: string | null
+          created_at: string
+          created_by: string | null
+          governorate: string | null
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          latitude: number
+          location_type: string | null
+          longitude: number
+          name: string
+          name_en: string | null
+          notes: string | null
+          organization_id: string | null
+          phone: string | null
+          source: string | null
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          address: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          latitude: number
+          location_type?: string | null
+          longitude: number
+          name: string
+          name_en?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          source?: string | null
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          address?: string
+          category?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          latitude?: number
+          location_type?: string | null
+          longitude?: number
+          name?: string
+          name_en?: string | null
+          notes?: string | null
+          organization_id?: string | null
+          phone?: string | null
+          source?: string | null
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_locations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_locations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "saved_locations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_audits: {
         Row: {
           audit_type: string
