@@ -6,13 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check, Globe, ExternalLink } from 'lucide-react';
+import { MapPin, Navigation, Map, Search, Loader2, Building2, Plus, Check, Globe, ExternalLink, Star, Bookmark } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
+import { useSavedLocations, SavedLocation } from '@/hooks/useSavedLocations';
 import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
 import MapboxInteractiveMapPicker from '@/components/maps/MapboxInteractiveMapPicker';
 import {
@@ -110,6 +111,15 @@ const EnhancedLocationPicker = ({
   const { profile } = useAuth();
   const [locations, setLocations] = useState<OrganizationLocation[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Saved locations hook for general saved locations
+  const { 
+    locations: savedLocations, 
+    loading: savedLocationsLoading, 
+    saveLocation,
+    incrementUsage,
+    searchLocations: searchSavedLocations 
+  } = useSavedLocations();
   const [activeTab, setActiveTab] = useState<string>('search');
   
   // Current location state
@@ -295,6 +305,18 @@ const EnhancedLocationPicker = ({
         : undefined
       );
     }
+    toast.success('تم اختيار الموقع');
+  };
+
+  // Handle general saved location selection
+  const handleGeneralSavedLocationSelect = async (location: SavedLocation) => {
+    const fullAddress = location.city 
+      ? `${location.address}, ${location.city}` 
+      : location.address;
+    onChange(fullAddress, { lat: location.latitude, lng: location.longitude });
+    
+    // Increment usage count
+    await incrementUsage(location.id);
     toast.success('تم اختيار الموقع');
   };
 
@@ -521,77 +543,149 @@ const EnhancedLocationPicker = ({
         </TabsContent>
 
         {/* Saved Locations Tab */}
-        <TabsContent value="saved" className="mt-3 space-y-2">
-          {loading ? (
+        <TabsContent value="saved" className="mt-3 space-y-3">
+          {(loading || savedLocationsLoading) ? (
             <div className="flex items-center justify-center py-4">
               <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <>
-              {/* Primary Location */}
-              <Card 
-                className={cn(
-                  "cursor-pointer transition-all hover:border-primary",
-                  value === primaryAddress && "border-primary bg-primary/5"
-                )}
-                onClick={() => handleSavedLocationSelect('primary')}
-              >
-                <CardContent className="p-3 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-5 h-5 text-primary" />
+            <ScrollArea className="max-h-[400px]">
+              <div className="space-y-4 pr-4">
+                {/* Organization Locations Section */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Building2 className="w-4 h-4" />
+                    <span>مواقع {organizationName}</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">المقر الرئيسي - {organizationName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{primaryAddress}</p>
-                  </div>
-                  {value === primaryAddress && (
-                    <Check className="w-5 h-5 text-primary flex-shrink-0" />
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Additional Locations */}
-              {locations.map(location => {
-                const fullAddress = location.city 
-                  ? `${location.address}, ${location.city}` 
-                  : location.address;
-                const isSelected = value === fullAddress;
-                
-                return (
+                  
+                  {/* Primary Location */}
                   <Card 
-                    key={location.id}
                     className={cn(
                       "cursor-pointer transition-all hover:border-primary",
-                      isSelected && "border-primary bg-primary/5"
+                      value === primaryAddress && "border-primary bg-primary/5"
                     )}
-                    onClick={() => handleSavedLocationSelect(location)}
+                    onClick={() => handleSavedLocationSelect('primary')}
                   >
                     <CardContent className="p-3 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                        <MapPin className="w-5 h-5 text-muted-foreground" />
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{location.location_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{fullAddress}</p>
+                        <p className="font-medium text-sm">المقر الرئيسي</p>
+                        <p className="text-xs text-muted-foreground truncate">{primaryAddress}</p>
                       </div>
-                      {isSelected && (
+                      {value === primaryAddress && (
                         <Check className="w-5 h-5 text-primary flex-shrink-0" />
                       )}
                     </CardContent>
                   </Card>
-                );
-              })}
 
-              {/* Add New Location Button */}
-              <Button 
-                variant="outline" 
-                className="w-full mt-2"
-                onClick={() => setShowAddDialog(true)}
-              >
-                <Plus className="w-4 h-4 ml-2" />
-                إضافة موقع جديد
-              </Button>
-            </>
+                  {/* Additional Organization Locations */}
+                  {locations.map(location => {
+                    const fullAddress = location.city 
+                      ? `${location.address}, ${location.city}` 
+                      : location.address;
+                    const isSelected = value === fullAddress;
+                    
+                    return (
+                      <Card 
+                        key={location.id}
+                        className={cn(
+                          "cursor-pointer transition-all hover:border-primary",
+                          isSelected && "border-primary bg-primary/5"
+                        )}
+                        onClick={() => handleSavedLocationSelect(location)}
+                      >
+                        <CardContent className="p-3 flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                            <MapPin className="w-5 h-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{location.location_name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{fullAddress}</p>
+                          </div>
+                          {isSelected && (
+                            <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+
+                {/* General Saved Locations Section */}
+                {savedLocations.length > 0 && (
+                  <div className="space-y-2 pt-2 border-t">
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      <Bookmark className="w-4 h-4" />
+                      <span>المواقع المحفوظة العامة</span>
+                      <Badge variant="secondary" className="text-[10px]">{savedLocations.length}</Badge>
+                    </div>
+                    
+                    {savedLocations.slice(0, 10).map(location => {
+                      const fullAddress = location.city 
+                        ? `${location.address}, ${location.city}` 
+                        : location.address;
+                      const isSelected = value === fullAddress;
+                      
+                      return (
+                        <Card 
+                          key={location.id}
+                          className={cn(
+                            "cursor-pointer transition-all hover:border-primary",
+                            isSelected && "border-primary bg-primary/5"
+                          )}
+                          onClick={() => handleGeneralSavedLocationSelect(location)}
+                        >
+                          <CardContent className="p-3 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
+                              <Star className="w-5 h-5 text-accent-foreground" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-sm">{location.name}</p>
+                                {location.usage_count > 0 && (
+                                  <Badge variant="outline" className="text-[10px]">
+                                    {location.usage_count} استخدام
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">{fullAddress}</p>
+                              {location.category && location.category !== 'other' && (
+                                <Badge variant="secondary" className="text-[9px] mt-1">
+                                  {location.category === 'generator' ? 'مولد' : 
+                                   location.category === 'recycler' ? 'مُعيد تدوير' : 
+                                   location.category === 'transporter' ? 'ناقل' : location.category}
+                                </Badge>
+                              )}
+                            </div>
+                            {isSelected && (
+                              <Check className="w-5 h-5 text-primary flex-shrink-0" />
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                    
+                    {savedLocations.length > 10 && (
+                      <p className="text-xs text-center text-muted-foreground">
+                        عرض أول 10 مواقع من {savedLocations.length} موقع محفوظ
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Add New Location Button */}
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-2"
+                  onClick={() => setShowAddDialog(true)}
+                >
+                  <Plus className="w-4 h-4 ml-2" />
+                  إضافة موقع جديد
+                </Button>
+              </div>
+            </ScrollArea>
           )}
         </TabsContent>
 
