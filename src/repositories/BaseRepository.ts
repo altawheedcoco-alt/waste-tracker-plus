@@ -173,7 +173,7 @@ export function createRepository<T extends { id: string }>(
         throw error;
       }
 
-      return (data || []) as T[];
+      return (data || []) as unknown as T[];
     },
 
     async update(id: string, updates: Partial<T>): Promise<T> {
