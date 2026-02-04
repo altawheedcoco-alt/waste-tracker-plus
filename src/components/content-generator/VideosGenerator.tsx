@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Video, Wand2, Loader2, Sparkles, Film, Play, RefreshCw, Leaf, Recycle, Send, CheckCircle2, Share2, Eye, Building2 } from 'lucide-react';
+import { Video, Wand2, Loader2, Film, Building2, CheckCircle2, Share2, Eye, Send } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,8 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import VideoPreviewPlayer from '@/components/video/VideoPreviewPlayer';
+import TemplateSelector from './TemplateSelector';
+import { videoCategories, VideoTemplate } from './templates/videoTemplates';
 
 interface GeneratedContent {
   title: string;
@@ -39,37 +41,6 @@ interface VideosGeneratorProps {
   profile: { id: string } | null;
 }
 
-const videoTemplates = [
-  {
-    id: 'promo',
-    title: 'فيديو ترويجي للمنصة',
-    description: 'فيديو يعرض مميزات منصة آي ريسايكل',
-    icon: Sparkles,
-    prompt: 'أنشئ سيناريو فيديو ترويجي احترافي لمنصة آي ريسايكل لإدارة النفايات والتدوير في مصر'
-  },
-  {
-    id: 'environmental',
-    title: 'توعية بيئية',
-    description: 'محتوى توعوي عن أهمية إعادة التدوير',
-    icon: Leaf,
-    prompt: 'أنشئ سيناريو فيديو توعوي عن أهمية إعادة التدوير والحفاظ على البيئة في مصر'
-  },
-  {
-    id: 'tutorial',
-    title: 'شرح استخدام المنصة',
-    description: 'فيديو تعليمي لكيفية استخدام النظام',
-    icon: Play,
-    prompt: 'أنشئ سيناريو فيديو تعليمي يشرح كيفية استخدام منصة آي ريسايكل لإنشاء وتتبع الشحنات'
-  },
-  {
-    id: 'success',
-    title: 'قصص نجاح',
-    description: 'عرض إنجازات ونتائج التدوير',
-    icon: Recycle,
-    prompt: 'أنشئ سيناريو فيديو يعرض قصص نجاح وإنجازات في مجال إعادة التدوير'
-  }
-];
-
 const VideosGenerator = ({
   isAdmin,
   organizations,
@@ -80,7 +51,7 @@ const VideosGenerator = ({
   targetOrganizationId,
   profile
 }: VideosGeneratorProps) => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [selectedTemplate, setSelectedTemplate] = useState<VideoTemplate | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [videoDuration, setVideoDuration] = useState('30');
   const [videoStyle, setVideoStyle] = useState('modern');
@@ -92,9 +63,13 @@ const VideosGenerator = ({
   const [generationProgress, setGenerationProgress] = useState(0);
   const [posted, setPosted] = useState(false);
 
+  const handleSelectTemplate = (template: VideoTemplate) => {
+    setSelectedTemplate(template);
+    setCustomPrompt('');
+  };
+
   const handleGenerateScript = async (postDirectly = false) => {
-    const template = videoTemplates.find(t => t.id === selectedTemplate);
-    const basePrompt = template?.prompt || customPrompt;
+    const basePrompt = selectedTemplate?.prompt || customPrompt;
 
     if (!basePrompt.trim()) {
       toast.error('يرجى اختيار نموذج أو كتابة وصف للفيديو');
@@ -199,10 +174,7 @@ const VideosGenerator = ({
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('تم نسخ النص!');
-  };
+  const totalTemplates = videoCategories.reduce((acc, c) => acc + c.templates.length, 0);
 
   return (
     <div className="space-y-6">
@@ -267,46 +239,42 @@ const VideosGenerator = ({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Film className="w-5 h-5 text-primary" />
-                اختر نموذج الفيديو
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Film className="w-5 h-5 text-primary" />
+                  اختر نموذج الفيديو
+                </span>
+                <Badge variant="secondary">{totalTemplates} نموذج</Badge>
               </CardTitle>
               <CardDescription>
                 اختر من النماذج الجاهزة أو أنشئ وصفك الخاص
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {videoTemplates.map((template) => (
-                  <motion.button
-                    key={template.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setSelectedTemplate(template.id);
-                      setCustomPrompt('');
-                    }}
-                    className={`p-4 rounded-xl border-2 text-right transition-all ${
-                      selectedTemplate === template.id
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <template.icon className={`w-6 h-6 mb-2 ${
-                      selectedTemplate === template.id ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
-                    <h4 className="font-medium text-sm">{template.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{template.description}</p>
-                  </motion.button>
-                ))}
-              </div>
+              <TemplateSelector
+                categories={videoCategories}
+                selectedTemplateId={selectedTemplate?.id || ''}
+                onSelectTemplate={handleSelectTemplate}
+                type="video"
+              />
+
+              {selectedTemplate && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 bg-primary/10 rounded-lg border border-primary/20"
+                >
+                  <p className="text-sm font-medium">النموذج المختار: {selectedTemplate.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{selectedTemplate.description}</p>
+                </motion.div>
+              )}
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">أو</span>
+                  <span className="bg-card px-2 text-muted-foreground">أو اكتب وصفاً مخصصاً</span>
                 </div>
               </div>
 
@@ -316,10 +284,10 @@ const VideosGenerator = ({
                   value={customPrompt}
                   onChange={(e) => {
                     setCustomPrompt(e.target.value);
-                    setSelectedTemplate('');
+                    setSelectedTemplate(null);
                   }}
                   placeholder="اكتب وصفاً تفصيلياً للفيديو الذي تريد إنشاءه..."
-                  className="min-h-[100px]"
+                  className="min-h-[80px]"
                   dir="rtl"
                 />
               </div>
@@ -360,6 +328,8 @@ const VideosGenerator = ({
                       <SelectItem value="modern">عصري وحديث</SelectItem>
                       <SelectItem value="corporate">احترافي رسمي</SelectItem>
                       <SelectItem value="creative">إبداعي وملفت</SelectItem>
+                      <SelectItem value="minimal">بسيط ونظيف</SelectItem>
+                      <SelectItem value="dynamic">ديناميكي وحيوي</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -445,113 +415,68 @@ const VideosGenerator = ({
                         className="w-full h-auto"
                       />
                     </div>
-                  ) : generatedImageUrl && generatedContent.scenes ? (
-                    <VideoPreviewPlayer 
-                      imageUrl={generatedImageUrl}
-                      scenes={generatedContent.scenes}
-                      script={generatedContent.script}
-                      title={generatedContent.title}
-                    />
                   ) : generatedImageUrl ? (
                     <div className="rounded-lg overflow-hidden">
                       <img 
-                        src={generatedImageUrl} 
-                        alt="صورة ترويجية" 
-                        className="w-full h-auto"
+                        src={generatedImageUrl}
+                        alt="صورة الفيديو"
+                        className="w-full h-auto object-cover"
                       />
                     </div>
                   ) : null}
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-sm">السيناريو:</h4>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => copyToClipboard(generatedContent.script)}
-                      >
-                        نسخ
-                      </Button>
-                    </div>
-                    <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg whitespace-pre-wrap">
-                      {generatedContent.script}
-                    </p>
+
+                  <div className="p-4 bg-muted rounded-lg">
+                    <h4 className="font-medium mb-2">السيناريو:</h4>
+                    <p className="text-sm whitespace-pre-wrap">{generatedContent.script}</p>
                   </div>
 
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">المشاهد المقترحة:</h4>
-                    <div className="space-y-1">
-                      {generatedContent.scenes.map((scene, index) => (
-                        <div key={index} className="flex items-start gap-2 text-sm">
-                          <span className="bg-primary text-primary-foreground w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0">
-                            {index + 1}
-                          </span>
-                          <span className="text-muted-foreground">{scene}</span>
-                        </div>
-                      ))}
+                  {generatedContent.scenes && generatedContent.scenes.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-medium">المشاهد:</h4>
+                      <div className="space-y-2">
+                        {generatedContent.scenes.map((scene, index) => (
+                          <div key={index} className="p-2 bg-muted/50 rounded text-sm flex gap-2">
+                            <Badge variant="outline" className="shrink-0">{index + 1}</Badge>
+                            <span>{scene}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                  )}
+
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <p className="text-sm font-medium">📢 {generatedContent.callToAction}</p>
                   </div>
 
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">الهاشتاقات:</h4>
+                  {generatedContent.hashtags && generatedContent.hashtags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {generatedContent.hashtags.map((tag, index) => (
                         <Badge key={index} variant="secondary">#{tag}</Badge>
                       ))}
                     </div>
-                  </div>
+                  )}
 
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <h4 className="font-medium text-sm mb-1">دعوة للتفاعل:</h4>
-                    <p className="text-sm">{generatedContent.callToAction}</p>
-                  </div>
+                  {!posted && (
+                    <Button 
+                      onClick={handlePostToOrganization}
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500"
+                      disabled={isPostingDirectly}
+                    >
+                      {isPostingDirectly ? (
+                        <>
+                          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                          جاري النشر...
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-4 h-4 ml-2" />
+                          نشر في صفحة الجهة
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
-
-              <div className="flex gap-3">
-                <Button 
-                  variant="outline" 
-                  className="flex-1"
-                  onClick={() => {
-                    setGeneratedContent(null);
-                    setGeneratedImageUrl(null);
-                    setGeneratedVideoUrl(null);
-                    setPosted(false);
-                  }}
-                >
-                  <RefreshCw className="w-4 h-4 ml-2" />
-                  إعادة الإنشاء
-                </Button>
-                
-                {!posted ? (
-                  <Button 
-                    onClick={handlePostToOrganization}
-                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                    disabled={isPostingDirectly}
-                  >
-                    {isPostingDirectly ? (
-                      <>
-                        <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                        جاري النشر...
-                      </>
-                    ) : (
-                      <>
-                        <Share2 className="w-4 h-4 ml-2" />
-                        نشر في منشورات الجهة
-                      </>
-                    )}
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline"
-                    className="flex-1 text-green-600 border-green-600"
-                    disabled
-                  >
-                    <CheckCircle2 className="w-4 h-4 ml-2" />
-                    تم النشر بنجاح
-                  </Button>
-                )}
-              </div>
             </>
           ) : (
             <Card className="h-full min-h-[400px] flex items-center justify-center">
@@ -562,7 +487,7 @@ const VideosGenerator = ({
                 <div>
                   <h3 className="font-semibold text-lg">ابدأ إنشاء فيديو جديد</h3>
                   <p className="text-muted-foreground text-sm mt-1">
-                    اختر نموذجاً أو اكتب وصفاً مخصصاً ثم اضغط على "إنشاء"
+                    اختر من {totalTemplates} نموذج جاهز أو اكتب وصفاً مخصصاً
                   </p>
                 </div>
               </div>

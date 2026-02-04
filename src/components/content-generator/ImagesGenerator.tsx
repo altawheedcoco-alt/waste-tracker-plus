@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Image as ImageIcon, Wand2, Loader2, Sparkles, Leaf, Recycle, Building2, CheckCircle2, Share2, Palette, Mountain, TreePine } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Image as ImageIcon, Wand2, Loader2, Building2, CheckCircle2, Share2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import TemplateSelector from './TemplateSelector';
+import { imageCategories, ImageTemplate } from './templates/imageTemplates';
 
 interface Organization {
   id: string;
@@ -29,37 +31,6 @@ interface ImagesGeneratorProps {
   profile: { id: string } | null;
 }
 
-const imageTemplates = [
-  {
-    id: 'recycling',
-    title: 'صورة إعادة تدوير',
-    description: 'صورة احترافية عن التدوير',
-    icon: Recycle,
-    prompt: 'صورة احترافية تعبر عن إعادة التدوير والاستدامة البيئية'
-  },
-  {
-    id: 'nature',
-    title: 'طبيعة خضراء',
-    description: 'صورة بيئية طبيعية',
-    icon: TreePine,
-    prompt: 'صورة طبيعة خضراء جميلة تعبر عن الحفاظ على البيئة'
-  },
-  {
-    id: 'infographic',
-    title: 'إنفوجرافيك',
-    description: 'تصميم معلوماتي',
-    icon: Palette,
-    prompt: 'تصميم إنفوجرافيك احترافي عن فوائد إعادة التدوير'
-  },
-  {
-    id: 'earth',
-    title: 'كوكب الأرض',
-    description: 'صورة كوكب الأرض',
-    icon: Mountain,
-    prompt: 'صورة فنية لكوكب الأرض تعبر عن الحفاظ على البيئة'
-  }
-];
-
 const ImagesGenerator = ({
   isAdmin,
   organizations,
@@ -70,7 +41,7 @@ const ImagesGenerator = ({
   targetOrganizationId,
   profile
 }: ImagesGeneratorProps) => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [selectedTemplate, setSelectedTemplate] = useState<ImageTemplate | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [imageStyle, setImageStyle] = useState('realistic');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -80,9 +51,13 @@ const ImagesGenerator = ({
   const [isPosting, setIsPosting] = useState(false);
   const [posted, setPosted] = useState(false);
 
+  const handleSelectTemplate = (template: ImageTemplate) => {
+    setSelectedTemplate(template);
+    setCustomPrompt('');
+  };
+
   const handleGenerateImage = async () => {
-    const template = imageTemplates.find(t => t.id === selectedTemplate);
-    const basePrompt = template?.prompt || customPrompt;
+    const basePrompt = selectedTemplate?.prompt || customPrompt;
 
     if (!basePrompt.trim()) {
       toast.error('يرجى اختيار نموذج أو كتابة وصف للصورة');
@@ -165,6 +140,8 @@ const ImagesGenerator = ({
     }
   };
 
+  const totalTemplates = imageCategories.reduce((acc, c) => acc + c.templates.length, 0);
+
   return (
     <div className="space-y-6">
       {/* Organization Selection for Admin */}
@@ -204,43 +181,39 @@ const ImagesGenerator = ({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-primary" />
-                اختر نوع الصورة
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-primary" />
+                  اختر نوع الصورة
+                </span>
+                <Badge variant="secondary">{totalTemplates} نموذج</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {imageTemplates.map((template) => (
-                  <motion.button
-                    key={template.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setSelectedTemplate(template.id);
-                      setCustomPrompt('');
-                    }}
-                    className={`p-4 rounded-xl border-2 text-right transition-all ${
-                      selectedTemplate === template.id
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <template.icon className={`w-6 h-6 mb-2 ${
-                      selectedTemplate === template.id ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
-                    <h4 className="font-medium text-sm">{template.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{template.description}</p>
-                  </motion.button>
-                ))}
-              </div>
+              <TemplateSelector
+                categories={imageCategories}
+                selectedTemplateId={selectedTemplate?.id || ''}
+                onSelectTemplate={handleSelectTemplate}
+                type="image"
+              />
+
+              {selectedTemplate && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 bg-primary/10 rounded-lg border border-primary/20"
+                >
+                  <p className="text-sm font-medium">النموذج المختار: {selectedTemplate.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{selectedTemplate.description}</p>
+                </motion.div>
+              )}
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">أو</span>
+                  <span className="bg-card px-2 text-muted-foreground">أو اكتب وصفاً مخصصاً</span>
                 </div>
               </div>
 
@@ -250,10 +223,10 @@ const ImagesGenerator = ({
                   value={customPrompt}
                   onChange={(e) => {
                     setCustomPrompt(e.target.value);
-                    setSelectedTemplate('');
+                    setSelectedTemplate(null);
                   }}
                   placeholder="اكتب وصفاً للصورة التي تريد إنشاءها..."
-                  className="min-h-[100px]"
+                  className="min-h-[80px]"
                   dir="rtl"
                 />
               </div>
@@ -269,6 +242,8 @@ const ImagesGenerator = ({
                     <SelectItem value="artistic">فني</SelectItem>
                     <SelectItem value="minimalist">بسيط</SelectItem>
                     <SelectItem value="vibrant">ملون ومشرق</SelectItem>
+                    <SelectItem value="3d">ثلاثي الأبعاد</SelectItem>
+                    <SelectItem value="illustration">رسم توضيحي</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -362,7 +337,7 @@ const ImagesGenerator = ({
                 <div>
                   <h3 className="font-semibold text-lg">ابدأ إنشاء صورة جديدة</h3>
                   <p className="text-muted-foreground text-sm mt-1">
-                    اختر نموذجاً أو اكتب وصفاً ثم اضغط على "إنشاء"
+                    اختر من {totalTemplates} نموذج جاهز أو اكتب وصفاً مخصصاً
                   </p>
                 </div>
               </div>
