@@ -99,13 +99,15 @@ const TwoFactorSetup = memo(({ className }: TwoFactorSetupProps) => {
               امسح رمز QR
             </h3>
             <p className="text-sm text-muted-foreground">
-              افتح تطبيق المصادقة (مثل Google Authenticator) وامسح الرمز التالي
+              افتح تطبيق المصادقة (مثل Google Authenticator أو Authy) وامسح الرمز التالي
             </p>
-            <div className="flex justify-center p-4 bg-white rounded-lg">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(setupData.otpauthUrl)}`}
-                alt="QR Code"
-                className="w-48 h-48"
+            <div className="flex justify-center p-6 bg-white rounded-xl shadow-inner">
+              <QRCodeSVG
+                value={setupData.otpauthUrl}
+                size={200}
+                level="H"
+                includeMargin
+                className="rounded-lg"
               />
             </div>
           </div>
