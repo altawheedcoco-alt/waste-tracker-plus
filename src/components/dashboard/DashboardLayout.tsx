@@ -71,6 +71,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 import DepositButton from '@/components/deposits/DepositButton';
+import OfflineIndicator from '@/components/offline/OfflineIndicator';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
