@@ -515,7 +515,7 @@ const MapExplorer = () => {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => fetchFromExternalSource('google')}
+                onClick={() => fetchFromExternalSource()}
                 disabled={isFetchingFromSource}
                 className="gap-2"
               >
