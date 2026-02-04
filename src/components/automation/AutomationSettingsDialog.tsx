@@ -255,8 +255,6 @@ const allAutomationSettings: AutomationSetting[] = [
   { id: '150', key: 'auto_data_export', title: 'تصدير البيانات', description: 'تصدير دوري للبيانات', icon: Download, category: 'integration', enabled: false },
 ];
 
-// Alias for missing icon
-const LogoutCircle = LogOut;
 
 interface AutomationSettingsDialogProps {
   organizationType?: string;
