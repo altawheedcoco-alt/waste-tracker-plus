@@ -970,8 +970,3 @@ export const getTemplateCount = (): number => {
 export const getCategoryCount = (): number => {
   return postCategories.length;
 };
-
-// أيقونات إضافية للتنوع
-const Trophy = Award;
-const Medal = Award;
-const Crown = Star;
