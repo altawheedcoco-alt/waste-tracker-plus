@@ -39,7 +39,7 @@ const DriverMiniMap = memo(({ latitude, longitude, accuracy }: DriverMiniMapProp
           <div className="relative">
             {/* Pulse animation */}
             <div 
-              className="absolute rounded-full bg-green-500/30 animate-ping"
+              className="absolute rounded-full bg-primary/30 animate-ping"
               style={{
                 width: '40px',
                 height: '40px',
