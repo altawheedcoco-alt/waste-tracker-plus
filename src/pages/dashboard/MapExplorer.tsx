@@ -255,16 +255,6 @@ const MapExplorer = () => {
     });
   }, []);
 
-  // Close results on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Reverse geocode using Mapbox
   const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
