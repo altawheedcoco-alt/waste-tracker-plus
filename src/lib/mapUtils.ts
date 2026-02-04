@@ -1,5 +1,5 @@
-// Map utilities for routing and geocoding
-import L from 'leaflet';
+// Map utilities for routing and geocoding - Mapbox Only
+// Note: This project uses Mapbox GL JS exclusively for all mapping features.
 
 // OSRM API for real road routing
 export const OSRM_API = 'https://router.project-osrm.org';
@@ -24,6 +24,7 @@ export interface GeocodingResult {
 
 /**
  * Fetch actual road route between two points using OSRM
+ * Returns coordinates in [lat, lng] format for consistency
  */
 export const fetchRoadRoute = async (
   start: { lat: number; lng: number },
@@ -48,7 +49,7 @@ export const fetchRoadRoute = async (
     if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
       const route = data.routes[0];
       
-      // Convert GeoJSON coordinates [lng, lat] to Leaflet format [lat, lng]
+      // Convert GeoJSON coordinates [lng, lat] to [lat, lng] format
       const coordinates: [number, number][] = route.geometry.coordinates.map(
         (coord: [number, number]) => [coord[1], coord[0]]
       );
@@ -132,7 +133,7 @@ export const fetchMultiPointRoute = async (
 };
 
 /**
- * Geocode an address to coordinates
+ * Geocode an address to coordinates using Mapbox
  */
 export const geocodeAddress = async (
   address: string,
@@ -178,7 +179,7 @@ export const geocodeAddress = async (
 };
 
 /**
- * Reverse geocode coordinates to address
+ * Reverse geocode coordinates to address using Mapbox
  */
 export const reverseGeocode = async (
   lat: number,
@@ -229,7 +230,7 @@ export const calculateHaversineDistance = (
 };
 
 /**
- * Format distance for display
+ * Format distance for display (Arabic)
  */
 export const formatDistance = (meters: number): string => {
   if (meters >= 1000) {
@@ -239,7 +240,7 @@ export const formatDistance = (meters: number): string => {
 };
 
 /**
- * Format duration for display
+ * Format duration for display (Arabic)
  */
 export const formatDuration = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600);
@@ -252,87 +253,41 @@ export const formatDuration = (seconds: number): string => {
 };
 
 /**
- * Create custom marker icons
+ * Generate Google Maps navigation URL
  */
-export const createMarkerIcon = (
-  color: string,
-  emoji: string,
-  size: number = 36
-): L.DivIcon => {
-  return new L.DivIcon({
-    className: 'custom-marker-icon',
-    html: `
-      <div style="
-        width: ${size}px;
-        height: ${size}px;
-        background: ${color};
-        border: 4px solid white;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <span style="transform: rotate(45deg); font-size: ${size * 0.4}px;">${emoji}</span>
-      </div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size],
-  });
+export const getGoogleMapsNavigationUrl = (
+  destination: { lat: number; lng: number },
+  origin?: { lat: number; lng: number }
+): string => {
+  if (origin) {
+    return `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${destination.lat},${destination.lng}`;
+  }
+  return `https://www.google.com/maps/dir/?api=1&destination=${destination.lat},${destination.lng}`;
 };
 
 /**
- * Create driver marker with pulse animation
+ * Generate Waze navigation URL
  */
-export const createDriverMarkerIcon = (
-  isOnline: boolean,
-  size: number = 44
-): L.DivIcon => {
-  const color = isOnline ? '#22c55e' : '#ef4444';
-  const shadowColor = isOnline ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.3)';
-  
-  return new L.DivIcon({
-    className: 'driver-marker-icon',
-    html: `
-      <div style="
-        position: relative;
-        width: ${size}px;
-        height: ${size}px;
-      ">
-        <div style="
-          position: absolute;
-          width: ${size}px;
-          height: ${size}px;
-          background: radial-gradient(circle, ${shadowColor} 0%, transparent 70%);
-          border-radius: 50%;
-          animation: driverPulse 2s infinite;
-        "></div>
-        <div style="
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: ${size * 0.65}px;
-          height: ${size * 0.65}px;
-          background: linear-gradient(135deg, ${color}, ${isOnline ? '#16a34a' : '#dc2626'});
-          border: 3px solid white;
-          border-radius: 50%;
-          box-shadow: 0 4px 12px ${shadowColor};
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">
-          <span style="color: white; font-size: ${size * 0.35}px;">🚛</span>
-        </div>
-      </div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
+export const getWazeNavigationUrl = (
+  destination: { lat: number; lng: number },
+  origin?: { lat: number; lng: number }
+): string => {
+  if (origin) {
+    return `https://waze.com/ul?ll=${destination.lat},${destination.lng}&navigate=yes&from=${origin.lat},${origin.lng}`;
+  }
+  return `https://waze.com/ul?ll=${destination.lat},${destination.lng}&navigate=yes`;
 };
 
-// Common marker icons
-export const pickupMarkerIcon = createMarkerIcon('#3b82f6', '📍');
-export const deliveryMarkerIcon = createMarkerIcon('#22c55e', '🏁');
-export const warehouseMarkerIcon = createMarkerIcon('#8b5cf6', '🏭');
+/**
+ * Open external navigation app
+ */
+export const openExternalNavigation = (
+  app: 'google' | 'waze',
+  destination: { lat: number; lng: number },
+  origin?: { lat: number; lng: number }
+): void => {
+  const url = app === 'google' 
+    ? getGoogleMapsNavigationUrl(destination, origin)
+    : getWazeNavigationUrl(destination, origin);
+  window.open(url, '_blank');
+};
