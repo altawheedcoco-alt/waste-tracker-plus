@@ -69,10 +69,10 @@ const OfflineIndicator = memo(({
           exit={{ opacity: 0, y: -100 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className={cn(
-            'fixed top-0 left-0 right-0 z-[100] px-4 py-3',
+            'fixed top-0 left-0 right-0 z-[100] px-4 py-3 backdrop-blur-sm',
             !isOnline 
-              ? 'bg-destructive/90 text-destructive-foreground backdrop-blur-sm' 
-              : 'bg-yellow-500/80 text-yellow-950 backdrop-blur-sm',
+              ? 'bg-destructive/80 text-destructive-foreground' 
+              : 'bg-warning/80 text-warning-foreground',
             className
           )}
         >

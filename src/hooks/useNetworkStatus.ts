@@ -77,7 +77,7 @@ export const useNetworkStatus = () => {
     };
   }, [updateNetworkStatus]);
 
-  return status;
+  return { ...status, checkConnection: updateNetworkStatus };
 };
 
 export default useNetworkStatus;
