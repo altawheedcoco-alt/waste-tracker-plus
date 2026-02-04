@@ -243,6 +243,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Truck, label: 'بيانات السائق', path: '/dashboard/driver-data', key: 'driver-data' },
     { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments', key: 'driver-shipments' },
     { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location', key: 'driver-location' },
+    { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'driver-saved-locations' },
     { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
