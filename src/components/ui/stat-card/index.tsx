@@ -20,7 +20,7 @@ const useStatCard = () => {
   return context;
 };
 
-// ==================== Variant Styles ====================
+// ==================== Variant Styles (using semantic tokens) ====================
 const variantStyles = {
   default: {
     bg: 'bg-card',
@@ -29,28 +29,28 @@ const variantStyles = {
     border: 'border-border',
   },
   success: {
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    icon: 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400',
-    value: 'text-emerald-700 dark:text-emerald-300',
-    border: 'border-emerald-200 dark:border-emerald-800',
+    bg: 'bg-accent/20',
+    icon: 'bg-accent/30 text-accent-foreground',
+    value: 'text-accent-foreground',
+    border: 'border-accent/50',
   },
   warning: {
-    bg: 'bg-amber-50 dark:bg-amber-950/20',
-    icon: 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400',
-    value: 'text-amber-700 dark:text-amber-300',
-    border: 'border-amber-200 dark:border-amber-800',
+    bg: 'bg-secondary/50',
+    icon: 'bg-secondary text-secondary-foreground',
+    value: 'text-secondary-foreground',
+    border: 'border-secondary',
   },
   danger: {
-    bg: 'bg-red-50 dark:bg-red-950/20',
-    icon: 'bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400',
-    value: 'text-red-700 dark:text-red-300',
-    border: 'border-red-200 dark:border-red-800',
+    bg: 'bg-destructive/10',
+    icon: 'bg-destructive/20 text-destructive',
+    value: 'text-destructive',
+    border: 'border-destructive/50',
   },
   info: {
-    bg: 'bg-blue-50 dark:bg-blue-950/20',
-    icon: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400',
-    value: 'text-blue-700 dark:text-blue-300',
-    border: 'border-blue-200 dark:border-blue-800',
+    bg: 'bg-muted',
+    icon: 'bg-primary/10 text-primary',
+    value: 'text-primary',
+    border: 'border-primary/30',
   },
 };
 
