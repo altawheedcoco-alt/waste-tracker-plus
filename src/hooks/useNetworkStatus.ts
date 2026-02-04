@@ -34,9 +34,7 @@ export const useNetworkStatus = (): NetworkStatus => {
 
     const isSlowConnection = connection?.effectiveType === '2g' || 
                              connection?.effectiveType === 'slow-2g' ||
-                             connection?.effectiveType === '3g' ||
-                             connection?.effectiveType === '4g' ||
-                             (connection?.downlink && connection.downlink < 1);
+                             (connection?.downlink && connection.downlink < 1.5);
 
     setStatus({
       isOnline: navigator.onLine,
