@@ -1,12 +1,14 @@
-import { memo, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, ShieldCheck, ShieldOff, Copy, Check, AlertTriangle, Key, Smartphone, Loader2 } from 'lucide-react';
+import { memo, useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Shield, ShieldCheck, ShieldOff, Copy, Check, AlertTriangle, Key, Smartphone, Loader2, Download } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { cn } from '@/lib/utils';
 
