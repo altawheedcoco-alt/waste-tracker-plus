@@ -5123,7 +5123,16 @@ export type Database = {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
       }
-      check_api_rate_limit: { Args: { p_api_key_id: string }; Returns: boolean }
+      check_api_rate_limit: {
+        Args: { p_api_key_id: string }
+        Returns: {
+          allowed: boolean
+          limit_per_minute: number
+          remaining: number
+          reset_at: string
+        }[]
+      }
+      cleanup_old_api_request_logs: { Args: never; Returns: number }
       count_recent_2fa_attempts: {
         Args: { _minutes?: number; _user_id: string }
         Returns: number
@@ -5221,6 +5230,15 @@ export type Database = {
           profile_id: string
           vehicle_plate: string
           vehicle_type: string
+        }[]
+      }
+      get_rate_limit_info: {
+        Args: { p_api_key_id: string }
+        Returns: {
+          current_usage: number
+          limit_per_minute: number
+          reset_at: string
+          window_start: string
         }[]
       }
       get_recycling_summary: {
