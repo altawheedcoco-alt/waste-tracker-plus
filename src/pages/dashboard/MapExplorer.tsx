@@ -6,7 +6,7 @@ import type { SymbolLayout, SymbolPaint, CircleLayout, CirclePaint } from 'mapbo
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
   MapPin, Crosshair, Info, Loader2, Sparkles, 
-  Building2, Factory, Globe, Navigation,
+  Building2, Factory, Globe, Navigation, X, Search,
   Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database,
   Bot
 } from 'lucide-react';
