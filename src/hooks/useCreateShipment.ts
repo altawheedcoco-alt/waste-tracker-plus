@@ -221,8 +221,88 @@ export const useCreateShipment = () => {
     fetchOrganizationsAndDrivers();
     if (isDriver) {
       fetchDriverOrganization();
+      fetchDriverCurrentLocation();
     }
   }, [isDriver]);
+
+  // Function to get current location and reverse geocode
+  const fetchDriverCurrentLocation = async () => {
+    if (!navigator.geolocation) {
+      console.warn('Geolocation not supported');
+      return;
+    }
+
+    setLoadingDriverLocation(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        try {
+          // Use Mapbox Geocoding API to get address
+          const response = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHNxN2JxdGQwMXhjMmptbGVtNm5uYTk4In0.R6z3KkTbTJLGXk2L7C5zNw&language=ar&types=address,place,locality`
+          );
+          
+          const data = await response.json();
+          const feature = data.features?.[0];
+          
+          let address = '';
+          let city = '';
+          
+          if (feature) {
+            address = feature.place_name_ar || feature.place_name || '';
+            // Extract city from context
+            const cityContext = feature.context?.find((c: any) => 
+              c.id.startsWith('place') || c.id.startsWith('locality')
+            );
+            city = cityContext?.text_ar || cityContext?.text || '';
+          }
+
+          const locationData: DriverLocation = {
+            latitude,
+            longitude,
+            address,
+            city,
+          };
+
+          setDriverCurrentLocation(locationData);
+
+          // Auto-fill pickup address with driver's current location
+          setFormData(prev => ({
+            ...prev,
+            pickup_address: address || `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+          }));
+
+          toast.success('تم تحديد موقعك الحالي كموقع الاستلام', {
+            description: address || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+          });
+        } catch (error) {
+          console.error('Error reverse geocoding:', error);
+          // Fallback to coordinates
+          setDriverCurrentLocation({ latitude, longitude });
+          setFormData(prev => ({
+            ...prev,
+            pickup_address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+          }));
+        } finally {
+          setLoadingDriverLocation(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        setLoadingDriverLocation(false);
+        toast.error('تعذر تحديد موقعك الحالي', {
+          description: 'يرجى السماح بالوصول للموقع أو إدخال العنوان يدوياً',
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    );
+  };
 
   const fetchOrganizationsAndDrivers = async () => {
     try {
