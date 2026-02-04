@@ -468,7 +468,7 @@ const MapExplorer = () => {
               mapStyle={MAP_STYLES[mapStyle].url}
               style={{ width: '100%', height: '100%' }}
               attributionControl={false}
-              interactiveLayerIds={showFactoryMarkers ? ['industrial-circles'] : []}
+              interactiveLayerIds={showFactoryMarkers ? ['industrial-labels'] : []}
               locale={{ 
                 'NavigationControl.ZoomIn': 'تكبير', 
                 'NavigationControl.ZoomOut': 'تصغير', 
