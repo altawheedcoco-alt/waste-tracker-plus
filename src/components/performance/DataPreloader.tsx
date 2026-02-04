@@ -133,20 +133,6 @@ DataPreloader.displayName = 'DataPreloader';
 
 // تكوينات التحميل المسبق الافتراضية
 export const defaultPreloadConfigs: PreloadConfig[] = [
-  // إحصائيات لوحة التحكم
-  {
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      const { data } = await supabase.rpc('get_dashboard_summary');
-      return data;
-    },
-    conditions: {
-      paths: ['/dashboard', '/'],
-      authenticated: true,
-    },
-    priority: 'high',
-    staleTime: 2 * 60 * 1000,
-  },
   // الإشعارات
   {
     queryKey: ['notifications', 'unread'],

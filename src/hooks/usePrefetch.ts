@@ -48,7 +48,7 @@ export function usePrefetch() {
         });
         prefetchedQueries.add(keyString);
       } catch (error) {
-        console.warn('Prefetch failed for:', keyKey, error);
+        console.warn('Prefetch failed for:', keyString, error);
       }
     },
     [queryClient]
