@@ -49,13 +49,13 @@ const DataPreloader = memo(({
       if (!conditions.authenticated && user) return false;
     }
 
-    // التحقق من الدور
-    if (conditions.roles && profile?.role) {
-      if (!conditions.roles.includes(profile.role)) return false;
+    // التحقق من نوع المستخدم
+    if (conditions.roles && profile?.user_type) {
+      if (!conditions.roles.includes(profile.user_type)) return false;
     }
 
     return true;
-  }, [location.pathname, user, profile?.role]);
+  }, [location.pathname, user, profile?.user_type]);
 
   // تنفيذ التحميل المسبق
   const executePreload = useCallback(async (config: PreloadConfig) => {
