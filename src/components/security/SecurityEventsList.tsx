@@ -52,13 +52,7 @@ const eventIcons: Record<string, React.ReactNode> = {
 };
 
 interface SecurityEventsListProps {
-  filters?: {
-    eventType?: SecurityEventType;
-    severity?: SecuritySeverity;
-    isSuspicious?: boolean;
-    isResolved?: boolean;
-    limit?: number;
-  };
+  filters?: SecurityEventsFilters;
   compact?: boolean;
 }
 

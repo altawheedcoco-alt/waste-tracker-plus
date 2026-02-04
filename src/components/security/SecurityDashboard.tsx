@@ -21,14 +21,6 @@ import { SecurityEventsList } from './SecurityEventsList';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
-interface SecurityEventsFilters {
-  eventType?: SecurityEventType;
-  severity?: SecuritySeverity;
-  isSuspicious?: boolean;
-  isResolved?: boolean;
-  limit?: number;
-}
-
 interface SecurityDashboardProps {
   organizationId?: string;
 }
