@@ -764,7 +764,7 @@ const MapExplorer = () => {
               variant="secondary" 
               className="absolute bottom-3 left-3 z-10 text-[10px] bg-background/80 backdrop-blur-sm"
             >
-              © Mapbox | OpenStreetMap
+              © Mapbox
             </Badge>
           </div>
         </CardContent>
