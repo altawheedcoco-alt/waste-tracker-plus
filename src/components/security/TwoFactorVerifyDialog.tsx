@@ -1,10 +1,10 @@
 import { memo, useState } from 'react';
-import { motion } from 'framer-motion';
 import { Shield, Key, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 
 interface TwoFactorVerifyDialogProps {
