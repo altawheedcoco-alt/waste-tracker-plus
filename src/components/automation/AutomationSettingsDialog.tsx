@@ -221,7 +221,7 @@ const allAutomationSettings: AutomationSetting[] = [
   // الأمان (10 إجراءات)
   { id: '121', key: 'auto_access_control', title: 'التحكم بالوصول', description: 'إدارة صلاحيات المستخدمين', icon: Lock, category: 'security', enabled: false },
   { id: '122', key: 'auto_audit_logging', title: 'سجل التدقيق', description: 'تسجيل جميع العمليات', icon: ClipboardList, category: 'security', enabled: false },
-  { id: '123', key: 'auto_session_management', title: 'إدارة الجلسات', description: 'إنهاء الجلسات غير النشطة', icon: LogoutCircle, category: 'security', enabled: false },
+  { id: '123', key: 'auto_session_management', title: 'إدارة الجلسات', description: 'إنهاء الجلسات غير النشطة', icon: LogOut, category: 'security', enabled: false },
   { id: '124', key: 'auto_password_expiry', title: 'انتهاء كلمة المرور', description: 'تذكير بتغيير كلمة المرور', icon: KeyRound, category: 'security', enabled: false },
   { id: '125', key: 'auto_threat_detection', title: 'كشف التهديدات', description: 'رصد النشاط المشبوه', icon: ShieldAlert, category: 'security', enabled: false, premium: true },
   { id: '126', key: 'auto_data_backup', title: 'النسخ الاحتياطي', description: 'نسخ البيانات احتياطياً', icon: Database, category: 'security', enabled: false },
