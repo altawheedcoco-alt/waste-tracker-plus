@@ -640,6 +640,8 @@ export const useCreateShipment = () => {
     driverInputType,
     setDriverInputType,
     suggestingWasteState,
+    driverCurrentLocation,
+    loadingDriverLocation,
     
     // Computed
     isDriver,
@@ -657,6 +659,7 @@ export const useCreateShipment = () => {
     getCurrentRecyclerInfo,
     handleApplyPinnedParties,
     getWasteStateLabel,
+    fetchDriverCurrentLocation,
     
     // Navigation
     navigate,
