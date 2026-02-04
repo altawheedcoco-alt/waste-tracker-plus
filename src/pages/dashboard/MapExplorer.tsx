@@ -282,14 +282,8 @@ const MapExplorer = () => {
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    search(query);
-    setShowResults(true);
-  };
-
-  const handleResultSelect = (result: SearchResult) => {
+  // Handle search result selection
+  const handleSearchResultSelect = useCallback((result: SearchResultItem) => {
     const position = { lat: result.lat, lng: result.lng };
     setSelectedPosition(position);
     setSelectedAddress(result.address || result.name);
@@ -298,16 +292,8 @@ const MapExplorer = () => {
       latitude: result.lat,
       zoom: 15,
     });
-    setSearchQuery(result.name);
-    setShowResults(false);
     toast.success('تم تحديد الموقع');
-  };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    setSearchQuery(suggestion);
-    search(suggestion);
-    setShowResults(true);
-  };
+  }, []);
 
   const handleMapClick = async (event: any) => {
     const { lngLat } = event;
@@ -331,32 +317,6 @@ const MapExplorer = () => {
     if (selectedAddress) {
       navigator.clipboard.writeText(selectedAddress);
       toast.success('تم نسخ العنوان');
-    }
-  };
-
-  const getResultIcon = (result: SearchResult) => {
-    switch (result.type) {
-      case 'local':
-        return result.source === 'مصنع' ? Factory : Building2;
-      case 'mapbox':
-        return MapPinned;
-      case 'ai':
-        return Sparkles;
-      default:
-        return MapPin;
-    }
-  };
-
-  const getResultBadgeColor = (result: SearchResult) => {
-    switch (result.type) {
-      case 'local':
-        return 'bg-green-500/10 text-green-600 border-green-500/20';
-      case 'mapbox':
-        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-      case 'ai':
-        return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
-      default:
-        return '';
     }
   };
 
