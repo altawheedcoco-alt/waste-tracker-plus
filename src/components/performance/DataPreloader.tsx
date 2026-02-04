@@ -30,7 +30,7 @@ const DataPreloader = memo(({
 }: DataPreloaderProps) => {
   const queryClient = useQueryClient();
   const location = useLocation();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
 
   // التحقق من الشروط
   const shouldPreload = useCallback((config: PreloadConfig): boolean => {
@@ -49,13 +49,8 @@ const DataPreloader = memo(({
       if (!conditions.authenticated && user) return false;
     }
 
-    // التحقق من نوع المستخدم
-    if (conditions.roles && profile?.user_type) {
-      if (!conditions.roles.includes(profile.user_type)) return false;
-    }
-
     return true;
-  }, [location.pathname, user, profile?.user_type]);
+  }, [location.pathname, user]);
 
   // تنفيذ التحميل المسبق
   const executePreload = useCallback(async (config: PreloadConfig) => {
