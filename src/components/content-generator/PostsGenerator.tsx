@@ -28,7 +28,7 @@ interface PostsGeneratorProps {
   setSelectedOrganizationId: (id: string) => void;
   selectedOrg: Organization | null | undefined;
   targetOrganizationId: string | undefined;
-  profile: { id: string } | null;
+  profile: { id: string; user_id?: string } | null;
 }
 
 const PostsGenerator = ({
@@ -111,8 +111,18 @@ const PostsGenerator = ({
   };
 
   const handlePostToOrganization = async () => {
-    if (!generatedPost || !targetOrganizationId || !profile?.id) {
+    if (!generatedPost) {
       toast.error('يرجى إنشاء المنشور أولاً');
+      return;
+    }
+
+    if (!targetOrganizationId) {
+      toast.error('يرجى اختيار الجهة المستهدفة');
+      return;
+    }
+
+    if (!profile?.id) {
+      toast.error('يرجى تسجيل الدخول أولاً');
       return;
     }
 
@@ -121,7 +131,13 @@ const PostsGenerator = ({
     try {
       const postContent = `${generatedPost}\n\n${generatedHashtags.map(h => `#${h}`).join(' ')}`;
 
-      const { error } = await supabase
+      console.log('Posting to organization:', {
+        organization_id: targetOrganizationId,
+        author_id: profile.id,
+        content_length: postContent.length
+      });
+
+      const { data, error } = await supabase
         .from('organization_posts')
         .insert({
           organization_id: targetOrganizationId,
@@ -129,15 +145,27 @@ const PostsGenerator = ({
           content: postContent,
           media_urls: [],
           post_type: 'text',
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      console.log('Post created successfully:', data);
       setPosted(true);
       toast.success(`🎉 تم نشر المنشور في صفحة ${selectedOrg?.name || 'الجهة'}!`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error posting:', error);
-      toast.error('فشل في نشر المنشور');
+      if (error?.code === '42501') {
+        toast.error('ليس لديك صلاحية للنشر في هذه الجهة');
+      } else if (error?.message?.includes('violates row-level security')) {
+        toast.error('ليس لديك صلاحية للنشر في هذه الجهة');
+      } else {
+        toast.error(`فشل في نشر المنشور: ${error?.message || 'خطأ غير معروف'}`);
+      }
     } finally {
       setIsPosting(false);
     }
