@@ -309,7 +309,7 @@ export const MapboxSearchBox = ({
         return (b.relevanceScore || 0) - (a.relevanceScore || 0);
       });
 
-      setResults(allResults.slice(0, 30));
+      setResults(allResults.slice(0, 50)); // زيادة عدد النتائج المعروضة
       setAiSuggestions(aiData);
     } catch (error) {
       console.error('Search error:', error);
