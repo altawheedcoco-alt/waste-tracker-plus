@@ -2,7 +2,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Loader2, X, Sparkles, Building2, Factory, 
-  MapPinned, MapPin, Lightbulb, Car, Database, Globe
+  MapPinned, MapPin, Lightbulb, Car, Database, Globe,
+  ChevronDown, ChevronLeft
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -433,14 +434,33 @@ export const MapboxSearchBox = ({
         </Badge>
       </div>
 
+      {/* Results Dropdown Arrow Indicator */}
+      {query.length >= 2 && (
+        <div className="flex justify-center mt-1">
+          <motion.div
+            animate={{ y: showResults ? 0 : [0, 3, 0] }}
+            transition={{ repeat: showResults ? 0 : Infinity, duration: 1.5 }}
+          >
+            <ChevronDown 
+              className={cn(
+                "h-5 w-5 text-muted-foreground transition-transform duration-200 cursor-pointer",
+                showResults && "rotate-180"
+              )}
+              onClick={() => setShowResults(!showResults)}
+            />
+          </motion.div>
+        </div>
+      )}
+
       {/* Results Dropdown */}
       <AnimatePresence>
         {showResults && (results.length > 0 || aiSuggestions) && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute z-50 w-full mt-2 bg-background border rounded-lg shadow-lg overflow-hidden"
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="absolute z-50 w-full mt-1 bg-background border rounded-lg shadow-xl overflow-hidden"
           >
             <ScrollArea className="max-h-[400px]">
               {/* AI Suggestions */}
@@ -489,11 +509,11 @@ export const MapboxSearchBox = ({
                       <button
                         key={result.id}
                         type="button"
-                        className="w-full px-3 py-2.5 text-right hover:bg-accent rounded-md transition-colors flex items-start gap-3"
+                        className="w-full px-3 py-2.5 text-right hover:bg-accent rounded-md transition-colors flex items-center gap-3 group"
                         onClick={() => handleResultClick(result)}
                       >
                         <div className={cn(
-                          'p-2 rounded-lg shrink-0 mt-0.5',
+                          'p-2 rounded-lg shrink-0',
                           getResultBadgeColor(result)
                         )}>
                           <IconComponent className="h-4 w-4" />
@@ -514,6 +534,8 @@ export const MapboxSearchBox = ({
                             {result.source}
                           </Badge>
                         </div>
+                        {/* سهم للإشارة للتحديد */}
+                        <ChevronLeft className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                       </button>
                     );
                   })}
