@@ -622,9 +622,10 @@ const MapExplorer = () => {
           <div className="lg:col-span-1">
             <AILocationChat 
               onLocationSelect={handleAILocationSelect}
-              isExpanded={isAIChatExpanded}
-              onToggleExpand={() => setIsAIChatExpanded(!isAIChatExpanded)}
             />
+          </div>
+        )}
+      </div>
           </div>
         )}
       </div>
