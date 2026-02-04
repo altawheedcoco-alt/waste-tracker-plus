@@ -7,6 +7,7 @@ interface NetworkStatus {
   effectiveType: string | null;
   downlink: number | null;
   rtt: number | null;
+  checkConnection: () => void;
 }
 
 /**
