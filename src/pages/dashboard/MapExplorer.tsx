@@ -216,10 +216,10 @@ const MapExplorer = () => {
     if (!map) return;
 
     // تغيير المؤشر عند المرور فوق المصانع
-    map.on('mouseenter', 'industrial-circles', () => {
+    map.on('mouseenter', 'industrial-labels', () => {
       map.getCanvas().style.cursor = 'pointer';
     });
-    map.on('mouseleave', 'industrial-circles', () => {
+    map.on('mouseleave', 'industrial-labels', () => {
       map.getCanvas().style.cursor = '';
     });
     
@@ -458,7 +458,7 @@ const MapExplorer = () => {
               onClick={(e) => {
                 // التحقق من النقر على المصانع
                 const features = e.features;
-                if (features && features.length > 0 && features[0].layer?.id === 'industrial-circles') {
+                if (features && features.length > 0 && features[0].layer?.id === 'industrial-labels') {
                   handleFactoryClick(e);
                 } else {
                   handleMapClick(e);
@@ -468,7 +468,7 @@ const MapExplorer = () => {
               mapStyle={MAP_STYLES[mapStyle].url}
               style={{ width: '100%', height: '100%' }}
               attributionControl={false}
-              interactiveLayerIds={showFactoryMarkers ? ['industrial-circles'] : []}
+              interactiveLayerIds={showFactoryMarkers ? ['industrial-labels'] : []}
               locale={{ 
                 'NavigationControl.ZoomIn': 'تكبير', 
                 'NavigationControl.ZoomOut': 'تصغير', 
@@ -495,68 +495,50 @@ const MapExplorer = () => {
               {/* GeoJSON Source للمصانع والمناطق الصناعية */}
               {showFactoryMarkers && facilities.length > 0 && (
                 <Source id="industrial-data" type="geojson" data={industrialGeoJSON}>
-                  {/* طبقة الدوائر (الأيقونات) */}
-                  <Layer
-                    id="industrial-circles"
-                    type="circle"
-                    paint={{
-                      'circle-radius': [
-                        'interpolate', ['linear'], ['zoom'],
-                        8, 6,
-                        12, 10,
-                        16, 14
-                      ],
-                      'circle-color': [
-                        'match', ['get', 'type'],
-                        'factory', '#ef4444',
-                        'zone', '#3b82f6',
-                        'recycling', '#22c55e',
-                        'workshop', '#f59e0b',
-                        'plant', '#8b5cf6',
-                        '#6b7280'
-                      ],
-                      'circle-stroke-width': [
-                        'case',
-                        ['get', 'isVerified'], 3,
-                        2
-                      ],
-                      'circle-stroke-color': [
-                        'case',
-                        ['get', 'isVerified'], '#fbbf24',
-                        '#ffffff'
-                      ],
-                      'circle-opacity': 0.9,
-                    }}
-                  />
-                  
-                  {/* طبقة الرموز مع النص (أسماء المصانع من قاعدة البيانات) */}
+                  {/* طبقة الرموز symbol مع النص والأيقونة (Permanent Labels) */}
                   <Layer
                     id="industrial-labels"
                     type="symbol"
                     layout={{
-                      // قراءة اسم المصنع من قاعدة البيانات
+                      // سحب اسم المصنع من قاعدة البيانات
                       'text-field': ['get', 'name'],
-                      'text-font': ['Noto Sans Arabic Bold', 'Arial Unicode MS Bold'],
+                      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
                       'text-size': [
                         'interpolate', ['linear'], ['zoom'],
-                        6, 9,
-                        10, 11,
-                        14, 13,
+                        6, 10,
+                        10, 12,
+                        14, 14,
                         18, 16
                       ],
-                      // ضمان عدم اختفاء الاسم عند تداخل العلامات
+                      // موضع النص المتغير حول الأيقونة
+                      'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
+                      'text-radial-offset': 0.8,
+                      'text-justify': 'auto',
+                      // لضمان ظهور الاسم دائماً وعدم اختفائه عند التداخل
                       'text-allow-overlap': true,
                       'text-ignore-placement': true,
+                      'text-max-width': 12,
+                      // أيقونة المصنع
+                      'icon-image': [
+                        'match', ['get', 'type'],
+                        'factory', 'industry-15',
+                        'zone', 'industrial-15',
+                        'recycling', 'recycling-15',
+                        'workshop', 'hardware-15',
+                        'plant', 'warehouse-15',
+                        'marker-15'
+                      ],
+                      'icon-size': [
+                        'interpolate', ['linear'], ['zoom'],
+                        6, 0.8,
+                        10, 1,
+                        14, 1.3,
+                        18, 1.5
+                      ],
                       'icon-allow-overlap': true,
                       'icon-ignore-placement': true,
-                      // موضع النص
-                      'text-anchor': 'top',
-                      'text-offset': [0, 0.8],
-                      'text-max-width': 15,
-                      'text-line-height': 1.2,
-                      // ترتيب الرسم حسب الأهمية
+                      // ترتيب الرسم حسب الأهمية (الموثق أولاً)
                       'symbol-sort-key': ['case', ['get', 'isVerified'], 1, 2],
-                      'symbol-z-order': 'source',
                     } as SymbolLayout}
                     paint={{
                       'text-color': [
@@ -566,12 +548,14 @@ const MapExplorer = () => {
                         'recycling', '#16a34a',
                         'workshop', '#d97706',
                         'plant', '#7c3aed',
-                        '#4b5563'
+                        '#374151'
                       ],
                       'text-halo-color': '#ffffff',
-                      'text-halo-width': 2.5,
+                      'text-halo-width': 2,
                       'text-halo-blur': 0.5,
-                      'text-opacity': 1,
+                      'icon-opacity': 1,
+                      'icon-halo-color': '#ffffff',
+                      'icon-halo-width': 1,
                     } as SymbolPaint}
                   />
                 </Source>
