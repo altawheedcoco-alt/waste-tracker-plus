@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Wand2, Loader2, Sparkles, Leaf, Recycle, Building2, Send, CheckCircle2, Share2, MessageSquare, Megaphone } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { FileText, Wand2, Loader2, Building2, CheckCircle2, Share2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import TemplateSelector from './TemplateSelector';
+import { postCategories, PostTemplate } from './templates/postTemplates';
 
 interface Organization {
   id: string;
@@ -29,37 +31,6 @@ interface PostsGeneratorProps {
   profile: { id: string } | null;
 }
 
-const postTemplates = [
-  {
-    id: 'announcement',
-    title: 'إعلان عام',
-    description: 'منشور إعلاني عن خدماتكم',
-    icon: Megaphone,
-    prompt: 'أنشئ منشوراً إعلانياً احترافياً عن خدمات الجهة في مجال إدارة النفايات'
-  },
-  {
-    id: 'environmental',
-    title: 'توعية بيئية',
-    description: 'محتوى توعوي عن البيئة',
-    icon: Leaf,
-    prompt: 'أنشئ منشوراً توعوياً عن أهمية إعادة التدوير والحفاظ على البيئة'
-  },
-  {
-    id: 'tips',
-    title: 'نصائح وإرشادات',
-    description: 'نصائح عملية للتدوير',
-    icon: MessageSquare,
-    prompt: 'أنشئ منشوراً يحتوي على نصائح عملية لفرز وإعادة تدوير النفايات'
-  },
-  {
-    id: 'achievement',
-    title: 'إنجازات وأرقام',
-    description: 'عرض إنجازات الجهة',
-    icon: Sparkles,
-    prompt: 'أنشئ منشوراً يعرض إنجازات الجهة في مجال التدوير'
-  }
-];
-
 const PostsGenerator = ({
   isAdmin,
   organizations,
@@ -70,7 +41,7 @@ const PostsGenerator = ({
   targetOrganizationId,
   profile
 }: PostsGeneratorProps) => {
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [selectedTemplate, setSelectedTemplate] = useState<PostTemplate | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
   const [postTone, setPostTone] = useState('professional');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -80,9 +51,13 @@ const PostsGenerator = ({
   const [isPosting, setIsPosting] = useState(false);
   const [posted, setPosted] = useState(false);
 
+  const handleSelectTemplate = (template: PostTemplate) => {
+    setSelectedTemplate(template);
+    setCustomPrompt('');
+  };
+
   const handleGeneratePost = async () => {
-    const template = postTemplates.find(t => t.id === selectedTemplate);
-    const basePrompt = template?.prompt || customPrompt;
+    const basePrompt = selectedTemplate?.prompt || customPrompt;
 
     if (!basePrompt.trim()) {
       toast.error('يرجى اختيار نموذج أو كتابة وصف للمنشور');
@@ -168,6 +143,8 @@ const PostsGenerator = ({
     }
   };
 
+  const totalTemplates = postCategories.reduce((acc, c) => acc + c.templates.length, 0);
+
   return (
     <div className="space-y-6">
       {/* Organization Selection for Admin */}
@@ -207,43 +184,39 @@ const PostsGenerator = ({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                اختر نوع المنشور
+              <CardTitle className="flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
+                  اختر نوع المنشور
+                </span>
+                <Badge variant="secondary">{totalTemplates} نموذج</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                {postTemplates.map((template) => (
-                  <motion.button
-                    key={template.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      setSelectedTemplate(template.id);
-                      setCustomPrompt('');
-                    }}
-                    className={`p-4 rounded-xl border-2 text-right transition-all ${
-                      selectedTemplate === template.id
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <template.icon className={`w-6 h-6 mb-2 ${
-                      selectedTemplate === template.id ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
-                    <h4 className="font-medium text-sm">{template.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{template.description}</p>
-                  </motion.button>
-                ))}
-              </div>
+              <TemplateSelector
+                categories={postCategories}
+                selectedTemplateId={selectedTemplate?.id || ''}
+                onSelectTemplate={handleSelectTemplate}
+                type="post"
+              />
+
+              {selectedTemplate && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-3 bg-primary/10 rounded-lg border border-primary/20"
+                >
+                  <p className="text-sm font-medium">النموذج المختار: {selectedTemplate.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{selectedTemplate.description}</p>
+                </motion.div>
+              )}
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">أو</span>
+                  <span className="bg-card px-2 text-muted-foreground">أو اكتب وصفاً مخصصاً</span>
                 </div>
               </div>
 
@@ -253,10 +226,10 @@ const PostsGenerator = ({
                   value={customPrompt}
                   onChange={(e) => {
                     setCustomPrompt(e.target.value);
-                    setSelectedTemplate('');
+                    setSelectedTemplate(null);
                   }}
                   placeholder="اكتب وصفاً للمنشور الذي تريد إنشاءه..."
-                  className="min-h-[100px]"
+                  className="min-h-[80px]"
                   dir="rtl"
                 />
               </div>
@@ -365,7 +338,7 @@ const PostsGenerator = ({
                 <div>
                   <h3 className="font-semibold text-lg">ابدأ إنشاء منشور جديد</h3>
                   <p className="text-muted-foreground text-sm mt-1">
-                    اختر نموذجاً أو اكتب وصفاً ثم اضغط على "إنشاء"
+                    اختر من {totalTemplates} نموذج جاهز أو اكتب وصفاً مخصصاً
                   </p>
                 </div>
               </div>
