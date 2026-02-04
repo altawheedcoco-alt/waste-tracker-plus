@@ -354,131 +354,17 @@ const MapExplorer = () => {
         </div>
       </div>
 
-      {/* Search Bar and Actions */}
+      {/* Mapbox Search Box */}
       <Card>
         <CardContent className="pt-4 space-y-4">
-          <div ref={searchRef} className="relative">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onFocus={() => results.length > 0 && setShowResults(true)}
-                placeholder="ابحث عن موقع، مصنع، منطقة صناعية، شركة..."
-                className="pr-11 pl-11 h-12 text-base"
-                dir="rtl"
-              />
-              <div className="absolute left-2 top-1/2 -translate-y-1/2 flex gap-1">
-                {isSearching && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
-                {searchQuery && !isSearching && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => {
-                      setSearchQuery('');
-                      clearResults();
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Search Results Dropdown */}
-            <AnimatePresence>
-              {showResults && (results.length > 0 || aiSuggestions) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute z-50 w-full mt-2 bg-background border rounded-lg shadow-lg overflow-hidden"
-                >
-                  <ScrollArea className="max-h-[350px]">
-                    {/* AI Suggestions */}
-                    {aiSuggestions && (
-                      <div className="p-3 border-b bg-gradient-to-l from-purple-500/5 to-transparent">
-                        <div className="flex items-center gap-2 text-sm font-medium text-purple-600 mb-2">
-                          <Sparkles className="w-4 h-4" />
-                          اقتراحات الذكاء الاصطناعي
-                        </div>
-                        
-                        {aiSuggestions.correctedQuery && (
-                          <button
-                            className="w-full text-right p-2 rounded-md bg-purple-500/10 hover:bg-purple-500/20 transition-colors mb-2"
-                            onClick={() => handleSuggestionClick(aiSuggestions.correctedQuery!)}
-                          >
-                            <span className="text-sm">هل تقصد: </span>
-                            <span className="font-medium text-purple-600">{aiSuggestions.correctedQuery}</span>
-                          </button>
-                        )}
-                        
-                        {aiSuggestions.alternativeQueries.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {aiSuggestions.alternativeQueries.slice(0, 4).map((query, index) => (
-                              <Button
-                                key={index}
-                                variant="outline"
-                                size="sm"
-                                className="text-xs h-7"
-                                onClick={() => handleSuggestionClick(query)}
-                              >
-                                <Lightbulb className="w-3 h-3 ml-1" />
-                                {query}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Search Results */}
-                    {results.length > 0 && (
-                      <div className="p-2">
-                        {results.map((result) => {
-                          const IconComponent = getResultIcon(result);
-                          return (
-                            <button
-                              key={result.id}
-                              type="button"
-                              className="w-full px-3 py-2.5 text-right hover:bg-accent rounded-md transition-colors flex items-start gap-3"
-                              onClick={() => handleResultSelect(result)}
-                            >
-                              <div className={cn(
-                                'p-2 rounded-lg shrink-0 mt-0.5',
-                                getResultBadgeColor(result)
-                              )}>
-                                <IconComponent className="h-4 w-4" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{result.name}</p>
-                                <p className="text-sm text-muted-foreground truncate">
-                                  {result.address}
-                                </p>
-                                <Badge variant="secondary" className="text-xs mt-1">
-                                  {result.source}
-                                </Badge>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {results.length === 0 && !aiSuggestions && !isSearching && searchQuery.length >= 2 && (
-                      <div className="p-6 text-center text-muted-foreground">
-                        <MapPin className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p>لم يتم العثور على نتائج</p>
-                        <p className="text-sm mt-1">جرب البحث بكلمات مختلفة</p>
-                      </div>
-                    )}
-                  </ScrollArea>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <MapboxSearchBox
+            onResultSelect={handleSearchResultSelect}
+            placeholder="ابحث عن موقع، مصنع، سيارة، منطقة صناعية..."
+            includeFactories={true}
+            includeVehicles={true}
+            includeMapbox={true}
+            userLocation={userLocation}
+          />
 
           {/* Actions Row */}
           <div className="flex flex-wrap gap-2 items-center justify-between">
