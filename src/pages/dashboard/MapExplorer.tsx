@@ -626,9 +626,6 @@ const MapExplorer = () => {
           </div>
         )}
       </div>
-          </div>
-        )}
-      </div>
 
       {/* Selected Location Info */}
       <AnimatePresence>
