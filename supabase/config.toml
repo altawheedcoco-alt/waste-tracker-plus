@@ -47,3 +47,15 @@ verify_jwt = false
 
 [functions.employee-invitation]
 verify_jwt = false
+
+[functions.geofencing-alerts]
+verify_jwt = false
+
+[functions.smart-notifications]
+verify_jwt = false
+
+[functions.analytics-engine]
+verify_jwt = false
+
+[functions.scheduled-tasks]
+verify_jwt = false
