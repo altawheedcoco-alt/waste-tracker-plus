@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin, RefreshCw, User, Truck } from 'lucide-react';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
 import WasteTypeCombobox from '@/components/shipments/WasteTypeCombobox';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
