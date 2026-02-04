@@ -181,8 +181,8 @@ const SmartLocationSearch = ({
     toast.success('تم اختيار الموقع');
   };
 
-  // Handle Photon result selection
-  const handlePhotonSelect = (result: PhotonResult) => {
+  // Handle geocoding result selection
+  const handleGeocodingSelect = (result: GeocodingResult) => {
     const coords = {
       lat: result.geometry.coordinates[1],
       lng: result.geometry.coordinates[0],
