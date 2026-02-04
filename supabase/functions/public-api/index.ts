@@ -14,6 +14,13 @@ interface ApiKeyInfo {
   rate_limit: number;
 }
 
+interface RateLimitInfo {
+  allowed: boolean;
+  remaining: number;
+  reset_at: string;
+  limit_per_minute: number;
+}
+
 // Hash API key for comparison
 async function hashApiKey(key: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -28,7 +35,7 @@ async function validateRequest(
   supabase: any,
   apiKey: string,
   requiredScope: string
-): Promise<{ valid: boolean; error?: string; keyInfo?: ApiKeyInfo }> {
+): Promise<{ valid: boolean; error?: string; keyInfo?: ApiKeyInfo; rateLimit?: RateLimitInfo }> {
   const keyHash = await hashApiKey(apiKey);
   
   // Validate API key
@@ -36,6 +43,7 @@ async function validateRequest(
     .rpc('validate_api_key', { p_key_hash: keyHash });
   
   if (keyError || !keyData || keyData.length === 0) {
+    console.log('API key validation failed:', keyError?.message || 'Key not found');
     return { valid: false, error: 'Invalid API key' };
   }
   
@@ -47,12 +55,23 @@ async function validateRequest(
     return { valid: false, error: `Insufficient permissions. Required scope: ${requiredScope}` };
   }
   
-  // Check rate limit
-  const { data: rateLimitOk } = await supabase
+  // Check rate limit with enhanced function
+  const { data: rateLimitData, error: rateLimitError } = await supabase
     .rpc('check_api_rate_limit', { p_api_key_id: keyInfo.api_key_id });
   
-  if (!rateLimitOk) {
-    return { valid: false, error: 'Rate limit exceeded. Please try again later.' };
+  if (rateLimitError) {
+    console.error('Rate limit check error:', rateLimitError);
+    return { valid: false, error: 'Rate limit check failed' };
+  }
+  
+  const rateLimit = rateLimitData?.[0] as RateLimitInfo;
+  
+  if (!rateLimit?.allowed) {
+    return { 
+      valid: false, 
+      error: 'Rate limit exceeded. Please try again later.',
+      rateLimit 
+    };
   }
   
   // Update last_used_at
@@ -61,7 +80,7 @@ async function validateRequest(
     .update({ last_used_at: new Date().toISOString() })
     .eq('id', keyInfo.api_key_id);
   
-  return { valid: true, keyInfo };
+  return { valid: true, keyInfo, rateLimit };
 }
 
 // Log API request
@@ -74,18 +93,40 @@ async function logRequest(
   responseTimeMs: number,
   ipAddress: string | null,
   userAgent: string | null,
-  errorMessage: string | null
+  errorMessage: string | null,
+  requestBody: any = null
 ) {
-  await supabase.from('api_request_logs').insert({
-    api_key_id: apiKeyId,
-    endpoint,
-    method,
-    status_code: statusCode,
-    response_time_ms: responseTimeMs,
-    ip_address: ipAddress,
-    user_agent: userAgent,
-    error_message: errorMessage,
-  });
+  try {
+    await supabase.from('api_request_logs').insert({
+      api_key_id: apiKeyId,
+      endpoint,
+      method,
+      status_code: statusCode,
+      response_time_ms: responseTimeMs,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      error_message: errorMessage,
+      request_body: requestBody,
+    });
+  } catch (e) {
+    console.error('Failed to log request:', e);
+  }
+}
+
+// Build rate limit headers
+function buildRateLimitHeaders(rateLimit?: RateLimitInfo): Record<string, string> {
+  if (!rateLimit) return {};
+  
+  const resetTimestamp = Math.floor(new Date(rateLimit.reset_at).getTime() / 1000);
+  
+  return {
+    'X-RateLimit-Limit': String(rateLimit.limit_per_minute),
+    'X-RateLimit-Remaining': String(Math.max(0, rateLimit.remaining - 1)),
+    'X-RateLimit-Reset': String(resetTimestamp),
+    'RateLimit-Limit': String(rateLimit.limit_per_minute),
+    'RateLimit-Remaining': String(Math.max(0, rateLimit.remaining - 1)),
+    'RateLimit-Reset': String(resetTimestamp),
+  };
 }
 
 // API Handlers
@@ -117,8 +158,8 @@ async function handleShipments(
       return { status: 200, data };
     } else {
       // List shipments with pagination
-      const page = body?.page || 1;
-      const limit = Math.min(body?.limit || 20, 100);
+      const page = parseInt(body?.page) || 1;
+      const limit = Math.min(parseInt(body?.limit) || 20, 100);
       const offset = (page - 1) * limit;
       
       const { data, error, count } = await supabase
@@ -220,8 +261,8 @@ async function handleInvoices(
     return { status: 200, data };
   }
   
-  const page = body?.page || 1;
-  const limit = Math.min(body?.limit || 20, 100);
+  const page = parseInt(body?.page) || 1;
+  const limit = Math.min(parseInt(body?.limit) || 20, 100);
   const offset = (page - 1) * limit;
   
   const { data, error, count } = await supabase
@@ -348,7 +389,10 @@ serve(async (req) => {
   const apiKey = req.headers.get('x-api-key');
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: 'API key required. Add x-api-key header.' }),
+      JSON.stringify({ 
+        error: 'API key required',
+        message: 'Add x-api-key header with your API key'
+      }),
       { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -377,6 +421,27 @@ serve(async (req) => {
   // Validate request
   const validation = await validateRequest(supabase, apiKey, requiredScope);
   
+  // Handle rate limit exceeded with proper headers
+  if (!validation.valid && validation.error?.includes('Rate limit')) {
+    const rateLimitHeaders = buildRateLimitHeaders(validation.rateLimit);
+    return new Response(
+      JSON.stringify({ 
+        error: 'Too Many Requests',
+        message: validation.error,
+        retry_after: 60
+      }),
+      { 
+        status: 429, 
+        headers: { 
+          ...corsHeaders, 
+          ...rateLimitHeaders,
+          'Content-Type': 'application/json',
+          'Retry-After': '60'
+        } 
+      }
+    );
+  }
+  
   if (!validation.valid) {
     return new Response(
       JSON.stringify({ error: validation.error }),
@@ -385,10 +450,11 @@ serve(async (req) => {
   }
   
   const keyInfo = validation.keyInfo!;
+  const rateLimit = validation.rateLimit;
   const orgId = keyInfo.organization_id;
   
   // Parse body for POST/PUT
-  let body = {};
+  let body: any = {};
   if (method === 'POST' || method === 'PUT') {
     try {
       body = await req.json();
@@ -398,10 +464,9 @@ serve(async (req) => {
   } else {
     // Parse query params for GET
     for (const [key, value] of url.searchParams) {
-      (body as any)[key] = value;
+      body[key] = value;
     }
   }
-  
   
   let result: { status: number; data: any } = { status: 404, data: { error: 'Endpoint not found' } };
   
@@ -423,6 +488,17 @@ serve(async (req) => {
       case 'health':
         result = { status: 200, data: { status: 'ok', timestamp: new Date().toISOString() } };
         break;
+      case 'rate-limit':
+        // Endpoint to check current rate limit status
+        result = { 
+          status: 200, 
+          data: { 
+            limit: rateLimit?.limit_per_minute,
+            remaining: Math.max(0, (rateLimit?.remaining || 0) - 1),
+            reset_at: rateLimit?.reset_at
+          } 
+        };
+        break;
       default:
         result = { 
           status: 200, 
@@ -438,8 +514,17 @@ serve(async (req) => {
               'GET /reports/summary - Get shipment summary report',
               'GET /reports/financial - Get financial report',
               'GET /organization - Get organization details',
+              'GET /rate-limit - Check current rate limit status',
               'GET /health - Health check'
             ],
+            rate_limiting: {
+              window: '1 minute',
+              headers: {
+                'X-RateLimit-Limit': 'Requests allowed per window',
+                'X-RateLimit-Remaining': 'Requests remaining in current window',
+                'X-RateLimit-Reset': 'Unix timestamp when window resets'
+              }
+            },
             documentation: '/docs'
           }
         };
@@ -450,6 +535,7 @@ serve(async (req) => {
   }
   
   const responseTime = Date.now() - startTime;
+  const rateLimitHeaders = buildRateLimitHeaders(rateLimit);
   
   // Log request
   await logRequest(
@@ -461,7 +547,8 @@ serve(async (req) => {
     responseTime,
     req.headers.get('x-forwarded-for') || req.headers.get('cf-connecting-ip'),
     req.headers.get('user-agent'),
-    result.status >= 400 ? JSON.stringify(result.data) : null
+    result.status >= 400 ? JSON.stringify(result.data) : null,
+    method !== 'GET' ? body : null
   );
   
   return new Response(
@@ -470,9 +557,9 @@ serve(async (req) => {
       status: result.status,
       headers: {
         ...corsHeaders,
+        ...rateLimitHeaders,
         'Content-Type': 'application/json',
         'X-Response-Time': `${responseTime}ms`,
-        'X-Rate-Limit-Remaining': String(keyInfo.rate_limit - 1)
       }
     }
   );
