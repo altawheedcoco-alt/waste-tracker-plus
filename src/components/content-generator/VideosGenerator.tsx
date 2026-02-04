@@ -438,14 +438,20 @@ const VideosGenerator = ({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {generatedVideoUrl ? (
+                    <div className="rounded-lg overflow-hidden bg-black">
+                      <video 
+                        src={generatedVideoUrl}
+                        controls
+                        className="w-full h-auto"
+                      />
+                    </div>
+                  ) : generatedImageUrl && generatedContent.scenes ? (
                     <VideoPreviewPlayer 
-                      videoUrl={generatedVideoUrl}
+                      imageUrl={generatedImageUrl}
+                      scenes={generatedContent.scenes}
+                      script={generatedContent.script}
                       title={generatedContent.title}
                     />
-                  ) : generatedImageUrl && (
-                    <div className="rounded-lg overflow-hidden">
-                      <img 
-                        src={generatedImageUrl} 
                         alt="صورة ترويجية" 
                         className="w-full h-auto"
                       />
