@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Video, Wand2, Loader2, Sparkles, Film, Play, RefreshCw, Leaf, Recycle, Send, CheckCircle2, Share2, Eye, Building2 } from 'lucide-react';
+import { Video, Wand2, Loader2, Sparkles, Film, Play, RefreshCw, Leaf, Recycle, Send, CheckCircle2, Share2, Eye, Building2, FileText, Image as ImageIcon, PenTool } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
