@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, Wifi, AlertTriangle, RefreshCw } from 'lucide-react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
@@ -13,12 +13,14 @@ interface OfflineIndicatorProps {
 /**
  * مؤشر حالة الاتصال بالإنترنت
  * يظهر عند انقطاع الاتصال أو بطء الشبكة
+ * يتحدث تلقائياً ويظهر بتأثير وميض
  */
 const OfflineIndicator = memo(({ 
   className, 
   showSlowConnection = true 
 }: OfflineIndicatorProps) => {
-  const { isOnline, isSlowConnection, effectiveType } = useNetworkStatus();
+  const { isOnline, isSlowConnection, effectiveType, checkConnection } = useNetworkStatus();
+  const [isVisible, setIsVisible] = useState(true);
 
   const handleRefresh = () => {
     window.location.reload();
@@ -26,19 +28,51 @@ const OfflineIndicator = memo(({
 
   const showWarning = !isOnline || (showSlowConnection && isSlowConnection);
 
+  // Auto-refresh connection status every 10 seconds
+  useEffect(() => {
+    if (!showWarning) return;
+
+    const interval = setInterval(() => {
+      checkConnection?.();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [showWarning, checkConnection]);
+
+  // Blinking effect - show/hide every 4 seconds for slow connection
+  useEffect(() => {
+    if (!isOnline) {
+      // Always show when offline
+      setIsVisible(true);
+      return;
+    }
+
+    if (!isSlowConnection) {
+      setIsVisible(true);
+      return;
+    }
+
+    // Blink effect for slow connection
+    const blinkInterval = setInterval(() => {
+      setIsVisible(prev => !prev);
+    }, 4000);
+
+    return () => clearInterval(blinkInterval);
+  }, [isOnline, isSlowConnection]);
+
   return (
     <AnimatePresence>
-      {showWarning && (
+      {showWarning && isVisible && (
         <motion.div
           initial={{ opacity: 0, y: -100 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -100 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           className={cn(
-            'fixed top-0 left-0 right-0 z-[100] px-4 py-3',
+            'fixed top-0 left-0 right-0 z-[100] px-4 py-3 backdrop-blur-sm',
             !isOnline 
-              ? 'bg-destructive text-destructive-foreground' 
-              : 'bg-yellow-500 text-yellow-950',
+              ? 'bg-destructive/80 text-destructive-foreground' 
+              : 'bg-warning/80 text-warning-foreground',
             className
           )}
         >
@@ -56,7 +90,12 @@ const OfflineIndicator = memo(({
                 </>
               ) : (
                 <>
-                  <AlertTriangle className="w-5 h-5 shrink-0" />
+                  <motion.div
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                  </motion.div>
                   <div className="text-sm">
                     <p className="font-semibold">اتصال بطيء ({effectiveType})</p>
                     <p className="text-xs opacity-90">

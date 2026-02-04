@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-interface NetworkStatus {
+interface NetworkStatusState {
   isOnline: boolean;
   isSlowConnection: boolean;
   connectionType: string | null;
@@ -9,12 +9,16 @@ interface NetworkStatus {
   rtt: number | null;
 }
 
+interface NetworkStatus extends NetworkStatusState {
+  checkConnection: () => void;
+}
+
 /**
  * Hook لمراقبة حالة الشبكة والاتصال
  * يوفر معلومات عن الاتصال بالإنترنت وجودة الشبكة
  */
-export const useNetworkStatus = () => {
-  const [status, setStatus] = useState<NetworkStatus>(() => ({
+export const useNetworkStatus = (): NetworkStatus => {
+  const [status, setStatus] = useState<NetworkStatusState>(() => ({
     isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
     isSlowConnection: false,
     connectionType: null,
@@ -30,6 +34,8 @@ export const useNetworkStatus = () => {
 
     const isSlowConnection = connection?.effectiveType === '2g' || 
                              connection?.effectiveType === 'slow-2g' ||
+                             connection?.effectiveType === '3g' ||
+                             connection?.effectiveType === '4g' ||
                              (connection?.downlink && connection.downlink < 1);
 
     setStatus({
@@ -76,7 +82,7 @@ export const useNetworkStatus = () => {
     };
   }, [updateNetworkStatus]);
 
-  return status;
+  return { ...status, checkConnection: updateNetworkStatus };
 };
 
 export default useNetworkStatus;
