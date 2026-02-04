@@ -527,20 +527,6 @@ const MapExplorer = () => {
                 جلب من Google Maps
               </Button>
               <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fetchFromExternalSource('osm')}
-                disabled={isFetchingFromSource}
-                className="gap-2"
-              >
-                {fetchingSource === 'osm' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Globe className="w-4 h-4" />
-                )}
-                جلب من OpenStreetMap
-              </Button>
-              <Button
                 variant="ghost"
                 size="sm"
                 onClick={loadFacilities}
