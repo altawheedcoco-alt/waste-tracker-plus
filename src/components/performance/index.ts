@@ -37,6 +37,11 @@ export {
   useBatchedUpdates,
 } from '@/hooks/useMemoization';
 
+// Web Workers Hooks
+export { useWebWorker } from '@/hooks/useWebWorker';
+export { useDataProcessor } from '@/hooks/useDataProcessor';
+export { useTaskQueue } from '@/hooks/useTaskQueue';
+
 // Memo Utilities
 export {
   deepEqual,
