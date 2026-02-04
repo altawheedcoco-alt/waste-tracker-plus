@@ -59,6 +59,13 @@ export type Database = {
             foreignKeyName: "activity_logs_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "activity_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -156,6 +163,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "api_keys_organization_id_fkey"
@@ -272,6 +286,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "approval_requests_requester_organization_id_fkey"
+            columns: ["requester_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
           {
             foreignKeyName: "approval_requests_requester_organization_id_fkey"
             columns: ["requester_organization_id"]
@@ -468,6 +489,13 @@ export type Database = {
             foreignKeyName: "contract_custom_versions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "contract_custom_versions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -576,6 +604,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "contract_templates_organization_id_fkey"
@@ -730,8 +765,22 @@ export type Database = {
             foreignKeyName: "contracts_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "contracts_partner_organization_id_fkey"
@@ -805,6 +854,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
           {
             foreignKeyName: "customers_organization_id_fkey"
             columns: ["organization_id"]
@@ -909,8 +965,22 @@ export type Database = {
             foreignKeyName: "deposits_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "deposits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "deposits_partner_organization_id_fkey"
@@ -960,8 +1030,22 @@ export type Database = {
             foreignKeyName: "direct_messages_receiver_organization_id_fkey"
             columns: ["receiver_organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "direct_messages_receiver_organization_id_fkey"
+            columns: ["receiver_organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_messages_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "direct_messages_sender_organization_id_fkey"
@@ -1019,6 +1103,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organization_documents"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_verifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "document_verifications_organization_id_fkey"
@@ -1115,6 +1206,13 @@ export type Database = {
             foreignKeyName: "drivers_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "drivers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -1207,6 +1305,13 @@ export type Database = {
             foreignKeyName: "employee_invitations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "employee_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -1259,8 +1364,22 @@ export type Database = {
             foreignKeyName: "employee_partner_access_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "employee_partner_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_partner_access_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "employee_partner_access_partner_organization_id_fkey"
@@ -1339,6 +1458,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_waste_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "employee_waste_access_organization_id_fkey"
@@ -1452,6 +1578,13 @@ export type Database = {
             foreignKeyName: "expenses_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "expenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -1523,6 +1656,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_partners_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "external_partners_organization_id_fkey"
@@ -1608,6 +1748,13 @@ export type Database = {
             foreignKeyName: "external_weight_records_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -1617,6 +1764,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_generator_company_id_fkey"
+            columns: ["generator_company_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "external_weight_records_generator_company_id_fkey"
@@ -1636,8 +1790,22 @@ export type Database = {
             foreignKeyName: "external_weight_records_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_weight_records_partner_company_id_fkey"
+            columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "external_weight_records_partner_company_id_fkey"
@@ -1689,6 +1857,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "financial_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
           {
             foreignKeyName: "financial_accounts_organization_id_fkey"
             columns: ["organization_id"]
@@ -1772,8 +1947,22 @@ export type Database = {
             foreignKeyName: "financial_transactions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_transactions_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "financial_transactions_partner_organization_id_fkey"
@@ -1996,8 +2185,22 @@ export type Database = {
             foreignKeyName: "invoices_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "invoices_partner_organization_id_fkey"
@@ -2007,6 +2210,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      materialized_view_refresh_log: {
+        Row: {
+          duration_ms: number | null
+          id: string
+          refreshed_at: string
+          triggered_by: string | null
+          view_name: string
+        }
+        Insert: {
+          duration_ms?: number | null
+          id?: string
+          refreshed_at?: string
+          triggered_by?: string | null
+          view_name: string
+        }
+        Update: {
+          duration_ms?: number | null
+          id?: string
+          refreshed_at?: string
+          triggered_by?: string | null
+          view_name?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -2138,6 +2365,13 @@ export type Database = {
             foreignKeyName: "operational_plans_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "operational_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -2176,6 +2410,13 @@ export type Database = {
           reason?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_approval_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
           {
             foreignKeyName: "organization_approval_logs_organization_id_fkey"
             columns: ["organization_id"]
@@ -2248,6 +2489,13 @@ export type Database = {
             foreignKeyName: "organization_documents_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -2306,6 +2554,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_locations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "organization_locations_organization_id_fkey"
@@ -2424,6 +2679,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_posts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "organization_posts_organization_id_fkey"
@@ -2647,8 +2909,22 @@ export type Database = {
             foreignKeyName: "partner_account_settings_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_account_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_account_settings_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "partner_account_settings_partner_organization_id_fkey"
@@ -2698,8 +2974,22 @@ export type Database = {
             foreignKeyName: "partner_balances_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_balances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_balances_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "partner_balances_partner_organization_id_fkey"
@@ -2762,8 +3052,22 @@ export type Database = {
             foreignKeyName: "partner_notes_receiver_organization_id_fkey"
             columns: ["receiver_organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_notes_receiver_organization_id_fkey"
+            columns: ["receiver_organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_notes_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "partner_notes_sender_organization_id_fkey"
@@ -2849,8 +3153,22 @@ export type Database = {
             foreignKeyName: "partner_price_items_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_price_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_price_items_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "partner_price_items_partner_organization_id_fkey"
@@ -2928,8 +3246,22 @@ export type Database = {
             foreignKeyName: "partner_visibility_settings_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_visibility_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_visibility_settings_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "partner_visibility_settings_partner_organization_id_fkey"
@@ -3004,8 +3336,22 @@ export type Database = {
             foreignKeyName: "partner_waste_types_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_waste_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_waste_types_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "partner_waste_types_partner_organization_id_fkey"
@@ -3081,6 +3427,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "invoices"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "payment_reminders_organization_id_fkey"
@@ -3177,8 +3530,22 @@ export type Database = {
             foreignKeyName: "payments_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "payments_partner_organization_id_fkey"
@@ -3264,6 +3631,13 @@ export type Database = {
             foreignKeyName: "profiles_active_organization_id_fkey"
             columns: ["active_organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "profiles_active_organization_id_fkey"
+            columns: ["active_organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -3273,6 +3647,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "profiles_organization_id_fkey"
@@ -3342,6 +3723,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recycling_reports_recycler_organization_id_fkey"
+            columns: ["recycler_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "recycling_reports_recycler_organization_id_fkey"
@@ -3419,6 +3807,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "report_requests_requester_organization_id_fkey"
+            columns: ["requester_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
           {
             foreignKeyName: "report_requests_requester_organization_id_fkey"
             columns: ["requester_organization_id"]
@@ -3502,6 +3897,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "report_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "report_templates_organization_id_fkey"
@@ -3709,6 +4111,13 @@ export type Database = {
             foreignKeyName: "shipments_generator_id_fkey"
             columns: ["generator_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -3716,8 +4125,22 @@ export type Database = {
             foreignKeyName: "shipments_recycler_id_fkey"
             columns: ["recycler_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "shipments_transporter_id_fkey"
@@ -3817,8 +4240,22 @@ export type Database = {
             foreignKeyName: "support_tickets_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "support_tickets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_tickets_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "support_tickets_partner_organization_id_fkey"
@@ -3987,6 +4424,13 @@ export type Database = {
             foreignKeyName: "terms_acceptances_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "terms_acceptances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -4044,6 +4488,13 @@ export type Database = {
             foreignKeyName: "ticket_messages_sender_organization_id_fkey"
             columns: ["sender_organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ticket_messages_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -4085,6 +4536,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_watchers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
           },
           {
             foreignKeyName: "ticket_watchers_organization_id_fkey"
@@ -4171,6 +4629,13 @@ export type Database = {
             foreignKeyName: "user_organizations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "user_organizations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -4235,7 +4700,178 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mv_admin_dashboard: {
+        Row: {
+          active_contracts: number | null
+          active_users: number | null
+          available_drivers: number | null
+          confirmed_shipments: number | null
+          generator_count: number | null
+          open_tickets: number | null
+          pending_approvals: number | null
+          pending_documents: number | null
+          pending_invoices: number | null
+          pending_shipments: number | null
+          recycler_count: number | null
+          refreshed_at: string | null
+          total_drivers: number | null
+          total_invoiced: number | null
+          total_organizations: number | null
+          total_paid: number | null
+          total_quantity: number | null
+          total_shipments: number | null
+          transporter_count: number | null
+          verified_organizations: number | null
+        }
+        Relationships: []
+      }
+      mv_daily_shipment_stats: {
+        Row: {
+          avg_quantity: number | null
+          generator_id: string | null
+          recycler_id: string | null
+          report_date: string | null
+          shipment_count: number | null
+          status: Database["public"]["Enums"]["shipment_status"] | null
+          total_quantity: number | null
+          transporter_id: string | null
+          waste_type: Database["public"]["Enums"]["waste_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipments_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mv_monthly_invoice_stats: {
+        Row: {
+          invoice_count: number | null
+          invoice_type: string | null
+          month: string | null
+          organization_id: string | null
+          paid_amount: number | null
+          remaining_amount: number | null
+          status: string | null
+          total_amount: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mv_organization_summary: {
+        Row: {
+          active_contracts_count: number | null
+          city: string | null
+          driver_count: number | null
+          employee_count: number | null
+          is_verified: boolean | null
+          organization_id: string | null
+          organization_name: string | null
+          organization_type:
+            | Database["public"]["Enums"]["organization_type"]
+            | null
+          refreshed_at: string | null
+          total_generated_quantity: number | null
+          total_generated_shipments: number | null
+          total_invoices_count: number | null
+          total_recycled_quantity: number | null
+          total_recycled_shipments: number | null
+          total_transported_quantity: number | null
+          total_transported_shipments: number | null
+        }
+        Relationships: []
+      }
+      mv_recycling_summary: {
+        Row: {
+          certificates_issued: number | null
+          month: string | null
+          recycler_organization_id: string | null
+          unique_shipments: number | null
+          waste_category: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recycling_reports_recycler_organization_id_fkey"
+            columns: ["recycler_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "recycling_reports_recycler_organization_id_fkey"
+            columns: ["recycler_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mv_waste_type_analytics: {
+        Row: {
+          avg_quantity: number | null
+          completion_rate: number | null
+          confirmed_count: number | null
+          month: string | null
+          shipment_count: number | null
+          total_quantity: number | null
+          unique_generators: number | null
+          unique_recyclers: number | null
+          waste_type: Database["public"]["Enums"]["waste_type"] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_access_contract: {
@@ -4313,6 +4949,79 @@ export type Database = {
       }
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
+      get_admin_dashboard_stats: {
+        Args: never
+        Returns: {
+          active_contracts: number
+          active_users: number
+          available_drivers: number
+          confirmed_shipments: number
+          generator_count: number
+          open_tickets: number
+          pending_approvals: number
+          pending_documents: number
+          pending_invoices: number
+          pending_shipments: number
+          recycler_count: number
+          refreshed_at: string
+          total_drivers: number
+          total_invoiced: number
+          total_organizations: number
+          total_paid: number
+          total_quantity: number
+          total_shipments: number
+          transporter_count: number
+          verified_organizations: number
+        }[]
+      }
+      get_daily_shipment_stats: {
+        Args: { _end_date?: string; _org_id: string; _start_date?: string }
+        Returns: {
+          avg_quantity: number
+          generator_id: string
+          recycler_id: string
+          report_date: string
+          shipment_count: number
+          status: string
+          total_quantity: number
+          transporter_id: string
+          waste_type: string
+        }[]
+      }
+      get_monthly_invoice_stats: {
+        Args: { _org_id: string }
+        Returns: {
+          invoice_count: number
+          invoice_type: string
+          month: string
+          organization_id: string
+          paid_amount: number
+          remaining_amount: number
+          status: string
+          total_amount: number
+        }[]
+      }
+      get_organization_summary: {
+        Args: { _org_id: string }
+        Returns: {
+          active_contracts_count: number
+          city: string
+          driver_count: number
+          employee_count: number
+          is_verified: boolean
+          organization_id: string
+          organization_name: string
+          organization_type: string
+          refreshed_at: string
+          total_generated_quantity: number
+          total_generated_shipments: number
+          total_invoices_count: number
+          total_recycled_quantity: number
+          total_recycled_shipments: number
+          total_transported_quantity: number
+          total_transported_shipments: number
+        }[]
+      }
       get_pending_drivers: {
         Args: never
         Returns: {
@@ -4329,6 +5038,16 @@ export type Database = {
           vehicle_type: string
         }[]
       }
+      get_recycling_summary: {
+        Args: { _org_id: string }
+        Returns: {
+          certificates_issued: number
+          month: string
+          recycler_organization_id: string
+          unique_shipments: number
+          waste_category: string
+        }[]
+      }
       get_user_driver_id: { Args: { _user_id: string }; Returns: string }
       get_user_org_id_safe: { Args: { _user_id: string }; Returns: string }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
@@ -4343,6 +5062,20 @@ export type Database = {
           organization_name: string
           organization_type: string
           role_in_organization: string
+        }[]
+      }
+      get_waste_type_analytics: {
+        Args: { _org_id?: string }
+        Returns: {
+          avg_quantity: number
+          completion_rate: number
+          confirmed_count: number
+          month: string
+          shipment_count: number
+          total_quantity: number
+          unique_generators: number
+          unique_recyclers: number
+          waste_type: string
         }[]
       }
       has_employee_permission: {
@@ -4380,6 +5113,11 @@ export type Database = {
       is_user_driver: {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
+      }
+      refresh_all_materialized_views: { Args: never; Returns: undefined }
+      refresh_materialized_view: {
+        Args: { view_name: string }
+        Returns: undefined
       }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
