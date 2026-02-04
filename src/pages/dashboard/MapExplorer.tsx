@@ -5,23 +5,21 @@ import type { MapRef, MapLayerMouseEvent } from 'react-map-gl';
 import type { SymbolLayout, SymbolPaint, CircleLayout, CirclePaint } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
-  MapPin, Search, Crosshair, Info, Loader2, X, Sparkles, 
-  Building2, Factory, MapPinned, Globe, Lightbulb, Navigation,
+  MapPin, Crosshair, Info, Loader2, Sparkles, 
+  Building2, Factory, Globe, Navigation,
   Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database,
-  Bot, MessageSquare
+  Bot
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
-import { useMultiSourceSearch, SearchResult } from '@/hooks/useMultiSourceSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import AILocationChat from '@/components/maps/AILocationChat';
+import MapboxSearchBox, { SearchResultItem } from '@/components/maps/MapboxSearchBox';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
