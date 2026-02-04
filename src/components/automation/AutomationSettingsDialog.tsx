@@ -35,6 +35,7 @@ import {
   Clipboard, ClipboardCheck, ClipboardList, ListChecks, ListTodo,
   CalendarCheck, CalendarClock, Timer, TimerOff, Hourglass,
   Play, Pause, StopCircle, RotateCcw, RotateCw, Repeat, Shuffle,
+  Camera, Calculator, LogOut,
   Volume2, VolumeX, Vibrate, BellRing, BellOff, MessageCircle,
   Megaphone, Inbox, SendHorizonal, ArrowUpDown, ArrowLeftRight,
   MoveVertical, Navigation, Compass, Map, PinOff, Locate,
