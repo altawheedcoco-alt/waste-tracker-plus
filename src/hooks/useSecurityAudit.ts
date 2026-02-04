@@ -53,7 +53,7 @@ export function useSecurityAudits(limit = 10) {
         .limit(limit);
       
       if (error) throw error;
-      return data as SecurityAudit[];
+      return data as unknown as SecurityAudit[];
     },
   });
 }
