@@ -323,6 +323,55 @@ Deno.serve(async (req) => {
         )
       }
 
+      case 'security-audit': {
+        // فحص أمني دوري شامل
+        console.log('[Scheduled Tasks] Running security audit...')
+        
+        const { data: result, error } = await supabase
+          .rpc('run_security_audit')
+
+        if (error) {
+          console.error('[Scheduled Tasks] Security audit error:', error)
+          return new Response(
+            JSON.stringify({ success: false, error: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log(`[Scheduled Tasks] Security audit completed: ${result?.status}`)
+
+        // إرسال تنبيه إذا كان هناك فشل
+        if (result?.failed > 0) {
+          // إنشاء إشعار للمسؤولين
+          const { data: admins } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('role', 'admin')
+            .eq('is_active', true)
+
+          const notifications = (admins || []).map(a => ({
+            user_id: a.user_id,
+            title: '🚨 تنبيه أمني: فشل في الفحص الدوري',
+            message: `تم اكتشاف ${result.failed} مشكلة أمنية تحتاج مراجعة فورية`,
+            type: 'security_alert',
+            is_read: false
+          }))
+
+          if (notifications.length > 0) {
+            await supabase.from('notifications').insert(notifications)
+          }
+        }
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            task: 'security-audit',
+            ...result
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       default:
         return new Response(
           JSON.stringify({ 
@@ -335,7 +384,8 @@ Deno.serve(async (req) => {
               'invoice-overdue-check',
               'update-partner-stats',
               'archive-old-data',
-              'refresh-materialized-views'
+              'refresh-materialized-views',
+              'security-audit'
             ]
           }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
