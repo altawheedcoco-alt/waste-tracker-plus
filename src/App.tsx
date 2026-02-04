@@ -90,6 +90,7 @@ const SystemStatus = lazy(() => import("./pages/dashboard/SystemStatus"));
 const SupportCenter = lazy(() => import("./pages/dashboard/SupportCenter"));
 const ApiManagement = lazy(() => import("./pages/dashboard/ApiManagement"));
 const AdvancedAnalytics = lazy(() => import("./pages/dashboard/AdvancedAnalytics"));
+const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
@@ -215,6 +216,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/support" element={<SupportCenter />} />
         <Route path="/dashboard/api" element={<ApiManagement />} />
         <Route path="/dashboard/advanced-analytics" element={<AdvancedAnalytics />} />
+        <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
