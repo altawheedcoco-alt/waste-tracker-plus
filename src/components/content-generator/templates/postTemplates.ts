@@ -8,7 +8,8 @@ import {
   Sprout, Apple, Carrot, Wheat, Coffee, Cookie, Pizza, Soup,
   Car, Truck, Plane, Train, Bike, Ship, Fuel, Battery, Plug,
   Home, School, Hospital, Factory, Store, Warehouse, Hotel, Church,
-  Scissors, Hammer, Wrench, Paintbrush, Palette, Ruler, Compass, Scale
+  Scissors, Hammer, Wrench, Paintbrush, Palette, Ruler, Compass, Scale,
+  Trophy, Medal, Crown
 } from 'lucide-react';
 
 export interface PostTemplate {
