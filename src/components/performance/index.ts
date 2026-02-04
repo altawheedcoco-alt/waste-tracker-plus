@@ -8,6 +8,15 @@ export { default as PrefetchLink } from './PrefetchLink';
 export { default as RoutePreloader } from './RoutePreloader';
 export { default as DataPreloader, defaultPreloadConfigs } from './DataPreloader';
 
+// Optimized Components
+export {
+  OptimizedList,
+  OptimizedGrid,
+  ConditionalRender,
+  StableChildren,
+  ExpensiveComponent,
+} from './OptimizedComponents';
+
 // Performance Components
 export { default as LazyImage } from './LazyImage';
 export { default as PerformanceOptimizer } from './PerformanceOptimizer';
@@ -15,3 +24,28 @@ export { default as PerformanceOptimizer } from './PerformanceOptimizer';
 // Hooks
 export { useVirtualScroll, type VirtualItem } from '@/hooks/useVirtualScroll';
 export { usePrefetch, usePredictivePrefetch } from '@/hooks/usePrefetch';
+export {
+  useDeepMemo,
+  useDeepCallback,
+  usePrevious,
+  useHasChanged,
+  useStableCallback,
+  useDebouncedValue,
+  useStableObject,
+  useStableArray,
+  useMemoizedMap,
+  useBatchedUpdates,
+} from '@/hooks/useMemoization';
+
+// Memo Utilities
+export {
+  deepEqual,
+  shallowEqual,
+  propsAreEqualIgnoringFunctions,
+  createPropsComparator,
+  withMemo,
+  withMemoIgnoringFunctions,
+  withMemoIgnoring,
+  useRenderCount,
+  useWhyDidYouUpdate,
+} from '@/lib/memoUtils';
