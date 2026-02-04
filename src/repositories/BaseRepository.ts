@@ -188,7 +188,7 @@ export function createRepository<T extends { id: string }>(
         throw error;
       }
 
-      return data as T;
+      return data as unknown as T;
     },
 
     async delete(id: string): Promise<void> {
