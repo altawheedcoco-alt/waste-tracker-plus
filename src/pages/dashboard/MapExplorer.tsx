@@ -925,7 +925,7 @@ const MapExplorer = () => {
           <ul className="text-sm text-muted-foreground space-y-2">
             <li className="flex items-center gap-2">
               <Download className="w-4 h-4 text-primary" />
-              اضغط "جلب من OpenStreetMap" لتحميل كافة المنشآت الصناعية في مصر
+              اضغط "جلب المنشآت الصناعية" لتحميل كافة المنشآت الصناعية في مصر
             </li>
             <li className="flex items-center gap-2">
               <Search className="w-4 h-4 text-primary" />
