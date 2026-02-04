@@ -26,6 +26,7 @@ import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import {
   Package,
   Truck,
   Users,
