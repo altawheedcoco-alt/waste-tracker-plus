@@ -183,15 +183,21 @@ const TwoFactorSetup = memo(({ className }: TwoFactorSetupProps) => {
             <p className="text-sm text-muted-foreground">
               أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة
             </p>
-            <div className="flex gap-2">
-              <Input
+            <div className="flex justify-center" dir="ltr">
+              <InputOTP
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="000000"
-                className="text-center text-2xl font-mono tracking-widest"
+                onChange={(value) => setVerificationCode(value)}
                 maxLength={6}
-                dir="ltr"
-              />
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
             </div>
           </div>
 

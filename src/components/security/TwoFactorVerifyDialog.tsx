@@ -74,15 +74,23 @@ const TwoFactorVerifyDialog = memo(({
             <p className="text-sm text-muted-foreground text-center">
               أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة
             </p>
-            <Input
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="000000"
-              className="text-center text-3xl font-mono tracking-[0.5em] h-14"
-              maxLength={6}
-              dir="ltr"
-              autoFocus
-            />
+            <div className="flex justify-center" dir="ltr">
+              <InputOTP
+                value={code}
+                onChange={(value) => setCode(value)}
+                maxLength={6}
+                autoFocus
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
             <Button
               onClick={handleVerify}
               disabled={loading || code.length !== 6}
