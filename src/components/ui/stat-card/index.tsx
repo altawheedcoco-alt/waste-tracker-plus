@@ -193,18 +193,18 @@ interface BadgeProps {
   className?: string;
 }
 
-const Badge = ({ children, variant = 'default', className }: BadgeProps) => {
-  const badgeVariants = {
-    default: 'bg-muted text-muted-foreground',
-    success: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
-    warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
-    danger: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-  };
+const badgeVariantStyles = {
+  default: 'bg-muted text-muted-foreground',
+  success: 'bg-accent text-accent-foreground',
+  warning: 'bg-secondary text-secondary-foreground',
+  danger: 'bg-destructive/10 text-destructive',
+};
 
+const Badge = ({ children, variant = 'default', className }: BadgeProps) => {
   return (
     <span className={cn(
       'text-xs px-2 py-0.5 rounded-full font-medium',
-      badgeVariants[variant],
+      badgeVariantStyles[variant],
       className
     )}>
       {children}
