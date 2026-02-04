@@ -529,40 +529,49 @@ const MapExplorer = () => {
                     }}
                   />
                   
-                  {/* طبقة النصوص (أسماء المصانع) */}
+                  {/* طبقة الرموز مع النص (أسماء المصانع من قاعدة البيانات) */}
                   <Layer
                     id="industrial-labels"
                     type="symbol"
                     layout={{
+                      // قراءة اسم المصنع من قاعدة البيانات
                       'text-field': ['get', 'name'],
-                      'text-font': ['Noto Sans Arabic Regular', 'Arial Unicode MS Regular'],
+                      'text-font': ['Noto Sans Arabic Bold', 'Arial Unicode MS Bold'],
                       'text-size': [
                         'interpolate', ['linear'], ['zoom'],
-                        8, 10,
-                        12, 12,
-                        16, 14
+                        6, 9,
+                        10, 11,
+                        14, 13,
+                        18, 16
                       ],
-                      'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-                      'text-radial-offset': 0.5,
-                      'text-justify': 'auto',
+                      // ضمان عدم اختفاء الاسم عند تداخل العلامات
                       'text-allow-overlap': true,
-                      'text-ignore-placement': false,
-                      'text-max-width': 12,
+                      'text-ignore-placement': true,
                       'icon-allow-overlap': true,
+                      'icon-ignore-placement': true,
+                      // موضع النص
+                      'text-anchor': 'top',
+                      'text-offset': [0, 0.8],
+                      'text-max-width': 15,
+                      'text-line-height': 1.2,
+                      // ترتيب الرسم حسب الأهمية
+                      'symbol-sort-key': ['case', ['get', 'isVerified'], 1, 2],
+                      'symbol-z-order': 'source',
                     } as SymbolLayout}
                     paint={{
                       'text-color': [
                         'match', ['get', 'type'],
-                        'factory', '#b91c1c',
-                        'zone', '#1d4ed8',
-                        'recycling', '#15803d',
-                        'workshop', '#b45309',
-                        'plant', '#6d28d9',
-                        '#374151'
+                        'factory', '#dc2626',
+                        'zone', '#2563eb',
+                        'recycling', '#16a34a',
+                        'workshop', '#d97706',
+                        'plant', '#7c3aed',
+                        '#4b5563'
                       ],
-                      'text-halo-color': 'rgba(255, 255, 255, 0.95)',
-                      'text-halo-width': 2,
+                      'text-halo-color': '#ffffff',
+                      'text-halo-width': 2.5,
                       'text-halo-blur': 0.5,
+                      'text-opacity': 1,
                     } as SymbolPaint}
                   />
                 </Source>
