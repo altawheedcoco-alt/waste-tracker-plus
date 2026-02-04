@@ -452,11 +452,15 @@ const VideosGenerator = ({
                       script={generatedContent.script}
                       title={generatedContent.title}
                     />
+                  ) : generatedImageUrl ? (
+                    <div className="rounded-lg overflow-hidden">
+                      <img 
+                        src={generatedImageUrl} 
                         alt="صورة ترويجية" 
                         className="w-full h-auto"
                       />
                     </div>
-                  )}
+                  ) : null}
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
