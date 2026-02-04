@@ -5,23 +5,21 @@ import type { MapRef, MapLayerMouseEvent } from 'react-map-gl';
 import type { SymbolLayout, SymbolPaint, CircleLayout, CirclePaint } from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
-  MapPin, Search, Crosshair, Info, Loader2, X, Sparkles, 
-  Building2, Factory, MapPinned, Globe, Lightbulb, Navigation,
+  MapPin, Crosshair, Info, Loader2, Sparkles, 
+  Building2, Factory, Globe, Navigation, X, Search,
   Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database,
-  Bot, MessageSquare
+  Bot
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
-import { useMultiSourceSearch, SearchResult } from '@/hooks/useMultiSourceSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import AILocationChat from '@/components/maps/AILocationChat';
+import MapboxSearchBox, { SearchResultItem } from '@/components/maps/MapboxSearchBox';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
@@ -62,8 +60,6 @@ interface IndustrialFacility {
 const MapExplorer = () => {
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showResults, setShowResults] = useState(false);
   const [mapStyle, setMapStyle] = useState<MapStyleKey>('streets');
   const [showFactoryMarkers, setShowFactoryMarkers] = useState(true);
   const [facilities, setFacilities] = useState<IndustrialFacility[]>([]);
@@ -72,17 +68,32 @@ const MapExplorer = () => {
   const [fetchingSource, setFetchingSource] = useState<'google' | null>(null);
   const [facilitiesCount, setFacilitiesCount] = useState(0);
   const [showAIChat, setShowAIChat] = useState(false);
-  const [isAIChatExpanded, setIsAIChatExpanded] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const mapRef = useRef<MapRef>(null);
-  
-  const { search, results, aiSuggestions, isSearching, clearResults } = useMultiSourceSearch();
 
   const [viewState, setViewState] = useState({
     longitude: 31.2357,
     latitude: 30.0444,
     zoom: 10,
   });
+
+  // Get user location on mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          // Default to Cairo
+          setUserLocation({ lat: 30.0444, lng: 31.2357 });
+        }
+      );
+    }
+  }, []);
 
   // Handle AI location selection
   const handleAILocationSelect = useCallback((location: { name: string; lat: number; lng: number; address?: string }) => {
@@ -244,16 +255,6 @@ const MapExplorer = () => {
     });
   }, []);
 
-  // Close results on outside click
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Reverse geocode using Mapbox
   const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
@@ -271,14 +272,8 @@ const MapExplorer = () => {
     }
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    search(query);
-    setShowResults(true);
-  };
-
-  const handleResultSelect = (result: SearchResult) => {
+  // Handle search result selection
+  const handleSearchResultSelect = useCallback((result: SearchResultItem) => {
     const position = { lat: result.lat, lng: result.lng };
     setSelectedPosition(position);
     setSelectedAddress(result.address || result.name);
@@ -287,16 +282,8 @@ const MapExplorer = () => {
       latitude: result.lat,
       zoom: 15,
     });
-    setSearchQuery(result.name);
-    setShowResults(false);
     toast.success('تم تحديد الموقع');
-  };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    setSearchQuery(suggestion);
-    search(suggestion);
-    setShowResults(true);
-  };
+  }, []);
 
   const handleMapClick = async (event: any) => {
     const { lngLat } = event;
@@ -320,32 +307,6 @@ const MapExplorer = () => {
     if (selectedAddress) {
       navigator.clipboard.writeText(selectedAddress);
       toast.success('تم نسخ العنوان');
-    }
-  };
-
-  const getResultIcon = (result: SearchResult) => {
-    switch (result.type) {
-      case 'local':
-        return result.source === 'مصنع' ? Factory : Building2;
-      case 'mapbox':
-        return MapPinned;
-      case 'ai':
-        return Sparkles;
-      default:
-        return MapPin;
-    }
-  };
-
-  const getResultBadgeColor = (result: SearchResult) => {
-    switch (result.type) {
-      case 'local':
-        return 'bg-green-500/10 text-green-600 border-green-500/20';
-      case 'mapbox':
-        return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
-      case 'ai':
-        return 'bg-purple-500/10 text-purple-600 border-purple-500/20';
-      default:
-        return '';
     }
   };
 
@@ -383,131 +344,17 @@ const MapExplorer = () => {
         </div>
       </div>
 
-      {/* Search Bar and Actions */}
+      {/* Mapbox Search Box */}
       <Card>
         <CardContent className="pt-4 space-y-4">
-          <div ref={searchRef} className="relative">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onFocus={() => results.length > 0 && setShowResults(true)}
-                placeholder="ابحث عن موقع، مصنع، منطقة صناعية، شركة..."
-                className="pr-11 pl-11 h-12 text-base"
-                dir="rtl"
-              />
-              <div className="absolute left-2 top-1/2 -translate-y-1/2 flex gap-1">
-                {isSearching && <Loader2 className="h-5 w-5 animate-spin text-primary" />}
-                {searchQuery && !isSearching && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => {
-                      setSearchQuery('');
-                      clearResults();
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Search Results Dropdown */}
-            <AnimatePresence>
-              {showResults && (results.length > 0 || aiSuggestions) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="absolute z-50 w-full mt-2 bg-background border rounded-lg shadow-lg overflow-hidden"
-                >
-                  <ScrollArea className="max-h-[350px]">
-                    {/* AI Suggestions */}
-                    {aiSuggestions && (
-                      <div className="p-3 border-b bg-gradient-to-l from-purple-500/5 to-transparent">
-                        <div className="flex items-center gap-2 text-sm font-medium text-purple-600 mb-2">
-                          <Sparkles className="w-4 h-4" />
-                          اقتراحات الذكاء الاصطناعي
-                        </div>
-                        
-                        {aiSuggestions.correctedQuery && (
-                          <button
-                            className="w-full text-right p-2 rounded-md bg-purple-500/10 hover:bg-purple-500/20 transition-colors mb-2"
-                            onClick={() => handleSuggestionClick(aiSuggestions.correctedQuery!)}
-                          >
-                            <span className="text-sm">هل تقصد: </span>
-                            <span className="font-medium text-purple-600">{aiSuggestions.correctedQuery}</span>
-                          </button>
-                        )}
-                        
-                        {aiSuggestions.alternativeQueries.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {aiSuggestions.alternativeQueries.slice(0, 4).map((query, index) => (
-                              <Button
-                                key={index}
-                                variant="outline"
-                                size="sm"
-                                className="text-xs h-7"
-                                onClick={() => handleSuggestionClick(query)}
-                              >
-                                <Lightbulb className="w-3 h-3 ml-1" />
-                                {query}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Search Results */}
-                    {results.length > 0 && (
-                      <div className="p-2">
-                        {results.map((result) => {
-                          const IconComponent = getResultIcon(result);
-                          return (
-                            <button
-                              key={result.id}
-                              type="button"
-                              className="w-full px-3 py-2.5 text-right hover:bg-accent rounded-md transition-colors flex items-start gap-3"
-                              onClick={() => handleResultSelect(result)}
-                            >
-                              <div className={cn(
-                                'p-2 rounded-lg shrink-0 mt-0.5',
-                                getResultBadgeColor(result)
-                              )}>
-                                <IconComponent className="h-4 w-4" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{result.name}</p>
-                                <p className="text-sm text-muted-foreground truncate">
-                                  {result.address}
-                                </p>
-                                <Badge variant="secondary" className="text-xs mt-1">
-                                  {result.source}
-                                </Badge>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {results.length === 0 && !aiSuggestions && !isSearching && searchQuery.length >= 2 && (
-                      <div className="p-6 text-center text-muted-foreground">
-                        <MapPin className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p>لم يتم العثور على نتائج</p>
-                        <p className="text-sm mt-1">جرب البحث بكلمات مختلفة</p>
-                      </div>
-                    )}
-                  </ScrollArea>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <MapboxSearchBox
+            onResultSelect={handleSearchResultSelect}
+            placeholder="ابحث عن موقع، مصنع، سيارة، منطقة صناعية..."
+            includeFactories={true}
+            includeVehicles={true}
+            includeMapbox={true}
+            userLocation={userLocation}
+          />
 
           {/* Actions Row */}
           <div className="flex flex-wrap gap-2 items-center justify-between">
@@ -775,8 +622,6 @@ const MapExplorer = () => {
           <div className="lg:col-span-1">
             <AILocationChat 
               onLocationSelect={handleAILocationSelect}
-              isExpanded={isAIChatExpanded}
-              onToggleExpand={() => setIsAIChatExpanded(!isAIChatExpanded)}
             />
           </div>
         )}
@@ -810,7 +655,7 @@ const MapExplorer = () => {
                   <div className="p-4 bg-background rounded-xl border shadow-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1">
-                        <MapPinned className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                        <MapPin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground mb-1">العنوان</p>
                           <p className="text-sm leading-relaxed">{selectedAddress}</p>
@@ -859,7 +704,7 @@ const MapExplorer = () => {
                       window.open(url, '_blank');
                       toast.success('جاري فتح الملاحة...');
                     }}
-                    className="flex-1 min-w-[160px] gap-2 bg-green-600 hover:bg-green-700"
+                    className="flex-1 min-w-[160px] gap-2 bg-primary hover:bg-primary/90"
                   >
                     <Navigation className="w-4 h-4" />
                     الذهاب إليه (ملاحة)
