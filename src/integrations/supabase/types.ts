@@ -103,6 +103,119 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          rate_limit_per_minute: number
+          scopes: Database["public"]["Enums"]["api_scope"][]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          rate_limit_per_minute?: number
+          scopes?: Database["public"]["Enums"]["api_scope"][]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          rate_limit_per_minute?: number
+          scopes?: Database["public"]["Enums"]["api_scope"][]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_request_logs: {
+        Row: {
+          api_key_id: string
+          created_at: string
+          endpoint: string
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          method: string
+          request_body: Json | null
+          response_time_ms: number | null
+          status_code: number
+          user_agent: string | null
+        }
+        Insert: {
+          api_key_id: string
+          created_at?: string
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          method: string
+          request_body?: Json | null
+          response_time_ms?: number | null
+          status_code: number
+          user_agent?: string | null
+        }
+        Update: {
+          api_key_id?: string
+          created_at?: string
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          method?: string
+          request_body?: Json | null
+          response_time_ms?: number | null
+          status_code?: number
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_request_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_requests: {
         Row: {
           admin_notes: string | null
@@ -3896,6 +4009,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_api_rate_limit: { Args: { p_api_key_id: string }; Returns: boolean }
       generate_contract_verification_code: { Args: never; Returns: string }
       get_pending_drivers: {
         Args: never
@@ -3954,8 +4068,25 @@ export type Database = {
         Args: { _organization_id: string; _user_id: string }
         Returns: boolean
       }
+      validate_api_key: {
+        Args: { p_key_hash: string }
+        Returns: {
+          api_key_id: string
+          organization_id: string
+          rate_limit: number
+          scopes: Database["public"]["Enums"]["api_scope"][]
+        }[]
+      }
     }
     Enums: {
+      api_scope:
+        | "shipments:read"
+        | "shipments:write"
+        | "accounts:read"
+        | "accounts:write"
+        | "reports:read"
+        | "organizations:read"
+        | "all"
       app_role: "admin" | "company_admin" | "employee" | "driver"
       employee_permission_type:
         | "create_deposits"
@@ -4140,6 +4271,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      api_scope: [
+        "shipments:read",
+        "shipments:write",
+        "accounts:read",
+        "accounts:write",
+        "reports:read",
+        "organizations:read",
+        "all",
+      ],
       app_role: ["admin", "company_admin", "employee", "driver"],
       employee_permission_type: [
         "create_deposits",
