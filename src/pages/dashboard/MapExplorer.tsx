@@ -216,10 +216,10 @@ const MapExplorer = () => {
     if (!map) return;
 
     // تغيير المؤشر عند المرور فوق المصانع
-    map.on('mouseenter', 'industrial-circles', () => {
+    map.on('mouseenter', 'industrial-labels', () => {
       map.getCanvas().style.cursor = 'pointer';
     });
-    map.on('mouseleave', 'industrial-circles', () => {
+    map.on('mouseleave', 'industrial-labels', () => {
       map.getCanvas().style.cursor = '';
     });
     
