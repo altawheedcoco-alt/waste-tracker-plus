@@ -1,7 +1,8 @@
-// Advanced routing utilities using OSRM
+// Advanced routing utilities using Mapbox Directions API
 // Provides alternative routes, turn-by-turn navigation, and ETA calculations
 
-export const OSRM_API = 'https://router.project-osrm.org';
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+const MAPBOX_DIRECTIONS_API = 'https://api.mapbox.com/directions/v5/mapbox/driving';
 
 export interface RouteStep {
   instruction: string;
@@ -34,7 +35,7 @@ export interface EnhancedRouteResult {
   error?: string;
 }
 
-// Translate OSRM maneuver types to Arabic
+// Translate Mapbox maneuver types to Arabic
 const translateManeuver = (type: string, modifier?: string, roadName?: string): string => {
   const modifierTranslations: Record<string, string> = {
     'left': 'يساراً',
@@ -102,29 +103,29 @@ export const calculateETA = (durationSeconds: number): string => {
 };
 
 /**
- * Fetch multiple route alternatives using OSRM
+ * Fetch multiple route alternatives using Mapbox Directions API
  */
 export const fetchRouteAlternatives = async (
   start: { lat: number; lng: number },
   end: { lat: number; lng: number }
 ): Promise<EnhancedRouteResult> => {
   try {
-    // OSRM expects lng,lat format
-    const url = `${OSRM_API}/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson&steps=true&alternatives=true&annotations=duration,distance`;
+    // Mapbox expects lng,lat format
+    const url = `${MAPBOX_DIRECTIONS_API}/${start.lng},${start.lat};${end.lng},${end.lat}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full&steps=true&alternatives=true&annotations=duration,distance`;
     
     const response = await fetch(url, {
       headers: { 'Accept': 'application/json' },
     });
     
     if (!response.ok) {
-      throw new Error(`OSRM error: ${response.status}`);
+      throw new Error(`Mapbox Directions error: ${response.status}`);
     }
     
     const data = await response.json();
     
     if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
       const alternatives: RouteAlternative[] = data.routes.map((route: any, index: number) => {
-        // Convert GeoJSON coordinates [lng, lat] to Leaflet format [lat, lng]
+        // Convert GeoJSON coordinates [lng, lat] to [lat, lng] format
         const coordinates: [number, number][] = route.geometry.coordinates.map(
           (coord: [number, number]) => [coord[1], coord[0]]
         );
@@ -159,7 +160,6 @@ export const fetchRouteAlternatives = async (
         
         // Determine route name and color
         const colors = ['#6366f1', '#22c55e', '#f59e0b'];
-        const names = ['المسار الموصى به', 'المسار البديل 1', 'المسار البديل 2'];
         
         return {
           id: `route-${index}`,
@@ -178,7 +178,7 @@ export const fetchRouteAlternatives = async (
     
     throw new Error('No routes found');
   } catch (error) {
-    console.error('OSRM routing error:', error);
+    console.error('Mapbox Directions error:', error);
     return {
       alternatives: [],
       success: false,

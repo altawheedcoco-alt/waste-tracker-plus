@@ -1,11 +1,10 @@
 // Map utilities for routing and geocoding - Mapbox Only
 // Note: This project uses Mapbox GL JS exclusively for all mapping features.
+// All routing is handled by Mapbox Directions API.
 
-// OSRM API for real road routing
-export const OSRM_API = 'https://router.project-osrm.org';
-
-// Mapbox API for geocoding
+// Mapbox API configuration
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+const MAPBOX_DIRECTIONS_API = 'https://api.mapbox.com/directions/v5/mapbox/driving';
 const MAPBOX_GEOCODING_API = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
 
 export interface RouteResult {
@@ -23,7 +22,7 @@ export interface GeocodingResult {
 }
 
 /**
- * Fetch actual road route between two points using OSRM
+ * Fetch actual road route between two points using Mapbox Directions API
  * Returns coordinates in [lat, lng] format for consistency
  */
 export const fetchRoadRoute = async (
@@ -31,8 +30,8 @@ export const fetchRoadRoute = async (
   end: { lat: number; lng: number }
 ): Promise<RouteResult> => {
   try {
-    // OSRM expects lng,lat format
-    const url = `${OSRM_API}/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson&steps=true`;
+    // Mapbox expects lng,lat format
+    const url = `${MAPBOX_DIRECTIONS_API}/${start.lng},${start.lat};${end.lng},${end.lat}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full&steps=true`;
     
     const response = await fetch(url, {
       headers: {
@@ -41,7 +40,7 @@ export const fetchRoadRoute = async (
     });
     
     if (!response.ok) {
-      throw new Error(`OSRM error: ${response.status}`);
+      throw new Error(`Mapbox Directions error: ${response.status}`);
     }
     
     const data = await response.json();
@@ -64,7 +63,7 @@ export const fetchRoadRoute = async (
     
     throw new Error('No route found');
   } catch (error) {
-    console.error('OSRM routing error:', error);
+    console.error('Mapbox Directions error:', error);
     
     // Fallback: straight line
     return {
@@ -77,7 +76,7 @@ export const fetchRoadRoute = async (
 };
 
 /**
- * Fetch route with multiple waypoints (driver path)
+ * Fetch route with multiple waypoints using Mapbox Directions API
  */
 export const fetchMultiPointRoute = async (
   points: { lat: number; lng: number }[]
@@ -92,14 +91,14 @@ export const fetchMultiPointRoute = async (
       .map(p => `${p.lng},${p.lat}`)
       .join(';');
     
-    const url = `${OSRM_API}/route/v1/driving/${coordsString}?overview=full&geometries=geojson`;
+    const url = `${MAPBOX_DIRECTIONS_API}/${coordsString}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full`;
     
     const response = await fetch(url, {
       headers: { 'Accept': 'application/json' },
     });
     
     if (!response.ok) {
-      throw new Error(`OSRM error: ${response.status}`);
+      throw new Error(`Mapbox Directions error: ${response.status}`);
     }
     
     const data = await response.json();
@@ -253,7 +252,7 @@ export const formatDuration = (seconds: number): string => {
 };
 
 /**
- * Generate Google Maps navigation URL
+ * Generate Google Maps navigation URL (for external navigation)
  */
 export const getGoogleMapsNavigationUrl = (
   destination: { lat: number; lng: number },
@@ -266,7 +265,7 @@ export const getGoogleMapsNavigationUrl = (
 };
 
 /**
- * Generate Waze navigation URL
+ * Generate Waze navigation URL (for external navigation)
  */
 export const getWazeNavigationUrl = (
   destination: { lat: number; lng: number },
@@ -279,7 +278,7 @@ export const getWazeNavigationUrl = (
 };
 
 /**
- * Open external navigation app
+ * Open external navigation app (Google Maps or Waze)
  */
 export const openExternalNavigation = (
   app: 'google' | 'waze',
