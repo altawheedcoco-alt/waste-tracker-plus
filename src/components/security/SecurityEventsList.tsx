@@ -27,6 +27,7 @@ import {
   SecurityEvent,
   SecurityEventType,
   SecuritySeverity,
+  SecurityEventsFilters,
   eventTypeLabels,
   severityConfig
 } from '@/hooks/useSecurityEvents';
