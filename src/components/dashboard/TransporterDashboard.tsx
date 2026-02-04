@@ -25,7 +25,7 @@ import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
 import ChatWidget from '@/components/chat/ChatWidget';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
-import {
+import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
   Package,
   Truck,
   Users,
