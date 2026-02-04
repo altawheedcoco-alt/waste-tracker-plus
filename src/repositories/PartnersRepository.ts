@@ -1,4 +1,4 @@
-import { BaseRepository, QueryOptions } from './BaseRepository';
+import { createRepository, QueryOptions } from './BaseRepository';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Partner {
@@ -29,21 +29,15 @@ export interface PartnerRelation {
   partner?: Partner;
 }
 
-class PartnersRepositoryClass extends BaseRepository<Partner> {
-  protected tableName = 'organizations';
-  protected defaultSelect = '*';
+const baseRepo = createRepository<Partner>('organizations', '*');
 
-  async findPartners(organizationId: string, options?: QueryOptions): Promise<Partner[]> {
+export const PartnersRepository = {
+  ...baseRepo,
+
+  async findPartners(organizationId: string): Promise<Partner[]> {
     const { data: relations, error } = await supabase
-      .from('partner_relationships')
-      .select(`
-        id,
-        partner_organization_id,
-        relationship_type,
-        status,
-        notes,
-        partner:partner_organization_id(*)
-      `)
+      .from('partner_relationships' as any)
+      .select('*, partner:partner_organization_id(*)')
       .eq('organization_id', organizationId)
       .eq('status', 'active');
 
@@ -52,36 +46,33 @@ class PartnersRepositoryClass extends BaseRepository<Partner> {
       throw error;
     }
 
-    return (relations || []).map(r => r.partner).filter(Boolean) as Partner[];
-  }
+    return ((relations || []) as any[]).map(r => r.partner).filter(Boolean) as Partner[];
+  },
 
   async findByType(type: 'generator' | 'transporter' | 'recycler', options?: QueryOptions): Promise<Partner[]> {
-    return this.findAll({
+    return baseRepo.findAll({
       ...options,
       filters: { ...options?.filters, organization_type: type, is_active: true },
     });
-  }
+  },
 
   async findVerifiedPartners(type?: string): Promise<Partner[]> {
     const filters: Record<string, any> = { is_verified: true, is_active: true };
     if (type) filters.organization_type = type;
     
-    return this.findAll({ filters, orderBy: { column: 'name', ascending: true } });
-  }
+    return baseRepo.findAll({ filters, orderBy: { column: 'name', ascending: true } });
+  },
 
   async addPartner(organizationId: string, partnerOrganizationId: string, relationshipType: string): Promise<PartnerRelation> {
     const { data, error } = await supabase
-      .from('partner_relationships')
+      .from('partner_relationships' as any)
       .insert({
         organization_id: organizationId,
         partner_organization_id: partnerOrganizationId,
         relationship_type: relationshipType,
         status: 'active',
       })
-      .select(`
-        *,
-        partner:partner_organization_id(*)
-      `)
+      .select('*, partner:partner_organization_id(*)')
       .single();
 
     if (error) {
@@ -89,12 +80,12 @@ class PartnersRepositoryClass extends BaseRepository<Partner> {
       throw error;
     }
 
-    return data as PartnerRelation;
-  }
+    return data as unknown as PartnerRelation;
+  },
 
   async removePartner(organizationId: string, partnerOrganizationId: string): Promise<void> {
     const { error } = await supabase
-      .from('partner_relationships')
+      .from('partner_relationships' as any)
       .delete()
       .eq('organization_id', organizationId)
       .eq('partner_organization_id', partnerOrganizationId);
@@ -103,15 +94,12 @@ class PartnersRepositoryClass extends BaseRepository<Partner> {
       console.error('Error removing partner:', error);
       throw error;
     }
-  }
+  },
 
   async getPartnerRelations(organizationId: string): Promise<PartnerRelation[]> {
     const { data, error } = await supabase
-      .from('partner_relationships')
-      .select(`
-        *,
-        partner:partner_organization_id(*)
-      `)
+      .from('partner_relationships' as any)
+      .select('*, partner:partner_organization_id(*)')
       .eq('organization_id', organizationId)
       .order('created_at', { ascending: false });
 
@@ -120,12 +108,13 @@ class PartnersRepositoryClass extends BaseRepository<Partner> {
       throw error;
     }
 
-    return (data || []) as PartnerRelation[];
-  }
+    return (data || []) as unknown as PartnerRelation[];
+  },
 
   async search(query: string, type?: string): Promise<Partner[]> {
-    let dbQuery = this.table
-      .select(this.defaultSelect)
+    let dbQuery = supabase
+      .from('organizations')
+      .select('*')
       .eq('is_active', true)
       .or(`name.ilike.%${query}%,email.ilike.%${query}%,phone.ilike.%${query}%`);
 
@@ -141,7 +130,7 @@ class PartnersRepositoryClass extends BaseRepository<Partner> {
     }
 
     return (data || []) as Partner[];
-  }
+  },
 
   async getStats(organizationId: string): Promise<{
     totalPartners: number;
@@ -157,7 +146,5 @@ class PartnersRepositoryClass extends BaseRepository<Partner> {
       transporters: partners.filter(p => p.organization_type === 'transporter').length,
       recyclers: partners.filter(p => p.organization_type === 'recycler').length,
     };
-  }
-}
-
-export const PartnersRepository = new PartnersRepositoryClass();
+  },
+};

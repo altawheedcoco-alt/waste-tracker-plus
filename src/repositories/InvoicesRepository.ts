@@ -1,4 +1,5 @@
-import { BaseRepository, QueryOptions } from './BaseRepository';
+import { createRepository, QueryOptions } from './BaseRepository';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Invoice {
   id: string;
@@ -20,9 +21,6 @@ export interface Invoice {
   created_by?: string;
   created_at: string;
   updated_at: string;
-  // Relations
-  partner_organization?: { id: string; name: string };
-  shipment?: { id: string; shipment_number: string };
 }
 
 export interface InvoiceFilters {
@@ -34,31 +32,29 @@ export interface InvoiceFilters {
   dateTo?: string;
 }
 
-class InvoicesRepositoryClass extends BaseRepository<Invoice> {
-  protected tableName = 'invoices';
-  protected defaultSelect = `
-    *,
-    partner_organization:partner_organization_id(id, name),
-    shipment:shipment_id(id, shipment_number)
-  `;
+const baseRepo = createRepository<Invoice>('invoices', '*');
+
+export const InvoicesRepository = {
+  ...baseRepo,
 
   async findByOrganization(organizationId: string, options?: QueryOptions): Promise<Invoice[]> {
-    return this.findAll({
+    return baseRepo.findAll({
       ...options,
       filters: { ...options?.filters, organization_id: organizationId },
     });
-  }
+  },
 
   async findByStatus(status: string, organizationId?: string): Promise<Invoice[]> {
     const filters: Record<string, any> = { status };
     if (organizationId) filters.organization_id = organizationId;
     
-    return this.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
-  }
+    return baseRepo.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
+  },
 
   async findUnpaid(organizationId: string): Promise<Invoice[]> {
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
       .eq('organization_id', organizationId)
       .in('status', ['pending', 'overdue'])
       .order('due_date', { ascending: true });
@@ -69,13 +65,14 @@ class InvoicesRepositoryClass extends BaseRepository<Invoice> {
     }
 
     return (data || []) as Invoice[];
-  }
+  },
 
   async findOverdue(organizationId: string): Promise<Invoice[]> {
     const now = new Date().toISOString();
     
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
       .eq('organization_id', organizationId)
       .eq('status', 'pending')
       .lt('due_date', now)
@@ -87,28 +84,28 @@ class InvoicesRepositoryClass extends BaseRepository<Invoice> {
     }
 
     return (data || []) as Invoice[];
-  }
+  },
 
   async findByPartner(partnerId: string, organizationId?: string): Promise<Invoice[]> {
     const filters: Record<string, any> = { partner_organization_id: partnerId };
     if (organizationId) filters.organization_id = organizationId;
     
-    return this.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
-  }
+    return baseRepo.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
+  },
 
   async findByShipment(shipmentId: string): Promise<Invoice[]> {
-    return this.findAll({
+    return baseRepo.findAll({
       filters: { shipment_id: shipmentId },
       orderBy: { column: 'created_at', ascending: false },
     });
-  }
+  },
 
   async markAsPaid(id: string): Promise<Invoice> {
-    return this.update(id, {
+    return baseRepo.update(id, {
       status: 'paid',
       paid_date: new Date().toISOString(),
     } as Partial<Invoice>);
-  }
+  },
 
   async getStats(organizationId: string): Promise<{
     total: number;
@@ -135,11 +132,12 @@ class InvoicesRepositoryClass extends BaseRepository<Invoice> {
       paidAmount: paid.reduce((sum, i) => sum + (i.total_amount || 0), 0),
       pendingAmount: pending.reduce((sum, i) => sum + (i.total_amount || 0), 0),
     };
-  }
+  },
 
   async search(query: string, organizationId: string): Promise<Invoice[]> {
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
       .eq('organization_id', organizationId)
       .ilike('invoice_number', `%${query}%`)
       .order('created_at', { ascending: false });
@@ -150,7 +148,5 @@ class InvoicesRepositoryClass extends BaseRepository<Invoice> {
     }
 
     return (data || []) as Invoice[];
-  }
-}
-
-export const InvoicesRepository = new InvoicesRepositoryClass();
+  },
+};

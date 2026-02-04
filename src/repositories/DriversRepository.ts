@@ -1,4 +1,4 @@
-import { BaseRepository, QueryOptions } from './BaseRepository';
+import { createRepository, QueryOptions } from './BaseRepository';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Driver {
@@ -12,18 +12,6 @@ export interface Driver {
   is_available: boolean;
   created_at: string;
   updated_at: string;
-  // Relations
-  profile?: {
-    id: string;
-    full_name: string;
-    email: string;
-    phone?: string;
-    avatar_url?: string;
-  };
-  organization?: {
-    id: string;
-    name: string;
-  };
 }
 
 export interface DriverLocation {
@@ -37,31 +25,29 @@ export interface DriverLocation {
   recorded_at: string;
 }
 
-class DriversRepositoryClass extends BaseRepository<Driver> {
-  protected tableName = 'drivers';
-  protected defaultSelect = `
-    *,
-    profile:profile_id(id, full_name, email, phone, avatar_url),
-    organization:organization_id(id, name)
-  `;
+const baseRepo = createRepository<Driver>('drivers', '*');
+
+export const DriversRepository = {
+  ...baseRepo,
 
   async findByOrganization(organizationId: string, options?: QueryOptions): Promise<Driver[]> {
-    return this.findAll({
+    return baseRepo.findAll({
       ...options,
       filters: { ...options?.filters, organization_id: organizationId },
     });
-  }
+  },
 
   async findAvailable(organizationId?: string): Promise<Driver[]> {
     const filters: Record<string, any> = { is_available: true };
     if (organizationId) filters.organization_id = organizationId;
     
-    return this.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
-  }
+    return baseRepo.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
+  },
 
   async findByProfile(profileId: string): Promise<Driver | null> {
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('drivers')
+      .select('*')
       .eq('profile_id', profileId)
       .maybeSingle();
 
@@ -71,15 +57,15 @@ class DriversRepositoryClass extends BaseRepository<Driver> {
     }
 
     return data as Driver | null;
-  }
+  },
 
   async setAvailability(driverId: string, isAvailable: boolean): Promise<Driver> {
-    return this.update(driverId, { is_available: isAvailable } as Partial<Driver>);
-  }
+    return baseRepo.update(driverId, { is_available: isAvailable } as Partial<Driver>);
+  },
 
   async assignToOrganization(driverId: string, organizationId: string): Promise<Driver> {
-    return this.update(driverId, { organization_id: organizationId } as Partial<Driver>);
-  }
+    return baseRepo.update(driverId, { organization_id: organizationId } as Partial<Driver>);
+  },
 
   async getLatestLocation(driverId: string): Promise<DriverLocation | null> {
     const { data, error } = await supabase
@@ -96,7 +82,7 @@ class DriversRepositoryClass extends BaseRepository<Driver> {
     }
 
     return data as DriverLocation | null;
-  }
+  },
 
   async updateLocation(driverId: string, location: Omit<DriverLocation, 'id' | 'driver_id' | 'recorded_at'>): Promise<DriverLocation> {
     const { data, error } = await supabase
@@ -115,7 +101,7 @@ class DriversRepositoryClass extends BaseRepository<Driver> {
     }
 
     return data as DriverLocation;
-  }
+  },
 
   async getLocationHistory(driverId: string, hoursBack = 24): Promise<DriverLocation[]> {
     const fromDate = new Date(Date.now() - hoursBack * 60 * 60 * 1000).toISOString();
@@ -133,7 +119,7 @@ class DriversRepositoryClass extends BaseRepository<Driver> {
     }
 
     return (data || []) as DriverLocation[];
-  }
+  },
 
   async getActiveDriversWithLocations(organizationId: string): Promise<(Driver & { location?: DriverLocation })[]> {
     const drivers = await this.findAvailable(organizationId);
@@ -146,7 +132,7 @@ class DriversRepositoryClass extends BaseRepository<Driver> {
     );
 
     return driversWithLocations;
-  }
+  },
 
   async getStats(organizationId: string): Promise<{
     total: number;
@@ -165,11 +151,12 @@ class DriversRepositoryClass extends BaseRepository<Driver> {
         d.license_expiry && new Date(d.license_expiry) <= thirtyDaysFromNow
       ).length,
     };
-  }
+  },
 
   async search(query: string, organizationId?: string): Promise<Driver[]> {
-    let dbQuery = this.table
-      .select(this.defaultSelect)
+    let dbQuery = supabase
+      .from('drivers')
+      .select('*')
       .or(`license_number.ilike.%${query}%,vehicle_plate.ilike.%${query}%`);
 
     if (organizationId) {
@@ -184,7 +171,5 @@ class DriversRepositoryClass extends BaseRepository<Driver> {
     }
 
     return (data || []) as Driver[];
-  }
-}
-
-export const DriversRepository = new DriversRepositoryClass();
+  },
+};

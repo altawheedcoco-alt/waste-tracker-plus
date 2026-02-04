@@ -1,4 +1,4 @@
-import { BaseRepository, QueryOptions } from './BaseRepository';
+import { createRepository, QueryOptions } from './BaseRepository';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Shipment {
@@ -29,11 +29,6 @@ export interface Shipment {
   created_at: string;
   updated_at: string;
   organization_id: string;
-  // Relations
-  generator?: { id: string; name: string };
-  transporter?: { id: string; name: string };
-  recycler?: { id: string; name: string };
-  driver?: { id: string; profile: { full_name: string } };
 }
 
 export interface ShipmentFilters {
@@ -48,39 +43,34 @@ export interface ShipmentFilters {
   dateTo?: string;
 }
 
-class ShipmentsRepositoryClass extends BaseRepository<Shipment> {
-  protected tableName = 'shipments';
-  protected defaultSelect = `
-    *,
-    generator:generator_id(id, name),
-    transporter:transporter_id(id, name),
-    recycler:recycler_id(id, name),
-    driver:driver_id(id, profile:profile_id(full_name))
-  `;
+const baseRepo = createRepository<Shipment>('shipments', '*');
+
+export const ShipmentsRepository = {
+  ...baseRepo,
 
   async findByOrganization(organizationId: string, options?: QueryOptions): Promise<Shipment[]> {
-    return this.findAll({
+    return baseRepo.findAll({
       ...options,
       filters: { ...options?.filters, organization_id: organizationId },
     });
-  }
+  },
 
   async findByStatus(status: string, organizationId?: string): Promise<Shipment[]> {
     const filters: Record<string, any> = { status };
     if (organizationId) filters.organization_id = organizationId;
     
-    return this.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
-  }
+    return baseRepo.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
+  },
 
   async findByDriver(driverId: string): Promise<Shipment[]> {
-    return this.findAll({
+    return baseRepo.findAll({
       filters: { driver_id: driverId },
       orderBy: { column: 'created_at', ascending: false },
     });
-  }
+  },
 
   async findWithFilters(filters: ShipmentFilters, options?: QueryOptions): Promise<Shipment[]> {
-    let query = this.table.select(options?.select || this.defaultSelect);
+    let query = supabase.from('shipments').select(options?.select || '*');
 
     if (filters.organization_id) {
       query = query.or(`organization_id.eq.${filters.organization_id},generator_id.eq.${filters.organization_id},transporter_id.eq.${filters.organization_id},recycler_id.eq.${filters.organization_id}`);
@@ -95,11 +85,7 @@ class ShipmentsRepositoryClass extends BaseRepository<Shipment> {
     if (filters.dateFrom) query = query.gte('created_at', filters.dateFrom);
     if (filters.dateTo) query = query.lte('created_at', filters.dateTo);
 
-    if (options?.orderBy) {
-      query = query.order(options.orderBy.column, { ascending: options.orderBy.ascending ?? false });
-    } else {
-      query = query.order('created_at', { ascending: false });
-    }
+    query = query.order('created_at', { ascending: options?.orderBy?.ascending ?? false });
 
     if (options?.limit) query = query.limit(options.limit);
 
@@ -111,7 +97,7 @@ class ShipmentsRepositoryClass extends BaseRepository<Shipment> {
     }
 
     return (data || []) as Shipment[];
-  }
+  },
 
   async updateStatus(id: string, status: string, userId?: string): Promise<Shipment> {
     const timestampFields: Record<string, string> = {
@@ -128,20 +114,20 @@ class ShipmentsRepositoryClass extends BaseRepository<Shipment> {
       updates[timestampFields[status]] = new Date().toISOString();
     }
 
-    const shipment = await this.update(id, updates as Partial<Shipment>);
+    const shipment = await baseRepo.update(id, updates as Partial<Shipment>);
 
     // Log the status change
     if (userId) {
       await supabase.from('shipment_logs').insert({
         shipment_id: id,
-        status,
+        status: status as any,
         changed_by: userId,
         notes: `تم تغيير الحالة إلى ${status}`,
       });
     }
 
     return shipment;
-  }
+  },
 
   async getStats(organizationId: string): Promise<{
     total: number;
@@ -150,28 +136,21 @@ class ShipmentsRepositoryClass extends BaseRepository<Shipment> {
     completed: number;
     cancelled: number;
   }> {
-    const statuses = ['pending', 'in_transit', 'completed', 'cancelled'];
-    const counts = await Promise.all(
-      statuses.map(status => this.count({ organization_id: organizationId, status }))
-    );
+    const [total, pending, inTransit, completed, cancelled] = await Promise.all([
+      baseRepo.count({ organization_id: organizationId }),
+      baseRepo.count({ organization_id: organizationId, status: 'pending' }),
+      baseRepo.count({ organization_id: organizationId, status: 'in_transit' }),
+      baseRepo.count({ organization_id: organizationId, status: 'completed' }),
+      baseRepo.count({ organization_id: organizationId, status: 'cancelled' }),
+    ]);
 
-    const total = await this.count({ organization_id: organizationId });
-
-    return {
-      total,
-      pending: counts[0],
-      inTransit: counts[1],
-      completed: counts[2],
-      cancelled: counts[3],
-    };
-  }
+    return { total, pending, inTransit, completed, cancelled };
+  },
 
   async getRecentShipments(organizationId: string, limit = 10): Promise<Shipment[]> {
     return this.findByOrganization(organizationId, {
       limit,
       orderBy: { column: 'created_at', ascending: false },
     });
-  }
-}
-
-export const ShipmentsRepository = new ShipmentsRepositoryClass();
+  },
+};

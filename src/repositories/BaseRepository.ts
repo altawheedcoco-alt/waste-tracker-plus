@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
+import type { Database } from '@/integrations/supabase/types';
 
 export interface QueryOptions {
   select?: string;
@@ -17,193 +17,228 @@ export interface PaginatedResult<T> {
   totalPages: number;
 }
 
-export abstract class BaseRepository<T extends { id: string }> {
-  protected abstract tableName: string;
-  protected abstract defaultSelect: string;
+// Type aliases for Supabase tables
+type Tables = Database['public']['Tables'];
+export type TableName = keyof Tables;
 
-  protected get table() {
-    return supabase.from(this.tableName);
+// Generic repository interface
+export interface IRepository<T> {
+  findById(id: string, select?: string): Promise<T | null>;
+  findAll(options?: QueryOptions): Promise<T[]>;
+  findPaginated(page: number, pageSize: number, options?: QueryOptions): Promise<PaginatedResult<T>>;
+  create(entity: Partial<T>): Promise<T>;
+  update(id: string, updates: Partial<T>): Promise<T>;
+  delete(id: string): Promise<void>;
+  count(filters?: Record<string, any>): Promise<number>;
+}
+
+// Helper function to build queries with filters
+export function applyFilters<T>(
+  query: any,
+  filters?: Record<string, any>
+): any {
+  if (!filters) return query;
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      query = query.eq(key, value);
+    }
+  });
+  
+  return query;
+}
+
+// Helper function to apply ordering
+export function applyOrdering(
+  query: any,
+  orderBy?: { column: string; ascending?: boolean }
+): any {
+  if (!orderBy) return query;
+  return query.order(orderBy.column, { ascending: orderBy.ascending ?? false });
+}
+
+// Helper function to apply pagination
+export function applyPagination(
+  query: any,
+  limit?: number,
+  offset?: number
+): any {
+  if (limit) {
+    query = query.limit(limit);
   }
-
-  async findById(id: string, select?: string): Promise<T | null> {
-    const { data, error } = await this.table
-      .select(select || this.defaultSelect)
-      .eq('id', id)
-      .maybeSingle();
-
-    if (error) {
-      console.error(`Error fetching ${this.tableName} by id:`, error);
-      throw error;
-    }
-
-    return data as T | null;
+  if (offset !== undefined && limit) {
+    query = query.range(offset, offset + limit - 1);
   }
+  return query;
+}
 
-  async findAll(options?: QueryOptions): Promise<T[]> {
-    let query = this.table.select(options?.select || this.defaultSelect);
+// Base repository factory function
+export function createRepository<T extends { id: string }>(
+  tableName: string,
+  defaultSelect = '*'
+) {
+  const getTable = () => supabase.from(tableName as any);
 
-    if (options?.filters) {
-      Object.entries(options.filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          query = query.eq(key, value);
-        }
-      });
-    }
+  return {
+    async findById(id: string, select?: string): Promise<T | null> {
+      const { data, error } = await getTable()
+        .select(select || defaultSelect)
+        .eq('id', id)
+        .maybeSingle();
 
-    if (options?.orderBy) {
-      query = query.order(options.orderBy.column, { 
-        ascending: options.orderBy.ascending ?? false 
-      });
-    }
+      if (error) {
+        console.error(`Error fetching ${tableName} by id:`, error);
+        throw error;
+      }
 
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
+      return data as T | null;
+    },
 
-    if (options?.offset) {
-      query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
-    }
+    async findAll(options?: QueryOptions): Promise<T[]> {
+      let query = getTable().select(options?.select || defaultSelect);
+      
+      query = applyFilters(query, options?.filters);
+      query = applyOrdering(query, options?.orderBy);
+      query = applyPagination(query, options?.limit, options?.offset);
 
-    const { data, error } = await query;
+      const { data, error } = await query;
 
-    if (error) {
-      console.error(`Error fetching ${this.tableName}:`, error);
-      throw error;
-    }
+      if (error) {
+        console.error(`Error fetching ${tableName}:`, error);
+        throw error;
+      }
 
-    return (data || []) as T[];
-  }
+      return (data || []) as T[];
+    },
 
-  async findPaginated(page: number, pageSize: number, options?: QueryOptions): Promise<PaginatedResult<T>> {
-    const offset = (page - 1) * pageSize;
-    
-    // Get count
-    let countQuery = this.table.select('*', { count: 'exact', head: true });
-    
-    if (options?.filters) {
-      Object.entries(options.filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          countQuery = countQuery.eq(key, value);
-        }
-      });
-    }
+    async findPaginated(page: number, pageSize: number, options?: QueryOptions): Promise<PaginatedResult<T>> {
+      const offset = (page - 1) * pageSize;
+      
+      // Get count
+      let countQuery = getTable().select('*', { count: 'exact', head: true });
+      countQuery = applyFilters(countQuery, options?.filters);
 
-    const { count, error: countError } = await countQuery;
-    
-    if (countError) {
-      console.error(`Error counting ${this.tableName}:`, countError);
-      throw countError;
-    }
+      const { count, error: countError } = await countQuery;
+      
+      if (countError) {
+        console.error(`Error counting ${tableName}:`, countError);
+        throw countError;
+      }
 
-    // Get data
-    const data = await this.findAll({
-      ...options,
-      limit: pageSize,
-      offset,
-    });
+      // Get data
+      let dataQuery = getTable().select(options?.select || defaultSelect);
+      dataQuery = applyFilters(dataQuery, options?.filters);
+      dataQuery = applyOrdering(dataQuery, options?.orderBy);
+      dataQuery = dataQuery.range(offset, offset + pageSize - 1);
 
-    const totalCount = count || 0;
-    
-    return {
-      data,
-      count: totalCount,
-      page,
-      pageSize,
-      totalPages: Math.ceil(totalCount / pageSize),
-    };
-  }
+      const { data, error } = await dataQuery;
 
-  async create(entity: Omit<T, 'id' | 'created_at' | 'updated_at'>): Promise<T> {
-    const { data, error } = await this.table
-      .insert(entity as any)
-      .select(this.defaultSelect)
-      .single();
+      if (error) {
+        console.error(`Error fetching paginated ${tableName}:`, error);
+        throw error;
+      }
 
-    if (error) {
-      console.error(`Error creating ${this.tableName}:`, error);
-      throw error;
-    }
+      const totalCount = count || 0;
+      
+      return {
+        data: (data || []) as T[],
+        count: totalCount,
+        page,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+      };
+    },
 
-    return data as T;
-  }
+    async create(entity: Partial<T>): Promise<T> {
+      const { data, error } = await getTable()
+        .insert(entity as any)
+        .select(defaultSelect)
+        .single();
 
-  async createMany(entities: Omit<T, 'id' | 'created_at' | 'updated_at'>[]): Promise<T[]> {
-    const { data, error } = await this.table
-      .insert(entities as any)
-      .select(this.defaultSelect);
+      if (error) {
+        console.error(`Error creating ${tableName}:`, error);
+        throw error;
+      }
 
-    if (error) {
-      console.error(`Error creating multiple ${this.tableName}:`, error);
-      throw error;
-    }
+      return data as T;
+    },
 
-    return (data || []) as T[];
-  }
+    async createMany(entities: Partial<T>[]): Promise<T[]> {
+      const { data, error } = await getTable()
+        .insert(entities as any)
+        .select(defaultSelect);
 
-  async update(id: string, updates: Partial<T>): Promise<T> {
-    const { data, error } = await this.table
-      .update(updates as any)
-      .eq('id', id)
-      .select(this.defaultSelect)
-      .single();
+      if (error) {
+        console.error(`Error creating multiple ${tableName}:`, error);
+        throw error;
+      }
 
-    if (error) {
-      console.error(`Error updating ${this.tableName}:`, error);
-      throw error;
-    }
+      return (data || []) as T[];
+    },
 
-    return data as T;
-  }
+    async update(id: string, updates: Partial<T>): Promise<T> {
+      const { data, error } = await getTable()
+        .update(updates as any)
+        .eq('id', id)
+        .select(defaultSelect)
+        .single();
 
-  async delete(id: string): Promise<void> {
-    const { error } = await this.table.delete().eq('id', id);
+      if (error) {
+        console.error(`Error updating ${tableName}:`, error);
+        throw error;
+      }
 
-    if (error) {
-      console.error(`Error deleting ${this.tableName}:`, error);
-      throw error;
-    }
-  }
+      return data as T;
+    },
 
-  async deleteMany(ids: string[]): Promise<void> {
-    const { error } = await this.table.delete().in('id', ids);
+    async delete(id: string): Promise<void> {
+      const { error } = await getTable().delete().eq('id', id);
 
-    if (error) {
-      console.error(`Error deleting multiple ${this.tableName}:`, error);
-      throw error;
-    }
-  }
+      if (error) {
+        console.error(`Error deleting ${tableName}:`, error);
+        throw error;
+      }
+    },
 
-  async exists(id: string): Promise<boolean> {
-    const { count, error } = await this.table
-      .select('id', { count: 'exact', head: true })
-      .eq('id', id);
+    async deleteMany(ids: string[]): Promise<void> {
+      const { error } = await getTable().delete().in('id', ids);
 
-    if (error) {
-      console.error(`Error checking existence in ${this.tableName}:`, error);
-      throw error;
-    }
+      if (error) {
+        console.error(`Error deleting multiple ${tableName}:`, error);
+        throw error;
+      }
+    },
 
-    return (count || 0) > 0;
-  }
+    async exists(id: string): Promise<boolean> {
+      const { count, error } = await getTable()
+        .select('id', { count: 'exact', head: true })
+        .eq('id', id);
 
-  async count(filters?: Record<string, any>): Promise<number> {
-    let query = this.table.select('*', { count: 'exact', head: true });
+      if (error) {
+        console.error(`Error checking existence in ${tableName}:`, error);
+        throw error;
+      }
 
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          query = query.eq(key, value);
-        }
-      });
-    }
+      return (count || 0) > 0;
+    },
 
-    const { count, error } = await query;
+    async count(filters?: Record<string, any>): Promise<number> {
+      let query = getTable().select('*', { count: 'exact', head: true });
+      query = applyFilters(query, filters);
 
-    if (error) {
-      console.error(`Error counting ${this.tableName}:`, error);
-      throw error;
-    }
+      const { count, error } = await query;
 
-    return count || 0;
-  }
+      if (error) {
+        console.error(`Error counting ${tableName}:`, error);
+        throw error;
+      }
+
+      return count || 0;
+    },
+
+    // Access to raw table for custom queries
+    table: getTable,
+    tableName,
+    defaultSelect,
+  };
 }

@@ -1,4 +1,5 @@
-import { BaseRepository, QueryOptions } from './BaseRepository';
+import { createRepository, QueryOptions } from './BaseRepository';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Contract {
   id: string;
@@ -24,8 +25,6 @@ export interface Contract {
   created_by?: string;
   created_at: string;
   updated_at: string;
-  // Relations
-  partner_organization?: { id: string; name: string };
 }
 
 export interface ContractFilters {
@@ -34,28 +33,26 @@ export interface ContractFilters {
   contract_type?: string;
   partner_organization_id?: string;
   is_verified?: boolean;
-  expiring_soon?: boolean; // within 30 days
 }
 
-class ContractsRepositoryClass extends BaseRepository<Contract> {
-  protected tableName = 'contracts';
-  protected defaultSelect = `
-    *,
-    partner_organization:partner_organization_id(id, name)
-  `;
+const baseRepo = createRepository<Contract>('contracts', '*');
+
+export const ContractsRepository = {
+  ...baseRepo,
 
   async findByOrganization(organizationId: string, options?: QueryOptions): Promise<Contract[]> {
-    return this.findAll({
+    return baseRepo.findAll({
       ...options,
       filters: { ...options?.filters, organization_id: organizationId },
     });
-  }
+  },
 
   async findActiveContracts(organizationId: string): Promise<Contract[]> {
     const now = new Date().toISOString();
     
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('contracts')
+      .select('*')
       .eq('organization_id', organizationId)
       .eq('status', 'active')
       .gte('end_date', now)
@@ -67,13 +64,14 @@ class ContractsRepositoryClass extends BaseRepository<Contract> {
     }
 
     return (data || []) as Contract[];
-  }
+  },
 
   async findExpiredContracts(organizationId: string): Promise<Contract[]> {
     const now = new Date().toISOString();
     
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('contracts')
+      .select('*')
       .eq('organization_id', organizationId)
       .lt('end_date', now)
       .order('end_date', { ascending: false });
@@ -84,14 +82,15 @@ class ContractsRepositoryClass extends BaseRepository<Contract> {
     }
 
     return (data || []) as Contract[];
-  }
+  },
 
   async findExpiringSoon(organizationId: string, daysAhead = 30): Promise<Contract[]> {
     const now = new Date();
     const futureDate = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
     
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('contracts')
+      .select('*')
       .eq('organization_id', organizationId)
       .eq('status', 'active')
       .gte('end_date', now.toISOString())
@@ -104,22 +103,22 @@ class ContractsRepositoryClass extends BaseRepository<Contract> {
     }
 
     return (data || []) as Contract[];
-  }
+  },
 
   async findByPartner(partnerId: string, organizationId?: string): Promise<Contract[]> {
     const filters: Record<string, any> = { partner_organization_id: partnerId };
     if (organizationId) filters.organization_id = organizationId;
     
-    return this.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
-  }
+    return baseRepo.findAll({ filters, orderBy: { column: 'created_at', ascending: false } });
+  },
 
   async verifyContract(id: string, verifiedBy: string): Promise<Contract> {
-    return this.update(id, {
+    return baseRepo.update(id, {
       is_verified: true,
       verified_at: new Date().toISOString(),
       verified_by: verifiedBy,
     } as Partial<Contract>);
-  }
+  },
 
   async getStats(organizationId: string): Promise<{
     total: number;
@@ -128,21 +127,21 @@ class ContractsRepositoryClass extends BaseRepository<Contract> {
     pending: number;
     expiringSoon: number;
   }> {
-    const [total, active, pending] = await Promise.all([
-      this.count({ organization_id: organizationId }),
-      this.count({ organization_id: organizationId, status: 'active' }),
-      this.count({ organization_id: organizationId, status: 'pending' }),
+    const [total, active, pending, expired, expiringSoon] = await Promise.all([
+      baseRepo.count({ organization_id: organizationId }),
+      baseRepo.count({ organization_id: organizationId, status: 'active' }),
+      baseRepo.count({ organization_id: organizationId, status: 'pending' }),
+      this.findExpiredContracts(organizationId).then(c => c.length),
+      this.findExpiringSoon(organizationId).then(c => c.length),
     ]);
 
-    const expired = await this.findExpiredContracts(organizationId).then(c => c.length);
-    const expiringSoon = await this.findExpiringSoon(organizationId).then(c => c.length);
-
     return { total, active, expired, pending, expiringSoon };
-  }
+  },
 
   async search(query: string, organizationId: string): Promise<Contract[]> {
-    const { data, error } = await this.table
-      .select(this.defaultSelect)
+    const { data, error } = await supabase
+      .from('contracts')
+      .select('*')
       .eq('organization_id', organizationId)
       .or(`title.ilike.%${query}%,partner_name.ilike.%${query}%,contract_number.ilike.%${query}%`)
       .order('created_at', { ascending: false });
@@ -153,7 +152,5 @@ class ContractsRepositoryClass extends BaseRepository<Contract> {
     }
 
     return (data || []) as Contract[];
-  }
-}
-
-export const ContractsRepository = new ContractsRepositoryClass();
+  },
+};
