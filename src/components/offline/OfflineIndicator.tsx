@@ -27,11 +27,9 @@ const OfflineIndicator = memo(({ className }: OfflineIndicatorProps) => {
         animate={isWeakConnection ? { opacity: [1, 0.4, 1] } : { opacity: 1 }}
         transition={isWeakConnection ? { duration: 1.5, repeat: Infinity } : {}}
       />
-      {isWeakConnection && (
-        <span className="text-xs text-muted-foreground">
-          ضعف الاتصال بالشبكة
-        </span>
-      )}
+      <span className="text-xs text-muted-foreground">
+        {isWeakConnection ? 'ضعف الاتصال بالشبكة' : 'الاتصال جيد'}
+      </span>
     </div>
   );
 });
