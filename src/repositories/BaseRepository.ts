@@ -91,7 +91,7 @@ export function createRepository<T extends { id: string }>(
         throw error;
       }
 
-      return data as T | null;
+      return data as unknown as T | null;
     },
 
     async findAll(options?: QueryOptions): Promise<T[]> {
