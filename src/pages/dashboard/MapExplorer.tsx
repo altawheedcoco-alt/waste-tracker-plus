@@ -60,8 +60,6 @@ interface IndustrialFacility {
 const MapExplorer = () => {
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showResults, setShowResults] = useState(false);
   const [mapStyle, setMapStyle] = useState<MapStyleKey>('streets');
   const [showFactoryMarkers, setShowFactoryMarkers] = useState(true);
   const [facilities, setFacilities] = useState<IndustrialFacility[]>([]);
@@ -70,17 +68,32 @@ const MapExplorer = () => {
   const [fetchingSource, setFetchingSource] = useState<'google' | null>(null);
   const [facilitiesCount, setFacilitiesCount] = useState(0);
   const [showAIChat, setShowAIChat] = useState(false);
-  const [isAIChatExpanded, setIsAIChatExpanded] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const mapRef = useRef<MapRef>(null);
-  
-  const { search, results, aiSuggestions, isSearching, clearResults } = useMultiSourceSearch();
 
   const [viewState, setViewState] = useState({
     longitude: 31.2357,
     latitude: 30.0444,
     zoom: 10,
   });
+
+  // Get user location on mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        () => {
+          // Default to Cairo
+          setUserLocation({ lat: 30.0444, lng: 31.2357 });
+        }
+      );
+    }
+  }, []);
 
   // Handle AI location selection
   const handleAILocationSelect = useCallback((location: { name: string; lat: number; lng: number; address?: string }) => {
