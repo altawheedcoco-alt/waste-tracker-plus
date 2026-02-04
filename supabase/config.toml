@@ -35,3 +35,12 @@ verify_jwt = false
 
 [functions.ai-location-search]
 verify_jwt = false
+
+[functions.two-factor-auth]
+verify_jwt = false
+
+[functions.public-api]
+verify_jwt = false
+
+[functions.ai-insights]
+verify_jwt = false
