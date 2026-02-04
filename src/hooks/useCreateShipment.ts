@@ -358,7 +358,25 @@ export const useCreateShipment = () => {
         .maybeSingle();
 
       if (driverData?.organization_id) {
-        setDriverInfo(driverData as unknown as Driver);
+        // Store full driver info including profile data
+        const { data: fullDriverData } = await supabase
+          .from('drivers')
+          .select('id, organization_id, vehicle_type, vehicle_plate, license_number, profile:profiles(full_name, phone)')
+          .eq('profile_id', profile.id)
+          .maybeSingle();
+
+        if (fullDriverData) {
+          setDriverInfo(fullDriverData as unknown as Driver);
+          
+          // Auto-fill driver's vehicle plate if available
+          if (fullDriverData.vehicle_plate) {
+            setFormData(prev => ({
+              ...prev,
+              manual_vehicle_plate: fullDriverData.vehicle_plate || '',
+              manual_driver_name: (fullDriverData.profile as any)?.full_name || '',
+            }));
+          }
+        }
         
         const { data: orgData } = await supabase
           .from('organizations')
