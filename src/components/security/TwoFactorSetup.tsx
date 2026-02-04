@@ -1,12 +1,14 @@
-import { memo, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, ShieldCheck, ShieldOff, Copy, Check, AlertTriangle, Key, Smartphone, Loader2 } from 'lucide-react';
+import { memo, useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { Shield, ShieldCheck, ShieldOff, Copy, Check, AlertTriangle, Key, Smartphone, Loader2, Download } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useTwoFactorAuth } from '@/hooks/useTwoFactorAuth';
 import { cn } from '@/lib/utils';
 
@@ -97,13 +99,15 @@ const TwoFactorSetup = memo(({ className }: TwoFactorSetupProps) => {
               امسح رمز QR
             </h3>
             <p className="text-sm text-muted-foreground">
-              افتح تطبيق المصادقة (مثل Google Authenticator) وامسح الرمز التالي
+              افتح تطبيق المصادقة (مثل Google Authenticator أو Authy) وامسح الرمز التالي
             </p>
-            <div className="flex justify-center p-4 bg-white rounded-lg">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(setupData.otpauthUrl)}`}
-                alt="QR Code"
-                className="w-48 h-48"
+            <div className="flex justify-center p-6 bg-white rounded-xl shadow-inner">
+              <QRCodeSVG
+                value={setupData.otpauthUrl}
+                size={200}
+                level="H"
+                includeMargin
+                className="rounded-lg"
               />
             </div>
           </div>
@@ -179,15 +183,21 @@ const TwoFactorSetup = memo(({ className }: TwoFactorSetupProps) => {
             <p className="text-sm text-muted-foreground">
               أدخل الرمز المكون من 6 أرقام من تطبيق المصادقة
             </p>
-            <div className="flex gap-2">
-              <Input
+            <div className="flex justify-center" dir="ltr">
+              <InputOTP
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="000000"
-                className="text-center text-2xl font-mono tracking-widest"
+                onChange={(value) => setVerificationCode(value)}
                 maxLength={6}
-                dir="ltr"
-              />
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
             </div>
           </div>
 
