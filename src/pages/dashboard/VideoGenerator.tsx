@@ -248,14 +248,59 @@ const VideoGenerator = () => {
         >
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Video className="w-6 h-6 text-white" />
+              <PenTool className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">إنشاء فيديوهات ترويجية</h1>
-              <p className="text-muted-foreground">أنشئ فيديوهات احترافية للترويج للمنصة والتوعية البيئية</p>
+              <h1 className="text-2xl font-bold">أنشئ منشورك بضغطة زر</h1>
+              <p className="text-muted-foreground">أنشئ منشورات وصور وفيديوهات احترافية للترويج للجهة والمنصة والتوعية البيئية</p>
             </div>
           </div>
         </motion.div>
+
+        {/* Content Type Tabs */}
+        <Tabs defaultValue="posts" className="w-full" dir="rtl">
+          <TabsList className="grid grid-cols-3 w-full max-w-lg">
+            <TabsTrigger value="posts" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              <span>منشورات</span>
+            </TabsTrigger>
+            <TabsTrigger value="images" className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4" />
+              <span>صور</span>
+            </TabsTrigger>
+            <TabsTrigger value="videos" className="flex items-center gap-2">
+              <Video className="w-4 h-4" />
+              <span>فيديوهات</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="posts" className="mt-6">
+            <PostsGenerator 
+              isAdmin={isAdmin}
+              organizations={organizations}
+              loadingOrgs={loadingOrgs}
+              selectedOrganizationId={selectedOrganizationId}
+              setSelectedOrganizationId={setSelectedOrganizationId}
+              selectedOrg={selectedOrg}
+              targetOrganizationId={targetOrganizationId}
+              profile={profile}
+            />
+          </TabsContent>
+
+          <TabsContent value="images" className="mt-6">
+            <ImagesGenerator 
+              isAdmin={isAdmin}
+              organizations={organizations}
+              loadingOrgs={loadingOrgs}
+              selectedOrganizationId={selectedOrganizationId}
+              setSelectedOrganizationId={setSelectedOrganizationId}
+              selectedOrg={selectedOrg}
+              targetOrganizationId={targetOrganizationId}
+              profile={profile}
+            />
+          </TabsContent>
+
+          <TabsContent value="videos" className="mt-6">
 
         {/* Organization Selection for Admin */}
         {isAdmin && (
