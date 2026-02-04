@@ -2152,7 +2152,7 @@ export type Database = {
           longitude: number
           name: string
           name_ar: string | null
-          osm_id: string | null
+          source_id: string | null
           tags: Json | null
           updated_at: string
         }
@@ -2169,7 +2169,7 @@ export type Database = {
           longitude: number
           name: string
           name_ar?: string | null
-          osm_id?: string | null
+          source_id?: string | null
           tags?: Json | null
           updated_at?: string
         }
@@ -2186,7 +2186,7 @@ export type Database = {
           longitude?: number
           name?: string
           name_ar?: string | null
-          osm_id?: string | null
+          source_id?: string | null
           tags?: Json | null
           updated_at?: string
         }

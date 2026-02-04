@@ -69,7 +69,7 @@ interface RouteData {
   steps: RouteStep[];
 }
 
-// Translate OSRM maneuver to Arabic
+// Translate Mapbox maneuver to Arabic
 const translateManeuver = (step: any): string => {
   const maneuverType = step.maneuver?.type || '';
   const modifier = step.maneuver?.modifier || '';
@@ -181,14 +181,16 @@ const NavigationDemo = () => {
     setNavigationMode('waze');
   };
 
-  // Fetch real route from OSRM
+  // Fetch real route from Mapbox Directions API
   const fetchRoute = async () => {
     setLoading(true);
     setError(null);
     
+    const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+    
     try {
       const response = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${ORIGIN.lng},${ORIGIN.lat};${DESTINATION.lng},${DESTINATION.lat}?overview=full&geometries=geojson&steps=true&annotations=true`
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${ORIGIN.lng},${ORIGIN.lat};${DESTINATION.lng},${DESTINATION.lat}?access_token=${MAPBOX_TOKEN}&geometries=geojson&overview=full&steps=true&annotations=duration,distance`
       );
       
       if (!response.ok) throw new Error('فشل في جلب المسار');
@@ -847,7 +849,7 @@ const NavigationDemo = () => {
                           alt="Google Maps" 
                           className="w-5 h-5"
                         />
-                        <span className="font-medium">خرائط جوجل + بيانات OSRM</span>
+                        <span className="font-medium">خرائط جوجل + بيانات Mapbox</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 mr-7">
                         {coordinates.length} نقطة GPS • {steps.length} تعليمات ملاحية

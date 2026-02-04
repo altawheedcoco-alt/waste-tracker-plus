@@ -69,7 +69,7 @@ const MapExplorer = () => {
   const [facilities, setFacilities] = useState<IndustrialFacility[]>([]);
   const [isLoadingFacilities, setIsLoadingFacilities] = useState(false);
   const [isFetchingFromSource, setIsFetchingFromSource] = useState(false);
-  const [fetchingSource, setFetchingSource] = useState<'google' | 'osm' | null>(null);
+  const [fetchingSource, setFetchingSource] = useState<'google' | null>(null);
   const [facilitiesCount, setFacilitiesCount] = useState(0);
   const [showAIChat, setShowAIChat] = useState(false);
   const [isAIChatExpanded, setIsAIChatExpanded] = useState(false);
@@ -116,18 +116,18 @@ const MapExplorer = () => {
     }
   }, []);
 
-  // جلب المنشآت من مصدر خارجي (Google أو OSM)
-  const fetchFromExternalSource = async (source: 'google' | 'osm') => {
+  // جلب المنشآت من Google Maps
+  const fetchFromExternalSource = async () => {
     setIsFetchingFromSource(true);
-    setFetchingSource(source);
+    setFetchingSource('google');
     
-    const sourceName = source === 'google' ? 'Google Maps' : 'OpenStreetMap';
+    const sourceName = 'Google Maps';
     
     try {
       toast.info(`جاري جلب المنشآت الصناعية من ${sourceName}...`, { duration: 10000 });
       
       const { data, error } = await supabase.functions.invoke('fetch-industrial-facilities', {
-        body: { source }
+        body: { source: 'google' }
       });
       
       if (error) throw error;
@@ -515,7 +515,7 @@ const MapExplorer = () => {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => fetchFromExternalSource('google')}
+                onClick={() => fetchFromExternalSource()}
                 disabled={isFetchingFromSource}
                 className="gap-2"
               >
@@ -524,21 +524,7 @@ const MapExplorer = () => {
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                جلب من Google Maps
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fetchFromExternalSource('osm')}
-                disabled={isFetchingFromSource}
-                className="gap-2"
-              >
-                {fetchingSource === 'osm' ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Globe className="w-4 h-4" />
-                )}
-                جلب من OpenStreetMap
+                جلب المنشآت الصناعية
               </Button>
               <Button
                 variant="ghost"
@@ -559,7 +545,7 @@ const MapExplorer = () => {
               {facilitiesCount > 0 ? (
                 <>عدد المنشآت المحفوظة: <strong>{facilitiesCount}</strong></>
               ) : (
-                'لا توجد منشآت محفوظة - اضغط على "جلب من OpenStreetMap"'
+                'لا توجد منشآت محفوظة - اضغط على "جلب المنشآت الصناعية"'
               )}
             </p>
           </div>
@@ -778,7 +764,7 @@ const MapExplorer = () => {
               variant="secondary" 
               className="absolute bottom-3 left-3 z-10 text-[10px] bg-background/80 backdrop-blur-sm"
             >
-              © Mapbox | OpenStreetMap
+              © Mapbox
             </Badge>
           </div>
         </CardContent>
@@ -939,7 +925,7 @@ const MapExplorer = () => {
           <ul className="text-sm text-muted-foreground space-y-2">
             <li className="flex items-center gap-2">
               <Download className="w-4 h-4 text-primary" />
-              اضغط "جلب من OpenStreetMap" لتحميل كافة المنشآت الصناعية في مصر
+              اضغط "جلب المنشآت الصناعية" لتحميل كافة المنشآت الصناعية في مصر
             </li>
             <li className="flex items-center gap-2">
               <Search className="w-4 h-4 text-primary" />
