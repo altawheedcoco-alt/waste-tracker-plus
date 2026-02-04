@@ -108,7 +108,7 @@ export function createRepository<T extends { id: string }>(
         throw error;
       }
 
-      return (data || []) as T[];
+      return (data || []) as unknown as T[];
     },
 
     async findPaginated(page: number, pageSize: number, options?: QueryOptions): Promise<PaginatedResult<T>> {
