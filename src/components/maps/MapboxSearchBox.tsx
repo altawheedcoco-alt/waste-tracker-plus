@@ -2,7 +2,8 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Loader2, X, Sparkles, Building2, Factory, 
-  MapPinned, MapPin, Lightbulb, Car, Database, Globe
+  MapPinned, MapPin, Lightbulb, Car, Database, Globe,
+  ChevronDown, ChevronLeft
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
