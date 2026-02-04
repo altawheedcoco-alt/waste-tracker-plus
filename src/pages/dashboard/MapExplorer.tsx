@@ -116,12 +116,12 @@ const MapExplorer = () => {
     }
   }, []);
 
-  // جلب المنشآت من مصدر خارجي (Google أو OSM)
-  const fetchFromExternalSource = async (source: 'google' | 'osm') => {
+  // جلب المنشآت من Google Maps
+  const fetchFromExternalSource = async () => {
     setIsFetchingFromSource(true);
-    setFetchingSource(source);
+    setFetchingSource('google');
     
-    const sourceName = source === 'google' ? 'Google Maps' : 'OpenStreetMap';
+    const sourceName = 'Google Maps';
     
     try {
       toast.info(`جاري جلب المنشآت الصناعية من ${sourceName}...`, { duration: 10000 });
