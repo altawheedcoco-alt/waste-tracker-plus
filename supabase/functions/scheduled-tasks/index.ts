@@ -269,6 +269,60 @@ Deno.serve(async (req) => {
         )
       }
 
+      case 'archive-old-data': {
+        // أرشفة البيانات القديمة تلقائياً
+        console.log('[Scheduled Tasks] Running data archival...')
+        
+        const { data: result, error } = await supabase
+          .rpc('run_full_archive')
+
+        if (error) {
+          console.error('[Scheduled Tasks] Archive error:', error)
+          return new Response(
+            JSON.stringify({ success: false, error: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log(`[Scheduled Tasks] Archived ${result?.total_archived || 0} records`)
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            task: 'archive-old-data',
+            ...result
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      case 'refresh-materialized-views': {
+        // تحديث الـ Materialized Views
+        console.log('[Scheduled Tasks] Refreshing materialized views...')
+        
+        const { error } = await supabase
+          .rpc('refresh_all_materialized_views')
+
+        if (error) {
+          console.error('[Scheduled Tasks] Refresh error:', error)
+          return new Response(
+            JSON.stringify({ success: false, error: error.message }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        console.log('[Scheduled Tasks] Materialized views refreshed successfully')
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            task: 'refresh-materialized-views',
+            refreshed_at: new Date().toISOString()
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       default:
         return new Response(
           JSON.stringify({ 
