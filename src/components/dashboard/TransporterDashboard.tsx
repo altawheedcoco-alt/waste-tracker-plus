@@ -389,6 +389,7 @@ const TransporterDashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <AutomationSettingsDialog />
           <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
           <Button 
             variant="outline" 
