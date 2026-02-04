@@ -55,6 +55,7 @@ interface SecurityEventsListProps {
     eventType?: SecurityEventType;
     severity?: SecuritySeverity;
     isSuspicious?: boolean;
+    isResolved?: boolean;
     limit?: number;
   };
   compact?: boolean;
