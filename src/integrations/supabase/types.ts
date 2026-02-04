@@ -1127,6 +1127,91 @@ export type Database = {
           },
         ]
       }
+      employee_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          access_all_partners: boolean | null
+          access_all_waste_types: boolean | null
+          created_at: string
+          email: string
+          employee_type: string
+          expires_at: string
+          external_partner_ids: string[] | null
+          id: string
+          invited_by: string
+          organization_id: string
+          partner_ids: string[] | null
+          permissions: string[] | null
+          status: string
+          token: string
+          updated_at: string
+          waste_types: string[] | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          access_all_partners?: boolean | null
+          access_all_waste_types?: boolean | null
+          created_at?: string
+          email: string
+          employee_type?: string
+          expires_at: string
+          external_partner_ids?: string[] | null
+          id?: string
+          invited_by: string
+          organization_id: string
+          partner_ids?: string[] | null
+          permissions?: string[] | null
+          status?: string
+          token: string
+          updated_at?: string
+          waste_types?: string[] | null
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          access_all_partners?: boolean | null
+          access_all_waste_types?: boolean | null
+          created_at?: string
+          email?: string
+          employee_type?: string
+          expires_at?: string
+          external_partner_ids?: string[] | null
+          id?: string
+          invited_by?: string
+          organization_id?: string
+          partner_ids?: string[] | null
+          permissions?: string[] | null
+          status?: string
+          token?: string
+          updated_at?: string
+          waste_types?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_invitations_accepted_by_fkey"
+            columns: ["accepted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_partner_access: {
         Row: {
           created_at: string
@@ -4093,6 +4178,7 @@ export type Database = {
         Returns: number
       }
       generate_contract_verification_code: { Args: never; Returns: string }
+      generate_invitation_token: { Args: never; Returns: string }
       get_pending_drivers: {
         Args: never
         Returns: {
