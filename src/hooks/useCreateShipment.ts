@@ -72,6 +72,13 @@ export const driverInputTypes = [
   { value: 'manual', label: 'إدخال السائق يدوياً' },
 ];
 
+interface DriverLocation {
+  latitude: number;
+  longitude: number;
+  address?: string;
+  city?: string;
+}
+
 const parseAndFormatDate = (dateStr: string): string => {
   if (!dateStr) return '';
   
