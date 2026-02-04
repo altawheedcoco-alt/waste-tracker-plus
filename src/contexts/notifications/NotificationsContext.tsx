@@ -6,11 +6,14 @@ interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: string;
   is_read: boolean;
   created_at: string;
   action_url?: string;
-  metadata?: Record<string, any>;
+  shipment_id?: string | null;
+  request_id?: string | null;
+  pdf_url?: string | null;
+  user_id?: string;
 }
 
 interface NotificationsState {
