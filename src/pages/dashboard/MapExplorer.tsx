@@ -69,7 +69,7 @@ const MapExplorer = () => {
   const [facilities, setFacilities] = useState<IndustrialFacility[]>([]);
   const [isLoadingFacilities, setIsLoadingFacilities] = useState(false);
   const [isFetchingFromSource, setIsFetchingFromSource] = useState(false);
-  const [fetchingSource, setFetchingSource] = useState<'google' | 'osm' | null>(null);
+  const [fetchingSource, setFetchingSource] = useState<'google' | null>(null);
   const [facilitiesCount, setFacilitiesCount] = useState(0);
   const [showAIChat, setShowAIChat] = useState(false);
   const [isAIChatExpanded, setIsAIChatExpanded] = useState(false);
