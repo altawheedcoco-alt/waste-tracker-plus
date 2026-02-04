@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Search, Loader2, MapPin, X, Navigation } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Search, Loader2, MapPin, X, Navigation, Crosshair, Copy, Check, LocateFixed } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
@@ -18,6 +20,7 @@ interface MapboxInteractiveMapPickerProps {
   onPositionSelect?: (position: { lat: number; lng: number }, address?: string) => void;
   showSearch?: boolean;
   showCurrentLocation?: boolean;
+  showCoordinatesInput?: boolean;
   className?: string;
   height?: string;
   markerColor?: 'blue' | 'green' | 'red';
@@ -42,6 +45,7 @@ const MapboxInteractiveMapPicker = ({
   onPositionSelect,
   showSearch = true,
   showCurrentLocation = true,
+  showCoordinatesInput = true,
   className = '',
   height = '400px',
   markerColor = 'blue',
@@ -64,8 +68,13 @@ const MapboxInteractiveMapPicker = ({
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [address, setAddress] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [coordsInput, setCoordsInput] = useState({ lat: '', lng: '' });
+  const [showCoordsInput, setShowCoordsInput] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout>();
+  const geolocateRef = useRef<any>(null);
 
   const colorMap = {
     blue: '#3b82f6',
@@ -127,6 +136,99 @@ const MapboxInteractiveMapPicker = ({
     }
     toast.success('تم تحديد الموقع');
   }, [effectiveOnChange]);
+
+  // Get current location manually
+  const getCurrentLocation = useCallback(async () => {
+    setIsLocating(true);
+    
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        });
+      });
+
+      const newPosition = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+
+      setMarkerPosition(newPosition);
+      setViewState({
+        longitude: newPosition.lng,
+        latitude: newPosition.lat,
+        zoom: 16,
+      });
+
+      const addressResult = await reverseGeocode(newPosition.lat, newPosition.lng);
+      setAddress(addressResult);
+
+      if (effectiveOnChange) {
+        effectiveOnChange(newPosition, addressResult);
+      }
+
+      toast.success('تم تحديد موقعك الحالي بنجاح');
+    } catch (error: any) {
+      if (error.code === 1) {
+        toast.error('يرجى السماح بالوصول للموقع من إعدادات المتصفح');
+      } else if (error.code === 2) {
+        toast.error('معلومات الموقع غير متوفرة');
+      } else if (error.code === 3) {
+        toast.error('انتهت مهلة تحديد الموقع');
+      } else {
+        toast.error('فشل في تحديد الموقع');
+      }
+    } finally {
+      setIsLocating(false);
+    }
+  }, [effectiveOnChange]);
+
+  // Navigate to coordinates input
+  const navigateToCoordinates = useCallback(async () => {
+    const lat = parseFloat(coordsInput.lat);
+    const lng = parseFloat(coordsInput.lng);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      toast.error('يرجى إدخال إحداثيات صحيحة');
+      return;
+    }
+
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      toast.error('الإحداثيات خارج النطاق المسموح');
+      return;
+    }
+
+    const position = { lat, lng };
+    setMarkerPosition(position);
+    setViewState({
+      longitude: lng,
+      latitude: lat,
+      zoom: 15,
+    });
+
+    const addressResult = await reverseGeocode(lat, lng);
+    setAddress(addressResult);
+
+    if (effectiveOnChange) {
+      effectiveOnChange(position, addressResult);
+    }
+
+    setShowCoordsInput(false);
+    toast.success('تم الانتقال للإحداثيات المحددة');
+  }, [coordsInput, effectiveOnChange]);
+
+  // Copy coordinates to clipboard
+  const copyCoordinates = useCallback(() => {
+    if (!markerPosition) return;
+    
+    const coordsText = `${markerPosition.lat.toFixed(6)}, ${markerPosition.lng.toFixed(6)}`;
+    navigator.clipboard.writeText(coordsText);
+    setCopied(true);
+    toast.success('تم نسخ الإحداثيات');
+    setTimeout(() => setCopied(false), 2000);
+  }, [markerPosition]);
 
   // Search places using Mapbox Geocoding
   const searchPlaces = useCallback(async (query: string) => {
@@ -260,6 +362,134 @@ const MapboxInteractiveMapPicker = ({
           </div>
         )}
 
+        {/* Floating Action Buttons */}
+        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+          {/* Current Location FAB */}
+          {showCurrentLocation && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    type="button"
+                    onClick={getCurrentLocation}
+                    disabled={isLocating}
+                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.05 }}
+                    className={cn(
+                      'w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-colors',
+                      'bg-primary hover:bg-primary/90 text-primary-foreground',
+                      'disabled:opacity-50'
+                    )}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isLocating ? (
+                        <motion.div
+                          key="loading"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                        >
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="icon"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                        >
+                          <LocateFixed className="h-5 w-5" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>موقعي الحالي</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          {/* Coordinates Input Toggle */}
+          {showCoordinatesInput && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <motion.button
+                    type="button"
+                    onClick={() => setShowCoordsInput(!showCoordsInput)}
+                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.05 }}
+                    className={cn(
+                      'w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-colors',
+                      showCoordsInput 
+                        ? 'bg-secondary text-secondary-foreground' 
+                        : 'bg-background border text-foreground hover:bg-accent'
+                    )}
+                  >
+                    <Crosshair className="h-5 w-5" />
+                  </motion.button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>إدخال إحداثيات</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+
+        {/* Coordinates Input Panel */}
+        <AnimatePresence>
+          {showCoordsInput && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="absolute top-16 left-3 z-10 bg-background/95 backdrop-blur-sm border rounded-lg shadow-lg p-3 w-64"
+            >
+              <div className="space-y-2">
+                <p className="text-sm font-medium mb-2">إدخال إحداثيات جغرافية</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-muted-foreground">خط العرض (Lat)</label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={coordsInput.lat}
+                      onChange={(e) => setCoordsInput(prev => ({ ...prev, lat: e.target.value }))}
+                      placeholder="30.0444"
+                      className="text-xs h-8"
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted-foreground">خط الطول (Lng)</label>
+                    <Input
+                      type="number"
+                      step="any"
+                      value={coordsInput.lng}
+                      onChange={(e) => setCoordsInput(prev => ({ ...prev, lng: e.target.value }))}
+                      placeholder="31.2357"
+                      className="text-xs h-8"
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="w-full gap-2"
+                  onClick={navigateToCoordinates}
+                >
+                  <Navigation className="h-4 w-4" />
+                  انتقل للموقع
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* OpenStreetMap Attribution Badge */}
         <Badge 
           variant="secondary" 
@@ -280,23 +510,16 @@ const MapboxInteractiveMapPicker = ({
           locale={{ 'NavigationControl.ZoomIn': 'تكبير', 'NavigationControl.ZoomOut': 'تصغير', 'NavigationControl.ResetBearing': 'إعادة الاتجاه', 'GeolocateControl.FindMyLocation': 'موقعي', 'GeolocateControl.LocationNotAvailable': 'الموقع غير متاح' }}
           onLoad={(e) => {
             const map = e.target;
-            map.setLayoutProperty('country-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('state-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('settlement-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('settlement-subdivision-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('airport-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('poi-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('road-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('natural-point-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('natural-line-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('waterway-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('water-point-label', 'text-field', ['get', 'name_ar']);
-            map.setLayoutProperty('water-line-label', 'text-field', ['get', 'name_ar']);
+            const arabicLayers = ['country-label', 'state-label', 'settlement-label', 'settlement-subdivision-label', 'airport-label', 'poi-label', 'road-label', 'natural-point-label', 'natural-line-label', 'waterway-label', 'water-point-label', 'water-line-label'];
+            arabicLayers.forEach(layer => {
+              try { map.setLayoutProperty(layer, 'text-field', ['get', 'name_ar']); } catch {}
+            });
           }}
         >
           <NavigationControl position="bottom-right" />
           {showCurrentLocation && (
             <GeolocateControl
+              ref={geolocateRef}
               position="bottom-right"
               trackUserLocation
               showUserHeading
@@ -319,7 +542,10 @@ const MapboxInteractiveMapPicker = ({
               latitude={markerPosition.lat}
               anchor="bottom"
             >
-              <div
+              <motion.div
+                initial={{ scale: 0, y: -20 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 style={{
                   width: '32px',
                   height: '32px',
@@ -340,16 +566,40 @@ const MapboxInteractiveMapPicker = ({
         <div className="p-3 bg-muted/50 rounded-lg border text-sm">
           <div className="flex items-start gap-2">
             <MapPin className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-            <p className="leading-relaxed">{address}</p>
+            <p className="leading-relaxed flex-1">{address}</p>
           </div>
         </div>
       )}
 
-      {/* Coordinates display */}
+      {/* Coordinates display with copy button */}
       {markerPosition && (
-        <p className="text-xs text-muted-foreground text-center" dir="ltr">
-          {markerPosition.lat.toFixed(6)}, {markerPosition.lng.toFixed(6)}
-        </p>
+        <div className="flex items-center justify-center gap-2">
+          <p className="text-xs text-muted-foreground" dir="ltr">
+            {markerPosition.lat.toFixed(6)}, {markerPosition.lng.toFixed(6)}
+          </p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={copyCoordinates}
+                >
+                  {copied ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>نسخ الإحداثيات</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       )}
     </div>
   );
