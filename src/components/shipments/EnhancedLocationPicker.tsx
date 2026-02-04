@@ -308,6 +308,18 @@ const EnhancedLocationPicker = ({
     toast.success('تم اختيار الموقع');
   };
 
+  // Handle general saved location selection
+  const handleGeneralSavedLocationSelect = async (location: SavedLocation) => {
+    const fullAddress = location.city 
+      ? `${location.address}, ${location.city}` 
+      : location.address;
+    onChange(fullAddress, { lat: location.latitude, lng: location.longitude });
+    
+    // Increment usage count
+    await incrementUsage(location.id);
+    toast.success('تم اختيار الموقع');
+  };
+
   const handleSaveNewLocation = async () => {
     if (!newLocation.location_name || !newLocation.address) {
       toast.error('يرجى ملء اسم الموقع والعنوان');
