@@ -178,7 +178,7 @@ const Trend = ({ value, suffix = '%', className }: TrendProps) => {
   return (
     <span className={cn(
       'text-xs font-medium',
-      isPositive ? 'text-emerald-600' : 'text-red-600',
+      isPositive ? 'text-primary' : 'text-destructive',
       className
     )}>
       {isPositive ? '+' : ''}{value}{suffix}
