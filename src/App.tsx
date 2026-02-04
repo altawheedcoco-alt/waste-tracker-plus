@@ -217,6 +217,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/support" element={<SupportCenter />} />
         <Route path="/dashboard/api" element={<ApiManagement />} />
         <Route path="/dashboard/advanced-analytics" element={<AdvancedAnalytics />} />
+        <Route path="/dashboard/saved-locations" element={<SavedLocationsPage />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />

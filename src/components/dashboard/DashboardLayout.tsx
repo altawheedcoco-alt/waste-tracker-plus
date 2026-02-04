@@ -300,6 +300,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: AlertTriangle, label: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register', key: 'hazardous' },
     { icon: Layers, label: 'تصنيف أنواع المخلفات', path: '/dashboard/waste-types', key: 'waste-types' },
     { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'map-explorer' },
+    { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'saved-locations' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'my-requests' },
     { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
