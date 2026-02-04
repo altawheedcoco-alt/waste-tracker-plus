@@ -119,7 +119,86 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
         </div>
       </div>
 
-      {/* Driver Input Type */}
+      {/* Driver Data Section - Shows when user is a driver */}
+      {isDriver && driverInfo && (
+        <div className="p-4 rounded-lg border-2 border-primary/30 bg-primary/5 space-y-4">
+          <div className="flex items-center justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={fetchDriverCurrentLocation}
+              disabled={loadingDriverLocation}
+            >
+              {loadingDriverLocation ? (
+                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="ml-2 h-4 w-4" />
+              )}
+              تحديث الموقع
+            </Button>
+            <div className="flex items-center gap-2 text-primary font-medium">
+              <User className="h-5 w-5" />
+              <span>بيانات السائق (أنت)</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                اسم السائق
+              </Label>
+              <Input
+                value={formData.manual_driver_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, manual_driver_name: e.target.value }))}
+                placeholder="اسمك"
+                className="bg-background"
+              />
+            </div>
+            <div>
+              <Label className="flex items-center gap-2">
+                <Truck className="h-4 w-4" />
+                رقم المركبة
+              </Label>
+              <Input
+                value={formData.manual_vehicle_plate}
+                onChange={(e) => setFormData(prev => ({ ...prev, manual_vehicle_plate: e.target.value }))}
+                placeholder="رقم مركبتك"
+                className="bg-background"
+              />
+            </div>
+          </div>
+
+          {/* Current Location Display */}
+          <div>
+            <Label className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              موقعك الحالي (موقع الاستلام الافتراضي)
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                value={formData.pickup_address}
+                onChange={(e) => setFormData(prev => ({ ...prev, pickup_address: e.target.value }))}
+                placeholder={loadingDriverLocation ? 'جاري تحديد موقعك...' : 'موقع الاستلام'}
+                className="bg-background flex-1"
+              />
+              {loadingDriverLocation && (
+                <div className="flex items-center px-3 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
+              )}
+            </div>
+            {driverCurrentLocation && (
+              <p className="text-xs text-muted-foreground mt-1">
+                📍 الإحداثيات: {driverCurrentLocation.latitude.toFixed(6)}, {driverCurrentLocation.longitude.toFixed(6)}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Driver Input Type - Only for non-drivers */}
       {!isDriver && (
         <div>
           <Label>نوع إدخال السائق</Label>
@@ -138,7 +217,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
         </div>
       )}
 
-      {/* Driver Details */}
+      {/* Driver Details - Only for non-drivers */}
       {!isDriver && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {driverInputType === 'select' ? (
