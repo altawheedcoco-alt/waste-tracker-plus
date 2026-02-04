@@ -141,7 +141,7 @@ export function createRepository<T extends { id: string }>(
       const totalCount = count || 0;
       
       return {
-        data: (data || []) as T[],
+        data: (data || []) as unknown as T[],
         count: totalCount,
         page,
         pageSize,
