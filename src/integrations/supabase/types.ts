@@ -4075,6 +4075,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_contract: {
+        Args: { _contract_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_invoice: {
+        Args: { _invoice_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_access_shipment: {
+        Args: { _shipment_id: string; _user_id: string }
+        Returns: boolean
+      }
       check_api_rate_limit: { Args: { p_api_key_id: string }; Returns: boolean }
       count_recent_2fa_attempts: {
         Args: { _minutes?: number; _user_id: string }
@@ -4098,6 +4110,7 @@ export type Database = {
         }[]
       }
       get_user_org_id_safe: { Args: { _user_id: string }; Returns: string }
+      get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_organization_id: { Args: { _user_id: string }; Returns: string }
       get_user_organizations: {
         Args: { _user_id: string }
@@ -4137,6 +4150,10 @@ export type Database = {
       }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_belongs_to_org: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       validate_api_key: {
