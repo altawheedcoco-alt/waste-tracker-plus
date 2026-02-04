@@ -111,6 +111,15 @@ const EnhancedLocationPicker = ({
   const { profile } = useAuth();
   const [locations, setLocations] = useState<OrganizationLocation[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // Saved locations hook for general saved locations
+  const { 
+    locations: savedLocations, 
+    loading: savedLocationsLoading, 
+    saveLocation,
+    incrementUsage,
+    searchLocations: searchSavedLocations 
+  } = useSavedLocations();
   const [activeTab, setActiveTab] = useState<string>('search');
   
   // Current location state
