@@ -3939,6 +3939,36 @@ export type Database = {
           },
         ]
       }
+      two_factor_attempts: {
+        Row: {
+          attempt_type: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          is_successful: boolean
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          attempt_type: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_successful?: boolean
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          attempt_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          is_successful?: boolean
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_organizations: {
         Row: {
           created_at: string
@@ -4004,12 +4034,52 @@ export type Database = {
         }
         Relationships: []
       }
+      user_two_factor_auth: {
+        Row: {
+          backup_codes_encrypted: string | null
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_used_at: string | null
+          secret_encrypted: string | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          backup_codes_encrypted?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_used_at?: string | null
+          secret_encrypted?: string | null
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          backup_codes_encrypted?: string | null
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_used_at?: string | null
+          secret_encrypted?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       check_api_rate_limit: { Args: { p_api_key_id: string }; Returns: boolean }
+      count_recent_2fa_attempts: {
+        Args: { _minutes?: number; _user_id: string }
+        Returns: number
+      }
       generate_contract_verification_code: { Args: never; Returns: string }
       get_pending_drivers: {
         Args: never
@@ -4060,6 +4130,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_two_factor_enabled: { Args: { _user_id: string }; Returns: boolean }
       has_waste_access: {
         Args: { _user_id: string; _waste_type: string }
         Returns: boolean
