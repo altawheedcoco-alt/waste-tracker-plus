@@ -116,6 +116,8 @@ export const useCreateShipment = () => {
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
   const [driverInputType, setDriverInputType] = useState<'select' | 'manual'>('select');
   const [suggestingWasteState, setSuggestingWasteState] = useState(false);
+  const [driverCurrentLocation, setDriverCurrentLocation] = useState<DriverLocation | null>(null);
+  const [loadingDriverLocation, setLoadingDriverLocation] = useState(false);
 
   const isDriver = roles.includes('driver');
   const isAdmin = roles.includes('admin');
