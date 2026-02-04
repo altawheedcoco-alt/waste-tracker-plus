@@ -5,7 +5,7 @@ export interface SearchResult {
   id: string;
   name: string;
   address: string;
-  type: 'saved' | 'nominatim' | 'organization' | 'ai';
+  type: 'saved' | 'mapbox' | 'organization' | 'ai';
   latitude?: number;
   longitude?: number;
   distance?: number; // km from reference point
@@ -342,56 +342,46 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
         }
       });
 
-      // 5. Search using Nominatim API - EGYPT ONLY (جمهورية مصر العربية)
-      // Comprehensive search within Egypt covering all location types
-      const searchStrategies = [
-        // Primary Egypt search - exact query
-        { query: `${query}`, countrycodes: 'eg', limit: 15 },
-        // Industrial/factory variations
-        { query: `${query} industrial`, countrycodes: 'eg', limit: 5 },
-        { query: `مصنع ${query}`, countrycodes: 'eg', limit: 5 },
-        { query: `شركة ${query}`, countrycodes: 'eg', limit: 5 },
-        // Location type variations
-        { query: `${query} مصر`, countrycodes: 'eg', limit: 5 },
-        { query: `منطقة ${query}`, countrycodes: 'eg', limit: 5 },
-      ];
-
-      for (const strategy of searchStrategies) {
-        try {
-          // Always search within Egypt only
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(strategy.query)}&countrycodes=eg&limit=${strategy.limit}&accept-language=ar,en&addressdetails=1`
-          );
-          
-          if (!response.ok) continue;
-          
+      // 5. Search using Mapbox Geocoding API - EGYPT ONLY
+      const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+      
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=15&language=ar&types=address,place,locality,neighborhood,poi`
+        );
+        
+        if (response.ok) {
           const data = await response.json();
           
-          if (data && data.length > 0) {
-            data.forEach((item: any) => {
+          if (data.features && data.features.length > 0) {
+            data.features.forEach((item: any) => {
               // Avoid duplicates
               const exists = allResults.some(r => 
-                r.address === item.display_name ||
-                (r.latitude && Math.abs(r.latitude - parseFloat(item.lat)) < 0.0001 && 
-                 r.longitude && Math.abs(r.longitude - parseFloat(item.lon)) < 0.0001)
+                r.address === item.place_name ||
+                (r.latitude && Math.abs(r.latitude - item.center[1]) < 0.0001 && 
+                 r.longitude && Math.abs(r.longitude - item.center[0]) < 0.0001)
               );
               
               if (!exists) {
-                const matchScore = calculateSimilarity(query, item.display_name);
+                const matchScore = calculateSimilarity(query, item.place_name);
                 
-                // Extract city and region from address details
-                const addressDetails = item.address || {};
-                const cityName = addressDetails.city || addressDetails.town || addressDetails.village || 
-                                 addressDetails.county || addressDetails.state || '';
-                const regionName = addressDetails.state || addressDetails.region || 'مصر';
+                // Extract city and region from context
+                let cityName = '';
+                let regionName = 'مصر';
+                if (item.context) {
+                  item.context.forEach((ctx: any) => {
+                    if (ctx.id.startsWith('place')) cityName = ctx.text;
+                    if (ctx.id.startsWith('region')) regionName = ctx.text;
+                  });
+                }
 
                 const result: SearchResult = {
-                  id: `nominatim-${item.place_id}`,
-                  name: item.name || item.display_name.split(',')[0],
-                  address: item.display_name,
-                  type: 'nominatim',
-                  latitude: parseFloat(item.lat),
-                  longitude: parseFloat(item.lon),
+                  id: `mapbox-${item.id}`,
+                  name: item.text || item.place_name.split(',')[0],
+                  address: item.place_name,
+                  type: 'mapbox',
+                  latitude: item.center[1],
+                  longitude: item.center[0],
                   matchScore: matchScore + 0.1,
                   city: cityName,
                   region: regionName,
@@ -402,23 +392,18 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
                   result.distance = calculateDistance(
                     options.referencePoint.lat,
                     options.referencePoint.lng,
-                    parseFloat(item.lat),
-                    parseFloat(item.lon)
+                    item.center[1],
+                    item.center[0]
                   );
                 }
 
                 allResults.push(result);
               }
             });
-            
-            // If we have enough results, we can stop searching
-            if (allResults.filter(r => r.type === 'nominatim').length >= 15) {
-              break;
-            }
           }
-        } catch (err) {
-          console.error('Nominatim search error:', err);
         }
+      } catch (err) {
+        console.error('Mapbox search error:', err);
       }
 
       // Sort by match score first, then by distance, then by type priority
@@ -437,8 +422,8 @@ export const useEnhancedLocationSearch = (options: UseEnhancedLocationSearchOpti
         }
         
         // Finally by type priority
-        const typePriority = { saved: 0, organization: 1, nominatim: 2 };
-        return typePriority[a.type] - typePriority[b.type];
+        const typePriority: Record<string, number> = { saved: 0, organization: 1, mapbox: 2, ai: 3 };
+        return (typePriority[a.type] || 2) - (typePriority[b.type] || 2);
       });
 
       // Remove duplicates and limit results
