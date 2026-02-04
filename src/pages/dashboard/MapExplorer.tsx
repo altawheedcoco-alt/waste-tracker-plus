@@ -524,7 +524,7 @@ const MapExplorer = () => {
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                جلب من Google Maps
+                جلب المنشآت الصناعية
               </Button>
               <Button
                 variant="ghost"
