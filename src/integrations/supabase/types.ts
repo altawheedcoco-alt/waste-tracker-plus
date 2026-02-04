@@ -302,6 +302,171 @@ export type Database = {
           },
         ]
       }
+      archive_run_log: {
+        Row: {
+          errors: Json | null
+          id: string
+          run_completed_at: string | null
+          run_started_at: string
+          status: string | null
+          tables_processed: string[] | null
+          total_records_archived: number | null
+        }
+        Insert: {
+          errors?: Json | null
+          id?: string
+          run_completed_at?: string | null
+          run_started_at?: string
+          status?: string | null
+          tables_processed?: string[] | null
+          total_records_archived?: number | null
+        }
+        Update: {
+          errors?: Json | null
+          id?: string
+          run_completed_at?: string | null
+          run_started_at?: string
+          status?: string | null
+          tables_processed?: string[] | null
+          total_records_archived?: number | null
+        }
+        Relationships: []
+      }
+      archive_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_run_at: string | null
+          records_archived: number | null
+          retention_days: number
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          records_archived?: number | null
+          retention_days?: number
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_run_at?: string | null
+          records_archived?: number | null
+          retention_days?: number
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      archived_activity_logs: {
+        Row: {
+          archived_at: string
+          id: string
+          original_data: Json
+        }
+        Insert: {
+          archived_at?: string
+          id: string
+          original_data: Json
+        }
+        Update: {
+          archived_at?: string
+          id?: string
+          original_data?: Json
+        }
+        Relationships: []
+      }
+      archived_chat_messages: {
+        Row: {
+          archived_at: string
+          id: string
+          original_data: Json
+        }
+        Insert: {
+          archived_at?: string
+          id: string
+          original_data: Json
+        }
+        Update: {
+          archived_at?: string
+          id?: string
+          original_data?: Json
+        }
+        Relationships: []
+      }
+      archived_driver_locations: {
+        Row: {
+          archived_at: string
+          id: string
+          original_data: Json
+        }
+        Insert: {
+          archived_at?: string
+          id: string
+          original_data: Json
+        }
+        Update: {
+          archived_at?: string
+          id?: string
+          original_data?: Json
+        }
+        Relationships: []
+      }
+      archived_notifications: {
+        Row: {
+          archived_at: string
+          archived_by: string | null
+          id: string
+          original_data: Json
+        }
+        Insert: {
+          archived_at?: string
+          archived_by?: string | null
+          id: string
+          original_data: Json
+        }
+        Update: {
+          archived_at?: string
+          archived_by?: string | null
+          id?: string
+          original_data?: Json
+        }
+        Relationships: []
+      }
+      archived_shipments: {
+        Row: {
+          archive_reason: string | null
+          archived_at: string
+          archived_by: string | null
+          id: string
+          original_data: Json
+          retention_until: string | null
+        }
+        Insert: {
+          archive_reason?: string | null
+          archived_at?: string
+          archived_by?: string | null
+          id: string
+          original_data: Json
+          retention_until?: string | null
+        }
+        Update: {
+          archive_reason?: string | null
+          archived_at?: string
+          archived_by?: string | null
+          id?: string
+          original_data?: Json
+          retention_until?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -4874,6 +5039,26 @@ export type Database = {
       }
     }
     Functions: {
+      archive_old_activity_logs: {
+        Args: { retention_days?: number }
+        Returns: number
+      }
+      archive_old_chat_messages: {
+        Args: { retention_days?: number }
+        Returns: number
+      }
+      archive_old_driver_locations: {
+        Args: { retention_days?: number }
+        Returns: number
+      }
+      archive_old_notifications: {
+        Args: { retention_days?: number }
+        Returns: number
+      }
+      archive_old_shipments: {
+        Args: { retention_days?: number }
+        Returns: number
+      }
       can_access_contract: {
         Args: { _contract_id: string; _user_id: string }
         Returns: boolean
@@ -5119,6 +5304,11 @@ export type Database = {
         Args: { view_name: string }
         Returns: undefined
       }
+      restore_from_archive: {
+        Args: { p_record_id: string; p_table_name: string }
+        Returns: boolean
+      }
+      run_full_archive: { Args: never; Returns: Json }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
         Returns: boolean
