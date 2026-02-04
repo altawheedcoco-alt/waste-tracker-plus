@@ -292,7 +292,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
           { icon: Truck, label: 'خريطة السائقين', path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
           { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'admin-certs' },
-          { icon: Video, label: 'إنشاء فيديوهات ترويجية', path: '/dashboard/video-generator', key: 'video-gen' },
+          { icon: Video, label: 'أنشئ منشورك بضغطة زر', path: '/dashboard/video-generator', key: 'video-gen' },
         ]
       : []),
     { icon: BarChart3, label: 'التقارير', path: '/dashboard/reports', key: 'reports' },
