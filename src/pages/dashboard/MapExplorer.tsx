@@ -704,7 +704,7 @@ const MapExplorer = () => {
                       window.open(url, '_blank');
                       toast.success('جاري فتح الملاحة...');
                     }}
-                    className="flex-1 min-w-[160px] gap-2 bg-green-600 hover:bg-green-700"
+                    className="flex-1 min-w-[160px] gap-2 bg-primary hover:bg-primary/90"
                   >
                     <Navigation className="w-4 h-4" />
                     الذهاب إليه (ملاحة)
