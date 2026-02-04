@@ -658,7 +658,7 @@ const MapExplorer = () => {
                   <div className="p-4 bg-background rounded-xl border shadow-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1">
-                        <MapPinned className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                        <MapPin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                         <div>
                           <p className="text-xs text-muted-foreground mb-1">العنوان</p>
                           <p className="text-sm leading-relaxed">{selectedAddress}</p>
