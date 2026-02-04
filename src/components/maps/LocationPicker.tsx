@@ -28,9 +28,11 @@ interface LocationSuggestion {
   display_name: string;
   lat: string;
   lon: string;
-  source?: 'nominatim' | 'database' | 'organization';
+  source?: 'mapbox' | 'database' | 'organization';
   organization_name?: string;
 }
+
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
 const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوان...', label }: LocationPickerProps) => {
   const [activeTab, setActiveTab] = useState<string>('search');
@@ -75,14 +77,14 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
         const { latitude, longitude } = position.coords;
         
         try {
-          // Reverse geocoding to get address using Nominatim
+          // Reverse geocoding to get address using Mapbox
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ar`
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
           );
           const data = await response.json();
           
-          if (data.display_name) {
-            onChange(data.display_name, latitude, longitude);
+          if (data.features && data.features.length > 0) {
+            onChange(data.features[0].place_name, latitude, longitude);
             toast.success('تم تحديد موقعك الحالي');
           } else {
             onChange(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`, latitude, longitude);
@@ -116,7 +118,7 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
     );
   };
 
-  // Search for locations from multiple sources (Database + Nominatim)
+  // Search for locations from multiple sources (Database + Mapbox)
   const searchLocations = useCallback(async (query: string) => {
     if (!query || query.length < 2) {
       setSuggestions([]);
@@ -125,20 +127,12 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
 
     setSearchLoading(true);
     try {
-      // Build search query with Egypt context for better results
-      const nominatimQuery = query.includes('مصر') ? query : `${query} مصر`;
-      
       // Search from multiple sources in parallel
-      const [mainResults, boundedResults, orgLocations, organizations] = await Promise.all([
-        // Nominatim main search
+      const [mapboxResults, orgLocations, organizations] = await Promise.all([
+        // Mapbox search
         fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(nominatimQuery)}&countrycodes=eg&limit=10&accept-language=ar&addressdetails=1&extratags=1`
-        ).then(res => res.json()).catch(() => []),
-        
-        // Nominatim bounded search within Egypt
-        fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&viewbox=25.0,31.9,35.0,22.0&bounded=1&limit=8&accept-language=ar&addressdetails=1`
-        ).then(res => res.json()).catch(() => []),
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=10&language=ar&types=address,place,locality,neighborhood,poi`
+        ).then(res => res.json()).catch(() => ({ features: [] })),
         
         // Search saved organization locations from database
         supabase
@@ -178,16 +172,16 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
         organization_name: org.name
       }));
 
-      // Convert Nominatim results
-      const nominatimSuggestions: LocationSuggestion[] = [...(mainResults || []), ...(boundedResults || [])].map((item: any) => ({
-        display_name: item.display_name,
-        lat: item.lat,
-        lon: item.lon,
-        source: 'nominatim' as const
+      // Convert Mapbox results
+      const mapboxSuggestions: LocationSuggestion[] = (mapboxResults.features || []).map((item: any) => ({
+        display_name: item.place_name,
+        lat: item.center[1].toString(),
+        lon: item.center[0].toString(),
+        source: 'mapbox' as const
       }));
 
       // Merge all results - prioritize database/organization results
-      const allResults = [...dbLocationSuggestions, ...orgSuggestions, ...nominatimSuggestions];
+      const allResults = [...dbLocationSuggestions, ...orgSuggestions, ...mapboxSuggestions];
       
       // Deduplicate by display_name similarity
       const uniqueResults = allResults.reduce((acc: LocationSuggestion[], curr) => {
@@ -202,10 +196,10 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
         return acc;
       }, []);
 
-      // Sort: database first, then organizations, then nominatim
+      // Sort: database first, then organizations, then mapbox
       const sortedResults = uniqueResults.sort((a, b) => {
-        const sourceOrder = { database: 0, organization: 1, nominatim: 2 };
-        return (sourceOrder[a.source || 'nominatim'] || 2) - (sourceOrder[b.source || 'nominatim'] || 2);
+        const sourceOrder: Record<string, number> = { database: 0, organization: 1, mapbox: 2 };
+        return (sourceOrder[a.source || 'mapbox'] || 2) - (sourceOrder[b.source || 'mapbox'] || 2);
       }).slice(0, 15);
 
       setSuggestions(sortedResults);
@@ -240,14 +234,14 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
   // Handle map coordinate selection
   const handleMapSelect = () => {
     if (mapCoordinates) {
-      // Get address from coordinates
+      // Get address from coordinates using Mapbox
       fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapCoordinates.lat}&lon=${mapCoordinates.lng}&accept-language=ar`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${mapCoordinates.lng},${mapCoordinates.lat}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
       )
         .then(res => res.json())
         .then(data => {
-          if (data.display_name) {
-            onChange(data.display_name, mapCoordinates.lat, mapCoordinates.lng);
+          if (data.features && data.features.length > 0) {
+            onChange(data.features[0].place_name, mapCoordinates.lat, mapCoordinates.lng);
           } else {
             onChange(`${mapCoordinates.lat.toFixed(6)}, ${mapCoordinates.lng.toFixed(6)}`, mapCoordinates.lat, mapCoordinates.lng);
           }

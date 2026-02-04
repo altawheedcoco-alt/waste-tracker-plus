@@ -49,8 +49,8 @@ interface SmartLocationSearchProps {
   enableAI?: boolean;
 }
 
-// Photon API for free places search
-const PHOTON_API = 'https://photon.komoot.io/api';
+// Mapbox API for places search
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
 const SmartLocationSearch = ({
   value,
@@ -70,9 +70,9 @@ const SmartLocationSearch = ({
   const [correctedQuery, setCorrectedQuery] = useState<string | null>(null);
   const [loadingAI, setLoadingAI] = useState(false);
   
-  // Free Places search state (Photon/Nominatim)
-  const [photonResults, setPhotonResults] = useState<PhotonResult[]>([]);
-  const [loadingPhoton, setLoadingPhoton] = useState(false);
+  // Mapbox Places search state
+  const [mapboxResults, setMapboxResults] = useState<any[]>([]);
+  const [loadingMapbox, setLoadingMapbox] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,57 +82,27 @@ const SmartLocationSearch = ({
     includeAllOrganizations,
   });
 
-  // Search using free Photon API
-  const searchPhoton = useCallback(async (searchQuery: string) => {
+  // Search using Mapbox Geocoding API
+  const searchMapbox = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 2) {
-      setPhotonResults([]);
+      setMapboxResults([]);
       return;
     }
 
-    setLoadingPhoton(true);
+    setLoadingMapbox(true);
     try {
-      const url = `${PHOTON_API}?q=${encodeURIComponent(searchQuery)}&limit=6&lang=ar&lat=30.0444&lon=31.2357`;
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=6&language=ar&types=address,place,locality,neighborhood,poi`;
       const response = await fetch(url);
       const data = await response.json();
       
       if (data.features) {
-        // Prioritize Egypt results
-        const filtered = data.features.filter((f: PhotonResult) => {
-          const cc = f.properties.countrycode?.toUpperCase();
-          return cc === 'EG' || !cc;
-        });
-        setPhotonResults(filtered.slice(0, 5));
+        setMapboxResults(data.features);
       }
     } catch (error) {
-      console.error('Photon search error:', error);
-      // Fallback to Nominatim
-      try {
-        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&countrycodes=eg&limit=5&accept-language=ar`;
-        const response = await fetch(nominatimUrl);
-        const data = await response.json();
-        
-        if (data?.length > 0) {
-          const converted = data.map((item: any) => ({
-            type: 'Feature',
-            geometry: {
-              coordinates: [parseFloat(item.lon), parseFloat(item.lat)],
-              type: 'Point',
-            },
-            properties: {
-              osm_id: item.osm_id,
-              name: item.display_name.split(',')[0],
-              city: item.address?.city || item.address?.town,
-              state: item.address?.state,
-              country: item.address?.country,
-            },
-          }));
-          setPhotonResults(converted);
-        }
-      } catch {
-        setPhotonResults([]);
-      }
+      console.error('Mapbox search error:', error);
+      setMapboxResults([]);
     } finally {
-      setLoadingPhoton(false);
+      setLoadingMapbox(false);
     }
   }, []);
 
@@ -162,7 +132,7 @@ const SmartLocationSearch = ({
         setShowResults(true);
         
         // Search free places in parallel
-        searchPhoton(query);
+        searchMapbox(query);
         
         // Trigger AI search for expanded results
         if (enableAI && query.length >= 3) {
@@ -175,7 +145,7 @@ const SmartLocationSearch = ({
         }
       } else {
         clearResults();
-        setPhotonResults([]);
+        setMapboxResults([]);
         setAiSuggestions([]);
         setAlternativeQueries([]);
         setCorrectedQuery(null);
@@ -184,7 +154,7 @@ const SmartLocationSearch = ({
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query, search, searchWithAI, clearResults, enableAI, searchPhoton]);
+  }, [query, search, searchWithAI, clearResults, enableAI, searchMapbox]);
 
   // Close results when clicking outside
   useEffect(() => {
@@ -230,7 +200,7 @@ const SmartLocationSearch = ({
     setQuery('');
     setShowResults(false);
     clearResults();
-    setPhotonResults([]);
+    setMapboxResults([]);
     setAiSuggestions([]);
     setAlternativeQueries([]);
     toast.success('تم اختيار الموقع');
@@ -267,12 +237,12 @@ const SmartLocationSearch = ({
         
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ar`
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
           );
           const data = await response.json();
           
-          if (data.display_name) {
-            onChange(data.display_name, { lat: latitude, lng: longitude });
+          if (data.features && data.features.length > 0) {
+            onChange(data.features[0].place_name, { lat: latitude, lng: longitude });
             toast.success('تم تحديد موقعك الحالي');
           }
         } catch {
@@ -289,9 +259,9 @@ const SmartLocationSearch = ({
     );
   };
 
-  const isLoading = loading || loadingAI || loadingPhoton;
-  const hasPhotonResults = photonResults.length > 0;
-  const hasAnyResults = results.length > 0 || hasPhotonResults || aiSuggestions.length > 0 || alternativeQueries.length > 0;
+  const isLoading = loading || loadingAI || loadingMapbox;
+  const hasMapboxResults = mapboxResults.length > 0;
+  const hasAnyResults = results.length > 0 || hasMapboxResults || aiSuggestions.length > 0 || alternativeQueries.length > 0;
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -309,7 +279,7 @@ const SmartLocationSearch = ({
           {isLoading ? (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-              {loadingPhoton && <Globe className="w-3 h-3 text-green-500 animate-pulse" />}
+              {loadingMapbox && <Globe className="w-3 h-3 text-blue-500 animate-pulse" />}
               {loadingAI && <Sparkles className="w-3 h-3 text-primary animate-pulse" />}
             </div>
           ) : query && (
@@ -319,7 +289,7 @@ const SmartLocationSearch = ({
               onClick={() => {
                 setQuery('');
                 clearResults();
-                setPhotonResults([]);
+                setMapboxResults([]);
                 setAiSuggestions([]);
                 setAlternativeQueries([]);
                 setCorrectedQuery(null);
@@ -351,9 +321,9 @@ const SmartLocationSearch = ({
 
       {/* Search Source Badges */}
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        <Badge variant="outline" className="text-[10px] gap-1 py-0 h-5 bg-green-500/10 text-green-600 border-green-200 dark:border-green-800">
+        <Badge variant="outline" className="text-[10px] gap-1 py-0 h-5 bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800">
           <Globe className="w-3 h-3" />
-          OpenStreetMap (مجاني)
+          Mapbox
         </Badge>
         {enableAI && (
           <Badge variant="secondary" className="text-[10px] gap-1 py-0 h-5 bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary border-0">
@@ -403,37 +373,45 @@ const SmartLocationSearch = ({
               </div>
             )}
 
-            {/* Free OSM/Photon Results */}
-            {hasPhotonResults && (
+            {/* Mapbox Results */}
+            {hasMapboxResults && (
               <div className="border-b">
-                <div className="px-4 py-2 bg-gradient-to-r from-green-500/5 to-emerald-500/5">
+                <div className="px-4 py-2 bg-gradient-to-r from-blue-500/5 to-sky-500/5">
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-medium text-green-600 flex items-center gap-1">
+                    <p className="text-[11px] font-medium text-blue-600 flex items-center gap-1">
                       <Globe className="w-3 h-3" />
-                      نتائج OpenStreetMap (مجاني)
+                      نتائج Mapbox
                     </p>
                   </div>
                 </div>
-                {photonResults.map((result, index) => (
+                {mapboxResults.map((result, index) => (
                   <button
-                    key={`osm-${result.properties.osm_id}-${index}`}
+                    key={`mapbox-${result.id}-${index}`}
                     type="button"
-                    className="w-full px-4 py-2.5 text-right hover:bg-green-50 dark:hover:bg-green-950/20 transition-all duration-150 flex items-start gap-3 group"
-                    onClick={() => handlePhotonSelect(result)}
+                    className="w-full px-4 py-2.5 text-right hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all duration-150 flex items-start gap-3 group"
+                    onClick={() => {
+                      const coords = { lat: result.center[1], lng: result.center[0] };
+                      onChange(result.place_name, coords);
+                      setQuery('');
+                      setShowResults(false);
+                      clearResults();
+                      setMapboxResults([]);
+                      toast.success('تم اختيار الموقع');
+                    }}
                   >
-                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-green-500/10 text-green-600">
+                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-600">
                       <MapPin className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="font-medium text-sm text-foreground group-hover:text-green-600 transition-colors block truncate">
-                        {result.properties.name || result.properties.street || 'موقع'}
+                      <span className="font-medium text-sm text-foreground group-hover:text-blue-600 transition-colors block truncate">
+                        {result.text || result.place_name.split(',')[0]}
                       </span>
                       <p className="text-xs text-muted-foreground truncate">
-                        {[result.properties.city, result.properties.state].filter(Boolean).join('، ')}
+                        {result.context?.map((c: any) => c.text).join('، ') || ''}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-green-200 text-green-500 self-center">
-                      OSM
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-blue-200 text-blue-500 self-center">
+                      Mapbox
                     </Badge>
                   </button>
                 ))}
@@ -475,12 +453,12 @@ const SmartLocationSearch = ({
               </div>
             )}
 
-            {isLoading && results.length === 0 && !hasPhotonResults ? (
+            {isLoading && results.length === 0 && !hasMapboxResults ? (
               <div className="flex items-center justify-center py-10">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
                 <span className="mr-3 text-sm text-muted-foreground">جاري البحث...</span>
               </div>
-            ) : results.length === 0 && aiSuggestions.length === 0 && !hasPhotonResults ? (
+            ) : results.length === 0 && aiSuggestions.length === 0 && !hasMapboxResults ? (
               <div className="p-8 text-center">
                 <Globe className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
                 <p className="text-sm text-muted-foreground">لا توجد نتائج لـ "{query}"</p>
@@ -500,12 +478,12 @@ const SmartLocationSearch = ({
                       "mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
                       result.type === 'saved' && "bg-primary/10 text-primary",
                       result.type === 'organization' && "bg-blue-500/10 text-blue-600",
-                      result.type === 'nominatim' && "bg-muted text-muted-foreground",
+                      result.type === 'mapbox' && "bg-muted text-muted-foreground",
                       result.type === 'ai' && "bg-gradient-to-br from-primary/20 to-purple-500/20 text-primary"
                     )}>
                       {result.type === 'saved' && <MapPin className="w-4 h-4" />}
                       {result.type === 'organization' && <Building2 className="w-4 h-4" />}
-                      {result.type === 'nominatim' && <Globe className="w-4 h-4" />}
+                      {result.type === 'mapbox' && <Globe className="w-4 h-4" />}
                       {result.type === 'ai' && <Sparkles className="w-4 h-4" />}
                     </div>
                     
@@ -566,8 +544,8 @@ const SmartLocationSearch = ({
                 
                 <div className="px-4 py-2 bg-muted/20 text-center">
                   <p className="text-[11px] text-muted-foreground flex items-center justify-center gap-1">
-                    <Globe className="w-3 h-3 text-green-500" />
-                    بحث مجاني بالكامل - OpenStreetMap
+                    <Globe className="w-3 h-3 text-blue-500" />
+                    بحث شامل - Mapbox
                   </p>
                 </div>
               </div>

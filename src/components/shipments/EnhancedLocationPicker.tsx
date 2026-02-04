@@ -185,13 +185,14 @@ const EnhancedLocationPicker = ({
         const { latitude, longitude } = position.coords;
         
         try {
+          const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ar`
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
           );
           const data = await response.json();
           
-          if (data.display_name) {
-            onChange(data.display_name, { lat: latitude, lng: longitude });
+          if (data.features && data.features.length > 0) {
+            onChange(data.features[0].place_name, { lat: latitude, lng: longitude });
             toast.success('تم تحديد موقعك الحالي');
           }
         } catch (error) {
@@ -275,8 +276,10 @@ const EnhancedLocationPicker = ({
         return <MapPin className="w-4 h-4 text-primary" />;
       case 'organization':
         return <Building2 className="w-4 h-4 text-secondary-foreground" />;
-      case 'nominatim':
-        return <Globe className="w-4 h-4 text-muted-foreground" />;
+      case 'mapbox':
+        return <Globe className="w-4 h-4 text-blue-500" />;
+      case 'ai':
+        return <Globe className="w-4 h-4 text-purple-500" />;
     }
   };
 
@@ -367,13 +370,14 @@ const EnhancedLocationPicker = ({
   // Handle map coordinate selection
   const handleMapSelect = () => {
     if (mapCoordinates) {
+      const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
       fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${mapCoordinates.lat}&lon=${mapCoordinates.lng}&accept-language=ar`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${mapCoordinates.lng},${mapCoordinates.lat}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
       )
         .then(res => res.json())
         .then(data => {
-          if (data.display_name) {
-            onChange(data.display_name, mapCoordinates);
+          if (data.features && data.features.length > 0) {
+            onChange(data.features[0].place_name, mapCoordinates);
           } else {
             onChange(`${mapCoordinates.lat}, ${mapCoordinates.lng}`, mapCoordinates);
           }
@@ -464,9 +468,9 @@ const EnhancedLocationPicker = ({
           <Card>
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Globe className="w-4 h-4 text-green-600" />
-                <span>بحث مجاني عن المواقع والعناوين</span>
-                <Badge variant="secondary" className="text-[10px]">OpenStreetMap</Badge>
+                <Globe className="w-4 h-4 text-blue-600" />
+                <span>بحث عن المواقع والعناوين</span>
+                <Badge variant="secondary" className="text-[10px]">Mapbox</Badge>
               </div>
               <FreeLocationSearch
                 value={value}

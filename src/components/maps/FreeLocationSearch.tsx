@@ -7,6 +7,8 @@ import { Loader2, MapPin, Navigation, X, Search, Building2, Globe, Locate } from
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+
 interface FreeLocationSearchProps {
   value: string;
   onChange: (address: string, coords?: { lat: number; lng: number }, placeId?: string) => void;
@@ -17,36 +19,21 @@ interface FreeLocationSearchProps {
   countryCode?: string;
 }
 
-interface PhotonResult {
-  type: string;
-  geometry: {
-    coordinates: [number, number]; // [lng, lat]
-    type: string;
+interface MapboxResult {
+  id: string;
+  place_name: string;
+  text: string;
+  center: [number, number]; // [lng, lat]
+  context?: { id: string; text: string }[];
+  properties?: {
+    category?: string;
+    maki?: string;
   };
-  properties: {
-    osm_id: number;
-    osm_type: string;
-    extent?: number[];
-    country?: string;
-    osm_key?: string;
-    city?: string;
-    countrycode?: string;
-    osm_value?: string;
-    postcode?: string;
-    name?: string;
-    state?: string;
-    street?: string;
-    housenumber?: string;
-    type?: string;
-  };
+  place_type?: string[];
 }
 
-// Photon API for places search (free, based on OpenStreetMap)
-const PHOTON_API = 'https://photon.komoot.io/api';
-
 /**
- * Free Location Search component using Photon API (OpenStreetMap-based)
- * Completely free alternative to Google Places
+ * Location Search component using Mapbox Geocoding API
  */
 const FreeLocationSearch = ({
   value,
@@ -58,7 +45,7 @@ const FreeLocationSearch = ({
   countryCode = 'EG',
 }: FreeLocationSearchProps) => {
   const [inputValue, setInputValue] = useState(value);
-  const [results, setResults] = useState<PhotonResult[]>([]);
+  const [results, setResults] = useState<MapboxResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
@@ -82,7 +69,7 @@ const FreeLocationSearch = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Search for places using Photon API
+  // Search for places using Mapbox Geocoding API
   const searchPlaces = useCallback(async (query: string) => {
     if (!query || query.length < 2) {
       setResults([]);
@@ -92,62 +79,25 @@ const FreeLocationSearch = ({
     setIsLoading(true);
 
     try {
-      // Photon API with Egypt bias and Arabic language
-      const url = `${PHOTON_API}?q=${encodeURIComponent(query)}&limit=8&lang=ar&lat=30.0444&lon=31.2357`;
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=${countryCode.toLowerCase()}&limit=8&types=address,place,locality,neighborhood,poi`;
       
       const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Photon API error: ${response.status}`);
+        throw new Error(`Mapbox API error: ${response.status}`);
       }
 
       const data = await response.json();
       
       if (data.features) {
-        // Filter results to prioritize Egypt
-        const filtered = data.features
-          .filter((f: PhotonResult) => {
-            const cc = f.properties.countrycode?.toUpperCase();
-            return !countryCode || cc === countryCode || !cc;
-          })
-          .slice(0, 6);
-        
-        setResults(filtered);
+        setResults(data.features);
         setShowDropdown(true);
       } else {
         setResults([]);
       }
     } catch (error) {
-      console.error('Photon search error:', error);
-      // Fallback to Nominatim if Photon fails
-      try {
-        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=eg&limit=6&accept-language=ar`;
-        const nominatimResponse = await fetch(nominatimUrl);
-        const nominatimData = await nominatimResponse.json();
-        
-        if (nominatimData?.length > 0) {
-          // Convert Nominatim results to Photon format
-          const converted = nominatimData.map((item: any) => ({
-            type: 'Feature',
-            geometry: {
-              coordinates: [parseFloat(item.lon), parseFloat(item.lat)],
-              type: 'Point',
-            },
-            properties: {
-              osm_id: item.osm_id,
-              name: item.display_name.split(',')[0],
-              city: item.address?.city || item.address?.town || item.address?.village,
-              state: item.address?.state,
-              country: item.address?.country,
-              countrycode: 'EG',
-            },
-          }));
-          setResults(converted);
-          setShowDropdown(true);
-        }
-      } catch {
-        setResults([]);
-      }
+      console.error('Mapbox search error:', error);
+      setResults([]);
     } finally {
       setIsLoading(false);
     }
@@ -169,51 +119,29 @@ const FreeLocationSearch = ({
     }, 350);
   };
 
-  // Format address from Photon result
-  const formatAddress = (result: PhotonResult): string => {
-    const props = result.properties;
-    const parts: string[] = [];
-
-    if (props.name) parts.push(props.name);
-    if (props.street) {
-      if (props.housenumber) {
-        parts.push(`${props.street} ${props.housenumber}`);
-      } else {
-        parts.push(props.street);
-      }
-    }
-    if (props.city) parts.push(props.city);
-    if (props.state && props.state !== props.city) parts.push(props.state);
-    if (props.country) parts.push(props.country);
-
-    return parts.length > 0 ? parts.join('، ') : `${result.geometry.coordinates[1]}, ${result.geometry.coordinates[0]}`;
-  };
-
   // Get display name from result
-  const getDisplayName = (result: PhotonResult): string => {
-    return result.properties.name || result.properties.street || formatAddress(result).split('،')[0];
+  const getDisplayName = (result: MapboxResult): string => {
+    return result.text || result.place_name.split(',')[0];
   };
 
-  // Get secondary text (city, state)
-  const getSecondaryText = (result: PhotonResult): string => {
-    const props = result.properties;
-    const parts: string[] = [];
-    if (props.city) parts.push(props.city);
-    if (props.state && props.state !== props.city) parts.push(props.state);
-    if (props.country) parts.push(props.country);
-    return parts.join('، ');
+  // Get secondary text (context)
+  const getSecondaryText = (result: MapboxResult): string => {
+    if (result.context) {
+      return result.context.map(c => c.text).join('، ');
+    }
+    const parts = result.place_name.split(',').slice(1);
+    return parts.join('،').trim();
   };
 
   // Select a place
-  const selectPlace = (result: PhotonResult) => {
-    const address = formatAddress(result);
+  const selectPlace = (result: MapboxResult) => {
     const coords = {
-      lat: result.geometry.coordinates[1],
-      lng: result.geometry.coordinates[0],
+      lat: result.center[1],
+      lng: result.center[0],
     };
 
-    setInputValue(address);
-    onChange(address, coords, `osm-${result.properties.osm_id}`);
+    setInputValue(result.place_name);
+    onChange(result.place_name, coords, result.id);
     setShowDropdown(false);
     setResults([]);
   };
@@ -232,16 +160,17 @@ const FreeLocationSearch = ({
         const { latitude, longitude } = position.coords;
 
         try {
-          // Reverse geocode using Nominatim
+          // Reverse geocode using Mapbox
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=ar`
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
           );
           const data = await response.json();
 
           setIsGettingLocation(false);
-          if (data.display_name) {
-            setInputValue(data.display_name);
-            onChange(data.display_name, { lat: latitude, lng: longitude });
+          if (data.features && data.features.length > 0) {
+            const address = data.features[0].place_name;
+            setInputValue(address);
+            onChange(address, { lat: latitude, lng: longitude });
             toast.success('تم تحديد موقعك الحالي');
           } else {
             const address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
@@ -273,11 +202,10 @@ const FreeLocationSearch = ({
   };
 
   // Get icon based on result type
-  const getResultIcon = (result: PhotonResult) => {
-    const type = result.properties.osm_value || result.properties.type;
-    const key = result.properties.osm_key;
-
-    if (key === 'amenity' || type === 'company' || type === 'industrial') {
+  const getResultIcon = (result: MapboxResult) => {
+    const placeType = result.place_type?.[0];
+    
+    if (placeType === 'poi' || result.properties?.category) {
       return <Building2 className="h-4 w-4 text-primary" />;
     }
     return <MapPin className="h-4 w-4 text-primary" />;
@@ -334,17 +262,17 @@ const FreeLocationSearch = ({
         <div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg overflow-hidden">
           <div className="p-2 border-b bg-muted/30">
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-200">
+              <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600 border-blue-200">
                 <Globe className="w-3 h-3 mr-1" />
-                OpenStreetMap
+                Mapbox
               </Badge>
-              <span className="text-xs text-muted-foreground">نتائج مجانية بالكامل</span>
+              <span className="text-xs text-muted-foreground">نتائج البحث</span>
             </div>
           </div>
           <ScrollArea className="max-h-[300px]">
             {results.map((result, index) => (
               <button
-                key={`${result.properties.osm_id}-${index}`}
+                key={`${result.id}-${index}`}
                 type="button"
                 className="w-full px-3 py-2.5 text-right hover:bg-accent transition-colors flex items-start gap-3"
                 onClick={() => selectPlace(result)}
@@ -363,10 +291,10 @@ const FreeLocationSearch = ({
               </button>
             ))}
           </ScrollArea>
-          {/* OpenStreetMap Attribution */}
+          {/* Mapbox Attribution */}
           <div className="px-3 py-1.5 border-t bg-muted/20">
             <p className="text-[10px] text-muted-foreground text-center">
-              © OpenStreetMap contributors
+              © Mapbox
             </p>
           </div>
         </div>

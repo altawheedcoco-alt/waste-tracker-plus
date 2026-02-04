@@ -4,8 +4,9 @@ import L from 'leaflet';
 // OSRM API for real road routing
 export const OSRM_API = 'https://router.project-osrm.org';
 
-// Nominatim API for geocoding
-export const NOMINATIM_API = 'https://nominatim.openstreetmap.org';
+// Mapbox API for geocoding
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+const MAPBOX_GEOCODING_API = 'https://api.mapbox.com/geocoding/v5/mapbox.places';
 
 export interface RouteResult {
   coordinates: [number, number][];
@@ -147,23 +148,24 @@ export const geocodeAddress = async (
   }
   
   try {
-    const url = `${NOMINATIM_API}/search?format=json&q=${encodeURIComponent(trimmedAddress)}&countrycodes=${countryCode}&limit=1&accept-language=ar`;
+    const url = `${MAPBOX_GEOCODING_API}/${encodeURIComponent(trimmedAddress)}.json?access_token=${MAPBOX_TOKEN}&country=${countryCode}&limit=1&language=ar&types=address,place,locality,neighborhood,poi`;
     
     const response = await fetch(url, {
       headers: { 'Accept': 'application/json' },
     });
     
     if (!response.ok) {
-      throw new Error(`Nominatim error: ${response.status}`);
+      throw new Error(`Mapbox error: ${response.status}`);
     }
     
     const data = await response.json();
     
-    if (data && data.length > 0) {
+    if (data.features && data.features.length > 0) {
+      const feature = data.features[0];
       return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon),
-        displayName: data[0].display_name,
+        lat: feature.center[1],
+        lng: feature.center[0],
+        displayName: feature.place_name,
         success: true,
       };
     }
@@ -183,18 +185,21 @@ export const reverseGeocode = async (
   lng: number
 ): Promise<string> => {
   try {
-    const url = `${NOMINATIM_API}/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`;
+    const url = `${MAPBOX_GEOCODING_API}/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`;
     
     const response = await fetch(url, {
       headers: { 'Accept': 'application/json' },
     });
     
     if (!response.ok) {
-      throw new Error(`Nominatim error: ${response.status}`);
+      throw new Error(`Mapbox error: ${response.status}`);
     }
     
     const data = await response.json();
-    return data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    if (data.features && data.features.length > 0) {
+      return data.features[0].place_name;
+    }
+    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
   } catch (error) {
     console.error('Reverse geocoding error:', error);
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
