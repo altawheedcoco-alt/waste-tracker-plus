@@ -255,10 +255,8 @@ const allAutomationSettings: AutomationSetting[] = [
   { id: '150', key: 'auto_data_export', title: 'تصدير البيانات', description: 'تصدير دوري للبيانات', icon: Download, category: 'integration', enabled: false },
 ];
 
-// Missing icon components that need to be replaced
-const LogoutCircle = Circle;
-const Camera = Eye;
-const Calculator = DollarSign;
+// Alias for missing icon
+const LogoutCircle = LogOut;
 
 interface AutomationSettingsDialogProps {
   organizationType?: string;
