@@ -333,7 +333,9 @@ Deno.serve(async (req) => {
               'contract-expiry-check',
               'driver-license-expiry',
               'invoice-overdue-check',
-              'update-partner-stats'
+              'update-partner-stats',
+              'archive-old-data',
+              'refresh-materialized-views'
             ]
           }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
