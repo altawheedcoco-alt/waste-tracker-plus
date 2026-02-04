@@ -210,7 +210,7 @@ export const MapboxSearchBox = ({
     }
   }, [includeVehicles]);
 
-  // Search using Mapbox Geocoding API
+  // Search using Mapbox Geocoding API - بحث عام موسع
   const searchMapbox = useCallback(async (searchQuery: string): Promise<SearchResultItem[]> => {
     if (!includeMapbox) return [];
     
@@ -220,8 +220,9 @@ export const MapboxSearchBox = ({
         ? `&proximity=${userLocation.lng},${userLocation.lat}` 
         : '';
       
+      // البحث بدون تحديد نوع للحصول على جميع النتائج المتشابهة
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=eg&limit=10&types=address,place,locality,neighborhood,poi${proximityParam}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=eg&limit=20&fuzzyMatch=true${proximityParam}`
       );
       
       if (!response.ok) throw new Error('Mapbox API error');
@@ -233,7 +234,11 @@ export const MapboxSearchBox = ({
         name: feature.text || feature.place_name,
         address: feature.place_name,
         type: 'mapbox' as const,
-        source: 'Mapbox',
+        source: feature.place_type?.[0] === 'poi' ? 'نقطة اهتمام' :
+                feature.place_type?.[0] === 'address' ? 'عنوان' :
+                feature.place_type?.[0] === 'place' ? 'مدينة' :
+                feature.place_type?.[0] === 'locality' ? 'منطقة' :
+                feature.place_type?.[0] === 'neighborhood' ? 'حي' : 'موقع',
         lat: feature.center[1],
         lng: feature.center[0],
         relevanceScore: (feature.relevance || 0.7) * 100,
