@@ -21,14 +21,14 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-interface PhotonResult {
+interface GeocodingResult {
   type: string;
   geometry: {
     coordinates: [number, number];
     type: string;
   };
   properties: {
-    osm_id: number;
+    source_id: number;
     name?: string;
     city?: string;
     state?: string;
