@@ -4079,6 +4079,75 @@ export type Database = {
           },
         ]
       }
+      security_events: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_type: string
+          id: string
+          ip_address: string | null
+          is_resolved: boolean | null
+          is_suspicious: boolean | null
+          location_info: Json | null
+          organization_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          is_resolved?: boolean | null
+          is_suspicious?: boolean | null
+          location_info?: Json | null
+          organization_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          is_resolved?: boolean | null
+          is_suspicious?: boolean | null
+          location_info?: Json | null
+          organization_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "security_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_logs: {
         Row: {
           changed_by: string | null
@@ -5132,6 +5201,19 @@ export type Database = {
           reset_at: string
         }[]
       }
+      check_brute_force: {
+        Args: {
+          p_ip_address?: string
+          p_threshold?: number
+          p_user_id?: string
+          p_window_minutes?: number
+        }
+        Returns: {
+          failed_attempts: number
+          is_blocked: boolean
+          last_attempt: string
+        }[]
+      }
       cleanup_old_api_request_logs: { Args: never; Returns: number }
       count_recent_2fa_attempts: {
         Args: { _minutes?: number; _user_id: string }
@@ -5251,6 +5333,18 @@ export type Database = {
           waste_category: string
         }[]
       }
+      get_security_summary: {
+        Args: { p_days?: number; p_organization_id?: string }
+        Returns: {
+          api_key_events: number
+          critical_events: number
+          high_events: number
+          login_failures: number
+          suspicious_events: number
+          total_events: number
+          unresolved_events: number
+        }[]
+      }
       get_user_driver_id: { Args: { _user_id: string }; Returns: string }
       get_user_org_id_safe: { Args: { _user_id: string }; Returns: string }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
@@ -5317,10 +5411,27 @@ export type Database = {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
       }
+      log_security_event: {
+        Args: {
+          p_event_data?: Json
+          p_event_type: string
+          p_ip_address?: string
+          p_is_suspicious?: boolean
+          p_organization_id?: string
+          p_severity: string
+          p_user_agent?: string
+          p_user_id?: string
+        }
+        Returns: string
+      }
       refresh_all_materialized_views: { Args: never; Returns: undefined }
       refresh_materialized_view: {
         Args: { view_name: string }
         Returns: undefined
+      }
+      resolve_security_event: {
+        Args: { p_event_id: string; p_resolution_notes?: string }
+        Returns: boolean
       }
       restore_from_archive: {
         Args: { p_record_id: string; p_table_name: string }
