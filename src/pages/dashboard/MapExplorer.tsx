@@ -127,7 +127,7 @@ const MapExplorer = () => {
       toast.info(`جاري جلب المنشآت الصناعية من ${sourceName}...`, { duration: 10000 });
       
       const { data, error } = await supabase.functions.invoke('fetch-industrial-facilities', {
-        body: { source }
+        body: { source: 'google' }
       });
       
       if (error) throw error;
