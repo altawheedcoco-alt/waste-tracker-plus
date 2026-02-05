@@ -1456,17 +1456,22 @@ export type Database = {
           created_by: string | null
           currency: string
           deposit_date: string
+          deposit_link_id: string | null
           depositor_name: string
           depositor_phone: string | null
           depositor_position: string | null
           depositor_title: string | null
           external_partner_id: string | null
           id: string
+          is_public_submission: boolean | null
           notes: string | null
           organization_id: string
           partner_organization_id: string | null
           receipt_url: string | null
           reference_number: string | null
+          submitter_email: string | null
+          submitter_name: string | null
+          submitter_phone: string | null
           transfer_method: string
           updated_at: string
         }
@@ -1481,17 +1486,22 @@ export type Database = {
           created_by?: string | null
           currency?: string
           deposit_date?: string
+          deposit_link_id?: string | null
           depositor_name: string
           depositor_phone?: string | null
           depositor_position?: string | null
           depositor_title?: string | null
           external_partner_id?: string | null
           id?: string
+          is_public_submission?: boolean | null
           notes?: string | null
           organization_id: string
           partner_organization_id?: string | null
           receipt_url?: string | null
           reference_number?: string | null
+          submitter_email?: string | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
           transfer_method?: string
           updated_at?: string
         }
@@ -1506,17 +1516,22 @@ export type Database = {
           created_by?: string | null
           currency?: string
           deposit_date?: string
+          deposit_link_id?: string | null
           depositor_name?: string
           depositor_phone?: string | null
           depositor_position?: string | null
           depositor_title?: string | null
           external_partner_id?: string | null
           id?: string
+          is_public_submission?: boolean | null
           notes?: string | null
           organization_id?: string
           partner_organization_id?: string | null
           receipt_url?: string | null
           reference_number?: string | null
+          submitter_email?: string | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
           transfer_method?: string
           updated_at?: string
         }
@@ -1526,6 +1541,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_deposit_link_id_fkey"
+            columns: ["deposit_link_id"]
+            isOneToOne: false
+            referencedRelation: "organization_deposit_links"
             referencedColumns: ["id"]
           },
           {
@@ -2993,6 +3015,64 @@ export type Database = {
           },
           {
             foreignKeyName: "organization_approval_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_deposit_links: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          organization_id: string
+          title: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          title?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          title?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_deposit_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_deposit_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_deposit_links_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

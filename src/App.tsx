@@ -92,6 +92,7 @@ const ApiManagement = lazy(() => import("./pages/dashboard/ApiManagement"));
 const AdvancedAnalytics = lazy(() => import("./pages/dashboard/AdvancedAnalytics"));
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const SavedLocationsPage = lazy(() => import("./pages/SavedLocationsPage"));
+const QuickDeposit = lazy(() => import("./pages/QuickDeposit"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
@@ -146,6 +147,8 @@ Providers.displayName = 'Providers';
 const AppRoutes = memo(() => (
   <Routes>
     <Route path="/" element={<Index />} />
+    <Route path="/deposit/:token" element={<QuickDeposit />} />
+    <Route path="/verify" element={<Verify />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/auth" element={<Auth />} />
     {/* Guide Routes */}
