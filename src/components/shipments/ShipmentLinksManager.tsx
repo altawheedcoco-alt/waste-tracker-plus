@@ -55,6 +55,11 @@ import {
   Navigation,
   X,
   User,
+  Pin,
+  PinOff,
+  BarChart3,
+  Clock,
+  StickyNote,
 } from 'lucide-react';
 import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
 import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
@@ -99,6 +104,11 @@ interface ShipmentLink {
   allow_recycler_edit: boolean;
   allow_location_edit: boolean;
   require_photo: boolean;
+  // New enhanced fields
+  is_pinned: boolean;
+  usage_count: number;
+  last_used_at: string | null;
+  notes: string | null;
 }
 
 // Helper to parse location data from JSON
@@ -394,6 +404,23 @@ const ShipmentLinksManager = () => {
     } catch (error) {
       console.error('Error deleting link:', error);
       toast.error('فشل في حذف الرابط');
+    }
+  };
+
+  const togglePin = async (linkId: string, isPinned: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('organization_shipment_links')
+        .update({ is_pinned: !isPinned })
+        .eq('id', linkId);
+
+      if (error) throw error;
+      
+      loadLinks();
+      toast.success(isPinned ? 'تم إلغاء التثبيت' : 'تم تثبيت الرابط');
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+      toast.error('فشل في تحديث الرابط');
     }
   };
 
@@ -809,7 +836,14 @@ const ShipmentLinksManager = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {links.map((link, index) => {
+            {/* Pinned links first */}
+            {links
+              .sort((a, b) => {
+                if (a.is_pinned && !b.is_pinned) return -1;
+                if (!a.is_pinned && b.is_pinned) return 1;
+                return 0;
+              })
+              .map((link, index) => {
               const isExpired = link.expires_at && new Date(link.expires_at) < new Date();
               const url = `${window.location.origin}/shipment/${link.token}`;
               const generatorName = getGeneratorName(link);
@@ -825,7 +859,9 @@ const ShipmentLinksManager = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className={`p-4 rounded-lg border ${
-                    link.is_active && !isExpired 
+                    link.is_pinned
+                      ? 'bg-amber-50/50 border-amber-300 dark:bg-amber-950/20 dark:border-amber-700'
+                      : link.is_active && !isExpired 
                       ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800' 
                       : 'bg-muted/30 border-border'
                   }`}
@@ -833,6 +869,9 @@ const ShipmentLinksManager = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {link.is_pinned && (
+                          <Pin className="h-4 w-4 text-amber-600 shrink-0" />
+                        )}
                         <h4 className="font-medium truncate">{link.title || 'رابط شحنة'}</h4>
                         {link.is_active && !isExpired ? (
                           <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 gap-1">
@@ -847,6 +886,13 @@ const ShipmentLinksManager = () => {
                         ) : (
                           <Badge variant="secondary">معطل</Badge>
                         )}
+                        {/* Usage stats badge */}
+                        {(link.usage_count > 0) && (
+                          <Badge variant="outline" className="gap-1 text-xs">
+                            <BarChart3 className="h-3 w-3" />
+                            {link.usage_count} استخدام
+                          </Badge>
+                        )}
                       </div>
                       
                       {/* Sender Name Badge */}
@@ -856,6 +902,12 @@ const ShipmentLinksManager = () => {
                             <User className="h-3 w-3" />
                             المرسل: {link.sender_name}
                           </Badge>
+                          {link.last_used_at && (
+                            <Badge variant="outline" className="gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              آخر استخدام: {new Date(link.last_used_at).toLocaleDateString('ar-EG')}
+                            </Badge>
+                          )}
                         </div>
                       )}
                       
@@ -936,6 +988,15 @@ const ShipmentLinksManager = () => {
                         title="فتح"
                       >
                         <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => togglePin(link.id, link.is_pinned)}
+                        title={link.is_pinned ? 'إلغاء التثبيت' : 'تثبيت'}
+                        className={link.is_pinned ? 'text-amber-600' : ''}
+                      >
+                        {link.is_pinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
                       </Button>
                       <Switch
                         checked={link.is_active}

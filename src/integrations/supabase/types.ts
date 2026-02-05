@@ -3050,6 +3050,9 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          is_pinned: boolean | null
+          last_used_at: string | null
+          notes: string | null
           organization_id: string
           preset_category: string | null
           preset_external_partner_id: string | null
@@ -3059,6 +3062,7 @@ export type Database = {
           require_receipt: boolean | null
           title: string | null
           token: string
+          usage_count: number | null
         }
         Insert: {
           allow_amount_edit?: boolean | null
@@ -3071,6 +3075,9 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          is_pinned?: boolean | null
+          last_used_at?: string | null
+          notes?: string | null
           organization_id: string
           preset_category?: string | null
           preset_external_partner_id?: string | null
@@ -3080,6 +3087,7 @@ export type Database = {
           require_receipt?: boolean | null
           title?: string | null
           token: string
+          usage_count?: number | null
         }
         Update: {
           allow_amount_edit?: boolean | null
@@ -3092,6 +3100,9 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          is_pinned?: boolean | null
+          last_used_at?: string | null
+          notes?: string | null
           organization_id?: string
           preset_category?: string | null
           preset_external_partner_id?: string | null
@@ -3101,6 +3112,7 @@ export type Database = {
           require_receipt?: boolean | null
           title?: string | null
           token?: string
+          usage_count?: number | null
         }
         Relationships: [
           {
@@ -3430,6 +3442,9 @@ export type Database = {
           expires_at: string | null
           id: string
           is_active: boolean
+          is_pinned: boolean | null
+          last_used_at: string | null
+          notes: string | null
           organization_id: string
           preset_delivery_location: Json | null
           preset_generator_external_id: string | null
@@ -3444,6 +3459,7 @@ export type Database = {
           sender_name: string | null
           title: string | null
           token: string
+          usage_count: number | null
         }
         Insert: {
           allow_date_edit?: boolean | null
@@ -3457,6 +3473,9 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          is_pinned?: boolean | null
+          last_used_at?: string | null
+          notes?: string | null
           organization_id: string
           preset_delivery_location?: Json | null
           preset_generator_external_id?: string | null
@@ -3471,6 +3490,7 @@ export type Database = {
           sender_name?: string | null
           title?: string | null
           token: string
+          usage_count?: number | null
         }
         Update: {
           allow_date_edit?: boolean | null
@@ -3484,6 +3504,9 @@ export type Database = {
           expires_at?: string | null
           id?: string
           is_active?: boolean
+          is_pinned?: boolean | null
+          last_used_at?: string | null
+          notes?: string | null
           organization_id?: string
           preset_delivery_location?: Json | null
           preset_generator_external_id?: string | null
@@ -3498,6 +3521,7 @@ export type Database = {
           sender_name?: string | null
           title?: string | null
           token?: string
+          usage_count?: number | null
         }
         Relationships: [
           {
