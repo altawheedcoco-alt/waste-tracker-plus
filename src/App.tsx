@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { FocusMusicProvider } from "@/contexts/FocusMusicContext";
+import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 
 // Offline & Performance components
 const OfflineIndicator = lazy(() => import("./components/offline/OfflineIndicator"));
@@ -131,17 +132,19 @@ const queryClient = new QueryClient({
 // Memoized providers wrapper for performance
 const Providers = memo(({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
-    <ThemeSettingsProvider>
-      <FocusMusicProvider>
-        <TooltipProvider delayDuration={300}>
-          <AuthProvider>
-            <Toaster />
-            <Sonner />
-            {children}
-          </AuthProvider>
-        </TooltipProvider>
-      </FocusMusicProvider>
-    </ThemeSettingsProvider>
+    <GoogleMapsProvider>
+      <ThemeSettingsProvider>
+        <FocusMusicProvider>
+          <TooltipProvider delayDuration={300}>
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              {children}
+            </AuthProvider>
+          </TooltipProvider>
+        </FocusMusicProvider>
+      </ThemeSettingsProvider>
+    </GoogleMapsProvider>
   </QueryClientProvider>
 ));
 Providers.displayName = 'Providers';
