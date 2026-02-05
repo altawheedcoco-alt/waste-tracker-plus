@@ -9,6 +9,7 @@ import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
 import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
 import ChatWidget from '@/components/chat/ChatWidget';
 import SmartRequestDialog from './SmartRequestDialog';
+import AdminDashboardSwitcher from './admin/AdminDashboardSwitcher';
 import {
   AdminStatsGrid,
   OrganizationBreakdown,
@@ -270,6 +271,7 @@ const AdminDashboard = () => {
           <p className="text-primary">مرحباً بك، مدير النظام</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          <AdminDashboardSwitcher />
           <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
           <Button variant="outline" onClick={() => navigate('/dashboard/shipments')}>
             <FileText className="ml-2 h-4 w-4" />
