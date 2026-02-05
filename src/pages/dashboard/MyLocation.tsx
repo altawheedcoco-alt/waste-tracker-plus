@@ -28,10 +28,7 @@ import TripHistoryView from '@/components/driver/TripHistoryView';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 import TrackingStatsCard from '@/components/tracking/TrackingStatsCard';
 import QuickLocationButton from '@/components/tracking/QuickLocationButton';
-import Map, { Marker, NavigationControl } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+import GoogleMapComponent from '@/components/maps/GoogleMapComponent';
 
 const defaultCenter = { lat: 30.0444, lng: 31.2357 }; // Cairo, Egypt
 
@@ -381,38 +378,19 @@ const MyLocation = () => {
               </CardHeader>
               <CardContent>
                 <div className="h-[400px] rounded-lg overflow-hidden border">
-                  <Map
-                    initialViewState={{
-                      longitude: currentLocation?.longitude || defaultCenter.lng,
-                      latitude: currentLocation?.latitude || defaultCenter.lat,
-                      zoom: currentLocation ? 15 : 6,
-                    }}
-                    mapboxAccessToken={MAPBOX_TOKEN}
-                    mapStyle="mapbox://styles/mapbox/streets-v12"
-                    style={{ width: '100%', height: '100%' }}
-                    attributionControl={false}
-                    onLoad={(e) => {
-                      const map = e.target;
-                      const arabicLayers = ['country-label', 'state-label', 'settlement-label', 'poi-label', 'road-label'];
-                      arabicLayers.forEach(layer => {
-                        try { map.setLayoutProperty(layer, 'text-field', ['get', 'name_ar']); } catch {}
-                      });
-                    }}
-                  >
-                    <NavigationControl position="bottom-right" />
-                    {currentLocation && (
-                      <Marker
-                        longitude={currentLocation.longitude}
-                        latitude={currentLocation.latitude}
-                        anchor="center"
-                      >
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping" style={{ width: '32px', height: '32px', marginLeft: '-4px', marginTop: '-4px' }} />
-                          <div className="w-6 h-6 bg-green-500 rounded-full border-3 border-white shadow-lg" />
-                        </div>
-                      </Marker>
-                    )}
-                  </Map>
+                  <GoogleMapComponent
+                    center={currentLocation 
+                      ? { lat: currentLocation.latitude, lng: currentLocation.longitude }
+                      : defaultCenter
+                    }
+                    zoom={currentLocation ? 15 : 6}
+                    markers={currentLocation ? [{
+                      position: { lat: currentLocation.latitude, lng: currentLocation.longitude },
+                      title: 'موقعي الحالي',
+                      color: 'green',
+                    }] : []}
+                    height="100%"
+                  />
                 </div>
 
                 {!currentLocation && (
