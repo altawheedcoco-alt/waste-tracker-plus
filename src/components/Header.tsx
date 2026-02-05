@@ -34,7 +34,10 @@ const Header = () => {
             onClick={() => navigate('/')}
           >
             <img src={logo} alt="آي ريسايكل" className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
-            <span className="text-lg sm:text-xl font-bold text-gradient-eco">آي ريسايكل</span>
+            <div className="flex flex-col">
+              <span className="text-sm sm:text-base font-bold text-primary">iRecycle</span>
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground">نظام إدارة المخلفات</span>
+            </div>
           </motion.div>
 
           {/* Desktop Navigation */}
