@@ -52,13 +52,24 @@ import {
   MapPin,
   Factory,
   Recycle,
+  Navigation,
+  X,
 } from 'lucide-react';
+import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
+import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
 
 interface Partner {
   id: string;
   name: string;
   type: 'organization' | 'external';
   orgType?: string;
+}
+
+interface LocationData {
+  address: string;
+  lat: number;
+  lng: number;
+  city?: string;
 }
 
 interface ShipmentLink {
@@ -77,6 +88,8 @@ interface ShipmentLink {
   preset_waste_type: string | null;
   preset_waste_category: string | null;
   preset_notes: string | null;
+  preset_pickup_location: unknown;
+  preset_delivery_location: unknown;
   allow_weight_edit: boolean;
   allow_date_edit: boolean;
   allow_generator_edit: boolean;
@@ -84,6 +97,21 @@ interface ShipmentLink {
   allow_location_edit: boolean;
   require_photo: boolean;
 }
+
+// Helper to parse location data from JSON
+const parseLocationData = (data: unknown): LocationData | null => {
+  if (!data || typeof data !== 'object') return null;
+  const loc = data as Record<string, unknown>;
+  if (typeof loc.address === 'string' && typeof loc.lat === 'number' && typeof loc.lng === 'number') {
+    return {
+      address: loc.address,
+      lat: loc.lat,
+      lng: loc.lng,
+      city: typeof loc.city === 'string' ? loc.city : undefined,
+    };
+  }
+  return null;
+};
 
 const wasteTypes = [
   { value: 'wood', label: 'أخشاب' },
@@ -131,6 +159,10 @@ const ShipmentLinksManager = () => {
   const [presetWasteCategory, setPresetWasteCategory] = useState('');
   const [presetNotes, setPresetNotes] = useState('');
   
+  // Preset locations
+  const [presetPickupLocation, setPresetPickupLocation] = useState<LocationData | null>(null);
+  const [presetDeliveryLocation, setPresetDeliveryLocation] = useState<LocationData | null>(null);
+  
   // Permissions
   const [allowWeightEdit, setAllowWeightEdit] = useState(true);
   const [allowDateEdit, setAllowDateEdit] = useState(true);
@@ -138,6 +170,9 @@ const ShipmentLinksManager = () => {
   const [allowRecyclerEdit, setAllowRecyclerEdit] = useState(false);
   const [allowLocationEdit, setAllowLocationEdit] = useState(true);
   const [requirePhoto, setRequirePhoto] = useState(false);
+  
+  // Google Maps
+  const { isLoaded: mapsLoaded } = useGoogleMaps();
 
   const loadLinks = async () => {
     if (!profile?.organization_id) return;
@@ -239,6 +274,8 @@ const ShipmentLinksManager = () => {
     setPresetWasteType('');
     setPresetWasteCategory('');
     setPresetNotes('');
+    setPresetPickupLocation(null);
+    setPresetDeliveryLocation(null);
     setAllowWeightEdit(true);
     setAllowDateEdit(true);
     setAllowGeneratorEdit(false);
@@ -266,6 +303,8 @@ const ShipmentLinksManager = () => {
         preset_waste_type: presetWasteType || null,
         preset_waste_category: presetWasteCategory || null,
         preset_notes: presetNotes || null,
+        preset_pickup_location: presetPickupLocation ? JSON.stringify(presetPickupLocation) : null,
+        preset_delivery_location: presetDeliveryLocation ? JSON.stringify(presetDeliveryLocation) : null,
         allow_weight_edit: allowWeightEdit,
         allow_date_edit: allowDateEdit,
         allow_generator_edit: allowGeneratorEdit,
@@ -554,6 +593,94 @@ const ShipmentLinksManager = () => {
                           rows={2}
                         />
                       </div>
+
+                      <Separator className="my-3" />
+
+                      {/* Preset Locations */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                          <MapPin className="h-4 w-4" />
+                          المواقع المحددة مسبقاً
+                        </div>
+
+                        {/* Pickup Location */}
+                        <div className="space-y-2">
+                          <Label className="flex items-center gap-2">
+                            <Navigation className="h-4 w-4 text-emerald-600" />
+                            مكان الاستلام
+                          </Label>
+                          {presetPickupLocation ? (
+                            <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                              <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
+                              <span className="text-sm flex-1 truncate">{presetPickupLocation.address}</span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive hover:text-destructive"
+                                onClick={() => setPresetPickupLocation(null)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : mapsLoaded ? (
+                            <GoogleMapsSearchBox
+                              onSelect={(result) => {
+                                setPresetPickupLocation({
+                                  address: result.address,
+                                  lat: result.position.lat,
+                                  lng: result.position.lng,
+                                });
+                              }}
+                              placeholder="ابحث عن مكان الاستلام..."
+                              showLocalResults={true}
+                            />
+                          ) : (
+                            <div className="p-3 rounded-lg bg-muted text-sm text-muted-foreground text-center">
+                              جاري تحميل الخريطة...
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Delivery Location */}
+                        <div className="space-y-2">
+                          <Label className="flex items-center gap-2">
+                            <Navigation className="h-4 w-4 text-blue-600" />
+                            مكان التسليم
+                          </Label>
+                          {presetDeliveryLocation ? (
+                            <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                              <MapPin className="h-4 w-4 text-blue-600 shrink-0" />
+                              <span className="text-sm flex-1 truncate">{presetDeliveryLocation.address}</span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-destructive hover:text-destructive"
+                                onClick={() => setPresetDeliveryLocation(null)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : mapsLoaded ? (
+                            <GoogleMapsSearchBox
+                              onSelect={(result) => {
+                                setPresetDeliveryLocation({
+                                  address: result.address,
+                                  lat: result.position.lat,
+                                  lng: result.position.lng,
+                                });
+                              }}
+                              placeholder="ابحث عن مكان التسليم..."
+                              showLocalResults={true}
+                            />
+                          ) : (
+                            <div className="p-3 rounded-lg bg-muted text-sm text-muted-foreground text-center">
+                              جاري تحميل الخريطة...
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </AccordionContent>
                   </AccordionItem>
 
@@ -671,6 +798,8 @@ const ShipmentLinksManager = () => {
               const generatorName = getGeneratorName(link);
               const recyclerName = getRecyclerName(link);
               const wasteType = wasteTypes.find(w => w.value === link.preset_waste_type)?.label;
+              const pickupLocation = parseLocationData(link.preset_pickup_location);
+              const deliveryLocation = parseLocationData(link.preset_delivery_location);
               
               return (
                 <motion.div
@@ -708,7 +837,7 @@ const ShipmentLinksManager = () => {
                       )}
 
                       {/* Preset Info */}
-                      {(generatorName || recyclerName || wasteType) && (
+                      {(generatorName || recyclerName || wasteType || pickupLocation || deliveryLocation) && (
                         <div className="flex flex-wrap gap-1.5 mb-2">
                           {generatorName && (
                             <Badge variant="outline" className="text-xs gap-1">
@@ -726,6 +855,18 @@ const ShipmentLinksManager = () => {
                             <Badge variant="outline" className="text-xs gap-1">
                               <Package className="h-3 w-3" />
                               {wasteType}
+                            </Badge>
+                          )}
+                          {pickupLocation && (
+                            <Badge variant="outline" className="text-xs gap-1 bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800">
+                              <Navigation className="h-3 w-3 text-emerald-600" />
+                              <span className="max-w-[100px] truncate">{pickupLocation.address.split(',')[0]}</span>
+                            </Badge>
+                          )}
+                          {deliveryLocation && (
+                            <Badge variant="outline" className="text-xs gap-1 bg-blue-50 dark:bg-blue-950/30 border-blue-300 dark:border-blue-800">
+                              <MapPin className="h-3 w-3 text-blue-600" />
+                              <span className="max-w-[100px] truncate">{deliveryLocation.address.split(',')[0]}</span>
                             </Badge>
                           )}
                         </div>
