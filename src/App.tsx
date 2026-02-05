@@ -94,6 +94,8 @@ const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const SavedLocationsPage = lazy(() => import("./pages/SavedLocationsPage"));
 const QuickDeposit = lazy(() => import("./pages/QuickDeposit"));
 const QuickShipment = lazy(() => import("./pages/QuickShipment"));
+const QuickDepositLinks = lazy(() => import("./pages/dashboard/QuickDepositLinks"));
+const QuickShipmentLinks = lazy(() => import("./pages/dashboard/QuickShipmentLinks"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
@@ -223,6 +225,8 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/api" element={<ApiManagement />} />
         <Route path="/dashboard/advanced-analytics" element={<AdvancedAnalytics />} />
         <Route path="/dashboard/saved-locations" element={<SavedLocationsPage />} />
+        <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
+        <Route path="/dashboard/quick-shipment-links" element={<QuickShipmentLinks />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
