@@ -469,6 +469,16 @@ const Auth = () => {
 
         <Card className="glass-eco border-0 shadow-eco-lg">
           <CardHeader className="text-center pb-2">
+            {/* System Branding */}
+            <div className="mb-4 pb-4 border-b border-border/50">
+              <h2 className="text-lg sm:text-xl font-bold text-primary tracking-wide">
+                iRecycle Waste Management System
+              </h2>
+              <p className="text-sm sm:text-base font-semibold text-foreground/70">
+                نظام آي ريسايكل لإدارة المخلفات
+              </p>
+            </div>
+            
             <CardTitle className="text-xl">
               {authMode === 'login' 
                 ? 'تسجيل الدخول' 
