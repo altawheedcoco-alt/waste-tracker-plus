@@ -3417,6 +3417,151 @@ export type Database = {
           },
         ]
       }
+      organization_shipment_links: {
+        Row: {
+          allow_date_edit: boolean | null
+          allow_generator_edit: boolean | null
+          allow_location_edit: boolean | null
+          allow_recycler_edit: boolean | null
+          allow_weight_edit: boolean | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          organization_id: string
+          preset_delivery_location: Json | null
+          preset_generator_external_id: string | null
+          preset_generator_id: string | null
+          preset_notes: string | null
+          preset_pickup_location: Json | null
+          preset_recycler_external_id: string | null
+          preset_recycler_id: string | null
+          preset_waste_category: string | null
+          preset_waste_type: string | null
+          require_photo: boolean | null
+          title: string | null
+          token: string
+        }
+        Insert: {
+          allow_date_edit?: boolean | null
+          allow_generator_edit?: boolean | null
+          allow_location_edit?: boolean | null
+          allow_recycler_edit?: boolean | null
+          allow_weight_edit?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          preset_delivery_location?: Json | null
+          preset_generator_external_id?: string | null
+          preset_generator_id?: string | null
+          preset_notes?: string | null
+          preset_pickup_location?: Json | null
+          preset_recycler_external_id?: string | null
+          preset_recycler_id?: string | null
+          preset_waste_category?: string | null
+          preset_waste_type?: string | null
+          require_photo?: boolean | null
+          title?: string | null
+          token: string
+        }
+        Update: {
+          allow_date_edit?: boolean | null
+          allow_generator_edit?: boolean | null
+          allow_location_edit?: boolean | null
+          allow_recycler_edit?: boolean | null
+          allow_weight_edit?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          preset_delivery_location?: Json | null
+          preset_generator_external_id?: string | null
+          preset_generator_id?: string | null
+          preset_notes?: string | null
+          preset_pickup_location?: Json | null
+          preset_recycler_external_id?: string | null
+          preset_recycler_id?: string | null
+          preset_waste_category?: string | null
+          preset_waste_type?: string | null
+          require_photo?: boolean | null
+          title?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_shipment_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_preset_generator_external_id_fkey"
+            columns: ["preset_generator_external_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_preset_generator_id_fkey"
+            columns: ["preset_generator_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_preset_generator_id_fkey"
+            columns: ["preset_generator_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_preset_recycler_external_id_fkey"
+            columns: ["preset_recycler_external_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_preset_recycler_id_fkey"
+            columns: ["preset_recycler_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_shipment_links_preset_recycler_id_fkey"
+            columns: ["preset_recycler_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           activity_type: string | null
@@ -4964,6 +5109,7 @@ export type Database = {
           hazard_level: string | null
           id: string
           in_transit_at: string | null
+          is_public_submission: boolean | null
           manual_driver_name: string | null
           manual_generator_name: string | null
           manual_recycler_name: string | null
@@ -4976,9 +5122,12 @@ export type Database = {
           quantity: number
           recycler_id: string | null
           recycler_notes: string | null
+          shipment_link_id: string | null
           shipment_number: string
           shipment_type: string | null
           status: Database["public"]["Enums"]["shipment_status"] | null
+          submitter_name: string | null
+          submitter_phone: string | null
           transporter_id: string
           unit: string | null
           updated_at: string | null
@@ -5007,6 +5156,7 @@ export type Database = {
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
+          is_public_submission?: boolean | null
           manual_driver_name?: string | null
           manual_generator_name?: string | null
           manual_recycler_name?: string | null
@@ -5019,9 +5169,12 @@ export type Database = {
           quantity: number
           recycler_id?: string | null
           recycler_notes?: string | null
+          shipment_link_id?: string | null
           shipment_number: string
           shipment_type?: string | null
           status?: Database["public"]["Enums"]["shipment_status"] | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
           transporter_id: string
           unit?: string | null
           updated_at?: string | null
@@ -5050,6 +5203,7 @@ export type Database = {
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
+          is_public_submission?: boolean | null
           manual_driver_name?: string | null
           manual_generator_name?: string | null
           manual_recycler_name?: string | null
@@ -5062,9 +5216,12 @@ export type Database = {
           quantity?: number
           recycler_id?: string | null
           recycler_notes?: string | null
+          shipment_link_id?: string | null
           shipment_number?: string
           shipment_type?: string | null
           status?: Database["public"]["Enums"]["shipment_status"] | null
+          submitter_name?: string | null
+          submitter_phone?: string | null
           transporter_id?: string
           unit?: string | null
           updated_at?: string | null
@@ -5113,6 +5270,13 @@ export type Database = {
             columns: ["recycler_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_shipment_link_id_fkey"
+            columns: ["shipment_link_id"]
+            isOneToOne: false
+            referencedRelation: "organization_shipment_links"
             referencedColumns: ["id"]
           },
           {

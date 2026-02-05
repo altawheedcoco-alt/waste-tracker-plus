@@ -93,6 +93,7 @@ const AdvancedAnalytics = lazy(() => import("./pages/dashboard/AdvancedAnalytics
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const SavedLocationsPage = lazy(() => import("./pages/SavedLocationsPage"));
 const QuickDeposit = lazy(() => import("./pages/QuickDeposit"));
+const QuickShipment = lazy(() => import("./pages/QuickShipment"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
@@ -148,6 +149,7 @@ const AppRoutes = memo(() => (
   <Routes>
     <Route path="/" element={<Index />} />
     <Route path="/deposit/:token" element={<QuickDeposit />} />
+    <Route path="/shipment/:token" element={<QuickShipment />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/auth" element={<Auth />} />
