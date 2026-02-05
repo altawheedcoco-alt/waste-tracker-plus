@@ -1,3 +1,5 @@
+/// <reference types="@types/google.maps" />
+
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,11 +21,10 @@ import {
   Check,
   Navigation2,
 } from 'lucide-react';
-import mapboxgl from 'mapbox-gl';
+import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
 import { useSavedLocations, NewLocationData } from '@/hooks/useSavedLocations';
 
-// Mapbox token
-const MAPBOX_TOKEN = 'pk.eyJ1IjoibW9oYW1lZHNhbGFoMTAyNCIsImEiOiJjbWFqMnM5dGcwMGZpMmxweXpzcDQ4OTk0In0.Or1lNo6Ytxq3HElkPRdeDg';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCIisN0sh-m5-pXvpnSELbCBhFabrEcwrE';
 
 const LOCATION_TYPES = [
   { value: 'pickup', label: 'نقطة استلام' },
@@ -51,14 +52,16 @@ export default function AddLocationForm({
   onSuccess,
   initialCoords,
 }: AddLocationFormProps) {
+  const { isLoaded } = useGoogleMaps();
   const { saveLocation, saving } = useSavedLocations();
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
+  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
 
   const [activeTab, setActiveTab] = useState<'search' | 'map' | 'coordinates'>('map');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<google.maps.places.AutocompletePrediction[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
 
@@ -72,54 +75,60 @@ export default function AddLocationForm({
     category: 'other',
   });
 
-  // Initialize map
+  // Initialize Google Map
   useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+    if (!isLoaded || !mapContainerRef.current || mapRef.current) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [formData.longitude, formData.latitude],
+    const map = new window.google.maps.Map(mapContainerRef.current, {
+      center: { lat: formData.latitude, lng: formData.longitude },
       zoom: 10,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true,
     });
 
-    // Set Arabic labels
-    map.on('load', () => {
-      map.setLayoutProperty('country-label', 'text-field', ['get', 'name_ar']);
-      map.setLayoutProperty('state-label', 'text-field', ['get', 'name_ar']);
-      map.setLayoutProperty('settlement-label', 'text-field', ['get', 'name_ar']);
-    });
+    geocoderRef.current = new window.google.maps.Geocoder();
 
-    // Add marker
-    const marker = new mapboxgl.Marker({
+    // Add draggable marker
+    const marker = new window.google.maps.Marker({
+      position: { lat: formData.latitude, lng: formData.longitude },
+      map,
       draggable: true,
-      color: '#10b981',
-    })
-      .setLngLat([formData.longitude, formData.latitude])
-      .addTo(map);
-
-    marker.on('dragend', () => {
-      const lngLat = marker.getLngLat();
-      handleCoordinatesChange(lngLat.lat, lngLat.lng);
+      icon: {
+        path: window.google.maps.SymbolPath.CIRCLE,
+        scale: 12,
+        fillColor: '#10b981',
+        fillOpacity: 1,
+        strokeColor: '#ffffff',
+        strokeWeight: 3,
+      },
     });
 
-    // Click to place marker
-    map.on('click', (e) => {
-      marker.setLngLat(e.lngLat);
-      handleCoordinatesChange(e.lngLat.lat, e.lngLat.lng);
+    // Handle marker drag
+    marker.addListener('dragend', () => {
+      const position = marker.getPosition();
+      if (position) {
+        handleCoordinatesChange(position.lat(), position.lng());
+      }
+    });
+
+    // Handle map click
+    map.addListener('click', (e: google.maps.MapMouseEvent) => {
+      if (e.latLng) {
+        marker.setPosition(e.latLng);
+        handleCoordinatesChange(e.latLng.lat(), e.latLng.lng());
+      }
     });
 
     mapRef.current = map;
     markerRef.current = marker;
 
     return () => {
-      map.remove();
+      marker.setMap(null);
       mapRef.current = null;
       markerRef.current = null;
     };
-  }, []);
+  }, [isLoaded]);
 
   const handleCoordinatesChange = async (lat: number, lng: number) => {
     setFormData((prev) => ({
@@ -129,68 +138,92 @@ export default function AddLocationForm({
     }));
 
     // Reverse geocode to get address
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=ar`
-      );
-      const data = await response.json();
+    if (geocoderRef.current) {
+      try {
+        const result = await geocoderRef.current.geocode({ location: { lat, lng } });
+        if (result.results?.[0]) {
+          const addressComponents = result.results[0].address_components;
+          const city = addressComponents?.find(c => 
+            c.types.includes('locality') || c.types.includes('administrative_area_level_1')
+          )?.long_name;
 
-      if (data.features?.[0]) {
-        const feature = data.features[0];
-        const city = feature.context?.find((c: any) => c.id.startsWith('place'))?.text;
-        
-        setFormData((prev) => ({
-          ...prev,
-          address: feature.place_name || prev.address,
-          city: city || prev.city,
-        }));
+          setFormData((prev) => ({
+            ...prev,
+            address: result.results[0].formatted_address || prev.address,
+            city: city || prev.city,
+          }));
+        }
+      } catch (error) {
+        console.error('Reverse geocode error:', error);
       }
-    } catch (error) {
-      console.error('Reverse geocode error:', error);
     }
   };
 
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim() || !isLoaded) return;
 
     setIsSearching(true);
     try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-          searchQuery
-        )}.json?access_token=${MAPBOX_TOKEN}&language=ar&country=eg&limit=5`
+      const service = new window.google.maps.places.AutocompleteService();
+      service.getPlacePredictions(
+        {
+          input: searchQuery,
+          componentRestrictions: { country: 'eg' },
+          language: 'ar',
+        },
+        (predictions, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setSearchResults(predictions);
+          } else {
+            setSearchResults([]);
+          }
+          setIsSearching(false);
+        }
       );
-      const data = await response.json();
-      setSearchResults(data.features || []);
     } catch (error) {
       console.error('Search error:', error);
-    } finally {
       setIsSearching(false);
     }
   };
 
-  const handleSelectSearchResult = (result: any) => {
-    const [lng, lat] = result.center;
-    
-    if (mapRef.current && markerRef.current) {
-      mapRef.current.flyTo({ center: [lng, lat], zoom: 15 });
-      markerRef.current.setLngLat([lng, lat]);
+  const handleSelectSearchResult = async (result: google.maps.places.AutocompletePrediction) => {
+    if (!isLoaded || !geocoderRef.current) return;
+
+    try {
+      const geocodeResult = await geocoderRef.current.geocode({ placeId: result.place_id });
+      
+      if (geocodeResult.results?.[0]) {
+        const location = geocodeResult.results[0].geometry.location;
+        const lat = location.lat();
+        const lng = location.lng();
+
+        if (mapRef.current && markerRef.current) {
+          mapRef.current.panTo({ lat, lng });
+          mapRef.current.setZoom(15);
+          markerRef.current.setPosition({ lat, lng });
+        }
+
+        const addressComponents = geocodeResult.results[0].address_components;
+        const city = addressComponents?.find(c => 
+          c.types.includes('locality') || c.types.includes('administrative_area_level_1')
+        )?.long_name;
+
+        setFormData((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+          address: geocodeResult.results[0].formatted_address,
+          city: city || '',
+          name: prev.name || result.structured_formatting.main_text,
+        }));
+
+        setSearchResults([]);
+        setSearchQuery('');
+        setActiveTab('map');
+      }
+    } catch (error) {
+      console.error('Geocode error:', error);
     }
-
-    const city = result.context?.find((c: any) => c.id.startsWith('place'))?.text;
-
-    setFormData((prev) => ({
-      ...prev,
-      latitude: lat,
-      longitude: lng,
-      address: result.place_name,
-      city: city || '',
-      name: prev.name || result.text,
-    }));
-
-    setSearchResults([]);
-    setSearchQuery('');
-    setActiveTab('map');
   };
 
   const handleUseCurrentLocation = () => {
@@ -202,8 +235,9 @@ export default function AddLocationForm({
         const { latitude, longitude } = position.coords;
 
         if (mapRef.current && markerRef.current) {
-          mapRef.current.flyTo({ center: [longitude, latitude], zoom: 15 });
-          markerRef.current.setLngLat([longitude, latitude]);
+          mapRef.current.panTo({ lat: latitude, lng: longitude });
+          mapRef.current.setZoom(15);
+          markerRef.current.setPosition({ lat: latitude, lng: longitude });
         }
 
         handleCoordinatesChange(latitude, longitude);
@@ -247,16 +281,25 @@ export default function AddLocationForm({
         <TabsContent value="map" className="space-y-4">
           {/* Map */}
           <div className="relative">
-            <div
-              ref={mapContainerRef}
-              className="h-[300px] rounded-lg border"
-            />
+            {!isLoaded ? (
+              <div className="h-[300px] rounded-lg border flex items-center justify-center bg-muted">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                  <p className="text-sm text-muted-foreground">جاري تحميل الخريطة...</p>
+                </div>
+              </div>
+            ) : (
+              <div
+                ref={mapContainerRef}
+                className="h-[300px] rounded-lg border"
+              />
+            )}
             <Button
               variant="secondary"
               size="sm"
               className="absolute bottom-3 left-3 gap-2"
               onClick={handleUseCurrentLocation}
-              disabled={isLocating}
+              disabled={isLocating || !isLoaded}
             >
               {isLocating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -292,19 +335,24 @@ export default function AddLocationForm({
             </Button>
           </div>
 
+          {/* Search Results */}
           {searchResults.length > 0 && (
             <div className="space-y-2 max-h-[250px] overflow-y-auto">
               {searchResults.map((result) => (
-                <button
-                  key={result.id}
+                <Button
+                  key={result.place_id}
+                  variant="outline"
+                  className="w-full justify-start text-right h-auto py-3"
                   onClick={() => handleSelectSearchResult(result)}
-                  className="w-full p-3 text-right rounded-lg border hover:bg-muted/50 transition-colors"
                 >
-                  <div className="font-medium">{result.text}</div>
-                  <div className="text-sm text-muted-foreground truncate">
-                    {result.place_name}
+                  <MapPin className="h-4 w-4 ml-2 shrink-0 text-primary" />
+                  <div className="text-right">
+                    <div className="font-medium">{result.structured_formatting.main_text}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {result.structured_formatting.secondary_text}
+                    </div>
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -319,16 +367,15 @@ export default function AddLocationForm({
                 step="0.000001"
                 value={formData.latitude}
                 onChange={(e) => {
-                  const lat = parseFloat(e.target.value);
-                  if (!isNaN(lat)) {
-                    setFormData((prev) => ({ ...prev, latitude: lat }));
-                    if (mapRef.current && markerRef.current) {
-                      markerRef.current.setLngLat([formData.longitude, lat]);
-                      mapRef.current.flyTo({ center: [formData.longitude, lat] });
-                    }
+                  const lat = parseFloat(e.target.value) || 0;
+                  setFormData((prev) => ({ ...prev, latitude: lat }));
+                  if (markerRef.current) {
+                    markerRef.current.setPosition({ lat, lng: formData.longitude });
+                  }
+                  if (mapRef.current) {
+                    mapRef.current.panTo({ lat, lng: formData.longitude });
                   }
                 }}
-                dir="ltr"
               />
             </div>
             <div className="space-y-2">
@@ -338,82 +385,64 @@ export default function AddLocationForm({
                 step="0.000001"
                 value={formData.longitude}
                 onChange={(e) => {
-                  const lng = parseFloat(e.target.value);
-                  if (!isNaN(lng)) {
-                    setFormData((prev) => ({ ...prev, longitude: lng }));
-                    if (mapRef.current && markerRef.current) {
-                      markerRef.current.setLngLat([lng, formData.latitude]);
-                      mapRef.current.flyTo({ center: [lng, formData.latitude] });
-                    }
+                  const lng = parseFloat(e.target.value) || 0;
+                  setFormData((prev) => ({ ...prev, longitude: lng }));
+                  if (markerRef.current) {
+                    markerRef.current.setPosition({ lat: formData.latitude, lng });
+                  }
+                  if (mapRef.current) {
+                    mapRef.current.panTo({ lat: formData.latitude, lng });
                   }
                 }}
-                dir="ltr"
               />
             </div>
           </div>
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => handleCoordinatesChange(formData.latitude, formData.longitude)}
+          >
+            <Check className="h-4 w-4" />
+            تأكيد الموقع
+          </Button>
         </TabsContent>
       </Tabs>
 
-      {/* Form Fields */}
+      {/* Location Details Form */}
       <div className="space-y-4 border-t pt-4">
         <div className="space-y-2">
-          <Label htmlFor="name">اسم الموقع *</Label>
+          <Label>اسم الموقع *</Label>
           <Input
-            id="name"
+            placeholder="مثال: مصنع التوحيد للأخشاب"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="مثال: مصنع بيبسي العامرية"
+            onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="name_en">الاسم بالإنجليزية</Label>
-          <Input
-            id="name_en"
-            value={formData.name_en || ''}
-            onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
-            placeholder="e.g., Pepsi Amreya Factory"
-            dir="ltr"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="address">العنوان *</Label>
-          <Input
-            id="address"
+          <Label>العنوان *</Label>
+          <Textarea
+            placeholder="العنوان التفصيلي..."
             value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            placeholder="العنوان التفصيلي"
+            onChange={(e) => setFormData((prev) => ({ ...prev, address: e.target.value }))}
+            rows={2}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="city">المدينة</Label>
+            <Label>المدينة</Label>
             <Input
-              id="city"
-              value={formData.city || ''}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              placeholder="مثال: العامرية"
+              placeholder="القاهرة"
+              value={formData.city}
+              onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="governorate">المحافظة</Label>
-            <Input
-              id="governorate"
-              value={formData.governorate || ''}
-              onChange={(e) => setFormData({ ...formData, governorate: e.target.value })}
-              placeholder="مثال: الإسكندرية"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>نوع الموقع</Label>
             <Select
               value={formData.location_type}
-              onValueChange={(value) => setFormData({ ...formData, location_type: value })}
+              onValueChange={(v) => setFormData((prev) => ({ ...prev, location_type: v }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -427,67 +456,50 @@ export default function AddLocationForm({
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-2">
-            <Label>التصنيف</Label>
-            <Select
-              value={formData.category}
-              onValueChange={(value) => setFormData({ ...formData, category: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">رقم الهاتف</Label>
-          <Input
-            id="phone"
-            value={formData.phone || ''}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            placeholder="01xxxxxxxxx"
-            dir="ltr"
-          />
+          <Label>التصنيف</Label>
+          <Select
+            value={formData.category}
+            onValueChange={(v) => setFormData((prev) => ({ ...prev, category: v }))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((cat) => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="notes">ملاحظات</Label>
+          <Label>ملاحظات</Label>
           <Textarea
-            id="notes"
+            placeholder="ملاحظات إضافية..."
             value={formData.notes || ''}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            placeholder="ملاحظات إضافية عن الموقع..."
+            onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
             rows={2}
           />
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* Save Button */}
       <Button
+        className="w-full gap-2"
         onClick={handleSave}
         disabled={saving || !formData.name.trim() || !formData.address.trim()}
-        className="w-full gap-2"
       >
         {saving ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            جاري الحفظ...
-          </>
+          <Loader2 className="h-4 w-4 animate-spin" />
         ) : (
-          <>
-            <Check className="h-4 w-4" />
-            حفظ الموقع
-          </>
+          <Check className="h-4 w-4" />
         )}
+        حفظ الموقع
       </Button>
     </div>
   );
