@@ -371,11 +371,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                           initial={{ opacity: 0, width: 0 }}
                           animate={{ opacity: 1, width: 'auto' }}
                           exit={{ opacity: 0, width: 0 }}
-                          className="overflow-hidden"
+                          className="overflow-hidden flex flex-col"
                         >
-                          <h1 className={`${isMobile ? 'text-base' : 'text-lg'} font-bold text-gradient-eco whitespace-nowrap`}>
-                            آي ريسايكل
+                          <h1 className={`${isMobile ? 'text-xs' : 'text-sm'} font-bold text-primary whitespace-nowrap leading-tight`}>
+                            iRecycle Waste Management System
                           </h1>
+                          <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-semibold text-foreground/70 whitespace-nowrap leading-tight`}>
+                            نظام آي ريسايكل لإدارة المخلفات
+                          </span>
                         </motion.div>
                       )}
                     </AnimatePresence>
