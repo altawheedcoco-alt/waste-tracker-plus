@@ -29,10 +29,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
   Calendar as CalendarIcon, 
-  Upload, 
   Loader2, 
   Sparkles, 
   CheckCircle2,
@@ -51,6 +50,9 @@ import {
   Image as ImageIcon,
   ArrowLeft,
   Recycle,
+  Package,
+  Lock,
+  Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.png';
@@ -77,11 +79,18 @@ interface DepositLink {
   description: string | null;
   is_active: boolean;
   expires_at: string | null;
-  organizations?: {
-    id: string;
-    name: string;
-    logo_url: string | null;
-  };
+  preset_partner_id: string | null;
+  preset_external_partner_id: string | null;
+  preset_waste_type: string | null;
+  preset_category: string | null;
+  preset_notes: string | null;
+  allow_amount_edit: boolean;
+  allow_date_edit: boolean;
+  allow_partner_edit: boolean;
+  require_receipt: boolean;
+  organization_name?: string;
+  organization_logo?: string | null;
+  partner_name?: string | null;
 }
 
 const transferMethods = [
@@ -91,6 +100,19 @@ const transferMethods = [
   { value: 'cash', label: 'نقدي', icon: Banknote },
   { value: 'check', label: 'شيك', icon: Receipt },
   { value: 'other', label: 'أخرى', icon: CreditCard },
+];
+
+const wasteTypes = [
+  { value: 'wood', label: 'أخشاب' },
+  { value: 'plastic', label: 'بلاستيك' },
+  { value: 'paper', label: 'ورق' },
+  { value: 'metal', label: 'معادن' },
+  { value: 'glass', label: 'زجاج' },
+  { value: 'organic', label: 'عضوي' },
+  { value: 'electronic', label: 'إلكتروني' },
+  { value: 'hazardous', label: 'خطر' },
+  { value: 'mixed', label: 'مختلط' },
+  { value: 'other', label: 'أخرى' },
 ];
 
 const QuickDeposit = () => {
@@ -137,34 +159,65 @@ const QuickDeposit = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        // First get the link data
+        const { data: linkResult, error: linkError } = await supabase
           .from('organization_deposit_links')
-          .select(`
-            *,
-            organizations:organization_id (
-              id,
-              name,
-              logo_url
-            )
-          `)
+          .select('*')
           .eq('token', token)
           .eq('is_active', true)
           .single();
 
-        if (error || !data) {
+        if (linkError || !linkResult) {
           setNotFound(true);
           setLoading(false);
           return;
         }
 
         // Check if expired
-        if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        if (linkResult.expires_at && new Date(linkResult.expires_at) < new Date()) {
           setExpired(true);
           setLoading(false);
           return;
         }
 
-        setLinkData(data as DepositLink);
+        // Get organization data
+        const { data: orgData } = await supabase
+          .from('organizations')
+          .select('name, logo_url')
+          .eq('id', linkResult.organization_id)
+          .single();
+
+        // Get partner name if preset
+        let partnerName = null;
+        if (linkResult.preset_partner_id) {
+          const { data: partnerOrg } = await supabase
+            .from('organizations')
+            .select('name')
+            .eq('id', linkResult.preset_partner_id)
+            .single();
+          partnerName = partnerOrg?.name;
+        } else if (linkResult.preset_external_partner_id) {
+          const { data: externalPartner } = await supabase
+            .from('external_partners')
+            .select('name')
+            .eq('id', linkResult.preset_external_partner_id)
+            .single();
+          partnerName = externalPartner?.name;
+        }
+
+        const fullLinkData: DepositLink = {
+          ...linkResult,
+          organization_name: orgData?.name,
+          organization_logo: orgData?.logo_url,
+          partner_name: partnerName,
+        };
+
+        setLinkData(fullLinkData);
+
+        // Set preset notes if available
+        if (linkResult.preset_notes) {
+          form.setValue('notes', linkResult.preset_notes);
+        }
       } catch (error) {
         console.error('Error loading deposit link:', error);
         setNotFound(true);
@@ -212,11 +265,13 @@ const QuickDeposit = () => {
       if (data?.success && data?.data) {
         const extracted = data.data;
         
-        if (extracted.amount) form.setValue('amount', String(extracted.amount));
+        if (extracted.amount && linkData?.allow_amount_edit) {
+          form.setValue('amount', String(extracted.amount));
+        }
         if (extracted.depositor_name) form.setValue('submitterName', extracted.depositor_name);
         if (extracted.bank_name) form.setValue('bankName', extracted.bank_name);
         if (extracted.reference_number) form.setValue('referenceNumber', extracted.reference_number);
-        if (extracted.payment_date) {
+        if (extracted.payment_date && linkData?.allow_date_edit) {
           form.setValue('depositDate', new Date(extracted.payment_date));
         }
         if (extracted.payment_method) {
@@ -237,6 +292,12 @@ const QuickDeposit = () => {
   const onSubmit = async (data: DepositFormData) => {
     if (!linkData) return;
 
+    // Validate receipt requirement
+    if (linkData.require_receipt && !receiptFile) {
+      toast.error('يرجى رفع صورة الإيصال');
+      return;
+    }
+
     setSubmitting(true);
     try {
       let receiptUrl = null;
@@ -252,7 +313,6 @@ const QuickDeposit = () => {
 
         if (uploadError) {
           console.error('Upload error:', uploadError);
-          // Continue without receipt
         } else {
           const { data: urlData } = supabase.storage
             .from('deposit-receipts')
@@ -261,26 +321,38 @@ const QuickDeposit = () => {
         }
       }
 
-      // Insert deposit
+      // Build deposit record with preset data
+      const depositRecord: any = {
+        organization_id: linkData.organization_id,
+        amount: parseFloat(data.amount),
+        deposit_date: format(data.depositDate, 'yyyy-MM-dd'),
+        depositor_name: data.submitterName,
+        depositor_phone: data.submitterPhone || null,
+        transfer_method: data.transferMethod,
+        bank_name: data.bankName || null,
+        reference_number: data.referenceNumber || null,
+        receipt_url: receiptUrl,
+        notes: data.notes || null,
+        deposit_link_id: linkData.id,
+        submitter_name: data.submitterName,
+        submitter_phone: data.submitterPhone || null,
+        submitter_email: data.submitterEmail || null,
+        is_public_submission: true,
+        waste_type: linkData.preset_waste_type,
+        category: linkData.preset_category,
+      };
+
+      // Add partner reference based on preset
+      if (linkData.preset_partner_id) {
+        depositRecord.partner_organization_id = linkData.preset_partner_id;
+      }
+      if (linkData.preset_external_partner_id) {
+        depositRecord.partner_external_id = linkData.preset_external_partner_id;
+      }
+
       const { error } = await supabase
         .from('deposits')
-        .insert({
-          organization_id: linkData.organization_id,
-          amount: parseFloat(data.amount),
-          deposit_date: format(data.depositDate, 'yyyy-MM-dd'),
-          depositor_name: data.submitterName,
-          depositor_phone: data.submitterPhone || null,
-          transfer_method: data.transferMethod,
-          bank_name: data.bankName || null,
-          reference_number: data.referenceNumber || null,
-          receipt_url: receiptUrl,
-          notes: data.notes || null,
-          deposit_link_id: linkData.id,
-          submitter_name: data.submitterName,
-          submitter_phone: data.submitterPhone || null,
-          submitter_email: data.submitterEmail || null,
-          is_public_submission: true,
-        });
+        .insert(depositRecord);
 
       if (error) throw error;
 
@@ -292,6 +364,11 @@ const QuickDeposit = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const getWasteTypeLabel = (value: string | null) => {
+    if (!value) return null;
+    return wasteTypes.find(w => w.value === value)?.label || value;
   };
 
   // Loading state
@@ -372,17 +449,42 @@ const QuickDeposit = () => {
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
               <h1 className="text-2xl font-bold mb-2 text-emerald-700">تم الإرسال بنجاح!</h1>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-4">
                 شكراً لك، تم استلام إيداعك وسيتم مراجعته من قبل{' '}
                 <span className="font-semibold text-foreground">
-                  {linkData?.organizations?.name}
+                  {linkData?.organization_name}
                 </span>
               </p>
+              
+              {/* Show preset info in success */}
+              {(linkData?.partner_name || linkData?.preset_waste_type) && (
+                <div className="bg-muted/50 rounded-lg p-3 mb-4 text-sm">
+                  <p className="text-muted-foreground mb-2">تم تسجيل الإيداع لحساب:</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {linkData?.partner_name && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Building2 className="h-3 w-3" />
+                        {linkData.partner_name}
+                      </Badge>
+                    )}
+                    {linkData?.preset_waste_type && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Package className="h-3 w-3" />
+                        {getWasteTypeLabel(linkData.preset_waste_type)}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 justify-center">
                 <Button 
                   onClick={() => {
                     setSubmitted(false);
                     form.reset();
+                    if (linkData?.preset_notes) {
+                      form.setValue('notes', linkData.preset_notes);
+                    }
                     setReceiptFile(null);
                     setReceiptPreview(null);
                     setAiExtracted(false);
@@ -410,10 +512,10 @@ const QuickDeposit = () => {
           className="text-center mb-6"
         >
           <div className="flex items-center justify-center gap-3 mb-4">
-            {linkData?.organizations?.logo_url ? (
+            {linkData?.organization_logo ? (
               <img 
-                src={linkData.organizations.logo_url} 
-                alt={linkData.organizations.name}
+                src={linkData.organization_logo} 
+                alt={linkData.organization_name}
                 className="h-14 w-14 rounded-xl object-contain border shadow-sm"
               />
             ) : (
@@ -427,7 +529,7 @@ const QuickDeposit = () => {
             {linkData?.title || 'إيداع سريع'}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {linkData?.organizations?.name}
+            {linkData?.organization_name}
           </p>
           {linkData?.description && (
             <p className="text-sm text-muted-foreground mt-2 bg-muted/50 rounded-lg p-3">
@@ -435,6 +537,48 @@ const QuickDeposit = () => {
             </p>
           )}
         </motion.div>
+
+        {/* Preset Info Banner */}
+        {(linkData?.partner_name || linkData?.preset_waste_type || linkData?.preset_category) && (
+          <motion.div
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.05 }}
+            className="mb-4"
+          >
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Info className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium mb-2">بيانات محددة مسبقاً</p>
+                    <div className="flex flex-wrap gap-2">
+                      {linkData?.partner_name && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Building2 className="h-3 w-3" />
+                          {linkData.partner_name}
+                        </Badge>
+                      )}
+                      {linkData?.preset_waste_type && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Package className="h-3 w-3" />
+                          {getWasteTypeLabel(linkData.preset_waste_type)}
+                        </Badge>
+                      )}
+                      {linkData?.preset_category && (
+                        <Badge variant="outline" className="text-xs">
+                          {linkData.preset_category}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Form Card */}
         <motion.div
@@ -447,10 +591,23 @@ const QuickDeposit = () => {
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                   {/* Receipt Upload Section */}
-                  <div className="p-4 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
+                  <div className={cn(
+                    "p-4 rounded-xl border-2 border-dashed",
+                    linkData?.require_receipt 
+                      ? "border-amber-400 bg-amber-50/50" 
+                      : "border-primary/30 bg-primary/5"
+                  )}>
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-5 w-5 text-primary" />
-                      <span className="font-semibold text-sm">صورة الإيصال (اختياري)</span>
+                      <span className="font-semibold text-sm">
+                        صورة الإيصال {linkData?.require_receipt ? '*' : '(اختياري)'}
+                      </span>
+                      {linkData?.require_receipt && (
+                        <Badge variant="outline" className="text-xs text-amber-700 border-amber-400 gap-1">
+                          <Lock className="h-3 w-3" />
+                          مطلوب
+                        </Badge>
+                      )}
                     </div>
                     
                     <input
@@ -545,6 +702,12 @@ const QuickDeposit = () => {
                         <FormLabel className="flex items-center gap-2">
                           <Banknote className="h-4 w-4" />
                           المبلغ (ج.م) *
+                          {!linkData?.allow_amount_edit && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              <Lock className="h-3 w-3" />
+                              ثابت
+                            </Badge>
+                          )}
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -553,6 +716,7 @@ const QuickDeposit = () => {
                             {...field}
                             className="text-lg font-semibold"
                             dir="ltr"
+                            disabled={!linkData?.allow_amount_edit}
                           />
                         </FormControl>
                         <FormMessage />
@@ -569,12 +733,19 @@ const QuickDeposit = () => {
                         <FormLabel className="flex items-center gap-2">
                           <CalendarIcon className="h-4 w-4" />
                           تاريخ الإيداع *
+                          {!linkData?.allow_date_edit && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              <Lock className="h-3 w-3" />
+                              ثابت
+                            </Badge>
+                          )}
                         </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
                                 variant="outline"
+                                disabled={!linkData?.allow_date_edit}
                                 className={cn(
                                   "w-full justify-start text-right font-normal",
                                   !field.value && "text-muted-foreground"

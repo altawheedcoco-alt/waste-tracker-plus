@@ -1452,6 +1452,7 @@ export type Database = {
           amount: number
           bank_name: string | null
           branch_name: string | null
+          category: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -1466,6 +1467,7 @@ export type Database = {
           is_public_submission: boolean | null
           notes: string | null
           organization_id: string
+          partner_external_id: string | null
           partner_organization_id: string | null
           receipt_url: string | null
           reference_number: string | null
@@ -1474,6 +1476,7 @@ export type Database = {
           submitter_phone: string | null
           transfer_method: string
           updated_at: string
+          waste_type: string | null
         }
         Insert: {
           account_number?: string | null
@@ -1482,6 +1485,7 @@ export type Database = {
           amount: number
           bank_name?: string | null
           branch_name?: string | null
+          category?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -1496,6 +1500,7 @@ export type Database = {
           is_public_submission?: boolean | null
           notes?: string | null
           organization_id: string
+          partner_external_id?: string | null
           partner_organization_id?: string | null
           receipt_url?: string | null
           reference_number?: string | null
@@ -1504,6 +1509,7 @@ export type Database = {
           submitter_phone?: string | null
           transfer_method?: string
           updated_at?: string
+          waste_type?: string | null
         }
         Update: {
           account_number?: string | null
@@ -1512,6 +1518,7 @@ export type Database = {
           amount?: number
           bank_name?: string | null
           branch_name?: string | null
+          category?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -1526,6 +1533,7 @@ export type Database = {
           is_public_submission?: boolean | null
           notes?: string | null
           organization_id?: string
+          partner_external_id?: string | null
           partner_organization_id?: string | null
           receipt_url?: string | null
           reference_number?: string | null
@@ -1534,6 +1542,7 @@ export type Database = {
           submitter_phone?: string | null
           transfer_method?: string
           updated_at?: string
+          waste_type?: string | null
         }
         Relationships: [
           {
@@ -1569,6 +1578,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_partner_external_id_fkey"
+            columns: ["partner_external_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
             referencedColumns: ["id"]
           },
           {
@@ -3024,35 +3040,65 @@ export type Database = {
       }
       organization_deposit_links: {
         Row: {
+          allow_amount_edit: boolean | null
+          allow_date_edit: boolean | null
+          allow_partner_edit: boolean | null
           created_at: string
           created_by: string | null
+          custom_fields: Json | null
           description: string | null
           expires_at: string | null
           id: string
           is_active: boolean
           organization_id: string
+          preset_category: string | null
+          preset_external_partner_id: string | null
+          preset_notes: string | null
+          preset_partner_id: string | null
+          preset_waste_type: string | null
+          require_receipt: boolean | null
           title: string | null
           token: string
         }
         Insert: {
+          allow_amount_edit?: boolean | null
+          allow_date_edit?: boolean | null
+          allow_partner_edit?: boolean | null
           created_at?: string
           created_by?: string | null
+          custom_fields?: Json | null
           description?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean
           organization_id: string
+          preset_category?: string | null
+          preset_external_partner_id?: string | null
+          preset_notes?: string | null
+          preset_partner_id?: string | null
+          preset_waste_type?: string | null
+          require_receipt?: boolean | null
           title?: string | null
           token: string
         }
         Update: {
+          allow_amount_edit?: boolean | null
+          allow_date_edit?: boolean | null
+          allow_partner_edit?: boolean | null
           created_at?: string
           created_by?: string | null
+          custom_fields?: Json | null
           description?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean
           organization_id?: string
+          preset_category?: string | null
+          preset_external_partner_id?: string | null
+          preset_notes?: string | null
+          preset_partner_id?: string | null
+          preset_waste_type?: string | null
+          require_receipt?: boolean | null
           title?: string | null
           token?: string
         }
@@ -3074,6 +3120,27 @@ export type Database = {
           {
             foreignKeyName: "organization_deposit_links_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_deposit_links_preset_external_partner_id_fkey"
+            columns: ["preset_external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_deposit_links_preset_partner_id_fkey"
+            columns: ["preset_partner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_deposit_links_preset_partner_id_fkey"
+            columns: ["preset_partner_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
