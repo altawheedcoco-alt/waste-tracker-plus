@@ -57,6 +57,7 @@ import {
 } from 'lucide-react';
 import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
 import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import WasteTypeCombobox from '@/components/shipments/WasteTypeCombobox';
 
 interface Partner {
   id: string;
@@ -113,20 +114,24 @@ const parseLocationData = (data: unknown): LocationData | null => {
   return null;
 };
 
-const wasteTypes = [
-  { value: 'wood', label: 'أخشاب' },
-  { value: 'plastic', label: 'بلاستيك' },
-  { value: 'paper', label: 'ورق وكرتون' },
-  { value: 'metal', label: 'معادن' },
-  { value: 'glass', label: 'زجاج' },
-  { value: 'organic', label: 'عضوي' },
-  { value: 'electronic', label: 'إلكتروني' },
-  { value: 'hazardous', label: 'خطر' },
-  { value: 'textile', label: 'منسوجات' },
-  { value: 'rubber', label: 'مطاط' },
-  { value: 'mixed', label: 'مختلط' },
-  { value: 'other', label: 'أخرى' },
-];
+// Basic waste type labels for display (full classification is handled by WasteTypeCombobox)
+const wasteTypeLabels: Record<string, string> = {
+  wood: 'أخشاب',
+  plastic: 'بلاستيك',
+  paper: 'ورق وكرتون',
+  metal: 'معادن',
+  glass: 'زجاج',
+  organic: 'عضوي',
+  electronic: 'إلكتروني',
+  hazardous: 'خطر',
+  textile: 'منسوجات',
+  rubber: 'مطاط',
+  mixed: 'مختلط',
+  other: 'أخرى',
+  chemical: 'كيميائي',
+  medical: 'طبي',
+  construction: 'بناء وهدم',
+};
 
 const generateToken = () => {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -550,34 +555,24 @@ const ShipmentLinksManager = () => {
                         </Select>
                       </div>
 
-                      {/* Waste Type */}
+                      {/* Waste Type - Full Classification */}
                       <div className="space-y-2">
                         <Label className="flex items-center gap-2">
                           <Package className="h-4 w-4" />
-                          نوع المخلفات
+                          نوع المخلفات (التصنيف الكامل)
                         </Label>
-                        <Select value={presetWasteType} onValueChange={setPresetWasteType}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر نوع المخلفات..." />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {wasteTypes.map((type) => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Category */}
-                      <div className="space-y-2">
-                        <Label>التصنيف / الوصف التفصيلي</Label>
-                        <Input
-                          value={presetWasteCategory}
-                          onChange={(e) => setPresetWasteCategory(e.target.value)}
-                          placeholder="مثال: مخلفات التعبئة والتغليف"
+                        <WasteTypeCombobox
+                          value={presetWasteCategory || ''}
+                          onChange={(wasteType, hazardLevel, wasteDescription) => {
+                            setPresetWasteType(wasteType);
+                            setPresetWasteCategory(wasteDescription);
+                          }}
                         />
+                        {presetWasteCategory && (
+                          <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                            <span className="font-medium">المختار:</span> {presetWasteCategory}
+                          </div>
+                        )}
                       </div>
 
                       {/* Preset Notes */}
@@ -797,7 +792,7 @@ const ShipmentLinksManager = () => {
               const url = `${window.location.origin}/shipment/${link.token}`;
               const generatorName = getGeneratorName(link);
               const recyclerName = getRecyclerName(link);
-              const wasteType = wasteTypes.find(w => w.value === link.preset_waste_type)?.label;
+              const wasteType = link.preset_waste_category || wasteTypeLabels[link.preset_waste_type || ''] || link.preset_waste_type;
               const pickupLocation = parseLocationData(link.preset_pickup_location);
               const deliveryLocation = parseLocationData(link.preset_delivery_location);
               
