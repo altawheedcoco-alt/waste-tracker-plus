@@ -15,7 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
 import { useSavedLocations, SavedLocation } from '@/hooks/useSavedLocations';
 import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
-import MapboxInteractiveMapPicker from '@/components/maps/MapboxInteractiveMapPicker';
+import GoogleMapsLocationPicker from '@/components/maps/GoogleMapsLocationPicker';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -832,12 +832,10 @@ const EnhancedLocationPicker = ({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Mapbox Interactive Map with Search */}
-            <MapboxInteractiveMapPicker
-              center={coordinates || defaultMapCenter}
-              zoom={coordinates ? 15 : 6}
-              selectedPosition={mapCoordinates}
-              onPositionSelect={handleMapPositionSelect}
+            {/* Google Maps Interactive Picker */}
+            <GoogleMapsLocationPicker
+              value={mapCoordinates}
+              onChange={handleMapPositionSelect}
               showSearch={true}
               showCurrentLocation={true}
               height="450px"

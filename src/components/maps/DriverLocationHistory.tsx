@@ -1,2 +1,2 @@
-// Re-export Mapbox version for backwards compatibility
-export { default } from './MapboxDriverLocationHistory';
+// Re-export Google Maps Driver History for backwards compatibility
+export { default } from './GoogleMapsDriverHistory';

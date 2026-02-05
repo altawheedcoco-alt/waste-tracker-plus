@@ -658,7 +658,6 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
                 }}
                 height="100%"
                 showSearch={true}
-                markerColor={mapPickerTarget === 'from' ? 'green' : 'red'}
                 label={mapPickerTarget === 'from' ? 'اضغط على الخريطة لتحديد نقطة الاستلام' : 'اضغط على الخريطة لتحديد نقطة التسليم'}
               />
             </Suspense>
