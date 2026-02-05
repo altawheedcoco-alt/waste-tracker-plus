@@ -54,6 +54,7 @@ import {
   Recycle,
   Navigation,
   X,
+  User,
 } from 'lucide-react';
 import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
 import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
@@ -79,6 +80,7 @@ interface ShipmentLink {
   token: string;
   title: string | null;
   description: string | null;
+  sender_name: string | null;
   is_active: boolean;
   expires_at: string | null;
   created_at: string;
@@ -163,6 +165,9 @@ const ShipmentLinksManager = () => {
   const [presetWasteType, setPresetWasteType] = useState('');
   const [presetWasteCategory, setPresetWasteCategory] = useState('');
   const [presetNotes, setPresetNotes] = useState('');
+  
+  // Sender name - the person designated to submit data via this link
+  const [senderName, setSenderName] = useState('');
   
   // Preset locations
   const [presetPickupLocation, setPresetPickupLocation] = useState<LocationData | null>(null);
@@ -272,6 +277,7 @@ const ShipmentLinksManager = () => {
   const resetForm = () => {
     setNewTitle('');
     setNewDescription('');
+    setSenderName('');
     setHasExpiry(false);
     setExpiryDate('');
     setPresetGeneratorId('');
@@ -303,6 +309,7 @@ const ShipmentLinksManager = () => {
         token,
         title: newTitle || 'رابط شحنة سريعة',
         description: newDescription || null,
+        sender_name: senderName || null,
         expires_at: hasExpiry && expiryDate ? new Date(expiryDate).toISOString() : null,
         created_by: profile.id,
         preset_waste_type: presetWasteType || null,
@@ -480,6 +487,21 @@ const ShipmentLinksManager = () => {
                       onChange={(e) => setNewTitle(e.target.value)}
                       placeholder="مثال: شحنات شركة نستلة - أخشاب"
                     />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      اسم المرسل (المسؤول عن إرسال البيانات)
+                    </Label>
+                    <Input
+                      value={senderName}
+                      onChange={(e) => setSenderName(e.target.value)}
+                      placeholder="مثال: أحمد محمد - مسؤول الشحنات"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      الشخص المخوّل من جهتكم لإرسال بيانات الشحنات عبر هذا الرابط
+                    </p>
                   </div>
                   
                   <div className="space-y-2">
@@ -826,6 +848,16 @@ const ShipmentLinksManager = () => {
                           <Badge variant="secondary">معطل</Badge>
                         )}
                       </div>
+                      
+                      {/* Sender Name Badge */}
+                      {link.sender_name && (
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Badge variant="outline" className="gap-1 bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
+                            <User className="h-3 w-3" />
+                            المرسل: {link.sender_name}
+                          </Badge>
+                        </div>
+                      )}
                       
                       {link.description && (
                         <p className="text-sm text-muted-foreground mb-2">{link.description}</p>

@@ -3441,6 +3441,7 @@ export type Database = {
           preset_waste_category: string | null
           preset_waste_type: string | null
           require_photo: boolean | null
+          sender_name: string | null
           title: string | null
           token: string
         }
@@ -3467,6 +3468,7 @@ export type Database = {
           preset_waste_category?: string | null
           preset_waste_type?: string | null
           require_photo?: boolean | null
+          sender_name?: string | null
           title?: string | null
           token: string
         }
@@ -3493,6 +3495,7 @@ export type Database = {
           preset_waste_category?: string | null
           preset_waste_type?: string | null
           require_photo?: boolean | null
+          sender_name?: string | null
           title?: string | null
           token?: string
         }
