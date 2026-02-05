@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewerPresence } from '@/hooks/useDriverPresence';
 import GoogleMapsNavigationButton from '@/components/navigation/GoogleMapsNavigationButton';
-import MapboxLiveTrackingMap from './MapboxLiveTrackingMap';
+import GoogleLiveTrackingMap from './GoogleLiveTrackingMap';
 import { 
   fetchRoadRoute, 
   geocodeAddress, 
@@ -475,7 +475,7 @@ const LiveTrackingMapDialog = memo(({
               )}
               
               {isOpen && (
-                <MapboxLiveTrackingMap
+                <GoogleLiveTrackingMap
                   key={mapKey}
                   pickupCoords={pickupCoords}
                   deliveryCoords={deliveryCoords}

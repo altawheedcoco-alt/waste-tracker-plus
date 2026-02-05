@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,8 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import Map, { Marker, Source, Layer, NavigationControl } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
 import {
   MapPin,
   Clock,
@@ -27,8 +26,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
 interface LocationLog {
   id: string;
@@ -74,11 +71,13 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [weekSummary, setWeekSummary] = useState<{ date: string; distance: number; trips: number }[]>([]);
 
-  const [viewState, setViewState] = useState({
-    longitude: 31.2357,
-    latitude: 30.0444,
-    zoom: 12,
-  });
+  const { isLoaded } = useGoogleMaps();
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const polylineFullRef = useRef<google.maps.Polyline | null>(null);
+  const polylinePlayedRef = useRef<google.maps.Polyline | null>(null);
+  const playbackMarkerRef = useRef<google.maps.Marker | null>(null);
 
   useEffect(() => {
     if (driverId) {
@@ -103,6 +102,152 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
     }
     return () => clearInterval(interval);
   }, [isPlaying, selectedTrip]);
+
+  // Initialize map when dialog opens
+  useEffect(() => {
+    if (showTripDialog && isLoaded && mapContainerRef.current && !mapRef.current && selectedTrip) {
+      const centerLat = (selectedTrip.start_location.lat + selectedTrip.end_location.lat) / 2;
+      const centerLng = (selectedTrip.start_location.lng + selectedTrip.end_location.lng) / 2;
+
+      mapRef.current = new google.maps.Map(mapContainerRef.current, {
+        center: { lat: centerLat, lng: centerLng },
+        zoom: 13,
+        mapTypeControl: false,
+        fullscreenControl: true,
+        streetViewControl: false,
+      });
+
+      // Draw trip on map
+      drawTripOnMap(selectedTrip);
+    }
+  }, [showTripDialog, isLoaded, selectedTrip]);
+
+  // Update playback position
+  useEffect(() => {
+    if (selectedTrip && mapRef.current && selectedTrip.locations[playbackIndex]) {
+      const currentLoc = selectedTrip.locations[playbackIndex];
+      const pos = { lat: Number(currentLoc.latitude), lng: Number(currentLoc.longitude) };
+
+      // Update played path
+      if (polylinePlayedRef.current) {
+        const playedPath = selectedTrip.locations.slice(0, playbackIndex + 1).map(l => ({
+          lat: Number(l.latitude),
+          lng: Number(l.longitude),
+        }));
+        polylinePlayedRef.current.setPath(playedPath);
+      }
+
+      // Update playback marker
+      if (playbackMarkerRef.current) {
+        playbackMarkerRef.current.setPosition(pos);
+      }
+    }
+  }, [playbackIndex, selectedTrip]);
+
+  // Cleanup on dialog close
+  useEffect(() => {
+    if (!showTripDialog) {
+      cleanupMap();
+    }
+  }, [showTripDialog]);
+
+  const cleanupMap = useCallback(() => {
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+    polylineFullRef.current?.setMap(null);
+    polylineFullRef.current = null;
+    polylinePlayedRef.current?.setMap(null);
+    polylinePlayedRef.current = null;
+    playbackMarkerRef.current?.setMap(null);
+    playbackMarkerRef.current = null;
+    mapRef.current = null;
+  }, []);
+
+  const drawTripOnMap = (trip: TripSession) => {
+    if (!mapRef.current) return;
+
+    // Full path (gray)
+    const fullPath = trip.locations.map(l => ({
+      lat: Number(l.latitude),
+      lng: Number(l.longitude),
+    }));
+
+    polylineFullRef.current = new google.maps.Polyline({
+      path: fullPath,
+      strokeColor: '#9ca3af',
+      strokeOpacity: 0.5,
+      strokeWeight: 3,
+      map: mapRef.current,
+    });
+
+    // Played path (green)
+    polylinePlayedRef.current = new google.maps.Polyline({
+      path: fullPath.slice(0, 1),
+      strokeColor: '#22c55e',
+      strokeOpacity: 1,
+      strokeWeight: 4,
+      map: mapRef.current,
+    });
+
+    // Start marker
+    const startMarker = new google.maps.Marker({
+      position: trip.start_location,
+      map: mapRef.current,
+      label: {
+        text: 'S',
+        color: 'white',
+        fontWeight: 'bold',
+      },
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 12,
+        fillColor: '#22c55e',
+        fillOpacity: 1,
+        strokeColor: 'white',
+        strokeWeight: 2,
+      },
+    });
+    markersRef.current.push(startMarker);
+
+    // End marker
+    const endMarker = new google.maps.Marker({
+      position: trip.end_location,
+      map: mapRef.current,
+      label: {
+        text: 'E',
+        color: 'white',
+        fontWeight: 'bold',
+      },
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 12,
+        fillColor: '#ef4444',
+        fillOpacity: 1,
+        strokeColor: 'white',
+        strokeWeight: 2,
+      },
+    });
+    markersRef.current.push(endMarker);
+
+    // Playback marker
+    playbackMarkerRef.current = new google.maps.Marker({
+      position: trip.start_location,
+      map: mapRef.current,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: '#3b82f6',
+        fillOpacity: 1,
+        strokeColor: 'white',
+        strokeWeight: 2,
+      },
+    });
+
+    // Fit bounds
+    const bounds = new google.maps.LatLngBounds();
+    fullPath.forEach(p => bounds.extend(p));
+    mapRef.current.fitBounds(bounds, 50);
+  };
 
   const fetchWeekSummary = async () => {
     const summaries: { date: string; distance: number; trips: number }[] = [];
@@ -273,40 +418,9 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
     setPlaybackIndex(0);
     setIsPlaying(false);
     setShowTripDialog(true);
-    
-    // Center map on trip
-    if (trip.locations.length > 0) {
-      const centerLat = (trip.start_location.lat + trip.end_location.lat) / 2;
-      const centerLng = (trip.start_location.lng + trip.end_location.lng) / 2;
-      setViewState({
-        longitude: centerLng,
-        latitude: centerLat,
-        zoom: 13,
-      });
-    }
   };
 
   const maxWeekDistance = Math.max(...weekSummary.map(d => d.distance), 1);
-
-  // GeoJSON for trip path
-  const tripPathGeoJSON = selectedTrip ? {
-    type: 'Feature' as const,
-    properties: {},
-    geometry: {
-      type: 'LineString' as const,
-      coordinates: selectedTrip.locations.map(l => [Number(l.longitude), Number(l.latitude)]),
-    },
-  } : null;
-
-  // GeoJSON for played path
-  const playedPathGeoJSON = selectedTrip ? {
-    type: 'Feature' as const,
-    properties: {},
-    geometry: {
-      type: 'LineString' as const,
-      coordinates: selectedTrip.locations.slice(0, playbackIndex + 1).map(l => [Number(l.longitude), Number(l.latitude)]),
-    },
-  } : null;
 
   return (
     <div className="space-y-6">
@@ -548,80 +662,15 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
                 </p>
               </div>
 
-              {/* Map */}
+              {/* Google Map */}
               <div className="h-[400px] rounded-lg overflow-hidden border">
-                <Map
-                  {...viewState}
-                  onMove={evt => setViewState(evt.viewState)}
-                  mapboxAccessToken={MAPBOX_TOKEN}
-                  mapStyle="mapbox://styles/mapbox/streets-v12"
-                  style={{ width: '100%', height: '100%' }}
-                  attributionControl={false}
-                >
-                  <NavigationControl position="top-left" />
-
-                  {/* Full path */}
-                  {tripPathGeoJSON && (
-                    <Source id="full-path" type="geojson" data={tripPathGeoJSON}>
-                      <Layer
-                        id="full-path-line"
-                        type="line"
-                        paint={{
-                          'line-color': '#9ca3af',
-                          'line-width': 3,
-                          'line-opacity': 0.5,
-                        }}
-                      />
-                    </Source>
-                  )}
-
-                  {/* Played path */}
-                  {playedPathGeoJSON && (
-                    <Source id="played-path" type="geojson" data={playedPathGeoJSON}>
-                      <Layer
-                        id="played-path-line"
-                        type="line"
-                        paint={{
-                          'line-color': '#22c55e',
-                          'line-width': 4,
-                        }}
-                      />
-                    </Source>
-                  )}
-
-                  {/* Start marker */}
-                  <Marker
-                    longitude={selectedTrip.start_location.lng}
-                    latitude={selectedTrip.start_location.lat}
-                    anchor="center"
-                  >
-                    <div className="w-6 h-6 bg-green-500 rounded-full border-2 border-white shadow flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">S</span>
-                    </div>
-                  </Marker>
-
-                  {/* End marker */}
-                  <Marker
-                    longitude={selectedTrip.end_location.lng}
-                    latitude={selectedTrip.end_location.lat}
-                    anchor="center"
-                  >
-                    <div className="w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">E</span>
-                    </div>
-                  </Marker>
-
-                  {/* Current playback position */}
-                  {selectedTrip.locations[playbackIndex] && (
-                    <Marker
-                      longitude={Number(selectedTrip.locations[playbackIndex].longitude)}
-                      latitude={Number(selectedTrip.locations[playbackIndex].latitude)}
-                      anchor="center"
-                    >
-                      <div className="w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow animate-pulse" />
-                    </Marker>
-                  )}
-                </Map>
+                {isLoaded ? (
+                  <div ref={mapContainerRef} className="w-full h-full" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                )}
               </div>
             </div>
           )}

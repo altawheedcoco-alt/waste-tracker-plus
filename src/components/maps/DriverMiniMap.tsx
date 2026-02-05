@@ -1,9 +1,6 @@
-import { memo } from 'react';
-import Map, { Marker } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { MapPin } from 'lucide-react';
-
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+import { useRef, useEffect } from 'react';
+import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import { Loader2 } from 'lucide-react';
 
 interface DriverMiniMapProps {
   latitude: number;
@@ -11,69 +8,80 @@ interface DriverMiniMapProps {
   accuracy?: number;
 }
 
-/**
- * Compact driver location map using Mapbox GL JS
- */
-const DriverMiniMap = memo(({ latitude, longitude, accuracy }: DriverMiniMapProps) => {
-  return (
-    <div className="relative w-full h-40 rounded-lg overflow-hidden border">
-      <Map
-        initialViewState={{
-          longitude,
-          latitude,
-          zoom: 15,
-        }}
-        mapboxAccessToken={MAPBOX_TOKEN}
-        mapStyle="mapbox://styles/mapbox/streets-v12"
-        style={{ width: '100%', height: '100%' }}
-        attributionControl={false}
-        interactive={false}
-        dragPan={false}
-        scrollZoom={false}
-        doubleClickZoom={false}
-        touchZoomRotate={false}
-        keyboard={false}
-      >
-        {/* Driver marker with pulse animation */}
-        <Marker longitude={longitude} latitude={latitude} anchor="center">
-          <div className="relative">
-            {/* Pulse animation */}
-            <div 
-              className="absolute rounded-full bg-primary/30 animate-ping"
-              style={{
-                width: '40px',
-                height: '40px',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-              }}
-            />
-            {/* Main marker */}
-            <div 
-              className="relative flex items-center justify-center rounded-full shadow-lg"
-              style={{
-                width: '28px',
-                height: '28px',
-                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                border: '3px solid white',
-              }}
-            >
-              <MapPin className="h-3.5 w-3.5 text-white" />
-            </div>
-          </div>
-        </Marker>
-      </Map>
-      
-      {/* Accuracy indicator */}
-      {accuracy && (
-        <div className="absolute bottom-2 right-2 px-2 py-1 bg-background/80 backdrop-blur-sm rounded text-[10px] text-muted-foreground">
-          ± {Math.round(accuracy)} م
-        </div>
-      )}
-    </div>
-  );
-});
+const DriverMiniMap = ({ latitude, longitude, accuracy }: DriverMiniMapProps) => {
+  const { isLoaded } = useGoogleMaps();
+  const mapRef = useRef<google.maps.Map | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<google.maps.Marker | null>(null);
+  const circleRef = useRef<google.maps.Circle | null>(null);
 
-DriverMiniMap.displayName = 'DriverMiniMap';
+  useEffect(() => {
+    if (!isLoaded || !containerRef.current) return;
+
+    if (!mapRef.current) {
+      mapRef.current = new google.maps.Map(containerRef.current, {
+        center: { lat: latitude, lng: longitude },
+        zoom: 15,
+        disableDefaultUI: true,
+        zoomControl: true,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+    }
+
+    // Update center
+    mapRef.current.setCenter({ lat: latitude, lng: longitude });
+
+    // Update marker
+    if (markerRef.current) {
+      markerRef.current.setPosition({ lat: latitude, lng: longitude });
+    } else {
+      markerRef.current = new google.maps.Marker({
+        position: { lat: latitude, lng: longitude },
+        map: mapRef.current,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: '#22c55e',
+          fillOpacity: 1,
+          strokeColor: 'white',
+          strokeWeight: 3,
+        },
+      });
+    }
+
+    // Update accuracy circle
+    if (accuracy) {
+      if (circleRef.current) {
+        circleRef.current.setCenter({ lat: latitude, lng: longitude });
+        circleRef.current.setRadius(accuracy);
+      } else {
+        circleRef.current = new google.maps.Circle({
+          map: mapRef.current,
+          center: { lat: latitude, lng: longitude },
+          radius: accuracy,
+          fillColor: '#22c55e',
+          fillOpacity: 0.15,
+          strokeColor: '#22c55e',
+          strokeOpacity: 0.5,
+          strokeWeight: 1,
+        });
+      }
+    }
+  }, [isLoaded, latitude, longitude, accuracy]);
+
+  if (!isLoaded) {
+    return (
+      <div className="h-40 rounded-lg bg-muted flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div ref={containerRef} className="h-40 rounded-lg overflow-hidden border" />
+  );
+};
 
 export default DriverMiniMap;
