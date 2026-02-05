@@ -258,9 +258,10 @@ const allAutomationSettings: AutomationSetting[] = [
 
 interface AutomationSettingsDialogProps {
   organizationType?: string;
+  children?: React.ReactNode;
 }
 
-const AutomationSettingsDialog = ({ organizationType = 'transporter' }: AutomationSettingsDialogProps) => {
+const AutomationSettingsDialog = ({ organizationType = 'transporter', children }: AutomationSettingsDialogProps) => {
   const { organization } = useAuth();
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState<AutomationSetting[]>(allAutomationSettings);
@@ -325,17 +326,19 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter' }: Automati
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="bg-gradient-to-r from-primary/10 to-amber-500/10 border-primary/30 hover:border-primary gap-2"
-        >
-          <Zap className="h-4 w-4 text-primary" />
-          تفعيل الإجراءات التلقائية
-          {enabledCount > 0 && (
-            <Badge variant="secondary" className="mr-1">{enabledCount}</Badge>
-          )}
-        </Button>
+        {children || (
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="bg-gradient-to-r from-primary/10 to-amber-500/10 border-primary/30 hover:border-primary gap-2"
+          >
+            <Zap className="h-4 w-4 text-primary" />
+            تفعيل الإجراءات التلقائية
+            {enabledCount > 0 && (
+              <Badge variant="secondary" className="mr-1">{enabledCount}</Badge>
+            )}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0">
         <DialogHeader className="p-6 pb-0">

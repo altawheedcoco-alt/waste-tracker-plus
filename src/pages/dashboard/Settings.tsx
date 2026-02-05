@@ -15,7 +15,8 @@ import {
   Volume2,
   Shield,
   FileText,
-  Lock
+  Lock,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -31,6 +32,7 @@ import NotificationSoundSettings from '@/components/settings/NotificationSoundSe
 import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
 import OrganizationTermsSettings from '@/components/settings/OrganizationTermsSettings';
 import TwoFactorSetup from '@/components/security/TwoFactorSetup';
+import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -144,7 +146,7 @@ const Settings = () => {
       <Tabs defaultValue="themes" className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid overflow-x-auto",
-          isTransporter ? "grid-cols-8" : "grid-cols-7"
+          isTransporter ? "grid-cols-9" : "grid-cols-8"
         )}>
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
@@ -165,6 +167,10 @@ const Settings = () => {
           <TabsTrigger value="sounds" className="gap-2">
             <Volume2 className="h-4 w-4" />
             <span className="hidden sm:inline">الأصوات</span>
+          </TabsTrigger>
+          <TabsTrigger value="automation" className="gap-2">
+            <Zap className="h-4 w-4" />
+            <span className="hidden sm:inline">الأتمتة</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="gap-2">
             <Lock className="h-4 w-4" />
@@ -551,6 +557,32 @@ const Settings = () => {
         {/* Sounds Tab */}
         <TabsContent value="sounds" className="space-y-6">
           <NotificationSoundSettings />
+        </TabsContent>
+
+        {/* Automation Tab */}
+        <TabsContent value="automation" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                الإجراءات التلقائية
+              </CardTitle>
+              <CardDescription>
+                إدارة أتمتة العمليات والمهام التلقائية في النظام
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AutomationSettingsDialog>
+                <Button className="w-full gap-2" size="lg">
+                  <Zap className="h-5 w-5" />
+                  فتح إعدادات الأتمتة
+                </Button>
+              </AutomationSettingsDialog>
+              <p className="text-sm text-muted-foreground mt-4 text-center">
+                أكثر من 150 إجراء تلقائي متاح للتفعيل
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Security Tab */}
