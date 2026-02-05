@@ -11,6 +11,8 @@ import { MapPin, Navigation, Loader2, Search, Check, Map, Building2, Globe } fro
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import GoogleMapsSearchBox from './GoogleMapsSearchBox';
+import { useGoogleMaps } from './GoogleMapsProvider';
 
 interface LocationPickerProps {
   value: string;
@@ -35,6 +37,7 @@ interface LocationSuggestion {
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
 const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوان...', label }: LocationPickerProps) => {
+  const { isLoaded: googleMapsLoaded } = useGoogleMaps();
   const [activeTab, setActiveTab] = useState<string>('search');
   
   // Current location state
@@ -298,88 +301,35 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
           </TabsTrigger>
         </TabsList>
 
-        {/* Search Tab */}
+        {/* Google Places Search Tab */}
         <TabsContent value="search" className="mt-3">
-          <div className="relative" ref={searchRef}>
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="ابحث عن عنوان أو مكان في مصر..."
-                className="pr-10"
-                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              />
-              {searchLoading && (
-                <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
-              )}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <Globe className="w-4 h-4 text-primary" />
+              <span>بحث عن المواقع والعناوين</span>
+              <Badge variant="secondary" className="text-[10px]">Google Places</Badge>
             </div>
-
-            {/* Suggestions Dropdown with ScrollArea for many results */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden">
-                <ScrollArea className="max-h-[350px]">
-                  {suggestions.map((suggestion, index) => {
-                    // Extract address parts for better display
-                    const parts = suggestion.display_name.split(/[-,]/);
-                    const mainName = parts[0]?.trim();
-                    const subLocation = parts.slice(1, 3).join('، ').trim();
-                    const isFromDatabase = suggestion.source === 'database' || suggestion.source === 'organization';
-                    
-                    return (
-                      <button
-                        key={index}
-                        type="button"
-                        className={cn(
-                          "w-full p-3 text-right hover:bg-muted transition-colors flex items-start gap-2 border-b last:border-b-0",
-                          isFromDatabase && "bg-primary/5"
-                        )}
-                        onClick={() => handleSuggestionSelect(suggestion)}
-                      >
-                        {isFromDatabase ? (
-                          <Building2 className="w-4 h-4 mt-1 text-primary flex-shrink-0" />
-                        ) : (
-                          <Globe className="w-4 h-4 mt-1 text-muted-foreground flex-shrink-0" />
-                        )}
-                        <div className="flex flex-col gap-1 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">{mainName}</span>
-                            {isFromDatabase && (
-                              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                                شركة مسجلة
-                              </Badge>
-                            )}
-                          </div>
-                          {subLocation && (
-                            <span className="text-xs text-muted-foreground">{subLocation}</span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </ScrollArea>
-                <div className="px-3 py-2 bg-muted/50 border-t text-xs text-muted-foreground flex items-center justify-between">
-                  <span>{suggestions.length} نتيجة</span>
-                  <span className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <Building2 className="w-3 h-3" />
-                      شركات
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Globe className="w-3 h-3" />
-                      خرائط
-                    </span>
-                  </span>
-                </div>
+            
+            {googleMapsLoaded ? (
+              <GoogleMapsSearchBox
+                onSelect={(result) => {
+                  onChange(result.address, result.position.lat, result.position.lng);
+                  toast.success('تم اختيار الموقع');
+                }}
+                placeholder="ابحث عن عنوان، مصنع، شركة..."
+                showLocalResults={true}
+              />
+            ) : (
+              <div className="text-center py-4 text-sm text-muted-foreground">
+                <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
+                جاري تحميل خرائط Google...
               </div>
             )}
-          </div>
 
-          {searchQuery.length > 0 && searchQuery.length < 2 && (
-            <p className="text-xs text-muted-foreground mt-2">
-              اكتب حرفين على الأقل للبحث
+            <p className="text-xs text-muted-foreground">
+              💡 بحث Google Places يدعم الأماكن والعناوين والمباني بدقة عالية
             </p>
-          )}
+          </div>
         </TabsContent>
 
         {/* Current Location Tab */}

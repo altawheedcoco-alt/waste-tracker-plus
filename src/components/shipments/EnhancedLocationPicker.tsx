@@ -15,6 +15,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
 import { useSavedLocations, SavedLocation } from '@/hooks/useSavedLocations';
 import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
+import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
+import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
 import GoogleMapsLocationPicker from '@/components/maps/GoogleMapsLocationPicker';
 import {
   DropdownMenu,
@@ -485,27 +487,27 @@ const EnhancedLocationPicker = ({
           </TabsList>
         </div>
 
-        {/* Free Search Tab - Primary */}
+        {/* Google Places Search Tab - Primary */}
         <TabsContent value="search" className="mt-3">
           <Card>
             <CardContent className="p-4 space-y-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Globe className="w-4 h-4 text-blue-600" />
+                <Globe className="w-4 h-4 text-primary" />
                 <span>بحث عن المواقع والعناوين</span>
-                <Badge variant="secondary" className="text-[10px]">Mapbox</Badge>
+                <Badge variant="secondary" className="text-[10px]">Google Places</Badge>
               </div>
-              <FreeLocationSearch
-                value={value}
-                onChange={(address, coords) => {
-                  onChange(address, coords);
-                  if (address) {
-                    setLastSelectedLocation({ address, coords });
-                    setShowSavePrompt(true);
-                    toast.success('تم اختيار الموقع');
-                  }
+              <GoogleMapsSearchBox
+                onSelect={(result) => {
+                  onChange(result.address, result.position);
+                  setLastSelectedLocation({ 
+                    address: result.address, 
+                    coords: result.position 
+                  });
+                  setShowSavePrompt(true);
+                  toast.success('تم اختيار الموقع');
                 }}
                 placeholder="ابحث عن عنوان، مصنع، شركة..."
-                showCurrentLocation={true}
+                showLocalResults={true}
               />
               
               {/* Save Location Prompt */}
@@ -536,7 +538,7 @@ const EnhancedLocationPicker = ({
               )}
               
               <p className="text-xs text-muted-foreground">
-                💡 بحث مجاني بالكامل يدعم الأماكن والعناوين والمباني
+                💡 بحث Google Places يدعم الأماكن والعناوين والمباني بدقة عالية
               </p>
             </CardContent>
           </Card>
