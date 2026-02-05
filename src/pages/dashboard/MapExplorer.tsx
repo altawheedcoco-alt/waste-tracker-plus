@@ -1,14 +1,12 @@
+/// <reference types="@types/google.maps" />
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Map, { Marker, NavigationControl, GeolocateControl, Source, Layer } from 'react-map-gl';
-import type { MapRef, MapLayerMouseEvent } from 'react-map-gl';
-import type { SymbolLayout, SymbolPaint, CircleLayout, CirclePaint } from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
-  MapPin, Crosshair, Info, Loader2, Sparkles, 
-  Building2, Factory, Globe, Navigation, X, Search,
+  MapPin, Loader2, 
+  Building2, Factory, Globe, X,
   Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database,
-  Bot
+  Copy, ExternalLink
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,29 +15,16 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { cn } from '@/lib/utils';
-import AILocationChat from '@/components/maps/AILocationChat';
-import MapboxSearchBox, { SearchResultItem } from '@/components/maps/MapboxSearchBox';
+import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import GoogleMapComponent from '@/components/maps/GoogleMapComponent';
+import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
-
-// أنماط الخريطة المتاحة
+// أنماط الخريطة المتاحة (Google Maps)
 const MAP_STYLES = {
-  streets: {
-    url: 'mapbox://styles/mapbox/streets-v12',
-    label: 'شوارع',
-    icon: MapIcon,
-  },
-  satellite: {
-    url: 'mapbox://styles/mapbox/satellite-streets-v12',
-    label: 'قمر صناعي',
-    icon: Satellite,
-  },
-  outdoors: {
-    url: 'mapbox://styles/mapbox/outdoors-v12',
-    label: 'طبوغرافي',
-    icon: Layers,
-  },
+  roadmap: { label: 'شوارع', icon: MapIcon },
+  satellite: { label: 'قمر صناعي', icon: Satellite },
+  hybrid: { label: 'هجين', icon: Layers },
+  terrain: { label: 'طبوغرافي', icon: Globe },
 } as const;
 
 type MapStyleKey = keyof typeof MAP_STYLES;
@@ -58,53 +43,38 @@ interface IndustrialFacility {
 }
 
 const MapExplorer = () => {
+  const { isLoaded, loadError } = useGoogleMaps();
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
-  const [mapStyle, setMapStyle] = useState<MapStyleKey>('streets');
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>('roadmap');
   const [showFactoryMarkers, setShowFactoryMarkers] = useState(true);
   const [facilities, setFacilities] = useState<IndustrialFacility[]>([]);
   const [isLoadingFacilities, setIsLoadingFacilities] = useState(false);
   const [isFetchingFromSource, setIsFetchingFromSource] = useState(false);
-  const [fetchingSource, setFetchingSource] = useState<'google' | null>(null);
   const [facilitiesCount, setFacilitiesCount] = useState(0);
-  const [showAIChat, setShowAIChat] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const mapRef = useRef<MapRef>(null);
-
-  const [viewState, setViewState] = useState({
-    longitude: 31.2357,
-    latitude: 30.0444,
-    zoom: 10,
-  });
+  const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
+  const [mapZoom, setMapZoom] = useState(10);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
 
   // Get user location on mount
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation({
+          const loc = {
             lat: position.coords.latitude,
             lng: position.coords.longitude
-          });
+          };
+          setUserLocation(loc);
+          setMapCenter(loc);
         },
         () => {
-          // Default to Cairo
           setUserLocation({ lat: 30.0444, lng: 31.2357 });
         }
       );
     }
-  }, []);
-
-  // Handle AI location selection
-  const handleAILocationSelect = useCallback((location: { name: string; lat: number; lng: number; address?: string }) => {
-    setSelectedPosition({ lat: location.lat, lng: location.lng });
-    setSelectedAddress(location.address || location.name);
-    setViewState(prev => ({
-      ...prev,
-      longitude: location.lng,
-      latitude: location.lat,
-      zoom: 15,
-    }));
   }, []);
 
   // جلب المنشآت من قاعدة البيانات
@@ -130,12 +100,9 @@ const MapExplorer = () => {
   // جلب المنشآت من Google Maps
   const fetchFromExternalSource = async () => {
     setIsFetchingFromSource(true);
-    setFetchingSource('google');
-    
-    const sourceName = 'Google Maps';
     
     try {
-      toast.info(`جاري جلب المنشآت الصناعية من ${sourceName}...`, { duration: 10000 });
+      toast.info('جاري جلب المنشآت الصناعية من Google Maps...', { duration: 10000 });
       
       const { data, error } = await supabase.functions.invoke('fetch-industrial-facilities', {
         body: { source: 'google' }
@@ -145,17 +112,15 @@ const MapExplorer = () => {
       
       if (data.success) {
         toast.success(data.message);
-        // إعادة تحميل البيانات
         await loadFacilities();
       } else {
         throw new Error(data.error);
       }
     } catch (error) {
-      console.error(`Error fetching from ${sourceName}:`, error);
-      toast.error(`فشل في جلب البيانات من ${sourceName}`);
+      console.error('Error fetching from Google:', error);
+      toast.error('فشل في جلب البيانات من Google Maps');
     } finally {
       setIsFetchingFromSource(false);
-      setFetchingSource(null);
     }
   };
 
@@ -164,140 +129,81 @@ const MapExplorer = () => {
     loadFacilities();
   }, [loadFacilities]);
 
-  // تحويل بيانات المنشآت إلى GeoJSON
-  const industrialGeoJSON: GeoJSON.FeatureCollection = {
-    type: 'FeatureCollection',
-    features: facilities.map((facility) => ({
-      type: 'Feature' as const,
-      id: facility.id,
-      properties: {
-        name: facility.name_ar || facility.name,
-        city: facility.city || '',
-        governorate: facility.governorate || '',
-        type: facility.facility_type,
-        typeLabel: facility.facility_type === 'factory' ? 'مصنع' : 
-                   facility.facility_type === 'zone' ? 'منطقة صناعية' : 
-                   facility.facility_type === 'recycling' ? 'منشأة تدوير' :
-                   facility.facility_type === 'workshop' ? 'ورشة' :
-                   facility.facility_type === 'plant' ? 'مصنع كبير' : 'منشأة',
-        isVerified: facility.is_verified,
-        address: facility.address,
-      },
-      geometry: {
-        type: 'Point' as const,
-        coordinates: [facility.longitude, facility.latitude],
-      },
-    })),
+  // Update markers when facilities change
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isLoaded || !showFactoryMarkers) {
+      // Clear markers if not showing
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+      return;
+    }
+
+    // Clear old markers
+    markersRef.current.forEach(marker => marker.setMap(null));
+    markersRef.current = [];
+
+    // Add new markers
+    facilities.forEach(facility => {
+      const marker = new window.google.maps.Marker({
+        position: { lat: facility.latitude, lng: facility.longitude },
+        map: mapInstanceRef.current!,
+        title: facility.name_ar || facility.name,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: facility.is_verified ? '#22c55e' : '#3b82f6',
+          fillOpacity: 0.9,
+          strokeColor: '#ffffff',
+          strokeWeight: 2,
+        },
+      });
+
+      marker.addListener('click', () => {
+        setSelectedPosition({ lat: facility.latitude, lng: facility.longitude });
+        setSelectedAddress(`${facility.name_ar || facility.name} - ${facility.city || ''} - ${facility.governorate || ''}`);
+        toast.success('تم تحديد الموقع');
+      });
+
+      markersRef.current.push(marker);
+    });
+  }, [facilities, isLoaded, showFactoryMarkers]);
+
+  // Handle map load
+  const handleMapLoad = (map: google.maps.Map) => {
+    mapInstanceRef.current = map;
+    map.setMapTypeId(mapStyle);
   };
 
-  // معالجة النقر على علامات المصانع
-  const handleFactoryClick = useCallback((e: MapLayerMouseEvent) => {
-    if (e.features && e.features.length > 0) {
-      const feature = e.features[0];
-      const coords = (feature.geometry as GeoJSON.Point).coordinates;
-      const props = feature.properties;
-      
-      setSelectedPosition({ lat: coords[1], lng: coords[0] });
-      const addressParts = [props?.name, props?.city, props?.governorate].filter(Boolean);
-      setSelectedAddress(addressParts.join(' - '));
-      setViewState(prev => ({
-        ...prev,
-        longitude: coords[0],
-        latitude: coords[1],
-        zoom: 14,
-      }));
-      toast.success('تم تحديد الموقع');
+  // Handle map style change
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setMapTypeId(mapStyle);
     }
-  }, []);
+  }, [mapStyle]);
 
-  // إعداد تفاعلية الخريطة
-  const onMapLoad = useCallback(() => {
-    const map = mapRef.current?.getMap();
-    if (!map) return;
-
-    // تغيير المؤشر عند المرور فوق المصانع
-    map.on('mouseenter', 'industrial-labels', () => {
-      map.getCanvas().style.cursor = 'pointer';
-    });
-    map.on('mouseleave', 'industrial-labels', () => {
-      map.getCanvas().style.cursor = '';
-    });
-    
-    // تعريب جميع التسميات على الخريطة
-    const arabicLayers = [
-      'country-label',
-      'state-label', 
-      'settlement-label',
-      'settlement-subdivision-label',
-      'settlement-minor-label',
-      'airport-label',
-      'poi-label',
-      'transit-label',
-      'road-label',
-      'road-number-shield',
-      'natural-point-label',
-      'natural-line-label',
-      'waterway-label',
-      'water-point-label',
-      'water-line-label',
-      'place-city-label',
-      'place-town-label',
-      'place-village-label',
-      'place-neighborhood-label'
-    ];
-    
-    arabicLayers.forEach(layerId => {
-      try {
-        if (map.getLayer(layerId)) {
-          map.setLayoutProperty(layerId, 'text-field', ['coalesce', ['get', 'name_ar'], ['get', 'name']]);
-        }
-      } catch {}
-    });
-  }, []);
-
-
-  // Reverse geocode using Mapbox
-  const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-    try {
-      const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
-      );
-      const data = await response.json();
-      if (data.features && data.features.length > 0) {
-        return data.features[0].place_name;
-      }
-      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    } catch {
-      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    }
+  // Handle position select from map
+  const handlePositionSelect = async (position: { lat: number; lng: number }, address?: string) => {
+    setSelectedPosition(position);
+    setSelectedAddress(address || `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`);
+    toast.success('تم تحديد الموقع');
   };
 
   // Handle search result selection
-  const handleSearchResultSelect = useCallback((result: SearchResultItem) => {
-    const position = { lat: result.lat, lng: result.lng };
-    setSelectedPosition(position);
-    setSelectedAddress(result.address || result.name);
-    setViewState({
-      longitude: result.lng,
-      latitude: result.lat,
-      zoom: 15,
-    });
-    toast.success('تم تحديد الموقع');
-  }, []);
-
-  const handleMapClick = async (event: any) => {
-    const { lngLat } = event;
-    const position = { lat: lngLat.lat, lng: lngLat.lng };
-    setSelectedPosition(position);
-    
-    const address = await reverseGeocode(position.lat, position.lng);
-    setSelectedAddress(address);
+  const handleSearchResultSelect = (result: {
+    position: { lat: number; lng: number };
+    address: string;
+    name: string;
+  }) => {
+    setSelectedPosition(result.position);
+    setSelectedAddress(result.address);
+    setMapCenter(result.position);
+    setMapZoom(15);
     toast.success('تم تحديد الموقع');
   };
 
   const handleCopyCoordinates = () => {
     if (selectedPosition) {
-      const coords = `${selectedPosition.lat}, ${selectedPosition.lng}`;
+      const coords = `${selectedPosition.lat.toFixed(6)}, ${selectedPosition.lng.toFixed(6)}`;
       navigator.clipboard.writeText(coords);
       toast.success('تم نسخ الإحداثيات');
     }
@@ -309,6 +215,24 @@ const MapExplorer = () => {
       toast.success('تم نسخ العنوان');
     }
   };
+
+  const openInGoogleMaps = () => {
+    if (selectedPosition) {
+      const url = `https://www.google.com/maps?q=${selectedPosition.lat},${selectedPosition.lng}`;
+      window.open(url, '_blank');
+    }
+  };
+
+  if (loadError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center text-destructive">
+          <MapPin className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>فشل تحميل الخريطة</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -322,7 +246,7 @@ const MapExplorer = () => {
               الخريطة التفاعلية
             </h1>
             <p className="text-sm text-muted-foreground">
-              ابحث عن أي موقع أو مصنع أو شركة - نتائج من مصادر متعددة
+              ابحث عن أي موقع أو مصنع أو شركة في مصر
             </p>
           </div>
         </div>
@@ -333,27 +257,20 @@ const MapExplorer = () => {
             <Database className="w-3 h-3" />
             {facilitiesCount} منشأة
           </Badge>
-          <Badge variant="outline" className="gap-1">
-            <Sparkles className="w-3 h-3" />
-            ذكاء اصطناعي
-          </Badge>
-          <Badge variant="outline" className="gap-1">
+          <Badge variant="default" className="gap-1 bg-destructive">
             <Globe className="w-3 h-3" />
-            خرائط عالمية
+            Google Maps
           </Badge>
         </div>
       </div>
 
-      {/* Mapbox Search Box */}
+      {/* Search Box */}
       <Card>
         <CardContent className="pt-4 space-y-4">
-          <MapboxSearchBox
-            onResultSelect={handleSearchResultSelect}
-            placeholder="ابحث عن موقع، مصنع، سيارة، منطقة صناعية..."
-            includeFactories={true}
-            includeVehicles={true}
-            includeMapbox={true}
-            userLocation={userLocation}
+          <GoogleMapsSearchBox
+            onSelect={handleSearchResultSelect}
+            placeholder="ابحث عن موقع، مصنع، منطقة صناعية..."
+            showLocalResults={true}
           />
 
           {/* Actions Row */}
@@ -362,11 +279,11 @@ const MapExplorer = () => {
               <Button
                 variant="default"
                 size="sm"
-                onClick={() => fetchFromExternalSource()}
+                onClick={fetchFromExternalSource}
                 disabled={isFetchingFromSource}
                 className="gap-2"
               >
-                {fetchingSource === 'google' ? (
+                {isFetchingFromSource ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Download className="w-4 h-4" />
@@ -392,29 +309,17 @@ const MapExplorer = () => {
               {facilitiesCount > 0 ? (
                 <>عدد المنشآت المحفوظة: <strong>{facilitiesCount}</strong></>
               ) : (
-                'لا توجد منشآت محفوظة - اضغط على "جلب المنشآت الصناعية"'
+                'لا توجد منشآت محفوظة'
               )}
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Map and AI Chat Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Map */}
-        <Card className={cn("overflow-hidden", showAIChat ? "lg:col-span-2" : "lg:col-span-3")}>
-          <CardContent className="p-0">
-            <div className="relative" style={{ height: 'calc(100vh - 450px)', minHeight: '400px' }}>
-              {/* AI Chat Toggle Button */}
-              <Button
-                variant={showAIChat ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowAIChat(!showAIChat)}
-                className="absolute top-3 left-3 z-10 gap-1.5 shadow-lg bg-background/95 backdrop-blur-sm"
-              >
-                <Bot className="w-4 h-4" />
-                <span className="hidden sm:inline">مساعد الذكاء الاصطناعي</span>
-              </Button>
+      {/* Map */}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          <div className="relative" style={{ height: 'calc(100vh - 450px)', minHeight: '400px' }}>
             {/* Map Style Switcher */}
             <div className="absolute top-3 right-3 z-10 flex flex-col sm:flex-row gap-2">
               <ToggleGroup 
@@ -450,338 +355,86 @@ const MapExplorer = () => {
                 <span className="hidden sm:inline">المصانع ({facilitiesCount})</span>
               </Button>
             </div>
-            
-            <Map
-              ref={mapRef}
-              {...viewState}
-              onMove={evt => setViewState(evt.viewState)}
-              onClick={(e) => {
-                // التحقق من النقر على المصانع
-                const features = e.features;
-                if (features && features.length > 0 && features[0].layer?.id === 'industrial-labels') {
-                  handleFactoryClick(e);
-                } else {
-                  handleMapClick(e);
-                }
-              }}
-              mapboxAccessToken={MAPBOX_TOKEN}
-              mapStyle={MAP_STYLES[mapStyle].url}
-              style={{ width: '100%', height: '100%' }}
-              attributionControl={false}
-              interactiveLayerIds={showFactoryMarkers ? ['industrial-labels'] : []}
-              locale={{ 
-                'NavigationControl.ZoomIn': 'تكبير', 
-                'NavigationControl.ZoomOut': 'تصغير', 
-                'NavigationControl.ResetBearing': 'إعادة الاتجاه', 
-                'GeolocateControl.FindMyLocation': 'موقعي', 
-                'GeolocateControl.LocationNotAvailable': 'الموقع غير متاح' 
-              }}
-              onLoad={onMapLoad}
-            >
-              <NavigationControl position="bottom-right" />
-              <GeolocateControl
-                position="bottom-right"
-                trackUserLocation
-                showUserHeading
-                onGeolocate={async (e) => {
-                  const position = { lat: e.coords.latitude, lng: e.coords.longitude };
-                  setSelectedPosition(position);
-                  const address = await reverseGeocode(position.lat, position.lng);
-                  setSelectedAddress(address);
-                  toast.success('تم تحديد موقعك الحالي');
-                }}
-              />
-              
-              {/* GeoJSON Source للمصانع والمناطق الصناعية */}
-              {showFactoryMarkers && facilities.length > 0 && (
-                <Source id="industrial-data" type="geojson" data={industrialGeoJSON}>
-                  {/* طبقة الرموز symbol مع النص والأيقونة (Permanent Labels) */}
-                  <Layer
-                    id="industrial-labels"
-                    type="symbol"
-                    layout={{
-                      // سحب اسم المصنع من قاعدة البيانات
-                      'text-field': ['get', 'name'],
-                      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-                      'text-size': [
-                        'interpolate', ['linear'], ['zoom'],
-                        6, 10,
-                        10, 12,
-                        14, 14,
-                        18, 16
-                      ],
-                      // موضع النص المتغير حول الأيقونة
-                      'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-                      'text-radial-offset': 0.8,
-                      'text-justify': 'auto',
-                      // لضمان ظهور الاسم دائماً وعدم اختفائه عند التداخل
-                      'text-allow-overlap': true,
-                      'text-ignore-placement': true,
-                      'text-max-width': 12,
-                      // أيقونة المصنع
-                      'icon-image': [
-                        'match', ['get', 'type'],
-                        'factory', 'industry-15',
-                        'zone', 'industrial-15',
-                        'recycling', 'recycling-15',
-                        'workshop', 'hardware-15',
-                        'plant', 'warehouse-15',
-                        'marker-15'
-                      ],
-                      'icon-size': [
-                        'interpolate', ['linear'], ['zoom'],
-                        6, 0.8,
-                        10, 1,
-                        14, 1.3,
-                        18, 1.5
-                      ],
-                      'icon-allow-overlap': true,
-                      'icon-ignore-placement': true,
-                      // ترتيب الرسم حسب الأهمية (الموثق أولاً)
-                      'symbol-sort-key': ['case', ['get', 'isVerified'], 1, 2],
-                    } as SymbolLayout}
-                    paint={{
-                      'text-color': [
-                        'match', ['get', 'type'],
-                        'factory', '#dc2626',
-                        'zone', '#2563eb',
-                        'recycling', '#16a34a',
-                        'workshop', '#d97706',
-                        'plant', '#7c3aed',
-                        '#374151'
-                      ],
-                      'text-halo-color': '#ffffff',
-                      'text-halo-width': 2,
-                      'text-halo-blur': 0.5,
-                      'icon-opacity': 1,
-                      'icon-halo-color': '#ffffff',
-                      'icon-halo-width': 1,
-                    } as SymbolPaint}
-                  />
-                </Source>
-              )}
-              
-              {/* Selected Position Marker */}
-              {selectedPosition && (
-                <Marker
-                  longitude={selectedPosition.lng}
-                  latitude={selectedPosition.lat}
-                  anchor="bottom"
-                >
-                  <motion.div
-                    initial={{ scale: 0, y: -20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                  >
-                    <div
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.8))',
-                        border: '4px solid white',
-                        borderRadius: '50% 50% 50% 0',
-                        transform: 'rotate(-45deg)',
-                        boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-                      }}
-                    />
-                  </motion.div>
-                </Marker>
-              )}
-            </Map>
-            
-            {/* Loading Overlay */}
-            {isLoadingFacilities && (
-              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20">
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  <p className="text-sm text-muted-foreground">جاري تحميل المنشآت...</p>
-                </div>
-              </div>
-            )}
-            
-            {/* Map Attribution */}
-            <Badge 
-              variant="secondary" 
-              className="absolute bottom-3 left-3 z-10 text-[10px] bg-background/80 backdrop-blur-sm"
-            >
-              © Mapbox
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
 
-        {/* AI Chat Panel */}
-        {showAIChat && (
-          <div className="lg:col-span-1">
-            <AILocationChat 
-              onLocationSelect={handleAILocationSelect}
+            {/* Map Component */}
+            <GoogleMapComponent
+              center={mapCenter}
+              zoom={mapZoom}
+              selectedPosition={selectedPosition}
+              onPositionSelect={handlePositionSelect}
+              onMapLoad={handleMapLoad}
+              height="100%"
+              clickable={true}
+              mapTypeControl={false}
+              fullscreenControl={true}
+              zoomControl={true}
             />
-          </div>
-        )}
-      </div>
 
-      {/* Selected Location Info */}
-      <AnimatePresence>
-        {selectedPosition && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          >
-            <Card className="bg-gradient-to-l from-primary/10 to-primary/5 border-primary/30 shadow-lg">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-3 text-lg">
-                  <div className="p-2.5 bg-primary rounded-xl shadow-md">
-                    <MapPin className="w-5 h-5 text-primary-foreground" />
-                  </div>
-                  <div>
-                    <span>الموقع المحدد</span>
-                    <p className="text-sm font-normal text-muted-foreground mt-0.5">
-                      تم تحديد الموقع بنجاح - يمكنك نسخ البيانات أو فتحه في خرائط جوجل
-                    </p>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Address */}
-                {selectedAddress && (
-                  <div className="p-4 bg-background rounded-xl border shadow-sm">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-3 flex-1">
-                        <MapPin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-1">العنوان</p>
-                          <p className="text-sm leading-relaxed">{selectedAddress}</p>
-                        </div>
+            {/* Selected Location Info */}
+            <AnimatePresence>
+              {selectedPosition && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-10"
+                >
+                  <Card className="shadow-xl border-2">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-primary" />
+                          الموقع المحدد
+                        </CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => {
+                            setSelectedPosition(null);
+                            setSelectedAddress('');
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
                       </div>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleCopyAddress}
-                        className="shrink-0"
-                      >
-                        نسخ العنوان
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Coordinates */}
-                <div className="p-4 bg-background rounded-xl border shadow-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <Crosshair className="w-5 h-5 text-primary shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground mb-1">الإحداثيات</p>
-                        <p className="text-sm font-mono" dir="ltr">
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {selectedAddress && (
+                        <div className="text-sm">
+                          <p className="text-muted-foreground mb-1">العنوان:</p>
+                          <p className="font-medium leading-relaxed">{selectedAddress}</p>
+                        </div>
+                      )}
+                      
+                      <div className="text-sm">
+                        <p className="text-muted-foreground mb-1">الإحداثيات:</p>
+                        <p className="font-mono text-xs" dir="ltr">
                           {selectedPosition.lat.toFixed(6)}, {selectedPosition.lng.toFixed(6)}
                         </p>
                       </div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={handleCopyCoordinates}
-                      className="shrink-0"
-                    >
-                      نسخ الإحداثيات
-                    </Button>
-                  </div>
-                </div>
-                
-                {/* Actions */}
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <Button 
-                    onClick={() => {
-                      const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedPosition.lat},${selectedPosition.lng}&travelmode=driving`;
-                      window.open(url, '_blank');
-                      toast.success('جاري فتح الملاحة...');
-                    }}
-                    className="flex-1 min-w-[160px] gap-2 bg-primary hover:bg-primary/90"
-                  >
-                    <Navigation className="w-4 h-4" />
-                    الذهاب إليه (ملاحة)
-                  </Button>
-                  
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      const url = `https://www.google.com/maps?q=${selectedPosition.lat},${selectedPosition.lng}`;
-                      window.open(url, '_blank');
-                    }}
-                    className="flex-1 min-w-[140px] gap-2"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    عرض على الخريطة
-                  </Button>
-                  
-                  <Button 
-                    variant="secondary"
-                    onClick={() => {
-                      const data = {
-                        lat: selectedPosition.lat,
-                        lng: selectedPosition.lng,
-                        address: selectedAddress
-                      };
-                      navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-                      toast.success('تم نسخ بيانات الموقع الكاملة');
-                    }}
-                    className="flex-1 min-w-[140px] gap-2"
-                  >
-                    <Crosshair className="w-4 h-4" />
-                    نسخ البيانات الكاملة
-                  </Button>
-                  
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      setSelectedPosition(null);
-                      setSelectedAddress('');
-                      toast.info('تم إلغاء تحديد الموقع');
-                    }}
-                    className="gap-2"
-                  >
-                    <X className="w-4 h-4" />
-                    إلغاء التحديد
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Info Card */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Info className="w-4 h-4 text-muted-foreground" />
-            نصائح الاستخدام
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="text-sm text-muted-foreground space-y-2">
-            <li className="flex items-center gap-2">
-              <Download className="w-4 h-4 text-primary" />
-              اضغط "جلب المنشآت الصناعية" لتحميل كافة المنشآت الصناعية في مصر
-            </li>
-            <li className="flex items-center gap-2">
-              <Search className="w-4 h-4 text-primary" />
-              ابحث عن أي موقع باللغة العربية أو الإنجليزية
-            </li>
-            <li className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-primary" />
-              اضغط على الخريطة مباشرة لتحديد موقع
-            </li>
-            <li className="flex items-center gap-2">
-              <Factory className="w-4 h-4 text-primary" />
-              المنشآت الموثقة تظهر بإطار ذهبي
-            </li>
-            <li className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              الذكاء الاصطناعي يساعدك في تصحيح الأخطاء الإملائية
-            </li>
-          </ul>
+                      <div className="flex gap-2 flex-wrap">
+                        <Button size="sm" variant="outline" onClick={handleCopyCoordinates} className="gap-1.5 flex-1">
+                          <Copy className="w-3 h-3" />
+                          نسخ الإحداثيات
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={handleCopyAddress} className="gap-1.5 flex-1">
+                          <Copy className="w-3 h-3" />
+                          نسخ العنوان
+                        </Button>
+                      </div>
+
+                      <Button size="sm" variant="default" onClick={openInGoogleMaps} className="w-full gap-2">
+                        <ExternalLink className="w-4 h-4" />
+                        فتح في خرائط جوجل
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </CardContent>
       </Card>
     </div>
