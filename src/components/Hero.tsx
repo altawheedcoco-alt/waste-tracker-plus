@@ -59,10 +59,18 @@ const Hero = () => {
             transition={{ duration: 0.8 }}
             className="mb-6"
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm">
-              <Globe className="w-4 h-4" />
-              حلول ذكية لبيئة نظيفة
-            </span>
+            <div className="flex flex-col items-center gap-3">
+              <h2 className="text-2xl md:text-3xl font-bold text-primary">
+                iRecycle Waste Management System
+              </h2>
+              <h3 className="text-xl md:text-2xl font-semibold text-foreground/80">
+                نظام آي ريسايكل لإدارة المخلفات
+              </h3>
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm">
+                <Globe className="w-4 h-4" />
+                حلول ذكية لبيئة نظيفة
+              </span>
+            </div>
           </motion.div>
 
           <motion.h1
