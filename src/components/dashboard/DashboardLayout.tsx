@@ -45,6 +45,8 @@ import {
   Activity,
   Headphones,
   Bookmark,
+  Link as LinkIcon,
+  Zap,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -308,6 +310,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
     { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
+    { icon: LinkIcon, label: 'روابط الإيداع السريع', path: '/dashboard/quick-deposit-links', key: 'quick-deposit-links' },
+    { icon: Zap, label: 'روابط الشحنات السريعة', path: '/dashboard/quick-shipment-links', key: 'quick-shipment-links' },
     { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
