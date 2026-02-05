@@ -1,2 +1,2 @@
-// Re-export Mapbox version for backwards compatibility
-export { default } from './MapboxInteractiveMapPicker';
+// Re-export Google Maps version
+export { default } from './GoogleMapsLocationPicker';

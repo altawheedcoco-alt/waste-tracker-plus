@@ -43,7 +43,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
-import MapboxNavigationDemo from '@/components/maps/MapboxNavigationDemo';
+import GoogleMapComponent from '@/components/maps/GoogleMapComponent';
 
 // Real Egyptian industrial locations
 const ORIGIN = { lat: 30.4628, lng: 31.1837, name: 'مصنع نستله للمياه - بنها', city: 'بنها - القليوبية' };
@@ -627,20 +627,15 @@ const NavigationDemo = () => {
       <div className={`grid ${showFullscreen ? '' : 'lg:grid-cols-3'} gap-4 p-4`}>
         {/* Map Section */}
         <div className={`${showFullscreen ? 'h-screen' : 'lg:col-span-2 h-[650px]'} relative rounded-2xl overflow-hidden shadow-2xl border`}>
-          <MapboxNavigationDemo
-            origin={ORIGIN}
-            destination={DESTINATION}
-            currentPosition={currentPosition}
-            heading={heading}
-            completedRoute={completedRoute}
-            remainingRoute={remainingRoute}
-            steps={steps}
-            currentStep={currentStep}
-            isPlaying={isPlaying}
-            showWaypoints={showWaypoints}
-            selectedWaypoint={selectedWaypoint}
-            onWaypointSelect={setSelectedWaypoint}
-            showFullscreen={showFullscreen}
+          <GoogleMapComponent
+            center={{ lat: currentPosition[0], lng: currentPosition[1] }}
+            zoom={15}
+            markers={[
+              { position: { lat: ORIGIN.lat, lng: ORIGIN.lng }, title: ORIGIN.name, color: 'green' },
+              { position: { lat: DESTINATION.lat, lng: DESTINATION.lng }, title: DESTINATION.name, color: 'red' },
+              { position: { lat: currentPosition[0], lng: currentPosition[1] }, title: 'الموقع الحالي', color: 'blue' },
+            ]}
+            height="100%"
           />
 
           {/* Navigation Overlay - Current Instruction */}

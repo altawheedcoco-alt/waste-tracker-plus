@@ -1,2 +1,2 @@
-// Re-export Mapbox version for backwards compatibility
-export { default } from './MapboxDriverTrackingMap';
+// Re-export Google Maps Driver Tracking for backwards compatibility
+export { default } from './GoogleMapsDriverTracking';

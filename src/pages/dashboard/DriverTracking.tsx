@@ -293,7 +293,7 @@ const DriverTracking = () => {
               <DriverTrackingMap
                 drivers={filteredDrivers}
                 selectedDriver={selectedDriver}
-                onSelectDriver={setSelectedDriver}
+                onSelectDriver={(driver) => setSelectedDriver(driver as any)}
               />
             </CardContent>
           </Card>
