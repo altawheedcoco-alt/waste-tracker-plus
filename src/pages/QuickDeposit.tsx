@@ -55,6 +55,7 @@ import {
   Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { numberToArabicWords, formatEgyptianNumber } from '@/lib/arabicNumberWords';
 import logo from '@/assets/logo.png';
 
 const depositSchema = z.object({
@@ -140,6 +141,7 @@ const QuickDeposit = () => {
   const [notFound, setNotFound] = useState(false);
   const [expired, setExpired] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submittedData, setSubmittedData] = useState<DepositFormData | null>(null);
   
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
@@ -447,6 +449,7 @@ const QuickDeposit = () => {
         })
         .eq('id', linkData.id);
 
+      setSubmittedData(data);
       setSubmitted(true);
       toast.success('🎉 تم إرسال الإيداع بنجاح!');
     } catch (error) {
@@ -520,16 +523,20 @@ const QuickDeposit = () => {
     );
   }
 
-  // Success state
-  if (submitted) {
+  // Success state with detailed confirmation
+  if (submitted && submittedData) {
+    const depositAmount = parseFloat(submittedData.amount) || 0;
+    const amountInWords = numberToArabicWords(depositAmount);
+    const transferMethodLabel = transferMethods.find(m => m.value === submittedData.transferMethod)?.label || submittedData.transferMethod;
+    
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-500/10 via-background to-primary/10 p-4">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="max-w-md w-full"
+          className="max-w-lg w-full"
         >
-          <Card className="text-center border-emerald-200 bg-gradient-to-b from-emerald-50/50 to-background dark:from-emerald-950/30 dark:to-background">
+          <Card className="border-emerald-200 bg-gradient-to-b from-emerald-50/50 to-background dark:from-emerald-950/30 dark:to-background">
             <CardContent className="pt-8 pb-6">
               {/* Success Icon */}
               <motion.div
@@ -541,52 +548,138 @@ const QuickDeposit = () => {
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
 
-              <h1 className="text-2xl font-bold mb-2 text-emerald-700 dark:text-emerald-400">تم الإرسال بنجاح!</h1>
-              <p className="text-muted-foreground mb-4">
-                تم استلام إيداعك وسيتم مراجعته من قبل{' '}
-                <span className="font-semibold text-foreground">
-                  {linkData?.organization_name}
-                </span>
-              </p>
+              <h1 className="text-2xl font-bold mb-2 text-emerald-700 dark:text-emerald-400 text-center">
+                تم الإيداع بنجاح!
+              </h1>
               
-              {/* Show preset info in success */}
-              {(linkData?.partner_name || linkData?.preset_waste_type) && (
-                <div className="bg-muted/50 rounded-lg p-3 mb-4 text-sm">
-                  <p className="text-muted-foreground mb-2">تم تسجيل الإيداع لحساب:</p>
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {linkData?.partner_name && (
-                      <Badge variant="secondary" className="gap-1">
-                        <Building2 className="h-3 w-3" />
-                        {linkData.partner_name}
-                      </Badge>
-                    )}
-                    {linkData?.preset_waste_type && (
-                      <Badge variant="secondary" className="gap-1">
-                        <Package className="h-3 w-3" />
-                        {getWasteTypeLabel(linkData.preset_waste_type)}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Branding Thank You Message */}
+              {/* Deposit Summary */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.3 }}
+                className="mt-4 p-4 rounded-xl bg-white dark:bg-background border space-y-4"
+              >
+                {/* Amount Display */}
+                <div className="text-center p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 mb-1">المبلغ المودع</p>
+                  <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">
+                    {formatEgyptianNumber(depositAmount)} ج.م
+                  </p>
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
+                    {amountInWords}
+                  </p>
+                </div>
+
+                {/* Deposit Details */}
+                <div className="space-y-3 text-sm">
+                  {/* To Company */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                    <Building2 className="h-5 w-5 text-blue-600 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">تم الإيداع في حساب</p>
+                      <p className="font-bold text-blue-800 dark:text-blue-200">
+                        {linkData?.organization_name}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* From Company/Partner */}
+                  {linkData?.partner_name && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
+                      <Building2 className="h-5 w-5 text-purple-600 mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-purple-600 dark:text-purple-400">من شركة</p>
+                        <p className="font-bold text-purple-800 dark:text-purple-200">
+                          {linkData.partner_name}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Depositor Name */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <User className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">المودع</p>
+                      <p className="font-semibold">{submittedData.submitterName}</p>
+                    </div>
+                  </div>
+
+                  {/* Transfer Method */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">طريقة الإيداع</p>
+                      <p className="font-semibold">{transferMethodLabel}</p>
+                    </div>
+                  </div>
+
+                  {/* Bank Details */}
+                  {submittedData.bankName && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      <Landmark className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">البنك</p>
+                        <p className="font-semibold">
+                          {submittedData.bankName}
+                          {submittedData.bankBranch && ` - فرع ${submittedData.bankBranch}`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reference Number */}
+                  {submittedData.referenceNumber && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      <Receipt className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">رقم المرجع</p>
+                        <p className="font-semibold font-mono" dir="ltr">{submittedData.referenceNumber}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Date */}
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">تاريخ الإيداع</p>
+                      <p className="font-semibold">
+                        {format(submittedData.depositDate, 'EEEE، dd MMMM yyyy', { locale: ar })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  {submittedData.notes && (
+                    <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                      <Info className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">ملاحظات</p>
+                        <p className="text-sm">{submittedData.notes}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+
+              {/* Thank You & Branding */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
                 className="mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-emerald-500/5 to-accent/10 border border-primary/20"
               >
                 <div className="flex justify-center mb-3">
                   <img src={logo} alt="iRecycle" className="h-12 w-auto" />
                 </div>
-                <p className="text-sm font-medium text-foreground mb-1">
-                  شكراً لاستخدامك منصة آي ريسايكل
+                <p className="text-base font-bold text-foreground mb-1 text-center">
+                  شكراً لثقتكم بنا
                 </p>
-                <p className="text-xs text-muted-foreground mb-2">
-                  نظام آي ريسايكل لإدارة المخلفات
+                <p className="text-sm text-muted-foreground mb-2 text-center">
+                  نقدر تعاملكم معنا ونتطلع لخدمتكم دائماً
                 </p>
-                <p className="text-xs font-medium text-primary">
+                <p className="text-xs font-medium text-primary text-center">
                   iRecycle Waste Management System
                 </p>
                 <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
@@ -599,11 +692,11 @@ const QuickDeposit = () => {
                 <Button 
                   onClick={() => {
                     setSubmitted(false);
+                    setSubmittedData(null);
                     form.reset();
                     if (linkData?.preset_notes) {
                       form.setValue('notes', linkData.preset_notes);
                     }
-                    // Reset preset values
                     if (linkData?.preset_amount) {
                       form.setValue('amount', String(linkData.preset_amount));
                     }
