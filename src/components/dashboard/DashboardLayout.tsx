@@ -48,6 +48,7 @@ import {
   Link as LinkIcon,
   Zap,
   Fingerprint,
+  Brain,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -291,6 +292,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     ] : []),
     ...(isAdmin
       ? [
+          { icon: Brain, label: 'العين الذكية', path: '/dashboard/smart-insights', key: 'smart-insights' },
           { icon: Activity, label: 'حالة النظام', path: '/dashboard/system-status', key: 'system-status' },
           { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals', key: 'company-approvals' },
           { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals', key: 'driver-approvals' },
