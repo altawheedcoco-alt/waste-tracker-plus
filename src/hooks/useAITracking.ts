@@ -152,9 +152,14 @@ export const useAITracking = ({
     if (remainingDistance < 2) {
       recommendations.push('السائق قريب جداً من نقطة التسليم');
     }
+    if (remainingDistance < 0.5) {
+      recommendations.push('السائق وصل تقريباً - يمكن تأكيد التسليم');
+    }
 
     // Confidence based on data quality
     const confidence = Math.min(95, 50 + (locationHistory.length * 2) + (speeds.length > 10 ? 20 : 0));
+
+    const progress = pickupCoords ? calculateProgress(lastLocation, pickupCoords, deliveryCoords) : 0;
 
     setAnalysis({
       estimatedArrival,
@@ -170,8 +175,14 @@ export const useAITracking = ({
       ...prev,
       estimatedArrival,
       distanceRemaining: remainingDistance,
-      progress: pickupCoords ? calculateProgress(lastLocation, pickupCoords, deliveryCoords) : 0,
+      progress,
     }));
+
+    // Auto-suggest status change when close to destination
+    // This works together with the realtime tracking - AI provides the intelligence
+    if (remainingDistance < 0.3 && progress > 95) {
+      recommendations.push('🎯 الشحنة وصلت للوجهة - جاهزة للتأكيد');
+    }
   }, [locationHistory, deliveryCoords, pickupCoords, analysis.routeEfficiency]);
 
   const calculateProgress = (

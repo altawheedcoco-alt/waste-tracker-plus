@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,11 +18,17 @@ import {
   Gauge,
   TrendingUp,
   AlertCircle,
-  Info
+  Info,
+  Truck,
+  PackageCheck,
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TrackingMode, TRACKING_MODES } from '@/types/tracking';
 import { useTrackingSystem } from '@/hooks/useTrackingSystem';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -33,6 +39,7 @@ interface TrackingModeControllerProps {
   deliveryCoords: { lat: number; lng: number } | null;
   currentStatus: string;
   onModeChange?: (mode: TrackingMode) => void;
+  onStatusChange?: () => void;
   compact?: boolean;
 }
 
@@ -55,9 +62,12 @@ const TrackingModeController = ({
   deliveryCoords,
   currentStatus,
   onModeChange,
+  onStatusChange,
   compact = false,
 }: TrackingModeControllerProps) => {
+  const { user } = useAuth();
   const [showDetails, setShowDetails] = useState(!compact);
+  const [isCompleting, setIsCompleting] = useState(false);
   
   const {
     activeMode,
@@ -80,6 +90,60 @@ const TrackingModeController = ({
     switchMode(mode);
     onModeChange?.(mode);
   };
+
+  // Quick complete shipment (deliver + confirm together)
+  const handleQuickComplete = useCallback(async () => {
+    if (!user?.id || !shipmentId) return;
+    
+    setIsCompleting(true);
+    try {
+      // First: Update to delivered
+      const { error: deliverError } = await supabase
+        .from('shipments')
+        .update({ 
+          status: 'delivered',
+          delivered_at: new Date().toISOString()
+        })
+        .eq('id', shipmentId);
+
+      if (deliverError) throw deliverError;
+
+      // Log delivered status
+      await supabase.from('shipment_logs').insert({
+        shipment_id: shipmentId,
+        status: 'delivered' as any,
+        changed_by: user.id,
+        notes: `[${activeMode === 'realtime' ? 'تتبع فعلي' : activeMode === 'ai' ? 'تتبع ذكي' : 'يدوي'}] تم التسليم والتأكيد معاً`,
+      });
+
+      // Then: Update to confirmed
+      const { error: confirmError } = await supabase
+        .from('shipments')
+        .update({ 
+          status: 'confirmed',
+          confirmed_at: new Date().toISOString()
+        })
+        .eq('id', shipmentId);
+
+      if (confirmError) throw confirmError;
+
+      // Log confirmed status
+      await supabase.from('shipment_logs').insert({
+        shipment_id: shipmentId,
+        status: 'confirmed' as any,
+        changed_by: user.id,
+        notes: `[${activeMode === 'realtime' ? 'تتبع فعلي' : activeMode === 'ai' ? 'تتبع ذكي' : 'يدوي'}] الشحنة مكتملة`,
+      });
+
+      toast.success('تم تسليم وتأكيد الشحنة بنجاح');
+      onStatusChange?.();
+    } catch (error) {
+      console.error('Error completing shipment:', error);
+      toast.error('فشل في إكمال الشحنة');
+    } finally {
+      setIsCompleting(false);
+    }
+  }, [user?.id, shipmentId, activeMode, onStatusChange]);
 
   const currentState = getCurrentState();
   const currentConfig = getModeConfig(activeMode);
@@ -306,6 +370,38 @@ const TrackingModeController = ({
                 </p>
               </div>
             </div>
+          </motion.div>
+        )}
+
+        {/* Quick Complete Button - Available when in_transit */}
+        {(currentStatus === 'in_transit' || currentStatus === 'approved') && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="pt-2"
+          >
+            <Separator className="mb-4" />
+            <Button
+              onClick={handleQuickComplete}
+              disabled={isCompleting}
+              className="w-full gap-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
+              size="lg"
+            >
+              {isCompleting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  جاري الإكمال...
+                </>
+              ) : (
+                <>
+                  <PackageCheck className="h-5 w-5" />
+                  تسليم + تأكيد (إكمال الشحنة)
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              سيتم تسجيل التسليم والتأكيد معاً بنفس الوقت
+            </p>
           </motion.div>
         )}
       </CardContent>
