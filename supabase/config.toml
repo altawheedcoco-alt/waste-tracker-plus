@@ -65,3 +65,9 @@ verify_jwt = false
 
 [functions.generate-post-content]
 verify_jwt = false
+
+[functions.generate-receipt-pdf]
+verify_jwt = false
+
+[functions.extract-receipt-data]
+verify_jwt = false

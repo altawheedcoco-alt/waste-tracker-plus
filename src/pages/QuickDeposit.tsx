@@ -372,9 +372,9 @@ const QuickDeposit = () => {
   const onSubmit = async (data: DepositFormData) => {
     if (!linkData) return;
 
-    // Validate receipt requirement
-    if (linkData.require_receipt && !receiptFile) {
-      toast.error('يرجى رفع صورة الإيصال');
+    // صورة الإيصال إلزامية دائماً - قاعدة أساسية
+    if (!receiptFile) {
+      toast.error('يجب رفع صورة الإيصال الفعلي للمتابعة');
       return;
     }
 
@@ -816,25 +816,26 @@ const QuickDeposit = () => {
             <CardContent className="pt-6">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                  {/* Receipt Upload Section */}
+                  {/* Receipt Upload Section - صورة الإيصال إلزامية دائماً */}
                   <div className={cn(
                     "p-4 rounded-xl border-2 border-dashed",
-                    linkData?.require_receipt 
-                      ? "border-amber-400 bg-amber-50/50" 
-                      : "border-primary/30 bg-primary/5"
+                    !receiptFile 
+                      ? "border-destructive/50 bg-destructive/5" 
+                      : "border-emerald-400 bg-emerald-50/50 dark:border-emerald-600 dark:bg-emerald-950/20"
                   )}>
                     <div className="flex items-center gap-2 mb-3">
                       <Sparkles className="h-5 w-5 text-primary" />
                       <span className="font-semibold text-sm">
-                        صورة الإيصال {linkData?.require_receipt ? '*' : '(اختياري)'}
+                        صورة الإيصال *
                       </span>
-                      {linkData?.require_receipt && (
-                        <Badge variant="outline" className="text-xs text-amber-700 border-amber-400 gap-1">
-                          <Lock className="h-3 w-3" />
-                          مطلوب
-                        </Badge>
-                      )}
+                      <Badge variant="destructive" className="text-xs gap-1">
+                        <Lock className="h-3 w-3" />
+                        مطلوب
+                      </Badge>
                     </div>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      يجب رفع صورة واضحة للإيصال الفعلي - سيتم معالجتها تلقائياً لتحسين القراءة
+                    </p>
                     
                     <input
                       ref={fileInputRef}

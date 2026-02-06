@@ -335,11 +335,17 @@ export default function AddDepositDialog({
   const onSubmit = async (data: DepositFormData) => {
     if (!profile?.organization_id) return;
 
+    // صورة الإيصال إلزامية دائماً - قاعدة أساسية
+    if (!receiptFile) {
+      toast.error('يجب رفع صورة الإيصال الفعلي للمتابعة');
+      return;
+    }
+
     setLoading(true);
     try {
       let receiptUrl = null;
 
-      // Upload receipt if exists
+      // Upload receipt - always required
       if (receiptFile) {
         setUploading(true);
         const fileExt = receiptFile.name.split('.').pop();
@@ -437,16 +443,24 @@ export default function AddDepositDialog({
         <ScrollArea className="max-h-[calc(90vh-120px)] px-1">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
-              {/* AI Receipt Scanner */}
-              <div className="p-4 rounded-xl border-2 border-dashed border-primary/30 bg-primary/5">
+              {/* AI Receipt Scanner - صورة الإيصال إلزامية */}
+              <div className={cn(
+                "p-4 rounded-xl border-2 border-dashed",
+                !receiptFile 
+                  ? "border-destructive/50 bg-destructive/5" 
+                  : "border-emerald-500 bg-emerald-50 dark:border-emerald-600 dark:bg-emerald-950/20"
+              )}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 rounded-lg bg-primary/10">
                     <Sparkles className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold">استخراج ذكي من الإيصال</h4>
+                  <div className="flex-1">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      صورة الإيصال
+                      <Badge variant="destructive" className="text-[10px]">مطلوب</Badge>
+                    </h4>
                     <p className="text-xs text-muted-foreground">
-                      ارفع صورة الإيصال وسيقوم الذكاء الاصطناعي باستخراج البيانات تلقائياً
+                      يجب رفع صورة الإيصال الفعلي - سيتم معالجتها واستخراج البيانات تلقائياً
                     </p>
                   </div>
                 </div>
