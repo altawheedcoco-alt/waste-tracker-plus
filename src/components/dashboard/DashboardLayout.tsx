@@ -316,6 +316,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
     { icon: LinkIcon, label: 'روابط الإيداع السريع', path: '/dashboard/quick-deposit-links', key: 'quick-deposit-links' },
     { icon: Zap, label: 'روابط الشحنات السريعة', path: '/dashboard/quick-shipment-links', key: 'quick-shipment-links' },
+    { icon: Truck, label: 'روابط السائقين السريعة', path: '/dashboard/quick-driver-links', key: 'quick-driver-links' },
     { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
