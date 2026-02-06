@@ -60,7 +60,8 @@ import logo from '@/assets/logo.png';
 const depositSchema = z.object({
   amount: z.string().min(1, 'يرجى إدخال المبلغ'),
   depositDate: z.date(),
-  submitterName: z.string().min(1, 'يرجى إدخال اسمك'),
+  submitterName: z.string().min(1, 'يرجى إدخال اسم المودع'),
+  recipientName: z.string().optional(),
   submitterPhone: z.string().optional(),
   submitterEmail: z.string().email('بريد إلكتروني غير صالح').optional().or(z.literal('')),
   transferMethod: z.string().min(1, 'يرجى اختيار طريقة التحويل'),
@@ -101,6 +102,7 @@ interface DepositLink {
   preset_bank_name: string | null;
   preset_account_number: string | null;
   preset_depositor_name: string | null;
+  preset_recipient_name: string | null;
   preset_branch: string | null;
   preset_reference_number: string | null;
   preset_payment_method: string | null;
@@ -153,6 +155,7 @@ const QuickDeposit = () => {
       amount: '',
       depositDate: new Date(),
       submitterName: '',
+      recipientName: '',
       submitterPhone: '',
       submitterEmail: '',
       transferMethod: 'bank_transfer',
@@ -242,6 +245,9 @@ const QuickDeposit = () => {
         }
         if (linkResult.preset_depositor_name) {
           form.setValue('submitterName', linkResult.preset_depositor_name);
+        }
+        if (linkResult.preset_recipient_name) {
+          form.setValue('recipientName', linkResult.preset_recipient_name);
         }
         if (linkResult.preset_reference_number) {
           form.setValue('referenceNumber', linkResult.preset_reference_number);
@@ -1030,7 +1036,7 @@ const QuickDeposit = () => {
                   />
 
                   <div className="border-t pt-4">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">بيانات المودع</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-3">بيانات المودع والمستلم</p>
                     
                     {/* Submitter Name */}
                     <FormField
@@ -1040,10 +1046,28 @@ const QuickDeposit = () => {
                         <FormItem className="mb-3">
                           <FormLabel className="flex items-center gap-2">
                             <User className="h-4 w-4" />
-                            الاسم *
+                            اسم المودع *
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="اسمك الكامل" {...field} />
+                            <Input placeholder="اسم الشخص الذي يقوم بالإيداع" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Recipient Name */}
+                    <FormField
+                      control={form.control}
+                      name="recipientName"
+                      render={({ field }) => (
+                        <FormItem className="mb-3">
+                          <FormLabel className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            اسم المودع إليه (المستفيد)
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="اسم المستلم أو المستفيد" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

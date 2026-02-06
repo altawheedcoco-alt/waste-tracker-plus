@@ -90,6 +90,7 @@ interface DepositLink {
   preset_bank_name: string | null;
   preset_account_number: string | null;
   preset_depositor_name: string | null;
+  preset_recipient_name: string | null;
   preset_branch: string | null;
   preset_reference_number: string | null;
   preset_payment_method: string | null;
@@ -147,6 +148,7 @@ const DepositLinksManager = () => {
   const [presetBankName, setPresetBankName] = useState('');
   const [presetAccountNumber, setPresetAccountNumber] = useState('');
   const [presetDepositorName, setPresetDepositorName] = useState('');
+  const [presetRecipientName, setPresetRecipientName] = useState('');
   const [presetBranch, setPresetBranch] = useState('');
   const [presetReferenceNumber, setPresetReferenceNumber] = useState('');
   const [presetPaymentMethod, setPresetPaymentMethod] = useState('bank_transfer');
@@ -226,6 +228,7 @@ const DepositLinksManager = () => {
     setPresetBankName('');
     setPresetAccountNumber('');
     setPresetDepositorName('');
+    setPresetRecipientName('');
     setPresetBranch('');
     setPresetReferenceNumber('');
     setPresetPaymentMethod('bank_transfer');
@@ -258,6 +261,7 @@ const DepositLinksManager = () => {
         preset_bank_name: presetBankName || null,
         preset_account_number: presetAccountNumber || null,
         preset_depositor_name: presetDepositorName || null,
+        preset_recipient_name: presetRecipientName || null,
         preset_branch: presetBranch || null,
         preset_reference_number: presetReferenceNumber || null,
         preset_payment_method: presetPaymentMethod || 'bank_transfer',
@@ -619,11 +623,27 @@ const DepositLinksManager = () => {
 
                         {/* Depositor Name */}
                         <div className="space-y-2">
-                          <Label>اسم المودع</Label>
+                          <Label className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            اسم المودع
+                          </Label>
                           <Input
                             value={presetDepositorName}
                             onChange={(e) => setPresetDepositorName(e.target.value)}
-                            placeholder="اسم الشخص المودع"
+                            placeholder="اسم الشخص الذي يقوم بالإيداع"
+                          />
+                        </div>
+
+                        {/* Recipient Name */}
+                        <div className="space-y-2">
+                          <Label className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            اسم المودع إليه
+                          </Label>
+                          <Input
+                            value={presetRecipientName}
+                            onChange={(e) => setPresetRecipientName(e.target.value)}
+                            placeholder="اسم المستلم / المستفيد"
                           />
                         </div>
 
@@ -838,6 +858,16 @@ const DepositLinksManager = () => {
                           {link.preset_account_number && (
                             <Badge variant="outline" className="text-xs gap-1">
                               📄 {link.preset_account_number}
+                            </Badge>
+                          )}
+                          {link.preset_depositor_name && (
+                            <Badge variant="outline" className="text-xs gap-1 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300">
+                              👤 المودع: {link.preset_depositor_name}
+                            </Badge>
+                          )}
+                          {link.preset_recipient_name && (
+                            <Badge variant="outline" className="text-xs gap-1 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300">
+                              👤 المودع إليه: {link.preset_recipient_name}
                             </Badge>
                           )}
                           {link.preset_payment_method && link.preset_payment_method !== 'bank_transfer' && (

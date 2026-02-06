@@ -3073,6 +3073,7 @@ export type Database = {
           preset_notes: string | null
           preset_partner_id: string | null
           preset_payment_method: string | null
+          preset_recipient_name: string | null
           preset_reference_number: string | null
           preset_waste_type: string | null
           require_receipt: boolean | null
@@ -3105,6 +3106,7 @@ export type Database = {
           preset_notes?: string | null
           preset_partner_id?: string | null
           preset_payment_method?: string | null
+          preset_recipient_name?: string | null
           preset_reference_number?: string | null
           preset_waste_type?: string | null
           require_receipt?: boolean | null
@@ -3137,6 +3139,7 @@ export type Database = {
           preset_notes?: string | null
           preset_partner_id?: string | null
           preset_payment_method?: string | null
+          preset_recipient_name?: string | null
           preset_reference_number?: string | null
           preset_waste_type?: string | null
           require_receipt?: boolean | null
