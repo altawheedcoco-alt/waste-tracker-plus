@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ResponsivePageContainer from '@/components/dashboard/ResponsivePageContainer';
 import ResponsiveGrid from '@/components/dashboard/ResponsiveGrid';
@@ -11,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 import {
   Bell,
   Package,
@@ -29,11 +32,19 @@ import {
   Eye,
   Volume2,
   Clock,
+  User,
+  Building2,
+  MapPin,
+  Scale,
+  Recycle,
+  Phone,
+  Car,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
 import NotificationDetailDialog from '@/components/notifications/NotificationDetailDialog';
 import { previewNotificationSound, isNotificationSoundEnabled } from '@/hooks/useNotificationSound';
+import { normalizeRelation } from '@/lib/supabaseHelpers';
 
 const getNotificationIcon = (type: string | null) => {
   switch (type) {
@@ -104,6 +115,19 @@ const getNotificationBadge = (type: string | null) => {
   }
 };
 
+const getStatusLabel = (status: string | null) => {
+  const statusMap: Record<string, { label: string; color: string }> = {
+    pending: { label: 'قيد الانتظار', color: 'bg-amber-100 text-amber-700' },
+    approved: { label: 'موافق عليها', color: 'bg-blue-100 text-blue-700' },
+    in_transit: { label: 'قيد النقل', color: 'bg-purple-100 text-purple-700' },
+    picked_up: { label: 'تم الاستلام', color: 'bg-indigo-100 text-indigo-700' },
+    delivered: { label: 'تم التسليم', color: 'bg-green-100 text-green-700' },
+    confirmed: { label: 'مؤكدة', color: 'bg-emerald-100 text-emerald-700' },
+    cancelled: { label: 'ملغاة', color: 'bg-red-100 text-red-700' },
+  };
+  return statusMap[status || ''] || { label: status || 'غير محدد', color: 'bg-muted text-muted-foreground' };
+};
+
 // Categorize notifications
 const categorizeNotification = (type: string | null) => {
   switch (type) {
@@ -137,6 +161,27 @@ interface Notification {
   pdf_url?: string | null;
 }
 
+interface ShipmentDetails {
+  id: string;
+  shipment_number: string | null;
+  status: string | null;
+  waste_type: string | null;
+  quantity: number | null;
+  unit: string | null;
+  pickup_address: string | null;
+  delivery_address: string | null;
+  created_at: string;
+  generator?: { name: string } | null;
+  recycler?: { name: string } | null;
+  transporter?: { name: string } | null;
+  driver?: { 
+    id: string;
+    vehicle_type: string | null;
+    vehicle_plate: string | null;
+    profiles?: { full_name: string | null; phone: string | null } | null;
+  } | null;
+}
+
 interface CategoryConfig {
   id: string;
   label: string;
@@ -164,6 +209,62 @@ const Notifications = () => {
   
   // Use display mode for responsive layout
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
+
+  // Get unique shipment IDs from notifications
+  const shipmentIds = useMemo(() => {
+    return notifications
+      .filter(n => n.shipment_id)
+      .map(n => n.shipment_id!)
+      .filter((id, index, arr) => arr.indexOf(id) === index);
+  }, [notifications]);
+
+  // Fetch shipment details for all shipments in notifications
+  const { data: shipmentsData } = useQuery({
+    queryKey: ['notification-shipments', shipmentIds],
+    queryFn: async () => {
+      if (shipmentIds.length === 0) return {};
+      
+      const { data } = await supabase
+        .from('shipments')
+        .select(`
+          id,
+          shipment_number,
+          status,
+          waste_type,
+          quantity,
+          unit,
+          pickup_address,
+          delivery_address,
+          created_at,
+          generator:generator_id(name),
+          recycler:recycler_id(name),
+          transporter:transporter_id(name),
+          driver:driver_id(
+            id,
+            vehicle_type,
+            vehicle_plate,
+            profiles(full_name, phone)
+          )
+        `)
+        .in('id', shipmentIds);
+
+      const map: Record<string, ShipmentDetails> = {};
+      (data || []).forEach((s: any) => {
+        map[s.id] = {
+          ...s,
+          generator: normalizeRelation(s.generator),
+          recycler: normalizeRelation(s.recycler),
+          transporter: normalizeRelation(s.transporter),
+          driver: normalizeRelation(s.driver),
+        };
+      });
+      return map;
+    },
+    enabled: shipmentIds.length > 0,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const shipmentDetailsMap = shipmentsData || {};
 
   useEffect(() => {
     setSoundEnabled(isNotificationSoundEnabled());
@@ -377,6 +478,12 @@ const Notifications = () => {
                   const iconColorClass = getNotificationColor(notification.type);
                   const badge = getNotificationBadge(notification.type);
                   const isRecyclingReport = notification.type === 'recycling_report' && notification.pdf_url;
+                  const shipmentDetails = notification.shipment_id ? shipmentDetailsMap[notification.shipment_id] : null;
+                  const driverProfile = shipmentDetails?.driver?.profiles 
+                    ? (Array.isArray(shipmentDetails.driver.profiles) 
+                        ? shipmentDetails.driver.profiles[0] 
+                        : shipmentDetails.driver.profiles)
+                    : null;
 
                   const handlePdfView = (e: React.MouseEvent) => {
                     e.stopPropagation();
@@ -445,9 +552,16 @@ const Notifications = () => {
                                 <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
                               )}
                             </div>
-                            <Badge variant={badge.variant} className={`shrink-0 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-xs'}`}>
-                              {badge.label}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              {shipmentDetails?.status && (
+                                <Badge className={`${getStatusLabel(shipmentDetails.status).color} text-[10px]`}>
+                                  {getStatusLabel(shipmentDetails.status).label}
+                                </Badge>
+                              )}
+                              <Badge variant={badge.variant} className={`shrink-0 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-xs'}`}>
+                                {badge.label}
+                              </Badge>
+                            </div>
                           </div>
                           
                           {/* Message - Full details */}
@@ -457,27 +571,131 @@ const Notifications = () => {
                             </p>
                           </div>
                           
-                          {/* Additional Details */}
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
-                            {notification.shipment_id && (
-                              <Badge variant="outline" className="gap-1 text-[10px] font-mono">
-                                <Package className="w-3 h-3" />
-                                {notification.shipment_id.slice(0, 8)}
-                              </Badge>
-                            )}
-                            {notification.request_id && (
-                              <Badge variant="outline" className="gap-1 text-[10px] font-mono">
-                                <FileText className="w-3 h-3" />
-                                طلب: {notification.request_id.slice(0, 6)}
-                              </Badge>
-                            )}
-                            <span className={`flex items-center gap-1 ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                              <Clock className="w-3 h-3" />
-                              {formatDistanceToNow(new Date(notification.created_at), {
-                                addSuffix: true,
-                                locale: ar,
-                              })}
-                            </span>
+                          {/* Shipment Details Section */}
+                          {shipmentDetails && (
+                            <div className="bg-muted/30 rounded-lg p-3 space-y-2 mt-2">
+                              {/* Shipment Number & Waste Type */}
+                              <div className="flex flex-wrap items-center gap-2">
+                                {shipmentDetails.shipment_number && (
+                                  <Badge variant="outline" className="gap-1 text-[10px] font-mono bg-primary/5">
+                                    <Package className="w-3 h-3" />
+                                    {shipmentDetails.shipment_number}
+                                  </Badge>
+                                )}
+                                {shipmentDetails.waste_type && (
+                                  <Badge variant="secondary" className="gap-1 text-[10px]">
+                                    <Recycle className="w-3 h-3" />
+                                    {shipmentDetails.waste_type}
+                                  </Badge>
+                                )}
+                                {shipmentDetails.quantity && (
+                                  <Badge variant="outline" className="gap-1 text-[10px]">
+                                    <Scale className="w-3 h-3" />
+                                    {shipmentDetails.quantity} {shipmentDetails.unit || 'كجم'}
+                                  </Badge>
+                                )}
+                              </div>
+
+                              {/* Parties Info */}
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                                {shipmentDetails.generator?.name && (
+                                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                                    <Building2 className="w-3.5 h-3.5 text-blue-500" />
+                                    <span className="text-[10px] text-muted-foreground/70">المولد:</span>
+                                    <span className="font-medium truncate">{shipmentDetails.generator.name}</span>
+                                  </div>
+                                )}
+                                {shipmentDetails.transporter?.name && (
+                                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                                    <Truck className="w-3.5 h-3.5 text-purple-500" />
+                                    <span className="text-[10px] text-muted-foreground/70">الناقل:</span>
+                                    <span className="font-medium truncate">{shipmentDetails.transporter.name}</span>
+                                  </div>
+                                )}
+                                {shipmentDetails.recycler?.name && (
+                                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                                    <Recycle className="w-3.5 h-3.5 text-green-500" />
+                                    <span className="text-[10px] text-muted-foreground/70">المدور:</span>
+                                    <span className="font-medium truncate">{shipmentDetails.recycler.name}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Driver Info */}
+                              {shipmentDetails.driver && (
+                                <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-border/50 mt-1">
+                                  <div className="flex items-center gap-1.5 text-xs">
+                                    <User className="w-3.5 h-3.5 text-amber-500" />
+                                    <span className="text-muted-foreground/70">السائق:</span>
+                                    <span className="font-medium">{driverProfile?.full_name || 'غير محدد'}</span>
+                                  </div>
+                                  {driverProfile?.phone && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <Phone className="w-3 h-3" />
+                                      <span dir="ltr">{driverProfile.phone}</span>
+                                    </div>
+                                  )}
+                                  {shipmentDetails.driver.vehicle_type && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <Car className="w-3 h-3" />
+                                      <span>{shipmentDetails.driver.vehicle_type}</span>
+                                    </div>
+                                  )}
+                                  {shipmentDetails.driver.vehicle_plate && (
+                                    <Badge variant="outline" className="text-[10px] font-mono">
+                                      {shipmentDetails.driver.vehicle_plate}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Locations */}
+                              {(shipmentDetails.pickup_address || shipmentDetails.delivery_address) && (
+                                <div className="space-y-1 pt-1 border-t border-border/50 mt-1">
+                                  {shipmentDetails.pickup_address && (
+                                    <div className="flex items-start gap-1.5 text-xs">
+                                      <MapPin className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
+                                      <span className="text-muted-foreground/70">من:</span>
+                                      <span className="text-muted-foreground line-clamp-1">{shipmentDetails.pickup_address}</span>
+                                    </div>
+                                  )}
+                                  {shipmentDetails.delivery_address && (
+                                    <div className="flex items-start gap-1.5 text-xs">
+                                      <MapPin className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                                      <span className="text-muted-foreground/70">إلى:</span>
+                                      <span className="text-muted-foreground line-clamp-1">{shipmentDetails.delivery_address}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Additional Details (for non-shipment notifications) */}
+                          {!shipmentDetails && (
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
+                              {notification.shipment_id && (
+                                <Badge variant="outline" className="gap-1 text-[10px] font-mono">
+                                  <Package className="w-3 h-3" />
+                                  {notification.shipment_id.slice(0, 8)}
+                                </Badge>
+                              )}
+                              {notification.request_id && (
+                                <Badge variant="outline" className="gap-1 text-[10px] font-mono">
+                                  <FileText className="w-3 h-3" />
+                                  طلب: {notification.request_id.slice(0, 6)}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Time */}
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            {formatDistanceToNow(new Date(notification.created_at), {
+                              addSuffix: true,
+                              locale: ar,
+                            })}
                           </div>
                           
                           {/* PDF Actions for Recycling Reports */}
