@@ -164,8 +164,8 @@ export const useRealtimeTracking = ({
     const pickupZone = zones.find(z => z.type === 'pickup');
     const deliveryZone = zones.find(z => z.type === 'delivery');
 
-    // Pickup zone logic
-    if (pickupZone && currentStatus === 'approved') {
+    // Handle pickup zone - auto transition to in_transit
+    if (pickupZone && (currentStatus === 'approved' || currentStatus === 'new')) {
       const inPickup = isInGeofence(location, pickupZone);
       
       if (inPickup && !hasEnteredPickupRef.current) {
@@ -187,14 +187,19 @@ export const useRealtimeTracking = ({
       }
     }
 
-    // Delivery zone logic
-    if (deliveryZone && currentStatus === 'in_transit') {
+    // Handle delivery zone - auto transition to delivered AND confirmed together
+    if (deliveryZone && (currentStatus === 'in_transit' || currentStatus === 'approved')) {
       const inDelivery = isInGeofence(location, deliveryZone);
       
       if (inDelivery && !hasEnteredDeliveryRef.current) {
         hasEnteredDeliveryRef.current = true;
-        // Auto change to delivered when entering delivery zone
+        // Auto change to delivered first
         await updateStatus('delivered', 'السائق وصل لمنطقة التسليم - تم التسليم تلقائياً', latitude, longitude);
+        
+        // Then immediately confirm (complete the shipment)
+        setTimeout(async () => {
+          await updateStatus('confirmed', 'تم تأكيد التسليم تلقائياً - الشحنة مكتملة', latitude, longitude);
+        }, 1000); // Small delay to ensure proper ordering
       }
     }
   }, [enabled, state.autoStatusChanges, pickupCoords, deliveryCoords, currentStatus, zones, isInGeofence, updateStatus, shipmentId, user?.id]);
