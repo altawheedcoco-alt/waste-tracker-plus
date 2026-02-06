@@ -232,24 +232,24 @@ const CreateReceiptDialog = ({
             </div>
           )}
 
-          {/* Waste Type */}
+          {/* Waste Type - Auto-filled from shipment */}
           <div className="space-y-2">
-            <Label>نوع النفايات</Label>
-            <Select 
-              value={formData.wasteType} 
-              onValueChange={(v) => setFormData(prev => ({ ...prev, wasteType: v }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="اختر نوع النفايات" />
-              </SelectTrigger>
-              <SelectContent>
-                {wasteTypes.map(type => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              نوع المخلفات
+              {selectedShipmentId && (
+                <span className="text-xs text-muted-foreground">(من الشحنة)</span>
+              )}
+            </Label>
+            <Input
+              value={formData.wasteType || 'غير محدد'}
+              readOnly
+              className="bg-muted/50 cursor-not-allowed"
+              placeholder="سيتم تحديده من الشحنة"
+            />
+            {!selectedShipmentId && (
+              <p className="text-xs text-muted-foreground">اختر شحنة لتحديد نوع المخلفات تلقائياً</p>
+            )}
           </div>
 
           {/* Weight Fields */}
