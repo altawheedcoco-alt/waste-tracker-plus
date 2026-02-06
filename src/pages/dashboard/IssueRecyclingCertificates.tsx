@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeShipments } from '@/lib/supabaseHelpers';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -183,12 +184,12 @@ const IssueRecyclingCertificates = () => {
 
       const reportedShipmentIds = new Set(reportsData?.map(r => r.shipment_id) || []);
 
-      const shipmentsWithReportStatus = (shipmentsData || []).map(s => ({
+      const shipmentsWithReportStatus = normalizeShipments(shipmentsData || []).map(s => ({
         ...s,
         has_report: reportedShipmentIds.has(s.id),
       }));
 
-      setShipments(shipmentsWithReportStatus as Shipment[]);
+      setShipments(shipmentsWithReportStatus as any);
     } catch (error) {
       console.error('Error fetching shipments:', error);
       toast({

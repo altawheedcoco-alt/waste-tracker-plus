@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { normalizeShipments } from '@/lib/supabaseHelpers';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -229,7 +230,7 @@ const ShipmentManagement = () => {
 
       if (orgsError) throw orgsError;
 
-      setShipments(shipmentsData || []);
+      setShipments(normalizeShipments(shipmentsData || []) as any);
       setOrganizations(orgsData || []);
     } catch (error) {
       console.error('Error fetching data:', error);
