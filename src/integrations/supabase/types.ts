@@ -5684,6 +5684,34 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "shipments_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "shipments_shipment_link_id_fkey"
             columns: ["shipment_link_id"]
             isOneToOne: false
@@ -6320,6 +6348,34 @@ export type Database = {
           waste_type: Database["public"]["Enums"]["waste_type"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "shipments_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipments_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shipments_transporter_id_fkey"
             columns: ["transporter_id"]
