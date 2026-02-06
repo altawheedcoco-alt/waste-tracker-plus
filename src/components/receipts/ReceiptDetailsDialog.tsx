@@ -30,6 +30,7 @@ import {
   User,
   Loader2,
 } from 'lucide-react';
+import { generateReceiptPrintHTML } from './ReceiptPrintTemplate';
 
 interface ReceiptDetailsDialogProps {
   open: boolean;
@@ -94,12 +95,14 @@ const ReceiptDetailsDialog = ({
   };
 
   const handlePrint = () => {
-    const printContent = generatePrintContent(receipt);
+    const printContent = generateReceiptPrintHTML(receipt);
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(printContent);
       printWindow.document.close();
-      printWindow.print();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
     }
   };
 
@@ -256,164 +259,6 @@ const ReceiptDetailsDialog = ({
       </DialogContent>
     </Dialog>
   );
-};
-
-const generatePrintContent = (receipt: any) => {
-  return `
-    <!DOCTYPE html>
-    <html dir="rtl" lang="ar">
-    <head>
-      <meta charset="UTF-8">
-      <title>شهادة استلام شحنة - ${receipt.receipt_number}</title>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-          font-family: 'Tajawal', Arial, sans-serif; 
-          padding: 40px; 
-          background: white;
-          color: #333;
-        }
-        .header { 
-          text-align: center; 
-          border-bottom: 3px solid #10b981; 
-          padding-bottom: 20px; 
-          margin-bottom: 30px; 
-        }
-        .header h1 { color: #10b981; font-size: 28px; margin-bottom: 10px; }
-        .receipt-number { 
-          font-size: 24px; 
-          font-weight: bold; 
-          color: #059669;
-          background: #ecfdf5;
-          padding: 10px 20px;
-          border-radius: 8px;
-          display: inline-block;
-          margin-top: 10px;
-        }
-        .section { margin-bottom: 25px; }
-        .section-title { 
-          font-size: 16px; 
-          font-weight: bold; 
-          color: #374151;
-          margin-bottom: 10px;
-          padding-bottom: 5px;
-          border-bottom: 1px solid #e5e7eb;
-        }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .field { margin-bottom: 15px; }
-        .field-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
-        .field-value { font-size: 14px; font-weight: 500; }
-        .footer { 
-          margin-top: 40px; 
-          padding-top: 20px; 
-          border-top: 2px solid #e5e7eb;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 40px;
-        }
-        .signature { text-align: center; }
-        .signature-line { 
-          border-bottom: 1px dashed #9ca3af; 
-          height: 60px; 
-          margin-bottom: 10px; 
-        }
-        .stamp { 
-          text-align: center;
-          margin-top: 30px;
-          padding: 20px;
-          border: 2px dashed #d1d5db;
-          border-radius: 8px;
-        }
-        @media print {
-          body { padding: 20px; }
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h1>🔄 نظام آي ريسايكل لإدارة المخلفات</h1>
-        <h2>شهادة استلام شحنة</h2>
-        <div class="receipt-number">${receipt.receipt_number}</div>
-      </div>
-
-      <div class="section">
-        <div class="grid">
-          <div class="field">
-            <div class="field-label">تاريخ الاستلام</div>
-            <div class="field-value">${new Date(receipt.pickup_date).toLocaleDateString('ar-EG', { 
-              year: 'numeric', month: 'long', day: 'numeric' 
-            })}</div>
-          </div>
-          <div class="field">
-            <div class="field-label">رقم الشحنة</div>
-            <div class="field-value">${receipt.shipment?.shipment_number || '-'}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">الأطراف</div>
-        <div class="grid">
-          <div class="field">
-            <div class="field-label">الجهة المولدة</div>
-            <div class="field-value">${receipt.generator?.name || '-'}</div>
-          </div>
-          <div class="field">
-            <div class="field-label">الجهة الناقلة</div>
-            <div class="field-value">${receipt.transporter?.name || '-'}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">تفاصيل النفايات</div>
-        <div class="grid">
-          <div class="field">
-            <div class="field-label">نوع النفايات</div>
-            <div class="field-value">${receipt.waste_type || '-'}</div>
-          </div>
-          <div class="field">
-            <div class="field-label">الوزن الفعلي</div>
-            <div class="field-value">${receipt.actual_weight || receipt.declared_weight || '-'} ${receipt.unit}</div>
-          </div>
-        </div>
-      </div>
-
-      ${receipt.pickup_location ? `
-      <div class="section">
-        <div class="section-title">موقع الاستلام</div>
-        <div class="field-value">${receipt.pickup_location}</div>
-      </div>
-      ` : ''}
-
-      ${receipt.notes ? `
-      <div class="section">
-        <div class="section-title">ملاحظات</div>
-        <div class="field-value">${receipt.notes}</div>
-      </div>
-      ` : ''}
-
-      <div class="footer">
-        <div class="signature">
-          <div class="signature-line"></div>
-          <div>توقيع المستلم (السائق)</div>
-          <div style="font-size: 12px; color: #6b7280; margin-top: 5px;">
-            ${receipt.driver?.profile?.full_name || ''}
-          </div>
-        </div>
-        <div class="signature">
-          <div class="signature-line"></div>
-          <div>توقيع المسلّم (الجهة المولدة)</div>
-        </div>
-      </div>
-
-      <div class="stamp">
-        <p>الختم الرسمي</p>
-      </div>
-    </body>
-    </html>
-  `;
 };
 
 export default ReceiptDetailsDialog;
