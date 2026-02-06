@@ -119,7 +119,7 @@ const generateToken = () => {
 };
 
 const DepositLinksManager = () => {
-  const { profile } = useAuth();
+  const { profile, organization } = useAuth();
   const [links, setLinks] = useState<DepositLink[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
