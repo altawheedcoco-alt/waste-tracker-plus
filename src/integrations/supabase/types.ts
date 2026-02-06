@@ -5114,6 +5114,130 @@ export type Database = {
           },
         ]
       }
+      shipment_receipts: {
+        Row: {
+          actual_weight: number | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          declared_weight: number | null
+          driver_id: string | null
+          driver_signature: string | null
+          generator_id: string
+          generator_signature: string | null
+          id: string
+          notes: string | null
+          pickup_coordinates: Json | null
+          pickup_date: string
+          pickup_location: string | null
+          pickup_photos: string[] | null
+          receipt_number: string
+          shipment_id: string
+          status: string
+          transporter_id: string
+          unit: string | null
+          updated_at: string
+          waste_category: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          actual_weight?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          declared_weight?: number | null
+          driver_id?: string | null
+          driver_signature?: string | null
+          generator_id: string
+          generator_signature?: string | null
+          id?: string
+          notes?: string | null
+          pickup_coordinates?: Json | null
+          pickup_date?: string
+          pickup_location?: string | null
+          pickup_photos?: string[] | null
+          receipt_number: string
+          shipment_id: string
+          status?: string
+          transporter_id: string
+          unit?: string | null
+          updated_at?: string
+          waste_category?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          actual_weight?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          declared_weight?: number | null
+          driver_id?: string | null
+          driver_signature?: string | null
+          generator_id?: string
+          generator_signature?: string | null
+          id?: string
+          notes?: string | null
+          pickup_coordinates?: Json | null
+          pickup_date?: string
+          pickup_location?: string | null
+          pickup_photos?: string[] | null
+          receipt_number?: string
+          shipment_id?: string
+          status?: string
+          transporter_id?: string
+          unit?: string | null
+          updated_at?: string
+          waste_category?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_receipts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_receipts_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_receipts_generator_id_fkey"
+            columns: ["generator_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_receipts_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_receipts_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_receipts_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipments: {
         Row: {
           account_notes: string | null
