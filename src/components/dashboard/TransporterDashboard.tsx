@@ -352,8 +352,8 @@ const TransporterDashboard = () => {
 
 
   const quickActions: QuickAction[] = [
-    { title: 'روابط الشحنات السريعة', subtitle: 'روابط مخصصة لتسجيل الشحنات', icon: Zap, path: '/dashboard/quick-shipment-links', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600' },
-    { title: 'روابط الإيداع السريع', subtitle: 'روابط مخصصة لتسجيل الإيداعات', icon: Link2, path: '/dashboard/quick-deposit-links', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600' },
+    { title: 'روابط الإيداع السريع', subtitle: 'روابط مخصصة لتسجيل الإيداعات', icon: Zap, path: '/dashboard/quick-deposit-links', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600' },
+    { title: 'روابط الشحنات السريعة', subtitle: 'روابط مخصصة لتسجيل الشحنات', icon: Link2, path: '/dashboard/quick-shipment-links', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600' },
     { title: 'شهادات استلام الشحنات', subtitle: 'إصدار وإدارة شهادات الاستلام', icon: FileText, path: '/dashboard/transporter-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600' },
     { title: 'عرض توضيحي للملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600' },
     { title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: () => setShowDepositDialog(true), iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
