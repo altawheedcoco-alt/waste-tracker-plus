@@ -5602,6 +5602,33 @@ export type Database = {
           },
         ]
       }
+      submission_rate_limits: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string
+          submission_count: number
+          submission_type: string
+          window_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address: string
+          submission_count?: number
+          submission_type: string
+          window_start?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string
+          submission_count?: number
+          submission_type?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           assigned_to: string | null
