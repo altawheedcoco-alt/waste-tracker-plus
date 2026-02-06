@@ -47,6 +47,7 @@ import {
   Bookmark,
   Link as LinkIcon,
   Zap,
+  Fingerprint,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -272,6 +273,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
           { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials', key: 'transporter-team' },
           { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'transporter-certs' },
+          { icon: Fingerprint, label: 'الرسم الغيوشي للمستندات', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
         ]
       : organization?.organization_type === 'recycler'
       ? [
