@@ -222,7 +222,7 @@ const TransporterDashboard = () => {
 
         setRecentShipments(shipmentsWithReportStatus.slice(0, 5) as unknown as RecentShipment[]);
         
-        const activeStatuses = ['new', 'approved', 'collecting', 'in_transit'];
+        const activeStatuses = ['new', 'approved', 'in_transit'];
         setStats({
           total: shipments.length,
           active: shipments.filter(s => activeStatuses.includes(s.status || '')).length,
@@ -251,7 +251,6 @@ const TransporterDashboard = () => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       new: { label: 'جديدة', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
       approved: { label: 'معتمدة', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-      collecting: { label: 'قيد الجمع', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
       in_transit: { label: 'في الطريق', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
       delivered: { label: 'تم التسليم', className: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300' },
       confirmed: { label: 'مؤكدة', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300' },
@@ -290,9 +289,6 @@ const TransporterDashboard = () => {
       switch (newStatus) {
         case 'approved':
           updateData.approved_at = now;
-          break;
-        case 'collecting':
-          updateData.collection_started_at = now;
           break;
         case 'in_transit':
           updateData.in_transit_at = now;
@@ -337,7 +333,6 @@ const TransporterDashboard = () => {
       // Show success toast
       const statusLabels: Record<string, string> = {
         approved: 'معتمدة',
-        collecting: 'قيد الجمع',
         in_transit: 'قيد النقل',
         delivered: 'تم التسليم',
         confirmed: 'مؤكدة',

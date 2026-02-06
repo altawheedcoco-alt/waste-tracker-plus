@@ -264,7 +264,7 @@ const OperationalPlans = () => {
         query = query.lte('created_at', endDate + 'T23:59:59');
       }
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as 'new' | 'approved' | 'collecting' | 'in_transit' | 'delivered' | 'confirmed');
+        query = query.eq('status', statusFilter as 'new' | 'approved' | 'in_transit' | 'delivered' | 'confirmed');
       }
       if (wasteTypeFilter !== 'all') {
         query = query.eq('waste_type', wasteTypeFilter as 'plastic' | 'paper' | 'metal' | 'glass' | 'electronic' | 'organic' | 'chemical' | 'medical' | 'construction' | 'other');
@@ -302,7 +302,6 @@ const OperationalPlans = () => {
     const labels: Record<string, string> = {
       new: 'جديدة',
       approved: 'معتمدة',
-      collecting: 'جاري التجميع',
       in_transit: 'في الطريق',
       delivered: 'تم التسليم',
       confirmed: 'مؤكدة',
@@ -314,7 +313,6 @@ const OperationalPlans = () => {
     const colors: Record<string, string> = {
       new: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
       approved: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
-      collecting: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
       in_transit: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
       delivered: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
       confirmed: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400',
@@ -595,7 +593,6 @@ const OperationalPlans = () => {
                     <SelectItem value="all">جميع الحالات</SelectItem>
                     <SelectItem value="new">جديدة</SelectItem>
                     <SelectItem value="approved">معتمدة</SelectItem>
-                    <SelectItem value="collecting">جاري التجميع</SelectItem>
                     <SelectItem value="in_transit">في الطريق</SelectItem>
                     <SelectItem value="delivered">تم التسليم</SelectItem>
                     <SelectItem value="confirmed">مؤكدة</SelectItem>

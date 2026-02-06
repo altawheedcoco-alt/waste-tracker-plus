@@ -176,7 +176,6 @@ const DriverDetailsPage = () => {
     const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
       new: { label: 'جديدة', variant: 'default', color: 'bg-blue-500' },
       approved: { label: 'معتمدة', variant: 'secondary', color: 'bg-indigo-500' },
-      collecting: { label: 'قيد الجمع', variant: 'outline', color: 'bg-amber-500' },
       in_transit: { label: 'في الطريق', variant: 'outline', color: 'bg-purple-500' },
       delivered: { label: 'تم التسليم', variant: 'secondary', color: 'bg-emerald-500' },
       confirmed: { label: 'مؤكدة', variant: 'default', color: 'bg-green-600' },
@@ -189,7 +188,6 @@ const DriverDetailsPage = () => {
     const colors: Record<string, string> = {
       new: 'bg-blue-500',
       approved: 'bg-indigo-500',
-      collecting: 'bg-amber-500',
       in_transit: 'bg-purple-500',
       delivered: 'bg-emerald-500',
       confirmed: 'bg-green-600',
@@ -205,7 +203,6 @@ const DriverDetailsPage = () => {
     const statusLabels: Record<string, string> = {
       new: 'تم إنشاء الشحنة',
       approved: 'تمت الموافقة',
-      collecting: 'بدء الجمع',
       in_transit: 'في الطريق',
       delivered: 'تم التسليم',
       confirmed: 'تم التأكيد',

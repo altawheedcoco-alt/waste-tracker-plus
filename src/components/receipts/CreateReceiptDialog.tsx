@@ -115,7 +115,7 @@ const CreateReceiptDialog = ({
           generator:organizations!shipments_generator_id_fkey(name)
         `)
         .eq('transporter_id', organization?.id)
-        .in('status', ['approved', 'collecting', 'in_transit'])
+        .in('status', ['approved', 'in_transit'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;

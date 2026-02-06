@@ -159,7 +159,7 @@ const DriverDashboard = () => {
     }
   };
 
-  const activeShipments = shipments.filter(s => ['new', 'approved', 'collecting', 'in_transit'].includes(s.status));
+  const activeShipments = shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status));
   const completedShipments = shipments.filter(s => ['delivered', 'confirmed'].includes(s.status));
 
   if (loading) {

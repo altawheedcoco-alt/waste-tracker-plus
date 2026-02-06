@@ -167,7 +167,7 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
           .from('shipments')
           .select('id, shipment_number, status, pickup_address, delivery_address')
           .eq('driver_id', driverId)
-          .in('status', ['new', 'approved', 'collecting', 'in_transit'])
+          .in('status', ['new', 'approved', 'in_transit'])
           .order('created_at', { ascending: false });
 
         if (error) throw error;
@@ -263,7 +263,6 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
     const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
       new: { label: 'جديدة', variant: 'secondary' },
       approved: { label: 'معتمدة', variant: 'default' },
-      collecting: { label: 'جاري التجميع', variant: 'default' },
       in_transit: { label: 'في الطريق', variant: 'default' },
     };
     const config = statusConfig[status] || { label: status, variant: 'secondary' };

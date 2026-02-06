@@ -128,7 +128,6 @@ const wasteTypes = [
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
   new: { label: 'جديدة', color: 'bg-blue-100 text-blue-800', icon: AlertCircle },
   approved: { label: 'معتمدة', color: 'bg-purple-100 text-purple-800', icon: CheckCircle },
-  collecting: { label: 'جاري التجميع', color: 'bg-amber-100 text-amber-800', icon: Truck },
   in_transit: { label: 'في الطريق', color: 'bg-orange-100 text-orange-800', icon: MapPin },
   delivered: { label: 'تم التسليم', color: 'bg-green-100 text-green-800', icon: Package },
   confirmed: { label: 'مكتمل', color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle },
@@ -333,7 +332,6 @@ const ShipmentManagement = () => {
       // Add timestamp based on status
       const now = new Date().toISOString();
       if (newStatus === 'approved') updateData.approved_at = now;
-      if (newStatus === 'collecting') updateData.collection_started_at = now;
       if (newStatus === 'in_transit') updateData.in_transit_at = now;
       if (newStatus === 'delivered') updateData.delivered_at = now;
       if (newStatus === 'confirmed') updateData.confirmed_at = now;
@@ -380,7 +378,7 @@ const ShipmentManagement = () => {
 
   const statsData = {
     total: shipments.length,
-    active: shipments.filter(s => ['new', 'approved', 'collecting', 'in_transit'].includes(s.status)).length,
+    active: shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length,
     completed: shipments.filter(s => s.status === 'confirmed').length,
   };
 

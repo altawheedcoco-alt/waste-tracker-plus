@@ -37,12 +37,11 @@ interface ShipmentStatusTimelineProps {
   showCard?: boolean;
 }
 
-const statusOrder = ['new', 'approved', 'collecting', 'in_transit', 'delivered', 'confirmed'];
+const statusOrder = ['new', 'approved', 'in_transit', 'delivered', 'confirmed'];
 
 const statusConfig: Record<string, { label: string; icon: React.ElementType; colorClass: string }> = {
   new: { label: 'جديدة', icon: Package, colorClass: 'text-blue-500 bg-blue-100 dark:bg-blue-900/50' },
   approved: { label: 'معتمدة', icon: CheckCircle2, colorClass: 'text-green-500 bg-green-100 dark:bg-green-900/50' },
-  collecting: { label: 'قيد الجمع', icon: PackageCheck, colorClass: 'text-yellow-500 bg-yellow-100 dark:bg-yellow-900/50' },
   in_transit: { label: 'قيد النقل', icon: Truck, colorClass: 'text-purple-500 bg-purple-100 dark:bg-purple-900/50' },
   delivered: { label: 'قيد التسليم', icon: ArrowDown, colorClass: 'text-teal-500 bg-teal-100 dark:bg-teal-900/50' },
   confirmed: { label: 'مكتمل', icon: Layers, colorClass: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-900/50' },
@@ -57,8 +56,6 @@ const ShipmentStatusTimeline = ({ shipment, showCard = true }: ShipmentStatusTim
         return shipment.created_at;
       case 'approved':
         return shipment.approved_at || null;
-      case 'collecting':
-        return shipment.collection_started_at || null;
       case 'in_transit':
         return shipment.in_transit_at || null;
       case 'delivered':

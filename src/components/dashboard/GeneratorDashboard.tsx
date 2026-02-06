@@ -167,7 +167,7 @@ const GeneratorDashboard = () => {
         const newStats: ShipmentStats = {
           total: shipments.length,
           new: shipments.filter((s) => s.status === 'new' || s.status === 'approved').length,
-          inTransit: shipments.filter((s) => s.status === 'collecting' || s.status === 'in_transit').length,
+          inTransit: shipments.filter((s) => s.status === 'in_transit').length,
           completed: shipments.filter((s) => s.status === 'delivered' || s.status === 'confirmed').length,
         };
         setStats(newStats);

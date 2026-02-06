@@ -47,7 +47,6 @@ interface BulkStatusChangeDropdownProps {
 
 const statusOptions = [
   { value: 'approved', label: 'معتمدة', icon: CheckCircle2, color: 'bg-green-100 text-green-800' },
-  { value: 'collecting', label: 'قيد الجمع', icon: Package, color: 'bg-yellow-100 text-yellow-800' },
   { value: 'in_transit', label: 'قيد النقل', icon: Truck, color: 'bg-purple-100 text-purple-800' },
   { value: 'delivered', label: 'تم التسليم', icon: Clock, color: 'bg-teal-100 text-teal-800' },
   { value: 'confirmed', label: 'مؤكدة', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-800' },
@@ -89,8 +88,7 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
     // Define which current statuses can transition to the target status (sequential flow)
     const eligibleCurrentStatuses: Record<string, string[]> = {
       approved: ['new'],           // Only new can become approved
-      collecting: ['approved'],    // Only approved can become collecting
-      in_transit: ['collecting'],  // Only collecting can become in_transit
+      in_transit: ['approved'],    // Only approved can become in_transit (collecting removed)
       delivered: ['in_transit'],   // Only in_transit can become delivered
       confirmed: ['delivered'],    // Only delivered can become confirmed
     };
@@ -118,9 +116,6 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
       switch (newStatus) {
         case 'approved':
           updateData.approved_at = now;
-          break;
-        case 'collecting':
-          updateData.collection_started_at = now;
           break;
         case 'in_transit':
           updateData.in_transit_at = now;
