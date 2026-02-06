@@ -420,7 +420,7 @@ const CompanyApprovals = () => {
               )}
 
               <p className="text-xs text-muted-foreground">
-                تاريخ التسجيل: {new Date(selectedOrg.created_at).toLocaleDateString('ar-SA')}
+                تاريخ التسجيل: {new Date(selectedOrg.created_at).toLocaleDateString('en-US')}
               </p>
             </div>
           )}

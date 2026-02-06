@@ -377,7 +377,7 @@ const DriverApprovals = () => {
                 {selectedDriver.license_expiry && (
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                     <Calendar className="w-5 h-5 text-muted-foreground" />
-                    <span>تاريخ انتهاء الرخصة: {new Date(selectedDriver.license_expiry).toLocaleDateString('ar-SA')}</span>
+                    <span>تاريخ انتهاء الرخصة: {new Date(selectedDriver.license_expiry).toLocaleDateString('en-US')}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
@@ -412,7 +412,7 @@ const DriverApprovals = () => {
               </div>
 
               <p className="text-xs text-muted-foreground">
-                تاريخ التسجيل: {new Date(selectedDriver.created_at).toLocaleDateString('ar-SA')}
+                تاريخ التسجيل: {new Date(selectedDriver.created_at).toLocaleDateString('en-US')}
               </p>
             </div>
           )}

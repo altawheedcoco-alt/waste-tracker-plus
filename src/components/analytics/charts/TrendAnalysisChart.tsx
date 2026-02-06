@@ -159,7 +159,7 @@ const TrendAnalysisChart = ({
           <p className="font-medium mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.value.toLocaleString('ar-EG')}
+              {entry.name}: {entry.value.toLocaleString('en-US')}
               {entry.dataKey === 'quantity' || entry.dataKey === 'cumulativeQuantity' ? ' كجم' : ''}
               {entry.dataKey === 'completionRate' ? '%' : ''}
             </p>
@@ -187,7 +187,7 @@ const TrendAnalysisChart = ({
                 {' '}{stats.growthRate > 0 ? '+' : ''}{stats.growthRate}%
               </Badge>
               <Badge variant="outline">
-                المتوسط: {stats.avgQuantity.toLocaleString('ar-EG')} كجم
+                المتوسط: {stats.avgQuantity.toLocaleString('en-US')} كجم
               </Badge>
             </div>
           )}

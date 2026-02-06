@@ -61,7 +61,7 @@ const AnimatedCounter = ({ value, suffix }: { value: number; suffix: string }) =
 
   return (
     <span ref={ref}>
-      {count.toLocaleString()}{suffix}
+      {count.toLocaleString('en-US')}{suffix}
     </span>
   );
 };

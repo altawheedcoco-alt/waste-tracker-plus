@@ -72,7 +72,7 @@ export default function AccountSummaryCard({
   subtitle,
   icon: Icon,
   variant = 'default',
-  formatValue = (v) => new Intl.NumberFormat('ar-EG').format(v),
+  formatValue = (v) => new Intl.NumberFormat('en-US').format(v),
   details,
   detailsTitle,
 }: AccountSummaryCardProps) {

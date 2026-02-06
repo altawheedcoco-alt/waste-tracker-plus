@@ -155,7 +155,7 @@ const ShipmentsChart = ({
           <p className="font-medium mb-2">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
-              {entry.name}: {entry.value.toLocaleString('ar-EG')}
+              {entry.name}: {entry.value.toLocaleString('en-US')}
             </p>
           ))}
         </div>

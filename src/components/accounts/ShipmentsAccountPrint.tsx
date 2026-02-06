@@ -27,7 +27,7 @@ interface ShipmentsAccountPrintProps {
 const ShipmentsAccountPrint = forwardRef<HTMLDivElement, ShipmentsAccountPrintProps>(
   ({ partnerName, partnerType, shipments, organizationName, printDate }, ref) => {
     const formatCurrency = (amount: number) => {
-      return new Intl.NumberFormat('ar-EG', {
+      return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 0,
       }).format(amount);
     };

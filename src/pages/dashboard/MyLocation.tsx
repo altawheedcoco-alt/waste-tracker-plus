@@ -298,7 +298,7 @@ const MyLocation = () => {
                       <p className="text-xs text-muted-foreground">آخر تحديث</p>
                       <p className="font-medium">
                         {currentLocation 
-                          ? new Date(currentLocation.recorded_at).toLocaleString('ar-SA', {
+                          ? new Date(currentLocation.recorded_at).toLocaleString('en-US', {
                               hour: '2-digit',
                               minute: '2-digit',
                               day: 'numeric',

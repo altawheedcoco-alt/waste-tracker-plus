@@ -15,7 +15,7 @@ interface AccountLedgerPrintProps {
 const AccountLedgerPrint = forwardRef<HTMLDivElement, AccountLedgerPrintProps>(
   ({ partnerName, partnerType, entries, previousBalance = 0, organizationName, printDate }, ref) => {
     const formatCurrency = (amount: number) => {
-      return new Intl.NumberFormat('ar-EG', {
+      return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 0,
       }).format(amount);
     };

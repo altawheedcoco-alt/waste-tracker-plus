@@ -435,7 +435,7 @@ const AdminDriversMap = () => {
                           {driver.last_update && (
                             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 justify-end">
                               <Clock className="w-3 h-3" />
-                              {new Date(driver.last_update).toLocaleTimeString('ar-SA')}
+                              {new Date(driver.last_update).toLocaleTimeString('en-US')}
                             </p>
                           )}
                         </div>

@@ -276,7 +276,7 @@ const CarbonFootprintAnalysis = () => {
         }
 
         // Monthly trend
-        const month = new Date(shipment.created_at).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short' });
+        const month = new Date(shipment.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
         if (!monthlyData[month]) {
           monthlyData[month] = { emissions: 0, savings: 0 };
         }

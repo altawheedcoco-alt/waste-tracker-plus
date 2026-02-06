@@ -56,12 +56,12 @@ const SustainabilityCertificate = ({
   const [exporting, setExporting] = useState(false);
 
   const certificateNumber = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-  const issueDate = new Date().toLocaleDateString("ar-SA", {
+  const issueDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric"
   });
-  const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString("ar-SA", {
+  const validUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric"

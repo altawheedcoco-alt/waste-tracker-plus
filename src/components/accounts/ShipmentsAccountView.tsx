@@ -61,7 +61,7 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
   const canCancel = isAdmin || organization?.organization_type === 'transporter';
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-EG', {
+    return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 0,
     }).format(amount);
   };

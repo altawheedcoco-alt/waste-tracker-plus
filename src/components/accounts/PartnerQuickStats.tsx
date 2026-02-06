@@ -31,7 +31,7 @@ export default function PartnerQuickStats({
   activeShipmentsCount = 0,
 }: PartnerQuickStatsProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-EG', {
+    return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 0,
     }).format(amount);
   };

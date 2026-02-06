@@ -137,7 +137,7 @@ const WasteTypeDistribution = ({
         <div className="bg-background border rounded-lg shadow-lg p-3">
           <p className="font-medium mb-1">{data.name}</p>
           <p className="text-sm text-muted-foreground">
-            الكمية: {data.quantity.toLocaleString('ar-EG')} كجم
+            الكمية: {data.quantity.toLocaleString('en-US')} كجم
           </p>
           <p className="text-sm text-muted-foreground">
             النسبة: {data.percentage}%
@@ -204,7 +204,7 @@ const WasteTypeDistribution = ({
                   </span>
                 </div>
                 <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>{item.quantity.toLocaleString('ar-EG')} كجم</span>
+                  <span>{item.quantity.toLocaleString('en-US')} كجم</span>
                   <span>{item.count} شحنة</span>
                 </div>
               </div>
