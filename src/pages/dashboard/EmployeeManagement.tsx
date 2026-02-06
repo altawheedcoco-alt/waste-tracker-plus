@@ -16,7 +16,8 @@ import {
   Edit,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  MessageSquare,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,6 +54,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import EmployeePostsViewer from '@/components/profile/EmployeePostsViewer';
 
 const DEPARTMENTS = [
   { value: 'operations', label: 'العمليات' },
@@ -98,6 +100,7 @@ const EmployeeManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedEmployeeForPosts, setSelectedEmployeeForPosts] = useState<Employee | null>(null);
   const [newEmployee, setNewEmployee] = useState({
     full_name: '',
     email: '',
@@ -593,6 +596,12 @@ const EmployeeManagement = () => {
                                 </>
                               )}
                             </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setSelectedEmployeeForPosts(employee)}
+                            >
+                              <MessageSquare className="h-4 w-4 ml-2" />
+                              عرض المنشورات
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
@@ -604,6 +613,15 @@ const EmployeeManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Employee Posts Viewer Dialog */}
+      <EmployeePostsViewer
+        open={!!selectedEmployeeForPosts}
+        onOpenChange={(open) => !open && setSelectedEmployeeForPosts(null)}
+        employeeId={selectedEmployeeForPosts?.user_id || ''}
+        employeeName={selectedEmployeeForPosts?.full_name || ''}
+        employeeAvatar={selectedEmployeeForPosts?.avatar_url}
+      />
     </DashboardLayout>
   );
 };
