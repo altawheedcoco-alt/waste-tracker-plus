@@ -6,6 +6,121 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+/**
+ * دالة تحليل الأرقام حسب التنسيق المصري
+ * النظام المصري: الفاصلة (,) للآلاف، النقطة (.) للكسور العشرية
+ * مثال: 60,000.00 = ستون ألف جنيه
+ */
+function parseEgyptianNumber(value: string | number): number {
+  if (!value || value === "") return 0;
+
+  let str = String(value).trim();
+  
+  // إزالة رموز العملات والمسافات والحروف العربية
+  str = str.replace(/[¤$€£¥\s٫،ج.مجم]/g, '');
+  str = str.replace(/جنيه|مصري|LE|EGP/gi, '');
+  str = str.trim();
+  
+  // إذا كان فارغاً بعد التنظيف
+  if (!str) return 0;
+  
+  // تحديد موقع آخر فاصلة ونقطة
+  const lastComma = str.lastIndexOf(',');
+  const lastDot = str.lastIndexOf('.');
+  
+  // عد الفواصل والنقاط
+  const commaCount = (str.match(/,/g) || []).length;
+  const dotCount = (str.match(/\./g) || []).length;
+  
+  console.log(`Parsing: "${str}" - lastComma: ${lastComma}, lastDot: ${lastDot}, commas: ${commaCount}, dots: ${dotCount}`);
+  
+  /**
+   * التنسيق المصري/الأمريكي: 60,000.00 أو 1,500,000
+   * - الفاصلة (,) = فاصل الآلاف
+   * - النقطة (.) = فاصل عشري
+   * 
+   * التنسيق الأوروبي: 60.000,00
+   * - النقطة (.) = فاصل الآلاف
+   * - الفاصلة (,) = فاصل عشري
+   */
+  
+  let isEuropeanFormat = false;
+  
+  // إذا كانت الفاصلة بعد النقطة، فهذا تنسيق أوروبي
+  if (lastComma > lastDot && lastDot !== -1) {
+    isEuropeanFormat = true;
+  }
+  // إذا كانت هناك فاصلة واحدة فقط وتتبعها رقمين (مثل 60,00)
+  else if (commaCount === 1 && lastComma !== -1 && str.length - lastComma - 1 === 2 && dotCount === 0) {
+    // قد يكون تنسيق أوروبي 60,00 أو تنسيق عادي 60,000
+    // نتحقق: إذا كان ما بعد الفاصلة رقمين فقط وليس 3، فهو عشري أوروبي
+    const afterComma = str.substring(lastComma + 1);
+    if (afterComma.length === 2) {
+      // لكن 60,00 غير منطقي كمبلغ إيداع، غالباً يقصد 6000
+      // لذا نفترض أنه خطأ قراءة ونعتبره تنسيق عادي
+      isEuropeanFormat = false;
+    }
+  }
+  
+  if (isEuropeanFormat) {
+    // تنسيق أوروبي: إزالة النقاط (فواصل الآلاف) وتحويل الفاصلة لنقطة (عشري)
+    str = str.replace(/\./g, '');
+    str = str.replace(',', '.');
+    console.log(`European format detected, converted to: ${str}`);
+  } else {
+    // تنسيق مصري/أمريكي: إزالة الفواصل (فواصل الآلاف) والإبقاء على النقطة (عشري)
+    str = str.replace(/,/g, '');
+    console.log(`Egyptian/US format, cleaned to: ${str}`);
+  }
+  
+  const parsed = parseFloat(str);
+  
+  if (isNaN(parsed)) {
+    console.log(`Failed to parse: ${str}`);
+    return 0;
+  }
+  
+  console.log(`Final parsed amount: ${parsed}`);
+  return parsed;
+}
+
+/**
+ * فحص معقولية المبلغ
+ * المبالغ المعقولة للإيداعات المصرية: 100 - 100,000,000 جنيه
+ */
+function sanityCheckAmount(amount: number, originalStr: string): { amount: number; warning?: string } {
+  if (amount <= 0) {
+    return { amount: 0, warning: 'لم يتم قراءة المبلغ' };
+  }
+  
+  // إذا كان أكبر من 100 مليون، قد يكون هناك خطأ في قراءة الأصفار
+  if (amount > 100000000) {
+    console.log(`Amount ${amount} > 100M, attempting correction...`);
+    
+    // جرب القسمة على 1000
+    const divided = amount / 1000;
+    if (divided >= 100 && divided <= 100000000) {
+      console.log(`Corrected to ${divided} (divided by 1000)`);
+      return { amount: divided, warning: 'تم تصحيح المبلغ تلقائياً' };
+    }
+    
+    // جرب القسمة على 100
+    const dividedBy100 = amount / 100;
+    if (dividedBy100 >= 100 && dividedBy100 <= 100000000) {
+      console.log(`Corrected to ${dividedBy100} (divided by 100)`);
+      return { amount: dividedBy100, warning: 'تم تصحيح المبلغ تلقائياً' };
+    }
+  }
+  
+  // إذا كان أقل من 100 جنيه، قد يكون هناك مشكلة
+  if (amount < 100) {
+    console.log(`Amount ${amount} < 100, might be incorrect`);
+    return { amount, warning: 'يرجى التحقق من المبلغ - يبدو صغيراً' };
+  }
+  
+  return { amount };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -38,31 +153,32 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `أنت خبير في قراءة إيصالات الإيداع البنكي. 
+                text: `أنت خبير في قراءة إيصالات الإيداع البنكي المصرية والعربية.
 
-**تعليمات صارمة لقراءة المبلغ:**
-- اقرأ المبلغ المكتوب بالضبط كما يظهر في الإيصال
-- المبالغ في الإيصالات المصرية عادة بين 100 جنيه و 10,000,000 جنيه
-- الفاصلة (,) هي فاصل الآلاف فقط - أزلها واكتب الرقم كاملاً
-- مثال: "60,000" تعني ستين ألف = 60000
-- مثال: "1,500,000" تعني مليون ونصف = 1500000
-- مثال: "250,000.50" تعني مئتان وخمسون ألف وخمسون قرش = 250000.50
-- لا تضرب أو تقسم المبلغ بأي رقم
-- إذا رأيت "60,000" لا ترسلها كـ 60000000 أو 60
+**تعليمات قراءة المبلغ - مهم جداً:**
+- النظام المصري يستخدم الفاصلة (,) لفصل الآلاف والنقطة (.) للكسور
+- اقرأ كل رقم بالترتيب من اليسار لليمين: آحاد، عشرات، مئات، آلاف، عشرات آلاف، مئات آلاف، ملايين
+- أمثلة صحيحة:
+  * "60,000" = 60000 (ستون ألف)
+  * "150,000" = 150000 (مائة وخمسون ألف)
+  * "1,500,000" = 1500000 (مليون ونصف)
+  * "25,000.50" = 25000.50 (خمسة وعشرون ألف وخمسون قرشاً)
+- لا تضرب أو تقسم - اكتب الرقم كما هو بدون الفواصل
+- احذر: "60,000" ليست 60 وليست 60000000
 
-استخرج من الصورة:
-1. amount: المبلغ (رقم صحيح أو عشري)
-2. payment_date: التاريخ (YYYY-MM-DD)
+**المطلوب استخراجه:**
+1. amount: المبلغ كرقم (بدون فواصل الآلاف)
+2. payment_date: تاريخ الإيداع (YYYY-MM-DD)
 3. bank_name: اسم البنك
-4. bank_branch: الفرع
+4. bank_branch: اسم الفرع
 5. account_number: رقم الحساب
-6. depositor_name: اسم المودع
-7. recipient_name: اسم المستلم
-8. reference_number: رقم المرجع
-9. check_number: رقم الشيك
+6. depositor_name: اسم المودع (من أودع)
+7. recipient_name: اسم صاحب الحساب (المستفيد)
+8. reference_number: رقم الإيصال أو المرجع
+9. check_number: رقم الشيك (إن وجد)
 10. payment_method: طريقة الدفع (cash/bank_transfer/check/card/other)
 
-أجب بـ JSON فقط:
+أجب بصيغة JSON فقط:
 {
   "amount": 0,
   "payment_date": "",
@@ -101,6 +217,8 @@ serve(async (req) => {
     const aiResponse = await response.json();
     const content = aiResponse.choices?.[0]?.message?.content || '';
     
+    console.log('AI Response:', content);
+    
     // Parse the JSON response - clean up common issues
     let extractedData;
     try {
@@ -120,50 +238,25 @@ serve(async (req) => {
         throw new Error('No JSON found in response');
       }
       
-      // Parse and clean the amount - handle locale-specific formats
-      if (extractedData.amount) {
-        let amountStr = String(extractedData.amount);
+      console.log('Extracted data before processing:', extractedData);
+      
+      // معالجة المبلغ باستخدام الدالة المحسنة
+      if (extractedData.amount !== undefined && extractedData.amount !== null) {
+        const originalAmount = String(extractedData.amount);
+        console.log(`Processing amount: "${originalAmount}"`);
         
-        // Remove currency symbols, spaces, and Arabic characters
-        amountStr = amountStr.replace(/[¤$€£¥\s٫،ج.م]/g, '');
+        const parsedAmount = parseEgyptianNumber(extractedData.amount);
+        const { amount: finalAmount, warning } = sanityCheckAmount(parsedAmount, originalAmount);
         
-        // Detect format: if comma appears after dot, comma is decimal separator (European)
-        const lastComma = amountStr.lastIndexOf(',');
-        const lastDot = amountStr.lastIndexOf('.');
+        extractedData.amount = finalAmount;
         
-        // Standard format: comma as thousand separator, dot as decimal
-        if (lastDot > lastComma || lastComma === -1) {
-          // Remove thousand separators (commas)
-          amountStr = amountStr.replace(/,/g, '');
-        } else {
-          // European format: dot as thousand separator, comma as decimal
-          amountStr = amountStr.replace(/\./g, '');
-          amountStr = amountStr.replace(',', '.');
+        if (warning) {
+          extractedData.notes = extractedData.notes 
+            ? `${extractedData.notes} - ${warning}` 
+            : warning;
         }
         
-        let parsedAmount = parseFloat(amountStr);
-        
-        // Sanity check: if amount is unreasonably large (> 100 million), 
-        // it might have been multiplied incorrectly - try dividing by 1000
-        if (parsedAmount > 100000000) {
-          console.log(`Amount ${parsedAmount} seems too large, checking...`);
-          // Check if dividing by 1000 gives a reasonable number
-          const correctedAmount = parsedAmount / 1000;
-          if (correctedAmount >= 100 && correctedAmount <= 100000000) {
-            console.log(`Correcting amount from ${parsedAmount} to ${correctedAmount}`);
-            parsedAmount = correctedAmount;
-            extractedData.notes = (extractedData.notes || '') + ' (تم تصحيح المبلغ تلقائياً)';
-          }
-        }
-        
-        // Also check if amount is too small (< 10) - might need multiplying
-        if (parsedAmount > 0 && parsedAmount < 10 && amountStr.length <= 2) {
-          console.log(`Amount ${parsedAmount} seems too small for a deposit`);
-          // This might be a partial read, leave a note
-          extractedData.notes = (extractedData.notes || '') + ' (يرجى التحقق من المبلغ)';
-        }
-        
-        extractedData.amount = isNaN(parsedAmount) ? 0 : parsedAmount;
+        console.log(`Final amount: ${finalAmount}`);
       }
       
     } catch (parseError) {
