@@ -68,7 +68,7 @@ const ReceiptDetailsDialog = ({
   };
 
   const handleConfirm = async () => {
-    if (!profile?.id) return;
+    if (!profile?.user_id) return;
     
     setConfirming(true);
     try {
@@ -77,7 +77,7 @@ const ReceiptDetailsDialog = ({
         .update({
           status: 'confirmed',
           confirmed_at: new Date().toISOString(),
-          confirmed_by: profile.id,
+          confirmed_by: profile.user_id,
         })
         .eq('id', receipt.id);
 
