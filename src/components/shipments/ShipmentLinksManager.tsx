@@ -195,7 +195,10 @@ const ShipmentLinksManager = () => {
   const { isLoaded: mapsLoaded } = useGoogleMaps();
 
   const loadLinks = async () => {
-    if (!profile?.organization_id) return;
+    if (!profile?.organization_id) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -473,6 +476,25 @@ const ShipmentLinksManager = () => {
       <Card>
         <CardContent className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Check if user has an organization
+  if (!profile?.organization_id) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <div className="max-w-md mx-auto space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+              <Building2 className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold">لا يوجد جهة مرتبطة</h3>
+            <p className="text-muted-foreground">
+              هذه الميزة متاحة فقط لشركات النقل المسجلة. يرجى التواصل مع المسؤول لربط حسابك بجهة نقل.
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
