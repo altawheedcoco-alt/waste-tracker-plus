@@ -673,23 +673,24 @@ const QuickDeposit = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-emerald-500/5 to-accent/10 border border-primary/20"
+                className="mt-6 p-5 rounded-xl bg-gradient-to-br from-primary/10 via-emerald-500/5 to-accent/10 border border-primary/20"
               >
-                <div className="flex justify-center mb-3">
-                  <img src={logo} alt="iRecycle" className="h-12 w-auto" />
+                <div className="flex justify-center mb-4">
+                  <img src={logo} alt="iRecycle" className="h-14 w-auto" />
                 </div>
-                <p className="text-base font-bold text-foreground mb-1 text-center">
-                  شكراً لثقتكم بنا
+                <p className="text-lg font-bold text-foreground mb-2 text-center">
+                  شكراً لاستخدامك منصة آي ريسايكل
                 </p>
-                <p className="text-sm text-muted-foreground mb-2 text-center">
-                  نقدر تعاملكم معنا ونتطلع لخدمتكم دائماً
+                <p className="text-sm text-muted-foreground mb-3 text-center">
+                  نظام آي ريسايكل الابتكار
                 </p>
-                <p className="text-xs font-medium text-primary text-center">
-                  iRecycle Waste Management System
+                <p className="text-sm font-semibold text-primary text-center mb-3">
+                  نظام إدارة النفايات iRecycle
                 </p>
-                <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                  <Recycle className="h-4 w-4 text-emerald-500" />
+                <div className="flex items-center justify-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                  <Recycle className="h-5 w-5" />
                   <span>معاً نحو بيئة أنظف</span>
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                 </div>
               </motion.div>
 
