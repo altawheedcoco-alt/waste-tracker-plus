@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimeline';
+import ShipmentProgressLogs from '@/components/shipments/ShipmentProgressLogs';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
 import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
@@ -356,6 +357,9 @@ const ShipmentDetailsPage = () => {
 
         {/* Status Timeline */}
         <ShipmentStatusTimeline shipment={shipment} />
+
+        {/* Progress Logs - Auto-recorded milestones */}
+        <ShipmentProgressLogs shipmentId={shipment.id} maxHeight={350} />
 
         {/* Live Tracking Section - Featured when driver is assigned */}
         {shipment.driver_id && (

@@ -17,6 +17,7 @@ import {
   formatDuration,
 } from '@/lib/mapUtils';
 import RouteProgressBar from './RouteProgressBar';
+import { useAutoProgressLogger } from '@/hooks/useAutoProgressLogger';
 
 interface DriverLocation {
   latitude: number;
@@ -68,6 +69,16 @@ const DriverRouteVisualization = memo(({
   const [progress, setProgress] = useState<number>(0);
   const [totalDistanceTraveled, setTotalDistanceTraveled] = useState<number>(0);
   const [avgSpeed, setAvgSpeed] = useState<number>(0);
+
+  // Auto progress logger - logs milestones automatically
+  useAutoProgressLogger({
+    shipmentId,
+    driverId,
+    pickupCoords,
+    deliveryCoords,
+    status,
+    enabled: status === 'in_transit' || status === 'approved',
+  });
 
   // Initialize map
   useEffect(() => {
