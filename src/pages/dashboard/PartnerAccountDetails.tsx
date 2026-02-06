@@ -15,6 +15,7 @@ import {
   Settings2,
   Layers,
   Plus,
+  CalendarRange,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -30,6 +31,7 @@ import WasteTypeAccountBreakdown from '@/components/accounts/WasteTypeAccountBre
 import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 import DepositButton from '@/components/deposits/DepositButton';
 import CreateInvoiceDialog from '@/components/invoices/CreateInvoiceDialog';
+import AccountPeriodsManager from '@/components/accounts/AccountPeriodsManager';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
@@ -330,10 +332,14 @@ export default function PartnerAccountDetails() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="grid w-full max-w-3xl grid-cols-5 mb-6">
+          <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <BookOpen className="h-4 w-4" />
               كشف الحساب
+            </TabsTrigger>
+            <TabsTrigger value="deferred" className="gap-2">
+              <CalendarRange className="h-4 w-4" />
+              الحساب الآجل
             </TabsTrigger>
             <TabsTrigger value="waste-types" className="gap-2">
               <Layers className="h-4 w-4" />
@@ -396,6 +402,30 @@ export default function PartnerAccountDetails() {
                 onDepositUpdated={refreshDeposits}
               />
             </div>
+          </TabsContent>
+
+          {/* Deferred Account Tab */}
+          <TabsContent value="deferred" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CalendarRange className="h-5 w-5" />
+                  الحساب الآجل - الفترات المحاسبية
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {organization?.id && (
+                  <AccountPeriodsManager
+                    organizationId={organization.id}
+                    partnerOrganizationId={partnerId}
+                    partnerName={partner.name}
+                    partnerType={partner.organization_type || 'guest'}
+                    entries={ledgerEntries}
+                    currentBalance={balance}
+                  />
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Waste Types Breakdown Tab */}
