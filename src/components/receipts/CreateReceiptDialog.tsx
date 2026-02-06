@@ -147,7 +147,7 @@ const CreateReceiptDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedShipmentId || !organization?.id || !profile?.id) {
+    if (!selectedShipmentId || !organization?.id || !profile?.user_id) {
       toast.error('يرجى اختيار شحنة');
       return;
     }
@@ -168,7 +168,7 @@ const CreateReceiptDialog = ({
         unit: formData.unit,
         pickup_location: formData.pickupLocation,
         notes: formData.notes || null,
-        created_by: profile.id,
+        created_by: profile.user_id,
       };
 
       const { error } = await supabase
