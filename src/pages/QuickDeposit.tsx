@@ -65,7 +65,10 @@ const depositSchema = z.object({
   submitterEmail: z.string().email('بريد إلكتروني غير صالح').optional().or(z.literal('')),
   transferMethod: z.string().min(1, 'يرجى اختيار طريقة التحويل'),
   bankName: z.string().optional(),
+  bankBranch: z.string().optional(),
+  accountNumber: z.string().optional(),
   referenceNumber: z.string().optional(),
+  checkNumber: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -154,7 +157,10 @@ const QuickDeposit = () => {
       submitterEmail: '',
       transferMethod: 'bank_transfer',
       bankName: '',
+      bankBranch: '',
+      accountNumber: '',
       referenceNumber: '',
+      checkNumber: '',
       notes: '',
     },
   });
@@ -261,26 +267,32 @@ const QuickDeposit = () => {
     setReceiptFile(file);
     
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setReceiptPreview(e.target?.result as string);
+    reader.onload = async (e) => {
+      const base64Result = e.target?.result as string;
+      setReceiptPreview(base64Result);
+      
+      // Auto-extract data with AI when image is uploaded
+      await extractDataFromImage(base64Result, file);
     };
     reader.readAsDataURL(file);
   };
 
-  const extractDataWithAI = async () => {
-    if (!receiptFile) {
-      toast.error('يرجى رفع صورة الإيصال أولاً');
-      return;
-    }
-
+  const extractDataFromImage = async (base64: string, file: File) => {
     setExtracting(true);
     try {
-      const base64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(receiptFile);
-      });
+      // First, upload to storage immediately for document archiving
+      const fileExt = file.name.split('.').pop() || 'jpg';
+      const fileName = `temp/${Date.now()}_receipt.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('deposit-receipts')
+        .upload(fileName, file);
 
+      if (uploadError) {
+        console.warn('Pre-upload warning:', uploadError);
+      }
+
+      // Then extract data with AI
       const { data, error } = await supabase.functions.invoke('extract-receipt-data', {
         body: { imageBase64: base64 },
       });
@@ -290,28 +302,63 @@ const QuickDeposit = () => {
       if (data?.success && data?.data) {
         const extracted = data.data;
         
+        // Fill all available fields
         if (extracted.amount && linkData?.allow_amount_edit) {
           form.setValue('amount', String(extracted.amount));
         }
-        if (extracted.depositor_name) form.setValue('submitterName', extracted.depositor_name);
-        if (extracted.bank_name) form.setValue('bankName', extracted.bank_name);
-        if (extracted.reference_number) form.setValue('referenceNumber', extracted.reference_number);
+        if (extracted.depositor_name) {
+          form.setValue('submitterName', extracted.depositor_name);
+        }
+        if (extracted.bank_name) {
+          form.setValue('bankName', extracted.bank_name);
+        }
+        if (extracted.bank_branch) {
+          form.setValue('bankBranch', extracted.bank_branch);
+        }
+        if (extracted.account_number) {
+          form.setValue('accountNumber', extracted.account_number);
+        }
+        if (extracted.reference_number) {
+          form.setValue('referenceNumber', extracted.reference_number);
+        }
+        if (extracted.check_number) {
+          form.setValue('checkNumber', extracted.check_number);
+        }
         if (extracted.payment_date && linkData?.allow_date_edit) {
-          form.setValue('depositDate', new Date(extracted.payment_date));
+          try {
+            form.setValue('depositDate', new Date(extracted.payment_date));
+          } catch (e) {
+            console.warn('Invalid date:', extracted.payment_date);
+          }
         }
         if (extracted.payment_method) {
           form.setValue('transferMethod', extracted.payment_method);
         }
+        if (extracted.notes) {
+          const currentNotes = form.getValues('notes') || '';
+          form.setValue('notes', currentNotes ? `${currentNotes}\n${extracted.notes}` : extracted.notes);
+        }
 
         setAiExtracted(true);
-        toast.success('✨ تم استخراج البيانات بنجاح!');
+        
+        const confidencePercent = Math.round((extracted.confidence || 0) * 100);
+        toast.success(`✨ تم استخراج البيانات تلقائياً (دقة ${confidencePercent}%)`);
       }
     } catch (error) {
       console.error('AI extraction error:', error);
-      toast.error('حدث خطأ أثناء استخراج البيانات');
+      toast.error('تعذر استخراج البيانات تلقائياً، يمكنك إدخالها يدوياً');
     } finally {
       setExtracting(false);
     }
+  };
+
+  const extractDataWithAI = async () => {
+    if (!receiptFile || !receiptPreview) {
+      toast.error('يرجى رفع صورة الإيصال أولاً');
+      return;
+    }
+    // Use the already extracted function
+    await extractDataFromImage(receiptPreview, receiptFile);
   };
 
   const onSubmit = async (data: DepositFormData) => {
@@ -346,7 +393,7 @@ const QuickDeposit = () => {
         }
       }
 
-      // Build deposit record with preset data
+      // Build deposit record with preset data and all extracted fields
       const depositRecord: any = {
         organization_id: linkData.organization_id,
         amount: parseFloat(data.amount),
@@ -355,7 +402,10 @@ const QuickDeposit = () => {
         depositor_phone: data.submitterPhone || null,
         transfer_method: data.transferMethod,
         bank_name: data.bankName || null,
+        bank_branch: data.bankBranch || null,
+        account_number: data.accountNumber || null,
         reference_number: data.referenceNumber || null,
+        check_number: data.checkNumber || null,
         receipt_url: receiptUrl,
         notes: data.notes || null,
         deposit_link_id: linkData.id,
@@ -365,6 +415,7 @@ const QuickDeposit = () => {
         is_public_submission: true,
         waste_type: linkData.preset_waste_type,
         category: linkData.preset_category,
+        ai_extracted: aiExtracted, // Track if data was AI-extracted
       };
 
       // Add partner reference based on preset
@@ -691,37 +742,43 @@ const QuickDeposit = () => {
                             alt="معاينة الإيصال"
                             className="w-full h-40 object-cover"
                           />
+                          {extracting && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <div className="text-center text-white">
+                                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                                <p className="text-sm">جاري تحليل الإيصال...</p>
+                              </div>
+                            </div>
+                          )}
                           <Button
                             type="button"
                             variant="secondary"
                             size="sm"
                             onClick={() => fileInputRef.current?.click()}
                             className="absolute bottom-2 left-2"
+                            disabled={extracting}
                           >
                             تغيير
                           </Button>
                         </div>
                         
-                        <Button
-                          type="button"
-                          onClick={extractDataWithAI}
-                          disabled={extracting}
-                          size="sm"
-                          className="w-full gap-2"
-                        >
-                          {extracting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Wand2 className="h-4 w-4" />
-                          )}
-                          استخراج البيانات تلقائياً
-                        </Button>
-
-                        {aiExtracted && (
-                          <Badge variant="secondary" className="w-full justify-center gap-1 bg-emerald-100 text-emerald-700">
+                        {aiExtracted ? (
+                          <Badge variant="secondary" className="w-full justify-center gap-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                             <CheckCircle2 className="h-3 w-3" />
-                            تم استخراج البيانات
+                            تم استخراج البيانات تلقائياً
                           </Badge>
+                        ) : !extracting && (
+                          <Button
+                            type="button"
+                            onClick={extractDataWithAI}
+                            disabled={extracting}
+                            size="sm"
+                            className="w-full gap-2"
+                            variant="outline"
+                          >
+                            <Wand2 className="h-4 w-4" />
+                            إعادة استخراج البيانات
+                          </Button>
                         )}
                       </div>
                     )}
@@ -858,6 +915,42 @@ const QuickDeposit = () => {
                     )}
                   />
 
+                  {/* Bank Branch */}
+                  <FormField
+                    control={form.control}
+                    name="bankBranch"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Building2 className="h-4 w-4" />
+                          فرع البنك
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="اسم الفرع" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Account Number */}
+                  <FormField
+                    control={form.control}
+                    name="accountNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          رقم الحساب
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="رقم الحساب البنكي" {...field} dir="ltr" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                   {/* Reference Number */}
                   <FormField
                     control={form.control}
@@ -870,6 +963,24 @@ const QuickDeposit = () => {
                         </FormLabel>
                         <FormControl>
                           <Input placeholder="رقم العملية أو الإيصال" {...field} dir="ltr" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Check Number */}
+                  <FormField
+                    control={form.control}
+                    name="checkNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Receipt className="h-4 w-4" />
+                          رقم الشيك (إن وجد)
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="رقم الشيك" {...field} dir="ltr" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

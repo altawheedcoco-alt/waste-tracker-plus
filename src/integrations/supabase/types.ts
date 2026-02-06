@@ -1448,11 +1448,14 @@ export type Database = {
         Row: {
           account_number: string | null
           ai_confidence_score: number | null
+          ai_extracted: boolean | null
           ai_extracted_data: Json | null
           amount: number
+          bank_branch: string | null
           bank_name: string | null
           branch_name: string | null
           category: string | null
+          check_number: string | null
           created_at: string
           created_by: string | null
           currency: string
@@ -1481,11 +1484,14 @@ export type Database = {
         Insert: {
           account_number?: string | null
           ai_confidence_score?: number | null
+          ai_extracted?: boolean | null
           ai_extracted_data?: Json | null
           amount: number
+          bank_branch?: string | null
           bank_name?: string | null
           branch_name?: string | null
           category?: string | null
+          check_number?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
@@ -1514,11 +1520,14 @@ export type Database = {
         Update: {
           account_number?: string | null
           ai_confidence_score?: number | null
+          ai_extracted?: boolean | null
           ai_extracted_data?: Json | null
           amount?: number
+          bank_branch?: string | null
           bank_name?: string | null
           branch_name?: string | null
           category?: string | null
+          check_number?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string
