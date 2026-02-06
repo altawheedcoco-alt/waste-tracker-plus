@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Wand2, Loader2, Building2, CheckCircle2, Share2 } from 'lucide-react';
+import { FileText, Wand2, Loader2, Building2, CheckCircle2, Share2, Copy, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import TemplateSelector from './TemplateSelector';
+import PostShareActions from './PostShareActions';
 import { postCategories, PostTemplate } from './templates/postTemplates';
 
 interface Organization {
@@ -329,31 +330,44 @@ const PostsGenerator = ({
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  {!posted ? (
-                    <Button 
-                      onClick={handlePostToOrganization}
-                      className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500"
-                      disabled={isPosting}
-                    >
-                      {isPosting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 ml-2 animate-spin" />
-                          جاري النشر...
-                        </>
-                      ) : (
-                        <>
-                          <Share2 className="w-4 h-4 ml-2" />
-                          نشر في صفحة الجهة
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button variant="outline" className="flex-1 text-green-600" disabled>
-                      <CheckCircle2 className="w-4 h-4 ml-2" />
-                      تم النشر بنجاح
-                    </Button>
-                  )}
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2">
+                    {!posted ? (
+                      <Button 
+                        onClick={handlePostToOrganization}
+                        className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500"
+                        disabled={isPosting}
+                      >
+                        {isPosting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                            جاري النشر...
+                          </>
+                        ) : (
+                          <>
+                            <Share2 className="w-4 h-4 ml-2" />
+                            نشر في صفحة الجهة
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="flex-1 text-green-600" disabled>
+                        <CheckCircle2 className="w-4 h-4 ml-2" />
+                        تم النشر بنجاح
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {/* Share Actions */}
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border">
+                    <span className="text-sm text-muted-foreground">مشاركة خارجية:</span>
+                    <PostShareActions 
+                      content={generatedPost}
+                      hashtags={generatedHashtags}
+                      variant="dropdown"
+                      size="sm"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
