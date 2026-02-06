@@ -523,8 +523,9 @@ const QuickDeposit = () => {
           animate={{ scale: 1, opacity: 1 }}
           className="max-w-md w-full"
         >
-          <Card className="text-center border-emerald-200 bg-gradient-to-b from-emerald-50/50 to-background">
+          <Card className="text-center border-emerald-200 bg-gradient-to-b from-emerald-50/50 to-background dark:from-emerald-950/30 dark:to-background">
             <CardContent className="pt-8 pb-6">
+              {/* Success Icon */}
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -533,9 +534,10 @@ const QuickDeposit = () => {
               >
                 <CheckCircle2 className="h-10 w-10 text-white" />
               </motion.div>
-              <h1 className="text-2xl font-bold mb-2 text-emerald-700">تم الإرسال بنجاح!</h1>
+
+              <h1 className="text-2xl font-bold mb-2 text-emerald-700 dark:text-emerald-400">تم الإرسال بنجاح!</h1>
               <p className="text-muted-foreground mb-4">
-                شكراً لك، تم استلام إيداعك وسيتم مراجعته من قبل{' '}
+                تم استلام إيداعك وسيتم مراجعته من قبل{' '}
                 <span className="font-semibold text-foreground">
                   {linkData?.organization_name}
                 </span>
@@ -562,7 +564,32 @@ const QuickDeposit = () => {
                 </div>
               )}
 
-              <div className="flex gap-3 justify-center">
+              {/* Branding Thank You Message */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-emerald-500/5 to-accent/10 border border-primary/20"
+              >
+                <div className="flex justify-center mb-3">
+                  <img src={logo} alt="iRecycle" className="h-12 w-auto" />
+                </div>
+                <p className="text-sm font-medium text-foreground mb-1">
+                  شكراً لاستخدامك منصة آي ريسايكل
+                </p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  نظام آي ريسايكل لإدارة المخلفات
+                </p>
+                <p className="text-xs font-medium text-primary">
+                  iRecycle Waste Management System
+                </p>
+                <div className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Recycle className="h-4 w-4 text-emerald-500" />
+                  <span>معاً نحو بيئة أنظف</span>
+                </div>
+              </motion.div>
+
+              <div className="flex gap-3 justify-center mt-6">
                 <Button 
                   onClick={() => {
                     setSubmitted(false);
@@ -570,12 +597,27 @@ const QuickDeposit = () => {
                     if (linkData?.preset_notes) {
                       form.setValue('notes', linkData.preset_notes);
                     }
+                    // Reset preset values
+                    if (linkData?.preset_amount) {
+                      form.setValue('amount', String(linkData.preset_amount));
+                    }
+                    if (linkData?.preset_bank_name) {
+                      form.setValue('bankName', linkData.preset_bank_name);
+                    }
+                    if (linkData?.preset_depositor_name) {
+                      form.setValue('submitterName', linkData.preset_depositor_name);
+                    }
+                    if (linkData?.preset_payment_method) {
+                      form.setValue('transferMethod', linkData.preset_payment_method);
+                    }
                     setReceiptFile(null);
                     setReceiptPreview(null);
                     setAiExtracted(false);
                   }} 
                   variant="outline"
+                  className="gap-2"
                 >
+                  <Send className="h-4 w-4" />
                   إرسال إيداع آخر
                 </Button>
               </div>
