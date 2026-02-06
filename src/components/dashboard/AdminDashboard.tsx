@@ -161,7 +161,7 @@ const AdminDashboard = () => {
         .limit(5);
 
       const activeShipments = shipments?.filter(s => 
-        ['new', 'approved', 'collecting', 'in_transit'].includes(s.status || '')
+        ['new', 'approved', 'in_transit'].includes(s.status || '')
       ).length || 0;
 
       // Fetch organizations stats

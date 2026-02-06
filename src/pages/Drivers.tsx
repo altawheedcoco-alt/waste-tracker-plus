@@ -131,7 +131,7 @@ const Drivers = () => {
             .from('shipments')
             .select('id', { count: 'exact', head: true })
             .eq('driver_id', driver.id)
-            .in('status', ['new', 'approved', 'collecting', 'in_transit']);
+            .in('status', ['new', 'approved', 'in_transit']);
 
           return {
             ...driver,

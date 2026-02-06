@@ -74,7 +74,6 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: Stat
       const now = new Date().toISOString();
       const timestampFields: Record<string, string> = {
         'approved': 'approved_at',
-        'collecting': 'collection_started_at',
         'in_transit': 'in_transit_at',
         'delivered': 'delivered_at',
         'confirmed': 'confirmed_at',

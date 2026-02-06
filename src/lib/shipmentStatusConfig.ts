@@ -307,7 +307,7 @@ export const getStatusPhase = (status: string): 'transporter' | 'recycler' | nul
 export const legacyStatusMapping: Record<string, ShipmentStatus> = {
   'new': 'pending',
   'approved': 'registered',
-  'collecting': 'loading',
+  'collecting': 'in_transit', // collecting now maps directly to in_transit
   'in_transit': 'in_transit',
   'delivered': 'received',
   'confirmed': 'completed',
@@ -317,10 +317,10 @@ export const legacyStatusMapping: Record<string, ShipmentStatus> = {
 export const reverseStatusMapping: Record<ShipmentStatus, string> = {
   'pending': 'new',
   'registered': 'approved',
-  'loading': 'collecting',
-  'weighing': 'collecting',
-  'weighed': 'collecting',
-  'picked_up': 'collecting',
+  'loading': 'in_transit',
+  'weighing': 'in_transit',
+  'weighed': 'in_transit',
+  'picked_up': 'in_transit',
   'on_the_way': 'in_transit',
   'in_transit': 'in_transit',
   'delivering': 'in_transit',

@@ -38,7 +38,6 @@ const wasteTypeLabels: Record<string, string> = {
 const statusLabels: Record<string, { label: string; color: string }> = {
   new: { label: 'جديدة', color: 'bg-blue-100 text-blue-800' },
   approved: { label: 'معتمدة', color: 'bg-green-100 text-green-800' },
-  collecting: { label: 'قيد الجمع', color: 'bg-yellow-100 text-yellow-800' },
   in_transit: { label: 'في الطريق', color: 'bg-orange-100 text-orange-800' },
   delivered: { label: 'تم التسليم', color: 'bg-purple-100 text-purple-800' },
   confirmed: { label: 'مؤكدة', color: 'bg-emerald-100 text-emerald-800' },

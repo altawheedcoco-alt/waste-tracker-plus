@@ -159,7 +159,7 @@ const RecyclerDashboard = () => {
 
         setRecentShipments(shipmentsWithReportStatus as unknown as RecentShipment[]);
 
-        const incomingStatuses = ['new', 'approved', 'collecting', 'in_transit'];
+        const incomingStatuses = ['new', 'approved', 'in_transit'];
         const processingStatuses = ['delivered'];
         const completedStatuses = ['confirmed'];
 

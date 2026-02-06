@@ -77,7 +77,6 @@ const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'
 const statusLabels: Record<string, string> = {
   new: 'جديدة',
   approved: 'معتمدة',
-  collecting: 'جاري التجميع',
   in_transit: 'في الطريق',
   delivered: 'تم التسليم',
   confirmed: 'مكتمل',
@@ -139,7 +138,7 @@ const Reports = () => {
 
       // Apply status filter
       if (statusFilter !== 'all') {
-        shipmentsQuery = shipmentsQuery.eq('status', statusFilter as 'new' | 'approved' | 'collecting' | 'in_transit' | 'delivered' | 'confirmed');
+        shipmentsQuery = shipmentsQuery.eq('status', statusFilter as 'new' | 'approved' | 'in_transit' | 'delivered' | 'confirmed');
       }
 
       // Apply waste type filter
@@ -393,7 +392,6 @@ const Reports = () => {
                     <SelectItem value="all">جميع الحالات</SelectItem>
                     <SelectItem value="new">جديدة</SelectItem>
                     <SelectItem value="approved">معتمدة</SelectItem>
-                    <SelectItem value="collecting">جاري التجميع</SelectItem>
                     <SelectItem value="in_transit">في الطريق</SelectItem>
                     <SelectItem value="delivered">تم التسليم</SelectItem>
                     <SelectItem value="confirmed">مكتمل</SelectItem>

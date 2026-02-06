@@ -102,7 +102,6 @@ export const ShipmentsRepository = {
   async updateStatus(id: string, status: string, userId?: string): Promise<Shipment> {
     const timestampFields: Record<string, string> = {
       'approved': 'approved_at',
-      'collecting': 'collection_started_at',
       'in_transit': 'in_transit_at',
       'delivered': 'delivered_at',
       'confirmed': 'confirmed_at',

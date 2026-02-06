@@ -89,7 +89,7 @@ const TransporterAnalytics = () => {
       if (error) throw error;
 
       if (shipments && shipments.length > 0) {
-        const activeStatuses = ['new', 'approved', 'collecting', 'in_transit'];
+        const activeStatuses = ['new', 'approved', 'in_transit'];
         const completedStatuses = ['delivered', 'confirmed'];
         
         const completedShipments = shipments.filter(s => completedStatuses.includes(s.status));

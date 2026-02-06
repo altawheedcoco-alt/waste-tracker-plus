@@ -294,7 +294,7 @@ const AggregateShipmentReport = () => {
         query = query.lte('created_at', endDate + 'T23:59:59');
       }
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as 'new' | 'approved' | 'collecting' | 'in_transit' | 'delivered' | 'confirmed');
+        query = query.eq('status', statusFilter as 'new' | 'approved' | 'in_transit' | 'delivered' | 'confirmed');
       }
       if (wasteTypeFilter !== 'all') {
         query = query.eq('waste_type', wasteTypeFilter as 'plastic' | 'paper' | 'metal' | 'glass' | 'electronic' | 'organic' | 'chemical' | 'medical' | 'construction' | 'other');
@@ -362,7 +362,6 @@ const AggregateShipmentReport = () => {
     const labels: Record<string, string> = {
       new: 'جديدة',
       approved: 'معتمدة',
-      collecting: 'جاري التجميع',
       in_transit: 'في الطريق',
       delivered: 'تم التسليم',
       confirmed: 'مؤكدة',
@@ -539,7 +538,6 @@ const AggregateShipmentReport = () => {
                     <SelectItem value="all">جميع الحالات</SelectItem>
                     <SelectItem value="new">جديدة</SelectItem>
                     <SelectItem value="approved">معتمدة</SelectItem>
-                    <SelectItem value="collecting">جاري التجميع</SelectItem>
                     <SelectItem value="in_transit">في الطريق</SelectItem>
                     <SelectItem value="delivered">تم التسليم</SelectItem>
                     <SelectItem value="confirmed">مؤكدة</SelectItem>

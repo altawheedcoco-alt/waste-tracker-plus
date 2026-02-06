@@ -28,7 +28,6 @@ interface RouteProgressBarProps {
 const statusStages = [
   { key: 'new', label: 'جديدة', icon: Package },
   { key: 'approved', label: 'معتمدة', icon: CheckCircle2 },
-  { key: 'collecting', label: 'جمع', icon: MapPin },
   { key: 'in_transit', label: 'نقل', icon: Truck },
   { key: 'delivered', label: 'تسليم', icon: Navigation },
   { key: 'confirmed', label: 'مؤكدة', icon: CheckCircle2 },

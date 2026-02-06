@@ -57,7 +57,6 @@ const statusOptions = [
   { value: 'all', label: 'جميع الحالات' },
   { value: 'new', label: 'جديدة' },
   { value: 'approved', label: 'معتمدة' },
-  { value: 'collecting', label: 'قيد الجمع' },
   { value: 'in_transit', label: 'في الطريق' },
   { value: 'delivered', label: 'تم التسليم' },
   { value: 'confirmed', label: 'مؤكدة' },
@@ -126,7 +125,6 @@ const TransporterShipments = () => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       new: { label: 'جديدة', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
       approved: { label: 'معتمدة', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-      collecting: { label: 'قيد الجمع', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
       in_transit: { label: 'في الطريق', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
       delivered: { label: 'تم التسليم', className: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300' },
       confirmed: { label: 'مؤكدة', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300' },
@@ -148,7 +146,7 @@ const TransporterShipments = () => {
 
   const stats = {
     total: shipments.length,
-    active: shipments.filter(s => ['new', 'approved', 'collecting', 'in_transit'].includes(s.status)).length,
+    active: shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length,
     completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
   };
 

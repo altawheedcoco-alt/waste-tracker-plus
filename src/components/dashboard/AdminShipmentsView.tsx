@@ -90,7 +90,6 @@ interface Shipment {
 const STATUS_CONFIG: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
   new: { color: 'bg-blue-100 text-blue-800', label: 'جديدة', icon: <Clock className="h-4 w-4" /> },
   approved: { color: 'bg-green-100 text-green-800', label: 'معتمدة', icon: <CheckCircle className="h-4 w-4" /> },
-  collecting: { color: 'bg-yellow-100 text-yellow-800', label: 'جاري التجميع', icon: <Package className="h-4 w-4" /> },
   in_transit: { color: 'bg-orange-100 text-orange-800', label: 'في الطريق', icon: <Truck className="h-4 w-4" /> },
   delivered: { color: 'bg-purple-100 text-purple-800', label: 'تم التسليم', icon: <CheckCircle className="h-4 w-4" /> },
   confirmed: { color: 'bg-emerald-100 text-emerald-800', label: 'مكتمل', icon: <CheckCircle className="h-4 w-4" /> },
@@ -207,7 +206,6 @@ const AdminShipmentsView = () => {
       all: shipments.length,
       new: 0,
       approved: 0,
-      collecting: 0,
       in_transit: 0,
       delivered: 0,
       confirmed: 0,
@@ -377,13 +375,12 @@ const AdminShipmentsView = () => {
               <TabsTrigger value="new" className="gap-1">
                 جديدة
                 {statusCounts.new > 0 && (
-                  <Badge variant="secondary" className="mr-1 h-5 px-1">
+                <Badge variant="secondary" className="mr-1 h-5 px-1">
                     {statusCounts.new}
                   </Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger value="approved">معتمدة</TabsTrigger>
-              <TabsTrigger value="collecting">جاري التجميع</TabsTrigger>
               <TabsTrigger value="in_transit">في الطريق</TabsTrigger>
               <TabsTrigger value="delivered">تم التسليم</TabsTrigger>
               <TabsTrigger value="confirmed">مكتملة</TabsTrigger>
