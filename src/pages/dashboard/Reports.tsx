@@ -203,7 +203,7 @@ const Reports = () => {
           s.created_at?.startsWith(dateStr)
         ).length;
         shipmentsTrend.push({
-          date: date.toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric' }),
+          date: date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }),
           count,
         });
       }

@@ -119,7 +119,7 @@ export default function AccountLedgerFilterDialog({
   }, [filteredEntries]);
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-EG', { minimumFractionDigits: 0 }).format(amount);
+    return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0 }).format(amount);
   };
 
   const formatDate = (dateStr: string) => {

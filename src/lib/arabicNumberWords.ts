@@ -117,7 +117,7 @@ export function numberToArabicWords(num: number, includeCurrency: boolean = true
  * مثال: 60000 → "60,000"
  */
 export function formatEgyptianNumber(num: number): string {
-  return new Intl.NumberFormat('ar-EG', {
+  return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(num);

@@ -224,7 +224,7 @@ const PartnerPerformanceChart = ({
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                       <span>{partner.shipmentsCount} شحنة</span>
-                      <span>{partner.totalQuantity.toLocaleString('ar-EG')} كجم</span>
+                      <span>{partner.totalQuantity.toLocaleString('en-US')} كجم</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Progress value={partner.score} className="flex-1 h-2" />

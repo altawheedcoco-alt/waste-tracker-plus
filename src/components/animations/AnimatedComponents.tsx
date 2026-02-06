@@ -210,7 +210,7 @@ export const AnimatedNumber = ({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
-        {value.toLocaleString('ar-EG', formatOptions)}
+        {value.toLocaleString('en-US', formatOptions)}
       </motion.span>
     </motion.span>
   );

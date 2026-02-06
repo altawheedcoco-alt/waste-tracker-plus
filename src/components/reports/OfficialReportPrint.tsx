@@ -38,7 +38,7 @@ const OfficialReportPrint: React.FC<OfficialReportPrintProps> = ({
   const printRef = useRef<HTMLDivElement>(null);
   const chartsRef = useRef<HTMLDivElement>(null);
 
-  const currentDate = new Date().toLocaleDateString('ar-SA', {
+  const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

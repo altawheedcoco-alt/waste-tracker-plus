@@ -372,7 +372,7 @@ const DriverTracking = () => {
                               {driver.last_update && (
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
-                                  {new Date(driver.last_update).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                                  {new Date(driver.last_update).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                               )}
                               <span className="flex items-center gap-1">
@@ -490,7 +490,7 @@ const DriverTracking = () => {
                       </div>
                       <div className="flex items-center gap-2 justify-end">
                         <span className="text-sm">
-                          {selectedDriver.last_update && new Date(selectedDriver.last_update).toLocaleTimeString('ar-SA')}
+                          {selectedDriver.last_update && new Date(selectedDriver.last_update).toLocaleTimeString('en-US')}
                         </span>
                         <Clock className="w-4 h-4 text-muted-foreground" />
                       </div>

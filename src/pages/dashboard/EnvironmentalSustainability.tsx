@@ -241,7 +241,7 @@ const EnvironmentalSustainability = () => {
       .sort(([a], [b]) => a.localeCompare(b))
       .slice(-12)
       .map(([month, data]) => ({
-        month: new Date(month + "-01").toLocaleDateString("ar-SA", { month: "short", year: "2-digit" }),
+        month: new Date(month + "-01").toLocaleDateString("en-US", { month: "short", year: "2-digit" }),
         معاد_تدويره: Math.round(data.recycled),
         إجمالي: Math.round(data.total),
         معدل: data.total > 0 ? Math.round((data.recycled / data.total) * 100) : 0
@@ -326,7 +326,7 @@ const EnvironmentalSustainability = () => {
       // التاريخ
       pdf.setFontSize(12);
       pdf.setTextColor(100);
-      pdf.text(`تاريخ التقرير: ${new Date().toLocaleDateString("ar-SA")}`, pageWidth / 2, 30, { align: "center" });
+      pdf.text(`تاريخ التقرير: ${new Date().toLocaleDateString("en-US")}`, pageWidth / 2, 30, { align: "center" });
       
       // الدرجة الإجمالية
       pdf.setFontSize(18);

@@ -58,7 +58,7 @@ const getWasteTypeLabel = (type: string) => {
 };
 
 export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
-  const printDate = new Date().toLocaleDateString('ar-EG', {
+  const printDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -67,7 +67,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
   });
 
   const pickupDateFormatted = receipt.pickup_date
-    ? new Date(receipt.pickup_date).toLocaleDateString('ar-EG', {
+    ? new Date(receipt.pickup_date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

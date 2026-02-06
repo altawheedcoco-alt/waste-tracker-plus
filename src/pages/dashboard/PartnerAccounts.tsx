@@ -82,7 +82,7 @@ export default function PartnerAccounts() {
   const [createDialogType, setCreateDialogType] = useState<'generator' | 'recycler' | 'guest'>('generator');
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('ar-EG', {
+    return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 0,
     }).format(amount);
   };

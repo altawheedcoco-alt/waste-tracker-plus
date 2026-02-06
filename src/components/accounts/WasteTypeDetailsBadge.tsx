@@ -142,7 +142,7 @@ export default function WasteTypeDetailsBadge({
                 <span className="font-medium text-sm truncate">{displayText}</span>
                 {quantity !== undefined && (
                   <span className="text-xs text-muted-foreground">
-                    {new Intl.NumberFormat('ar-EG').format(quantity)} {unit || 'كجم'}
+                    {new Intl.NumberFormat('en-US').format(quantity)} {unit || 'كجم'}
                   </span>
                 )}
               </div>
@@ -195,7 +195,7 @@ export default function WasteTypeDetailsBadge({
         </div>
         {quantity !== undefined && (
           <span className="text-lg font-bold">
-            {new Intl.NumberFormat('ar-EG').format(quantity)} <span className="text-sm text-muted-foreground">{unit || 'كجم'}</span>
+            {new Intl.NumberFormat('en-US').format(quantity)} <span className="text-sm text-muted-foreground">{unit || 'كجم'}</span>
           </span>
         )}
       </div>

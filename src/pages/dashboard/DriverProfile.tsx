@@ -245,7 +245,7 @@ const DriverProfile = () => {
                   <h2 className="text-xl font-bold">{profileData?.full_name}</h2>
                   <p className="text-muted-foreground">{profileData?.email}</p>
                   <p className="text-sm text-muted-foreground">
-                    عضو منذ {profileData?.created_at ? new Date(profileData.created_at).toLocaleDateString('ar-EG') : '-'}
+                    عضو منذ {profileData?.created_at ? new Date(profileData.created_at).toLocaleDateString('en-US') : '-'}
                   </p>
                 </div>
               </div>
@@ -371,7 +371,7 @@ const DriverProfile = () => {
                     <p className="text-sm font-medium">تاريخ الإنشاء</p>
                     <p className="text-sm text-muted-foreground">
                       {profileData?.created_at 
-                        ? new Date(profileData.created_at).toLocaleDateString('ar-EG', {
+                        ? new Date(profileData.created_at).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',

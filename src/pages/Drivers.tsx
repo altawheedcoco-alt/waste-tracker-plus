@@ -589,7 +589,7 @@ const Drivers = () => {
                           <Calendar className="w-3.5 h-3.5" />
                           <span>
                             انتهاء الرخصة:{' '}
-                            {new Date(driver.license_expiry).toLocaleDateString('ar-EG')}
+                            {new Date(driver.license_expiry).toLocaleDateString('en-US')}
                           </span>
                         </div>
                       )}
