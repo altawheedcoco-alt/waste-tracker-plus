@@ -34,6 +34,7 @@ interface Shipment {
   generator_id: string;
   generator: { name: string } | null;
   driver_id: string | null;
+  status: string;
 }
 
 interface CreateReceiptDialogProps {
@@ -104,6 +105,8 @@ const CreateReceiptDialog = ({
 
   const loadShipments = async () => {
     try {
+      // Fetch all shipments where this organization is the transporter
+      // Include all statuses that can have receipts issued
       const { data, error } = await supabase
         .from('shipments')
         .select(`
@@ -116,10 +119,11 @@ const CreateReceiptDialog = ({
           delivery_address,
           generator_id,
           driver_id,
+          status,
           generator:organizations!shipments_generator_id_fkey(name)
         `)
         .eq('transporter_id', organization?.id)
-        .in('status', ['approved', 'in_transit'])
+        .in('status', ['new', 'approved', 'in_transit', 'delivered', 'confirmed'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -228,11 +232,34 @@ const CreateReceiptDialog = ({
                   <SelectValue placeholder="اختر شحنة..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {shipments.map(s => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.shipment_number} - {s.generator?.name || 'غير محدد'}
-                    </SelectItem>
-                  ))}
+                  {shipments.length === 0 ? (
+                    <div className="p-4 text-center text-muted-foreground">
+                      لا توجد شحنات متاحة
+                    </div>
+                  ) : (
+                    shipments.map(s => (
+                      <SelectItem key={s.id} value={s.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{s.shipment_number}</span>
+                          <span className="text-muted-foreground">-</span>
+                          <span className="text-muted-foreground">{s.generator?.name || 'غير محدد'}</span>
+                          <span className={`text-xs px-1.5 py-0.5 rounded ${
+                            s.status === 'delivered' || s.status === 'confirmed' 
+                              ? 'bg-green-100 text-green-700' 
+                              : s.status === 'in_transit' 
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {s.status === 'new' ? 'جديدة' : 
+                             s.status === 'approved' ? 'معتمدة' : 
+                             s.status === 'in_transit' ? 'قيد النقل' : 
+                             s.status === 'delivered' ? 'تم التسليم' : 
+                             s.status === 'confirmed' ? 'مؤكدة' : s.status}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
