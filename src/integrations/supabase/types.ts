@@ -1356,7 +1356,7 @@ export type Database = {
           is_verified: boolean | null
           legal_references: Json | null
           notes: string | null
-          organization_id: string
+          organization_id: string | null
           partner_name: string | null
           partner_organization_id: string | null
           start_date: string | null
@@ -1386,7 +1386,7 @@ export type Database = {
           is_verified?: boolean | null
           legal_references?: Json | null
           notes?: string | null
-          organization_id: string
+          organization_id?: string | null
           partner_name?: string | null
           partner_organization_id?: string | null
           start_date?: string | null
@@ -1416,7 +1416,7 @@ export type Database = {
           is_verified?: boolean | null
           legal_references?: Json | null
           notes?: string | null
-          organization_id?: string
+          organization_id?: string | null
           partner_name?: string | null
           partner_organization_id?: string | null
           start_date?: string | null
@@ -1434,13 +1434,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "contracts_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "contracts_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -1466,13 +1459,6 @@ export type Database = {
             columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contracts_verified_by_fkey"
-            columns: ["verified_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -2825,7 +2811,7 @@ export type Database = {
           invoice_type: string
           issue_date: string
           notes: string | null
-          organization_id: string
+          organization_id: string | null
           paid_amount: number | null
           partner_name: string | null
           partner_organization_id: string | null
@@ -2852,7 +2838,7 @@ export type Database = {
           invoice_type?: string
           issue_date?: string
           notes?: string | null
-          organization_id: string
+          organization_id?: string | null
           paid_amount?: number | null
           partner_name?: string | null
           partner_organization_id?: string | null
@@ -2879,7 +2865,7 @@ export type Database = {
           invoice_type?: string
           issue_date?: string
           notes?: string | null
-          organization_id?: string
+          organization_id?: string | null
           paid_amount?: number | null
           partner_name?: string | null
           partner_organization_id?: string | null
@@ -2894,20 +2880,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "invoices_approved_by_fkey"
-            columns: ["approved_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "invoices_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -2917,20 +2889,6 @@ export type Database = {
           {
             foreignKeyName: "invoices_organization_id_fkey"
             columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "invoices_partner_organization_id_fkey"
-            columns: ["partner_organization_id"]
-            isOneToOne: false
-            referencedRelation: "mv_organization_summary"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "invoices_partner_organization_id_fkey"
-            columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -3730,13 +3688,13 @@ export type Database = {
       organizations: {
         Row: {
           activity_type: string | null
-          address: string
+          address: string | null
           agent_email: string | null
           agent_name: string | null
           agent_national_id: string | null
           agent_phone: string | null
           branches: Json | null
-          city: string
+          city: string | null
           client_code: string | null
           commercial_register: string | null
           cover_url: string | null
@@ -3783,13 +3741,13 @@ export type Database = {
         }
         Insert: {
           activity_type?: string | null
-          address: string
+          address?: string | null
           agent_email?: string | null
           agent_name?: string | null
           agent_national_id?: string | null
           agent_phone?: string | null
           branches?: Json | null
-          city: string
+          city?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
@@ -3836,13 +3794,13 @@ export type Database = {
         }
         Update: {
           activity_type?: string | null
-          address?: string
+          address?: string | null
           agent_email?: string | null
           agent_name?: string | null
           agent_national_id?: string | null
           agent_phone?: string | null
           branches?: Json | null
-          city?: string
+          city?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
@@ -5333,7 +5291,7 @@ export type Database = {
           receipt_number: string
           shipment_id: string
           status: string
-          transporter_id: string
+          transporter_id: string | null
           unit: string | null
           updated_at: string
           waste_category: string | null
@@ -5359,7 +5317,7 @@ export type Database = {
           receipt_number?: string
           shipment_id: string
           status?: string
-          transporter_id: string
+          transporter_id?: string | null
           unit?: string | null
           updated_at?: string
           waste_category?: string | null
@@ -5385,7 +5343,7 @@ export type Database = {
           receipt_number?: string
           shipment_id?: string
           status?: string
-          transporter_id?: string
+          transporter_id?: string | null
           unit?: string | null
           updated_at?: string
           waste_category?: string | null
@@ -5393,45 +5351,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "shipment_receipts_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shipment_receipts_generator_id_fkey"
-            columns: ["generator_id"]
-            isOneToOne: false
-            referencedRelation: "mv_organization_summary"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "shipment_receipts_generator_id_fkey"
-            columns: ["generator_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "shipment_receipts_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shipment_receipts_transporter_id_fkey"
-            columns: ["transporter_id"]
-            isOneToOne: false
-            referencedRelation: "mv_organization_summary"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "shipment_receipts_transporter_id_fkey"
-            columns: ["transporter_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -5447,9 +5370,9 @@ export type Database = {
           collection_started_at: string | null
           confirmed_at: string | null
           created_at: string | null
-          created_by: string
+          created_by: string | null
           delivered_at: string | null
-          delivery_address: string
+          delivery_address: string | null
           delivery_city: string | null
           delivery_latitude: number | null
           delivery_longitude: number | null
@@ -5469,12 +5392,12 @@ export type Database = {
           manual_vehicle_plate: string | null
           notes: string | null
           packaging_method: string | null
-          pickup_address: string
+          pickup_address: string | null
           pickup_city: string | null
           pickup_date: string | null
           pickup_latitude: number | null
           pickup_longitude: number | null
-          quantity: number
+          quantity: number | null
           recycler_id: string | null
           recycler_notes: string | null
           shipment_link_id: string | null
@@ -5488,7 +5411,7 @@ export type Database = {
           updated_at: string | null
           waste_description: string | null
           waste_state: string | null
-          waste_type: Database["public"]["Enums"]["waste_type"]
+          waste_type: Database["public"]["Enums"]["waste_type"] | null
         }
         Insert: {
           account_notes?: string | null
@@ -5500,9 +5423,9 @@ export type Database = {
           collection_started_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null
-          created_by: string
+          created_by?: string | null
           delivered_at?: string | null
-          delivery_address: string
+          delivery_address?: string | null
           delivery_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
@@ -5522,12 +5445,12 @@ export type Database = {
           manual_vehicle_plate?: string | null
           notes?: string | null
           packaging_method?: string | null
-          pickup_address: string
+          pickup_address?: string | null
           pickup_city?: string | null
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
-          quantity: number
+          quantity?: number | null
           recycler_id?: string | null
           recycler_notes?: string | null
           shipment_link_id?: string | null
@@ -5541,7 +5464,7 @@ export type Database = {
           updated_at?: string | null
           waste_description?: string | null
           waste_state?: string | null
-          waste_type: Database["public"]["Enums"]["waste_type"]
+          waste_type?: Database["public"]["Enums"]["waste_type"] | null
         }
         Update: {
           account_notes?: string | null
@@ -5553,9 +5476,9 @@ export type Database = {
           collection_started_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null
-          created_by?: string
+          created_by?: string | null
           delivered_at?: string | null
-          delivery_address?: string
+          delivery_address?: string | null
           delivery_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
@@ -5575,12 +5498,12 @@ export type Database = {
           manual_vehicle_plate?: string | null
           notes?: string | null
           packaging_method?: string | null
-          pickup_address?: string
+          pickup_address?: string | null
           pickup_city?: string | null
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
-          quantity?: number
+          quantity?: number | null
           recycler_id?: string | null
           recycler_notes?: string | null
           shipment_link_id?: string | null
@@ -5594,51 +5517,9 @@ export type Database = {
           updated_at?: string | null
           waste_description?: string | null
           waste_state?: string | null
-          waste_type?: Database["public"]["Enums"]["waste_type"]
+          waste_type?: Database["public"]["Enums"]["waste_type"] | null
         }
         Relationships: [
-          {
-            foreignKeyName: "shipments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shipments_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shipments_generator_id_fkey"
-            columns: ["generator_id"]
-            isOneToOne: false
-            referencedRelation: "mv_organization_summary"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "shipments_generator_id_fkey"
-            columns: ["generator_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shipments_recycler_id_fkey"
-            columns: ["recycler_id"]
-            isOneToOne: false
-            referencedRelation: "mv_organization_summary"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "shipments_recycler_id_fkey"
-            columns: ["recycler_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "shipments_shipment_link_id_fkey"
             columns: ["shipment_link_id"]
@@ -6276,34 +6157,6 @@ export type Database = {
           waste_type: Database["public"]["Enums"]["waste_type"] | null
         }
         Relationships: [
-          {
-            foreignKeyName: "shipments_generator_id_fkey"
-            columns: ["generator_id"]
-            isOneToOne: false
-            referencedRelation: "mv_organization_summary"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "shipments_generator_id_fkey"
-            columns: ["generator_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shipments_recycler_id_fkey"
-            columns: ["recycler_id"]
-            isOneToOne: false
-            referencedRelation: "mv_organization_summary"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "shipments_recycler_id_fkey"
-            columns: ["recycler_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "shipments_transporter_id_fkey"
             columns: ["transporter_id"]

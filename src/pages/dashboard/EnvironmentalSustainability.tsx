@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { normalizeShipments } from '@/lib/supabaseHelpers';
 import SustainabilityCertificate from "@/components/sustainability/SustainabilityCertificate";
 import BackButton from "@/components/ui/back-button";
 import { 
@@ -118,11 +119,12 @@ const EnvironmentalSustainability = () => {
       const { data, error } = await query;
       if (error) throw error;
       
-      let filtered = data || [];
+      // Normalize the shipments data
+      let filtered = normalizeShipments(data || []);
       
       // فلترة حسب نوع الجهة
       if (selectedOrganization !== "all") {
-        filtered = filtered.filter(s => 
+        filtered = filtered.filter((s: any) => 
           s.generator_id === selectedOrganization ||
           s.transporter_id === selectedOrganization ||
           s.recycler_id === selectedOrganization
@@ -252,36 +254,42 @@ const EnvironmentalSustainability = () => {
   const organizationPerformance = () => {
     const orgStats: Record<string, { name: string; type: string; total: number; recycled: number }> = {};
     
-    shipments.forEach(s => {
+    shipments.forEach((s: any) => {
       // المولد
       if (s.generator && selectedTypes.includes("generator")) {
-        const id = s.generator.id;
-        if (!orgStats[id]) {
-          orgStats[id] = { name: s.generator.name, type: "generator", total: 0, recycled: 0 };
+        const id = s.generator?.id;
+        if (id && !orgStats[id]) {
+          orgStats[id] = { name: s.generator?.name || 'غير محدد', type: "generator", total: 0, recycled: 0 };
         }
-        orgStats[id].total += Number(s.quantity || 0);
-        if (s.disposal_method === "recycling" || s.disposal_method === "remanufacturing") {
-          orgStats[id].recycled += Number(s.quantity || 0);
+        if (id) {
+          orgStats[id].total += Number(s.quantity || 0);
+          if (s.disposal_method === "recycling" || s.disposal_method === "remanufacturing") {
+            orgStats[id].recycled += Number(s.quantity || 0);
+          }
         }
       }
       
       // الناقل
       if (s.transporter && selectedTypes.includes("transporter")) {
-        const id = s.transporter.id;
-        if (!orgStats[id]) {
-          orgStats[id] = { name: s.transporter.name, type: "transporter", total: 0, recycled: 0 };
+        const id = s.transporter?.id;
+        if (id && !orgStats[id]) {
+          orgStats[id] = { name: s.transporter?.name || 'غير محدد', type: "transporter", total: 0, recycled: 0 };
         }
-        orgStats[id].total += Number(s.quantity || 0);
+        if (id) {
+          orgStats[id].total += Number(s.quantity || 0);
+        }
       }
       
       // المدور
       if (s.recycler && selectedTypes.includes("recycler")) {
-        const id = s.recycler.id;
-        if (!orgStats[id]) {
-          orgStats[id] = { name: s.recycler.name, type: "recycler", total: 0, recycled: 0 };
+        const id = s.recycler?.id;
+        if (id && !orgStats[id]) {
+          orgStats[id] = { name: s.recycler?.name || 'غير محدد', type: "recycler", total: 0, recycled: 0 };
         }
-        orgStats[id].total += Number(s.quantity || 0);
-        orgStats[id].recycled += Number(s.quantity || 0);
+        if (id) {
+          orgStats[id].total += Number(s.quantity || 0);
+          orgStats[id].recycled += Number(s.quantity || 0);
+        }
       }
     });
 

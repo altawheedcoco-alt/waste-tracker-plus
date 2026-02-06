@@ -32,6 +32,7 @@ import {
   Scale,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeShipment, normalizeRelation } from '@/lib/supabaseHelpers';
 import { useAuth } from '@/contexts/AuthContext';
 import DocumentVerificationPanel from './DocumentVerificationPanel';
 
@@ -208,51 +209,56 @@ const NotificationDetailDialog = ({
             .single();
 
           if (shipment) {
+            // Normalize shipment relations
+            const normalizedShipment = normalizeShipment(shipment as any);
+            
             // Check if notification is from a driver (shipment_assigned type)
-            if (notification.type === 'shipment_assigned' && shipment.driver_id) {
+            if (notification.type === 'shipment_assigned' && normalizedShipment.driver_id) {
               // Get driver info
               const { data: driver } = await supabase
                 .from('drivers')
                 .select(`
                   profile:profiles!drivers_profile_id_fkey(full_name, avatar_url)
                 `)
-                .eq('id', shipment.driver_id)
+                .eq('id', normalizedShipment.driver_id)
                 .single();
 
               if (driver?.profile) {
-                info.senderName = driver.profile.full_name;
+                const profile = normalizeRelation(driver.profile);
+                info.senderName = profile?.full_name || 'سائق';
                 info.senderType = 'driver';
-                info.senderLogo = driver.profile.avatar_url;
+                info.senderLogo = profile?.avatar_url || null;
               }
             } else if (notification.type === 'shipment_created' || notification.type === 'shipment_status') {
               // Check if created by a driver
-              if (shipment.driver_id) {
+              if (normalizedShipment.driver_id) {
                 const { data: driver } = await supabase
                   .from('drivers')
                   .select(`
                     profile:profiles!drivers_profile_id_fkey(full_name, avatar_url)
                   `)
-                  .eq('id', shipment.driver_id)
+                  .eq('id', normalizedShipment.driver_id)
                   .single();
 
                 if (driver?.profile) {
-                  info.senderName = driver.profile.full_name;
+                  const profile = normalizeRelation(driver.profile);
+                  info.senderName = profile?.full_name || 'سائق';
                   info.senderType = 'driver';
-                  info.senderLogo = driver.profile.avatar_url;
+                  info.senderLogo = profile?.avatar_url || null;
                 } else {
-                  info.senderName = shipment.transporter?.name || 'جهة ناقلة';
+                  info.senderName = normalizedShipment.transporter?.name || 'جهة ناقلة';
                   info.senderType = 'transporter';
-                  info.senderLogo = shipment.transporter?.logo_url || null;
+                  info.senderLogo = normalizedShipment.transporter?.logo_url || null;
                 }
               } else {
-                info.senderName = shipment.transporter?.name || 'جهة ناقلة';
+                info.senderName = normalizedShipment.transporter?.name || 'جهة ناقلة';
                 info.senderType = 'transporter';
-                info.senderLogo = shipment.transporter?.logo_url || null;
+                info.senderLogo = normalizedShipment.transporter?.logo_url || null;
               }
             } else if (notification.type === 'recycling_report') {
-              info.senderName = shipment.recycler?.name || 'جهة معالجة';
+              info.senderName = normalizedShipment.recycler?.name || 'جهة معالجة';
               info.senderType = 'recycler';
-              info.senderLogo = shipment.recycler?.logo_url || null;
+              info.senderLogo = normalizedShipment.recycler?.logo_url || null;
             }
           }
         }

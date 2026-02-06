@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { normalizeShipment, normalizeRecyclingReport } from '@/lib/supabaseHelpers';
 import { ar } from 'date-fns/locale';
 import { 
   CheckCircle2, 
@@ -107,7 +108,7 @@ const Verify = () => {
             return;
           }
 
-          setData(shipment as ShipmentData);
+          setData(normalizeShipment(shipment as any) as any);
           setDocumentType('shipment');
           setVerified(true);
         } else if (type === 'certificate' || type === 'recycling') {
@@ -128,7 +129,7 @@ const Verify = () => {
             .single();
 
           if (!reportError && report) {
-            setData(report as RecyclingReport);
+            setData(normalizeRecyclingReport(report as any) as any);
             setDocumentType('certificate');
             setVerified(true);
           } else {
@@ -150,7 +151,7 @@ const Verify = () => {
               return;
             }
 
-            setData(shipment as ShipmentData);
+            setData(normalizeShipment(shipment as any) as any);
             setDocumentType('shipment');
             setVerified(true);
           }

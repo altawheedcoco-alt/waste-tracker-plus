@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeShipment } from '@/lib/supabaseHelpers';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -138,7 +139,7 @@ const ShipmentReports = () => {
         return true; // RLS ستتكفل بالتصفية
       });
 
-      setReports(filteredReports as RecyclingReport[]);
+      setReports(filteredReports.map((r: any) => ({ ...r, shipment: normalizeShipment(r.shipment) })) as any);
     } catch (error) {
       console.error('Error fetching reports:', error);
     } finally {
