@@ -54,6 +54,7 @@ import ShipmentQuickPrint from './ShipmentQuickPrint';
 import ShipmentRouteMap from './ShipmentRouteMap';
 import CancelShipmentDialog from './CancelShipmentDialog';
 import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
+import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -236,6 +237,23 @@ const ShipmentCard = ({
                       <FileText className="w-3 h-3" />
                       {isRecycler ? 'إصدار' : 'شهادة'}
                     </Button>
+                  )}
+                  {/* Quick Receipt Button - only for transporter */}
+                  {isTransporter && (
+                    <QuickReceiptButton
+                      shipment={{
+                        ...shipment,
+                        unit: shipment.unit || 'كجم',
+                        pickup_address: shipment.pickup_address || '',
+                        generator_id: (shipment as any).generator_id || '',
+                        generator: shipment.generator,
+                        recycler: shipment.recycler,
+                        driver_id: shipment.driver_id || null,
+                      }}
+                      onSuccess={onStatusChange}
+                      variant="outline"
+                      size="sm"
+                    />
                   )}
                   {/* Cancel Shipment Button */}
                   <CancelShipmentDialog
@@ -520,6 +538,23 @@ const ShipmentCard = ({
                         <FileText className="w-4 h-4" />
                         {isRecycler ? 'إصدار شهادة' : 'شهادة التدوير'}
                       </Button>
+                    )}
+                    {/* Quick Receipt Button - only for transporter */}
+                    {isTransporter && (
+                      <QuickReceiptButton
+                        shipment={{
+                          ...shipment,
+                          unit: shipment.unit || 'كجم',
+                          pickup_address: shipment.pickup_address || '',
+                          generator_id: (shipment as any).generator_id || '',
+                          generator: shipment.generator,
+                          recycler: shipment.recycler,
+                          driver_id: shipment.driver_id || null,
+                        }}
+                        onSuccess={onStatusChange}
+                        variant="outline"
+                        size="sm"
+                      />
                     )}
                     {canChange && availableNextStatuses.length > 0 ? (
                       <DropdownMenu>
