@@ -5390,6 +5390,9 @@ export type Database = {
           created_by: string
           delivered_at: string | null
           delivery_address: string
+          delivery_city: string | null
+          delivery_latitude: number | null
+          delivery_longitude: number | null
           disposal_method: string | null
           driver_id: string | null
           expected_delivery_date: string | null
@@ -5407,7 +5410,10 @@ export type Database = {
           notes: string | null
           packaging_method: string | null
           pickup_address: string
+          pickup_city: string | null
           pickup_date: string | null
+          pickup_latitude: number | null
+          pickup_longitude: number | null
           quantity: number
           recycler_id: string | null
           recycler_notes: string | null
@@ -5437,6 +5443,9 @@ export type Database = {
           created_by: string
           delivered_at?: string | null
           delivery_address: string
+          delivery_city?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           disposal_method?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
@@ -5454,7 +5463,10 @@ export type Database = {
           notes?: string | null
           packaging_method?: string | null
           pickup_address: string
+          pickup_city?: string | null
           pickup_date?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           quantity: number
           recycler_id?: string | null
           recycler_notes?: string | null
@@ -5484,6 +5496,9 @@ export type Database = {
           created_by?: string
           delivered_at?: string | null
           delivery_address?: string
+          delivery_city?: string | null
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           disposal_method?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
@@ -5501,7 +5516,10 @@ export type Database = {
           notes?: string | null
           packaging_method?: string | null
           pickup_address?: string
+          pickup_city?: string | null
           pickup_date?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           quantity?: number
           recycler_id?: string | null
           recycler_notes?: string | null
