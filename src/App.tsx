@@ -103,8 +103,8 @@ const TransporterReceipts = lazy(() => import("./pages/dashboard/TransporterRece
 const GeneratorReceipts = lazy(() => import("./pages/dashboard/GeneratorReceipts"));
 const CreateReceipt = lazy(() => import("./pages/dashboard/CreateReceipt"));
 const GuillochePatterns = lazy(() => import("./pages/dashboard/GuillochePatterns"));
+const SmartInsights = lazy(() => import("./pages/dashboard/SmartInsights"));
 
-// Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
 const RecyclerGuide = lazy(() => import("./pages/guide/RecyclerGuide"));
@@ -241,6 +241,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/create-receipt" element={<CreateReceipt />} />
         <Route path="/dashboard/generator-receipts" element={<GeneratorReceipts />} />
         <Route path="/dashboard/guilloche-patterns" element={<GuillochePatterns />} />
+        <Route path="/dashboard/smart-insights" element={<SmartInsights />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
