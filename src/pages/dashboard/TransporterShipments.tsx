@@ -326,20 +326,13 @@ const TransporterShipments = () => {
                               <TooltipContent>عرض التفاصيل</TooltipContent>
                             </Tooltip>
                             
-                            {/* Quick Receipt Button - Show for active shipments */}
-                            {['approved', 'collecting', 'in_transit'].includes(shipment.status) && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span>
-                                    <QuickReceiptButton 
-                                      shipment={shipment} 
-                                      onSuccess={fetchShipments}
-                                    />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent>إنشاء شهادة استلام</TooltipContent>
-                              </Tooltip>
-                            )}
+                            {/* Quick Receipt Button - Show for all active shipments */}
+                            <QuickReceiptButton 
+                              shipment={shipment} 
+                              onSuccess={fetchShipments}
+                              variant="outline"
+                              size="default"
+                            />
                           </div>
                         </TooltipProvider>
                       </TableCell>
