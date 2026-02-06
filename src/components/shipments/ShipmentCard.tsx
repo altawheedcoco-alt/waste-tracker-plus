@@ -108,14 +108,15 @@ const ShipmentCard = ({
   const mappedStatus = mapLegacyStatus(shipment.status);
   const currentStatusConfig = getStatusConfig(mappedStatus);
   
-  const organizationType = organization?.organization_type || 'generator';
+  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'admin';
+  const isAdmin = organizationType === 'admin';
   const canChange = canChangeStatus(mappedStatus, organizationType);
   const isRecycler = organizationType === 'recycler';
   const isTransporter = organizationType === 'transporter';
   const isCompleted = shipment.status === 'completed' || shipment.status === 'confirmed';
 
   // Get available next statuses for quick change
-  const availableNextStatuses = getAvailableNextStatuses(mappedStatus, organizationType as 'generator' | 'transporter' | 'recycler');
+  const availableNextStatuses = getAvailableNextStatuses(mappedStatus, organizationType);
 
   // Calculate current status index for progress display
   const currentStatusIndex = allStatuses.findIndex(s => s.key === mappedStatus);
@@ -520,7 +521,7 @@ const ShipmentCard = ({
                         {isRecycler ? 'إصدار شهادة' : 'شهادة التدوير'}
                       </Button>
                     )}
-                    {canChange && !isCompleted ? (
+                    {canChange && availableNextStatuses.length > 0 ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <Button
@@ -584,7 +585,7 @@ const ShipmentCard = ({
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    ) : isCompleted ? (
+                    ) : isCompleted && !isAdmin ? (
                       <Badge className="bg-emerald-500 text-white gap-1">
                         <CheckCircle2 className="w-4 h-4" />
                         مكتملة

@@ -254,35 +254,40 @@ export const getStatusesByPhase = (phase: 'transporter' | 'recycler'): StatusCon
 // Get available next statuses based on current status and organization type
 export const getAvailableNextStatuses = (
   currentStatus: string,
-  organizationType: 'generator' | 'transporter' | 'recycler'
+  organizationType: 'generator' | 'transporter' | 'recycler' | 'admin'
 ): StatusConfig[] => {
   const currentConfig = getStatusConfig(currentStatus);
-  if (!currentConfig) return [];
+  if (!currentConfig) return allStatuses; // If no current config, allow all statuses
 
-  // Only transporter and recycler can change statuses
-  if (organizationType === 'generator') return [];
-
-  // Transporter can only change transporter phase statuses
-  if (organizationType === 'transporter') {
-    // If current status is in transporter phase, return next transporter statuses
-    if (currentConfig.phase === 'transporter') {
-      return transporterStatuses.filter(s => s.order > currentConfig.order);
-    }
-    // Transporter cannot change recycler phase statuses
-    return [];
+  // Admin can change to any status
+  if (organizationType === 'admin') {
+    return allStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Recycler can only change recycler phase statuses
+  // Generator can only view, not change
+  if (organizationType === 'generator') return [];
+
+  // Transporter can change all transporter phase statuses (not just next ones)
+  if (organizationType === 'transporter') {
+    // If current status is in transporter phase, return all transporter statuses except current
+    if (currentConfig.phase === 'transporter') {
+      return transporterStatuses.filter(s => s.key !== currentStatus);
+    }
+    // Transporter can also move back to transporter statuses from recycler phase
+    return transporterStatuses;
+  }
+
+  // Recycler can change all recycler phase statuses
   if (organizationType === 'recycler') {
-    // If current status is delivering (last transporter status), recycler can start receiving
-    if (currentConfig.key === 'delivering') {
+    // If current status is delivering (last transporter status) or any recycler status
+    if (currentConfig.key === 'delivering' || currentConfig.phase === 'recycler') {
+      return recyclerStatuses.filter(s => s.key !== currentStatus);
+    }
+    // If still in transporter phase, recycler can start with receiving
+    if (currentConfig.phase === 'transporter') {
       return recyclerStatuses;
     }
-    // If current status is in recycler phase, return next recycler statuses
-    if (currentConfig.phase === 'recycler') {
-      return recyclerStatuses.filter(s => s.order > currentConfig.order);
-    }
-    return [];
+    return recyclerStatuses;
   }
 
   return [];
@@ -291,8 +296,10 @@ export const getAvailableNextStatuses = (
 // Check if organization can change status
 export const canChangeStatus = (
   currentStatus: string,
-  organizationType: 'generator' | 'transporter' | 'recycler'
+  organizationType: 'generator' | 'transporter' | 'recycler' | 'admin'
 ): boolean => {
+  // Admin can always change status
+  if (organizationType === 'admin') return true;
   return getAvailableNextStatuses(currentStatus, organizationType).length > 0;
 };
 
