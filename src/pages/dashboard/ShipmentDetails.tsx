@@ -10,9 +10,11 @@ import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
 import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
 import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker';
 import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
+import RouteProgressBar from '@/components/tracking/RouteProgressBar';
 
-// Lazy load the live tracking dialog
+// Lazy load the live tracking components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
+const DriverRouteVisualization = lazy(() => import('@/components/tracking/DriverRouteVisualization'));
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,6 +44,9 @@ import {
   Zap,
   Navigation,
   XCircle,
+  Route,
+  Activity,
+  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -331,17 +336,76 @@ const ShipmentDetailsPage = () => {
         {/* Status Timeline */}
         <ShipmentStatusTimeline shipment={shipment} />
 
-        {/* Unified Tracker with Live Map */}
-        <UnifiedShipmentTracker
-          shipment={{
-            ...shipment,
-            generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city } : null,
-            transporter: shipment.transporter ? { name: shipment.transporter.name, phone: shipment.transporter.phone } : null,
-            recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city } : null,
-          }}
-          showMap={generatorLocation !== null && recyclerLocation !== null}
-          onStatusUpdate={fetchShipmentDetails}
-        />
+        {/* Live Tracking Section - Featured when driver is assigned */}
+        {shipment.driver_id && (
+          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Navigation className="h-5 w-5 text-primary" />
+                  </div>
+                  التتبع المباشر للشحنة
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowLiveTracking(true)}
+                  >
+                    <Eye className="ml-2 h-4 w-4" />
+                    تتبع كامل
+                  </Button>
+                </div>
+              </div>
+              <CardDescription className="mt-2">
+                تتبع مسار السائق والمسافة المتبقية في الوقت الحقيقي
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Progress Bar */}
+              <RouteProgressBar
+                status={shipment.status}
+                pickupAddress={shipment.pickup_address}
+                deliveryAddress={shipment.delivery_address}
+                pickupDate={shipment.pickup_date}
+                deliveredAt={shipment.delivered_at}
+                compact
+              />
+
+              {/* Driver Route Visualization */}
+              <Suspense fallback={
+                <div className="h-[400px] flex items-center justify-center bg-muted/30 rounded-lg">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              }>
+                <DriverRouteVisualization
+                  shipmentId={shipment.id}
+                  driverId={shipment.driver_id}
+                  pickupAddress={shipment.pickup_address}
+                  deliveryAddress={shipment.delivery_address}
+                  status={shipment.status}
+                  showStats={true}
+                  height={350}
+                />
+              </Suspense>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Unified Tracker with Live Map - Show only if no driver */}
+        {!shipment.driver_id && (
+          <UnifiedShipmentTracker
+            shipment={{
+              ...shipment,
+              generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city } : null,
+              transporter: shipment.transporter ? { name: shipment.transporter.name, phone: shipment.transporter.phone } : null,
+              recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city } : null,
+            }}
+            showMap={generatorLocation !== null && recyclerLocation !== null}
+            onStatusUpdate={fetchShipmentDetails}
+          />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Waste Details */}
