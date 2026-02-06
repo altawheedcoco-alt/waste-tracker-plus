@@ -20,8 +20,6 @@ export interface PartnerBalance {
   balance: number;
   shipments_count: number;
   last_transaction_date?: string;
-  auto_linked?: boolean;
-  first_transaction_date?: string;
 }
 
 export interface ExternalPartner {
@@ -59,51 +57,6 @@ export function usePartnerAccounts() {
   };
 
   const partnerTypes = getPartnerTypes();
-
-  // Fetch auto-linked partners from partner_links table
-  const { data: partnerLinks = [], isLoading: linksLoading } = useQuery({
-    queryKey: ['partner-links', organization?.id],
-    queryFn: async () => {
-      if (!organization?.id) return [];
-
-      // First get links
-      const { data: links, error: linksError } = await supabase
-        .from('partner_links')
-        .select('id, partner_organization_id, external_partner_id, partner_type, status, auto_created, first_transaction_date')
-        .eq('organization_id', organization.id)
-        .eq('status', 'active');
-
-      if (linksError) {
-        console.error('Error fetching partner links:', linksError);
-        return [];
-      }
-
-      // Get partner organization details
-      const partnerIds = (links || [])
-        .filter(l => l.partner_organization_id)
-        .map(l => l.partner_organization_id);
-
-      if (partnerIds.length === 0) return links || [];
-
-      const { data: orgs, error: orgsError } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type, city, phone')
-        .in('id', partnerIds);
-
-      if (orgsError) {
-        console.error('Error fetching partner organizations:', orgsError);
-        return links || [];
-      }
-
-      // Merge data
-      const orgMap = new Map((orgs || []).map(o => [o.id, o]));
-      return (links || []).map(link => ({
-        ...link,
-        partner_organization: link.partner_organization_id ? orgMap.get(link.partner_organization_id) : null,
-      }));
-    },
-    enabled: !!organization?.id,
-  });
 
   // Fetch external partners
   const { data: externalPartners = [], isLoading: externalLoading } = useQuery({
@@ -150,46 +103,82 @@ export function usePartnerAccounts() {
     enabled: !!organization?.id,
   });
 
-  // Fetch shipment data for all linked partners
-  const { data: shipmentData = new Map(), isLoading: shipmentsLoading } = useQuery({
-    queryKey: ['partner-shipments-data', organization?.id, partnerLinks],
+  // Fetch partners from shipments with full data - BIDIRECTIONAL
+  const { data: shipmentPartners = [], isLoading: shipmentsLoading } = useQuery({
+    queryKey: ['shipment-partners-full', organization?.id, organization?.organization_type, wasteTypePrices],
     queryFn: async () => {
-      if (!organization?.id) return new Map();
+      if (!organization?.id || !organization?.organization_type) return [];
 
-      const partnerIds = partnerLinks
-        .filter(pl => pl.partner_organization_id)
-        .map(pl => pl.partner_organization_id);
-
-      if (partnerIds.length === 0) return new Map();
-
-      // Fetch shipments involving our org and any linked partner
+      const orgType = organization.organization_type;
+      
+      // Fetch ALL shipments where this organization is involved (as ANY party)
       const { data: shipments, error } = await supabase
         .from('shipments')
-        .select('id, generator_id, transporter_id, recycler_id, quantity, waste_type, waste_description, created_at, cancelled_at')
+        .select(`
+          id,
+          shipment_number,
+          generator_id,
+          transporter_id,
+          recycler_id,
+          quantity,
+          unit,
+          waste_type,
+          waste_description,
+          created_at,
+          cancelled_at,
+          generator:organizations!shipments_generator_id_fkey(id, name, organization_type, city, phone),
+          transporter:organizations!shipments_transporter_id_fkey(id, name, organization_type, city, phone),
+          recycler:organizations!shipments_recycler_id_fkey(id, name, organization_type, city, phone)
+        `)
         .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`);
 
       if (error) {
         console.error('Error fetching shipments:', error);
-        return new Map();
+        return [];
       }
 
-      // Group by partner
-      const partnerShipmentMap = new Map<string, { count: number; value: number; lastDate?: string }>();
+      // Group shipments by partner
+      const partnerMap = new Map<string, {
+        org: any;
+        type: string;
+        shipments: any[];
+      }>();
 
       for (const shipment of shipments || []) {
-        if (shipment.cancelled_at) continue;
+        // For each shipment, find all OTHER parties (partners)
+        const parties = [
+          { id: shipment.generator_id, org: shipment.generator, type: 'generator' },
+          { id: shipment.transporter_id, org: shipment.transporter, type: 'transporter' },
+          { id: shipment.recycler_id, org: shipment.recycler, type: 'recycler' },
+        ];
 
-        // Find which partner this shipment involves
-        const involvedPartnerIds = [
-          shipment.generator_id,
-          shipment.transporter_id,
-          shipment.recycler_id
-        ].filter(id => id && id !== organization.id);
+        for (const party of parties) {
+          // Skip if this is our own organization or if party doesn't exist
+          if (!party.id || !party.org || party.id === organization.id) continue;
+          
+          if (!partnerMap.has(party.id)) {
+            partnerMap.set(party.id, {
+              org: party.org,
+              type: party.type,
+              shipments: [],
+            });
+          }
+          partnerMap.get(party.id)!.shipments.push(shipment);
+        }
+      }
 
-        for (const partnerId of involvedPartnerIds) {
-          if (!partnerId || !partnerIds.includes(partnerId)) continue;
+      // Calculate values for each partner
+      const partners: PartnerBalance[] = [];
 
-          const existing = partnerShipmentMap.get(partnerId) || { count: 0, value: 0 };
+      for (const [partnerId, data] of partnerMap) {
+        let totalValue = 0;
+        let activeShipments = 0;
+
+        for (const shipment of data.shipments) {
+          // Skip cancelled shipments
+          if (shipment.cancelled_at) continue;
+          
+          activeShipments++;
           const quantity = Number(shipment.quantity) || 0;
           
           // Find price for this waste type
@@ -201,19 +190,33 @@ export function usePartnerAccounts() {
           });
           
           const pricePerUnit = priceData?.price_per_unit || 0;
-          const value = pricePerUnit * quantity;
-
-          partnerShipmentMap.set(partnerId, {
-            count: existing.count + 1,
-            value: existing.value + value,
-            lastDate: shipment.created_at,
-          });
+          totalValue += pricePerUnit * quantity;
         }
+
+        partners.push({
+          id: partnerId,
+          partner_organization_id: partnerId,
+          external_partner_id: null,
+          isExternal: false,
+          partner_organization: {
+            id: data.org.id,
+            name: data.org.name,
+            organization_type: data.type,
+            city: data.org.city,
+            phone: data.org.phone,
+          },
+          total_shipment_value: totalValue,
+          total_invoiced: 0,
+          total_paid: 0,
+          balance: totalValue,
+          shipments_count: activeShipments,
+          last_transaction_date: data.shipments[0]?.created_at,
+        });
       }
 
-      return partnerShipmentMap;
+      return partners;
     },
-    enabled: !!organization?.id && partnerLinks.length > 0,
+    enabled: !!organization?.id && !!organization?.organization_type,
   });
 
   // Fetch deposits for partners
@@ -281,43 +284,24 @@ export function usePartnerAccounts() {
     enabled: !!organization?.id,
   });
 
-  // Build partner balances from partner_links
-  const partnerBalances: PartnerBalance[] = partnerLinks
-    .filter(link => link.partner_organization_id && (link as any).partner_organization)
-    .map((link) => {
-      const partnerId = link.partner_organization_id!;
-      const partnerOrg = (link as any).partner_organization;
-      const shipmentInfo = shipmentData instanceof Map ? shipmentData.get(partnerId) : null;
-      const deposits = depositsData instanceof Map ? depositsData.get(partnerId) || 0 : 0;
-      const invoiceData = invoicesData instanceof Map ? invoicesData.get(partnerId) : null;
-      
-      const totalShipmentValue = shipmentInfo?.value || 0;
-      const totalPaid = deposits + (invoiceData?.paid || 0);
-      const totalInvoiced = invoiceData?.total || 0;
-      const balance = totalShipmentValue - totalPaid;
+  // Merge all data into final partner balances
+  const partnerBalances: PartnerBalance[] = shipmentPartners.map((partner) => {
+    const deposits = depositsData instanceof Map ? depositsData.get(partner.id) || 0 : 0;
+    const invoiceData = invoicesData instanceof Map ? invoicesData.get(partner.id) : null;
+    
+    const totalPaid = deposits + (invoiceData?.paid || 0);
+    const totalInvoiced = invoiceData?.total || 0;
+    
+    // Balance = shipment value - total paid
+    const balance = partner.total_shipment_value - totalPaid;
 
-      return {
-        id: link.id,
-        partner_organization_id: partnerId,
-        external_partner_id: null,
-        isExternal: false,
-        partner_organization: partnerOrg ? {
-          id: partnerOrg.id,
-          name: partnerOrg.name,
-          organization_type: link.partner_type,
-          city: partnerOrg.city,
-          phone: partnerOrg.phone,
-        } : null,
-        total_shipment_value: totalShipmentValue,
-        total_invoiced: totalInvoiced,
-        total_paid: totalPaid,
-        balance: balance,
-        shipments_count: shipmentInfo?.count || 0,
-        last_transaction_date: shipmentInfo?.lastDate,
-        auto_linked: link.auto_created,
-        first_transaction_date: link.first_transaction_date,
-      };
-    });
+    return {
+      ...partner,
+      total_invoiced: totalInvoiced,
+      total_paid: totalPaid,
+      balance: balance,
+    };
+  });
 
   // Get external partners with their balances
   const getExternalPartnersWithBalances = (type: string): PartnerBalance[] => {
@@ -341,7 +325,7 @@ export function usePartnerAccounts() {
           total_shipment_value: 0,
           total_invoiced: 0,
           total_paid: deposits,
-          balance: -deposits,
+          balance: -deposits, // External partners with deposits = we owe them
           shipments_count: 0,
           last_transaction_date: undefined,
         };
@@ -350,7 +334,7 @@ export function usePartnerAccounts() {
 
   // Combine registered and external partners
   const getAllPartners = (type: string): PartnerBalance[] => {
-    // Registered partners from partner_links
+    // Registered partners
     const registered = partnerBalances.filter(
       (b) => b.partner_organization?.organization_type === type
     );
@@ -385,8 +369,7 @@ export function usePartnerAccounts() {
   return {
     partnerBalances,
     externalPartners,
-    partnerLinks,
-    balancesLoading: linksLoading || shipmentsLoading || externalLoading || depositsLoading || invoicesLoading,
+    balancesLoading: shipmentsLoading || externalLoading || depositsLoading || invoicesLoading,
     partnerTypes,
     filteredBalances,
     calculateTotals,
