@@ -419,21 +419,37 @@ export default function GuillochePatterns() {
             </p>
           </div>
 
-          {activePattern && (
-            <Card className="border-primary bg-primary/5">
-              <CardContent className="p-3 flex items-center gap-3">
-                <GuillochePatternSVG pattern={activePattern} size={50} />
-                <div>
-                  <p className="text-xs text-muted-foreground">النمط المحدد حالياً</p>
-                  <p className="font-semibold text-sm">{activePattern.name}</p>
-                </div>
-                <Badge variant="secondary" className="gap-1">
-                  <Check className="h-3 w-3" />
-                  مُفعَّل
-                </Badge>
-              </CardContent>
-            </Card>
-          )}
+          <div className="flex items-center gap-3">
+            {/* Default (No Pattern) Button */}
+            <Button
+              variant={activePattern === null ? "default" : "outline"}
+              onClick={() => {
+                setActivePattern(null);
+                toast.success('تم إلغاء الرسم الغيوشي - ستتم طباعة المستندات بدون خلفية');
+              }}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              الافتراضي (بدون رسم)
+              {activePattern === null && <Check className="h-4 w-4 mr-1" />}
+            </Button>
+
+            {activePattern && (
+              <Card className="border-primary bg-primary/5">
+                <CardContent className="p-3 flex items-center gap-3">
+                  <GuillochePatternSVG pattern={activePattern} size={50} />
+                  <div>
+                    <p className="text-xs text-muted-foreground">النمط المحدد حالياً</p>
+                    <p className="font-semibold text-sm">{activePattern.name}</p>
+                  </div>
+                  <Badge variant="secondary" className="gap-1">
+                    <Check className="h-3 w-3" />
+                    مُفعَّل
+                  </Badge>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
 
         {/* Filters */}
