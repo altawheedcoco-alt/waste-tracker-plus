@@ -76,7 +76,7 @@ serve(async (req) => {
 
     switch (type) {
       case "chat":
-        // مساعد ذكي متخصص للمنصة
+        // مساعد ذكي متخصص للمنصة - مع streaming
         requestBody = {
           model: "google/gemini-3-flash-preview",
           messages: [
@@ -87,6 +87,21 @@ serve(async (req) => {
             ...messages
           ],
           stream: true,
+        };
+        break;
+
+      case "generate_text":
+        // توليد نص بدون streaming - للاستخدام مع invoke العادي
+        requestBody = {
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            {
+              role: "system",
+              content: platformSystemPrompt
+            },
+            ...messages
+          ],
+          stream: false,
         };
         break;
 

@@ -92,7 +92,7 @@ const OrganizationPortfolio = ({
 
       const { data, error } = await supabase.functions.invoke('ai-assistant', {
         body: { 
-          type: 'chat', 
+          type: 'generate_text', 
           messages: [
             { role: 'user', content: prompts[field] }
           ]
