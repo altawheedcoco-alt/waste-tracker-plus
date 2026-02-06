@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +28,7 @@ import {
   Printer,
   MapPin,
   ChevronDown,
+  ChevronUp,
   Settings2,
   Loader2,
   BadgeCheck,
@@ -35,6 +36,7 @@ import {
   Navigation,
   Eye,
   XCircle,
+  Route,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -55,8 +57,9 @@ import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Lazy load the live tracking map dialog
+// Lazy load the live tracking map dialog and inline map
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
+const ShipmentInlineTrackingMap = lazy(() => import('./ShipmentInlineTrackingMap'));
 
 interface ShipmentCardProps {
   shipment: {
@@ -99,6 +102,7 @@ const ShipmentCard = ({
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [isLiveTrackingOpen, setIsLiveTrackingOpen] = useState(false);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
+  const [showInlineMap, setShowInlineMap] = useState(false);
 
   // Map legacy status to new status
   const mappedStatus = mapLegacyStatus(shipment.status);
@@ -624,6 +628,59 @@ const ShipmentCard = ({
                     </p>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Inline Tracking Map - Collapsible */}
+            {shipment.driver_id && (
+              <div className="border-t">
+                <Button
+                  variant="ghost"
+                  className="w-full flex items-center justify-between px-4 py-2 text-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowInlineMap(!showInlineMap);
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <Route className="h-4 w-4 text-primary" />
+                    <span>خريطة التتبع</span>
+                  </div>
+                  {showInlineMap ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
+                </Button>
+                <AnimatePresence>
+                  {showInlineMap && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Suspense fallback={
+                        <div className="h-[200px] flex items-center justify-center bg-muted/30">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      }>
+                        <ShipmentInlineTrackingMap
+                          shipmentId={shipment.id}
+                          pickupAddress={shipment.pickup_address || ''}
+                          deliveryAddress={shipment.delivery_address || ''}
+                          driverId={shipment.driver_id}
+                          status={shipment.status}
+                          collapsible={false}
+                          defaultExpanded={true}
+                          height={180}
+                          onExpandClick={() => setIsLiveTrackingOpen(true)}
+                        />
+                      </Suspense>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
