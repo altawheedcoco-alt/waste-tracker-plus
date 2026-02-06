@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import {
   Table,
   TableBody,
@@ -29,9 +30,11 @@ import {
   Truck,
   Building2,
   Recycle,
+  FileCheck,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 
 interface Shipment {
   id: string;
@@ -43,6 +46,8 @@ interface Shipment {
   created_at: string;
   pickup_address: string;
   delivery_address: string;
+  generator_id: string;
+  driver_id: string | null;
   generator: { name: string } | null;
   recycler: { name: string } | null;
   driver: { profile: { full_name: string } | null } | null;
@@ -99,6 +104,8 @@ const TransporterShipments = () => {
           created_at,
           pickup_address,
           delivery_address,
+          generator_id,
+          driver_id,
           generator:organizations!shipments_generator_id_fkey(name),
           recycler:organizations!shipments_recycler_id_fkey(name),
           driver:drivers(profile:profiles(full_name))
@@ -304,13 +311,37 @@ const TransporterShipments = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/dashboard/s/${shipment.shipment_number}`)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                        <TooltipProvider>
+                          <div className="flex items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => navigate(`/dashboard/s/${shipment.shipment_number}`)}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>عرض التفاصيل</TooltipContent>
+                            </Tooltip>
+                            
+                            {/* Quick Receipt Button - Show for active shipments */}
+                            {['approved', 'collecting', 'in_transit'].includes(shipment.status) && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span>
+                                    <QuickReceiptButton 
+                                      shipment={shipment} 
+                                      onSuccess={fetchShipments}
+                                    />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent>إنشاء شهادة استلام</TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
+                        </TooltipProvider>
                       </TableCell>
                     </motion.tr>
                   ))}
