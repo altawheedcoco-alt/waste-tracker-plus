@@ -38,30 +38,34 @@ serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `أنت مساعد متخصص في قراءة إيصالات الإيداع البنكي العربية والإنجليزية.
+                text: `أنت خبير في قراءة إيصالات الإيداع البنكي. 
 
-قم بتحليل هذه الصورة لإيصال إيداع بنكي واستخرج المعلومات التالية:
-1. المبلغ المودع (رقم فقط بدون عملة - انتبه للفواصل والنقاط)
-   - مهم جداً: اقرأ المبلغ بالكامل كما هو مكتوب
-   - مثال: إذا كان المبلغ 60,000 أو 60000 فأرسله كـ 60000
-   - مثال: إذا كان المبلغ 1,500,000 فأرسله كـ 1500000
-   - لا تقسم على 1000 أو أي رقم آخر
-   - الفاصلة (,) هي فاصل الآلاف وليست فاصلة عشرية
-   - النقطة (.) قد تكون فاصلة عشرية للكسور فقط
-2. تاريخ الإيداع (بصيغة YYYY-MM-DD)
-3. اسم البنك
-4. فرع البنك
-5. رقم الحساب المودع فيه
-6. اسم المودع (صاحب الحساب أو المستفيد)
-7. اسم المودع إليه (المستلم)
-8. رقم المرجع أو رقم الإيصال
-9. رقم الشيك (إن وجد)
-10. طريقة الدفع (cash, bank_transfer, check, card, other)
+**تعليمات صارمة لقراءة المبلغ:**
+- اقرأ المبلغ المكتوب بالضبط كما يظهر في الإيصال
+- المبالغ في الإيصالات المصرية عادة بين 100 جنيه و 10,000,000 جنيه
+- الفاصلة (,) هي فاصل الآلاف فقط - أزلها واكتب الرقم كاملاً
+- مثال: "60,000" تعني ستين ألف = 60000
+- مثال: "1,500,000" تعني مليون ونصف = 1500000
+- مثال: "250,000.50" تعني مئتان وخمسون ألف وخمسون قرش = 250000.50
+- لا تضرب أو تقسم المبلغ بأي رقم
+- إذا رأيت "60,000" لا ترسلها كـ 60000000 أو 60
 
-أجب بصيغة JSON فقط بدون أي نص إضافي:
+استخرج من الصورة:
+1. amount: المبلغ (رقم صحيح أو عشري)
+2. payment_date: التاريخ (YYYY-MM-DD)
+3. bank_name: اسم البنك
+4. bank_branch: الفرع
+5. account_number: رقم الحساب
+6. depositor_name: اسم المودع
+7. recipient_name: اسم المستلم
+8. reference_number: رقم المرجع
+9. check_number: رقم الشيك
+10. payment_method: طريقة الدفع (cash/bank_transfer/check/card/other)
+
+أجب بـ JSON فقط:
 {
   "amount": 0,
-  "payment_date": "YYYY-MM-DD",
+  "payment_date": "",
   "bank_name": "",
   "bank_branch": "",
   "account_number": "",
@@ -72,11 +76,7 @@ serve(async (req) => {
   "payment_method": "bank_transfer",
   "confidence": 0.0,
   "notes": ""
-}
-
-مهم جداً للمبلغ: اقرأ كل الأرقام بالتسلسل بدون تجاهل أي أصفار.
-إذا لم تتمكن من قراءة قيمة معينة، اتركها فارغة أو 0.
-أضف مستوى الثقة في القراءة (0-1) وأي ملاحظات مهمة.`
+}`
               },
               {
                 type: 'image_url',
@@ -141,7 +141,28 @@ serve(async (req) => {
           amountStr = amountStr.replace(',', '.');
         }
         
-        const parsedAmount = parseFloat(amountStr);
+        let parsedAmount = parseFloat(amountStr);
+        
+        // Sanity check: if amount is unreasonably large (> 100 million), 
+        // it might have been multiplied incorrectly - try dividing by 1000
+        if (parsedAmount > 100000000) {
+          console.log(`Amount ${parsedAmount} seems too large, checking...`);
+          // Check if dividing by 1000 gives a reasonable number
+          const correctedAmount = parsedAmount / 1000;
+          if (correctedAmount >= 100 && correctedAmount <= 100000000) {
+            console.log(`Correcting amount from ${parsedAmount} to ${correctedAmount}`);
+            parsedAmount = correctedAmount;
+            extractedData.notes = (extractedData.notes || '') + ' (تم تصحيح المبلغ تلقائياً)';
+          }
+        }
+        
+        // Also check if amount is too small (< 10) - might need multiplying
+        if (parsedAmount > 0 && parsedAmount < 10 && amountStr.length <= 2) {
+          console.log(`Amount ${parsedAmount} seems too small for a deposit`);
+          // This might be a partial read, leave a note
+          extractedData.notes = (extractedData.notes || '') + ' (يرجى التحقق من المبلغ)';
+        }
+        
         extractedData.amount = isNaN(parsedAmount) ? 0 : parsedAmount;
       }
       
