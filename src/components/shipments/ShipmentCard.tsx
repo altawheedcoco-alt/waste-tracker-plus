@@ -74,6 +74,7 @@ interface ShipmentCardProps {
     pickup_address?: string;
     delivery_address?: string;
     driver_id?: string | null;
+    generator_id?: string | null;
     expected_delivery_date?: string | null;
     approved_at?: string | null;
     collection_started_at?: string | null;
@@ -81,9 +82,9 @@ interface ShipmentCardProps {
     delivered_at?: string | null;
     confirmed_at?: string | null;
     recycler_notes?: string | null;
-    generator?: { name: string } | null;
-    recycler?: { name: string } | null;
-    transporter?: { name: string } | null;
+    generator?: { name: string; id?: string } | null;
+    recycler?: { name: string; id?: string } | null;
+    transporter?: { name: string; id?: string } | null;
     has_report?: boolean;
   };
   onStatusChange?: () => void;
@@ -245,7 +246,7 @@ const ShipmentCard = ({
                         ...shipment,
                         unit: shipment.unit || 'كجم',
                         pickup_address: shipment.pickup_address || '',
-                        generator_id: (shipment as any).generator_id || '',
+                        generator_id: shipment.generator_id || shipment.generator?.id || '',
                         generator: shipment.generator,
                         recycler: shipment.recycler,
                         driver_id: shipment.driver_id || null,
@@ -546,7 +547,7 @@ const ShipmentCard = ({
                           ...shipment,
                           unit: shipment.unit || 'كجم',
                           pickup_address: shipment.pickup_address || '',
-                          generator_id: (shipment as any).generator_id || '',
+                          generator_id: shipment.generator_id || shipment.generator?.id || '',
                           generator: shipment.generator,
                           recycler: shipment.recycler,
                           driver_id: shipment.driver_id || null,

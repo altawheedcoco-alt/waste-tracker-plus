@@ -11,6 +11,7 @@ import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
 import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker';
 import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
 import RouteProgressBar from '@/components/tracking/RouteProgressBar';
+import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 
 // Lazy load the live tracking components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -145,7 +146,7 @@ const statusLabels: Record<string, { label: string; className: string }> = {
 const ShipmentDetailsPage = () => {
   const { shipmentId } = useParams();
   const navigate = useNavigate();
-  const { roles } = useAuth();
+  const { roles, organization } = useAuth();
   const [shipment, setShipment] = useState<ShipmentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -313,6 +314,27 @@ const ShipmentDetailsPage = () => {
                 <Navigation className="ml-2 h-4 w-4" />
                 التتبع المباشر
               </Button>
+            )}
+            {/* Quick Receipt Button - only for transporter */}
+            {organization?.organization_type === 'transporter' && (
+              <QuickReceiptButton
+                shipment={{
+                  id: shipment.id,
+                  shipment_number: shipment.shipment_number,
+                  waste_type: shipment.waste_type,
+                  quantity: shipment.quantity,
+                  unit: shipment.unit || 'كجم',
+                  pickup_address: shipment.pickup_address || '',
+                  generator_id: shipment.generator_id,
+                  generator: shipment.generator,
+                  recycler: shipment.recycler,
+                  driver_id: shipment.driver_id,
+                  created_at: shipment.created_at,
+                }}
+                onSuccess={fetchShipmentDetails}
+                variant="outline"
+                size="default"
+              />
             )}
             <Button variant="outline" onClick={() => setShowStatusDialog(true)}>
               <Edit className="ml-2 h-4 w-4" />
