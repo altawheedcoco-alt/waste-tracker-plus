@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -63,6 +64,7 @@ interface Receipt {
 }
 
 const TransporterReceipts = () => {
+  const navigate = useNavigate();
   const { organization } = useAuth();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
@@ -159,7 +161,7 @@ const TransporterReceipts = () => {
               إدارة شهادات استلام الشحنات من الجهات المولدة
             </p>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <Button onClick={() => navigate('/dashboard/create-receipt')}>
             <Plus className="h-4 w-4 ml-2" />
             إنشاء شهادة جديدة
           </Button>
@@ -263,7 +265,7 @@ const TransporterReceipts = () => {
                 <p className="text-muted-foreground mb-4">
                   لم يتم إنشاء أي شهادات استلام بعد
                 </p>
-                <Button onClick={() => setCreateDialogOpen(true)}>
+                <Button onClick={() => navigate('/dashboard/create-receipt')}>
                   <Plus className="h-4 w-4 ml-2" />
                   إنشاء شهادة جديدة
                 </Button>

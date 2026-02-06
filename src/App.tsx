@@ -99,6 +99,7 @@ const QuickDepositLinks = lazy(() => import("./pages/dashboard/QuickDepositLinks
 const QuickShipmentLinks = lazy(() => import("./pages/dashboard/QuickShipmentLinks"));
 const TransporterReceipts = lazy(() => import("./pages/dashboard/TransporterReceipts"));
 const GeneratorReceipts = lazy(() => import("./pages/dashboard/GeneratorReceipts"));
+const CreateReceipt = lazy(() => import("./pages/dashboard/CreateReceipt"));
 
 // Guide pages
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
@@ -233,6 +234,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
         <Route path="/dashboard/quick-shipment-links" element={<QuickShipmentLinks />} />
         <Route path="/dashboard/transporter-receipts" element={<TransporterReceipts />} />
+        <Route path="/dashboard/create-receipt" element={<CreateReceipt />} />
         <Route path="/dashboard/generator-receipts" element={<GeneratorReceipts />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
