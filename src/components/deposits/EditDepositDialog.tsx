@@ -51,6 +51,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { numberToArabicWords, formatEgyptianNumber } from '@/lib/arabicNumberWords';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -364,23 +365,38 @@ export default function EditDepositDialog({
                   <FormField
                     control={form.control}
                     name="amount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <Banknote className="h-4 w-4 text-muted-foreground" />
-                          المبلغ (ج.م)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            type="number"
-                            placeholder="0.00"
-                            className="text-lg font-semibold"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const amountValue = parseFloat(field.value) || 0;
+                      const amountInWords = amountValue > 0 ? numberToArabicWords(amountValue) : '';
+                      
+                      return (
+                        <FormItem className="col-span-2 md:col-span-1">
+                          <FormLabel className="flex items-center gap-2">
+                            <Banknote className="h-4 w-4 text-muted-foreground" />
+                            المبلغ (ج.م)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="number"
+                              placeholder="0.00"
+                              className="text-lg font-semibold"
+                            />
+                          </FormControl>
+                          {amountValue > 0 && (
+                            <div className="mt-2 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                              <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+                                {formatEgyptianNumber(amountValue)} ج.م
+                              </p>
+                              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+                                {amountInWords}
+                              </p>
+                            </div>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
