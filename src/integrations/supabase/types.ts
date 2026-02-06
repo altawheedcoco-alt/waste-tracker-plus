@@ -663,6 +663,83 @@ export type Database = {
         }
         Relationships: []
       }
+      biometric_credentials: {
+        Row: {
+          biometric_type: string
+          created_at: string
+          credential_id: string
+          device_name: string
+          id: string
+          last_used_at: string | null
+          public_key: string
+          user_id: string
+        }
+        Insert: {
+          biometric_type?: string
+          created_at?: string
+          credential_id: string
+          device_name?: string
+          id?: string
+          last_used_at?: string | null
+          public_key: string
+          user_id: string
+        }
+        Update: {
+          biometric_type?: string
+          created_at?: string
+          credential_id?: string
+          device_name?: string
+          id?: string
+          last_used_at?: string | null
+          public_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      biometric_verifications: {
+        Row: {
+          created_at: string
+          credential_id: string | null
+          device_info: string | null
+          error_message: string | null
+          id: string
+          ip_address: unknown
+          purpose: string
+          success: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id?: string | null
+          device_info?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown
+          purpose: string
+          success?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string | null
+          device_info?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown
+          purpose?: string
+          success?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "biometric_verifications_credential_id_fkey"
+            columns: ["credential_id"]
+            isOneToOne: false
+            referencedRelation: "biometric_credentials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_analysis: {
         Row: {
           action_items: Json | null
