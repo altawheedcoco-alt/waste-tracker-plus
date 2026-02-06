@@ -113,6 +113,7 @@ const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
 const ChatWidget = lazy(() => import("./components/chat/ChatWidget"));
 const BetaBanner = lazy(() => import("./components/BetaBanner"));
 const AccessibilityPanel = lazy(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel })));
+const ScreenProtection = lazy(() => import("./components/security/ScreenProtection"));
 
 // Optimized QueryClient with aggressive caching
 const queryClient = new QueryClient({
@@ -247,19 +248,23 @@ AppRoutes.displayName = 'AppRoutes';
 const App = memo(() => (
   <Providers>
     <BrowserRouter>
-      <Suspense fallback={<PageLoader />}>
-        <AppRoutes />
-      </Suspense>
       <Suspense fallback={null}>
-        <AIChatbot />
-        <ChatWidget />
-        <BetaBanner />
-        <AccessibilityPanel />
-        
-        <OfflineBanner />
-      </Suspense>
-      <Suspense fallback={null}>
-        <PerformanceOptimizer>{null}</PerformanceOptimizer>
+        <ScreenProtection watermarkText="iRecycle - محمي">
+          <Suspense fallback={<PageLoader />}>
+            <AppRoutes />
+          </Suspense>
+          <Suspense fallback={null}>
+            <AIChatbot />
+            <ChatWidget />
+            <BetaBanner />
+            <AccessibilityPanel />
+            
+            <OfflineBanner />
+          </Suspense>
+          <Suspense fallback={null}>
+            <PerformanceOptimizer>{null}</PerformanceOptimizer>
+          </Suspense>
+        </ScreenProtection>
       </Suspense>
     </BrowserRouter>
   </Providers>
