@@ -30,6 +30,7 @@ interface Shipment {
   quantity: number;
   unit: string;
   pickup_address: string;
+  delivery_address: string;
   generator_id: string;
   generator: { name: string } | null;
   driver_id: string | null;
@@ -74,6 +75,7 @@ const CreateReceiptDialog = ({
     actualWeight: '',
     unit: 'kg',
     pickupLocation: '',
+    deliveryLocation: '',
     notes: '',
   });
 
@@ -90,9 +92,10 @@ const CreateReceiptDialog = ({
       setFormData({
         wasteType: shipment.waste_type || '',
         declaredWeight: shipment.quantity?.toString() || '',
-        actualWeight: '',
+        actualWeight: shipment.quantity?.toString() || '', // Pre-fill with declared weight
         unit: shipment.unit || 'kg',
         pickupLocation: shipment.pickup_address || '',
+        deliveryLocation: shipment.delivery_address || '',
         notes: '',
       });
       setSelectedShipmentId(shipment.id);
@@ -110,6 +113,7 @@ const CreateReceiptDialog = ({
           quantity,
           unit,
           pickup_address,
+          delivery_address,
           generator_id,
           driver_id,
           generator:organizations!shipments_generator_id_fkey(name)
@@ -132,9 +136,10 @@ const CreateReceiptDialog = ({
       setFormData({
         wasteType: selected.waste_type || '',
         declaredWeight: selected.quantity?.toString() || '',
-        actualWeight: '',
+        actualWeight: selected.quantity?.toString() || '', // Pre-fill with declared weight
         unit: selected.unit || 'kg',
         pickupLocation: selected.pickup_address || '',
+        deliveryLocation: selected.delivery_address || '',
         notes: '',
       });
     }
@@ -191,6 +196,7 @@ const CreateReceiptDialog = ({
       actualWeight: '',
       unit: 'kg',
       pickupLocation: '',
+      deliveryLocation: '',
       notes: '',
     });
     setSelectedShipmentId('');
@@ -258,33 +264,48 @@ const CreateReceiptDialog = ({
               <Label className="flex items-center gap-2">
                 <Scale className="w-4 h-4" />
                 الوزن المصرح
+                {selectedShipmentId && (
+                  <span className="text-xs text-green-600">(من الشحنة - قابل للتعديل)</span>
+                )}
               </Label>
               <Input
                 type="number"
                 value={formData.declaredWeight}
                 onChange={(e) => setFormData(prev => ({ ...prev, declaredWeight: e.target.value }))}
                 placeholder="0"
+                className={selectedShipmentId ? "border-green-200 bg-green-50/50" : ""}
               />
             </div>
             <div className="space-y-2">
-              <Label>الوزن الفعلي</Label>
+              <Label className="flex items-center gap-2">
+                الوزن الفعلي
+                {selectedShipmentId && formData.actualWeight && (
+                  <span className="text-xs text-blue-600">(تم الملء تلقائياً)</span>
+                )}
+              </Label>
               <Input
                 type="number"
                 value={formData.actualWeight}
                 onChange={(e) => setFormData(prev => ({ ...prev, actualWeight: e.target.value }))}
                 placeholder="0"
+                className={selectedShipmentId ? "border-blue-200 bg-blue-50/50" : ""}
               />
             </div>
           </div>
 
           {/* Unit */}
           <div className="space-y-2">
-            <Label>الوحدة</Label>
+            <Label className="flex items-center gap-2">
+              الوحدة
+              {selectedShipmentId && (
+                <span className="text-xs text-green-600">(من الشحنة - قابل للتعديل)</span>
+              )}
+            </Label>
             <Select 
               value={formData.unit} 
               onValueChange={(v) => setFormData(prev => ({ ...prev, unit: v }))}
             >
-              <SelectTrigger>
+              <SelectTrigger className={selectedShipmentId ? "border-green-200 bg-green-50/50" : ""}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -296,17 +317,41 @@ const CreateReceiptDialog = ({
             </Select>
           </div>
 
-          {/* Pickup Location */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              موقع الاستلام
-            </Label>
-            <Input
-              value={formData.pickupLocation}
-              onChange={(e) => setFormData(prev => ({ ...prev, pickupLocation: e.target.value }))}
-              placeholder="أدخل عنوان موقع الاستلام"
-            />
+          {/* Locations */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Pickup Location */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-green-600" />
+                موقع الاستلام
+                {selectedShipmentId && formData.pickupLocation && (
+                  <span className="text-xs text-green-600">(تلقائي)</span>
+                )}
+              </Label>
+              <Input
+                value={formData.pickupLocation}
+                onChange={(e) => setFormData(prev => ({ ...prev, pickupLocation: e.target.value }))}
+                placeholder="عنوان موقع الاستلام"
+                className={selectedShipmentId && formData.pickupLocation ? "border-green-200 bg-green-50/50" : ""}
+              />
+            </div>
+
+            {/* Delivery Location */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-600" />
+                موقع التسليم
+                {selectedShipmentId && formData.deliveryLocation && (
+                  <span className="text-xs text-blue-600">(تلقائي)</span>
+                )}
+              </Label>
+              <Input
+                value={formData.deliveryLocation}
+                onChange={(e) => setFormData(prev => ({ ...prev, deliveryLocation: e.target.value }))}
+                placeholder="عنوان موقع التسليم"
+                className={selectedShipmentId && formData.deliveryLocation ? "border-blue-200 bg-blue-50/50" : ""}
+              />
+            </div>
           </div>
 
           {/* Notes */}
