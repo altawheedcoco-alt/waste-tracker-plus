@@ -267,6 +267,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     ...(organization?.organization_type === 'transporter'
       ? [
           { icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments', key: 'transporter-shipments' },
+          { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
           { icon: Users, label: 'السائقين', path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
           { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
           { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials', key: 'transporter-team' },
@@ -279,6 +280,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         ]
       : [
           { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'generator-shipments' },
+          { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
           { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'generator-certs' },
         ]),
     // Add team credentials for all organization types with employees
