@@ -18,6 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import GuideToolbar from "@/components/guide/GuideToolbar";
 
 const sections = [
   {
@@ -202,6 +203,13 @@ const sections = [
 const GeneratorGuide = () => {
   const navigate = useNavigate();
 
+  // Transform sections for toolbar
+  const toolbarSections = sections.map(s => ({
+    id: s.id,
+    title: s.title,
+    content: s.content,
+  }));
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       {/* Header */}
@@ -230,8 +238,15 @@ const GeneratorGuide = () => {
         </div>
       </div>
 
+      {/* Toolbar */}
+      <GuideToolbar 
+        sections={toolbarSections} 
+        guideTitle="دليل المولد" 
+        primaryColor="blue"
+      />
+
       {/* Quick Stats */}
-      <div className="container mx-auto px-4 -mt-6">
+      <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "أقسام الدليل", value: "8", icon: FileText },
@@ -262,7 +277,7 @@ const GeneratorGuide = () => {
       </div>
 
       {/* Table of Contents */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pb-8">
         <Card className="bg-card border-border mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
