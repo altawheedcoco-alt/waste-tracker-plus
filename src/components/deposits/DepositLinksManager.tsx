@@ -80,11 +80,19 @@ interface DepositLink {
   allow_date_edit: boolean;
   allow_partner_edit: boolean;
   require_receipt: boolean;
-  // New enhanced fields
+  // Enhanced fields
   is_pinned: boolean;
   usage_count: number;
   last_used_at: string | null;
   notes: string | null;
+  // Receipt preset fields
+  preset_amount: number | null;
+  preset_bank_name: string | null;
+  preset_account_number: string | null;
+  preset_depositor_name: string | null;
+  preset_branch: string | null;
+  preset_reference_number: string | null;
+  preset_payment_method: string | null;
 }
 
 const wasteTypes = [
@@ -133,6 +141,15 @@ const DepositLinksManager = () => {
   const [allowDateEdit, setAllowDateEdit] = useState(true);
   const [allowPartnerEdit, setAllowPartnerEdit] = useState(false);
   const [requireReceipt, setRequireReceipt] = useState(false);
+  
+  // Receipt preset fields
+  const [presetAmount, setPresetAmount] = useState('');
+  const [presetBankName, setPresetBankName] = useState('');
+  const [presetAccountNumber, setPresetAccountNumber] = useState('');
+  const [presetDepositorName, setPresetDepositorName] = useState('');
+  const [presetBranch, setPresetBranch] = useState('');
+  const [presetReferenceNumber, setPresetReferenceNumber] = useState('');
+  const [presetPaymentMethod, setPresetPaymentMethod] = useState('bank_transfer');
 
   const loadLinks = async () => {
     if (!profile?.organization_id) {
@@ -204,6 +221,14 @@ const DepositLinksManager = () => {
     setAllowDateEdit(true);
     setAllowPartnerEdit(false);
     setRequireReceipt(false);
+    // Reset receipt preset fields
+    setPresetAmount('');
+    setPresetBankName('');
+    setPresetAccountNumber('');
+    setPresetDepositorName('');
+    setPresetBranch('');
+    setPresetReferenceNumber('');
+    setPresetPaymentMethod('bank_transfer');
   };
 
   const createLink = async () => {
@@ -228,6 +253,14 @@ const DepositLinksManager = () => {
         allow_date_edit: allowDateEdit,
         allow_partner_edit: allowPartnerEdit,
         require_receipt: requireReceipt,
+        // Receipt preset fields
+        preset_amount: presetAmount ? parseFloat(presetAmount) : null,
+        preset_bank_name: presetBankName || null,
+        preset_account_number: presetAccountNumber || null,
+        preset_depositor_name: presetDepositorName || null,
+        preset_branch: presetBranch || null,
+        preset_reference_number: presetReferenceNumber || null,
+        preset_payment_method: presetPaymentMethod || 'bank_transfer',
       };
 
       // Set partner based on type
@@ -514,6 +547,102 @@ const DepositLinksManager = () => {
                     </AccordionContent>
                   </AccordionItem>
 
+                  {/* Receipt Preset Data Section */}
+                  <AccordionItem value="receipt" className="border-none">
+                    <AccordionTrigger className="py-2">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <StickyNote className="h-4 w-4 text-blue-600" />
+                        بيانات إيصال الإيداع
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 pt-2">
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Payment Method */}
+                        <div className="col-span-2 space-y-2">
+                          <Label>طريقة الدفع</Label>
+                          <Select value={presetPaymentMethod} onValueChange={setPresetPaymentMethod}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر طريقة الدفع..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="bank_transfer">تحويل بنكي</SelectItem>
+                              <SelectItem value="cash">نقدي</SelectItem>
+                              <SelectItem value="check">شيك</SelectItem>
+                              <SelectItem value="card">بطاقة</SelectItem>
+                              <SelectItem value="other">أخرى</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Amount */}
+                        <div className="space-y-2">
+                          <Label>المبلغ الثابت</Label>
+                          <Input
+                            type="number"
+                            value={presetAmount}
+                            onChange={(e) => setPresetAmount(e.target.value)}
+                            placeholder="0.00"
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
+
+                        {/* Bank Name */}
+                        <div className="space-y-2">
+                          <Label>اسم البنك</Label>
+                          <Input
+                            value={presetBankName}
+                            onChange={(e) => setPresetBankName(e.target.value)}
+                            placeholder="مثال: البنك الأهلي"
+                          />
+                        </div>
+
+                        {/* Account Number */}
+                        <div className="space-y-2">
+                          <Label>رقم الحساب</Label>
+                          <Input
+                            value={presetAccountNumber}
+                            onChange={(e) => setPresetAccountNumber(e.target.value)}
+                            placeholder="رقم الحساب البنكي"
+                          />
+                        </div>
+
+                        {/* Branch */}
+                        <div className="space-y-2">
+                          <Label>الفرع</Label>
+                          <Input
+                            value={presetBranch}
+                            onChange={(e) => setPresetBranch(e.target.value)}
+                            placeholder="اسم الفرع"
+                          />
+                        </div>
+
+                        {/* Depositor Name */}
+                        <div className="space-y-2">
+                          <Label>اسم المودع</Label>
+                          <Input
+                            value={presetDepositorName}
+                            onChange={(e) => setPresetDepositorName(e.target.value)}
+                            placeholder="اسم الشخص المودع"
+                          />
+                        </div>
+
+                        {/* Reference Number */}
+                        <div className="space-y-2">
+                          <Label>رقم الإيصال / المرجع</Label>
+                          <Input
+                            value={presetReferenceNumber}
+                            onChange={(e) => setPresetReferenceNumber(e.target.value)}
+                            placeholder="رقم مرجعي"
+                          />
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                        💡 هذه البيانات ستُعبأ تلقائياً في نموذج الإيداع السريع، ويمكن للمودع تعديلها حسب الصلاحيات.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
                   <AccordionItem value="permissions" className="border-none">
                     <AccordionTrigger className="py-2">
                       <div className="flex items-center gap-2 text-sm font-medium">
@@ -677,7 +806,7 @@ const DepositLinksManager = () => {
                       )}
 
                       {/* Preset Info */}
-                      {(partnerName || wasteType || link.preset_category) && (
+                      {(partnerName || wasteType || link.preset_category || link.preset_amount || link.preset_bank_name) && (
                         <div className="flex flex-wrap gap-1.5 mb-2">
                           {partnerName && (
                             <Badge variant="outline" className="text-xs gap-1">
@@ -694,6 +823,28 @@ const DepositLinksManager = () => {
                           {link.preset_category && (
                             <Badge variant="outline" className="text-xs">
                               {link.preset_category}
+                            </Badge>
+                          )}
+                          {link.preset_amount && (
+                            <Badge variant="outline" className="text-xs gap-1 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300">
+                              💰 {link.preset_amount.toLocaleString('ar-EG')} ر.س
+                            </Badge>
+                          )}
+                          {link.preset_bank_name && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              🏦 {link.preset_bank_name}
+                            </Badge>
+                          )}
+                          {link.preset_account_number && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              📄 {link.preset_account_number}
+                            </Badge>
+                          )}
+                          {link.preset_payment_method && link.preset_payment_method !== 'bank_transfer' && (
+                            <Badge variant="outline" className="text-xs gap-1">
+                              💳 {link.preset_payment_method === 'cash' ? 'نقدي' : 
+                                  link.preset_payment_method === 'check' ? 'شيك' : 
+                                  link.preset_payment_method === 'card' ? 'بطاقة' : 'أخرى'}
                             </Badge>
                           )}
                         </div>

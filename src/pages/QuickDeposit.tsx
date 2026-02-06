@@ -93,6 +93,14 @@ interface DepositLink {
   organization_name?: string;
   organization_logo?: string | null;
   partner_name?: string | null;
+  // Receipt preset fields
+  preset_amount: number | null;
+  preset_bank_name: string | null;
+  preset_account_number: string | null;
+  preset_depositor_name: string | null;
+  preset_branch: string | null;
+  preset_reference_number: string | null;
+  preset_payment_method: string | null;
 }
 
 const transferMethods = [
@@ -216,9 +224,24 @@ const QuickDeposit = () => {
 
         setLinkData(fullLinkData);
 
-        // Set preset notes if available
+        // Set preset values if available
         if (linkResult.preset_notes) {
           form.setValue('notes', linkResult.preset_notes);
+        }
+        if (linkResult.preset_amount) {
+          form.setValue('amount', String(linkResult.preset_amount));
+        }
+        if (linkResult.preset_bank_name) {
+          form.setValue('bankName', linkResult.preset_bank_name);
+        }
+        if (linkResult.preset_depositor_name) {
+          form.setValue('submitterName', linkResult.preset_depositor_name);
+        }
+        if (linkResult.preset_reference_number) {
+          form.setValue('referenceNumber', linkResult.preset_reference_number);
+        }
+        if (linkResult.preset_payment_method) {
+          form.setValue('transferMethod', linkResult.preset_payment_method);
         }
       } catch (error) {
         console.error('Error loading deposit link:', error);
