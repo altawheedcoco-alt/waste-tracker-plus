@@ -17,6 +17,7 @@ export interface BiometricVerificationResult {
   success: boolean;
   credentialId?: string;
   biometricType?: string;
+  verificationId?: string;
   timestamp: string;
   deviceInfo?: string;
   error?: string;
@@ -300,6 +301,7 @@ export function useBiometricAuth() {
         success: true,
         credentialId: matchedCredential.id,
         biometricType: matchedCredential.biometric_type,
+        verificationId: `bio-${Date.now()}-${matchedCredential.id.slice(0, 8)}`,
         timestamp: new Date().toISOString(),
         deviceInfo: getDeviceName(),
       };
