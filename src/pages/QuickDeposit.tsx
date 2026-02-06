@@ -452,9 +452,14 @@ const QuickDeposit = () => {
       setSubmittedData(data);
       setSubmitted(true);
       toast.success('🎉 تم إرسال الإيداع بنجاح!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting deposit:', error);
-      toast.error('حدث خطأ أثناء إرسال الإيداع');
+      // Check for duplicate entry error
+      if (error?.code === '23505' || error?.message?.includes('duplicate') || error?.message?.includes('unique')) {
+        toast.error('هذا الإيداع مسجل مسبقاً! يرجى التأكد من عدم تكرار نفس الإيداع');
+      } else {
+        toast.error('حدث خطأ أثناء إرسال الإيداع');
+      }
     } finally {
       setSubmitting(false);
     }

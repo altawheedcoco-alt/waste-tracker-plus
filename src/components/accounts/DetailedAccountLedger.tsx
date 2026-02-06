@@ -48,6 +48,8 @@ import {
   Pencil,
   FileImage,
   ExternalLink,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { LedgerEntry } from './AccountLedger';
 import { cn } from '@/lib/utils';
@@ -125,6 +127,8 @@ export default function DetailedAccountLedger({
   const [editDepositOpen, setEditDepositOpen] = useState(false);
   const [selectedDeposit, setSelectedDeposit] = useState<Deposit | null>(null);
   const [loadingDepositId, setLoadingDepositId] = useState<string | null>(null);
+  const [deletingDepositId, setDeletingDepositId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   
   // Notes editing state
   const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
@@ -160,6 +164,27 @@ export default function DetailedAccountLedger({
   const handleDepositUpdated = () => {
     queryClient.invalidateQueries({ queryKey: ['partner-deposits'] });
     onDepositUpdated?.();
+  };
+  
+  // Handle deleting deposit
+  const handleDeleteDeposit = async (depositId: string) => {
+    setDeletingDepositId(depositId);
+    try {
+      const { error } = await supabase
+        .from('deposits')
+        .delete()
+        .eq('id', depositId);
+      
+      if (error) throw error;
+      
+      queryClient.invalidateQueries({ queryKey: ['partner-deposits'] });
+      onDepositUpdated?.();
+      setConfirmDeleteId(null);
+    } catch (error) {
+      console.error('Error deleting deposit:', error);
+    } finally {
+      setDeletingDepositId(null);
+    }
   };
   
   // Handle saving shipment notes
@@ -554,9 +579,41 @@ export default function DetailedAccountLedger({
                     // Extract deposit ID from entry.id (format: deposit-{uuid})
                     const depositId = entry.id.replace('deposit-', '');
                     const isLoading = loadingDepositId === depositId;
+                    const isDeleting = deletingDepositId === depositId;
+                    const showConfirmDelete = confirmDeleteId === depositId;
                     
                     return (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group">
+                      <div key={idx} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg group relative">
+                        {/* Confirm Delete Overlay */}
+                        {showConfirmDelete && (
+                          <div className="absolute inset-0 bg-destructive/10 backdrop-blur-sm rounded-lg flex items-center justify-center gap-3 z-10">
+                            <span className="text-sm font-medium text-destructive">تأكيد الحذف؟</span>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteDeposit(depositId);
+                              }}
+                              disabled={isDeleting}
+                              className="gap-1"
+                            >
+                              {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                              حذف
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setConfirmDeleteId(null);
+                              }}
+                            >
+                              إلغاء
+                            </Button>
+                          </div>
+                        )}
+                        
                         <div className="flex-1">
                           <p className="text-sm font-medium">{entry.description}</p>
                           <p className="text-xs text-muted-foreground">{formatDate(entry.date)}</p>
@@ -579,6 +636,17 @@ export default function DetailedAccountLedger({
                             ) : (
                               <Pencil className="h-4 w-4 text-amber-600" />
                             )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmDeleteId(depositId);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>

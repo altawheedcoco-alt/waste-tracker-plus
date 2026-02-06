@@ -409,9 +409,14 @@ export default function AddDepositDialog({
       setAiConfidence(null);
       onOpenChange(false);
       onSuccess?.();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving deposit:', error);
-      toast.error('حدث خطأ أثناء حفظ الإيداع');
+      // Check for duplicate entry error
+      if (error?.code === '23505' || error?.message?.includes('duplicate') || error?.message?.includes('unique')) {
+        toast.error('هذا الإيداع مسجل مسبقاً! (نفس المبلغ والتاريخ ورقم المرجع)');
+      } else {
+        toast.error('حدث خطأ أثناء حفظ الإيداع');
+      }
     } finally {
       setLoading(false);
       setUploading(false);
