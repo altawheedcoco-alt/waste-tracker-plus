@@ -90,6 +90,8 @@ interface ShipmentLink {
   allow_recycler_edit: boolean;
   allow_location_edit: boolean;
   require_photo: boolean;
+  usage_count: number;
+  last_used_at: string | null;
   organization_name?: string;
   organization_logo?: string | null;
   generator_name?: string | null;
@@ -330,6 +332,15 @@ const QuickShipment = () => {
         .insert(shipmentRecord);
 
       if (error) throw error;
+
+      // Update link usage statistics
+      await supabase
+        .from('organization_shipment_links')
+        .update({ 
+          usage_count: (linkData.usage_count || 0) + 1,
+          last_used_at: new Date().toISOString()
+        })
+        .eq('id', linkData.id);
 
       setCreatedShipmentNumber(shipmentNumber);
       setSubmitted(true);
