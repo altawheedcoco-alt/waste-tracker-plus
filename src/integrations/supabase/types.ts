@@ -1876,6 +1876,95 @@ export type Database = {
           },
         ]
       }
+      driver_quick_links: {
+        Row: {
+          allow_name_edit: boolean | null
+          allow_phone_edit: boolean | null
+          allow_vehicle_edit: boolean | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          driver_id: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          is_for_registration: boolean | null
+          is_pinned: boolean | null
+          last_used_at: string | null
+          notes: string | null
+          organization_id: string
+          preset_driver_name: string | null
+          preset_license_number: string | null
+          preset_notes: string | null
+          preset_phone: string | null
+          preset_plate_number: string | null
+          preset_vehicle_type: string | null
+          title: string | null
+          token: string
+          usage_count: number | null
+        }
+        Insert: {
+          allow_name_edit?: boolean | null
+          allow_phone_edit?: boolean | null
+          allow_vehicle_edit?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          driver_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_for_registration?: boolean | null
+          is_pinned?: boolean | null
+          last_used_at?: string | null
+          notes?: string | null
+          organization_id: string
+          preset_driver_name?: string | null
+          preset_license_number?: string | null
+          preset_notes?: string | null
+          preset_phone?: string | null
+          preset_plate_number?: string | null
+          preset_vehicle_type?: string | null
+          title?: string | null
+          token: string
+          usage_count?: number | null
+        }
+        Update: {
+          allow_name_edit?: boolean | null
+          allow_phone_edit?: boolean | null
+          allow_vehicle_edit?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          driver_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_for_registration?: boolean | null
+          is_pinned?: boolean | null
+          last_used_at?: string | null
+          notes?: string | null
+          organization_id?: string
+          preset_driver_name?: string | null
+          preset_license_number?: string | null
+          preset_notes?: string | null
+          preset_phone?: string | null
+          preset_plate_number?: string | null
+          preset_vehicle_type?: string | null
+          title?: string | null
+          token?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_quick_links_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           created_at: string | null
@@ -3982,6 +4071,80 @@ export type Database = {
           },
           {
             foreignKeyName: "partner_balances_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_links: {
+        Row: {
+          auto_created: boolean | null
+          created_at: string
+          external_partner_id: string | null
+          first_shipment_id: string | null
+          first_transaction_date: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          partner_organization_id: string | null
+          partner_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auto_created?: boolean | null
+          created_at?: string
+          external_partner_id?: string | null
+          first_shipment_id?: string | null
+          first_transaction_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          partner_organization_id?: string | null
+          partner_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_created?: boolean | null
+          created_at?: string
+          external_partner_id?: string | null
+          first_shipment_id?: string | null
+          first_transaction_date?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          partner_organization_id?: string | null
+          partner_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_links_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_links_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
