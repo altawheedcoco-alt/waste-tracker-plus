@@ -88,6 +88,8 @@ interface DepositLink {
   allow_date_edit: boolean;
   allow_partner_edit: boolean;
   require_receipt: boolean;
+  usage_count: number;
+  last_used_at: string | null;
   organization_name?: string;
   organization_logo?: string | null;
   partner_name?: string | null;
@@ -355,6 +357,15 @@ const QuickDeposit = () => {
         .insert(depositRecord);
 
       if (error) throw error;
+
+      // Update link usage statistics
+      await supabase
+        .from('organization_deposit_links')
+        .update({ 
+          usage_count: (linkData.usage_count || 0) + 1,
+          last_used_at: new Date().toISOString()
+        })
+        .eq('id', linkData.id);
 
       setSubmitted(true);
       toast.success('🎉 تم إرسال الإيداع بنجاح!');
