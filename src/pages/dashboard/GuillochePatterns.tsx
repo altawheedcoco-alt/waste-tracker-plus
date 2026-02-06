@@ -39,6 +39,7 @@ import {
   Plus,
   Minus,
   Trash2,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -348,6 +349,7 @@ export default function GuillochePatterns() {
   const [selectedPattern, setSelectedPattern] = useState<PatternConfig | null>(null);
   const [activePatterns, setActivePatterns] = useState<PatternConfig[]>([]);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [documentPreviewOpen, setDocumentPreviewOpen] = useState(false);
   const [gridSize, setGridSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [isApplying, setIsApplying] = useState(false);
   const [visibleCount, setVisibleCount] = useState(50);
@@ -492,10 +494,21 @@ export default function GuillochePatterns() {
                     {layerMode ? `الطبقات المحددة (${activePatterns.length}/${MAX_LAYERS})` : 'النمط المحدد'}
                   </h3>
                 </div>
-                <Button variant="ghost" size="sm" onClick={handleClearAllLayers} className="gap-1 text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4" />
-                  مسح الكل
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setDocumentPreviewOpen(true)} 
+                    className="gap-1"
+                  >
+                    <FileText className="h-4 w-4" />
+                    معاينة على مستند
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleClearAllLayers} className="gap-1 text-destructive hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                    مسح الكل
+                  </Button>
+                </div>
               </div>
 
               {/* Layered Preview */}
@@ -866,6 +879,136 @@ export default function GuillochePatterns() {
                     تحديد كخلفية للمستندات
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Document Preview Dialog */}
+        <Dialog open={documentPreviewOpen} onOpenChange={setDocumentPreviewOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                معاينة المستند مع الرسم الغيوشي
+              </DialogTitle>
+              <DialogDescription>
+                معاينة كيف ستظهر الطبقات المحددة على المستندات الرسمية
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {/* A4 Document Preview */}
+              <div 
+                className="relative mx-auto border-2 shadow-xl rounded-lg overflow-hidden"
+                style={{ 
+                  width: '100%',
+                  maxWidth: '595px',
+                  aspectRatio: '1 / 1.414',
+                  backgroundColor: activePatterns[0]?.colorPalette.bg || '#fff'
+                }}
+              >
+                {/* Pattern Layers */}
+                {activePatterns.map((pattern, idx) => (
+                  <div 
+                    key={pattern.id} 
+                    className="absolute inset-0"
+                    style={{ opacity: 0.08 - (idx * 0.015) }}
+                  >
+                    <svg 
+                      width="100%" 
+                      height="100%" 
+                      viewBox="0 0 595 842"
+                      preserveAspectRatio="xMidYMid slice"
+                    >
+                      <defs>
+                        <pattern 
+                          id={`doc-pattern-${pattern.id}`} 
+                          patternUnits="userSpaceOnUse" 
+                          width="200" 
+                          height="200"
+                        >
+                          <g transform={`rotate(${pattern.rotation} 100 100)`}>
+                            <GuillochePatternSVG pattern={pattern} size={200} />
+                          </g>
+                        </pattern>
+                      </defs>
+                      <rect width="100%" height="100%" fill={`url(#doc-pattern-${pattern.id})`} />
+                    </svg>
+                  </div>
+                ))}
+
+                {/* Document Content */}
+                <div className="absolute inset-0 p-8 flex flex-col">
+                  {/* Header */}
+                  <div className="text-center border-b-2 border-current/20 pb-4 mb-6">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Fingerprint className="h-8 w-8 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-bold">شهادة إعادة التدوير</h2>
+                    <p className="text-sm text-muted-foreground mt-1">Certificate of Recycling</p>
+                  </div>
+
+                  {/* Body */}
+                  <div className="flex-1 space-y-4 text-sm">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-background/50 rounded border">
+                        <p className="text-xs text-muted-foreground">رقم الشهادة</p>
+                        <p className="font-mono font-bold">RC-2026-001234</p>
+                      </div>
+                      <div className="p-3 bg-background/50 rounded border">
+                        <p className="text-xs text-muted-foreground">تاريخ الإصدار</p>
+                        <p className="font-bold">06/02/2026</p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-background/50 rounded border">
+                      <p className="text-xs text-muted-foreground mb-1">اسم المنشأة</p>
+                      <p className="font-bold text-base">شركة البيئة الخضراء للتدوير</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 bg-background/50 rounded border">
+                        <p className="text-xs text-muted-foreground">نوع المخلفات</p>
+                        <p className="font-bold">مخلفات بلاستيكية</p>
+                      </div>
+                      <div className="p-3 bg-background/50 rounded border">
+                        <p className="text-xs text-muted-foreground">الكمية</p>
+                        <p className="font-bold">5,000 كجم</p>
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-background/50 rounded border text-center">
+                      <p className="text-xs text-muted-foreground">نسبة إعادة التدوير</p>
+                      <p className="text-2xl font-bold text-primary">95%</p>
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mt-6 pt-4 border-t-2 border-current/20 flex justify-between items-end">
+                    <div>
+                      <p className="text-xs text-muted-foreground">التوقيع والختم</p>
+                      <div className="w-24 h-12 border-b-2 border-dashed border-current/30 mt-2"></div>
+                    </div>
+                    <div className="text-left">
+                      <div className="w-16 h-16 border-2 border-dashed border-current/30 rounded flex items-center justify-center">
+                        <span className="text-[8px] text-muted-foreground">QR</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Layer Info */}
+              <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                <Layers className="h-4 w-4" />
+                <span>عدد الطبقات المطبقة: {activePatterns.length}</span>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDocumentPreviewOpen(false)}>
+                إغلاق
               </Button>
             </DialogFooter>
           </DialogContent>
