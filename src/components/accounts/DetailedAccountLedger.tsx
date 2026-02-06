@@ -46,6 +46,8 @@ import {
   Loader2,
   Info,
   Pencil,
+  FileImage,
+  ExternalLink,
 } from 'lucide-react';
 import { LedgerEntry } from './AccountLedger';
 import { cn } from '@/lib/utils';
@@ -925,13 +927,14 @@ export default function DetailedAccountLedger({
                   <TableHead className="text-center font-bold w-24">مدين</TableHead>
                   <TableHead className="text-center font-bold w-24">دائن</TableHead>
                   <TableHead className="text-center font-bold w-28">الرصيد</TableHead>
+                  <TableHead className="text-center font-bold w-16">الإيصال</TableHead>
                   <TableHead className="text-center font-bold w-40">ملاحظات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {entriesWithBalance.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center py-12 text-muted-foreground">
+                    <TableCell colSpan={11} className="text-center py-12 text-muted-foreground">
                       لا توجد حركات في الفترة المحددة
                     </TableCell>
                   </TableRow>
@@ -1017,6 +1020,40 @@ export default function DetailedAccountLedger({
                             {formatCurrency(Math.abs(entry.balance))}
                           </span>
                         </div>
+                      </TableCell>
+                      {/* Receipt Column */}
+                      <TableCell className="text-center">
+                        {entry.type === 'deposit' && entry.receiptUrl ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 w-7 p-0 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.open(entry.receiptUrl, '_blank');
+                                  }}
+                                >
+                                  <FileImage className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <div className="text-center">
+                                  <p className="font-medium">عرض صورة الإيصال</p>
+                                  {entry.depositorName && (
+                                    <p className="text-xs text-muted-foreground">المودع: {entry.depositorName}</p>
+                                  )}
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : entry.type === 'deposit' ? (
+                          <span className="text-muted-foreground/50 text-xs">-</span>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       {/* Notes Column */}
                       <TableCell className="text-center">

@@ -256,6 +256,9 @@ export default function PartnerAccountDetails() {
         debit: isGenerator ? amount : 0,
         credit: isGenerator ? 0 : amount,
         reference: deposit.reference_number || '-',
+        depositId: deposit.id,
+        receiptUrl: deposit.receipt_url || undefined,
+        depositorName: deposit.depositor_name || undefined,
       });
     });
 
