@@ -4587,6 +4587,66 @@ export type Database = {
           },
         ]
       }
+      profile_posts: {
+        Row: {
+          content: string | null
+          content_type: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_pinned: boolean | null
+          media_url: string | null
+          organization_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+          views_count: number | null
+        }
+        Insert: {
+          content?: string | null
+          content_type: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          media_url?: string | null
+          organization_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          views_count?: number | null
+        }
+        Update: {
+          content?: string | null
+          content_type?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          media_url?: string | null
+          organization_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_posts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "profile_posts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           access_all_partners: boolean | null

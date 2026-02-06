@@ -8,14 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { 
   User, 
   Mail, 
   Phone, 
-  MapPin, 
   Camera, 
   Save, 
   Loader2,
@@ -25,8 +24,10 @@ import {
   FileText,
   Globe,
   Briefcase,
+  MessageSquare,
 } from 'lucide-react';
 import ResponsivePageContainer from '@/components/dashboard/ResponsivePageContainer';
+import ProfilePostsSection from '@/components/profile/ProfilePostsSection';
 import { motion } from 'framer-motion';
 
 interface ProfileData {
@@ -252,147 +253,167 @@ const DriverProfile = () => {
             </CardContent>
           </Card>
 
-          {/* Personal Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
+          {/* Tabs for Profile and Posts */}
+          <Tabs defaultValue="info" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="info" className="gap-2">
+                <FileText className="h-4 w-4" />
                 المعلومات الشخصية
-              </CardTitle>
-              <CardDescription>
-                قم بتحديث بياناتك الشخصية الأساسية
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Full Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="full_name" className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    الاسم الكامل
-                  </Label>
-                  <Input
-                    id="full_name"
-                    value={formData.full_name}
-                    onChange={(e) => handleInputChange('full_name', e.target.value)}
-                    placeholder="أدخل اسمك الكامل"
-                  />
-                </div>
+              </TabsTrigger>
+              <TabsTrigger value="posts" className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                المنشورات
+              </TabsTrigger>
+            </TabsList>
 
-                {/* Email (Read-only) */}
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    البريد الإلكتروني
-                  </Label>
-                  <Input
-                    id="email"
-                    value={profileData?.email || ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-xs text-muted-foreground">لا يمكن تغيير البريد الإلكتروني</p>
-                </div>
+            <TabsContent value="info" className="space-y-6">
+              {/* Personal Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    المعلومات الشخصية
+                  </CardTitle>
+                  <CardDescription>
+                    قم بتحديث بياناتك الشخصية الأساسية
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {/* Full Name */}
+                    <div className="space-y-2">
+                      <Label htmlFor="full_name" className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        الاسم الكامل
+                      </Label>
+                      <Input
+                        id="full_name"
+                        value={formData.full_name}
+                        onChange={(e) => handleInputChange('full_name', e.target.value)}
+                        placeholder="أدخل اسمك الكامل"
+                      />
+                    </div>
 
-                {/* Phone */}
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    رقم الهاتف
-                  </Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    placeholder="أدخل رقم هاتفك"
-                    dir="ltr"
-                    className="text-left"
-                  />
-                </div>
+                    {/* Email (Read-only) */}
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        البريد الإلكتروني
+                      </Label>
+                      <Input
+                        id="email"
+                        value={profileData?.email || ''}
+                        disabled
+                        className="bg-muted"
+                      />
+                      <p className="text-xs text-muted-foreground">لا يمكن تغيير البريد الإلكتروني</p>
+                    </div>
 
-                {/* Position */}
-                <div className="space-y-2">
-                  <Label htmlFor="position" className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                    المسمى الوظيفي
-                  </Label>
-                  <Input
-                    id="position"
-                    value={formData.position}
-                    onChange={(e) => handleInputChange('position', e.target.value)}
-                    placeholder="مثال: سائق نقل"
-                  />
-                </div>
+                    {/* Phone */}
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        رقم الهاتف
+                      </Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        placeholder="أدخل رقم هاتفك"
+                        dir="ltr"
+                        className="text-left"
+                      />
+                    </div>
 
-                {/* Department */}
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="department" className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
-                    القسم / الإدارة
-                  </Label>
-                  <Input
-                    id="department"
-                    value={formData.department}
-                    onChange={(e) => handleInputChange('department', e.target.value)}
-                    placeholder="مثال: قسم النقل والتوصيل"
-                  />
-                </div>
-              </div>
+                    {/* Position */}
+                    <div className="space-y-2">
+                      <Label htmlFor="position" className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 text-muted-foreground" />
+                        المسمى الوظيفي
+                      </Label>
+                      <Input
+                        id="position"
+                        value={formData.position}
+                        onChange={(e) => handleInputChange('position', e.target.value)}
+                        placeholder="مثال: سائق نقل"
+                      />
+                    </div>
 
-              <Separator />
-
-              {/* Save Button */}
-              <div className="flex justify-end">
-                <Button onClick={handleSave} disabled={saving} className="gap-2">
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  حفظ التغييرات
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Account Info Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                معلومات الحساب
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">تاريخ الإنشاء</p>
-                    <p className="text-sm text-muted-foreground">
-                      {profileData?.created_at 
-                        ? new Date(profileData.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })
-                        : '-'}
-                    </p>
+                    {/* Department */}
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="department" className="flex items-center gap-2">
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        القسم / الإدارة
+                      </Label>
+                      <Input
+                        id="department"
+                        value={formData.department}
+                        onChange={(e) => handleInputChange('department', e.target.value)}
+                        placeholder="مثال: قسم النقل والتوصيل"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                  <Globe className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium">معرف المستخدم</p>
-                    <p className="text-sm text-muted-foreground font-mono truncate max-w-[200px]">
-                      {user?.id?.substring(0, 8)}...
-                    </p>
+                  <Separator />
+
+                  {/* Save Button */}
+                  <div className="flex justify-end">
+                    <Button onClick={handleSave} disabled={saving} className="gap-2">
+                      {saving ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4" />
+                      )}
+                      حفظ التغييرات
+                    </Button>
                   </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+
+              {/* Account Info Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    معلومات الحساب
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <Calendar className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">تاريخ الإنشاء</p>
+                        <p className="text-sm text-muted-foreground">
+                          {profileData?.created_at 
+                            ? new Date(profileData.created_at).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                              })
+                            : '-'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                      <Globe className="h-5 w-5 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">معرف المستخدم</p>
+                        <p className="text-sm text-muted-foreground font-mono truncate max-w-[200px]">
+                          {user?.id?.substring(0, 8)}...
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="posts">
+              <ProfilePostsSection isOwnProfile={true} />
+            </TabsContent>
+          </Tabs>
         </motion.div>
       </ResponsivePageContainer>
     </DashboardLayout>
