@@ -17,6 +17,7 @@ import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 // Lazy load the live tracking components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 const DriverRouteVisualization = lazy(() => import('@/components/tracking/DriverRouteVisualization'));
+const TrackingModeController = lazy(() => import('@/components/tracking/TrackingModeController'));
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -360,6 +361,23 @@ const ShipmentDetailsPage = () => {
 
         {/* Progress Logs - Auto-recorded milestones */}
         <ShipmentProgressLogs shipmentId={shipment.id} maxHeight={350} />
+
+        {/* Tracking Mode Controller - Shows when driver is assigned */}
+        {shipment.driver_id && (
+          <Suspense fallback={
+            <div className="h-[200px] flex items-center justify-center bg-muted/30 rounded-lg">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          }>
+            <TrackingModeController
+              shipmentId={shipment.id}
+              driverId={shipment.driver_id}
+              pickupCoords={generatorLocation}
+              deliveryCoords={recyclerLocation}
+              currentStatus={shipment.status}
+            />
+          </Suspense>
+        )}
 
         {/* Live Tracking Section - Featured when driver is assigned */}
         {shipment.driver_id && (
