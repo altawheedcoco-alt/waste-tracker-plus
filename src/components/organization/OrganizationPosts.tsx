@@ -18,7 +18,8 @@ import {
   X,
   Loader2,
   Play,
-  Images
+  Images,
+  Share2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -40,6 +41,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import PostInteractions from './PostInteractions';
+import PostShareActions from '@/components/content-generator/PostShareActions';
 
 interface OrganizationPost {
   id: string;
@@ -573,7 +575,14 @@ const OrganizationPosts = ({
 
                   {renderMedia(post)}
                   
-                  <PostInteractions postId={post.id} likesCount={post.likes_count || 0} />
+                  <div className="flex items-center justify-between mt-3">
+                    <PostInteractions postId={post.id} likesCount={post.likes_count || 0} />
+                    <PostShareActions 
+                      content={post.content || ''}
+                      postId={post.id}
+                      variant="icon"
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>
