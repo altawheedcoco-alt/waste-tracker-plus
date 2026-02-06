@@ -28,6 +28,7 @@ import {
   Printer,
   Eye,
   Volume2,
+  Clock,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
@@ -449,26 +450,34 @@ const Notifications = () => {
                             </Badge>
                           </div>
                           
-                          {/* Message - Formatted nicely */}
+                          {/* Message - Full details */}
                           <div className={`text-muted-foreground leading-relaxed ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                            <p className="line-clamp-3 whitespace-pre-wrap">
+                            <p className="whitespace-pre-wrap">
                               {notification.message}
                             </p>
                           </div>
                           
-                          {/* Footer - Time */}
-                          <div className="flex items-center justify-between pt-1">
-                            <span className={`text-muted-foreground/70 ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+                          {/* Additional Details */}
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
+                            {notification.shipment_id && (
+                              <Badge variant="outline" className="gap-1 text-[10px] font-mono">
+                                <Package className="w-3 h-3" />
+                                {notification.shipment_id.slice(0, 8)}
+                              </Badge>
+                            )}
+                            {notification.request_id && (
+                              <Badge variant="outline" className="gap-1 text-[10px] font-mono">
+                                <FileText className="w-3 h-3" />
+                                طلب: {notification.request_id.slice(0, 6)}
+                              </Badge>
+                            )}
+                            <span className={`flex items-center gap-1 ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
+                              <Clock className="w-3 h-3" />
                               {formatDistanceToNow(new Date(notification.created_at), {
                                 addSuffix: true,
                                 locale: ar,
                               })}
                             </span>
-                            {notification.shipment_id && (
-                              <span className={`text-primary/70 ${isMobile ? 'text-[10px]' : 'text-xs'}`}>
-                                رقم الشحنة: {notification.shipment_id.slice(0, 8)}...
-                              </span>
-                            )}
                           </div>
                           
                           {/* PDF Actions for Recycling Reports */}
