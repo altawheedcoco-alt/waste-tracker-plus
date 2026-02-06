@@ -14,6 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_periods: {
+        Row: {
+          carry_over_balance: boolean | null
+          closed_at: string | null
+          closed_by: string | null
+          closing_balance: number | null
+          created_at: string
+          end_date: string
+          external_partner_id: string | null
+          id: string
+          notes: string | null
+          opening_balance: number
+          organization_id: string
+          partner_organization_id: string | null
+          period_name: string
+          start_date: string
+          status: string
+          total_deposits: number | null
+          total_deposits_count: number | null
+          total_shipments_count: number | null
+          total_shipments_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          carry_over_balance?: boolean | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_balance?: number | null
+          created_at?: string
+          end_date: string
+          external_partner_id?: string | null
+          id?: string
+          notes?: string | null
+          opening_balance?: number
+          organization_id: string
+          partner_organization_id?: string | null
+          period_name: string
+          start_date: string
+          status?: string
+          total_deposits?: number | null
+          total_deposits_count?: number | null
+          total_shipments_count?: number | null
+          total_shipments_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          carry_over_balance?: boolean | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closing_balance?: number | null
+          created_at?: string
+          end_date?: string
+          external_partner_id?: string | null
+          id?: string
+          notes?: string | null
+          opening_balance?: number
+          organization_id?: string
+          partner_organization_id?: string | null
+          period_name?: string
+          start_date?: string
+          status?: string
+          total_deposits?: number | null
+          total_deposits_count?: number | null
+          total_shipments_count?: number | null
+          total_shipments_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_periods_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_periods_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "account_periods_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_periods_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "account_periods_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_logs: {
         Row: {
           action: string
