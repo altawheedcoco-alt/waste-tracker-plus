@@ -10,3 +10,6 @@ export { default as DocumentSignatureSection } from './DocumentSignatureSection'
 
 export { default as BiometricStampVerification } from './BiometricStampVerification';
 export type { StampVerificationData } from './BiometricStampVerification';
+
+// Organization Settings
+export { default as OrganizationSignatureSettings } from './OrganizationSignatureSettings';

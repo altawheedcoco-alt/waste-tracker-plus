@@ -1845,6 +1845,84 @@ export type Database = {
           },
         ]
       }
+      document_signatures: {
+        Row: {
+          biometric_type: string | null
+          biometric_verification_id: string | null
+          biometric_verified: boolean | null
+          created_at: string
+          device_info: string | null
+          document_id: string
+          document_type: string
+          id: string
+          ip_address: string | null
+          organization_id: string | null
+          signature_image_url: string | null
+          signature_method: string
+          signed_by: string | null
+          signer_name: string
+          signer_role: string | null
+          stamp_applied: boolean | null
+          stamp_verified_biometrically: boolean | null
+          timestamp_signed: string
+        }
+        Insert: {
+          biometric_type?: string | null
+          biometric_verification_id?: string | null
+          biometric_verified?: boolean | null
+          created_at?: string
+          device_info?: string | null
+          document_id: string
+          document_type: string
+          id?: string
+          ip_address?: string | null
+          organization_id?: string | null
+          signature_image_url?: string | null
+          signature_method: string
+          signed_by?: string | null
+          signer_name: string
+          signer_role?: string | null
+          stamp_applied?: boolean | null
+          stamp_verified_biometrically?: boolean | null
+          timestamp_signed?: string
+        }
+        Update: {
+          biometric_type?: string | null
+          biometric_verification_id?: string | null
+          biometric_verified?: boolean | null
+          created_at?: string
+          device_info?: string | null
+          document_id?: string
+          document_type?: string
+          id?: string
+          ip_address?: string | null
+          organization_id?: string | null
+          signature_image_url?: string | null
+          signature_method?: string
+          signed_by?: string | null
+          signer_name?: string
+          signer_role?: string | null
+          stamp_applied?: boolean | null
+          stamp_verified_biometrically?: boolean | null
+          timestamp_signed?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "document_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_verifications: {
         Row: {
           ai_analysis: Json | null
@@ -3851,6 +3929,60 @@ export type Database = {
           },
         ]
       }
+      organization_signature_settings: {
+        Row: {
+          allow_drawn_signature: boolean | null
+          allow_stamp_without_biometric: boolean | null
+          allow_uploaded_signature: boolean | null
+          created_at: string
+          default_signature_method: string | null
+          id: string
+          organization_id: string | null
+          require_biometric_for_signature: boolean | null
+          require_biometric_for_stamp: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          allow_drawn_signature?: boolean | null
+          allow_stamp_without_biometric?: boolean | null
+          allow_uploaded_signature?: boolean | null
+          created_at?: string
+          default_signature_method?: string | null
+          id?: string
+          organization_id?: string | null
+          require_biometric_for_signature?: boolean | null
+          require_biometric_for_stamp?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          allow_drawn_signature?: boolean | null
+          allow_stamp_without_biometric?: boolean | null
+          allow_uploaded_signature?: boolean | null
+          created_at?: string
+          default_signature_method?: string | null
+          id?: string
+          organization_id?: string | null
+          require_biometric_for_signature?: boolean | null
+          require_biometric_for_stamp?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_signature_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_signature_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           activity_type: string | null
@@ -4851,6 +4983,7 @@ export type Database = {
           access_all_waste_types: boolean | null
           active_organization_id: string | null
           avatar_url: string | null
+          can_sign_documents: boolean | null
           created_at: string | null
           department: string | null
           email: string
@@ -4866,6 +4999,7 @@ export type Database = {
           organization_id: string | null
           phone: string | null
           position: string | null
+          signature_authority_level: string | null
           updated_at: string | null
           user_id: string
         }
@@ -4874,6 +5008,7 @@ export type Database = {
           access_all_waste_types?: boolean | null
           active_organization_id?: string | null
           avatar_url?: string | null
+          can_sign_documents?: boolean | null
           created_at?: string | null
           department?: string | null
           email: string
@@ -4889,6 +5024,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           position?: string | null
+          signature_authority_level?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -4897,6 +5033,7 @@ export type Database = {
           access_all_waste_types?: boolean | null
           active_organization_id?: string | null
           avatar_url?: string | null
+          can_sign_documents?: boolean | null
           created_at?: string | null
           department?: string | null
           email?: string
@@ -4912,6 +5049,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           position?: string | null
+          signature_authority_level?: string | null
           updated_at?: string | null
           user_id?: string
         }
