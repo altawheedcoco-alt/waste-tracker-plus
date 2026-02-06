@@ -35,6 +35,10 @@ import {
   Loader2,
   Filter,
   X,
+  Layers,
+  Plus,
+  Minus,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -342,11 +346,15 @@ export default function GuillochePatterns() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
   const [selectedPattern, setSelectedPattern] = useState<PatternConfig | null>(null);
-  const [activePattern, setActivePattern] = useState<PatternConfig | null>(null);
+  const [activePatterns, setActivePatterns] = useState<PatternConfig[]>([]);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [gridSize, setGridSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [isApplying, setIsApplying] = useState(false);
   const [visibleCount, setVisibleCount] = useState(50);
+  const [layerMode, setLayerMode] = useState(false);
+
+  // Max layers allowed
+  const MAX_LAYERS = 5;
 
   // Generate all patterns
   const allPatterns = useMemo(() => generatePatterns(), []);
@@ -378,13 +386,43 @@ export default function GuillochePatterns() {
   const handleApplyPattern = async (pattern: PatternConfig) => {
     setIsApplying(true);
     try {
-      // Simulate saving to database
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setActivePattern(pattern);
-      toast.success(`تم تحديد "${pattern.name}" كخلفية للمستندات`);
+      await new Promise(resolve => setTimeout(resolve, 300));
+      if (layerMode) {
+        // In layer mode, add to activePatterns if not already there
+        if (!activePatterns.find(p => p.id === pattern.id)) {
+          if (activePatterns.length >= MAX_LAYERS) {
+            toast.error(`الحد الأقصى للطبقات هو ${MAX_LAYERS}`);
+            return;
+          }
+          setActivePatterns(prev => [...prev, pattern]);
+          toast.success(`تمت إضافة "${pattern.name}" كطبقة (${activePatterns.length + 1}/${MAX_LAYERS})`);
+        } else {
+          // Remove if already selected
+          setActivePatterns(prev => prev.filter(p => p.id !== pattern.id));
+          toast.info(`تمت إزالة "${pattern.name}" من الطبقات`);
+        }
+      } else {
+        // Single pattern mode
+        setActivePatterns([pattern]);
+        toast.success(`تم تحديد "${pattern.name}" كخلفية للمستندات`);
+      }
     } finally {
       setIsApplying(false);
     }
+  };
+
+  const handleRemoveLayer = (patternId: string) => {
+    setActivePatterns(prev => prev.filter(p => p.id !== patternId));
+    toast.info('تمت إزالة الطبقة');
+  };
+
+  const handleClearAllLayers = () => {
+    setActivePatterns([]);
+    toast.success('تم إلغاء جميع الطبقات - ستتم طباعة المستندات بدون خلفية');
+  };
+
+  const isPatternActive = (patternId: string) => {
+    return activePatterns.some(p => p.id === patternId);
   };
 
   const handlePreview = (pattern: PatternConfig) => {
@@ -419,38 +457,98 @@ export default function GuillochePatterns() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Layer Mode Toggle */}
+            <Button
+              variant={layerMode ? "default" : "outline"}
+              onClick={() => setLayerMode(!layerMode)}
+              className="gap-2"
+            >
+              <Layers className="h-4 w-4" />
+              {layerMode ? 'وضع التداخل مُفعَّل' : 'تفعيل التداخل'}
+            </Button>
+
             {/* Default (No Pattern) Button */}
             <Button
-              variant={activePattern === null ? "default" : "outline"}
-              onClick={() => {
-                setActivePattern(null);
-                toast.success('تم إلغاء الرسم الغيوشي - ستتم طباعة المستندات بدون خلفية');
-              }}
+              variant={activePatterns.length === 0 ? "default" : "outline"}
+              onClick={handleClearAllLayers}
               className="gap-2"
             >
               <X className="h-4 w-4" />
               الافتراضي (بدون رسم)
-              {activePattern === null && <Check className="h-4 w-4 mr-1" />}
+              {activePatterns.length === 0 && <Check className="h-4 w-4 mr-1" />}
             </Button>
-
-            {activePattern && (
-              <Card className="border-primary bg-primary/5">
-                <CardContent className="p-3 flex items-center gap-3">
-                  <GuillochePatternSVG pattern={activePattern} size={50} />
-                  <div>
-                    <p className="text-xs text-muted-foreground">النمط المحدد حالياً</p>
-                    <p className="font-semibold text-sm">{activePattern.name}</p>
-                  </div>
-                  <Badge variant="secondary" className="gap-1">
-                    <Check className="h-3 w-3" />
-                    مُفعَّل
-                  </Badge>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
+
+        {/* Active Patterns / Layers Display */}
+        {activePatterns.length > 0 && (
+          <Card className="border-primary bg-primary/5">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">
+                    {layerMode ? `الطبقات المحددة (${activePatterns.length}/${MAX_LAYERS})` : 'النمط المحدد'}
+                  </h3>
+                </div>
+                <Button variant="ghost" size="sm" onClick={handleClearAllLayers} className="gap-1 text-destructive hover:text-destructive">
+                  <Trash2 className="h-4 w-4" />
+                  مسح الكل
+                </Button>
+              </div>
+
+              {/* Layered Preview */}
+              <div className="flex gap-4 items-start">
+                {/* Combined Preview */}
+                <div 
+                  className="relative w-32 h-32 rounded-lg border overflow-hidden flex-shrink-0"
+                  style={{ backgroundColor: activePatterns[0]?.colorPalette.bg || '#fff' }}
+                >
+                  {activePatterns.map((pattern, idx) => (
+                    <div 
+                      key={pattern.id} 
+                      className="absolute inset-0"
+                      style={{ opacity: 0.3 - (idx * 0.05) }}
+                    >
+                      <GuillochePatternSVG pattern={pattern} size={128} />
+                    </div>
+                  ))}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                    <span className="text-xs font-bold text-white drop-shadow">معاينة</span>
+                  </div>
+                </div>
+
+                {/* Layer List */}
+                <div className="flex-1 space-y-2">
+                  {activePatterns.map((pattern, idx) => (
+                    <div 
+                      key={pattern.id} 
+                      className="flex items-center gap-2 p-2 bg-background rounded-lg border"
+                    >
+                      <Badge variant="outline" className="w-6 h-6 flex items-center justify-center p-0">
+                        {idx + 1}
+                      </Badge>
+                      <GuillochePatternSVG pattern={pattern} size={40} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{pattern.name}</p>
+                        <p className="text-xs text-muted-foreground">{pattern.categoryName}</p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => handleRemoveLayer(pattern.id)}
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Filters */}
         <Card>
@@ -571,7 +669,7 @@ export default function GuillochePatterns() {
                 <Card 
                   className={cn(
                     'cursor-pointer transition-all hover:shadow-lg hover:scale-105 group overflow-hidden',
-                    activePattern?.id === pattern.id && 'ring-2 ring-primary'
+                    isPatternActive(pattern.id) && 'ring-2 ring-primary'
                   )}
                   onClick={() => handlePreview(pattern)}
                 >
@@ -592,6 +690,7 @@ export default function GuillochePatterns() {
                       </Button>
                       <Button
                         size="sm"
+                        variant={isPatternActive(pattern.id) ? "destructive" : "default"}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleApplyPattern(pattern);
@@ -600,6 +699,10 @@ export default function GuillochePatterns() {
                       >
                         {isApplying ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : isPatternActive(pattern.id) ? (
+                          <Minus className="h-4 w-4" />
+                        ) : layerMode ? (
+                          <Plus className="h-4 w-4" />
                         ) : (
                           <Check className="h-4 w-4" />
                         )}
@@ -607,11 +710,20 @@ export default function GuillochePatterns() {
                     </div>
 
                     {/* Active Indicator */}
-                    {activePattern?.id === pattern.id && (
+                    {isPatternActive(pattern.id) && (
                       <div className="absolute top-1 left-1">
                         <Badge className="gap-1 bg-primary">
-                          <Star className="h-3 w-3" />
-                          مُفعَّل
+                          {layerMode ? (
+                            <>
+                              <Layers className="h-3 w-3" />
+                              {activePatterns.findIndex(p => p.id === pattern.id) + 1}
+                            </>
+                          ) : (
+                            <>
+                              <Star className="h-3 w-3" />
+                              مُفعَّل
+                            </>
+                          )}
                         </Badge>
                       </div>
                     )}
@@ -693,13 +805,20 @@ export default function GuillochePatterns() {
                   </div>
                 </div>
 
-                {/* Document Preview */}
+                {/* Document Preview with Layers */}
                 <div className="border rounded-lg p-4 bg-muted/30">
-                  <p className="text-sm font-medium mb-2">معاينة على مستند:</p>
+                  <p className="text-sm font-medium mb-2">معاينة على مستند {layerMode && activePatterns.length > 0 ? '(مع الطبقات المحددة)' : ''}:</p>
                   <div 
                     className="relative h-48 rounded-lg border overflow-hidden"
                     style={{ backgroundColor: selectedPattern.colorPalette.bg }}
                   >
+                    {/* Show existing layers first */}
+                    {layerMode && activePatterns.map((p, idx) => (
+                      <div key={p.id} className="absolute inset-0" style={{ opacity: 0.1 - (idx * 0.02) }}>
+                        <GuillochePatternSVG pattern={p} size={400} />
+                      </div>
+                    ))}
+                    {/* Show selected pattern */}
                     <div className="absolute inset-0 opacity-10">
                       <GuillochePatternSVG pattern={selectedPattern} size={400} />
                     </div>
@@ -719,10 +838,11 @@ export default function GuillochePatterns() {
                 إغلاق
               </Button>
               <Button
+                variant={isPatternActive(selectedPattern?.id || '') ? "destructive" : "default"}
                 onClick={() => {
                   if (selectedPattern) {
                     handleApplyPattern(selectedPattern);
-                    setPreviewDialogOpen(false);
+                    if (!layerMode) setPreviewDialogOpen(false);
                   }
                 }}
                 disabled={isApplying}
@@ -730,10 +850,22 @@ export default function GuillochePatterns() {
               >
                 {isApplying ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
+                ) : isPatternActive(selectedPattern?.id || '') ? (
+                  <>
+                    <Minus className="h-4 w-4" />
+                    إزالة من الطبقات
+                  </>
+                ) : layerMode ? (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    إضافة كطبقة ({activePatterns.length}/{MAX_LAYERS})
+                  </>
                 ) : (
-                  <Check className="h-4 w-4" />
+                  <>
+                    <Check className="h-4 w-4" />
+                    تحديد كخلفية للمستندات
+                  </>
                 )}
-                تحديد كخلفية للمستندات
               </Button>
             </DialogFooter>
           </DialogContent>
