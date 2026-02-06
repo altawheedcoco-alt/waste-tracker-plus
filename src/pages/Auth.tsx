@@ -574,6 +574,7 @@ const Auth = () => {
                       </span>
                     </div>
                     
+                    {/* الحسابات الأساسية */}
                     <div className="grid grid-cols-5 gap-2 mt-4">
                       {[
                         { email: 'admin@demo.com', password: 'admin123456', icon: Shield, label: 'المدير', color: 'bg-red-500 hover:bg-red-600' },
@@ -609,6 +610,44 @@ const Auth = () => {
                         >
                           <demo.icon className="w-5 h-5 mb-1" />
                           <span className="text-[10px] font-medium">{demo.label}</span>
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {/* الشركات الجديدة (الثانية) */}
+                    <div className="grid grid-cols-3 gap-2 mt-3">
+                      {[
+                        { email: 'generator2@demo.com', password: 'generator123456', icon: Building2, label: 'مولدة 2', color: 'bg-blue-400 hover:bg-blue-500' },
+                        { email: 'transporter2@demo.com', password: 'transporter123456', icon: Truck, label: 'ناقلة 2', color: 'bg-amber-400 hover:bg-amber-500' },
+                        { email: 'recycler2@demo.com', password: 'recycler123456', icon: Recycle, label: 'مدورة 2', color: 'bg-emerald-400 hover:bg-emerald-500' },
+                      ].map((demo) => (
+                        <motion.button
+                          key={demo.email}
+                          type="button"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={async () => {
+                            setLoading(true);
+                            try {
+                              const { error } = await signIn(demo.email, demo.password);
+                              if (error) {
+                                toast({
+                                  title: 'خطأ',
+                                  description: 'فشل تسجيل الدخول',
+                                  variant: 'destructive',
+                                });
+                              } else {
+                                navigate('/dashboard');
+                              }
+                            } finally {
+                              setLoading(false);
+                            }
+                          }}
+                          disabled={loading}
+                          className={`flex flex-col items-center justify-center p-2.5 rounded-lg text-white transition-all ${demo.color} disabled:opacity-50 border-2 border-dashed border-white/30`}
+                        >
+                          <demo.icon className="w-4 h-4 mb-1" />
+                          <span className="text-[9px] font-medium">{demo.label}</span>
                         </motion.button>
                       ))}
                     </div>
