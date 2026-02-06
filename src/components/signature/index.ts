@@ -13,3 +13,6 @@ export type { StampVerificationData } from './BiometricStampVerification';
 
 // Organization Settings
 export { default as OrganizationSignatureSettings } from './OrganizationSignatureSettings';
+
+// Sign Document Button
+export { default as SignDocumentButton, BiometricVerifiedBadge } from './SignDocumentButton';

@@ -36,6 +36,8 @@ import StampSignatureUpload from '@/components/organization/StampSignatureUpload
 import ProfileHeader from '@/components/organization/ProfileHeader';
 import BackButton from '@/components/ui/back-button';
 import OrganizationPortfolio from '@/components/organization/OrganizationPortfolio';
+import { OrganizationSignatureSettings } from '@/components/signature';
+import BiometricManager from '@/components/biometric/BiometricManager';
 
 interface OrganizationDocument {
   id: string;
@@ -777,13 +779,24 @@ const OrganizationProfile = () => {
 
           {/* Stamps and Signatures Tab */}
           <TabsContent value="stamps">
-            <StampSignatureUpload
-              organizationId={organization.id}
-              stampUrl={orgData?.stamp_url || null}
-              signatureUrl={orgData?.signature_url || null}
-              onUpdate={fetchOrganizationData}
-              disabled={!isCompanyAdmin}
-            />
+            <div className="space-y-6">
+              {/* Upload Stamp and Signature Images */}
+              <StampSignatureUpload
+                organizationId={organization.id}
+                stampUrl={orgData?.stamp_url || null}
+                signatureUrl={orgData?.signature_url || null}
+                onUpdate={fetchOrganizationData}
+                disabled={!isCompanyAdmin}
+              />
+
+              {/* Biometric Authentication Manager */}
+              <BiometricManager />
+
+              {/* Signature Settings for Organization */}
+              {isCompanyAdmin && (
+                <OrganizationSignatureSettings />
+              )}
+            </div>
           </TabsContent>
 
           {/* Documents Tab */}
