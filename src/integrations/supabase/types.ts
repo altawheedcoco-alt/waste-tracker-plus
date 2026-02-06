@@ -5322,7 +5322,7 @@ export type Database = {
           declared_weight: number | null
           driver_id: string | null
           driver_signature: string | null
-          generator_id: string
+          generator_id: string | null
           generator_signature: string | null
           id: string
           notes: string | null
@@ -5348,7 +5348,7 @@ export type Database = {
           declared_weight?: number | null
           driver_id?: string | null
           driver_signature?: string | null
-          generator_id: string
+          generator_id?: string | null
           generator_signature?: string | null
           id?: string
           notes?: string | null
@@ -5356,7 +5356,7 @@ export type Database = {
           pickup_date?: string
           pickup_location?: string | null
           pickup_photos?: string[] | null
-          receipt_number: string
+          receipt_number?: string
           shipment_id: string
           status?: string
           transporter_id: string
@@ -5374,7 +5374,7 @@ export type Database = {
           declared_weight?: number | null
           driver_id?: string | null
           driver_signature?: string | null
-          generator_id?: string
+          generator_id?: string | null
           generator_signature?: string | null
           id?: string
           notes?: string | null
