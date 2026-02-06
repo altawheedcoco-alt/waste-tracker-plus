@@ -3054,10 +3054,17 @@ export type Database = {
           last_used_at: string | null
           notes: string | null
           organization_id: string
+          preset_account_number: string | null
+          preset_amount: number | null
+          preset_bank_name: string | null
+          preset_branch: string | null
           preset_category: string | null
+          preset_depositor_name: string | null
           preset_external_partner_id: string | null
           preset_notes: string | null
           preset_partner_id: string | null
+          preset_payment_method: string | null
+          preset_reference_number: string | null
           preset_waste_type: string | null
           require_receipt: boolean | null
           title: string | null
@@ -3079,10 +3086,17 @@ export type Database = {
           last_used_at?: string | null
           notes?: string | null
           organization_id: string
+          preset_account_number?: string | null
+          preset_amount?: number | null
+          preset_bank_name?: string | null
+          preset_branch?: string | null
           preset_category?: string | null
+          preset_depositor_name?: string | null
           preset_external_partner_id?: string | null
           preset_notes?: string | null
           preset_partner_id?: string | null
+          preset_payment_method?: string | null
+          preset_reference_number?: string | null
           preset_waste_type?: string | null
           require_receipt?: boolean | null
           title?: string | null
@@ -3104,10 +3118,17 @@ export type Database = {
           last_used_at?: string | null
           notes?: string | null
           organization_id?: string
+          preset_account_number?: string | null
+          preset_amount?: number | null
+          preset_bank_name?: string | null
+          preset_branch?: string | null
           preset_category?: string | null
+          preset_depositor_name?: string | null
           preset_external_partner_id?: string | null
           preset_notes?: string | null
           preset_partner_id?: string | null
+          preset_payment_method?: string | null
+          preset_reference_number?: string | null
           preset_waste_type?: string | null
           require_receipt?: boolean | null
           title?: string | null
