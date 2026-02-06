@@ -110,56 +110,84 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<string> 
 };
 
 /**
- * Fetch road route between two points using Google Directions API
+ * Fetch road route between two points using Google Maps Directions Service SDK
+ * Uses the SDK instead of direct fetch to avoid CORS issues
  */
 export const fetchRoadRoute = async (
   origin: { lat: number; lng: number },
   destination: { lat: number; lng: number }
 ): Promise<RouteResult> => {
-  try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.lat},${origin.lng}&destination=${destination.lat},${destination.lng}&mode=driving&region=eg&language=ar&key=${GOOGLE_MAPS_API_KEY}`
-    );
-    const data = await response.json();
-    
-    if (data.status === 'OK' && data.routes?.[0]) {
-      const route = data.routes[0];
-      const leg = route.legs[0];
-      
-      // Decode polyline to coordinates
-      const coordinates: [number, number][] = decodePolyline(route.overview_polyline.points);
-      
-      return {
-        coordinates,
-        distance: leg.distance.value, // meters
-        duration: leg.duration.value, // seconds
-        success: true,
-      };
+  return new Promise((resolve) => {
+    // Check if Google Maps SDK is loaded
+    if (typeof google === 'undefined' || !google.maps) {
+      console.warn('Google Maps SDK not loaded, using fallback');
+      resolve({
+        coordinates: [
+          [origin.lat, origin.lng],
+          [destination.lat, destination.lng],
+        ],
+        distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
+        duration: 0,
+        success: false,
+      });
+      return;
     }
-    
-    // Fallback to straight line
-    return {
-      coordinates: [
-        [origin.lat, origin.lng],
-        [destination.lat, destination.lng],
-      ],
-      distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
-      duration: 0,
-      success: false,
-    };
-  } catch (error) {
-    console.error('Route fetch error:', error);
-    // Fallback to straight line
-    return {
-      coordinates: [
-        [origin.lat, origin.lng],
-        [destination.lat, destination.lng],
-      ],
-      distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
-      duration: 0,
-      success: false,
-    };
-  }
+
+    try {
+      const directionsService = new google.maps.DirectionsService();
+
+      directionsService.route(
+        {
+          origin: new google.maps.LatLng(origin.lat, origin.lng),
+          destination: new google.maps.LatLng(destination.lat, destination.lng),
+          travelMode: google.maps.TravelMode.DRIVING,
+          region: 'EG',
+        },
+        (result, status) => {
+          if (status === google.maps.DirectionsStatus.OK && result?.routes?.[0]) {
+            const route = result.routes[0];
+            const leg = route.legs[0];
+            
+            // Extract coordinates from the route path
+            const coordinates: [number, number][] = route.overview_path.map(
+              (point) => [point.lat(), point.lng()] as [number, number]
+            );
+            
+            resolve({
+              coordinates,
+              distance: leg.distance?.value || 0, // meters
+              duration: leg.duration?.value || 0, // seconds
+              success: true,
+            });
+          } else {
+            console.warn('Directions request failed:', status);
+            // Fallback to straight line
+            resolve({
+              coordinates: [
+                [origin.lat, origin.lng],
+                [destination.lat, destination.lng],
+              ],
+              distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
+              duration: 0,
+              success: false,
+            });
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Route fetch error:', error);
+      // Fallback to straight line
+      resolve({
+        coordinates: [
+          [origin.lat, origin.lng],
+          [destination.lat, destination.lng],
+        ],
+        distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
+        duration: 0,
+        success: false,
+      });
+    }
+  });
 };
 
 /**
