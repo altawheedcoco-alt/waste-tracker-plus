@@ -33,6 +33,10 @@ export interface LedgerEntry {
   isCancelled?: boolean;
   notes?: string; // ملاحظات الحساب
   shipmentId?: string; // معرف الشحنة لتحديث الملاحظات
+  depositId?: string; // معرف الإيداع
+  receiptUrl?: string; // رابط صورة الإيصال
+  depositorName?: string; // اسم المودع
+  recipientName?: string; // اسم المودع إليه
 }
 
 interface AccountLedgerProps {
