@@ -87,6 +87,7 @@ export const transporterQuickActions: QuickActionConfig[] = [
   { id: 'partners', title: 'الشركاء', subtitle: 'الجهات المولدة والمدورة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'utility' },
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
 ];
 
@@ -147,6 +148,7 @@ export const generatorQuickActions: QuickActionConfig[] = [
   { id: 'reports', title: 'التقارير', subtitle: 'تقارير الأداء والإحصائيات', icon: TrendingUp, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
 ];
 
@@ -171,6 +173,7 @@ export const recyclerQuickActions: QuickActionConfig[] = [
   // 4️⃣ إدارة الفريق
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
 ];
@@ -194,6 +197,7 @@ export const driverQuickActions: QuickActionConfig[] = [
   { id: 'chat', title: 'المحادثات', subtitle: 'التواصل مع الفريق', icon: MessageCircle, path: '/dashboard/chat', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'utility' },
   { id: 'notifications', title: 'الإشعارات', subtitle: 'التنبيهات والإخطارات', icon: Bell, path: '/dashboard/notifications', iconBgClass: 'bg-gradient-to-br from-red-500 to-rose-600', category: 'utility' },
   { id: 'my-requests', title: 'طلباتي', subtitle: 'عرض وإدارة طلباتك', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   
   // 5️⃣ الدعم والإعدادات
   { id: 'support', title: 'الدعم الفني', subtitle: 'تواصل مع فريق الدعم', icon: Headphones, path: '/dashboard/support', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
