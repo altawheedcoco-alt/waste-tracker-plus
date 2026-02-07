@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.extract-receipt-data]
 verify_jwt = false
+
+[functions.ai-document-classifier]
+verify_jwt = false
