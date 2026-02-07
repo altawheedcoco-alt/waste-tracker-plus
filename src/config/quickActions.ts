@@ -41,6 +41,8 @@ import {
   Bookmark,
   User,
   Info,
+  QrCode,
+  ScanLine,
 } from 'lucide-react';
 
 export interface QuickActionConfig {
@@ -85,6 +87,7 @@ export const transporterQuickActions: QuickActionConfig[] = [
   { id: 'partners', title: 'الشركاء', subtitle: 'الجهات المولدة والمدورة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'utility' },
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
 ];
 
 // ============= ADMIN QUICK ACTIONS =============
@@ -105,6 +108,7 @@ export const adminQuickActions: QuickActionConfig[] = [
   { id: 'company-approvals', title: 'موافقات الشركات', subtitle: 'قبول أو رفض تسجيل الجهات', icon: Building2, path: '/dashboard/company-approvals', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'secondary' },
   { id: 'driver-approvals', title: 'موافقات السائقين', subtitle: 'اعتماد السائقين الجدد', icon: UserPlus, path: '/dashboard/driver-approvals', iconBgClass: 'bg-gradient-to-br from-cyan-500 to-blue-600', category: 'secondary' },
   { id: 'document-verification', title: 'التحقق من المستندات', subtitle: 'فحص الوثائق والتراخيص', icon: Shield, path: '/dashboard/document-verification', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'secondary' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'مسح وتحقق من أي مستند', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'secondary' },
   
   // 4️⃣ إدارة الشركات والمستخدمين
   { id: 'company-management', title: 'إدارة الشركات', subtitle: 'تحكم في بيانات جميع الجهات', icon: Building2, path: '/dashboard/company-management', iconBgClass: 'bg-gradient-to-br from-slate-600 to-gray-700', category: 'secondary' },
@@ -143,6 +147,7 @@ export const generatorQuickActions: QuickActionConfig[] = [
   { id: 'reports', title: 'التقارير', subtitle: 'تقارير الأداء والإحصائيات', icon: TrendingUp, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
 ];
 
 // ============= RECYCLER QUICK ACTIONS =============
@@ -167,6 +172,7 @@ export const recyclerQuickActions: QuickActionConfig[] = [
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
   { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
 ];
 
 // ============= DRIVER QUICK ACTIONS =============

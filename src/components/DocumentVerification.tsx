@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, QrCode, FileCheck, FileX, Loader2, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, QrCode, FileCheck, FileX, Loader2, Shield, Camera, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -46,6 +47,7 @@ const statusLabels: Record<string, string> = {
 };
 
 const DocumentVerification = () => {
+  const navigate = useNavigate();
   const [documentNumber, setDocumentNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
@@ -201,12 +203,20 @@ const DocumentVerification = () => {
 
                 <TabsContent value="qr" className="space-y-4">
                   <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/50">
-                    <QrCode className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground mb-2">
-                      قم بمسح رمز QR الموجود على الوثيقة
+                    <QrCode className="w-16 h-16 mx-auto text-primary mb-4" />
+                    <p className="text-muted-foreground mb-4">
+                      امسح رمز QR الموجود على أي مستند للتحقق من صحته
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      هذه الميزة قيد التطوير
+                    <Button 
+                      size="lg" 
+                      onClick={() => navigate('/scan')}
+                      className="gap-2"
+                    >
+                      <Camera className="w-5 h-5" />
+                      فتح الماسح الضوئي
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-4">
+                      يدعم: الشحنات، شهادات التدوير، إيصالات الاستلام، العقود
                     </p>
                   </div>
                 </TabsContent>

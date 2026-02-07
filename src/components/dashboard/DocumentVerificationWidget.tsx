@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, FileCheck, FileX, Loader2, Shield, QrCode } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, FileCheck, FileX, Loader2, Shield, QrCode, Camera, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +53,7 @@ interface DocumentVerificationWidgetProps {
 }
 
 const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerificationWidgetProps) => {
+  const navigate = useNavigate();
   const [documentNumber, setDocumentNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
@@ -179,13 +181,23 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
         </TabsContent>
 
         <TabsContent value="qr" className="mt-4">
-          <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/50">
-            <QrCode className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground text-sm">
-              قم بمسح رمز QR الموجود على الوثيقة
+          <div className="text-center py-6 border-2 border-dashed rounded-lg bg-muted/50">
+            <QrCode className="w-12 h-12 mx-auto text-primary mb-3" />
+            <p className="text-muted-foreground text-sm mb-4">
+              امسح رمز QR للتحقق من أي مستند
             </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              هذه الميزة قيد التطوير
+            <Button 
+              onClick={() => {
+                onOpenChange?.(false);
+                navigate('/scan');
+              }}
+              className="gap-2"
+            >
+              <Camera className="w-4 h-4" />
+              فتح الماسح الضوئي
+            </Button>
+            <p className="text-xs text-muted-foreground mt-3">
+              يدعم: الشحنات، الشهادات، الإيصالات، العقود
             </p>
           </div>
         </TabsContent>

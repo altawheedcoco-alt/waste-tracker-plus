@@ -5876,6 +5876,48 @@ export type Database = {
           },
         ]
       }
+      qr_scan_logs: {
+        Row: {
+          created_at: string
+          document_data: Json | null
+          document_id: string | null
+          document_reference: string
+          id: string
+          scan_result: string
+          scan_type: string
+          scanner_ip: unknown
+          scanner_location: Json | null
+          scanner_user_agent: string | null
+          scanner_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_data?: Json | null
+          document_id?: string | null
+          document_reference: string
+          id?: string
+          scan_result?: string
+          scan_type: string
+          scanner_ip?: unknown
+          scanner_location?: Json | null
+          scanner_user_agent?: string | null
+          scanner_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_data?: Json | null
+          document_id?: string | null
+          document_reference?: string
+          id?: string
+          scan_result?: string
+          scan_type?: string
+          scanner_ip?: unknown
+          scanner_location?: Json | null
+          scanner_user_agent?: string | null
+          scanner_user_id?: string | null
+        }
+        Relationships: []
+      }
       recycling_reports: {
         Row: {
           closing_declaration: string | null
