@@ -16,6 +16,7 @@ import {
   Layers,
   Plus,
   CalendarRange,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +33,7 @@ import PartnerWasteTypes from '@/components/partners/PartnerWasteTypes';
 import DepositButton from '@/components/deposits/DepositButton';
 import CreateInvoiceDialog from '@/components/invoices/CreateInvoiceDialog';
 import AccountPeriodsManager from '@/components/accounts/AccountPeriodsManager';
+import LinkedPartiesTab from '@/components/partners/LinkedPartiesTab';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
@@ -332,10 +334,14 @@ export default function PartnerAccountDetails() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="grid w-full max-w-4xl grid-cols-6 mb-6">
+          <TabsList className="grid w-full max-w-5xl grid-cols-7 mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <BookOpen className="h-4 w-4" />
               كشف الحساب
+            </TabsTrigger>
+            <TabsTrigger value="linked" className="gap-2">
+              <LinkIcon className="h-4 w-4" />
+              الجهات المرتبطة
             </TabsTrigger>
             <TabsTrigger value="deferred" className="gap-2">
               <CalendarRange className="h-4 w-4" />
@@ -402,6 +408,26 @@ export default function PartnerAccountDetails() {
                 onDepositUpdated={refreshDeposits}
               />
             </div>
+          </TabsContent>
+
+          {/* Linked Parties Tab */}
+          <TabsContent value="linked" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LinkIcon className="h-5 w-5" />
+                  الجهات المرتبطة - الشحنات والعقود والأرصدة المشتركة
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {partnerId && (
+                  <LinkedPartiesTab
+                    organizationId={partnerId}
+                    organizationType={partner.organization_type}
+                  />
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Deferred Account Tab */}
