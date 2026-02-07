@@ -79,6 +79,8 @@ import DepositButton from '@/components/deposits/DepositButton';
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
 import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
+import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomizer';
+import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -344,10 +346,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
   }, [isAdmin, isDriver, organization]);
 
+  // Use quick action preferences hook
+  const { applyOrder, preferences: quickActionPrefs } = useQuickActionPreferences();
+
   const quickActionsSidebarItems = useMemo(() => {
-    const actions = getQuickActionsByType(quickActionsType);
+    let actions = getQuickActionsByType(quickActionsType);
+    // Apply user's custom order if available
+    if (quickActionPrefs) {
+      actions = applyOrder(actions);
+    }
     return getSidebarItemsFromQuickActions(actions);
-  }, [quickActionsType]);
+  }, [quickActionsType, quickActionPrefs, applyOrder]);
 
   // Filter menu items based on search
   const filteredMenuItems = useMemo(() => {
@@ -506,7 +515,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             {/* Quick Actions Section */}
             {filteredQuickActions.length > 0 && (
               <div className="pt-4 mt-4 border-t border-border">
-                {/* Section Header */}
+                {/* Section Header with Customize Button */}
                 <AnimatePresence>
                   {isSidebarOpen && (
                     <motion.div
@@ -520,6 +529,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                         الإجراءات السريعة
                       </span>
                       <div className="flex-1 h-px bg-border/50" />
+                      <QuickActionsCustomizer 
+                        userType={quickActionsType}
+                        trigger={
+                          <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <Settings className="w-3.5 h-3.5 text-muted-foreground hover:text-primary" />
+                          </Button>
+                        }
+                      />
                     </motion.div>
                   )}
                 </AnimatePresence>
