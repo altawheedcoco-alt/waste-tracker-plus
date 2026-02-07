@@ -123,12 +123,13 @@ const ChatWidget = () => {
 
   return (
     <>
-      {/* Chat Button - Positioned to avoid overlap on mobile */}
+      {/* Chat Button - Positioned bottom-left, offset for mobile nav */}
       <motion.button
         onClick={handleOpen}
-        className="fixed bottom-4 left-4 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+        className="fixed bottom-4 left-4 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        aria-label="فتح المحادثات"
       >
         <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
       </motion.button>

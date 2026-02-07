@@ -36,7 +36,7 @@ export const AccessibilityPanel = () => {
         <Button
           variant="outline"
           size="icon"
-          className="fixed bottom-20 left-4 z-50 rounded-full shadow-lg"
+          className="fixed bottom-36 left-4 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg bg-background touch-manipulation"
           data-accessibility-trigger
           aria-label="إعدادات إمكانية الوصول"
         >
