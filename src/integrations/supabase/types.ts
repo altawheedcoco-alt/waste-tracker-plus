@@ -7378,6 +7378,33 @@ export type Database = {
           },
         ]
       }
+      user_quick_action_preferences: {
+        Row: {
+          action_order: string[]
+          created_at: string
+          hidden_actions: string[] | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          action_order?: string[]
+          created_at?: string
+          hidden_actions?: string[] | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          action_order?: string[]
+          created_at?: string
+          hidden_actions?: string[] | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
