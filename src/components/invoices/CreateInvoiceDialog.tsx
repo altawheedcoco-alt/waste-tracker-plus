@@ -134,11 +134,15 @@ export default function CreateInvoiceDialog({
     return availableShipments.filter(s => !s.cancelled_at && s.calculatedTotal && s.calculatedTotal > 0);
   }, [availableShipments]);
 
+  // Watch form values outside useMemo to avoid infinite loop
+  const watchedTaxRate = form.watch('tax_rate');
+  const watchedDiscountAmount = form.watch('discount_amount');
+
   // Calculate totals
   const calculations = useMemo(() => {
     const subtotal = items.reduce((sum, item) => sum + item.total, 0);
-    const taxRate = form.watch('tax_rate') || 0;
-    const discountAmount = form.watch('discount_amount') || 0;
+    const taxRate = watchedTaxRate || 0;
+    const discountAmount = watchedDiscountAmount || 0;
     const taxAmount = (subtotal * taxRate) / 100;
     const total = subtotal + taxAmount - discountAmount;
     
@@ -148,7 +152,7 @@ export default function CreateInvoiceDialog({
       discountAmount,
       total,
     };
-  }, [items, form.watch('tax_rate'), form.watch('discount_amount')]);
+  }, [items, watchedTaxRate, watchedDiscountAmount]);
 
   // Toggle shipment selection
   const toggleShipment = (shipment: Shipment) => {
