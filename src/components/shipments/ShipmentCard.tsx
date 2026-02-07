@@ -88,6 +88,7 @@ interface ShipmentCardProps {
     recycler?: { name: string; id?: string } | null;
     transporter?: { name: string; id?: string } | null;
     has_report?: boolean;
+    has_receipt?: boolean;
   };
   onStatusChange?: () => void;
   variant?: 'compact' | 'full';
@@ -120,6 +121,7 @@ const ShipmentCard = ({
   const canChange = canChangeStatus(mappedStatus, organizationType);
   const isRecycler = organizationType === 'recycler';
   const isTransporter = organizationType === 'transporter';
+  const isGenerator = organizationType === 'generator';
   const isCompleted = shipment.status === 'completed' || shipment.status === 'confirmed';
 
   // Get available next statuses for quick change
@@ -356,6 +358,13 @@ const ShipmentCard = ({
                 </div>
                 <div className="flex-1 text-right">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
+                    {/* Receipt Issued Badge - Show to Generator */}
+                    {shipment.has_receipt && isGenerator && (
+                      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-700 gap-1">
+                        <FileCheck className="w-3 h-3" />
+                        تم استلام الشحنة
+                      </Badge>
+                    )}
                     {/* Recycling Report Issued Badge */}
                     {shipment.has_report && (
                       <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700 gap-1">
@@ -456,6 +465,13 @@ const ShipmentCard = ({
                 {/* Right Side - Shipment Info */}
                 <div className="flex-1 text-right order-1 sm:order-2">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
+                    {/* Receipt Issued Badge - Show to Generator */}
+                    {shipment.has_receipt && isGenerator && (
+                      <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-300 dark:border-blue-700 gap-1.5">
+                        <FileCheck className="w-4 h-4" />
+                        تم استلام الشحنة
+                      </Badge>
+                    )}
                     {/* Recycling Report Issued Badge - Prominent indicator */}
                     {shipment.has_report && (
                       <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 gap-1.5 animate-pulse">
