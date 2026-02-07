@@ -34,6 +34,13 @@ import {
   CheckCircle2,
   LucideIcon,
   Sparkles,
+  Map,
+  Bell,
+  MessageCircle,
+  Headphones,
+  Bookmark,
+  User,
+  Info,
 } from 'lucide-react';
 
 export interface QuickActionConfig {
@@ -158,13 +165,37 @@ export const recyclerQuickActions: QuickActionConfig[] = [
   { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', category: 'utility' },
 ];
 
+// ============= DRIVER QUICK ACTIONS =============
+export const driverQuickActions: QuickActionConfig[] = [
+  // Primary Actions - Navigation & Location
+  { id: 'my-location', title: 'عرض موقعي', subtitle: 'عرض موقعك الحالي على الخريطة', icon: Map, onClick: 'openLiveMap', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'primary' },
+  { id: 'navigation-demo', title: 'عرض توضيحي للملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
+  { id: 'transporter-shipments', title: 'شحناتي', subtitle: 'عرض الشحنات المسندة إليك', icon: Package, path: '/dashboard/transporter-shipments', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
+  { id: 'saved-locations', title: 'المواقع المحفوظة', subtitle: 'الوجهات المفضلة والمتكررة', icon: Bookmark, path: '/dashboard/saved-locations', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'primary' },
+  
+  // Profile & Settings
+  { id: 'driver-profile', title: 'ملف السائق', subtitle: 'عرض وتعديل بياناتك الشخصية', icon: User, path: '/dashboard/driver-profile', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
+  { id: 'driver-data', title: 'بيانات المركبة', subtitle: 'معلومات الرخصة والمركبة', icon: Truck, path: '/dashboard/driver-data', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'secondary' },
+  { id: 'settings', title: 'إعدادات الحساب', subtitle: 'تعديل إعدادات حسابك', icon: Settings, onClick: 'openSettings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'secondary' },
+  
+  // Communication
+  { id: 'chat', title: 'المحادثات', subtitle: 'التواصل مع الفريق والشركاء', icon: MessageCircle, path: '/dashboard/chat', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'utility' },
+  { id: 'my-requests', title: 'طلباتي', subtitle: 'عرض وإدارة طلباتك', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'notifications', title: 'الإشعارات', subtitle: 'التنبيهات والإخطارات', icon: Bell, path: '/dashboard/notifications', iconBgClass: 'bg-gradient-to-br from-red-500 to-rose-600', category: 'utility' },
+  
+  // Support & Info
+  { id: 'support', title: 'الدعم الفني', subtitle: 'تواصل مع فريق الدعم', icon: Headphones, path: '/dashboard/support', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
+  { id: 'map-explorer', title: 'استكشاف الخريطة', subtitle: 'البحث عن المواقع والوجهات', icon: Search, path: '/dashboard/map-explorer', category: 'utility' },
+  { id: 'about-platform', title: 'عن المنصة', subtitle: 'معلومات عن iRecycle', icon: Info, path: '/dashboard/about-platform', category: 'utility' },
+];
+
 // ============= HELPER FUNCTIONS =============
 
 /**
  * Get quick actions by user type
  */
 export function getQuickActionsByType(
-  type: 'admin' | 'transporter' | 'generator' | 'recycler'
+  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver'
 ): QuickActionConfig[] {
   switch (type) {
     case 'admin':
@@ -175,6 +206,8 @@ export function getQuickActionsByType(
       return generatorQuickActions;
     case 'recycler':
       return recyclerQuickActions;
+    case 'driver':
+      return driverQuickActions;
     default:
       return generatorQuickActions;
   }
