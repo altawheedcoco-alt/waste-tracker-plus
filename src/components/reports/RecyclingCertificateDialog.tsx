@@ -58,35 +58,60 @@ interface Shipment {
   confirmed_at?: string | null;
   generator?: {
     name: string;
+    name_en?: string | null;
     email?: string;
     phone?: string;
     address?: string;
     city?: string;
+    region?: string | null;
     commercial_register?: string;
     environmental_license?: string;
     representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
+    logo_url?: string | null;
+    stamp_url?: string | null;
+    signature_url?: string | null;
+    client_code?: string | null;
   } | null;
   transporter?: {
     name: string;
+    name_en?: string | null;
     email?: string;
     phone?: string;
     address?: string;
     city?: string;
+    region?: string | null;
     commercial_register?: string;
     environmental_license?: string;
     representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
+    logo_url?: string | null;
+    stamp_url?: string | null;
+    signature_url?: string | null;
+    client_code?: string | null;
   } | null;
   recycler?: {
     name: string;
+    name_en?: string | null;
     email?: string;
     phone?: string;
     address?: string;
     city?: string;
+    region?: string | null;
     commercial_register?: string;
     environmental_license?: string;
     representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
     stamp_url?: string | null;
     signature_url?: string | null;
+    logo_url?: string | null;
+    client_code?: string | null;
   } | null;
 }
 
