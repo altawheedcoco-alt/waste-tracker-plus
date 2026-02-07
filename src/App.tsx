@@ -85,6 +85,7 @@ const PartnerAccountDetails = lazy(() => import("./pages/dashboard/PartnerAccoun
 const ExternalPartnerDetails = lazy(() => import("./pages/dashboard/ExternalPartnerDetails"));
 const DocumentVerification = lazy(() => import("./pages/dashboard/DocumentVerification"));
 const Verify = lazy(() => import("./pages/Verify"));
+const QRVerify = lazy(() => import("./pages/QRVerify"));
 const NavigationDemo = lazy(() => import("./pages/dashboard/NavigationDemo"));
 const MapExplorer = lazy(() => import("./pages/dashboard/MapExplorer"));
 const SystemStatus = lazy(() => import("./pages/dashboard/SystemStatus"));
@@ -165,6 +166,8 @@ const AppRoutes = memo(() => (
     <Route path="/shipment/:token" element={<QuickShipment />} />
     <Route path="/driver/:token" element={<QuickDriver />} />
     <Route path="/verify" element={<Verify />} />
+    <Route path="/qr-verify" element={<QRVerify />} />
+    <Route path="/scan" element={<QRVerify />} />
     <Route path="/auth" element={<Auth />} />
     {/* Guide Routes */}
     <Route path="/guide/generator" element={<GeneratorGuide />} />

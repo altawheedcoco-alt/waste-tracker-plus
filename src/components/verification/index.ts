@@ -8,6 +8,8 @@ export { default as AILegalAnalysisPanel } from './AILegalAnalysisPanel';
 export { default as VerificationHistoryPanel } from './VerificationHistoryPanel';
 export { default as VerificationActionsPanel } from './VerificationActionsPanel';
 export { default as DocumentInfoGrid } from './DocumentInfoGrid';
+export { default as QRScanner } from './QRScanner';
+export { default as VerificationResult } from './VerificationResult';
 
 // Hooks
 export { useDocumentVerification } from './hooks/useDocumentVerification';
