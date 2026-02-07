@@ -1,15 +1,22 @@
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, BarChart3, Lightbulb, CalendarDays } from 'lucide-react';
+import { Bot, BarChart3, Lightbulb, CalendarDays, Brain, FileText } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import WasteAnalytics from '@/components/ai/WasteAnalytics';
 import WasteReductionAdvisor from '@/components/ai/WasteReductionAdvisor';
 import WasteTypeDetailedAnalytics from '@/components/ai/WasteTypeDetailedAnalytics';
+import AIInsightsDashboard from '@/components/ai/AIInsightsDashboard';
+import SmartDocumentUpload from '@/components/ai/SmartDocumentUpload';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
+import { toast } from 'sonner';
 
 const AITools = () => {
   const { isMobile } = useDisplayMode();
+
+  const handleDocumentClassified = (result: any, file: File) => {
+    toast.success(`تم تصنيف المستند: ${result.document_type}`);
+  };
 
   return (
     <DashboardLayout>
@@ -25,27 +32,45 @@ const AITools = () => {
               <Bot className="w-6 h-6 text-primary-foreground" />
             </div>
             <div className="text-right">
-              <h1 className="text-xl md:text-2xl font-bold">أدوات تحليل المخلفات</h1>
+              <h1 className="text-xl md:text-2xl font-bold">أدوات الذكاء الاصطناعي</h1>
               <p className="text-muted-foreground text-sm">أدوات ذكية لتحليل وإدارة مخلفات منشأتك</p>
             </div>
           </div>
         </motion.div>
 
-        <Tabs defaultValue="analytics" className="w-full" dir="rtl">
-          <TabsList className={`grid grid-cols-3 w-full max-w-2xl`}>
+        <Tabs defaultValue="insights" className="w-full" dir="rtl">
+          <TabsList className={`grid grid-cols-5 w-full max-w-3xl`}>
+            <TabsTrigger value="insights" className="flex items-center gap-2 text-xs md:text-sm">
+              <Brain className="w-4 h-4" />
+              <span className="hidden sm:inline">رؤى ذكية</span>
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="flex items-center gap-2 text-xs md:text-sm">
+              <FileText className="w-4 h-4" />
+              <span className="hidden sm:inline">تصنيف المستندات</span>
+            </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2 text-xs md:text-sm">
               <BarChart3 className="w-4 h-4" />
-              <span>الإحصائيات</span>
+              <span className="hidden sm:inline">الإحصائيات</span>
             </TabsTrigger>
             <TabsTrigger value="detailed" className="flex items-center gap-2 text-xs md:text-sm">
               <CalendarDays className="w-4 h-4" />
-              <span>تحليل تفصيلي</span>
+              <span className="hidden sm:inline">تحليل تفصيلي</span>
             </TabsTrigger>
             <TabsTrigger value="reduction" className="flex items-center gap-2 text-xs md:text-sm">
               <Lightbulb className="w-4 h-4" />
-              <span>توصيات الحد</span>
+              <span className="hidden sm:inline">توصيات</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="insights" className="mt-6">
+            <AIInsightsDashboard />
+          </TabsContent>
+
+          <TabsContent value="documents" className="mt-6">
+            <div className="max-w-2xl">
+              <SmartDocumentUpload onClassified={handleDocumentClassified} />
+            </div>
+          </TabsContent>
 
           <TabsContent value="analytics" className="mt-6">
             <WasteAnalytics />
