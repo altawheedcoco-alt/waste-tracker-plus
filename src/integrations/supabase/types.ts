@@ -2153,6 +2153,95 @@ export type Database = {
           },
         ]
       }
+      document_endorsements: {
+        Row: {
+          biometric_verified: boolean | null
+          created_at: string
+          document_id: string
+          document_number: string
+          document_type: string
+          endorsed_at: string
+          endorsed_by: string | null
+          endorsement_type: string
+          id: string
+          ip_address: unknown
+          notes: string | null
+          organization_id: string
+          qr_code_url: string | null
+          signature_id: string | null
+          stamp_id: string | null
+          user_agent: string | null
+          verification_code: string
+        }
+        Insert: {
+          biometric_verified?: boolean | null
+          created_at?: string
+          document_id: string
+          document_number: string
+          document_type: string
+          endorsed_at?: string
+          endorsed_by?: string | null
+          endorsement_type?: string
+          id?: string
+          ip_address?: unknown
+          notes?: string | null
+          organization_id: string
+          qr_code_url?: string | null
+          signature_id?: string | null
+          stamp_id?: string | null
+          user_agent?: string | null
+          verification_code: string
+        }
+        Update: {
+          biometric_verified?: boolean | null
+          created_at?: string
+          document_id?: string
+          document_number?: string
+          document_type?: string
+          endorsed_at?: string
+          endorsed_by?: string | null
+          endorsement_type?: string
+          id?: string
+          ip_address?: unknown
+          notes?: string | null
+          organization_id?: string
+          qr_code_url?: string | null
+          signature_id?: string | null
+          stamp_id?: string | null
+          user_agent?: string | null
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_endorsements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "document_endorsements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_endorsements_signature_id_fkey"
+            columns: ["signature_id"]
+            isOneToOne: false
+            referencedRelation: "organization_signatures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_endorsements_stamp_id_fkey"
+            columns: ["stamp_id"]
+            isOneToOne: false
+            referencedRelation: "organization_stamps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_signatures: {
         Row: {
           biometric_type: string | null
@@ -4370,6 +4459,153 @@ export type Database = {
           },
         ]
       }
+      organization_signatures: {
+        Row: {
+          authorization_document_url: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          organization_id: string
+          signature_image_url: string
+          signature_name: string
+          signature_name_en: string | null
+          signer_email: string | null
+          signer_name: string
+          signer_national_id: string | null
+          signer_phone: string | null
+          signer_position: string | null
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          authorization_document_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          organization_id: string
+          signature_image_url: string
+          signature_name: string
+          signature_name_en?: string | null
+          signer_email?: string | null
+          signer_name: string
+          signer_national_id?: string | null
+          signer_phone?: string | null
+          signer_position?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          authorization_document_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          organization_id?: string
+          signature_image_url?: string
+          signature_name?: string
+          signature_name_en?: string | null
+          signer_email?: string | null
+          signer_name?: string
+          signer_national_id?: string | null
+          signer_phone?: string | null
+          signer_position?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_stamps: {
+        Row: {
+          branch: string | null
+          created_at: string
+          created_by: string | null
+          department: string | null
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          organization_id: string
+          stamp_image_url: string
+          stamp_name: string
+          stamp_name_en: string | null
+          stamp_type: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          branch?: string | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          organization_id: string
+          stamp_image_url: string
+          stamp_name: string
+          stamp_name_en?: string | null
+          stamp_type?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          branch?: string | null
+          created_at?: string
+          created_by?: string | null
+          department?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          organization_id?: string
+          stamp_image_url?: string
+          stamp_name?: string
+          stamp_name_en?: string | null
+          stamp_type?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_stamps_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_stamps_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           activity_type: string | null
@@ -6566,6 +6802,59 @@ export type Database = {
           },
         ]
       }
+      system_endorsements: {
+        Row: {
+          created_at: string
+          document_endorsement_id: string
+          endorsed_at: string
+          id: string
+          is_valid: boolean | null
+          legal_disclaimer: string
+          platform_version: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          system_seal_hash: string
+          system_seal_number: string
+          verification_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_endorsement_id: string
+          endorsed_at?: string
+          id?: string
+          is_valid?: boolean | null
+          legal_disclaimer?: string
+          platform_version?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          system_seal_hash: string
+          system_seal_number: string
+          verification_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_endorsement_id?: string
+          endorsed_at?: string
+          id?: string
+          is_valid?: boolean | null
+          legal_disclaimer?: string
+          platform_version?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          system_seal_hash?: string
+          system_seal_number?: string
+          verification_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_endorsements_document_endorsement_id_fkey"
+            columns: ["document_endorsement_id"]
+            isOneToOne: false
+            referencedRelation: "document_endorsements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_health_metrics: {
         Row: {
           created_at: string
@@ -7277,6 +7566,8 @@ export type Database = {
       }
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
+      generate_system_seal_number: { Args: never; Returns: string }
+      generate_verification_code: { Args: never; Returns: string }
       get_admin_dashboard_stats: {
         Args: never
         Returns: {
