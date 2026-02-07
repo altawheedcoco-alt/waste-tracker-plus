@@ -57,6 +57,7 @@ import ShipmentRouteMap from './ShipmentRouteMap';
 import CancelShipmentDialog from './CancelShipmentDialog';
 import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
+import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -246,15 +247,17 @@ const ShipmentCard = ({
                   </Button>
                   {/* Show recycling certificate button for recycler (to issue) or transporter (to view) */}
                   {(isRecycler || isTransporter) && (
-                    <Button
-                      size="sm"
+                    <QuickCertificateButton
+                      shipment={{
+                        ...shipment,
+                        unit: shipment.unit || 'كجم',
+                        has_report: shipment.has_report,
+                      }}
+                      onSuccess={onStatusChange}
                       variant="outline"
-                      onClick={handleReportButtonClick}
-                      className="gap-1 text-xs"
-                    >
-                      <FileText className="w-3 h-3" />
-                      {isRecycler ? 'إصدار' : 'شهادة'}
-                    </Button>
+                      size="sm"
+                      showLabel={false}
+                    />
                   )}
                   {/* Quick Receipt Button - only for transporter */}
                   {isTransporter && (
@@ -572,16 +575,18 @@ const ShipmentCard = ({
                       طباعة
                     </Button>
                     {/* Show recycling certificate button for recycler (to issue) or transporter/admin (to view) */}
-                    {(isRecycler || isTransporter || (shipment as any).has_report) && (
-                      <Button
+                    {(isRecycler || isTransporter || shipment.has_report) && (
+                      <QuickCertificateButton
+                        shipment={{
+                          ...shipment,
+                          unit: shipment.unit || 'كجم',
+                          has_report: shipment.has_report,
+                        }}
+                        onSuccess={onStatusChange}
                         variant="outline"
                         size="sm"
-                        onClick={handleReportButtonClick}
-                        className="gap-2"
-                      >
-                        <FileText className="w-4 h-4" />
-                        {isRecycler ? 'إصدار شهادة' : 'شهادة التدوير'}
-                      </Button>
+                        showLabel={true}
+                      />
                     )}
                     {/* Quick Receipt Button - only for transporter */}
                     {isTransporter && (
