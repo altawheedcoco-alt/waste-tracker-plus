@@ -1632,6 +1632,7 @@ export type Database = {
           depositor_name: string
           depositor_phone: string | null
           depositor_position: string | null
+          depositor_signature_url: string | null
           depositor_title: string | null
           external_partner_id: string | null
           id: string
@@ -1668,6 +1669,7 @@ export type Database = {
           depositor_name: string
           depositor_phone?: string | null
           depositor_position?: string | null
+          depositor_signature_url?: string | null
           depositor_title?: string | null
           external_partner_id?: string | null
           id?: string
@@ -1704,6 +1706,7 @@ export type Database = {
           depositor_name?: string
           depositor_phone?: string | null
           depositor_position?: string | null
+          depositor_signature_url?: string | null
           depositor_title?: string | null
           external_partner_id?: string | null
           id?: string

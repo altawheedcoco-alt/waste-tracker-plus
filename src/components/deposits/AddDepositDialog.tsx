@@ -56,10 +56,12 @@ import {
   UserCircle,
   Save,
   Download,
-  Trash2
+  Trash2,
+  PenTool
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { numberToArabicWords, formatEgyptianNumber } from '@/lib/arabicNumberWords';
+import SignaturePad, { SignaturePadRef } from '@/components/signature/SignaturePad';
 
 const depositSchema = z.object({
   partnerId: z.string().min(1, 'يرجى اختيار الجهة'),
@@ -122,7 +124,9 @@ export default function AddDepositDialog({
   const [aiConfidence, setAiConfidence] = useState<number | null>(null);
   const [saveForFuture, setSaveForFuture] = useState(false);
   const [hasSavedData, setHasSavedData] = useState(false);
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const signaturePadRef = useRef<SignaturePadRef>(null);
 
   // Storage key for saved depositor data
   const SAVED_DATA_KEY = `deposit_saved_data_${profile?.organization_id}`;
@@ -335,17 +339,26 @@ export default function AddDepositDialog({
   const onSubmit = async (data: DepositFormData) => {
     if (!profile?.organization_id) return;
 
-    // صورة الإيصال إلزامية دائماً - قاعدة أساسية
-    if (!receiptFile) {
-      toast.error('يجب رفع صورة الإيصال الفعلي للمتابعة');
+    // صورة الإيصال إلزامية للإيداعات البنكية
+    const isCashPayment = data.transferMethod === 'cash';
+    
+    if (!isCashPayment && !receiptFile) {
+      toast.error('يجب رفع صورة الإيصال البنكي للمتابعة');
+      return;
+    }
+
+    // التوقيع إلزامي للإيداعات النقدية
+    if (isCashPayment && (!signatureDataUrl || signaturePadRef.current?.isEmpty())) {
+      toast.error('يجب التوقيع في خانة التوقيع للإيداعات النقدية');
       return;
     }
 
     setLoading(true);
     try {
       let receiptUrl = null;
+      let signatureUrl = null;
 
-      // Upload receipt - always required
+      // Upload receipt if provided
       if (receiptFile) {
         setUploading(true);
         const fileExt = receiptFile.name.split('.').pop();
@@ -363,6 +376,24 @@ export default function AddDepositDialog({
 
         receiptUrl = urlData.publicUrl;
         setUploading(false);
+      }
+
+      // Upload signature for cash payments
+      if (isCashPayment && signatureDataUrl) {
+        const signatureBlob = await fetch(signatureDataUrl).then(r => r.blob());
+        const signatureFileName = `${profile.organization_id}/signatures/${Date.now()}.png`;
+
+        const { error: sigUploadError } = await supabase.storage
+          .from('deposit-receipts')
+          .upload(signatureFileName, signatureBlob, { contentType: 'image/png' });
+
+        if (sigUploadError) throw sigUploadError;
+
+        const { data: sigUrlData } = supabase.storage
+          .from('deposit-receipts')
+          .getPublicUrl(signatureFileName);
+
+        signatureUrl = sigUrlData.publicUrl;
       }
 
       // Find selected partner
@@ -383,6 +414,7 @@ export default function AddDepositDialog({
         branch_name: data.branchName || null,
         reference_number: data.referenceNumber || null,
         receipt_url: receiptUrl,
+        depositor_signature_url: signatureUrl,
         notes: data.notes || null,
         created_by: profile.id,
         ai_extracted_data: aiExtracted ? JSON.stringify(form.getValues()) : null,
@@ -407,6 +439,8 @@ export default function AddDepositDialog({
       setReceiptPreview(null);
       setAiExtracted(false);
       setAiConfidence(null);
+      setSignatureDataUrl(null);
+      signaturePadRef.current?.clear();
       onOpenChange(false);
       onSuccess?.();
     } catch (error: any) {
@@ -862,6 +896,43 @@ export default function AddDepositDialog({
                     )}
                   />
                 </div>
+
+                {/* Cash Signature Section - Only for cash payments */}
+                {form.watch('transferMethod') === 'cash' && (
+                  <div className="space-y-4 p-4 rounded-xl border-2 border-amber-300 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-950/20">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                        <PenTool className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold flex items-center gap-2">
+                          توقيع المودع
+                          <Badge variant="destructive" className="text-[10px]">مطلوب للنقدي</Badge>
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          يرجى التوقيع أدناه لتأكيد استلام المبلغ النقدي
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-background rounded-lg p-3 border">
+                      <SignaturePad
+                        ref={signaturePadRef}
+                        onSignatureChange={setSignatureDataUrl}
+                        width={450}
+                        height={150}
+                        className="mx-auto"
+                      />
+                    </div>
+
+                    {!signatureDataUrl && (
+                      <div className="flex items-center gap-2 text-amber-600 text-sm">
+                        <AlertCircle className="h-4 w-4" />
+                        <span>يجب التوقيع للمتابعة مع الإيداع النقدي</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Notes */}
