@@ -2835,6 +2835,168 @@ export type Database = {
           },
         ]
       }
+      entity_documents: {
+        Row: {
+          award_letter_id: string | null
+          contract_id: string | null
+          created_at: string
+          deposit_id: string | null
+          description: string | null
+          document_category: string
+          document_date: string | null
+          document_type: string
+          external_partner_id: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          invoice_id: string | null
+          organization_id: string
+          partner_organization_id: string | null
+          reference_number: string | null
+          search_text: unknown
+          shipment_id: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+          uploaded_by_role: string | null
+        }
+        Insert: {
+          award_letter_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          deposit_id?: string | null
+          description?: string | null
+          document_category: string
+          document_date?: string | null
+          document_type: string
+          external_partner_id?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          invoice_id?: string | null
+          organization_id: string
+          partner_organization_id?: string | null
+          reference_number?: string | null
+          search_text?: unknown
+          shipment_id?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+          uploaded_by_role?: string | null
+        }
+        Update: {
+          award_letter_id?: string | null
+          contract_id?: string | null
+          created_at?: string
+          deposit_id?: string | null
+          description?: string | null
+          document_category?: string
+          document_date?: string | null
+          document_type?: string
+          external_partner_id?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          invoice_id?: string | null
+          organization_id?: string
+          partner_organization_id?: string | null
+          reference_number?: string | null
+          search_text?: unknown
+          shipment_id?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+          uploaded_by_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_documents_award_letter_id_fkey"
+            columns: ["award_letter_id"]
+            isOneToOne: false
+            referencedRelation: "award_letters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "entity_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "entity_documents_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
