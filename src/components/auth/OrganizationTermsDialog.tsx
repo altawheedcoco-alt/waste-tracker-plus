@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Dialog,
@@ -45,6 +45,7 @@ import {
   CURRENT_TERMS_VERSION,
   OrganizationType
 } from '@/data/organizationTermsContent';
+import { useTermsContent } from '@/hooks/useTermsContent';
 import SignaturePad, { SignaturePadRef } from '@/components/signature/SignaturePad';
 
 interface OrganizationTermsDialogProps {
@@ -58,6 +59,9 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [step, setStep] = useState<'identity' | 'terms'>('identity');
+  
+  // Fetch terms from database
+  const { data: dbTermsContent, isLoading: isLoadingTerms } = useTermsContent(organizationType);
   
   // Identity form state
   const [nationalId, setNationalId] = useState('');
@@ -74,7 +78,15 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   const idBackInputRef = useRef<HTMLInputElement>(null);
   const signaturePadRef = useRef<SignaturePadRef>(null);
 
-  const termsSections = getTermsSections(organizationType);
+  // Use database terms if available, otherwise fallback to static content
+  const termsSections = useMemo(() => {
+    if (dbTermsContent?.sections?.length) {
+      return dbTermsContent.sections;
+    }
+    return getTermsSections(organizationType);
+  }, [dbTermsContent, organizationType]);
+
+  const currentTermsVersion = dbTermsContent?.version || CURRENT_TERMS_VERSION;
   const termsTitle = getTermsTitle(organizationType);
   const orgTypeLabel = getOrganizationTypeLabel(organizationType);
   const agreementText = getAgreementText(organizationType);
@@ -243,7 +255,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
           organization_type: organization.organization_type,
           organization_name: organization.name,
           full_name: profile.full_name,
-          terms_version: CURRENT_TERMS_VERSION,
+          terms_version: currentTermsVersion,
           user_agent: navigator.userAgent,
           signer_national_id: nationalId,
           signer_phone: signerPhone,
