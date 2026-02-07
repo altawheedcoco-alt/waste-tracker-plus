@@ -107,6 +107,7 @@ const GuillochePatterns = lazy(() => import("./pages/dashboard/GuillochePatterns
 const SmartInsights = lazy(() => import("./pages/dashboard/SmartInsights"));
 const AwardLetters = lazy(() => import("./pages/dashboard/AwardLetters"));
 const OperationsDashboard = lazy(() => import("./pages/dashboard/OperationsDashboard"));
+const ActivityLogPage = lazy(() => import("./pages/dashboard/ActivityLogPage"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -249,6 +250,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/smart-insights" element={<SmartInsights />} />
         <Route path="/dashboard/award-letters" element={<AwardLetters />} />
         <Route path="/dashboard/operations" element={<OperationsDashboard />} />
+        <Route path="/dashboard/activity-log" element={<ActivityLogPage />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
