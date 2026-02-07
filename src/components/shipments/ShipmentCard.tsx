@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
+import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +38,7 @@ import {
   Eye,
   XCircle,
   Route,
+  Lock,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -105,6 +107,9 @@ const ShipmentCard = ({
   const [isLiveTrackingOpen, setIsLiveTrackingOpen] = useState(false);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
   const [showInlineMap, setShowInlineMap] = useState(false);
+
+  // استخدام hook صلاحيات الرؤية
+  const visibility = useShipmentVisibility(shipment.id);
 
   // Map legacy status to new status
   const mappedStatus = mapLegacyStatus(shipment.status);
@@ -196,8 +201,8 @@ const ShipmentCard = ({
             <CardContent className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  {/* Live tracking button - only show if driver is assigned */}
-                  {shipment.driver_id && (
+                  {/* Live tracking button - only show if driver is assigned AND visibility allowed */}
+                  {shipment.driver_id && visibility.canViewTracking && (
                     <Button
                       size="sm"
                       variant="default"
@@ -209,15 +214,25 @@ const ShipmentCard = ({
                       مباشر
                     </Button>
                   )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleMapButtonClick}
-                    className="gap-1 text-xs"
-                    title="تتبع على الخريطة"
-                  >
-                    <MapPin className="w-3 h-3" />
-                  </Button>
+                  {/* Locked indicator when tracking is blocked */}
+                  {shipment.driver_id && !visibility.canViewTracking && !visibility.isOwner && (
+                    <div className="flex items-center gap-1 px-2 py-1 text-xs text-amber-600 bg-amber-50 rounded">
+                      <Lock className="w-3 h-3" />
+                      <span>مقفل</span>
+                    </div>
+                  )}
+                  {/* Map button - only show if visibility allowed */}
+                  {visibility.canViewMaps && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleMapButtonClick}
+                      className="gap-1 text-xs"
+                      title="تتبع على الخريطة"
+                    >
+                      <MapPin className="w-3 h-3" />
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="ghost"
@@ -489,14 +504,16 @@ const ShipmentCard = ({
                 {/* Left Side - Action Buttons */}
                 <div className="flex flex-col items-start gap-2 order-2 sm:order-1 w-full sm:w-auto">
                   <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-                    {/* Navigation Button Group - Google Maps & Waze */}
-                    <NavigationButtonGroup
-                      pickupAddress={shipment.pickup_address}
-                      deliveryAddress={shipment.delivery_address}
-                      size="sm"
-                    />
-                    {/* Live Tracking Button - shows when driver is assigned */}
-                    {shipment.driver_id && (
+                    {/* Navigation Button Group - Google Maps & Waze - only if maps allowed */}
+                    {visibility.canViewMaps && (
+                      <NavigationButtonGroup
+                        pickupAddress={shipment.pickup_address}
+                        deliveryAddress={shipment.delivery_address}
+                        size="sm"
+                      />
+                    )}
+                    {/* Live Tracking Button - shows when driver is assigned AND visibility allowed */}
+                    {shipment.driver_id && visibility.canViewTracking && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -508,16 +525,26 @@ const ShipmentCard = ({
                         تتبع مباشر
                       </Button>
                     )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleMapButtonClick}
-                      className="gap-2"
-                      title="تتبع على الخريطة"
-                    >
-                      <MapPin className="w-4 h-4" />
-                      الخريطة
-                    </Button>
+                    {/* Locked indicator when tracking is blocked */}
+                    {shipment.driver_id && !visibility.canViewTracking && !visibility.isOwner && (
+                      <div className="flex items-center gap-1 px-2 py-1 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/20 rounded border border-amber-200 dark:border-amber-800">
+                        <Lock className="w-3 h-3" />
+                        <span>التتبع مقفل</span>
+                      </div>
+                    )}
+                    {/* Map Button - only if maps allowed */}
+                    {visibility.canViewMaps && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleMapButtonClick}
+                        className="gap-2"
+                        title="تتبع على الخريطة"
+                      >
+                        <MapPin className="w-4 h-4" />
+                        الخريطة
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
