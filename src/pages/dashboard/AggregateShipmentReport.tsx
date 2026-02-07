@@ -280,9 +280,21 @@ const AggregateShipmentReport = () => {
           created_at,
           pickup_date,
           delivered_at,
-          generator:generator_id(id, name, logo_url, stamp_url, signature_url, client_code, email),
-          transporter:transporter_id(id, name, logo_url, stamp_url, signature_url, client_code, email),
-          recycler:recycler_id(id, name, logo_url, stamp_url, signature_url, client_code, email)
+          generator:generator_id(
+            id, name, name_en, logo_url, stamp_url, signature_url, client_code, email, phone,
+            address, city, region, commercial_register, environmental_license,
+            representative_name, representative_position, representative_phone, representative_national_id
+          ),
+          transporter:transporter_id(
+            id, name, name_en, logo_url, stamp_url, signature_url, client_code, email, phone,
+            address, city, region, commercial_register, environmental_license,
+            representative_name, representative_position, representative_phone, representative_national_id
+          ),
+          recycler:recycler_id(
+            id, name, name_en, logo_url, stamp_url, signature_url, client_code, email, phone,
+            address, city, region, commercial_register, environmental_license,
+            representative_name, representative_position, representative_phone, representative_national_id
+          )
         `)
         .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`)
         .order('created_at', { ascending: false });

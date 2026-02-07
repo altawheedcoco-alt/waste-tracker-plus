@@ -13,6 +13,7 @@ import {
   Hash,
   Leaf,
 } from 'lucide-react';
+import ReportCoverPage, { PartyInfo } from './ReportCoverPage';
 
 interface Shipment {
   id: string;
@@ -30,51 +31,82 @@ interface Shipment {
   confirmed_at?: string | null;
   generator?: {
     name: string;
+    name_en?: string | null;
     email?: string;
     phone?: string;
     address?: string;
     city?: string;
+    region?: string | null;
     commercial_register?: string;
     environmental_license?: string;
     representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
+    logo_url?: string | null;
+    stamp_url?: string | null;
+    signature_url?: string | null;
+    client_code?: string | null;
   } | null;
   transporter?: {
     name: string;
+    name_en?: string | null;
     email?: string;
     phone?: string;
     address?: string;
     city?: string;
+    region?: string | null;
     commercial_register?: string;
     environmental_license?: string;
     representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
+    logo_url?: string | null;
+    stamp_url?: string | null;
+    signature_url?: string | null;
+    client_code?: string | null;
   } | null;
   recycler?: {
     name: string;
+    name_en?: string | null;
     email?: string;
     phone?: string;
     address?: string;
     city?: string;
+    region?: string | null;
     commercial_register?: string;
     environmental_license?: string;
     representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
     stamp_url?: string | null;
     signature_url?: string | null;
+    logo_url?: string | null;
+    client_code?: string | null;
   } | null;
 }
 
 interface RecyclerOrg {
   id?: string;
   name?: string;
+  name_en?: string | null;
   email?: string;
   phone?: string;
   address?: string;
   city?: string;
+  region?: string | null;
   commercial_register?: string;
   environmental_license?: string;
   stamp_url?: string | null;
   signature_url?: string | null;
   logo_url?: string | null;
   representative_name?: string | null;
+  representative_position?: string | null;
+  representative_phone?: string | null;
+  representative_national_id?: string | null;
+  client_code?: string | null;
 }
 
 interface RecyclingCertificatePrintProps {
@@ -85,6 +117,7 @@ interface RecyclingCertificatePrintProps {
   openingDeclaration?: string;
   closingDeclaration?: string;
   recyclerOrg: RecyclerOrg | null;
+  includeCoverPage?: boolean;
 }
 
 const wasteTypeLabels: Record<string, string> = {
@@ -115,27 +148,132 @@ const RecyclingCertificatePrint = ({
   openingDeclaration,
   closingDeclaration,
   recyclerOrg,
+  includeCoverPage = true,
 }: RecyclingCertificatePrintProps) => {
   const currentDate = format(new Date(), 'PP', { locale: ar });
   const deliveryDate = shipment.delivered_at
     ? format(new Date(shipment.delivered_at), 'PP', { locale: ar })
     : '-';
 
+  // Prepare party info for cover page
+  const generatorParty: PartyInfo | null = shipment.generator ? {
+    name: shipment.generator.name,
+    name_en: shipment.generator.name_en,
+    email: shipment.generator.email,
+    phone: shipment.generator.phone,
+    address: shipment.generator.address,
+    city: shipment.generator.city,
+    region: shipment.generator.region,
+    commercial_register: shipment.generator.commercial_register,
+    environmental_license: shipment.generator.environmental_license,
+    representative_name: shipment.generator.representative_name,
+    representative_position: shipment.generator.representative_position,
+    representative_phone: shipment.generator.representative_phone,
+    representative_national_id: shipment.generator.representative_national_id,
+    logo_url: shipment.generator.logo_url,
+    stamp_url: shipment.generator.stamp_url,
+    signature_url: shipment.generator.signature_url,
+    client_code: shipment.generator.client_code,
+  } : null;
+
+  const transporterParty: PartyInfo | null = shipment.transporter ? {
+    name: shipment.transporter.name,
+    name_en: shipment.transporter.name_en,
+    email: shipment.transporter.email,
+    phone: shipment.transporter.phone,
+    address: shipment.transporter.address,
+    city: shipment.transporter.city,
+    region: shipment.transporter.region,
+    commercial_register: shipment.transporter.commercial_register,
+    environmental_license: shipment.transporter.environmental_license,
+    representative_name: shipment.transporter.representative_name,
+    representative_position: shipment.transporter.representative_position,
+    representative_phone: shipment.transporter.representative_phone,
+    representative_national_id: shipment.transporter.representative_national_id,
+    logo_url: shipment.transporter.logo_url,
+    stamp_url: shipment.transporter.stamp_url,
+    signature_url: shipment.transporter.signature_url,
+    client_code: shipment.transporter.client_code,
+  } : null;
+
+  const recyclerParty: PartyInfo | null = recyclerOrg ? {
+    id: recyclerOrg.id,
+    name: recyclerOrg.name || shipment.recycler?.name || '',
+    name_en: recyclerOrg.name_en,
+    email: recyclerOrg.email,
+    phone: recyclerOrg.phone,
+    address: recyclerOrg.address,
+    city: recyclerOrg.city,
+    region: recyclerOrg.region,
+    commercial_register: recyclerOrg.commercial_register,
+    environmental_license: recyclerOrg.environmental_license,
+    representative_name: recyclerOrg.representative_name,
+    representative_position: recyclerOrg.representative_position,
+    representative_phone: recyclerOrg.representative_phone,
+    representative_national_id: recyclerOrg.representative_national_id,
+    logo_url: recyclerOrg.logo_url,
+    stamp_url: recyclerOrg.stamp_url,
+    signature_url: recyclerOrg.signature_url,
+    client_code: recyclerOrg.client_code,
+  } : shipment.recycler ? {
+    name: shipment.recycler.name,
+    name_en: shipment.recycler.name_en,
+    email: shipment.recycler.email,
+    phone: shipment.recycler.phone,
+    address: shipment.recycler.address,
+    city: shipment.recycler.city,
+    region: shipment.recycler.region,
+    commercial_register: shipment.recycler.commercial_register,
+    environmental_license: shipment.recycler.environmental_license,
+    representative_name: shipment.recycler.representative_name,
+    representative_position: shipment.recycler.representative_position,
+    representative_phone: shipment.recycler.representative_phone,
+    representative_national_id: shipment.recycler.representative_national_id,
+    logo_url: shipment.recycler.logo_url,
+    stamp_url: shipment.recycler.stamp_url,
+    signature_url: shipment.recycler.signature_url,
+    client_code: shipment.recycler.client_code,
+  } : null;
+
   return (
-    <div 
-      className="print-container bg-white text-black print:p-0" 
-      dir="rtl" 
-      style={{ 
-        height: '297mm', 
-        width: '210mm', 
-        margin: '0 auto',
-        padding: '12px 15px',
-        fontFamily: 'Cairo, sans-serif',
-        fontSize: '9pt',
-        overflow: 'hidden',
-        boxSizing: 'border-box'
-      }}
-    >
+    <>
+      {/* Cover Page with Full Legal Party Information */}
+      {includeCoverPage && (
+        <ReportCoverPage
+          reportType="certificate"
+          reportTitle={templateTitles[template]}
+          reportNumber={shipment.shipment_number}
+          reportDate={new Date()}
+          generator={generatorParty}
+          transporter={transporterParty}
+          recycler={recyclerParty}
+          issuingOrganization={recyclerParty}
+          summary={{
+            shipmentsCount: 1,
+            totalQuantity: shipment.quantity,
+            unit: shipment.unit || 'كجم',
+            wasteTypes: [wasteTypeLabels[shipment.waste_type] || shipment.waste_type],
+          }}
+          includeStamps={true}
+          includeSignatures={true}
+        />
+      )}
+
+      {/* Main Certificate Content */}
+      <div 
+        className="print-container bg-white text-black print:p-0" 
+        dir="rtl" 
+        style={{ 
+          height: '297mm', 
+          width: '210mm', 
+          margin: '0 auto',
+          padding: '12px 15px',
+          fontFamily: 'Cairo, sans-serif',
+          fontSize: '9pt',
+          overflow: 'hidden',
+          boxSizing: 'border-box'
+        }}
+      >
       {/* Header with QR and Barcode */}
       <header className="print-header flex items-start justify-between mb-3 pb-2" style={{ borderBottom: '2px solid #16a34a' }}>
         {/* QR Code */}
@@ -420,6 +558,7 @@ const RecyclingCertificatePrint = ({
         </p>
       </footer>
     </div>
+    </>
   );
 };
 

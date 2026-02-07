@@ -14,6 +14,7 @@ import {
   Stamp,
   PenTool,
 } from 'lucide-react';
+import ReportCoverPage, { PartyInfo } from './ReportCoverPage';
 
 interface ShipmentData {
   id: string;
@@ -30,45 +31,83 @@ interface ShipmentData {
   generator: {
     id?: string;
     name: string;
+    name_en?: string | null;
     logo_url: string | null;
     stamp_url: string | null;
     signature_url: string | null;
     client_code: string | null;
     email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    region?: string | null;
+    commercial_register?: string | null;
+    environmental_license?: string | null;
+    representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
   };
   transporter: {
     id?: string;
     name: string;
+    name_en?: string | null;
     logo_url: string | null;
     stamp_url: string | null;
     signature_url: string | null;
     client_code: string | null;
     email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    region?: string | null;
+    commercial_register?: string | null;
+    environmental_license?: string | null;
+    representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
   };
   recycler: {
     id?: string;
     name: string;
+    name_en?: string | null;
     logo_url: string | null;
     stamp_url: string | null;
     signature_url: string | null;
     client_code: string | null;
     email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    region?: string | null;
+    commercial_register?: string | null;
+    environmental_license?: string | null;
+    representative_name?: string | null;
+    representative_position?: string | null;
+    representative_phone?: string | null;
+    representative_national_id?: string | null;
   };
 }
 
 interface OrganizationInfo {
   id: string;
   name: string;
+  name_en?: string | null;
   logo_url?: string | null;
   stamp_url?: string | null;
   signature_url?: string | null;
   address?: string;
   city?: string;
+  region?: string | null;
   phone?: string;
   email?: string;
   commercial_register?: string;
   environmental_license?: string;
   representative_name?: string | null;
+  representative_position?: string | null;
+  representative_phone?: string | null;
+  representative_national_id?: string | null;
 }
 
 interface AggregateReportPrintProps {
@@ -76,6 +115,7 @@ interface AggregateReportPrintProps {
   organization: OrganizationInfo | null;
   includeStamps: boolean;
   includeSignatures: boolean;
+  includeCoverPage?: boolean;
   reportTitle?: string;
   dateRange?: { start?: string; end?: string };
 }
@@ -107,6 +147,7 @@ const AggregateReportPrint = ({
   organization,
   includeStamps,
   includeSignatures,
+  includeCoverPage = true,
   reportTitle = 'التقرير المجمع للشحنات',
   dateRange,
 }: AggregateReportPrintProps) => {
@@ -130,7 +171,7 @@ const AggregateReportPrint = ({
     }
   };
 
-  // Get unique organizations
+  // Get unique organizations with full data for cover page
   const uniqueGenerators = shipments
     .map(s => s.generator)
     .filter((g, i, arr) => g?.id && arr.findIndex(x => x?.id === g.id) === i);
@@ -143,16 +184,118 @@ const AggregateReportPrint = ({
     .map(s => s.recycler)
     .filter((r, i, arr) => r?.id && arr.findIndex(x => x?.id === r.id) === i);
 
+  // Get unique waste types for summary
+  const uniqueWasteTypes = [...new Set(shipments.map(s => wasteTypeLabels[s.waste_type] || s.waste_type))];
+
+  // Prepare party info for cover page - use first of each type or merge multiple
+  const primaryGenerator: PartyInfo | null = uniqueGenerators[0] ? {
+    id: uniqueGenerators[0].id,
+    name: uniqueGenerators.length > 1 
+      ? `${uniqueGenerators[0].name} (+${uniqueGenerators.length - 1} جهات أخرى)`
+      : uniqueGenerators[0].name,
+    name_en: uniqueGenerators[0].name_en,
+    email: uniqueGenerators[0].email,
+    phone: uniqueGenerators[0].phone,
+    address: uniqueGenerators[0].address,
+    city: uniqueGenerators[0].city,
+    region: uniqueGenerators[0].region,
+    commercial_register: uniqueGenerators[0].commercial_register,
+    environmental_license: uniqueGenerators[0].environmental_license,
+    representative_name: uniqueGenerators[0].representative_name,
+    representative_position: uniqueGenerators[0].representative_position,
+    representative_phone: uniqueGenerators[0].representative_phone,
+    representative_national_id: uniqueGenerators[0].representative_national_id,
+    logo_url: uniqueGenerators[0].logo_url,
+    stamp_url: uniqueGenerators[0].stamp_url,
+    signature_url: uniqueGenerators[0].signature_url,
+    client_code: uniqueGenerators[0].client_code,
+  } : null;
+
+  const primaryTransporter: PartyInfo | null = uniqueTransporters[0] ? {
+    id: uniqueTransporters[0].id,
+    name: uniqueTransporters.length > 1 
+      ? `${uniqueTransporters[0].name} (+${uniqueTransporters.length - 1} جهات أخرى)`
+      : uniqueTransporters[0].name,
+    name_en: uniqueTransporters[0].name_en,
+    email: uniqueTransporters[0].email,
+    phone: uniqueTransporters[0].phone,
+    address: uniqueTransporters[0].address,
+    city: uniqueTransporters[0].city,
+    region: uniqueTransporters[0].region,
+    commercial_register: uniqueTransporters[0].commercial_register,
+    environmental_license: uniqueTransporters[0].environmental_license,
+    representative_name: uniqueTransporters[0].representative_name,
+    representative_position: uniqueTransporters[0].representative_position,
+    representative_phone: uniqueTransporters[0].representative_phone,
+    representative_national_id: uniqueTransporters[0].representative_national_id,
+    logo_url: uniqueTransporters[0].logo_url,
+    stamp_url: uniqueTransporters[0].stamp_url,
+    signature_url: uniqueTransporters[0].signature_url,
+    client_code: uniqueTransporters[0].client_code,
+  } : null;
+
+  const primaryRecycler: PartyInfo | null = uniqueRecyclers[0] ? {
+    id: uniqueRecyclers[0].id,
+    name: uniqueRecyclers.length > 1 
+      ? `${uniqueRecyclers[0].name} (+${uniqueRecyclers.length - 1} جهات أخرى)`
+      : uniqueRecyclers[0].name,
+    name_en: uniqueRecyclers[0].name_en,
+    email: uniqueRecyclers[0].email,
+    phone: uniqueRecyclers[0].phone,
+    address: uniqueRecyclers[0].address,
+    city: uniqueRecyclers[0].city,
+    region: uniqueRecyclers[0].region,
+    commercial_register: uniqueRecyclers[0].commercial_register,
+    environmental_license: uniqueRecyclers[0].environmental_license,
+    representative_name: uniqueRecyclers[0].representative_name,
+    representative_position: uniqueRecyclers[0].representative_position,
+    representative_phone: uniqueRecyclers[0].representative_phone,
+    representative_national_id: uniqueRecyclers[0].representative_national_id,
+    logo_url: uniqueRecyclers[0].logo_url,
+    stamp_url: uniqueRecyclers[0].stamp_url,
+    signature_url: uniqueRecyclers[0].signature_url,
+    client_code: uniqueRecyclers[0].client_code,
+  } : null;
+
   // Limit shipments to show based on count for single page
   const maxShipmentsToShow = Math.min(shipments.length, 15);
   const displayedShipments = shipments.slice(0, maxShipmentsToShow);
   const hasMoreShipments = shipments.length > maxShipmentsToShow;
 
   return (
-    <div 
-      className="print-container bg-white text-black" 
-      dir="rtl" 
-      style={{ 
+    <>
+      {/* Cover Page with Full Legal Party Information */}
+      {includeCoverPage && (
+        <ReportCoverPage
+          reportType="aggregate"
+          reportTitle={reportTitle}
+          reportNumber={reportNumber}
+          reportDate={new Date()}
+          generator={primaryGenerator}
+          transporter={primaryTransporter}
+          recycler={primaryRecycler}
+          issuingOrganization={organization ? {
+            ...organization,
+            id: organization.id,
+            name: organization.name,
+          } : null}
+          summary={{
+            shipmentsCount: shipments.length,
+            totalQuantity,
+            unit: 'كجم',
+            dateRange,
+            wasteTypes: uniqueWasteTypes,
+          }}
+          includeStamps={includeStamps}
+          includeSignatures={includeSignatures}
+        />
+      )}
+
+      {/* Main Report Content */}
+      <div 
+        className="print-container bg-white text-black" 
+        dir="rtl" 
+        style={{
         height: '297mm', 
         width: '210mm', 
         margin: '0 auto',
@@ -354,6 +497,7 @@ const AggregateReportPrint = ({
         <p style={{ color: '#9ca3af' }}>وثيقة إلكترونية - دون أدنى مسؤولية على النظام</p>
       </footer>
     </div>
+    </>
   );
 };
 
