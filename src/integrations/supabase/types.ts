@@ -119,6 +119,152 @@ export type Database = {
           },
         ]
       }
+      accounting_ledger: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          call_recording_url: string | null
+          created_at: string
+          created_by: string | null
+          deposit_id: string | null
+          description: string | null
+          entry_category: string
+          entry_date: string
+          entry_type: string
+          external_partner_id: string | null
+          id: string
+          invoice_id: string | null
+          organization_id: string
+          partner_organization_id: string | null
+          payment_proof_url: string | null
+          reference_number: string | null
+          shipment_id: string | null
+          verified: boolean | null
+          verified_at: string | null
+          verified_by: string | null
+          weighbridge_photo_url: string | null
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          call_recording_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposit_id?: string | null
+          description?: string | null
+          entry_category: string
+          entry_date?: string
+          entry_type: string
+          external_partner_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          organization_id: string
+          partner_organization_id?: string | null
+          payment_proof_url?: string | null
+          reference_number?: string | null
+          shipment_id?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+          weighbridge_photo_url?: string | null
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          call_recording_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposit_id?: string | null
+          description?: string | null
+          entry_category?: string
+          entry_date?: string
+          entry_type?: string
+          external_partner_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          organization_id?: string
+          partner_organization_id?: string | null
+          payment_proof_url?: string | null
+          reference_number?: string | null
+          shipment_id?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+          weighbridge_photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_ledger_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_deposit_id_fkey"
+            columns: ["deposit_id"]
+            isOneToOne: false
+            referencedRelation: "deposits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_logs: {
         Row: {
           action: string
@@ -663,6 +809,159 @@ export type Database = {
         }
         Relationships: []
       }
+      award_letter_items: {
+        Row: {
+          award_letter_id: string
+          created_at: string
+          id: string
+          max_quantity: number | null
+          min_quantity: number | null
+          notes: string | null
+          unit: string | null
+          unit_price: number
+          waste_description: string | null
+          waste_type: string
+        }
+        Insert: {
+          award_letter_id: string
+          created_at?: string
+          id?: string
+          max_quantity?: number | null
+          min_quantity?: number | null
+          notes?: string | null
+          unit?: string | null
+          unit_price: number
+          waste_description?: string | null
+          waste_type: string
+        }
+        Update: {
+          award_letter_id?: string
+          created_at?: string
+          id?: string
+          max_quantity?: number | null
+          min_quantity?: number | null
+          notes?: string | null
+          unit?: string | null
+          unit_price?: number
+          waste_description?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_letter_items_award_letter_id_fkey"
+            columns: ["award_letter_id"]
+            isOneToOne: false
+            referencedRelation: "award_letters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      award_letters: {
+        Row: {
+          attachment_url: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          end_date: string | null
+          external_partner_id: string | null
+          id: string
+          issue_date: string
+          letter_number: string
+          notes: string | null
+          organization_id: string
+          partner_organization_id: string | null
+          start_date: string
+          status: string | null
+          title: string
+          total_estimated_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          end_date?: string | null
+          external_partner_id?: string | null
+          id?: string
+          issue_date: string
+          letter_number: string
+          notes?: string | null
+          organization_id: string
+          partner_organization_id?: string | null
+          start_date: string
+          status?: string | null
+          title: string
+          total_estimated_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          end_date?: string | null
+          external_partner_id?: string | null
+          id?: string
+          issue_date?: string
+          letter_number?: string
+          notes?: string | null
+          organization_id?: string
+          partner_organization_id?: string | null
+          start_date?: string
+          status?: string | null
+          title?: string
+          total_estimated_quantity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_letters_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_letters_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_letters_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "award_letters_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_letters_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "award_letters_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       biometric_credentials: {
         Row: {
           biometric_type: string
@@ -886,6 +1185,8 @@ export type Database = {
           gps_snapshot: Json | null
           id: string
           link_confidence: number | null
+          link_notes: string | null
+          linked_manually: boolean | null
           notes: string | null
           organization_id: string
           parent_call_sid: string | null
@@ -916,6 +1217,8 @@ export type Database = {
           gps_snapshot?: Json | null
           id?: string
           link_confidence?: number | null
+          link_notes?: string | null
+          linked_manually?: boolean | null
           notes?: string | null
           organization_id: string
           parent_call_sid?: string | null
@@ -946,6 +1249,8 @@ export type Database = {
           gps_snapshot?: Json | null
           id?: string
           link_confidence?: number | null
+          link_notes?: string | null
+          linked_manually?: boolean | null
           notes?: string | null
           organization_id?: string
           parent_call_sid?: string | null
@@ -2769,6 +3074,85 @@ export type Database = {
           {
             foreignKeyName: "external_weight_records_partner_company_id_fkey"
             columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      factory_map_labels: {
+        Row: {
+          address: string | null
+          city: string | null
+          color: string | null
+          created_at: string
+          display_priority: number | null
+          external_partner_id: string | null
+          icon_type: string | null
+          id: string
+          is_visible: boolean | null
+          label_type: string | null
+          latitude: number
+          longitude: number
+          name: string
+          organization_id: string | null
+          short_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          color?: string | null
+          created_at?: string
+          display_priority?: number | null
+          external_partner_id?: string | null
+          icon_type?: string | null
+          id?: string
+          is_visible?: boolean | null
+          label_type?: string | null
+          latitude: number
+          longitude: number
+          name: string
+          organization_id?: string | null
+          short_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          color?: string | null
+          created_at?: string
+          display_priority?: number | null
+          external_partner_id?: string | null
+          icon_type?: string | null
+          id?: string
+          is_visible?: boolean | null
+          label_type?: string | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          organization_id?: string | null
+          short_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factory_map_labels_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "factory_map_labels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "factory_map_labels_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -5743,8 +6127,11 @@ export type Database = {
       shipments: {
         Row: {
           account_notes: string | null
+          actual_weight: number | null
           approved_at: string | null
           auto_approve_at: string | null
+          award_letter_id: string | null
+          call_log_id: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
@@ -5762,6 +6149,10 @@ export type Database = {
           expected_delivery_date: string | null
           generator_id: string | null
           generator_notes: string | null
+          gps_delivery_lat: number | null
+          gps_delivery_lng: number | null
+          gps_pickup_lat: number | null
+          gps_pickup_lng: number | null
           hazard_level: string | null
           id: string
           in_transit_at: string | null
@@ -5773,11 +6164,16 @@ export type Database = {
           manual_vehicle_plate: string | null
           notes: string | null
           packaging_method: string | null
+          payment_proof_type: string | null
+          payment_proof_url: string | null
+          payment_status: string | null
           pickup_address: string | null
           pickup_city: string | null
           pickup_date: string | null
           pickup_latitude: number | null
           pickup_longitude: number | null
+          price_per_unit: number | null
+          price_source: string | null
           quantity: number | null
           recycler_id: string | null
           recycler_notes: string | null
@@ -5787,17 +6183,28 @@ export type Database = {
           status: Database["public"]["Enums"]["shipment_status"] | null
           submitter_name: string | null
           submitter_phone: string | null
+          total_value: number | null
           transporter_id: string
           unit: string | null
           updated_at: string | null
           waste_description: string | null
           waste_state: string | null
           waste_type: Database["public"]["Enums"]["waste_type"] | null
+          weighbridge_date: string | null
+          weighbridge_gross_weight: number | null
+          weighbridge_net_weight: number | null
+          weighbridge_photo_url: string | null
+          weighbridge_tare_weight: number | null
+          weighbridge_ticket_number: string | null
+          weighbridge_verified: boolean | null
         }
         Insert: {
           account_notes?: string | null
+          actual_weight?: number | null
           approved_at?: string | null
           auto_approve_at?: string | null
+          award_letter_id?: string | null
+          call_log_id?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -5815,6 +6222,10 @@ export type Database = {
           expected_delivery_date?: string | null
           generator_id?: string | null
           generator_notes?: string | null
+          gps_delivery_lat?: number | null
+          gps_delivery_lng?: number | null
+          gps_pickup_lat?: number | null
+          gps_pickup_lng?: number | null
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
@@ -5826,11 +6237,16 @@ export type Database = {
           manual_vehicle_plate?: string | null
           notes?: string | null
           packaging_method?: string | null
+          payment_proof_type?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
           pickup_address?: string | null
           pickup_city?: string | null
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
+          price_per_unit?: number | null
+          price_source?: string | null
           quantity?: number | null
           recycler_id?: string | null
           recycler_notes?: string | null
@@ -5840,17 +6256,28 @@ export type Database = {
           status?: Database["public"]["Enums"]["shipment_status"] | null
           submitter_name?: string | null
           submitter_phone?: string | null
+          total_value?: number | null
           transporter_id: string
           unit?: string | null
           updated_at?: string | null
           waste_description?: string | null
           waste_state?: string | null
           waste_type?: Database["public"]["Enums"]["waste_type"] | null
+          weighbridge_date?: string | null
+          weighbridge_gross_weight?: number | null
+          weighbridge_net_weight?: number | null
+          weighbridge_photo_url?: string | null
+          weighbridge_tare_weight?: number | null
+          weighbridge_ticket_number?: string | null
+          weighbridge_verified?: boolean | null
         }
         Update: {
           account_notes?: string | null
+          actual_weight?: number | null
           approved_at?: string | null
           auto_approve_at?: string | null
+          award_letter_id?: string | null
+          call_log_id?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
@@ -5868,6 +6295,10 @@ export type Database = {
           expected_delivery_date?: string | null
           generator_id?: string | null
           generator_notes?: string | null
+          gps_delivery_lat?: number | null
+          gps_delivery_lng?: number | null
+          gps_pickup_lat?: number | null
+          gps_pickup_lng?: number | null
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
@@ -5879,11 +6310,16 @@ export type Database = {
           manual_vehicle_plate?: string | null
           notes?: string | null
           packaging_method?: string | null
+          payment_proof_type?: string | null
+          payment_proof_url?: string | null
+          payment_status?: string | null
           pickup_address?: string | null
           pickup_city?: string | null
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
+          price_per_unit?: number | null
+          price_source?: string | null
           quantity?: number | null
           recycler_id?: string | null
           recycler_notes?: string | null
@@ -5893,14 +6329,36 @@ export type Database = {
           status?: Database["public"]["Enums"]["shipment_status"] | null
           submitter_name?: string | null
           submitter_phone?: string | null
+          total_value?: number | null
           transporter_id?: string
           unit?: string | null
           updated_at?: string | null
           waste_description?: string | null
           waste_state?: string | null
           waste_type?: Database["public"]["Enums"]["waste_type"] | null
+          weighbridge_date?: string | null
+          weighbridge_gross_weight?: number | null
+          weighbridge_net_weight?: number | null
+          weighbridge_photo_url?: string | null
+          weighbridge_tare_weight?: number | null
+          weighbridge_ticket_number?: string | null
+          weighbridge_verified?: boolean | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_shipments_award_letter"
+            columns: ["award_letter_id"]
+            isOneToOne: false
+            referencedRelation: "award_letters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_shipments_call_log"
+            columns: ["call_log_id"]
+            isOneToOne: false
+            referencedRelation: "call_logs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "shipments_generator_id_fkey"
             columns: ["generator_id"]
@@ -6842,6 +7300,19 @@ export type Database = {
           total_shipments: number
           transporter_count: number
           verified_organizations: number
+        }[]
+      }
+      get_award_letter_price: {
+        Args: {
+          p_date?: string
+          p_partner_org_id: string
+          p_waste_type: string
+        }
+        Returns: {
+          award_letter_id: string
+          letter_number: string
+          unit: string
+          unit_price: number
         }[]
       }
       get_daily_shipment_stats: {
