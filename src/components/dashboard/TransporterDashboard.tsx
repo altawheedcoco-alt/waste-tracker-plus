@@ -20,7 +20,7 @@ import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimelin
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkStatusChangeDropdown from '@/components/shipments/BulkStatusChangeDropdown';
-
+import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
@@ -113,6 +113,7 @@ interface RecentShipment {
   transporter: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
   driver: { license_number: string; vehicle_type: string | null; vehicle_plate: string | null; profile: { full_name: string; phone: string | null } } | null;
   has_report?: boolean;
+  has_receipt?: boolean;
 }
 
 const TransporterDashboard = () => {
@@ -213,14 +214,22 @@ const TransporterDashboard = () => {
           .select('shipment_id')
           .in('shipment_id', shipmentIds);
 
-        const reportedShipmentIds = new Set(reportsData?.map(r => r.shipment_id) || []);
+        // Fetch receipts to check which shipments have receipts
+        const { data: receiptsData } = await supabase
+          .from('shipment_receipts')
+          .select('shipment_id')
+          .in('shipment_id', shipmentIds);
 
-        const shipmentsWithReportStatus = shipments.map(s => ({
+        const reportedShipmentIds = new Set(reportsData?.map(r => r.shipment_id) || []);
+        const receiptShipmentIds = new Set(receiptsData?.map(r => r.shipment_id) || []);
+
+        const shipmentsWithStatus = shipments.map(s => ({
           ...s,
           has_report: reportedShipmentIds.has(s.id),
+          has_receipt: receiptShipmentIds.has(s.id),
         }));
 
-        setRecentShipments(shipmentsWithReportStatus.slice(0, 5) as unknown as RecentShipment[]);
+        setRecentShipments(shipmentsWithStatus.slice(0, 5) as unknown as RecentShipment[]);
         
         const activeStatuses = ['new', 'approved', 'in_transit'];
         setStats({
@@ -486,7 +495,25 @@ const TransporterDashboard = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <BulkCertificateButton
+                    shipments={recentShipments.map(s => ({
+                      id: s.id,
+                      shipment_number: s.shipment_number,
+                      status: s.status,
+                      created_at: s.created_at,
+                      waste_type: s.waste_type,
+                      quantity: s.quantity,
+                      unit: s.unit,
+                      delivered_at: s.delivered_at,
+                      has_receipt: s.has_receipt,
+                      generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
+                      transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
+                      recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
+                    }))}
+                    type="receipt"
+                    onSuccess={fetchDashboardData}
+                  />
                   <BulkStatusChangeDropdown 
                     shipments={recentShipments.map(s => ({
                       id: s.id,

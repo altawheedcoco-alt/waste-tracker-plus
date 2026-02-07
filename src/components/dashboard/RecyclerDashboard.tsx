@@ -16,6 +16,7 @@ import ChatWidget from '@/components/chat/ChatWidget';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
+import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import {
   Package,
   Recycle,
@@ -287,7 +288,26 @@ const RecyclerDashboard = () => {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <BulkCertificateButton
+                shipments={recentShipments.map(s => ({
+                  id: s.id,
+                  shipment_number: s.shipment_number,
+                  status: s.status,
+                  created_at: s.created_at,
+                  waste_type: s.waste_type,
+                  quantity: s.quantity,
+                  unit: s.unit,
+                  delivered_at: s.delivered_at,
+                  confirmed_at: s.confirmed_at,
+                  has_report: s.has_report,
+                  generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
+                  transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
+                  recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
+                }))}
+                type="certificate"
+                onSuccess={fetchDashboardData}
+              />
               <RecyclerBulkStatusDropdown 
                 shipments={recentShipments.map(s => ({
                   id: s.id,
