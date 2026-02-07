@@ -7173,6 +7173,39 @@ export type Database = {
           },
         ]
       }
+      terms_content: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          organization_type: string
+          sections: Json
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          organization_type: string
+          sections?: Json
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          organization_type?: string
+          sections?: Json
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       ticket_messages: {
         Row: {
           attachment_name: string | null
