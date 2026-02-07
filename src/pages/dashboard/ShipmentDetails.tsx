@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchShipmentByIdOrNumber, EnrichedShipment } from '@/hooks/useShipmentData';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimeline';
@@ -59,67 +60,8 @@ import { getCityById } from '@/lib/egyptianCities';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-interface ShipmentDetails {
-  id: string;
-  shipment_number: string;
-  waste_type: string;
-  quantity: number;
-  unit: string;
-  status: string;
-  created_at: string;
-  pickup_address: string;
-  delivery_address: string;
-  pickup_date: string | null;
-  expected_delivery_date: string | null;
-  notes: string | null;
-  generator_notes: string | null;
-  recycler_notes: string | null;
-  waste_description: string | null;
-  hazard_level: string | null;
-  packaging_method: string | null;
-  disposal_method: string | null;
-  approved_at: string | null;
-  collection_started_at: string | null;
-  in_transit_at: string | null;
-  delivered_at: string | null;
-  confirmed_at: string | null;
-  manual_driver_name: string | null;
-  manual_vehicle_plate: string | null;
-  driver_id: string | null;
-  generator_id: string;
-  recycler_id: string;
-  generator: { 
-    name: string; 
-    email: string; 
-    phone: string; 
-    address: string; 
-    city: string; 
-    representative_name: string | null;
-  } | null;
-  recycler: { 
-    name: string; 
-    email: string; 
-    phone: string; 
-    address: string; 
-    city: string; 
-    representative_name: string | null;
-  } | null;
-  transporter: { 
-    name: string; 
-    email: string; 
-    phone: string; 
-    address: string; 
-    city: string; 
-    representative_name: string | null;
-  } | null;
-  driver: { 
-    id: string;
-    license_number: string; 
-    vehicle_type: string | null; 
-    vehicle_plate: string | null; 
-    profile: { full_name: string; phone: string | null } 
-  } | null;
-}
+// Using EnrichedShipment from useShipmentData.ts
+type ShipmentDetails = EnrichedShipment;
 
 const wasteTypeLabels: Record<string, string> = {
   plastic: 'بلاستيك',
@@ -174,57 +116,19 @@ const ShipmentDetailsPage = () => {
 
   const fetchShipmentDetails = async () => {
     try {
-      // التحقق من نوع المعرف - UUID أو رقم الشحنة
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(shipmentId || '');
-      
-      let query = supabase
-        .from('shipments')
-        .select(`
-          id,
-          shipment_number,
-          waste_type,
-          quantity,
-          unit,
-          status,
-          created_at,
-          pickup_address,
-          delivery_address,
-          pickup_date,
-          expected_delivery_date,
-          notes,
-          generator_notes,
-          recycler_notes,
-          waste_description,
-          hazard_level,
-          packaging_method,
-          disposal_method,
-          approved_at,
-          collection_started_at,
-          in_transit_at,
-          delivered_at,
-          confirmed_at,
-          manual_driver_name,
-          manual_vehicle_plate,
-          driver_id,
-          generator_id,
-          recycler_id,
-          generator:organizations!shipments_generator_id_fkey(name, email, phone, address, city, representative_name),
-          recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, representative_name),
-          transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, representative_name),
-          driver:drivers(id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
-        `);
-      
-      // البحث بـ UUID أو رقم الشحنة
-      if (isUUID) {
-        query = query.eq('id', shipmentId);
-      } else {
-        query = query.eq('shipment_number', shipmentId);
+      if (!shipmentId) {
+        setError('معرف الشحنة غير صالح');
+        return;
       }
-      
-      const { data, error } = await query.single();
 
-      if (error) throw error;
-      const shipmentData = data as unknown as ShipmentDetails;
+      // استخدام الدالة الموحدة التي تتجنب مشاكل FK
+      const shipmentData = await fetchShipmentByIdOrNumber(shipmentId);
+
+      if (!shipmentData) {
+        setError('الشحنة غير موجودة');
+        return;
+      }
+
       setShipment(shipmentData);
 
       // Fetch locations for generator and recycler
@@ -239,7 +143,6 @@ const ShipmentDetailsPage = () => {
         if (genLoc?.latitude && genLoc?.longitude) {
           setGeneratorLocation({ lat: Number(genLoc.latitude), lng: Number(genLoc.longitude) });
         } else {
-          // Default to Cairo if no location
           setGeneratorLocation({ lat: 30.0444, lng: 31.2357 });
         }
       }
@@ -255,15 +158,13 @@ const ShipmentDetailsPage = () => {
         if (recLoc?.latitude && recLoc?.longitude) {
           setRecyclerLocation({ lat: Number(recLoc.latitude), lng: Number(recLoc.longitude) });
         } else {
-          // Default to Giza if no location
           setRecyclerLocation({ lat: 30.0131, lng: 31.2089 });
         }
       }
     } catch (error: any) {
       console.error('Error fetching shipment details:', error);
-      // تحديد نوع الخطأ
       if (error?.code === 'PGRST116') {
-        setError('لا توجد صلاحية للوصول لهذه الشحنة أو الشحنة غير موجودة');
+        setError('لا توجد صلاحية للوصول لهذه الشحنة');
       } else if (error?.message?.includes('JWT')) {
         setError('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
       } else {
@@ -480,9 +381,11 @@ const ShipmentDetailsPage = () => {
           <UnifiedShipmentTracker
             shipment={{
               ...shipment,
-              generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city } : null,
-              transporter: shipment.transporter ? { name: shipment.transporter.name, phone: shipment.transporter.phone } : null,
-              recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city } : null,
+              pickup_address: shipment.pickup_address || '',
+              delivery_address: shipment.delivery_address || '',
+              generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city || '' } : null,
+              transporter: shipment.transporter ? { name: shipment.transporter.name, phone: shipment.transporter.phone || '' } : null,
+              recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city || '' } : null,
             }}
             showMap={generatorLocation !== null && recyclerLocation !== null}
             onStatusUpdate={fetchShipmentDetails}
