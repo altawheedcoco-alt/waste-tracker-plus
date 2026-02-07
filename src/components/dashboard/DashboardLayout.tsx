@@ -78,6 +78,7 @@ import logo from '@/assets/logo.png';
 import DepositButton from '@/components/deposits/DepositButton';
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
+import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -844,20 +845,20 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating Create Shipment Button for Transporters/Drivers - positioned to avoid chat widget */}
-          {(isTransporter || isDriver) && (
-            <motion.button
-              onClick={() => navigate('/dashboard/shipments/new')}
-              className={`fixed z-30 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center touch-manipulation ${
-                isMobile ? 'bottom-4 right-4 w-12 h-12' : 'bottom-6 left-20 w-14 h-14'
-              }`}
-              whileHover={{ scale: 1.1, boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
-              whileTap={{ scale: 0.9 }}
-              title="إنشاء شحنة جديدة"
-            >
-              <Plus size={isMobile ? 20 : 24} />
-            </motion.button>
-          )}
+          {/* Floating Actions - Unified Stack for Web & Mobile */}
+          <FloatingActionsStack 
+            actions={[
+              {
+                id: 'create-shipment',
+                icon: <Plus size={isMobile ? 20 : 24} />,
+                onClick: () => navigate('/dashboard/shipments/new'),
+                label: 'إنشاء شحنة جديدة',
+                variant: 'primary',
+                visible: isTransporter || isDriver,
+              },
+            ]}
+            position="bottom-left"
+          />
         </div>
       </div>
     </TooltipProvider>

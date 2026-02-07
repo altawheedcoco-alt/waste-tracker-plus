@@ -92,13 +92,13 @@ const QuickLocationButton = ({
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.05 }}
               className={`
-                fixed bottom-24 left-4 z-50
-                w-14 h-14 rounded-full shadow-lg
+                fixed bottom-20 left-4 z-40
+                w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg
                 flex items-center justify-center
-                transition-colors duration-200
+                transition-colors duration-200 touch-manipulation
                 ${success 
-                  ? 'bg-green-500 hover:bg-green-600' 
-                  : 'bg-primary hover:bg-primary/90'
+                  ? 'bg-emerald-500 hover:bg-emerald-600' 
+                  : 'bg-secondary hover:bg-secondary/90'
                 }
                 disabled:opacity-50
               `}

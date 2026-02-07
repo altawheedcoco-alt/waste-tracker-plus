@@ -72,18 +72,19 @@ const AIChatbot = () => {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - Hidden as ChatWidget handles this */}
+      {/* This component uses the same position as ChatWidget, consider using FloatingActionsStack */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="fixed bottom-6 left-6 z-50"
+        className="fixed bottom-52 left-4 z-40 hidden" // Hidden - use ChatWidget instead
       >
         <Button
           onClick={() => setIsOpen(!isOpen)}
           size="lg"
-          className="w-14 h-14 rounded-full shadow-lg gradient-eco"
+          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg bg-accent text-accent-foreground touch-manipulation"
         >
-          {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+          {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
         </Button>
       </motion.div>
 

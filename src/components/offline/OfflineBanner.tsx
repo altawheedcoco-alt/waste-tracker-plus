@@ -46,7 +46,7 @@ const OfflineBanner = memo(({ className }: OfflineBannerProps) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         className={cn(
-          'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 z-[90]',
+          'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 z-[100]',
           'bg-primary text-primary-foreground rounded-lg shadow-lg p-4',
           className
         )}
@@ -74,7 +74,7 @@ const OfflineBanner = memo(({ className }: OfflineBannerProps) => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         className={cn(
-          'fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-96 z-[90]',
+          'fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-[100]',
           'bg-card border border-border rounded-xl shadow-xl overflow-hidden',
           className
         )}
