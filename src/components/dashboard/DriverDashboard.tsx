@@ -120,7 +120,7 @@ const DriverDashboard = () => {
       if (driver) {
         setDriverInfo(driver as unknown as DriverInfo);
 
-        // Fetch all driver's shipments with full details like transporter dashboard
+        // Fetch shipments with simplified query
         const { data: shipmentsData } = await supabase
           .from('shipments')
           .select(`
@@ -141,15 +141,40 @@ const DriverDashboard = () => {
             delivered_at,
             confirmed_at,
             recycler_notes,
-            generator:organizations!shipments_generator_id_fkey(name),
-            recycler:organizations!shipments_recycler_id_fkey(name),
-            transporter:organizations!shipments_transporter_id_fkey(name)
+            generator_id,
+            recycler_id,
+            transporter_id
           `)
           .eq('driver_id', driver.id)
           .order('created_at', { ascending: false });
 
         if (shipmentsData) {
-          setShipments(shipmentsData as unknown as Shipment[]);
+          // Fetch organizations for enrichment
+          const orgIds: string[] = [];
+          shipmentsData.forEach(s => {
+            if (s.generator_id) orgIds.push(s.generator_id);
+            if (s.recycler_id) orgIds.push(s.recycler_id);
+            if (s.transporter_id) orgIds.push(s.transporter_id);
+          });
+          const uniqueOrgIds = [...new Set(orgIds)];
+
+          const orgsMap: Record<string, { name: string }> = {};
+          if (uniqueOrgIds.length > 0) {
+            const { data: orgsData } = await supabase
+              .from('organizations')
+              .select('id, name')
+              .in('id', uniqueOrgIds);
+            orgsData?.forEach(o => { orgsMap[o.id] = { name: o.name }; });
+          }
+
+          const enriched = shipmentsData.map(s => ({
+            ...s,
+            generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
+            recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
+            transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
+          }));
+
+          setShipments(enriched as unknown as Shipment[]);
         }
       }
     } catch (error) {

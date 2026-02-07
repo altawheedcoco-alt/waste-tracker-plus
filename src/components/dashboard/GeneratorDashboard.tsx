@@ -107,7 +107,7 @@ const GeneratorDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const { data: shipments, error } = await supabase
+      const { data: shipmentsRaw, error } = await supabase
         .from('shipments')
         .select(`
           id,
@@ -136,10 +136,9 @@ const GeneratorDashboard = () => {
           manual_driver_name,
           manual_vehicle_plate,
           driver_id,
-          transporter:organizations!shipments_transporter_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
-          recycler:organizations!shipments_recycler_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
-          generator:organizations!shipments_generator_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
-          driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
+          generator_id,
+          transporter_id,
+          recycler_id
         `)
         .eq('generator_id', organization?.id)
         .order('created_at', { ascending: false })
@@ -147,7 +146,36 @@ const GeneratorDashboard = () => {
 
       if (error) throw error;
 
-      if (shipments) {
+      if (shipmentsRaw) {
+        // Fetch organizations for enrichment
+        const orgIds = [...new Set([
+          ...shipmentsRaw.map(s => s.transporter_id).filter(Boolean),
+          ...shipmentsRaw.map(s => s.recycler_id).filter(Boolean),
+          ...shipmentsRaw.map(s => s.generator_id).filter(Boolean),
+        ])] as string[];
+        
+        const orgsMap: Record<string, any> = {};
+        if (orgIds.length > 0) {
+          const { data: orgsData } = await supabase.from('organizations').select('*').in('id', orgIds);
+          orgsData?.forEach(o => { orgsMap[o.id] = o; });
+        }
+
+        // Fetch drivers
+        const driverIds = [...new Set(shipmentsRaw.map(s => s.driver_id).filter(Boolean))] as string[];
+        const driversMap: Record<string, any> = {};
+        if (driverIds.length > 0) {
+          const { data: driversData } = await supabase.from('drivers').select('license_number, vehicle_type, vehicle_plate, id, profile:profiles(full_name, phone)').in('id', driverIds);
+          driversData?.forEach(d => { driversMap[d.id] = { ...d, profile: Array.isArray(d.profile) ? d.profile[0] : d.profile }; });
+        }
+
+        const shipments = shipmentsRaw.map(s => ({
+          ...s,
+          generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
+          transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
+          recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
+          driver: s.driver_id ? driversMap[s.driver_id] || null : null,
+        }));
+
         // Fetch recycling reports to check which shipments have reports
         const shipmentIds = shipments.map(s => s.id);
         const { data: reportsData } = await supabase
