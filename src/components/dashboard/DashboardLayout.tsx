@@ -49,6 +49,7 @@ import {
   Zap,
   Fingerprint,
   Brain,
+  Sparkles,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -76,6 +77,7 @@ import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 import DepositButton from '@/components/deposits/DepositButton';
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
+import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -329,6 +331,23 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Use driver menu if user is a driver (not admin)
   const menuItems = isDriver && !isAdmin ? driverMenuItems : fullMenuItems;
 
+  // Get quick actions based on user type
+  const quickActionsType = useMemo(() => {
+    if (isAdmin) return 'admin';
+    if (isDriver && !organization) return 'driver';
+    switch (organization?.organization_type) {
+      case 'transporter': return 'transporter';
+      case 'generator': return 'generator';
+      case 'recycler': return 'recycler';
+      default: return 'generator';
+    }
+  }, [isAdmin, isDriver, organization]);
+
+  const quickActionsSidebarItems = useMemo(() => {
+    const actions = getQuickActionsByType(quickActionsType);
+    return getSidebarItemsFromQuickActions(actions);
+  }, [quickActionsType]);
+
   // Filter menu items based on search
   const filteredMenuItems = useMemo(() => {
     if (!sidebarSearch.trim()) return menuItems;
@@ -338,6 +357,16 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       item.path.toLowerCase().includes(searchLower)
     );
   }, [menuItems, sidebarSearch]);
+
+  // Filter quick actions based on search
+  const filteredQuickActions = useMemo(() => {
+    if (!sidebarSearch.trim()) return quickActionsSidebarItems;
+    const searchLower = sidebarSearch.toLowerCase();
+    return quickActionsSidebarItems.filter((item) => 
+      item.label.toLowerCase().includes(searchLower) ||
+      item.path.toLowerCase().includes(searchLower)
+    );
+  }, [quickActionsSidebarItems, sidebarSearch]);
 
   // Get responsive values
   const sidebarWidth = isSidebarOpen ? (isMobile ? 260 : isTablet ? 270 : 280) : 80;
@@ -470,6 +499,42 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             ) : (
               <div className="text-center py-4 text-sm text-muted-foreground">
                 لا توجد نتائج
+              </div>
+            )}
+            
+            {/* Quick Actions Section */}
+            {filteredQuickActions.length > 0 && (
+              <div className="pt-4 mt-4 border-t border-border">
+                {/* Section Header */}
+                <AnimatePresence>
+                  {isSidebarOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="flex items-center gap-2 px-2 mb-3"
+                    >
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                        الإجراءات السريعة
+                      </span>
+                      <div className="flex-1 h-px bg-border/50" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                {/* Quick Action Items */}
+                <div className="space-y-1">
+                  {filteredQuickActions.map((item) => (
+                    <SidebarNavItem
+                      key={item.key}
+                      icon={item.icon}
+                      label={item.label}
+                      path={item.path}
+                      isCollapsed={!isSidebarOpen}
+                    />
+                  ))}
+                </div>
               </div>
             )}
             
@@ -739,6 +804,31 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   ) : (
                     <div className="text-center py-4 text-sm text-muted-foreground">
                       لا توجد نتائج
+                    </div>
+                  )}
+                  
+                  {/* Quick Actions Section - Mobile */}
+                  {filteredQuickActions.length > 0 && (
+                    <div className="pt-4 mt-4 border-t border-border">
+                      <div className="flex items-center gap-2 px-2 mb-3">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                          الإجراءات السريعة
+                        </span>
+                        <div className="flex-1 h-px bg-border/50" />
+                      </div>
+                      <div className="space-y-1">
+                        {filteredQuickActions.map((item) => (
+                          <div key={item.key} onClick={() => setIsMobileMenuOpen(false)}>
+                            <SidebarNavItem
+                              icon={item.icon}
+                              label={item.label}
+                              path={item.path}
+                              isCollapsed={false}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </nav>
