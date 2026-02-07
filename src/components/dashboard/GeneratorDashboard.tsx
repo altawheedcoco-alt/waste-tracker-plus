@@ -57,6 +57,7 @@ interface RecentShipment {
   generator: { name: string; email: string; phone: string; address: string; city: string; representative_name: string | null } | null;
   driver: { license_number: string; vehicle_type: string | null; vehicle_plate: string | null; profile: { full_name: string; phone: string | null } } | null;
   has_report?: boolean;
+  has_receipt?: boolean;
 }
 
 const GeneratorDashboard = () => {
@@ -186,12 +187,21 @@ const GeneratorDashboard = () => {
 
         const reportedShipmentIds = new Set(reportsData?.map(r => r.shipment_id) || []);
 
-        const shipmentsWithReportStatus = shipments.map(s => ({
+        // Fetch receipts to check which shipments have receipts
+        const { data: receiptsData } = await supabase
+          .from('shipment_receipts')
+          .select('shipment_id')
+          .in('shipment_id', shipmentIds);
+
+        const receiptShipmentIds = new Set(receiptsData?.map(r => r.shipment_id) || []);
+
+        const shipmentsWithStatus = shipments.map(s => ({
           ...s,
           has_report: reportedShipmentIds.has(s.id),
+          has_receipt: receiptShipmentIds.has(s.id),
         }));
 
-        setRecentShipments(shipmentsWithReportStatus as unknown as RecentShipment[]);
+        setRecentShipments(shipmentsWithStatus as unknown as RecentShipment[]);
 
         const newStats: ShipmentStats = {
           total: shipments.length,
