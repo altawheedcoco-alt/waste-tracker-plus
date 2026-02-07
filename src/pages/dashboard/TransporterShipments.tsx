@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,10 +31,19 @@ import {
   Building2,
   Recycle,
   FileCheck,
+  Factory,
+  Link as LinkIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
+
+interface LinkedPartner {
+  id: string;
+  name: string;
+  type: 'generator' | 'recycler';
+  shipmentsCount: number;
+}
 
 interface Shipment {
   id: string;
@@ -47,9 +56,10 @@ interface Shipment {
   pickup_address: string;
   delivery_address: string;
   generator_id: string;
+  recycler_id: string | null;
   driver_id: string | null;
-  generator: { name: string } | null;
-  recycler: { name: string } | null;
+  generator: { id: string; name: string } | null;
+  recycler: { id: string; name: string } | null;
   driver: { profile: { full_name: string } | null } | null;
 }
 
@@ -82,6 +92,7 @@ const TransporterShipments = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [partnerFilter, setPartnerFilter] = useState('all');
 
   useEffect(() => {
     if (organization?.id) {
@@ -104,9 +115,10 @@ const TransporterShipments = () => {
           pickup_address,
           delivery_address,
           generator_id,
+          recycler_id,
           driver_id,
-          generator:organizations!shipments_generator_id_fkey(name),
-          recycler:organizations!shipments_recycler_id_fkey(name),
+          generator:organizations!shipments_generator_id_fkey(id, name),
+          recycler:organizations!shipments_recycler_id_fkey(id, name),
           driver:drivers(profile:profiles(full_name))
         `)
         .eq('transporter_id', organization?.id)
@@ -133,6 +145,45 @@ const TransporterShipments = () => {
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 
+  // Calculate linked partners (generators and recyclers)
+  const linkedPartners = useMemo<LinkedPartner[]>(() => {
+    const partnersMap = new Map<string, LinkedPartner>();
+    
+    shipments.forEach(shipment => {
+      // Add generator as linked partner
+      if (shipment.generator?.id && shipment.generator?.name) {
+        const existing = partnersMap.get(shipment.generator.id);
+        if (existing) {
+          existing.shipmentsCount++;
+        } else {
+          partnersMap.set(shipment.generator.id, {
+            id: shipment.generator.id,
+            name: shipment.generator.name,
+            type: 'generator',
+            shipmentsCount: 1,
+          });
+        }
+      }
+      
+      // Add recycler as linked partner
+      if (shipment.recycler?.id && shipment.recycler?.name) {
+        const existing = partnersMap.get(shipment.recycler.id);
+        if (existing) {
+          existing.shipmentsCount++;
+        } else {
+          partnersMap.set(shipment.recycler.id, {
+            id: shipment.recycler.id,
+            name: shipment.recycler.name,
+            type: 'recycler',
+            shipmentsCount: 1,
+          });
+        }
+      }
+    });
+    
+    return Array.from(partnersMap.values()).sort((a, b) => b.shipmentsCount - a.shipmentsCount);
+  }, [shipments]);
+
   const filteredShipments = shipments.filter(shipment => {
     const matchesSearch =
       shipment.shipment_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -140,14 +191,20 @@ const TransporterShipments = () => {
       shipment.recycler?.name?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || shipment.status === statusFilter;
+    
+    // Partner filter
+    const matchesPartner = partnerFilter === 'all' || 
+      shipment.generator_id === partnerFilter || 
+      shipment.recycler_id === partnerFilter;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesPartner;
   });
 
   const stats = {
     total: shipments.length,
     active: shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length,
     completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
+    linkedPartners: linkedPartners.length,
   };
 
   return (
@@ -168,11 +225,11 @@ const TransporterShipments = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-              <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Package className="w-6 h-6 text-primary" />
             </div>
             <div>
               <p className="text-2xl font-bold">{stats.total}</p>
@@ -182,8 +239,8 @@ const TransporterShipments = () => {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
-              <Truck className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
+              <Truck className="w-6 h-6 text-amber-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{stats.active}</p>
@@ -193,12 +250,23 @@ const TransporterShipments = () => {
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-              <Recycle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <Recycle className="w-6 h-6 text-emerald-600" />
             </div>
             <div>
               <p className="text-2xl font-bold">{stats.completed}</p>
               <p className="text-sm text-muted-foreground">مكتملة</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <LinkIcon className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{stats.linkedPartners}</p>
+              <p className="text-sm text-muted-foreground">جهة مرتبطة</p>
             </div>
           </CardContent>
         </Card>
@@ -220,13 +288,46 @@ const TransporterShipments = () => {
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="الحالة" />
                 </SelectTrigger>
                 <SelectContent>
                   {statusOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Partner Filter */}
+            <div className="flex items-center gap-2">
+              <LinkIcon className="h-4 w-4 text-primary" />
+              <Select value={partnerFilter} onValueChange={setPartnerFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="الجهة المرتبطة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      جميع الجهات
+                    </div>
+                  </SelectItem>
+                  {linkedPartners.map(partner => (
+                    <SelectItem key={partner.id} value={partner.id}>
+                      <div className="flex items-center gap-2">
+                        {partner.type === 'generator' ? (
+                          <Factory className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <Recycle className="h-4 w-4 text-emerald-600" />
+                        )}
+                        <span>{partner.name}</span>
+                        <Badge variant="secondary" className="text-[10px] mr-1">
+                          {partner.shipmentsCount}
+                        </Badge>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
