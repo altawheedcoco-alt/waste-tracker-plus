@@ -86,36 +86,44 @@ export const transporterQuickActions: QuickActionConfig[] = [
 ];
 
 // ============= ADMIN QUICK ACTIONS =============
+// مدير النظام يمتلك صلاحيات المراقبة والتحكم الكامل في جميع جوانب المنصة
 export const adminQuickActions: QuickActionConfig[] = [
-  // Primary Admin Actions
-  { id: 'navigation-demo', title: 'عرض توضيحي للملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'primary' },
-  { id: 'system-overview', title: 'نظرة عامة على النظام', subtitle: 'لوحة تحكم شاملة لجميع الجهات', icon: LayoutDashboard, path: '/dashboard/system-overview', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'primary' },
-  { id: 'shipments', title: 'إدارة الشحنات', subtitle: 'عرض وإدارة جميع الشحنات', icon: Package, path: '/dashboard/shipments', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'primary' },
-  { id: 'my-requests', title: 'إدارة الطلبات', subtitle: 'مراجعة طلبات الموافقة', icon: ClipboardList, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'primary' },
+  // === المراقبة والتحكم المركزي ===
+  { id: 'system-overview', title: 'مركز التحكم الرئيسي', subtitle: 'مراقبة شاملة لجميع العمليات والجهات', icon: LayoutDashboard, path: '/dashboard/system-overview', iconBgClass: 'bg-gradient-to-br from-purple-600 to-indigo-700', category: 'primary' },
+  { id: 'smart-insights', title: 'العين الذكية', subtitle: 'تحليلات تنبؤية ورؤى استراتيجية', icon: Bot, path: '/dashboard/smart-insights', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'primary' },
+  { id: 'activity-log', title: 'سجل النشاطات الكامل', subtitle: 'تتبع جميع العمليات والأحداث', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'primary' },
+  { id: 'driver-tracking', title: 'مراقبة السائقين', subtitle: 'تتبع لحظي لجميع المواقع', icon: MapPin, path: '/dashboard/driver-tracking', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'primary' },
   
-  // Verification & Security
-  { id: 'document-verification', title: 'التحقق من المستندات', subtitle: 'نظام التحقق التلقائي من الوثائق القانونية', icon: Shield, path: '/dashboard/document-verification', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'primary' },
+  // === إدارة الشحنات والعمليات ===
+  { id: 'shipments', title: 'إدارة جميع الشحنات', subtitle: 'عرض وتعديل وحذف أي شحنة', icon: Package, path: '/dashboard/shipments', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
+  { id: 'shipments-new', title: 'إنشاء شحنة', subtitle: 'إنشاء شحنة لأي جهة', icon: Plus, path: '/dashboard/shipments/new', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'primary' },
+  { id: 'navigation-demo', title: 'محاكاة الملاحة', subtitle: 'اختبار نظام التتبع والتوجيه', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'secondary' },
   
-  // Environment & AI
-  { id: 'environmental-sustainability', title: 'تقارير الاستدامة البيئية', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'secondary' },
-  { id: 'carbon-footprint', title: 'تحليل البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'secondary' },
-  { id: 'ai-tools', title: 'أدوات الذكاء الاصطناعي', subtitle: 'استخراج البيانات وتحليلها', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'secondary' },
+  // === الموافقات والطلبات ===
+  { id: 'my-requests', title: 'مركز الموافقات', subtitle: 'جميع الطلبات المعلقة والمراجعات', icon: ClipboardList, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'primary' },
+  { id: 'company-approvals', title: 'موافقات الشركات', subtitle: 'قبول أو رفض تسجيل الجهات', icon: Building2, path: '/dashboard/company-approvals', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'secondary' },
+  { id: 'driver-approvals', title: 'موافقات السائقين', subtitle: 'اعتماد السائقين الجدد', icon: UserPlus, path: '/dashboard/driver-approvals', iconBgClass: 'bg-gradient-to-br from-cyan-500 to-blue-600', category: 'secondary' },
+  { id: 'terms-acceptances', title: 'موافقات الشروط', subtitle: 'متابعة قبول السياسات القانونية', icon: FileCheck, path: '/dashboard/terms-acceptances', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
   
-  // Company & User Management
-  { id: 'company-management', title: 'إدارة الشركات', subtitle: 'إضافة وإدارة الشركات', icon: Building2, path: '/dashboard/company-management', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'secondary' },
-  { id: 'employees', title: 'إدارة الموظفين', subtitle: 'إضافة وإدارة موظفي جميع الشركات', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-teal-500 to-emerald-600', category: 'secondary' },
-  { id: 'company-approvals', title: 'موافقات الشركات', subtitle: 'مراجعة طلبات التسجيل', icon: Building2, path: '/dashboard/company-approvals', category: 'utility' },
-  { id: 'driver-approvals', title: 'إضافة سائق', subtitle: 'تسجيل سائقين جدد', icon: UserPlus, path: '/dashboard/driver-approvals', category: 'utility' },
+  // === الأمان والتحقق ===
+  { id: 'document-verification', title: 'التحقق من المستندات', subtitle: 'فحص الوثائق القانونية والتراخيص', icon: Shield, path: '/dashboard/document-verification', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'primary' },
   
-  // Waste & Reports
-  { id: 'waste-types', title: 'إدارة أنواع المخلفات', subtitle: 'تحرير فئات المخلفات', icon: Recycle, path: '/dashboard/waste-types', category: 'utility' },
-  { id: 'reports', title: 'عرض التقارير', subtitle: 'إنشاء تقارير النظام', icon: ChartBar, path: '/dashboard/reports', category: 'utility' },
-  { id: 'user-linking', title: 'ربط المستخدمين بالشركات', subtitle: 'إدارة ربط المستخدمين بالشركات', icon: Link, path: '/dashboard/user-linking', category: 'utility' },
-  { id: 'documents', title: 'مستندات الشركات', subtitle: 'عرض وطباعة مستندات الشروط والأختام', icon: FileText, path: '/dashboard/documents', category: 'utility' },
-  { id: 'terms-acceptances', title: 'موافقات الشروط والأحكام', subtitle: 'متابعة موافقات الجهات على السياسات', icon: FileCheck, path: '/dashboard/terms-acceptances', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'utility' },
-  { id: 'shipments-new', title: 'إنشاء شحنة', subtitle: 'إنشاء شحنة جديدة', icon: Plus, path: '/dashboard/shipments/new', category: 'utility' },
-  { id: 'driver-tracking', title: 'تتبع السائقين', subtitle: 'خريطة مواقع السائقين', icon: MapPin, path: '/dashboard/driver-tracking', category: 'utility' },
-  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', category: 'utility' },
+  // === إدارة الشركات والمستخدمين ===
+  { id: 'company-management', title: 'إدارة جميع الشركات', subtitle: 'تحكم كامل في بيانات الجهات', icon: Building2, path: '/dashboard/company-management', iconBgClass: 'bg-gradient-to-br from-slate-600 to-gray-700', category: 'secondary' },
+  { id: 'employees', title: 'إدارة جميع الموظفين', subtitle: 'صلاحيات وأدوار كل الحسابات', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-teal-500 to-emerald-600', category: 'secondary' },
+  { id: 'user-linking', title: 'ربط المستخدمين', subtitle: 'إدارة انتماء الحسابات للشركات', icon: Link, path: '/dashboard/user-linking', iconBgClass: 'bg-gradient-to-br from-pink-500 to-rose-600', category: 'secondary' },
+  
+  // === التقارير والتحليلات ===
+  { id: 'reports', title: 'التقارير المركزية', subtitle: 'تقارير شاملة لجميع الجهات', icon: ChartBar, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600', category: 'secondary' },
+  { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'الأداء البيئي لجميع الجهات', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'utility' },
+  { id: 'carbon-footprint', title: 'البصمة الكربونية', subtitle: 'تحليل الانبعاثات الشامل', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'utility' },
+  { id: 'ai-tools', title: 'أدوات الذكاء الاصطناعي', subtitle: 'تحليل متقدم للبيانات', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'utility' },
+  
+  // === إعدادات النظام ===
+  { id: 'waste-types', title: 'أنواع المخلفات', subtitle: 'تحرير التصنيفات والفئات', icon: Recycle, path: '/dashboard/waste-types', iconBgClass: 'bg-gradient-to-br from-lime-500 to-green-600', category: 'utility' },
+  { id: 'documents', title: 'المستندات والأختام', subtitle: 'إدارة الوثائق الرسمية', icon: FileText, path: '/dashboard/documents', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
+  { id: 'contracts', title: 'جميع العقود', subtitle: 'مراقبة عقود كل الجهات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-violet-600', category: 'utility' },
+  { id: 'deposits-overview', title: 'مراقبة الإيداعات', subtitle: 'جميع المعاملات المالية', icon: Banknote, path: '/dashboard/deposits-overview', iconBgClass: 'bg-gradient-to-br from-emerald-600 to-green-700', category: 'utility' },
 ];
 
 // ============= GENERATOR QUICK ACTIONS =============
