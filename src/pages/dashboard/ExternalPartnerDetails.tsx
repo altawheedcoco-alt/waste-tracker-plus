@@ -25,6 +25,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import CreateExternalInvoiceDialog from '@/components/invoices/CreateExternalInvoiceDialog';
+import { EntityProfileArchive } from '@/components/archive';
 
 export default function ExternalPartnerDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
@@ -237,6 +238,12 @@ export default function ExternalPartnerDetails() {
             </CardContent>
           </Card>
         )}
+
+        {/* Document Archive */}
+        <EntityProfileArchive
+          externalPartnerId={partnerId}
+          partnerName={partner?.name || ''}
+        />
 
         {/* Financial Summary */}
         <Card>
