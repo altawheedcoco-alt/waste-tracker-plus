@@ -996,7 +996,7 @@ export default function DetailedAccountLedger({
                   <TableHead className="text-center font-bold w-24">دائن</TableHead>
                   <TableHead className="text-center font-bold w-28">الرصيد</TableHead>
                   <TableHead className="text-center font-bold w-16">الإيصال</TableHead>
-                  <TableHead className="text-center font-bold w-40">ملاحظات</TableHead>
+                  <TableHead className="text-center font-bold w-40">الإجراءات</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1123,9 +1123,95 @@ export default function DetailedAccountLedger({
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
-                      {/* Notes Column */}
+                      {/* Notes/Actions Column */}
                       <TableCell className="text-center">
-                        {entry.type === 'shipment' && entry.shipmentId ? (
+                        {entry.type === 'deposit' ? (
+                          // Deposit Actions - Edit/Delete with tooltip
+                          <div className="flex items-center justify-center gap-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const depositId = entry.id.replace('deposit-', '');
+                                      handleEditDeposit(depositId);
+                                    }}
+                                    disabled={loadingDepositId === entry.id.replace('deposit-', '')}
+                                  >
+                                    {loadingDepositId === entry.id.replace('deposit-', '') ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <Pencil className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>تعديل الإيداع</p>
+                                  <p className="text-xs text-amber-600">إلغاء تلك الخطوة</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const depositId = entry.id.replace('deposit-', '');
+                                      setConfirmDeleteId(depositId);
+                                    }}
+                                    disabled={deletingDepositId === entry.id.replace('deposit-', '')}
+                                  >
+                                    {deletingDepositId === entry.id.replace('deposit-', '') ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>حذف الإيداع</p>
+                                  <p className="text-xs text-destructive">إلغاء تلك الخطوة</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                            {/* Confirm Delete Inline */}
+                            {confirmDeleteId === entry.id.replace('deposit-', '') && (
+                              <div className="absolute inset-0 bg-destructive/10 backdrop-blur-sm rounded flex items-center justify-center gap-2 z-10">
+                                <span className="text-xs font-medium text-destructive">حذف؟</span>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteDeposit(entry.id.replace('deposit-', ''));
+                                  }}
+                                >
+                                  نعم
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setConfirmDeleteId(null);
+                                  }}
+                                >
+                                  لا
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        ) : entry.type === 'shipment' && entry.shipmentId ? (
                           editingNotesId === entry.shipmentId ? (
                             <div className="flex items-center gap-1">
                               <Input
