@@ -154,6 +154,7 @@ const ShipmentDetailsPage = () => {
   const { roles, organization } = useAuth();
   const [shipment, setShipment] = useState<ShipmentDetails | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showLiveTracking, setShowLiveTracking] = useState(false);
@@ -258,8 +259,16 @@ const ShipmentDetailsPage = () => {
           setRecyclerLocation({ lat: 30.0131, lng: 31.2089 });
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching shipment details:', error);
+      // تحديد نوع الخطأ
+      if (error?.code === 'PGRST116') {
+        setError('لا توجد صلاحية للوصول لهذه الشحنة أو الشحنة غير موجودة');
+      } else if (error?.message?.includes('JWT')) {
+        setError('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+      } else {
+        setError('حدث خطأ أثناء جلب بيانات الشحنة');
+      }
     } finally {
       setLoading(false);
     }
@@ -286,8 +295,20 @@ const ShipmentDetailsPage = () => {
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <Package className="w-16 h-16 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">الشحنة غير موجودة</h2>
-          <p className="text-muted-foreground mb-4">لم يتم العثور على الشحنة المطلوبة</p>
-          <Button onClick={() => navigate(-1)}>العودة</Button>
+          <p className="text-muted-foreground mb-4">
+            {error || 'لم يتم العثور على الشحنة المطلوبة'}
+          </p>
+          {error?.includes('صلاحية') && (
+            <p className="text-sm text-muted-foreground mb-4">
+              رقم الشحنة: {shipmentId}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button onClick={() => navigate(-1)}>العودة</Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              إعادة المحاولة
+            </Button>
+          </div>
         </div>
       </DashboardLayout>
     );
