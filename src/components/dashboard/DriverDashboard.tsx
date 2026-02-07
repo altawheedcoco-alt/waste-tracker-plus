@@ -28,6 +28,8 @@ import QuickLocationButton from '@/components/tracking/QuickLocationButton';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 import TrackingWatcherIndicator from '@/components/tracking/TrackingWatcherIndicator';
 import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPicker';
+import QuickActionsGrid from './QuickActionsGrid';
+import { useQuickActions } from '@/hooks/useQuickActions';
 
 // Lazy load components for better performance
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -362,6 +364,19 @@ const DriverDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Quick Actions Grid */}
+      <QuickActionsGrid
+        actions={useQuickActions({
+          type: 'driver',
+          handlers: {
+            openLiveMap: () => handleOpenLiveMap(),
+            openSettings: () => setShowSettingsDialog(true),
+          },
+        })}
+        title="الإجراءات السريعة"
+        subtitle="الوظائف المستخدمة بكثرة"
+      />
 
       {/* Destination Picker Card */}
       {driverInfo && (

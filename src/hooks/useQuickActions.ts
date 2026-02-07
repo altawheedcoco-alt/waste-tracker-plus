@@ -9,11 +9,14 @@ import { QuickAction } from '@/components/dashboard/QuickActionsGrid';
 
 type ActionHandlers = {
   openDepositDialog?: () => void;
+  openSmartWeightUpload?: () => void;
+  openLiveMap?: () => void;
+  openSettings?: () => void;
   [key: string]: (() => void) | undefined;
 };
 
 interface UseQuickActionsOptions {
-  type: 'admin' | 'transporter' | 'generator' | 'recycler';
+  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver';
   handlers?: ActionHandlers;
   category?: 'primary' | 'secondary' | 'utility' | 'all';
   limit?: number;
@@ -75,7 +78,7 @@ export function useQuickActions({
  * Get raw quick action configs without converting to QuickAction format
  */
 export function useQuickActionConfigs(
-  type: 'admin' | 'transporter' | 'generator' | 'recycler'
+  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver'
 ): QuickActionConfig[] {
   return useMemo(() => getQuickActionsByType(type), [type]);
 }
