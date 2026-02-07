@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
+import QuickActionsGrid from './QuickActionsGrid';
+import { useQuickActions } from '@/hooks/useQuickActions';
 import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
 import ChatWidget from '@/components/chat/ChatWidget';
 import SmartRequestDialog from './SmartRequestDialog';
@@ -196,28 +197,10 @@ const AdminDashboard = () => {
     { title: 'السائقون النشطون', value: stats.activeDrivers, subtitle: `من أصل ${stats.totalDrivers}`, icon: Users },
   ];
 
-  const quickActions: QuickAction[] = [
-    { title: 'عرض توضيحي للملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600' },
-    { title: 'نظرة عامة على النظام', subtitle: 'لوحة تحكم شاملة لجميع الجهات', icon: LayoutDashboard, path: '/dashboard/system-overview', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600' },
-    { title: 'إدارة الشحنات', subtitle: 'عرض وإدارة جميع الشحنات', icon: Package, path: '/dashboard/shipments', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
-    { title: 'إدارة الطلبات', subtitle: 'مراجعة طلبات الموافقة', icon: ClipboardList, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600' },
-    { title: 'التحقق من المستندات', subtitle: 'نظام التحقق التلقائي من الوثائق القانونية', icon: Shield, path: '/dashboard/document-verification', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600' },
-    { title: 'تقارير الاستدامة البيئية', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600' },
-    { title: 'تحليل البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-    { title: 'أدوات الذكاء الاصطناعي', subtitle: 'استخراج البيانات وتحليلها', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },
-    { title: 'إدارة الشركات', subtitle: 'إضافة وإدارة الشركات', icon: Building2, path: '/dashboard/company-management', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
-    { title: 'إدارة الموظفين', subtitle: 'إضافة وإدارة موظفي جميع الشركات', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-teal-500 to-emerald-600' },
-    { title: 'موافقات الشركات', subtitle: 'مراجعة طلبات التسجيل', icon: Building2, path: '/dashboard/company-approvals' },
-    { title: 'إضافة سائق', subtitle: 'تسجيل سائقين جدد', icon: UserPlus, path: '/dashboard/driver-approvals' },
-    { title: 'إدارة أنواع المخلفات', subtitle: 'تحرير فئات المخلفات', icon: Recycle, path: '/dashboard/waste-types' },
-    { title: 'عرض التقارير', subtitle: 'إنشاء تقارير النظام', icon: ChartBar, path: '/dashboard/reports' },
-    { title: 'ربط المستخدمين بالشركات', subtitle: 'إدارة ربط المستخدمين بالشركات', icon: Link, path: '/dashboard/user-linking' },
-    { title: 'مستندات الشركات', subtitle: 'عرض وطباعة مستندات الشروط والأختام', icon: FileText, path: '/dashboard/documents' },
-    { title: 'موافقات الشروط والأحكام', subtitle: 'متابعة موافقات الجهات على السياسات', icon: FileCheck, path: '/dashboard/terms-acceptances', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
-    { title: 'إنشاء شحنة', subtitle: 'إنشاء شحنة جديدة', icon: Plus, path: '/dashboard/shipments/new' },
-    { title: 'تتبع السائقين', subtitle: 'خريطة مواقع السائقين', icon: MapPin, path: '/dashboard/driver-tracking' },
-    { title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log' },
-  ];
+  // Use centralized quick actions
+  const quickActions = useQuickActions({
+    type: 'admin',
+  });
 
   const containerVariants = {
     hidden: { opacity: 0 },
