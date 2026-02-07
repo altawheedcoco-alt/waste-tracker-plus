@@ -123,46 +123,29 @@ const AdminDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch shipments with full details
-      const { data: shipments, count: totalShipments } = await supabase
+      // Fetch shipments with simplified query
+      const { data: shipmentsRaw, count: totalShipments } = await supabase
         .from('shipments')
-        .select(`
-          id,
-          shipment_number,
-          status,
-          waste_type,
-          quantity,
-          unit,
-          created_at,
-          pickup_address,
-          delivery_address,
-          pickup_date,
-          expected_delivery_date,
-          notes,
-          generator_notes,
-          recycler_notes,
-          waste_description,
-          hazard_level,
-          packaging_method,
-          disposal_method,
-          approved_at,
-          collection_started_at,
-          in_transit_at,
-          delivered_at,
-          confirmed_at,
-          manual_driver_name,
-          manual_vehicle_plate,
-          generator:organizations!shipments_generator_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          transporter:organizations!shipments_transporter_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          recycler:organizations!shipments_recycler_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
-        `, { count: 'exact' })
+        .select(`id, shipment_number, status, waste_type, quantity, unit, created_at, generator_id, transporter_id, recycler_id`, { count: 'exact' })
         .order('created_at', { ascending: false })
         .limit(5);
 
-      const activeShipments = shipments?.filter(s => 
+      // Fetch organizations for enrichment
+      const { data: orgsData } = await supabase.from('organizations').select('id, name');
+      const orgsMap: Record<string, any> = {};
+      orgsData?.forEach(o => { orgsMap[o.id] = { name: o.name }; });
+
+      const shipments = (shipmentsRaw || []).map(s => ({
+        ...s,
+        generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
+        transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
+        recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
+        driver: null,
+      }));
+
+      const activeShipments = shipments.filter(s => 
         ['new', 'approved', 'in_transit'].includes(s.status || '')
-      ).length || 0;
+      ).length;
 
       // Fetch organizations stats
       const { data: organizations } = await supabase

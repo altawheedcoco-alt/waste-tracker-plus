@@ -135,20 +135,32 @@ const AdminShipmentsView = () => {
   const fetchShipments = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: shipmentsRaw, error } = await supabase
         .from('shipments')
-        .select(`
-          *,
-          generator:organizations!shipments_generator_id_fkey(id, name, organization_type, city, address),
-          transporter:organizations!shipments_transporter_id_fkey(id, name, organization_type, city),
-          recycler:organizations!shipments_recycler_id_fkey(id, name, organization_type, city, address),
-          driver:drivers(id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)),
-          created_by_profile:profiles!shipments_created_by_fkey(full_name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setShipments((data as unknown as Shipment[]) || []);
+
+      // Fetch organizations for enrichment
+      const { data: orgsData } = await supabase.from('organizations').select('id, name, organization_type, city, address');
+      const orgsMap: Record<string, any> = {};
+      orgsData?.forEach(o => { orgsMap[o.id] = o; });
+
+      // Fetch drivers
+      const { data: driversData } = await supabase.from('drivers').select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)');
+      const driversMap: Record<string, any> = {};
+      driversData?.forEach(d => { driversMap[d.id] = { ...d, profile: Array.isArray(d.profile) ? d.profile[0] : d.profile }; });
+
+      const enriched = (shipmentsRaw || []).map(s => ({
+        ...s,
+        generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
+        transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
+        recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
+        driver: s.driver_id ? driversMap[s.driver_id] || null : null,
+      }));
+
+      setShipments(enriched as unknown as Shipment[]);
     } catch (error) {
       console.error('Error fetching shipments:', error);
       toast({
@@ -163,30 +175,45 @@ const AdminShipmentsView = () => {
 
   // Prepare shipment data for print view
   const handlePrintShipment = async (shipment: Shipment) => {
-    // Fetch complete shipment data for printing
-    const { data, error } = await supabase
-      .from('shipments')
-      .select(`
-        *,
-        generator:organizations!shipments_generator_id_fkey(name, email, phone, address, city, representative_name, client_code, commercial_register, environmental_license, activity_type),
-        transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, representative_name, client_code, commercial_register, environmental_license, activity_type),
-        recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, representative_name, client_code, commercial_register, environmental_license, activity_type),
-        driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
-      `)
-      .eq('id', shipment.id)
-      .single();
+    try {
+      // Fetch complete shipment data
+      const { data: rawData, error } = await supabase
+        .from('shipments')
+        .select('*')
+        .eq('id', shipment.id)
+        .single();
 
-    if (error) {
+      if (error) throw error;
+
+      // Fetch related data
+      const orgIds = [rawData.generator_id, rawData.transporter_id, rawData.recycler_id].filter(Boolean) as string[];
+      const { data: orgsData } = await supabase.from('organizations').select('id, name, email, phone, address, city, representative_name, client_code, commercial_register, environmental_license, activity_type').in('id', orgIds);
+      const orgsMap: Record<string, any> = {};
+      orgsData?.forEach(o => { orgsMap[o.id] = o; });
+
+      let driver = null;
+      if (rawData.driver_id) {
+        const { data: driverData } = await supabase.from('drivers').select('license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)').eq('id', rawData.driver_id).maybeSingle();
+        if (driverData) driver = { ...driverData, profile: Array.isArray(driverData.profile) ? driverData.profile[0] : driverData.profile };
+      }
+
+      const data = {
+        ...rawData,
+        generator: rawData.generator_id ? orgsMap[rawData.generator_id] || null : null,
+        transporter: rawData.transporter_id ? orgsMap[rawData.transporter_id] || null : null,
+        recycler: rawData.recycler_id ? orgsMap[rawData.recycler_id] || null : null,
+        driver,
+      };
+
+      setPrintShipmentData(data);
+      setShowPrintDialog(true);
+    } catch (error) {
       toast({
         title: 'خطأ',
         description: 'فشل في تحميل بيانات الطباعة',
         variant: 'destructive',
       });
-      return;
     }
-
-    setPrintShipmentData(data);
-    setShowPrintDialog(true);
   };
 
   const filteredShipments = shipments.filter((shipment) => {

@@ -103,13 +103,14 @@ export default function OperationsDashboard() {
   const [selectedShipment, setSelectedShipment] = useState<LiveShipment | null>(null);
   const [activeTab, setActiveTab] = useState('live');
 
-  // Fetch live shipments
+  // Fetch live shipments with simplified query
   const { data: shipments = [], isLoading, refetch } = useQuery({
     queryKey: ['operations-live-shipments', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
 
-      const { data, error } = await supabase
+      // First fetch shipments
+      const { data: shipmentsData, error } = await supabase
         .from('shipments')
         .select(`
           id,
@@ -127,10 +128,10 @@ export default function OperationsDashboard() {
           payment_status,
           actual_weight,
           total_value,
-          generator:organizations!shipments_generator_id_fkey(id, name),
-          transporter:organizations!shipments_transporter_id_fkey(id, name),
-          recycler:organizations!shipments_recycler_id_fkey(id, name),
-          driver:drivers(profile:profiles(full_name))
+          generator_id,
+          transporter_id,
+          recycler_id,
+          driver_id
         `)
         .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`)
         .in('status', ['new', 'approved', 'collecting', 'in_transit', 'delivered'])
@@ -138,10 +139,25 @@ export default function OperationsDashboard() {
         .limit(50);
 
       if (error) throw error;
-      return (data || []) as unknown as LiveShipment[];
+
+      // Fetch organizations for mapping
+      const { data: orgsData } = await supabase
+        .from('organizations')
+        .select('id, name');
+
+      const orgsMap = new Map(orgsData?.map(o => [o.id, { id: o.id, name: o.name }]) || []);
+
+      // Enrich shipments with org data
+      return (shipmentsData || []).map(s => ({
+        ...s,
+        generator: s.generator_id ? orgsMap.get(s.generator_id) || null : null,
+        transporter: s.transporter_id ? orgsMap.get(s.transporter_id) || null : null,
+        recycler: s.recycler_id ? orgsMap.get(s.recycler_id) || null : null,
+        driver: null,
+      })) as unknown as LiveShipment[];
     },
     enabled: !!organization?.id,
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: 30000,
   });
 
   // Stats

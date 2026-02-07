@@ -179,7 +179,9 @@ const ShipmentManagement = () => {
 
   const fetchData = async () => {
     try {
-      // Fetch shipments with full details
+      setLoading(true);
+      
+      // Fetch shipments with simplified relations to avoid FK issues
       const { data: shipmentsData, error: shipmentsError } = await supabase
         .from('shipments')
         .select(`
@@ -212,31 +214,53 @@ const ShipmentManagement = () => {
           generator_id,
           recycler_id,
           transporter_id,
-          driver_id,
-          generator:organizations!shipments_generator_id_fkey(id, name, name_en, email, phone, secondary_phone, address, city, region, client_code, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          transporter:organizations!shipments_transporter_id_fkey(id, name, name_en, email, phone, secondary_phone, address, city, region, client_code, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          recycler:organizations!shipments_recycler_id_fkey(id, name, name_en, email, phone, secondary_phone, address, city, region, client_code, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          driver:drivers(id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
+          driver_id
         `)
         .order('created_at', { ascending: false });
 
-      if (shipmentsError) throw shipmentsError;
+      if (shipmentsError) {
+        console.error('Shipments fetch error:', shipmentsError);
+        throw shipmentsError;
+      }
 
-      // Fetch organizations
+      // Fetch organizations separately for better performance
       const { data: orgsData, error: orgsError } = await supabase
         .from('organizations')
-        .select('id, name, organization_type')
+        .select('id, name, organization_type, email, phone, address, city, representative_name')
         .eq('is_active', true);
 
-      if (orgsError) throw orgsError;
+      if (orgsError) {
+        console.error('Organizations fetch error:', orgsError);
+        throw orgsError;
+      }
 
-      setShipments(normalizeShipments(shipmentsData || []) as any);
+      // Fetch drivers separately
+      const { data: driversData } = await supabase
+        .from('drivers')
+        .select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)');
+
+      // Map organizations and drivers to shipments
+      const orgsMap = new Map(orgsData?.map(o => [o.id, o]) || []);
+      const driversMap = new Map(driversData?.map(d => [d.id, {
+        ...d,
+        profile: Array.isArray(d.profile) ? d.profile[0] : d.profile
+      }]) || []);
+
+      const enrichedShipments = (shipmentsData || []).map(shipment => ({
+        ...shipment,
+        generator: shipment.generator_id ? orgsMap.get(shipment.generator_id) || null : null,
+        transporter: shipment.transporter_id ? orgsMap.get(shipment.transporter_id) || null : null,
+        recycler: shipment.recycler_id ? orgsMap.get(shipment.recycler_id) || null : null,
+        driver: shipment.driver_id ? driversMap.get(shipment.driver_id) || null : null,
+      }));
+
+      setShipments(enrichedShipments as any);
       setOrganizations(orgsData || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
-        title: 'خطأ',
-        description: 'فشل في تحميل البيانات',
+        title: 'خطأ في تحميل البيانات',
+        description: error?.message || 'حدث خطأ غير متوقع',
         variant: 'destructive',
       });
     } finally {

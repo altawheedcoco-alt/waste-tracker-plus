@@ -147,45 +147,39 @@ const TransporterDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      // Fetch shipments for this transporter
-      const { data: shipments } = await supabase
+      // Fetch shipments with simplified query
+      const { data: shipmentsRaw } = await supabase
         .from('shipments')
-        .select(`
-          id,
-          shipment_number,
-          waste_type,
-          quantity,
-          unit,
-          status,
-          created_at,
-          pickup_address,
-          delivery_address,
-          pickup_date,
-          expected_delivery_date,
-          notes,
-          generator_notes,
-          recycler_notes,
-          waste_description,
-          hazard_level,
-          packaging_method,
-          disposal_method,
-          approved_at,
-          collection_started_at,
-          in_transit_at,
-          delivered_at,
-          confirmed_at,
-          manual_driver_name,
-          manual_vehicle_plate,
-          generator_id,
-          recycler_id,
-          driver_id,
-          generator:organizations!shipments_generator_id_fkey(id, name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          recycler:organizations!shipments_recycler_id_fkey(id, name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          transporter:organizations!shipments_transporter_id_fkey(id, name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, delegate_name, delegate_phone, delegate_email, delegate_national_id, agent_name, agent_phone, agent_email, agent_national_id, stamp_url, signature_url, logo_url),
-          driver:drivers(id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
-        `)
+        .select(`id, shipment_number, waste_type, quantity, unit, status, created_at, pickup_address, delivery_address, generator_id, recycler_id, driver_id`)
         .eq('transporter_id', organization?.id)
         .order('created_at', { ascending: false });
+
+      // Fetch organizations for enrichment
+      const orgIds = [...new Set([
+        ...(shipmentsRaw || []).map(s => s.generator_id).filter(Boolean),
+        ...(shipmentsRaw || []).map(s => s.recycler_id).filter(Boolean),
+      ])] as string[];
+      
+      const orgsMap: Record<string, any> = {};
+      if (orgIds.length > 0) {
+        const { data: orgsData } = await supabase.from('organizations').select('id, name').in('id', orgIds);
+        orgsData?.forEach(o => { orgsMap[o.id] = o; });
+      }
+
+      // Fetch drivers
+      const driverIds = [...new Set((shipmentsRaw || []).map(s => s.driver_id).filter(Boolean))] as string[];
+      const driversMap: Record<string, any> = {};
+      if (driverIds.length > 0) {
+        const { data: driversData } = await supabase.from('drivers').select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)').in('id', driverIds);
+        driversData?.forEach(d => { driversMap[d.id] = { ...d, profile: Array.isArray(d.profile) ? d.profile[0] : d.profile }; });
+      }
+
+      const shipments = (shipmentsRaw || []).map(s => ({
+        ...s,
+        generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
+        recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
+        driver: s.driver_id ? driversMap[s.driver_id] || null : null,
+      }));
 
       // Fetch drivers count
       const { data: driversData } = await supabase
