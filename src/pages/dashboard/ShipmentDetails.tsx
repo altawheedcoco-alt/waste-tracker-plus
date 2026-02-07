@@ -13,6 +13,7 @@ import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker
 import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
 import RouteProgressBar from '@/components/tracking/RouteProgressBar';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
+import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 
 // Lazy load the live tracking components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -50,11 +51,13 @@ import {
   Route,
   Activity,
   Eye,
+  Lock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { getCityById } from '@/lib/egyptianCities';
 import { toast } from 'sonner';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface ShipmentDetails {
   id: string;
@@ -156,6 +159,9 @@ const ShipmentDetailsPage = () => {
   const [showLiveTracking, setShowLiveTracking] = useState(false);
   const [generatorLocation, setGeneratorLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recyclerLocation, setRecyclerLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // استخدام hook صلاحيات الرؤية
+  const visibility = useShipmentVisibility(shipment?.id);
 
   const isDriver = roles.includes('driver');
 
@@ -307,8 +313,8 @@ const ShipmentDetailsPage = () => {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            {/* Live Tracking Button - only show if driver is assigned */}
-            {shipment.driver_id && (
+            {/* Live Tracking Button - only show if driver is assigned AND visibility allowed */}
+            {shipment.driver_id && visibility.canViewTracking && (
               <Button 
                 onClick={() => setShowLiveTracking(true)}
                 className="bg-green-600 hover:bg-green-700 text-white"
@@ -362,8 +368,8 @@ const ShipmentDetailsPage = () => {
         {/* Progress Logs - Auto-recorded milestones */}
         <ShipmentProgressLogs shipmentId={shipment.id} maxHeight={350} />
 
-        {/* Tracking Mode Controller - Shows when driver is assigned */}
-        {shipment.driver_id && (
+        {/* Tracking Mode Controller - Shows when driver is assigned AND visibility allowed */}
+        {shipment.driver_id && visibility.canViewTracking && (
           <Suspense fallback={
             <div className="h-[200px] flex items-center justify-center bg-muted/30 rounded-lg">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -379,8 +385,18 @@ const ShipmentDetailsPage = () => {
           </Suspense>
         )}
 
-        {/* Live Tracking Section - Featured when driver is assigned */}
-        {shipment.driver_id && (
+        {/* Visibility Restricted Notice */}
+        {shipment.driver_id && !visibility.canViewTracking && !visibility.isOwner && (
+          <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+            <Lock className="h-4 w-4 text-amber-600" />
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              التتبع المباشر غير متاح. الناقل لم يفعّل هذه الميزة لحسابكم.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Live Tracking Section - Featured when driver is assigned AND visibility allowed */}
+        {shipment.driver_id && visibility.canViewTracking && visibility.canViewMaps && (
           <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -416,22 +432,24 @@ const ShipmentDetailsPage = () => {
                 compact
               />
 
-              {/* Driver Route Visualization */}
-              <Suspense fallback={
-                <div className="h-[400px] flex items-center justify-center bg-muted/30 rounded-lg">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              }>
-                <DriverRouteVisualization
-                  shipmentId={shipment.id}
-                  driverId={shipment.driver_id}
-                  pickupAddress={shipment.pickup_address}
-                  deliveryAddress={shipment.delivery_address}
-                  status={shipment.status}
-                  showStats={true}
-                  height={350}
-                />
-              </Suspense>
+              {/* Driver Route Visualization - only if can view driver location */}
+              {visibility.canViewDriverLocation && (
+                <Suspense fallback={
+                  <div className="h-[400px] flex items-center justify-center bg-muted/30 rounded-lg">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                }>
+                  <DriverRouteVisualization
+                    shipmentId={shipment.id}
+                    driverId={shipment.driver_id}
+                    pickupAddress={shipment.pickup_address}
+                    deliveryAddress={shipment.delivery_address}
+                    status={shipment.status}
+                    showStats={true}
+                    height={350}
+                  />
+                </Suspense>
+              )}
             </CardContent>
           </Card>
         )}
@@ -621,8 +639,8 @@ const ShipmentDetailsPage = () => {
                   </p>
                 </div>
 
-                {/* Driver Info */}
-                {(shipment.driver || shipment.manual_driver_name) && (
+                {/* Driver Info - only if visibility allowed */}
+                {(shipment.driver || shipment.manual_driver_name) && visibility.canViewDriverInfo && (
                   <>
                     <Separator />
                     <div className="text-right p-3 rounded-lg bg-muted/50">
@@ -638,13 +656,26 @@ const ShipmentDetailsPage = () => {
                             <Phone className="w-4 h-4 text-muted-foreground" />
                           </p>
                         )}
-                        <p className="flex items-center gap-2 justify-end">
-                          <span>{shipment.driver?.vehicle_plate || shipment.manual_vehicle_plate || '-'}</span>
-                          <Truck className="w-4 h-4 text-muted-foreground" />
-                        </p>
+                        {/* Vehicle Info - only if visibility allowed */}
+                        {visibility.canViewVehicleInfo && (
+                          <p className="flex items-center gap-2 justify-end">
+                            <span>{shipment.driver?.vehicle_plate || shipment.manual_vehicle_plate || '-'}</span>
+                            <Truck className="w-4 h-4 text-muted-foreground" />
+                          </p>
+                        )}
                       </div>
                     </div>
                   </>
+                )}
+                
+                {/* Notice when driver info is hidden */}
+                {(shipment.driver || shipment.manual_driver_name) && !visibility.canViewDriverInfo && !visibility.isOwner && (
+                  <div className="text-right p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200">
+                    <div className="flex items-center gap-2 justify-end text-sm text-amber-800 dark:text-amber-200">
+                      <span>بيانات السائق محجوبة</span>
+                      <Lock className="w-4 h-4" />
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
