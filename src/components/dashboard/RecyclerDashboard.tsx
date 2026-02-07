@@ -5,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
+import QuickActionsGrid from './QuickActionsGrid';
+import { useQuickActions } from '@/hooks/useQuickActions';
 import CreateShipmentButton from './CreateShipmentButton';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
@@ -271,23 +272,13 @@ const RecyclerDashboard = () => {
 
       {/* Quick Actions Grid */}
       <QuickActionsGrid
-        actions={[
-          { title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: () => setShowDepositDialog(true), iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-          { title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
-          { title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600' },
-          { title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: () => setShowSmartWeightUpload(true), iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600' },
-          { title: 'أدوات تحليل التدوير', subtitle: 'إحصائيات وتحليلات متقدمة', icon: Bot, path: '/dashboard/recycler-ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },
-          { title: 'تقارير الاستدامة البيئية', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600' },
-          { title: 'تحليل البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-          { title: 'الشحنات الواردة', subtitle: 'عرض وإدارة الشحنات', icon: Package, path: '/dashboard/shipments' },
-          { title: 'تأكيد الاستلام', subtitle: 'تأكيد استلام الشحنات', icon: CheckCircle2, path: '/dashboard/shipments' },
-          { title: 'إدارة الموظفين', subtitle: 'إضافة وإدارة موظفي المنشأة', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
-          { title: 'التقارير', subtitle: 'تقارير التدوير والأداء', icon: BarChart3, path: '/dashboard/reports' },
-          { title: 'تتبع الشحنات', subtitle: 'متابعة الشحنات القادمة', icon: Truck, path: '/dashboard/shipments' },
-          { title: 'مستندات التدوير', subtitle: 'طباعة شهادات وأختام', icon: FileText, path: '/dashboard/documents' },
-          { title: 'إحصائيات المعالجة', subtitle: 'تحليل أداء التدوير', icon: TrendingUp, path: '/dashboard/reports' },
-          { title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings' },
-        ] as QuickAction[]}
+        actions={useQuickActions({
+          type: 'recycler',
+          handlers: {
+            openDepositDialog: () => setShowDepositDialog(true),
+            openSmartWeightUpload: () => setShowSmartWeightUpload(true),
+          },
+        })}
         title="الإجراءات السريعة"
         subtitle="وظائف التدوير المستخدمة بكثرة"
       />

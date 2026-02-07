@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
+import QuickActionsGrid from './QuickActionsGrid';
+import { useQuickActions } from '@/hooks/useQuickActions';
 import ResponsiveGrid from './ResponsiveGrid';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
@@ -242,19 +243,13 @@ const GeneratorDashboard = () => {
   // State for deposit dialog
   const [showDepositDialog, setShowDepositDialog] = useState(false);
 
-  const quickActions: QuickAction[] = [
-    { title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: () => setShowDepositDialog(true), iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-    { title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
-    { title: 'شهادات استلام الشحنات', subtitle: 'إدارة شهادات استلام الشحنات من الناقلين', icon: FileCheck, path: '/dashboard/generator-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600' },
-    { title: 'شهادات إعادة التدوير', subtitle: 'تقارير جهات التدوير المستلمة', icon: FolderCheck, path: '/dashboard/recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-    { title: 'تحليل المخلفات بالذكاء الاصطناعي', subtitle: 'تحليلات دقيقة وتوصيات للحد من المخلفات', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600' },
-    { title: 'تقارير الاستدامة البيئية', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600' },
-    { title: 'تحليل البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-    { title: 'طلب تقارير بيئية', subtitle: 'إرسال طلب تقارير للإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600' },
-    { title: 'الشحنات', subtitle: 'عرض جميع الشحنات', icon: Package, path: '/dashboard/shipments' },
-    { title: 'إدارة الموظفين', subtitle: 'إضافة وإدارة موظفي المنشأة', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
-    { title: 'التقارير', subtitle: 'تقارير الأداء', icon: TrendingUp, path: '/dashboard/reports' },
-  ];
+  // Use centralized quick actions
+  const quickActions = useQuickActions({
+    type: 'generator',
+    handlers: {
+      openDepositDialog: () => setShowDepositDialog(true),
+    },
+  });
 
   return (
     <div className="space-y-6">

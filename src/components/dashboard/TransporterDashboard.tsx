@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import QuickActionsGrid, { QuickAction } from './QuickActionsGrid';
+import QuickActionsGrid from './QuickActionsGrid';
+import { useQuickActions } from '@/hooks/useQuickActions';
 import PartnersView from './PartnersView';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimeline';
@@ -345,28 +346,13 @@ const TransporterDashboard = () => {
   };
 
 
-  const quickActions: QuickAction[] = [
-    { title: 'روابط الإيداع السريع ⚡', subtitle: 'روابط مخصصة لاستقبال الإيداعات', icon: Zap, path: '/dashboard/quick-deposit-links', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600' },
-    { title: 'روابط الشحنات السريعة', subtitle: 'روابط مخصصة لتسجيل الشحنات', icon: Link2, path: '/dashboard/quick-shipment-links', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600' },
-    { title: 'شهادات استلام الشحنات', subtitle: 'إصدار وإدارة شهادات الاستلام', icon: FileText, path: '/dashboard/transporter-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600' },
-    { title: 'عرض توضيحي للملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600' },
-    { title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: () => setShowDepositDialog(true), iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-    { title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600' },
-    { title: 'قوالب العقود', subtitle: 'إنشاء صيغ عقود الجمع والنقل', icon: FileText, path: '/dashboard/contract-templates', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600' },
-    { title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600' },
-    { title: 'أدوات تحليل النقل', subtitle: 'إحصائيات وتحليلات الشحنات', icon: Bot, path: '/dashboard/transporter-ai-tools', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
-    { title: 'تقارير الاستدامة البيئية', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600' },
-    { title: 'تحليل البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600' },
-    { title: 'طلب تقارير بيئية', subtitle: 'إرسال طلب تقارير للإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600' },
-    { title: 'تسجيل شركة', subtitle: 'تسجيل شركة مولدة أو مدورة', icon: Building2, path: '/dashboard/register-company' },
-    { title: 'إدارة السائقين', subtitle: 'إضافة أو تعديل السائقين', icon: Users, path: '/dashboard/transporter-drivers' },
-    { title: 'إدارة الموظفين', subtitle: 'إضافة وإدارة موظفي الشركة', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600' },
-    { title: 'البحث والتصفية', subtitle: 'بحث متقدم عن الشحنات', icon: Search, path: '/dashboard/transporter-shipments' },
-    { title: 'التقرير المجمع', subtitle: 'طباعة تقرير مجمع للشحنات', icon: FileText, path: '/dashboard/reports' },
-    { title: 'الامضاءات والأختام', subtitle: 'رفع امضاء وختم الشركة', icon: Stamp, path: '/dashboard/signatures' },
-    { title: 'تتبع السائقين', subtitle: 'متابعة مواقع السائقين', icon: MapPin, path: '/dashboard/driver-tracking' },
-    { title: 'الشركاء', subtitle: 'عرض الجهات المولدة والمدورة', icon: Factory, path: '/dashboard/partners' },
-  ];
+  // Use centralized quick actions
+  const quickActions = useQuickActions({
+    type: 'transporter',
+    handlers: {
+      openDepositDialog: () => setShowDepositDialog(true),
+    },
+  });
 
   const statCards = [
     { title: 'إجمالي الشحنات', value: stats.total, subtitle: 'جميع الشحنات', icon: FileText },
