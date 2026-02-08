@@ -16,6 +16,7 @@ interface TermsAcceptanceData {
   full_name: string | null;
   organization_name: string | null;
   organization_type: string;
+  organization_logo_url?: string | null;
   terms_version: string;
   accepted_at: string;
   ip_address: string | null;

@@ -15,6 +15,7 @@ interface TermsDocumentPrintProps {
     full_name: string | null;
     organization_name: string | null;
     organization_type: string;
+    organization_logo_url?: string | null;
     terms_version: string;
     accepted_at: string;
     ip_address: string | null;
@@ -88,7 +89,17 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
       <div ref={ref} className="bg-white text-black p-8 max-w-4xl mx-auto" dir="rtl">
         {/* Header */}
         <div className="text-center border-b-2 border-gray-300 pb-6 mb-6">
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center items-center gap-6 mb-4">
+            {/* Organization Logo */}
+            {acceptance.organization_logo_url && (
+              <img 
+                src={acceptance.organization_logo_url} 
+                alt={acceptance.organization_name || 'Logo'} 
+                className="h-16 object-contain"
+                crossOrigin="anonymous"
+              />
+            )}
+            {/* Platform Logo */}
             <img 
               src="/lovable-uploads/d3dbed14-6b0a-4a5a-90b3-de9dbfc586e3.png" 
               alt="I-Recycle Logo" 
