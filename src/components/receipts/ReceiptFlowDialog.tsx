@@ -430,19 +430,66 @@ const ReceiptFlowDialog = ({
                 />
               </div>
 
-              {/* Auto Endorse Switch */}
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-primary" />
-                  <div>
-                    <p className="text-sm font-medium">اعتماد تلقائي بالتوقيع والختم</p>
-                    <p className="text-xs text-muted-foreground">توقيع وختم الشهادة فور إنشائها</p>
+              {/* Endorsement Option */}
+              <div className="space-y-3 p-4 bg-muted/30 rounded-lg border">
+                <Label className="flex items-center gap-2 text-base font-semibold">
+                  <Shield className="w-5 h-5 text-primary" />
+                  خيارات الاعتماد
+                </Label>
+                
+                <div className="grid grid-cols-1 gap-2">
+                  {/* With Signature & Stamp */}
+                  <div 
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      autoEndorse 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setAutoEndorse(true)}
+                  >
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      autoEndorse ? 'border-primary' : 'border-muted-foreground'
+                    }`}>
+                      {autoEndorse && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <PenTool className="w-4 h-4 text-primary" />
+                        <Stamp className="w-4 h-4 text-primary" />
+                        <span className="font-medium text-sm">مع التوقيع والختم الإلكتروني</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        شهادة رسمية معتمدة بالتوقيع والختم (موصى به)
+                      </p>
+                    </div>
+                    <Badge variant="default" className="text-xs">موصى به</Badge>
+                  </div>
+
+                  {/* Without Signature & Stamp */}
+                  <div 
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      !autoEndorse 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-muted hover:border-primary/50'
+                    }`}
+                    onClick={() => setAutoEndorse(false)}
+                  >
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      !autoEndorse ? 'border-primary' : 'border-muted-foreground'
+                    }`}>
+                      {!autoEndorse && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium text-sm">بدون توقيع وختم</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        شهادة استلام بسيطة بدون اعتماد رسمي
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <Switch
-                  checked={autoEndorse}
-                  onCheckedChange={setAutoEndorse}
-                />
               </div>
             </motion.div>
           )}
