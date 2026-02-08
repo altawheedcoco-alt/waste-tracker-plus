@@ -98,3 +98,6 @@ verify_jwt = false
 
 [functions.ai-capacity-planner]
 verify_jwt = false
+
+[functions.gps-device-gateway]
+verify_jwt = false
