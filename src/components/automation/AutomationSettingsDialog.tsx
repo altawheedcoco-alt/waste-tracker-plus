@@ -35,7 +35,7 @@ import {
   Clipboard, ClipboardCheck, ClipboardList, ListChecks, ListTodo,
   CalendarCheck, CalendarClock, Timer, TimerOff, Hourglass,
   Play, Pause, StopCircle, RotateCcw, RotateCw, Repeat, Shuffle,
-  Camera, Calculator, LogOut,
+  Camera, Calculator, LogOut, Crown, Stamp, PenTool, EyeClosed,
   Volume2, VolumeX, Vibrate, BellRing, BellOff, MessageCircle,
   Megaphone, Inbox, SendHorizonal, ArrowUpDown, ArrowLeftRight,
   MoveVertical, Navigation, Compass, Map, PinOff, Locate,
@@ -81,6 +81,7 @@ const categories: AutomationCategory[] = [
   { id: 'security', title: 'الأمان', description: 'إجراءات أمنية تلقائية', icon: Shield, color: 'from-slate-500 to-gray-500' },
   { id: 'ai', title: 'الذكاء الاصطناعي', description: 'ميزات AI المتقدمة', icon: Sparkles, color: 'from-pink-500 to-rose-500' },
   { id: 'integration', title: 'التكامل', description: 'ربط الأنظمة الخارجية', icon: Link, color: 'from-cyan-500 to-blue-500' },
+  { id: 'admin_control', title: 'تحكم المدير', description: 'صلاحيات مدير النظام الحصرية', icon: Crown, color: 'from-amber-500 to-yellow-500' },
 ];
 
 const allAutomationSettings: AutomationSetting[] = [
@@ -253,6 +254,42 @@ const allAutomationSettings: AutomationSetting[] = [
   { id: '148', key: 'auto_email_integration', title: 'ربط البريد', description: 'التكامل مع خدمات البريد', icon: Mail, category: 'integration', enabled: false },
   { id: '149', key: 'auto_webhook_triggers', title: 'محفزات Webhook', description: 'إرسال أحداث للأنظمة الخارجية', icon: Zap, category: 'integration', enabled: false },
   { id: '150', key: 'auto_data_export', title: 'تصدير البيانات', description: 'تصدير دوري للبيانات', icon: Download, category: 'integration', enabled: false },
+
+  // تحكم مدير النظام - صلاحيات حصرية (25 إجراء)
+  // 1️⃣ المراقبة الخفية
+  { id: '151', key: 'admin_invisible_mode', title: 'الوضع الخفي', description: 'مراقبة جميع العمليات دون ظهور اسمك في السجلات للمستخدمين', icon: EyeOff, category: 'admin_control', enabled: true, premium: true },
+  { id: '152', key: 'admin_full_audit_access', title: 'وصول كامل لسجل التدقيق', description: 'عرض جميع السجلات والتعديلات من جميع الجهات', icon: ClipboardList, category: 'admin_control', enabled: true },
+  { id: '153', key: 'admin_realtime_monitoring', title: 'مراقبة لحظية شاملة', description: 'متابعة جميع العمليات والشحنات والسائقين في الوقت الفعلي', icon: Activity, category: 'admin_control', enabled: true },
+  { id: '154', key: 'admin_shadow_login', title: 'الدخول الخفي للحسابات', description: 'الدخول لأي حساب ومراقبته دون علم صاحبه', icon: Eye, category: 'admin_control', enabled: false, premium: true },
+  { id: '155', key: 'admin_activity_alerts', title: 'تنبيهات النشاط المشبوه', description: 'إشعارات فورية عند أي نشاط غير معتاد', icon: AlertTriangle, category: 'admin_control', enabled: true },
+
+  // 2️⃣ التحكم في الجهات
+  { id: '156', key: 'admin_suspend_organization', title: 'إيقاف الجهات مؤقتاً', description: 'إيقاف أي جهة عن العمل لمدة محددة مع إشعارها', icon: Pause, category: 'admin_control', enabled: true },
+  { id: '157', key: 'admin_permanent_ban', title: 'حظر الجهات نهائياً', description: 'حظر جهة بشكل دائم من استخدام المنصة', icon: Ban, category: 'admin_control', enabled: true },
+  { id: '158', key: 'admin_restrict_features', title: 'تقييد الميزات', description: 'تحديد الميزات المتاحة لكل جهة على حدة', icon: Lock, category: 'admin_control', enabled: true },
+  { id: '159', key: 'admin_force_password_reset', title: 'إجبار تغيير كلمة المرور', description: 'إجبار أي مستخدم على تغيير كلمة مروره', icon: KeyRound, category: 'admin_control', enabled: true },
+  { id: '160', key: 'admin_revoke_sessions', title: 'إنهاء جميع الجلسات', description: 'تسجيل خروج إجباري لأي مستخدم أو جهة', icon: LogOut, category: 'admin_control', enabled: true },
+
+  // 3️⃣ الطباعة والختم نيابةً
+  { id: '161', key: 'admin_sign_on_behalf', title: 'التوقيع نيابةً عن الجهات', description: 'التوقيع على المستندات نيابةً عن أي جهة بصلاحية قانونية', icon: PenTool, category: 'admin_control', enabled: true, premium: true },
+  { id: '162', key: 'admin_stamp_on_behalf', title: 'الختم نيابةً عن الجهات', description: 'ختم المستندات بختم أي جهة مسجلة في النظام', icon: Stamp, category: 'admin_control', enabled: true, premium: true },
+  { id: '163', key: 'admin_print_any_document', title: 'طباعة أي مستند', description: 'طباعة جميع المستندات والتقارير لأي جهة', icon: Printer, category: 'admin_control', enabled: true },
+  { id: '164', key: 'admin_issue_certificates', title: 'إصدار الشهادات نيابةً', description: 'إصدار شهادات التدوير والاستلام نيابةً عن الجهات', icon: Award, category: 'admin_control', enabled: true },
+  { id: '165', key: 'admin_override_approvals', title: 'تجاوز الموافقات', description: 'الموافقة على أي طلب دون انتظار الجهة المعنية', icon: CheckCircle2, category: 'admin_control', enabled: true },
+
+  // 4️⃣ التحكم في البيانات
+  { id: '166', key: 'admin_edit_any_shipment', title: 'تعديل أي شحنة', description: 'تعديل بيانات أي شحنة حتى المؤكدة', icon: FileText, category: 'admin_control', enabled: true },
+  { id: '167', key: 'admin_delete_any_record', title: 'حذف أي سجل', description: 'حذف أي سجل من قاعدة البيانات مع الاحتفاظ بنسخة', icon: Trash2, category: 'admin_control', enabled: true },
+  { id: '168', key: 'admin_restore_deleted', title: 'استعادة المحذوفات', description: 'استعادة أي سجل تم حذفه', icon: RotateCcw, category: 'admin_control', enabled: true },
+  { id: '169', key: 'admin_modify_contracts', title: 'تعديل العقود', description: 'تعديل أي عقد حتى الموقعة منها', icon: FileCheck, category: 'admin_control', enabled: true, premium: true },
+  { id: '170', key: 'admin_adjust_balances', title: 'تعديل الأرصدة', description: 'تعديل أرصدة الحسابات يدوياً', icon: Wallet, category: 'admin_control', enabled: true, premium: true },
+
+  // 5️⃣ إشعارات وتنبيهات المدير
+  { id: '171', key: 'admin_receive_all_alerts', title: 'استلام جميع التنبيهات', description: 'استلام نسخة من جميع التنبيهات والإشعارات', icon: BellRing, category: 'admin_control', enabled: true },
+  { id: '172', key: 'admin_critical_only_alerts', title: 'التنبيهات الحرجة فقط', description: 'استلام التنبيهات الحرجة والطارئة فقط', icon: AlertCircle, category: 'admin_control', enabled: false },
+  { id: '173', key: 'admin_terms_acceptance_notify', title: 'إشعار موافقات الشروط', description: 'إشعار عند موافقة أي جهة على الشروط والأحكام', icon: FileCheck, category: 'admin_control', enabled: true },
+  { id: '174', key: 'admin_new_registration_notify', title: 'إشعار التسجيلات الجديدة', description: 'إشعار فوري عند تسجيل أي جهة أو سائق جديد', icon: UserPlus, category: 'admin_control', enabled: true },
+  { id: '175', key: 'admin_daily_summary', title: 'ملخص يومي للمدير', description: 'تقرير يومي شامل بجميع العمليات', icon: BarChart3, category: 'admin_control', enabled: true },
 ];
 
 
@@ -262,13 +299,24 @@ interface AutomationSettingsDialogProps {
 }
 
 const AutomationSettingsDialog = ({ organizationType = 'transporter', children }: AutomationSettingsDialogProps) => {
-  const { organization } = useAuth();
+  const { organization, roles } = useAuth();
+  const isAdmin = roles.includes('admin');
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState<AutomationSetting[]>(allAutomationSettings);
   const [saving, setSaving] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+
+  // Filter categories based on user role - admin_control only visible to admins
+  const visibleCategories = isAdmin 
+    ? categories 
+    : categories.filter(c => c.id !== 'admin_control');
+
+  // Filter settings based on user role
+  const visibleSettings = isAdmin 
+    ? settings 
+    : settings.filter(s => s.category !== 'admin_control');
 
   useEffect(() => {
     if (open && organization?.id) {
@@ -309,7 +357,7 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
     );
   };
 
-  const filteredSettings = settings.filter(s => {
+  const filteredSettings = visibleSettings.filter(s => {
     const matchesCategory = selectedCategory === 'all' || s.category === selectedCategory;
     const matchesSearch = !searchQuery || 
       s.title.includes(searchQuery) || 
@@ -317,8 +365,8 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
     return matchesCategory && matchesSearch;
   });
 
-  const enabledCount = settings.filter(s => s.enabled).length;
-  const totalCount = settings.length;
+  const enabledCount = visibleSettings.filter(s => s.enabled).length;
+  const totalCount = visibleSettings.length;
 
   const getCategorySettings = (categoryId: string) => 
     filteredSettings.filter(s => s.category === categoryId);
@@ -380,7 +428,7 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
             >
               الكل ({totalCount})
             </Badge>
-            {categories.map(cat => (
+            {visibleCategories.map(cat => (
               <Badge
                 key={cat.id}
                 variant={selectedCategory === cat.id ? 'default' : 'outline'}
@@ -396,7 +444,7 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
           {/* Settings List */}
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-4">
-              {categories.map(category => {
+              {visibleCategories.map(category => {
                 const categorySettings = getCategorySettings(category.id);
                 if (categorySettings.length === 0) return null;
 
