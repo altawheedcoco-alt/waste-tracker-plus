@@ -20,6 +20,7 @@ import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 const DriverRouteVisualization = lazy(() => import('@/components/tracking/DriverRouteVisualization'));
 const TrackingModeController = lazy(() => import('@/components/tracking/TrackingModeController'));
+const ShipmentGPSTrackingPanel = lazy(() => import('@/components/tracking/ShipmentGPSTrackingPanel'));
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -391,6 +392,22 @@ const ShipmentDetailsPage = () => {
             onStatusUpdate={fetchShipmentDetails}
           />
         )}
+
+        {/* GPS Vehicle Tracking Panel - Integrated with all parties */}
+        <Suspense fallback={
+          <div className="h-[200px] flex items-center justify-center bg-muted/30 rounded-lg">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        }>
+          <ShipmentGPSTrackingPanel
+            shipmentId={shipment.id}
+            driverId={shipment.driver_id}
+            transporterId={shipment.transporter_id}
+            generatorId={shipment.generator_id}
+            recyclerId={shipment.recycler_id}
+            shipmentStatus={shipment.status}
+          />
+        </Suspense>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Waste Details */}
