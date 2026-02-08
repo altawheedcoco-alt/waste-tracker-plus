@@ -12,7 +12,7 @@ import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPr
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
-import ChatWidget from '@/components/chat/ChatWidget';
+// ChatWidget is now global in App.tsx
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
@@ -384,8 +384,7 @@ const RecyclerDashboard = () => {
         />
       )}
 
-      {/* Chat Widget */}
-      <ChatWidget />
+      {/* Chat Widget - Now global in App.tsx */}
 
       {/* Deposit Dialog */}
       <AddDepositDialog

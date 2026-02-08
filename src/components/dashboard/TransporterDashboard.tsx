@@ -24,7 +24,7 @@ import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import SmartRequestDialog from './SmartRequestDialog';
-import ChatWidget from '@/components/chat/ChatWidget';
+// ChatWidget is now global in App.tsx
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import {
@@ -754,8 +754,7 @@ const TransporterDashboard = () => {
         />
       )}
 
-      {/* Chat Widget */}
-      <ChatWidget />
+      {/* Chat Widget - Now global in App.tsx */}
 
       {/* Deposit Dialog */}
       <AddDepositDialog

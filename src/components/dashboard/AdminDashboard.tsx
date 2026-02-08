@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
-import ChatWidget from '@/components/chat/ChatWidget';
+// ChatWidget is now global in App.tsx
 import SmartRequestDialog from './SmartRequestDialog';
 import AdminDashboardSwitcher from './admin/AdminDashboardSwitcher';
 import {
@@ -314,8 +314,7 @@ const AdminDashboard = () => {
         user={selectedUser}
       />
 
-      {/* Chat Widget */}
-      <ChatWidget />
+      {/* Chat Widget - Now global in App.tsx */}
     </motion.div>
   );
 };
