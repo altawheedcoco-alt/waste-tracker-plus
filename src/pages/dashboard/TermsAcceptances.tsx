@@ -57,6 +57,7 @@ interface TermsAcceptance {
   user_agent: string | null;
   full_name: string | null;
   organization_name: string | null;
+  organization_logo_url?: string | null;
   profile_email?: string;
   profile_phone?: string;
   signer_national_id?: string | null;
@@ -116,9 +117,11 @@ const TermsAcceptances = () => {
 
       if (error) throw error;
 
-      // Fetch profile emails for display
+      // Fetch profile emails and organization logos for display
       const userIds = acceptancesData?.map(a => a.user_id).filter(Boolean) || [];
+      const orgIds = acceptancesData?.map(a => a.organization_id).filter(Boolean) || [];
       let profilesMap: Record<string, { email: string; phone: string | null }> = {};
+      let orgsMap: Record<string, { logo_url: string | null }> = {};
       
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
@@ -131,10 +134,22 @@ const TermsAcceptances = () => {
         });
       }
 
+      if (orgIds.length > 0) {
+        const { data: orgs } = await supabase
+          .from('organizations')
+          .select('id, logo_url')
+          .in('id', orgIds);
+        
+        orgs?.forEach(o => {
+          orgsMap[o.id] = { logo_url: o.logo_url };
+        });
+      }
+
       const enrichedData = acceptancesData?.map(a => ({
         ...a,
         profile_email: profilesMap[a.user_id]?.email,
         profile_phone: profilesMap[a.user_id]?.phone,
+        organization_logo_url: a.organization_id ? orgsMap[a.organization_id]?.logo_url : null,
       })) || [];
 
       setAcceptances(enrichedData);

@@ -22,6 +22,7 @@ export interface ReceiptPrintData {
     address?: string;
     phone?: string;
     commercial_register?: string;
+    logo_url?: string | null;
   } | null;
   transporter: {
     id: string;
@@ -29,6 +30,7 @@ export interface ReceiptPrintData {
     address?: string;
     phone?: string;
     commercial_register?: string;
+    logo_url?: string | null;
   } | null;
   driver: {
     id: string;
@@ -649,6 +651,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
           <div class="parties-grid">
             <div class="party-card">
               <h4>🏭 الجهة المولدة (المسلّم)</h4>
+              ${receipt.generator?.logo_url ? `<img src="${receipt.generator.logo_url}" alt="Logo" style="height: 40px; object-fit: contain; margin-bottom: 8px;" crossOrigin="anonymous" />` : ''}
               <div class="party-name">${receipt.generator?.name || '-'}</div>
               ${receipt.generator?.address ? `<div class="party-details">📍 ${receipt.generator.address}</div>` : ''}
               ${receipt.generator?.phone ? `<div class="party-details">📞 ${receipt.generator.phone}</div>` : ''}
@@ -656,6 +659,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
             </div>
             <div class="party-card">
               <h4>🚛 الجهة الناقلة (المستلم)</h4>
+              ${receipt.transporter?.logo_url ? `<img src="${receipt.transporter.logo_url}" alt="Logo" style="height: 40px; object-fit: contain; margin-bottom: 8px;" crossOrigin="anonymous" />` : ''}
               <div class="party-name">${receipt.transporter?.name || '-'}</div>
               ${receipt.transporter?.address ? `<div class="party-details">📍 ${receipt.transporter.address}</div>` : ''}
               ${receipt.transporter?.phone ? `<div class="party-details">📞 ${receipt.transporter.phone}</div>` : ''}
