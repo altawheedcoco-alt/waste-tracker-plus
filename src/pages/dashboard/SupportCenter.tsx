@@ -5,17 +5,8 @@ import { useSupportTickets, useSupportStats, TicketStatus, TicketPriority, Ticke
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -23,8 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import {
@@ -35,8 +24,6 @@ import {
   Clock,
   CheckCircle2,
   MessageCircle,
-  BarChart3,
-  Filter,
   Bug,
   Lightbulb,
   HelpCircle,
@@ -45,11 +32,11 @@ import {
   AlertCircle,
   Star,
   Users,
-  TrendingUp,
   Timer,
 } from 'lucide-react';
 import TicketDetailDialog from '@/components/support/TicketDetailDialog';
 import CreateTicketDialog from '@/components/support/CreateTicketDialog';
+import AdminSupportCenter from '@/components/support/AdminSupportCenter';
 import BackButton from '@/components/ui/back-button';
 
 const statusConfig: Record<TicketStatus, { label: string; color: string; icon: React.ElementType }> = {
@@ -80,9 +67,29 @@ const categoryConfig: Record<TicketCategory, { label: string; icon: React.Elemen
 const SupportCenter = () => {
   const { roles } = useAuth();
   const isAdmin = roles.includes('admin');
-  const { tickets, isLoading, refetch } = useSupportTickets();
-  const stats = useSupportStats();
 
+  // Show enhanced admin support center for admins
+  if (isAdmin) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        <BackButton />
+        <AdminSupportCenter />
+      </motion.div>
+    );
+  }
+
+  // Regular user support page
+  return <UserSupportPage />;
+};
+
+// Separate component for non-admin users
+const UserSupportPage = () => {
+  const { tickets, isLoading, refetch } = useSupportTickets();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -116,16 +123,12 @@ const SupportCenter = () => {
         <BackButton />
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-white">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
               <Headphones className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">
-                {isAdmin ? 'مركز الدعم الفني' : 'الدعم الفني'}
-              </h1>
-              <p className="text-muted-foreground">
-                {isAdmin ? 'إدارة ومتابعة جميع تذاكر الدعم' : 'تواصل معنا لحل مشكلاتك'}
-              </p>
+              <h1 className="text-2xl font-bold">الدعم الفني</h1>
+              <p className="text-muted-foreground">تواصل مع إدارة النظام لحل مشكلاتك</p>
             </div>
           </div>
           <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
@@ -135,89 +138,27 @@ const SupportCenter = () => {
         </div>
       </div>
 
-      {/* Stats Cards - Admin Only */}
-      {isAdmin && stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">الإجمالي</span>
-              </div>
-              <p className="text-2xl font-bold mt-1">{stats.total}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-blue-500" />
-                <span className="text-sm text-blue-600">مفتوحة</span>
-              </div>
-              <p className="text-2xl font-bold mt-1 text-blue-700">{stats.open}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-yellow-200 bg-yellow-50/50 dark:bg-yellow-950/20">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-yellow-500" />
-                <span className="text-sm text-yellow-600">قيد المعالجة</span>
-              </div>
-              <p className="text-2xl font-bold mt-1 text-yellow-700">{stats.inProgress}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-green-200 bg-green-50/50 dark:bg-green-950/20">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-green-500" />
-                <span className="text-sm text-green-600">تم الحل</span>
-              </div>
-              <p className="text-2xl font-bold mt-1 text-green-700">{stats.resolved}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-red-200 bg-red-50/50 dark:bg-red-950/20">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-500" />
-                <span className="text-sm text-red-600">عاجلة</span>
-              </div>
-              <p className="text-2xl font-bold mt-1 text-red-700">{stats.urgent}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-500" />
-                <span className="text-sm text-amber-600">التقييم</span>
-              </div>
-              <p className="text-2xl font-bold mt-1 text-amber-700">{stats.avgRating} / 5</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Quick Stats for Non-Admin */}
-      {!isAdmin && (
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-blue-500" />
-                <span className="text-muted-foreground">تذاكري المفتوحة</span>
-              </div>
-              <p className="text-3xl font-bold mt-2 text-blue-700">{openTickets}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-red-200 bg-red-50/50 dark:bg-red-950/20">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-500" />
-                <span className="text-muted-foreground">العاجلة</span>
-              </div>
-              <p className="text-3xl font-bold mt-2 text-red-700">{urgentTickets}</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-blue-500" />
+              <span className="text-muted-foreground">تذاكري المفتوحة</span>
+            </div>
+            <p className="text-3xl font-bold mt-2 text-blue-700">{openTickets}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-red-200 bg-red-50/50 dark:bg-red-950/20">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              <span className="text-muted-foreground">العاجلة</span>
+            </div>
+            <p className="text-3xl font-bold mt-2 text-red-700">{urgentTickets}</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Filters */}
       <Card>
@@ -268,6 +209,9 @@ const SupportCenter = () => {
             <MessageCircle className="w-5 h-5" />
             التذاكر ({filteredTickets.length})
           </CardTitle>
+          <CardDescription>
+            جميع التذاكر ترسل مباشرة إلى مدير النظام
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -317,12 +261,6 @@ const SupportCenter = () => {
                           <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
                             {ticket.description}
                           </p>
-                          {isAdmin && ticket.organization && (
-                            <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                              <Users className="w-3 h-3" />
-                              {ticket.organization.name}
-                            </div>
-                          )}
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <Badge className={`${statusConfig[ticket.status].color} text-white flex items-center gap-1`}>
