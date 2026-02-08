@@ -128,16 +128,33 @@ const PartnerLinkingCard = () => {
   // Link partner mutation
   const linkPartnerMutation = useMutation({
     mutationFn: async (code: string) => {
-      if (!organization?.id) throw new Error('لا يوجد منظمة');
+      // التحقق الأولي
+      if (!organization?.id) {
+        throw new Error('يجب تسجيل الدخول أولاً');
+      }
       
-      // Find organization by partner code
+      const trimmedCode = code.trim().toUpperCase();
+      if (trimmedCode.length < 6) {
+        throw new Error('كود الشراكة يجب أن يكون 8 أحرف على الأقل');
+      }
+
+      console.log('🔍 البحث عن المنظمة بالكود:', trimmedCode);
+      
+      // البحث عن المنظمة بالكود
       const { data: partnerOrg, error: findError } = await supabase
         .from('organizations')
         .select('id, name, organization_type')
-        .eq('partner_code', code.toUpperCase())
-        .single();
+        .eq('partner_code', trimmedCode)
+        .maybeSingle();
 
-      if (findError || !partnerOrg) {
+      console.log('📋 نتيجة البحث:', { partnerOrg, findError });
+
+      if (findError) {
+        console.error('❌ خطأ في البحث:', findError);
+        throw new Error('حدث خطأ أثناء البحث عن الشريك');
+      }
+      
+      if (!partnerOrg) {
         throw new Error('كود الشريك غير صحيح أو غير موجود');
       }
 
@@ -145,18 +162,29 @@ const PartnerLinkingCard = () => {
         throw new Error('لا يمكنك ربط منظمتك بنفسها');
       }
 
-      // Check if partnership already exists
-      const { data: existing } = await supabase
+      // التحقق من وجود شراكة سابقة
+      const { data: existingList, error: checkError } = await supabase
         .from('verified_partnerships')
-        .select('id')
-        .or(`and(requester_org_id.eq.${organization.id},partner_org_id.eq.${partnerOrg.id}),and(requester_org_id.eq.${partnerOrg.id},partner_org_id.eq.${organization.id})`)
-        .single();
+        .select('id, status')
+        .or(`and(requester_org_id.eq.${organization.id},partner_org_id.eq.${partnerOrg.id}),and(requester_org_id.eq.${partnerOrg.id},partner_org_id.eq.${organization.id})`);
 
-      if (existing) {
+      console.log('🔗 التحقق من الشراكات السابقة:', { existingList, checkError });
+
+      if (checkError) {
+        console.error('❌ خطأ في التحقق:', checkError);
+        throw new Error('حدث خطأ أثناء التحقق من الشراكات السابقة');
+      }
+
+      if (existingList && existingList.length > 0) {
         throw new Error('الشراكة موجودة مسبقاً');
       }
 
-      // Create partnership
+      // إنشاء الشراكة
+      console.log('✨ إنشاء شراكة جديدة:', {
+        requester_org_id: organization.id,
+        partner_org_id: partnerOrg.id,
+      });
+
       const { data, error } = await supabase
         .from('verified_partnerships')
         .insert({
@@ -168,16 +196,25 @@ const PartnerLinkingCard = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ خطأ في إنشاء الشراكة:', error);
+        if (error.code === '42501') {
+          throw new Error('ليس لديك صلاحية لإنشاء شراكات. تأكد من أنك مسؤول المنظمة.');
+        }
+        throw new Error(`فشل في إنشاء الشراكة: ${error.message}`);
+      }
+
+      console.log('✅ تم إنشاء الشراكة:', data);
       return { partnership: data, partnerName: partnerOrg.name };
     },
     onSuccess: (result) => {
-      toast.success(`تم ربط الشراكة مع ${result.partnerName} بنجاح`);
+      toast.success(`تم ربط الشراكة مع ${result.partnerName} بنجاح 🎉`);
       queryClient.invalidateQueries({ queryKey: ['verified-partnerships'] });
       setPartnerCode('');
       setShowLinkDialog(false);
     },
     onError: (error: Error) => {
+      console.error('❌ خطأ في عملية الربط:', error);
       toast.error(error.message);
     },
   });
@@ -425,16 +462,19 @@ const PartnerLinkingCard = () => {
               <Input
                 id="partner-code"
                 value={partnerCode}
-                onChange={(e) => setPartnerCode(e.target.value.toUpperCase())}
-                placeholder="أدخل كود الشريك (8 أحرف)"
-                className="font-mono text-center tracking-wider"
-                maxLength={8}
+                onChange={(e) => setPartnerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                placeholder="أدخل كود الشريك"
+                className="font-mono text-center tracking-wider text-lg"
+                maxLength={10}
                 dir="ltr"
               />
+              <p className="text-xs text-muted-foreground text-right">
+                الكود يتكون من 8 أحرف وأرقام (مثال: 8AAF2C90)
+              </p>
             </div>
             <Button
               onClick={() => linkPartnerMutation.mutate(partnerCode)}
-              disabled={partnerCode.length < 8 || linkPartnerMutation.isPending}
+              disabled={partnerCode.length < 6 || linkPartnerMutation.isPending}
               className="w-full"
             >
               {linkPartnerMutation.isPending ? (
