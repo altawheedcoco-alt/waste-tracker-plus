@@ -260,7 +260,7 @@ const ShipmentCard = ({
                       showLabel={false}
                     />
                   )}
-                  {/* Quick Receipt Button - only for transporter */}
+{/* Quick Receipt Button - only for transporter */}
                   {isTransporter && (
                     <QuickReceiptButton
                       shipment={{
@@ -271,6 +271,7 @@ const ShipmentCard = ({
                         generator: shipment.generator,
                         recycler: shipment.recycler,
                         driver_id: shipment.driver_id || null,
+                        has_receipt: shipment.has_receipt,
                       }}
                       onSuccess={onStatusChange}
                       variant="outline"
@@ -362,11 +363,11 @@ const ShipmentCard = ({
                 </div>
                 <div className="flex-1 text-right">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
-                    {/* Receipt Issued Badge - Show to Generator */}
-                    {shipment.has_receipt && isGenerator && (
+                    {/* Receipt Issued Badge - Show to Generator and Transporter */}
+                    {shipment.has_receipt && (isGenerator || isTransporter) && (
                       <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-700 gap-1">
                         <FileCheck className="w-3 h-3" />
-                        تم استلام الشحنة
+                        {isTransporter ? 'تم إصدار شهادة استلام' : 'تم استلام الشحنة'}
                       </Badge>
                     )}
                     {/* Recycling Report Issued Badge */}
@@ -469,11 +470,11 @@ const ShipmentCard = ({
                 {/* Right Side - Shipment Info */}
                 <div className="flex-1 text-right order-1 sm:order-2">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
-                    {/* Receipt Issued Badge - Show to Generator */}
-                    {shipment.has_receipt && isGenerator && (
+                    {/* Receipt Issued Badge - Show to Generator and Transporter */}
+                    {shipment.has_receipt && (isGenerator || isTransporter) && (
                       <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-300 dark:border-blue-700 gap-1.5">
                         <FileCheck className="w-4 h-4" />
-                        تم استلام الشحنة
+                        {isTransporter ? 'تم إصدار شهادة استلام' : 'تم استلام الشحنة'}
                       </Badge>
                     )}
                     {/* Recycling Report Issued Badge - Prominent indicator */}
@@ -611,6 +612,7 @@ const ShipmentCard = ({
                           generator: shipment.generator,
                           recycler: shipment.recycler,
                           driver_id: shipment.driver_id || null,
+                          has_receipt: shipment.has_receipt,
                         }}
                         onSuccess={onStatusChange}
                         variant="outline"
