@@ -8,7 +8,7 @@ export interface TermsSection {
   content: string[];
 }
 
-export type OrganizationType = 'generator' | 'transporter' | 'recycler';
+export type OrganizationType = 'generator' | 'transporter' | 'recycler' | 'disposal';
 
 // ============= شروط الجهات الناقلة =============
 export const transporterTermsSections: TermsSection[] = [

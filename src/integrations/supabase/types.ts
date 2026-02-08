@@ -9206,7 +9206,7 @@ export type Database = {
         | "view_settings"
         | "manage_settings"
         | "full_access"
-      organization_type: "generator" | "transporter" | "recycler"
+      organization_type: "generator" | "transporter" | "recycler" | "disposal"
       shipment_status:
         | "new"
         | "approved"
@@ -9412,7 +9412,7 @@ export const Constants = {
         "manage_settings",
         "full_access",
       ],
-      organization_type: ["generator", "transporter", "recycler"],
+      organization_type: ["generator", "transporter", "recycler", "disposal"],
       shipment_status: [
         "new",
         "approved",

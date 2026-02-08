@@ -27,7 +27,7 @@
  interface Organization {
    id: string;
    name: string;
-   organization_type: 'generator' | 'transporter' | 'recycler';
+   organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
    city: string | null;
    is_verified: boolean;
    logo_url: string | null;

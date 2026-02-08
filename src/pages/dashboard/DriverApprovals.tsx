@@ -62,7 +62,7 @@ interface PendingDriver {
 interface Organization {
   id: string;
   name: string;
-  organization_type: 'generator' | 'transporter' | 'recycler';
+  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
 }
 
 const DriverApprovals = () => {
