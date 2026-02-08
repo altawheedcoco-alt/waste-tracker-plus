@@ -17,6 +17,7 @@ import {
   Loader2,
   ArrowRight,
   AlertTriangle,
+  Phone,
 } from 'lucide-react';
 import CreateTicketDialog from './CreateTicketDialog';
 import TicketDetailDialog from './TicketDetailDialog';
@@ -109,6 +110,14 @@ const SupportWidget = () => {
                   <p className="text-xs opacity-80">نحن هنا لمساعدتك</p>
                 </div>
               </div>
+              {/* Direct Call Button */}
+              <a 
+                href="tel:+201009671329"
+                className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-sm font-medium"
+              >
+                <Phone className="h-4 w-4" />
+                اتصل الآن: 01009671329
+              </a>
             </div>
 
             {/* Content */}
