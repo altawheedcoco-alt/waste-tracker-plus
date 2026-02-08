@@ -101,3 +101,6 @@ verify_jwt = false
 
 [functions.gps-device-gateway]
 verify_jwt = false
+
+[functions.analyze-call]
+verify_jwt = false
