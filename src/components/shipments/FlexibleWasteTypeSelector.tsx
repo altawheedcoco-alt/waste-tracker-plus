@@ -19,19 +19,21 @@ type WasteType = Database['public']['Enums']['waste_type'];
 // ============================================
 
 export interface MainWasteCategory {
-  id: WasteType;
+  id: string; // معرف داخلي فريد
+  dbType: WasteType; // نوع قاعدة البيانات
   name: string;
   nameShort: string;
   code: string;
   isHazardous: boolean;
   keywords: string[]; // كلمات مفتاحية للتعرف التلقائي
-  icon?: 'wood' | 'plastic' | 'paper' | 'metal' | 'glass' | 'organic' | 'chemical' | 'medical' | 'electronic' | 'construction' | 'other';
+  icon?: 'wood' | 'plastic' | 'paper' | 'metal' | 'glass' | 'organic' | 'chemical' | 'medical' | 'electronic' | 'construction' | 'other' | 'food';
 }
 
 // الفئات الرئيسية للمخلفات غير الخطرة
 export const mainNonHazardousCategories: MainWasteCategory[] = [
   {
-    id: 'organic',
+    id: 'wood',
+    dbType: 'organic',
     name: 'أخشاب',
     nameShort: 'خشب',
     code: 'WD',
@@ -40,7 +42,41 @@ export const mainNonHazardousCategories: MainWasteCategory[] = [
     icon: 'wood',
   },
   {
+    id: 'food_factory',
+    dbType: 'organic',
+    name: 'مخلفات مصانع غذائية',
+    nameShort: 'غذائي',
+    code: 'FD',
+    isHazardous: false,
+    keywords: [
+      // ألبان ومشتقاتها
+      'لبن', 'البان', 'حليب', 'زبادي', 'جبنة', 'جبن', 'زبدة', 'قشطة', 'ايس كريم', 'مثلجات',
+      // مشروبات
+      'بن', 'قهوة', 'كاكاو', 'نسكافيه', 'شاي', 'عصير', 'مشروبات',
+      // أغذية أطفال
+      'سيريلاك', 'cerelac', 'رضاعة', 'اغذية اطفال', 'بيبي',
+      // توابل ومنكهات
+      'ماجي', 'maggi', 'مرقة', 'توابل', 'بهارات', 'ملح', 'سكر',
+      // أعلاف
+      'علف', 'اعلاف', 'علف مخلط', 'علف زراعي', 'علف حيواني', 'علف دواجن', 'علف ماشية', 'ذرة علف', 'صويا', 'كسب',
+      // حبوب ومطحونات
+      'دقيق', 'طحين', 'قمح', 'ارز', 'شعير', 'ذرة', 'فول', 'عدس', 'حمص',
+      // زيوت
+      'زيت طعام', 'زيت نباتي', 'زيت ذرة', 'زيت زيتون', 'سمن',
+      // مخبوزات وحلويات
+      'خبز', 'بسكويت', 'كيك', 'شوكولاتة', 'حلويات', 'سناكس', 'شيبسي', 'مقرمشات',
+      // معلبات
+      'معلبات', 'صلصة', 'طماطم', 'فول مدمس', 'تونة', 'سردين',
+      // لحوم ودواجن
+      'لحوم', 'لانشون', 'سجق', 'برجر', 'دجاج', 'دواجن',
+      // منتجات غذائية عامة
+      'غذائي', 'غذائية', 'طعام', 'اكل', 'مأكولات', 'منتج غذائي', 'مصنع غذائي', 'food', 'expired food', 'منتهي الصلاحية'
+    ],
+    icon: 'food',
+  },
+  {
     id: 'plastic',
+    dbType: 'plastic',
     name: 'بلاستيك',
     nameShort: 'بلاستيك',
     code: 'PL',
@@ -50,6 +86,7 @@ export const mainNonHazardousCategories: MainWasteCategory[] = [
   },
   {
     id: 'paper',
+    dbType: 'paper',
     name: 'ورق وكرتون',
     nameShort: 'ورق',
     code: 'PA',
@@ -59,6 +96,7 @@ export const mainNonHazardousCategories: MainWasteCategory[] = [
   },
   {
     id: 'metal',
+    dbType: 'metal',
     name: 'معادن',
     nameShort: 'معادن',
     code: 'MT',
@@ -68,6 +106,7 @@ export const mainNonHazardousCategories: MainWasteCategory[] = [
   },
   {
     id: 'glass',
+    dbType: 'glass',
     name: 'زجاج',
     nameShort: 'زجاج',
     code: 'GL',
@@ -77,6 +116,7 @@ export const mainNonHazardousCategories: MainWasteCategory[] = [
   },
   {
     id: 'construction',
+    dbType: 'construction',
     name: 'مخلفات بناء وهدم',
     nameShort: 'بناء',
     code: 'CN',
@@ -86,6 +126,7 @@ export const mainNonHazardousCategories: MainWasteCategory[] = [
   },
   {
     id: 'other',
+    dbType: 'other',
     name: 'مخلفات متنوعة',
     nameShort: 'متنوع',
     code: 'OT',
@@ -99,6 +140,7 @@ export const mainNonHazardousCategories: MainWasteCategory[] = [
 export const mainHazardousCategories: MainWasteCategory[] = [
   {
     id: 'chemical',
+    dbType: 'chemical',
     name: 'مخلفات كيميائية',
     nameShort: 'كيميائي',
     code: 'CH',
@@ -108,6 +150,7 @@ export const mainHazardousCategories: MainWasteCategory[] = [
   },
   {
     id: 'electronic',
+    dbType: 'electronic',
     name: 'مخلفات إلكترونية',
     nameShort: 'إلكتروني',
     code: 'EL',
@@ -117,6 +160,7 @@ export const mainHazardousCategories: MainWasteCategory[] = [
   },
   {
     id: 'medical',
+    dbType: 'medical',
     name: 'مخلفات طبية',
     nameShort: 'طبي',
     code: 'MD',
@@ -159,6 +203,12 @@ export const getHazardLevel = (categoryId: string): 'hazardous' | 'non_hazardous
   return isHazardousCategory(categoryId) ? 'hazardous' : 'non_hazardous';
 };
 
+// الحصول على نوع قاعدة البيانات من معرف الفئة
+export const getDbTypeFromCategoryId = (categoryId: string): WasteType => {
+  const category = allMainCategories.find(c => c.id === categoryId);
+  return category?.dbType ?? 'other';
+};
+
 // ============================================
 // المكون الرئيسي
 // ============================================
@@ -168,7 +218,8 @@ const MAX_RECENT_ITEMS = 20;
 
 interface RecentDescription {
   description: string;
-  categoryId: WasteType;
+  categoryId: string; // Internal category ID (e.g., 'wood', 'food_factory')
+  dbType: WasteType; // Database type (e.g., 'organic', 'plastic')
   usedAt: string;
   count: number;
 }
@@ -182,7 +233,7 @@ const getRecentDescriptions = (): RecentDescription[] => {
   }
 };
 
-const saveRecentDescription = (description: string, categoryId: WasteType) => {
+const saveRecentDescription = (description: string, categoryId: string, dbType: WasteType) => {
   const recent = getRecentDescriptions();
   const existing = recent.find(r => r.description.toLowerCase() === description.toLowerCase());
   
@@ -193,6 +244,7 @@ const saveRecentDescription = (description: string, categoryId: WasteType) => {
     recent.unshift({
       description,
       categoryId,
+      dbType,
       usedAt: new Date().toISOString(),
       count: 1,
     });
@@ -266,8 +318,9 @@ const FlexibleWasteTypeSelector = ({ value, onChange }: FlexibleWasteTypeSelecto
     const category = allMainCategories.find(c => c.id === recent.categoryId);
     if (category) {
       const label = `${category.code} - ${recent.description}`;
-      onChange(category.id, getHazardLevel(category.id), label);
-      saveRecentDescription(recent.description, category.id);
+      // Use dbType for database, category.id for internal reference
+      onChange(category.dbType, getHazardLevel(category.id), label);
+      saveRecentDescription(recent.description, category.id, category.dbType);
       setOpen(false);
       setSearchQuery('');
       setCustomDescription('');
@@ -288,8 +341,9 @@ const FlexibleWasteTypeSelector = ({ value, onChange }: FlexibleWasteTypeSelecto
     }
 
     const label = `${selectedCategory.code} - ${description}`;
-    onChange(selectedCategory.id, getHazardLevel(selectedCategory.id), label);
-    saveRecentDescription(description, selectedCategory.id);
+    // Use dbType for database, selectedCategory.id for internal reference
+    onChange(selectedCategory.dbType, getHazardLevel(selectedCategory.id), label);
+    saveRecentDescription(description, selectedCategory.id, selectedCategory.dbType);
     setRecentDescriptions(getRecentDescriptions());
     setOpen(false);
     setSearchQuery('');
@@ -304,8 +358,9 @@ const FlexibleWasteTypeSelector = ({ value, onChange }: FlexibleWasteTypeSelecto
 
     const detected = detectCategoryFromDescription(query) || mainNonHazardousCategories.find(c => c.id === 'other')!;
     const label = `${detected.code} - ${query}`;
-    onChange(detected.id, getHazardLevel(detected.id), label);
-    saveRecentDescription(query, detected.id);
+    // Use dbType for database, detected.id for internal reference
+    onChange(detected.dbType, getHazardLevel(detected.id), label);
+    saveRecentDescription(query, detected.id, detected.dbType);
     setRecentDescriptions(getRecentDescriptions());
     setOpen(false);
     setSearchQuery('');
