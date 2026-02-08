@@ -86,7 +86,18 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
     };
 
     return (
-      <div ref={ref} className="bg-white text-black p-6 max-w-4xl mx-auto" dir="rtl" style={{ fontFamily: 'Cairo, sans-serif' }}>
+      <div 
+        ref={ref} 
+        className="bg-white text-black mx-auto print:m-0" 
+        dir="rtl" 
+        style={{ 
+          fontFamily: 'Cairo, sans-serif',
+          width: '210mm',
+          minHeight: '297mm',
+          padding: '15mm 20mm',
+          boxSizing: 'border-box'
+        }}
+      >
         {/* Header */}
         <div className="text-center border-b-2 border-gray-300 pb-4 mb-4">
           <div className="flex justify-center items-center gap-4 mb-3">

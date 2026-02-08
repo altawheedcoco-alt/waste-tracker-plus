@@ -130,21 +130,72 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     }
 
     const defaultStyles = `
-      * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-      body { padding: 20px; direction: rtl; background: white; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: right; font-size: 11px; }
-      th { background-color: #f5f5f5; }
-      @media print { body { padding: 0; } }
+      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+      
+      @page {
+        size: A4;
+        margin: 15mm 20mm;
+      }
+      
+      * { 
+        margin: 0; 
+        padding: 0; 
+        box-sizing: border-box; 
+        font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+      }
+      
+      body { 
+        direction: rtl; 
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
+      table { 
+        width: 100%; 
+        border-collapse: collapse; 
+      }
+      
+      th, td { 
+        border: 1px solid #ddd; 
+        padding: 6px 8px; 
+        text-align: right; 
+        font-size: 11px; 
+      }
+      
+      th { 
+        background-color: #f5f5f5 !important; 
+      }
+      
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      
+      .print\\:break-inside-avoid {
+        break-inside: avoid;
+      }
+      
+      @media print { 
+        body { 
+          padding: 0; 
+          margin: 0;
+        }
+        
+        .no-print {
+          display: none !important;
+        }
+      }
     `;
 
     const content = element.innerHTML;
     printWindow.document.write(`
       <!DOCTYPE html>
-      <html dir="rtl">
+      <html dir="rtl" lang="ar">
         <head>
           <meta charset="UTF-8">
-          <title>طباعة</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>طباعة الوثيقة</title>
           <style>${styles || defaultStyles}</style>
         </head>
         <body>${content}</body>
@@ -152,9 +203,10 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     `);
     printWindow.document.close();
     
+    // Wait for fonts and images to load
     setTimeout(() => {
       printWindow.print();
-    }, 250);
+    }, 500);
   }, []);
 
   return { 
