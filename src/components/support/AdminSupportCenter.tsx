@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SupportAnalyticsDashboard from './SupportAnalyticsDashboard';
 import {
   Select,
   SelectContent,
@@ -202,6 +203,10 @@ const AdminSupportCenter = () => {
             <MessageSquare className="h-4 w-4" />
             التذاكر ({tickets.length})
           </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-2">
+            <TrendingUp className="h-4 w-4" />
+            التحليلات
+          </TabsTrigger>
           <TabsTrigger value="replies" className="gap-2">
             <Zap className="h-4 w-4" />
             الردود الجاهزة
@@ -276,6 +281,10 @@ const AdminSupportCenter = () => {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-4">
+          <SupportAnalyticsDashboard />
         </TabsContent>
 
         <TabsContent value="replies" className="mt-4">
