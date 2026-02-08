@@ -7740,6 +7740,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "shipments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "shipments_generator_id_fkey"
             columns: ["generator_id"]
             isOneToOne: false
