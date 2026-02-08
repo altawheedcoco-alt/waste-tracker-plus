@@ -2264,6 +2264,107 @@ export type Database = {
           },
         ]
       }
+      disposal_certificates: {
+        Row: {
+          certificate_number: string
+          created_at: string
+          disposal_facility_id: string | null
+          disposal_method: string | null
+          environmental_compliance_score: number | null
+          expiry_date: string | null
+          id: string
+          issue_date: string
+          issued_by: string | null
+          notes: string | null
+          operation_id: string | null
+          organization_id: string | null
+          pdf_url: string | null
+          qr_code_url: string | null
+          quantity: number | null
+          unit: string | null
+          updated_at: string
+          verification_code: string | null
+          verified: boolean | null
+          waste_description: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          certificate_number: string
+          created_at?: string
+          disposal_facility_id?: string | null
+          disposal_method?: string | null
+          environmental_compliance_score?: number | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          notes?: string | null
+          operation_id?: string | null
+          organization_id?: string | null
+          pdf_url?: string | null
+          qr_code_url?: string | null
+          quantity?: number | null
+          unit?: string | null
+          updated_at?: string
+          verification_code?: string | null
+          verified?: boolean | null
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          certificate_number?: string
+          created_at?: string
+          disposal_facility_id?: string | null
+          disposal_method?: string | null
+          environmental_compliance_score?: number | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          notes?: string | null
+          operation_id?: string | null
+          organization_id?: string | null
+          pdf_url?: string | null
+          qr_code_url?: string | null
+          quantity?: number | null
+          unit?: string | null
+          updated_at?: string
+          verification_code?: string | null
+          verified?: boolean | null
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_certificates_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_certificates_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disposal_facilities: {
         Row: {
           accepted_hazard_levels: string[] | null
@@ -2298,6 +2399,7 @@ export type Database = {
           name_en: string | null
           notes: string | null
           operating_hours: Json | null
+          organization_id: string | null
           phone: string | null
           phone_secondary: string | null
           photos: Json | null
@@ -2344,6 +2446,7 @@ export type Database = {
           name_en?: string | null
           notes?: string | null
           operating_hours?: Json | null
+          organization_id?: string | null
           phone?: string | null
           phone_secondary?: string | null
           photos?: Json | null
@@ -2390,6 +2493,7 @@ export type Database = {
           name_en?: string | null
           notes?: string | null
           operating_hours?: Json | null
+          organization_id?: string | null
           phone?: string | null
           phone_secondary?: string | null
           photos?: Json | null
@@ -2403,7 +2507,22 @@ export type Database = {
           verified_by?: string | null
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "disposal_facilities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_facilities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       disposal_facility_reviews: {
         Row: {
@@ -2462,6 +2581,208 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposal_incoming_requests: {
+        Row: {
+          created_at: string
+          disposal_facility_id: string | null
+          estimated_quantity: number | null
+          hazard_level: string | null
+          id: string
+          notes: string | null
+          preferred_date: string | null
+          priority: string | null
+          requesting_organization_id: string | null
+          responded_at: string | null
+          responded_by: string | null
+          response_notes: string | null
+          scheduled_date: string | null
+          shipment_id: string | null
+          status: string | null
+          unit: string | null
+          updated_at: string
+          waste_description: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          disposal_facility_id?: string | null
+          estimated_quantity?: number | null
+          hazard_level?: string | null
+          id?: string
+          notes?: string | null
+          preferred_date?: string | null
+          priority?: string | null
+          requesting_organization_id?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          scheduled_date?: string | null
+          shipment_id?: string | null
+          status?: string | null
+          unit?: string | null
+          updated_at?: string
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          disposal_facility_id?: string | null
+          estimated_quantity?: number | null
+          hazard_level?: string | null
+          id?: string
+          notes?: string | null
+          preferred_date?: string | null
+          priority?: string | null
+          requesting_organization_id?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          scheduled_date?: string | null
+          shipment_id?: string | null
+          status?: string | null
+          unit?: string | null
+          updated_at?: string
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_incoming_requests_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_incoming_requests_requesting_organization_id_fkey"
+            columns: ["requesting_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_incoming_requests_requesting_organization_id_fkey"
+            columns: ["requesting_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_incoming_requests_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposal_operations: {
+        Row: {
+          certificate_number: string | null
+          certificate_url: string | null
+          cost: number | null
+          created_at: string
+          currency: string | null
+          disposal_date: string
+          disposal_facility_id: string | null
+          disposal_method: string | null
+          environmental_impact_score: number | null
+          hazard_level: string | null
+          id: string
+          manifest_number: string | null
+          notes: string | null
+          operation_type: string
+          organization_id: string | null
+          quantity: number
+          receiving_officer: string | null
+          shipment_id: string | null
+          status: string | null
+          unit: string | null
+          updated_at: string
+          waste_description: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          certificate_number?: string | null
+          certificate_url?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          disposal_date?: string
+          disposal_facility_id?: string | null
+          disposal_method?: string | null
+          environmental_impact_score?: number | null
+          hazard_level?: string | null
+          id?: string
+          manifest_number?: string | null
+          notes?: string | null
+          operation_type?: string
+          organization_id?: string | null
+          quantity: number
+          receiving_officer?: string | null
+          shipment_id?: string | null
+          status?: string | null
+          unit?: string | null
+          updated_at?: string
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          certificate_number?: string | null
+          certificate_url?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          disposal_date?: string
+          disposal_facility_id?: string | null
+          disposal_method?: string | null
+          environmental_impact_score?: number | null
+          hazard_level?: string | null
+          id?: string
+          manifest_number?: string | null
+          notes?: string | null
+          operation_type?: string
+          organization_id?: string | null
+          quantity?: number
+          receiving_officer?: string | null
+          shipment_id?: string | null
+          status?: string | null
+          unit?: string | null
+          updated_at?: string
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_operations_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_operations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_operations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_operations_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
