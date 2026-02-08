@@ -9224,6 +9224,10 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      user_belongs_to_organization: {
+        Args: { _org_id: string }
+        Returns: boolean
+      }
       validate_api_key: {
         Args: { p_key_hash: string }
         Returns: {
