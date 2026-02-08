@@ -71,7 +71,6 @@ const MyLocation = lazy(() => import("./pages/dashboard/MyLocation"));
 const RecyclingCertificates = lazy(() => import("./pages/dashboard/RecyclingCertificates"));
 const IssueRecyclingCertificates = lazy(() => import("./pages/dashboard/IssueRecyclingCertificates"));
 const Settings = lazy(() => import("./pages/dashboard/Settings"));
-const AppearanceSettings = lazy(() => import("./pages/dashboard/AppearanceSettings"));
 const ReportsGuide = lazy(() => import("./pages/dashboard/ReportsGuide"));
 const AboutPlatform = lazy(() => import("./pages/dashboard/AboutPlatform"));
 const DriverProfile = lazy(() => import("./pages/dashboard/DriverProfile"));
@@ -230,7 +229,6 @@ const AppRoutes = memo(() => (
     <Route path="/dashboard/recycling-certificates" element={<RecyclingCertificates />} />
     <Route path="/dashboard/issue-recycling-certificates" element={<IssueRecyclingCertificates />} />
     <Route path="/dashboard/settings" element={<Settings />} />
-        <Route path="/dashboard/appearance" element={<AppearanceSettings />} />
     <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
     <Route path="/dashboard/reports-guide" element={<ReportsGuide />} />
     <Route path="/dashboard/driver-profile" element={<DriverProfile />} />

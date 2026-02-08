@@ -16,7 +16,8 @@ import {
   Shield,
   FileText,
   Lock,
-  Zap
+  Zap,
+  Brush
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -33,6 +34,7 @@ import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySe
 import OrganizationTermsSettings from '@/components/settings/OrganizationTermsSettings';
 import TwoFactorSetup from '@/components/security/TwoFactorSetup';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import AdvancedAppearanceSettings from '@/components/settings/AdvancedAppearanceSettings';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -146,7 +148,7 @@ const Settings = () => {
       <Tabs defaultValue="themes" className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid overflow-x-auto",
-          isTransporter ? "grid-cols-9" : "grid-cols-8"
+          isTransporter ? "grid-cols-10" : "grid-cols-9"
         )}>
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
@@ -164,6 +166,12 @@ const Settings = () => {
             <Eye className="h-4 w-4" />
             <span className="hidden sm:inline">العرض</span>
           </TabsTrigger>
+          {isTransporter && (
+            <TabsTrigger value="advanced-appearance" className="gap-2">
+              <Brush className="h-4 w-4" />
+              <span className="hidden sm:inline">الهوية البصرية</span>
+            </TabsTrigger>
+          )}
           <TabsTrigger value="sounds" className="gap-2">
             <Volume2 className="h-4 w-4" />
             <span className="hidden sm:inline">الأصوات</span>
@@ -553,6 +561,13 @@ const Settings = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Advanced Appearance Tab - Only for Transporters */}
+        {isTransporter && (
+          <TabsContent value="advanced-appearance" className="space-y-6">
+            <AdvancedAppearanceSettings />
+          </TabsContent>
+        )}
 
         {/* Sounds Tab */}
         <TabsContent value="sounds" className="space-y-6">
