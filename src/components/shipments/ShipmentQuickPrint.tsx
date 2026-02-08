@@ -168,57 +168,68 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
   const fetchShipmentDetails = async () => {
     setLoading(true);
     try {
-      // Fetch shipment and logs in parallel
-      const [shipmentResult, logsResult] = await Promise.all([
-        supabase
-          .from('shipments')
-          .select(`
-            id,
-            shipment_number,
-            waste_type,
-            quantity,
-            unit,
-            status,
-            created_at,
-            pickup_address,
-            delivery_address,
-            pickup_date,
-            expected_delivery_date,
-            notes,
-            generator_notes,
-            recycler_notes,
-            waste_description,
-            hazard_level,
-            packaging_method,
-            disposal_method,
-            approved_at,
-            collection_started_at,
-            in_transit_at,
-            delivered_at,
-            confirmed_at,
-            manual_driver_name,
-            manual_vehicle_plate,
-            generator:organizations!shipments_generator_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, environmental_license, wmra_license, establishment_registration, registered_activity),
-            recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, environmental_license, wmra_license, establishment_registration, registered_activity, ida_license, industrial_registry, license_number),
-            transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, wmra_license, establishment_registration, registered_activity, land_transport_license),
-            driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
-          `)
-          .eq('id', shipmentId)
-          .single(),
-        supabase
-          .from('shipment_logs')
-          .select(`
-            id,
-            status,
-            notes,
-            created_at,
-            changed_by:profiles(full_name)
-          `)
-          .eq('shipment_id', shipmentId)
-          .order('created_at', { ascending: true })
-      ]);
+      // Determine if shipmentId is UUID or shipment_number
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(shipmentId);
+      const filterColumn = isUUID ? 'id' : 'shipment_number';
+      
+      // First fetch shipment to get UUID for logs query
+      const shipmentResult = await supabase
+        .from('shipments')
+        .select(`
+          id,
+          shipment_number,
+          waste_type,
+          quantity,
+          unit,
+          status,
+          created_at,
+          pickup_address,
+          delivery_address,
+          pickup_date,
+          expected_delivery_date,
+          notes,
+          generator_notes,
+          recycler_notes,
+          waste_description,
+          hazard_level,
+          packaging_method,
+          disposal_method,
+          approved_at,
+          collection_started_at,
+          in_transit_at,
+          delivered_at,
+          confirmed_at,
+          manual_driver_name,
+          manual_vehicle_plate,
+          generator:organizations!shipments_generator_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, environmental_license, wmra_license, establishment_registration, registered_activity),
+          recycler:organizations!shipments_recycler_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, environmental_license, wmra_license, establishment_registration, registered_activity, ida_license, industrial_registry, license_number),
+          transporter:organizations!shipments_transporter_id_fkey(name, email, phone, address, city, representative_name, client_code, stamp_url, signature_url, commercial_register, tax_card, environmental_approval_number, wmra_license, establishment_registration, registered_activity, land_transport_license),
+          driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
+        `)
+        .eq(filterColumn, shipmentId)
+        .maybeSingle();
 
       if (shipmentResult.error) throw shipmentResult.error;
+      if (!shipmentResult.data) {
+        console.error('Shipment not found');
+        setShipment(null);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch logs using the actual UUID
+      const logsResult = await supabase
+        .from('shipment_logs')
+        .select(`
+          id,
+          status,
+          notes,
+          created_at,
+          changed_by:profiles(full_name)
+        `)
+        .eq('shipment_id', shipmentResult.data.id)
+        .order('created_at', { ascending: true });
+
       setShipment(shipmentResult.data as unknown as ShipmentData);
       
       if (!logsResult.error && logsResult.data) {
