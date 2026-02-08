@@ -15,6 +15,7 @@ import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPr
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartRequestDialog from './SmartRequestDialog';
+import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 // ChatWidget is now global in App.tsx
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 
@@ -307,6 +308,9 @@ const GeneratorDashboard = () => {
           </motion.div>
         ))}
       </ResponsiveGrid>
+
+      {/* Pending Approvals Widget - For Generator */}
+      <PendingApprovalsWidget />
 
       {/* Quick Actions */}
       <QuickActionsGrid
