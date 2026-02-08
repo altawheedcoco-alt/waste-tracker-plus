@@ -110,6 +110,12 @@ const OperationsDashboard = lazy(() => import("./pages/dashboard/OperationsDashb
 const ActivityLogPage = lazy(() => import("./pages/dashboard/ActivityLogPage"));
 const GPSSettings = lazy(() => import("./pages/dashboard/GPSSettings"));
 const DisposalFacilities = lazy(() => import("./pages/dashboard/DisposalFacilities"));
+const DisposalDashboard = lazy(() => import("./pages/dashboard/disposal/DisposalDashboard"));
+const DisposalOperations = lazy(() => import("./pages/dashboard/disposal/DisposalOperations"));
+const NewDisposalOperation = lazy(() => import("./pages/dashboard/disposal/NewDisposalOperation"));
+const DisposalIncomingRequests = lazy(() => import("./pages/dashboard/disposal/DisposalIncomingRequests"));
+const DisposalCertificates = lazy(() => import("./pages/dashboard/disposal/DisposalCertificates"));
+const DisposalReports = lazy(() => import("./pages/dashboard/disposal/DisposalReports"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -256,6 +262,13 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/activity-log" element={<ActivityLogPage />} />
         <Route path="/dashboard/gps-settings" element={<GPSSettings />} />
         <Route path="/dashboard/disposal-facilities" element={<DisposalFacilities />} />
+        <Route path="/dashboard/disposal" element={<DisposalDashboard />} />
+        <Route path="/dashboard/disposal/operations" element={<DisposalOperations />} />
+        <Route path="/dashboard/disposal/operations/new" element={<NewDisposalOperation />} />
+        <Route path="/dashboard/disposal/incoming-requests" element={<DisposalIncomingRequests />} />
+        <Route path="/dashboard/disposal/certificates" element={<DisposalCertificates />} />
+        <Route path="/dashboard/disposal/certificates/new" element={<DisposalCertificates />} />
+        <Route path="/dashboard/disposal/reports" element={<DisposalReports />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
