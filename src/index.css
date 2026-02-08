@@ -9,6 +9,25 @@
 
 @layer base {
   :root {
+    /* ========================================
+       الألوان الثابتة للصفحة الرئيسية العامة
+       (لا تتأثر بإعدادات المظهر الداخلية)
+       ======================================== */
+    --landing-background: 140 20% 98%;
+    --landing-foreground: 150 30% 15%;
+    --landing-primary: 142 71% 45%;
+    --landing-primary-foreground: 0 0% 100%;
+    --landing-muted: 140 15% 93%;
+    --landing-muted-foreground: 150 10% 45%;
+    --landing-accent: 160 84% 39%;
+    --landing-accent-foreground: 0 0% 100%;
+    --landing-border: 140 20% 88%;
+    --landing-card: 0 0% 100%;
+    --landing-card-foreground: 150 30% 15%;
+
+    /* ========================================
+       الألوان القابلة للتخصيص (لوحة التحكم)
+       ======================================== */
     --background: 140 20% 98%;
     --foreground: 150 30% 15%;
 
@@ -964,6 +983,74 @@
   .touch-target {
     padding: 12px;
   }
+}
+
+/* ========================================
+   الصفحة الرئيسية العامة - ألوان ثابتة
+   لا تتأثر بإعدادات المظهر الداخلية
+   ======================================== */
+.landing-page {
+  /* إعادة تعيين الألوان للقيم الافتراضية الثابتة */
+  --primary: 142 71% 45% !important;
+  --primary-foreground: 0 0% 100% !important;
+  --background: 140 20% 98% !important;
+  --foreground: 150 30% 15% !important;
+  --muted: 140 15% 93% !important;
+  --muted-foreground: 150 10% 45% !important;
+  --accent: 160 84% 39% !important;
+  --accent-foreground: 0 0% 100% !important;
+  --border: 140 20% 88% !important;
+  --card: 0 0% 100% !important;
+  --card-foreground: 150 30% 15% !important;
+  --ring: 142 71% 45% !important;
+  --eco-green: 142 71% 45% !important;
+  --eco-emerald: 160 84% 39% !important;
+  --eco-green-dark: 142 76% 36% !important;
+  --eco-green-light: 142 76% 55% !important;
+  
+  /* تأكيد الألوان */
+  color: hsl(150 30% 15%);
+  background-color: hsl(140 20% 98%);
+  font-size: 16px !important;
+  font-family: 'Cairo', sans-serif !important;
+}
+
+/* منع وضع الظلام في الصفحة الرئيسية */
+.landing-page,
+.landing-page * {
+  --background: 140 20% 98%;
+  --foreground: 150 30% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 150 30% 15%;
+}
+
+/* ضمان ظهور الزجاج بشكل صحيح */
+.landing-page .glass-eco {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px);
+  border-color: hsl(140 20% 88%) !important;
+}
+
+/* ضمان ألوان الأزرار الصحيحة */
+.landing-page button[variant="eco"],
+.landing-page .bg-primary {
+  background-color: hsl(142 71% 45%) !important;
+  color: white !important;
+}
+
+.landing-page .text-primary {
+  color: hsl(142 71% 45%) !important;
+}
+
+.landing-page .text-gradient-eco {
+  background: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(160 84% 39%) 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+
+.landing-page .gradient-eco {
+  background: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(160 84% 39%) 100%) !important;
 }
 
 /* Hardware acceleration hints */
