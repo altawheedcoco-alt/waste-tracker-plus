@@ -6955,8 +6955,12 @@ export type Database = {
           disposal_method: string | null
           driver_id: string | null
           expected_delivery_date: string | null
+          generator_approval_at: string | null
+          generator_approval_status: string | null
+          generator_auto_approve_deadline: string | null
           generator_id: string | null
           generator_notes: string | null
+          generator_rejection_reason: string | null
           gps_delivery_lat: number | null
           gps_delivery_lng: number | null
           gps_pickup_lat: number | null
@@ -6983,8 +6987,12 @@ export type Database = {
           price_per_unit: number | null
           price_source: string | null
           quantity: number | null
+          recycler_approval_at: string | null
+          recycler_approval_status: string | null
+          recycler_auto_approve_deadline: string | null
           recycler_id: string | null
           recycler_notes: string | null
+          recycler_rejection_reason: string | null
           shipment_link_id: string | null
           shipment_number: string
           shipment_type: string | null
@@ -7028,8 +7036,12 @@ export type Database = {
           disposal_method?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
+          generator_approval_at?: string | null
+          generator_approval_status?: string | null
+          generator_auto_approve_deadline?: string | null
           generator_id?: string | null
           generator_notes?: string | null
+          generator_rejection_reason?: string | null
           gps_delivery_lat?: number | null
           gps_delivery_lng?: number | null
           gps_pickup_lat?: number | null
@@ -7056,8 +7068,12 @@ export type Database = {
           price_per_unit?: number | null
           price_source?: string | null
           quantity?: number | null
+          recycler_approval_at?: string | null
+          recycler_approval_status?: string | null
+          recycler_auto_approve_deadline?: string | null
           recycler_id?: string | null
           recycler_notes?: string | null
+          recycler_rejection_reason?: string | null
           shipment_link_id?: string | null
           shipment_number: string
           shipment_type?: string | null
@@ -7101,8 +7117,12 @@ export type Database = {
           disposal_method?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
+          generator_approval_at?: string | null
+          generator_approval_status?: string | null
+          generator_auto_approve_deadline?: string | null
           generator_id?: string | null
           generator_notes?: string | null
+          generator_rejection_reason?: string | null
           gps_delivery_lat?: number | null
           gps_delivery_lng?: number | null
           gps_pickup_lat?: number | null
@@ -7129,8 +7149,12 @@ export type Database = {
           price_per_unit?: number | null
           price_source?: string | null
           quantity?: number | null
+          recycler_approval_at?: string | null
+          recycler_approval_status?: string | null
+          recycler_auto_approve_deadline?: string | null
           recycler_id?: string | null
           recycler_notes?: string | null
+          recycler_rejection_reason?: string | null
           shipment_link_id?: string | null
           shipment_number?: string
           shipment_type?: string | null
@@ -8250,6 +8274,7 @@ export type Database = {
         Args: { retention_days?: number }
         Returns: number
       }
+      auto_approve_expired_shipments: { Args: never; Returns: undefined }
       can_access_contract: {
         Args: { _contract_id: string; _user_id: string }
         Returns: boolean

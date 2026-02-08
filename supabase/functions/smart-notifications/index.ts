@@ -135,6 +135,78 @@ Deno.serve(async (req) => {
         )
       }
 
+      case 'shipment-approval-request': {
+        const { shipment_id, approval_type } = data
+
+        if (!shipment_id) {
+          return new Response(
+            JSON.stringify({ error: 'shipment_id is required' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Get shipment details with all organization info
+        const { data: shipment } = await supabase
+          .from('shipments')
+          .select('*')
+          .eq('id', shipment_id)
+          .single()
+
+        if (!shipment) {
+          return new Response(
+            JSON.stringify({ error: 'Shipment not found' }),
+            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Determine target organization based on approval_type
+        const targetOrgId = approval_type === 'generator' 
+          ? shipment.generator_id 
+          : shipment.recycler_id
+
+        if (!targetOrgId) {
+          return new Response(
+            JSON.stringify({ error: 'Target organization not found' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Get users in target organization
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('organization_id', targetOrgId)
+          .eq('is_active', true)
+
+        // Build detailed notification message
+        const wasteInfo = `${shipment.waste_type} - ${shipment.quantity} ${shipment.unit || 'كجم'}`
+        const message = `📦 شحنة جديدة تحتاج موافقتك\n\nرقم الشحنة: ${shipment.shipment_number}\nنوع المخلف: ${wasteInfo}\n\n⏰ الموافقة التلقائية بعد 6 ساعات`
+
+        const notifications = (profiles || []).map(p => ({
+          user_id: p.user_id,
+          title: '🔔 طلب موافقة على شحنة',
+          message,
+          type: 'shipment_approval_request',
+          shipment_id,
+          is_read: false
+        }))
+
+        if (notifications.length > 0) {
+          await supabase.from('notifications').insert(notifications)
+        }
+
+        console.log(`[Smart Notifications] Approval request sent for shipment ${shipment_id} to ${approval_type}`)
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            notified: notifications.length,
+            shipment_number: shipment.shipment_number
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       case 'shipment-delayed': {
         const { shipment_id, delay_reason, estimated_delay_minutes } = data
 

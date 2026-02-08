@@ -45,6 +45,15 @@ export interface EnrichedShipment {
   transporter?: ShipmentOrganization | null;
   recycler?: ShipmentOrganization | null;
   driver?: ShipmentDriver | null;
+  // Approval fields
+  generator_approval_status?: string | null;
+  generator_approval_at?: string | null;
+  generator_rejection_reason?: string | null;
+  generator_auto_approve_deadline?: string | null;
+  recycler_approval_status?: string | null;
+  recycler_approval_at?: string | null;
+  recycler_rejection_reason?: string | null;
+  recycler_auto_approve_deadline?: string | null;
   [key: string]: any;
 }
 

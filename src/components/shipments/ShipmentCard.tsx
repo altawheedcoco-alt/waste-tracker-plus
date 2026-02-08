@@ -58,6 +58,7 @@ import CancelShipmentDialog from './CancelShipmentDialog';
 import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
+import ShipmentApprovalBadge from './ShipmentApprovalBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -79,6 +80,7 @@ interface ShipmentCardProps {
     delivery_address?: string;
     driver_id?: string | null;
     generator_id?: string | null;
+    recycler_id?: string | null;
     expected_delivery_date?: string | null;
     approved_at?: string | null;
     collection_started_at?: string | null;
@@ -91,6 +93,15 @@ interface ShipmentCardProps {
     transporter?: { name: string; id?: string } | null;
     has_report?: boolean;
     has_receipt?: boolean;
+    // Approval status fields
+    generator_approval_status?: 'pending' | 'approved' | 'rejected' | 'auto_approved' | null;
+    generator_approval_at?: string | null;
+    generator_rejection_reason?: string | null;
+    generator_auto_approve_deadline?: string | null;
+    recycler_approval_status?: 'pending' | 'approved' | 'rejected' | 'auto_approved' | null;
+    recycler_approval_at?: string | null;
+    recycler_rejection_reason?: string | null;
+    recycler_auto_approve_deadline?: string | null;
   };
   onStatusChange?: () => void;
   variant?: 'compact' | 'full';
@@ -470,6 +481,28 @@ const ShipmentCard = ({
                 {/* Right Side - Shipment Info */}
                 <div className="flex-1 text-right order-1 sm:order-2">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
+                    {/* Generator Approval Badge */}
+                    {shipment.generator_id && (
+                      <ShipmentApprovalBadge
+                        status={shipment.generator_approval_status}
+                        approvalAt={shipment.generator_approval_at}
+                        rejectionReason={shipment.generator_rejection_reason}
+                        deadline={shipment.generator_auto_approve_deadline}
+                        type="generator"
+                        compact
+                      />
+                    )}
+                    {/* Recycler Approval Badge */}
+                    {shipment.recycler_id && (
+                      <ShipmentApprovalBadge
+                        status={shipment.recycler_approval_status}
+                        approvalAt={shipment.recycler_approval_at}
+                        rejectionReason={shipment.recycler_rejection_reason}
+                        deadline={shipment.recycler_auto_approve_deadline}
+                        type="recycler"
+                        compact
+                      />
+                    )}
                     {/* Receipt Issued Badge - Show to Generator and Transporter */}
                     {shipment.has_receipt && (isGenerator || isTransporter) && (
                       <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border border-blue-300 dark:border-blue-700 gap-1.5">
