@@ -7,22 +7,25 @@ import FeaturesList from "@/components/FeaturesList";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import DocumentVerification from "@/components/DocumentVerification";
+import LandingWrapper from "@/components/LandingWrapper";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main>
-        <Hero />
-        <DocumentVerification />
-        <Stats />
-        <FeaturesList />
-        <Features />
-        <Services />
-        <CTA />
-      </main>
-      <Footer />
-    </div>
+    <LandingWrapper>
+      <div className="min-h-screen bg-[hsl(140,20%,98%)]">
+        <Header />
+        <main>
+          <Hero />
+          <DocumentVerification />
+          <Stats />
+          <FeaturesList />
+          <Features />
+          <Services />
+          <CTA />
+        </main>
+        <Footer />
+      </div>
+    </LandingWrapper>
   );
 };
 
