@@ -1,7 +1,13 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { getTermsSections, OrganizationType } from '@/data/organizationTermsContent';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+
+interface TermsSection {
+  title: string;
+  content: string[];
+}
 
 interface TermsDocumentPrintProps {
   acceptance: {
@@ -25,7 +31,49 @@ interface TermsDocumentPrintProps {
 
 const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
   ({ acceptance, showSignature = false }, ref) => {
-    const sections = getTermsSections(acceptance.organization_type as OrganizationType);
+    const [sections, setSections] = useState<TermsSection[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Fetch terms content from database
+    useEffect(() => {
+      const fetchTerms = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('terms_content')
+            .select('sections')
+            .eq('organization_type', acceptance.organization_type)
+            .eq('is_active', true)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (data?.sections && Array.isArray(data.sections)) {
+            // Cast through unknown to handle JSON type
+            const parsedSections = (data.sections as unknown) as TermsSection[];
+            setSections(parsedSections);
+          } else {
+            // Fallback to static content
+            const staticSections = getTermsSections(acceptance.organization_type as OrganizationType);
+            setSections(staticSections.map(s => ({
+              title: s.title,
+              content: Array.isArray(s.content) ? s.content : [String(s.content)]
+            })));
+          }
+        } catch (error) {
+          console.error('Error fetching terms:', error);
+          // Fallback to static content
+          const staticSections = getTermsSections(acceptance.organization_type as OrganizationType);
+          setSections(staticSections.map(s => ({
+            title: s.title,
+            content: Array.isArray(s.content) ? s.content : [String(s.content)]
+          })));
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchTerms();
+    }, [acceptance.organization_type]);
     
     const getOrgTypeLabel = (type: string) => {
       switch (type) {
@@ -146,20 +194,40 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
             الشروط والأحكام - {getOrgTypeLabel(acceptance.organization_type)}
           </h2>
           
-          {sections.map((section, index) => (
-            <div key={`section-${index}`} className="mb-4">
-              <h3 className="font-bold text-sm text-gray-700 mb-2">
-                {index + 1}. {section.title}
-              </h3>
-              <div className="text-xs text-gray-600 leading-relaxed whitespace-pre-line pr-4">
-                {section.content}
-              </div>
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-500">
+              جاري تحميل الشروط والأحكام...
             </div>
-          ))}
+          ) : sections.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              لا توجد شروط وأحكام متاحة
+            </div>
+          ) : (
+            sections.map((section, index) => (
+              <div key={`section-${index}`} className="mb-6 print:break-inside-avoid">
+                <h3 className="font-bold text-base text-gray-700 mb-3 bg-gray-100 px-3 py-2 rounded">
+                  {index + 1}. {section.title}
+                </h3>
+                <div className="pr-4 space-y-2">
+                  {Array.isArray(section.content) ? (
+                    section.content.map((item, itemIndex) => (
+                      <p key={`item-${itemIndex}`} className="text-sm text-gray-600 leading-relaxed">
+                        {item}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                      {String(section.content)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Electronic Signature Section */}
-        <div className="border-t-2 border-gray-300 pt-6 mt-6">
+        <div className="border-t-2 border-gray-300 pt-6 mt-6 print:break-inside-avoid">
           <h2 className="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
             <span>✍️</span> التوقيع الإلكتروني والموافقة
           </h2>
