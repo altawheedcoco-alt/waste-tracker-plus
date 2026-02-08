@@ -86,33 +86,39 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
     };
 
     return (
-      <div ref={ref} className="bg-white text-black p-8 max-w-4xl mx-auto" dir="rtl">
+      <div ref={ref} className="bg-white text-black p-6 max-w-4xl mx-auto" dir="rtl" style={{ fontFamily: 'Cairo, sans-serif' }}>
         {/* Header */}
-        <div className="text-center border-b-2 border-gray-300 pb-6 mb-6">
-          <div className="flex justify-center items-center gap-6 mb-4">
+        <div className="text-center border-b-2 border-gray-300 pb-4 mb-4">
+          <div className="flex justify-center items-center gap-4 mb-3">
             {/* Organization Logo */}
             {acceptance.organization_logo_url && (
               <img 
                 src={acceptance.organization_logo_url} 
                 alt={acceptance.organization_name || 'Logo'} 
-                className="h-16 object-contain"
+                className="h-10 w-auto object-contain"
                 crossOrigin="anonymous"
+                style={{ maxWidth: '80px' }}
               />
+            )}
+            {/* Separator */}
+            {acceptance.organization_logo_url && (
+              <div className="h-8 w-px bg-gray-300" />
             )}
             {/* Platform Logo */}
             <img 
               src="/lovable-uploads/d3dbed14-6b0a-4a5a-90b3-de9dbfc586e3.png" 
               alt="I-Recycle Logo" 
-              className="h-16 object-contain"
+              className="h-10 w-auto object-contain"
+              style={{ maxWidth: '80px' }}
             />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          <h1 className="text-xl font-bold text-gray-800 mb-1">
             وثيقة الموافقة على الشروط والأحكام
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-xs text-gray-600">
             منصة I-Recycle لإدارة المخلفات الصناعية
           </p>
-          <div className="mt-3 inline-block bg-amber-100 text-amber-800 px-4 py-1 rounded-full text-xs font-medium">
+          <div className="mt-2 inline-block bg-amber-100 text-amber-800 px-3 py-0.5 rounded-full text-[10px] font-medium">
             🔒 هذه الوثيقة سرية ومؤمنة
           </div>
         </div>
