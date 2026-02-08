@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOrganizationSignatures } from '@/hooks/useOrganizationSignatures';
 import { useDocumentEndorsement, EndorsementResult } from '@/hooks/useDocumentEndorsement';
+import SecureEndorsementDialog from '@/components/endorsement/SecureEndorsementDialog';
 import {
   Dialog,
   DialogContent,
@@ -126,6 +127,7 @@ const ReceiptFlowDialog = ({
   const [loading, setLoading] = useState(false);
   const [createdReceipt, setCreatedReceipt] = useState<any>(null);
   const [endorsementResult, setEndorsementResult] = useState<EndorsementResult | null>(null);
+  const [showSecureEndorsement, setShowSecureEndorsement] = useState(false);
 
   // Form data
   const [actualWeight, setActualWeight] = useState(shipment.quantity?.toString() || '');
@@ -199,9 +201,9 @@ const ReceiptFlowDialog = ({
 
       setCreatedReceipt(data);
 
-      // If auto-endorse is enabled, go to signature step
+      // If auto-endorse is enabled, open secure endorsement dialog
       if (autoEndorse) {
-        setStep('signature');
+        setShowSecureEndorsement(true);
       } else {
         // Just save without endorsement
         toast.success('تم إنشاء شهادة الاستلام بنجاح');
@@ -283,9 +285,10 @@ const ReceiptFlowDialog = ({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileCheck className="w-5 h-5 text-primary" />
             استلام الشحنة - {shipment.shipment_number}
@@ -742,6 +745,41 @@ const ReceiptFlowDialog = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    {/* Secure Endorsement Dialog */}
+    {createdReceipt && (
+      <SecureEndorsementDialog
+        open={showSecureEndorsement}
+        onOpenChange={setShowSecureEndorsement}
+        documentType="receipt"
+        documentId={createdReceipt.id}
+        documentNumber={createdReceipt.receipt_number || ''}
+        documentTitle={`شهادة استلام الشحنة ${shipment.shipment_number}`}
+        requirePassword={true}
+        allowSkipAuth={false}
+        onSuccess={(result) => {
+          setEndorsementResult(result);
+          setShowSecureEndorsement(false);
+          
+          // Update receipt status to confirmed
+          supabase
+            .from('shipment_receipts')
+            .update({ status: 'confirmed' })
+            .eq('id', createdReceipt.id)
+            .then(() => {
+              toast.success('تم اعتماد الشهادة وإرسالها للمولد');
+              setStep('complete');
+              onSuccess?.();
+            });
+        }}
+        onCancel={() => {
+          setShowSecureEndorsement(false);
+          // Go back to form or signature step
+          setStep('form');
+        }}
+      />
+    )}
+  </>
   );
 };
 
