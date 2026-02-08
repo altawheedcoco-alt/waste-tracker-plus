@@ -109,6 +109,7 @@ const AwardLetters = lazy(() => import("./pages/dashboard/AwardLetters"));
 const OperationsDashboard = lazy(() => import("./pages/dashboard/OperationsDashboard"));
 const ActivityLogPage = lazy(() => import("./pages/dashboard/ActivityLogPage"));
 const GPSSettings = lazy(() => import("./pages/dashboard/GPSSettings"));
+const DisposalFacilities = lazy(() => import("./pages/dashboard/DisposalFacilities"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -254,6 +255,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/operations" element={<OperationsDashboard />} />
         <Route path="/dashboard/activity-log" element={<ActivityLogPage />} />
         <Route path="/dashboard/gps-settings" element={<GPSSettings />} />
+        <Route path="/dashboard/disposal-facilities" element={<DisposalFacilities />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />

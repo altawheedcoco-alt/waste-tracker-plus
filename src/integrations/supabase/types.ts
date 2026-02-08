@@ -2264,6 +2264,208 @@ export type Database = {
           },
         ]
       }
+      disposal_facilities: {
+        Row: {
+          accepted_hazard_levels: string[] | null
+          accepted_waste_types: string[] | null
+          address: string | null
+          city: string | null
+          contact_person: string | null
+          contact_position: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          current_fill_percentage: number | null
+          daily_capacity_tons: number | null
+          eeaa_rating: string | null
+          email: string | null
+          environmental_license_url: string | null
+          facility_type: string
+          google_maps_url: string | null
+          governorate: string | null
+          id: string
+          inspection_result: string | null
+          is_verified: boolean | null
+          iso_certification: string | null
+          last_inspection_date: string | null
+          latitude: number | null
+          license_authority: string | null
+          license_expiry: string | null
+          license_number: string | null
+          logo_url: string | null
+          longitude: number | null
+          name: string
+          name_en: string | null
+          notes: string | null
+          operating_hours: Json | null
+          phone: string | null
+          phone_secondary: string | null
+          photos: Json | null
+          price_per_ton: number | null
+          pricing_notes: string | null
+          rejected_waste_types: string[] | null
+          status: string | null
+          total_capacity_tons: number | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+          website: string | null
+        }
+        Insert: {
+          accepted_hazard_levels?: string[] | null
+          accepted_waste_types?: string[] | null
+          address?: string | null
+          city?: string | null
+          contact_person?: string | null
+          contact_position?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          current_fill_percentage?: number | null
+          daily_capacity_tons?: number | null
+          eeaa_rating?: string | null
+          email?: string | null
+          environmental_license_url?: string | null
+          facility_type?: string
+          google_maps_url?: string | null
+          governorate?: string | null
+          id?: string
+          inspection_result?: string | null
+          is_verified?: boolean | null
+          iso_certification?: string | null
+          last_inspection_date?: string | null
+          latitude?: number | null
+          license_authority?: string | null
+          license_expiry?: string | null
+          license_number?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          name: string
+          name_en?: string | null
+          notes?: string | null
+          operating_hours?: Json | null
+          phone?: string | null
+          phone_secondary?: string | null
+          photos?: Json | null
+          price_per_ton?: number | null
+          pricing_notes?: string | null
+          rejected_waste_types?: string[] | null
+          status?: string | null
+          total_capacity_tons?: number | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
+        }
+        Update: {
+          accepted_hazard_levels?: string[] | null
+          accepted_waste_types?: string[] | null
+          address?: string | null
+          city?: string | null
+          contact_person?: string | null
+          contact_position?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          current_fill_percentage?: number | null
+          daily_capacity_tons?: number | null
+          eeaa_rating?: string | null
+          email?: string | null
+          environmental_license_url?: string | null
+          facility_type?: string
+          google_maps_url?: string | null
+          governorate?: string | null
+          id?: string
+          inspection_result?: string | null
+          is_verified?: boolean | null
+          iso_certification?: string | null
+          last_inspection_date?: string | null
+          latitude?: number | null
+          license_authority?: string | null
+          license_expiry?: string | null
+          license_number?: string | null
+          logo_url?: string | null
+          longitude?: number | null
+          name?: string
+          name_en?: string | null
+          notes?: string | null
+          operating_hours?: Json | null
+          phone?: string | null
+          phone_secondary?: string | null
+          photos?: Json | null
+          price_per_ton?: number | null
+          pricing_notes?: string | null
+          rejected_waste_types?: string[] | null
+          status?: string | null
+          total_capacity_tons?: number | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      disposal_facility_reviews: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          documentation: number | null
+          facility_id: string
+          id: string
+          organization_id: string
+          rating: number | null
+          response_time: number | null
+          review_text: string | null
+          service_quality: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          documentation?: number | null
+          facility_id: string
+          id?: string
+          organization_id: string
+          rating?: number | null
+          response_time?: number | null
+          review_text?: string | null
+          service_quality?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          documentation?: number | null
+          facility_id?: string
+          id?: string
+          organization_id?: string
+          rating?: number | null
+          response_time?: number | null
+          review_text?: string | null
+          service_quality?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_facility_reviews_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_facility_reviews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_facility_reviews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_endorsements: {
         Row: {
           biometric_verified: boolean | null
@@ -6952,7 +7154,11 @@ export type Database = {
           delivery_city: string | null
           delivery_latitude: number | null
           delivery_longitude: number | null
+          disposal_certificate_url: string | null
+          disposal_facility_id: string | null
           disposal_method: string | null
+          disposal_type: string | null
+          disposed_at: string | null
           driver_id: string | null
           expected_delivery_date: string | null
           generator_approval_at: string | null
@@ -7033,7 +7239,11 @@ export type Database = {
           delivery_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          disposal_certificate_url?: string | null
+          disposal_facility_id?: string | null
           disposal_method?: string | null
+          disposal_type?: string | null
+          disposed_at?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
           generator_approval_at?: string | null
@@ -7114,7 +7324,11 @@ export type Database = {
           delivery_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          disposal_certificate_url?: string | null
+          disposal_facility_id?: string | null
           disposal_method?: string | null
+          disposal_type?: string | null
+          disposed_at?: string | null
           driver_id?: string | null
           expected_delivery_date?: string | null
           generator_approval_at?: string | null
@@ -7189,6 +7403,13 @@ export type Database = {
             columns: ["call_log_id"]
             isOneToOne: false
             referencedRelation: "call_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
             referencedColumns: ["id"]
           },
           {
