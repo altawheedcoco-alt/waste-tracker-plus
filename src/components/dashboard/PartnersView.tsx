@@ -31,6 +31,7 @@ import {
   Info,
 } from 'lucide-react';
 import PartnerNotesDialog from '@/components/partners/PartnerNotesDialog';
+import PartnerLinkingCard from '@/components/partners/PartnerLinkingCard';
 import usePartners from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -293,14 +294,17 @@ const PartnersView = () => {
         </div>
       </div>
 
+      {/* Partner Linking Card */}
+      <PartnerLinkingCard />
+
       {/* Info Banner */}
       {totalPartners === 0 && (
         <div className="bg-muted/50 border rounded-lg p-4 flex items-start gap-3">
           <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
           <div className="text-right">
-            <p className="font-medium">لا يوجد شركاء بعد</p>
+            <p className="font-medium">لا يوجد شركاء عبر الشحنات بعد</p>
             <p className="text-sm text-muted-foreground">
-              ستظهر هنا الجهات التي تتعامل معها عبر الشحنات. عند إنشاء شحنة جديدة مع جهة ما، ستضاف تلقائياً إلى قائمة شركائك.
+              ستظهر هنا الجهات التي تتعامل معها عبر الشحنات. يمكنك أيضاً ربط شركاء مباشرة باستخدام كود التحقق أعلاه.
             </p>
           </div>
         </div>

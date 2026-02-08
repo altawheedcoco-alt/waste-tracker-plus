@@ -5638,6 +5638,7 @@ export type Database = {
           name: string
           name_en: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
+          partner_code: string
           phone: string
           policy: string | null
           production_capacity: string | null
@@ -5691,6 +5692,7 @@ export type Database = {
           name: string
           name_en?: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
+          partner_code?: string
           phone: string
           policy?: string | null
           production_capacity?: string | null
@@ -5744,6 +5746,7 @@ export type Database = {
           name?: string
           name_en?: string | null
           organization_type?: Database["public"]["Enums"]["organization_type"]
+          partner_code?: string
           phone?: string
           policy?: string | null
           production_capacity?: string | null
@@ -8622,6 +8625,71 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      verified_partnerships: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          partner_org_id: string
+          partnership_type: string | null
+          requester_org_id: string
+          status: string | null
+          updated_at: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          partner_org_id: string
+          partnership_type?: string | null
+          requester_org_id: string
+          status?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          partner_org_id?: string
+          partnership_type?: string | null
+          requester_org_id?: string
+          status?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verified_partnerships_partner_org_id_fkey"
+            columns: ["partner_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "verified_partnerships_partner_org_id_fkey"
+            columns: ["partner_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verified_partnerships_requester_org_id_fkey"
+            columns: ["requester_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "verified_partnerships_requester_org_id_fkey"
+            columns: ["requester_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
