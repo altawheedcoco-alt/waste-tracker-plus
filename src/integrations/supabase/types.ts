@@ -7496,6 +7496,7 @@ export type Database = {
           id: string
           in_transit_at: string | null
           is_public_submission: boolean | null
+          manual_disposal_name: string | null
           manual_driver_name: string | null
           manual_generator_name: string | null
           manual_recycler_name: string | null
@@ -7581,6 +7582,7 @@ export type Database = {
           id?: string
           in_transit_at?: string | null
           is_public_submission?: boolean | null
+          manual_disposal_name?: string | null
           manual_driver_name?: string | null
           manual_generator_name?: string | null
           manual_recycler_name?: string | null
@@ -7666,6 +7668,7 @@ export type Database = {
           id?: string
           in_transit_at?: string | null
           is_public_submission?: boolean | null
+          manual_disposal_name?: string | null
           manual_driver_name?: string | null
           manual_generator_name?: string | null
           manual_recycler_name?: string | null

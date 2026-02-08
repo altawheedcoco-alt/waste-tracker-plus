@@ -31,6 +31,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
     setFormData,
     generators,
     recyclers,
+    disposalFacilities,
     drivers,
     driverOrganization,
     driverInfo,
@@ -44,9 +45,11 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
     generatorOptions,
     recyclerOptions,
     transporterOptions,
+    disposalFacilityOptions,
     handleGeneratorChange,
     handleRecyclerChange,
     handleTransporterChange,
+    handleDisposalFacilityChange,
     handleSubmit,
     getCurrentGeneratorInfo,
     getCurrentRecyclerInfo,
@@ -116,6 +119,25 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
             emptyMessage="لا توجد شركات"
             manualInputLabel="إدخال يدوي"
           />
+        </div>
+      </div>
+
+      {/* Row 2: Disposal Facility */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>شركة التخلص النهائي (اختياري)</Label>
+          <ComboboxWithInput
+            options={disposalFacilityOptions}
+            value={formData.disposal_facility_id}
+            onValueChange={handleDisposalFacilityChange}
+            placeholder="اختر أو أدخل جهة التخلص النهائي"
+            searchPlaceholder="ابحث عن مدفن أو محرقة..."
+            emptyMessage="لا توجد جهات تخلص"
+            manualInputLabel="إدخال يدوي"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            المدافن والمحارق المرخصة للمخلفات الخطرة والطبية
+          </p>
         </div>
       </div>
 

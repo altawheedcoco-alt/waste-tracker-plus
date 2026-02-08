@@ -27,6 +27,7 @@ export interface ShipmentFormData {
   generator_id: string;
   transporter_id: string;
   recycler_id: string;
+  disposal_facility_id: string;
   driver_id: string;
   waste_type: WasteType | '';
   quantity: string;
@@ -111,6 +112,7 @@ export const useCreateShipment = () => {
   const [generators, setGenerators] = useState<Organization[]>([]);
   const [recyclers, setRecyclers] = useState<Organization[]>([]);
   const [transporters, setTransporters] = useState<Organization[]>([]);
+  const [disposalFacilities, setDisposalFacilities] = useState<Organization[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [driverOrganization, setDriverOrganization] = useState<Organization | null>(null);
   const [driverInfo, setDriverInfo] = useState<Driver | null>(null);
@@ -142,6 +144,7 @@ export const useCreateShipment = () => {
     generator_id: '',
     transporter_id: '',
     recycler_id: '',
+    disposal_facility_id: '',
     driver_id: '',
     waste_type: '',
     quantity: prefilledNetWeight,
@@ -320,6 +323,14 @@ export const useCreateShipment = () => {
         .eq('is_verified', true)
         .eq('is_active', true);
 
+      // Fetch disposal facilities
+      const { data: disposalData } = await supabase
+        .from('organizations')
+        .select('id, name, address, city')
+        .eq('organization_type', 'disposal')
+        .eq('is_verified', true)
+        .eq('is_active', true);
+
       if (isAdmin) {
         const { data: transporterData } = await supabase
           .from('organizations')
@@ -342,6 +353,7 @@ export const useCreateShipment = () => {
 
       if (generatorData) setGenerators(generatorData);
       if (recyclerData) setRecyclers(recyclerData);
+      if (disposalData) setDisposalFacilities(disposalData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -424,6 +436,11 @@ export const useCreateShipment = () => {
     [transporters]
   );
 
+  const disposalFacilityOptions = useMemo(() => 
+    disposalFacilities.map(d => ({ value: d.id, label: d.name, sublabel: d.city })),
+    [disposalFacilities]
+  );
+
   const handleGeneratorChange = (value: string) => {
     if (value.startsWith('manual:')) {
       setFormData(prev => ({
@@ -460,6 +477,10 @@ export const useCreateShipment = () => {
 
   const handleTransporterChange = (value: string) => {
     setFormData(prev => ({ ...prev, transporter_id: value }));
+  };
+
+  const handleDisposalFacilityChange = (value: string) => {
+    setFormData(prev => ({ ...prev, disposal_facility_id: value }));
   };
 
   const getWasteStateLabel = (state: string): string => {
@@ -512,10 +533,15 @@ export const useCreateShipment = () => {
     setLoading(true);
 
     try {
+      const isManualDisposal = formData.disposal_facility_id.startsWith('manual:');
+      const disposalFacilityId = isManualDisposal ? null : (formData.disposal_facility_id || null);
+      const manualDisposalName = isManualDisposal ? formData.disposal_facility_id.replace('manual:', '') : null;
+
       const { data: shipmentData, error } = await supabase.from('shipments').insert({
         generator_id: generatorId,
         recycler_id: recyclerId,
         transporter_id: transporterId || organization?.id,
+        disposal_facility_id: disposalFacilityId,
         driver_id: driverId,
         waste_type: formData.waste_type as WasteType,
         quantity: parseFloat(formData.quantity),
@@ -535,6 +561,7 @@ export const useCreateShipment = () => {
         manual_generator_name: manualGeneratorName,
         manual_recycler_name: manualRecyclerName,
         manual_transporter_name: manualTransporterName,
+        manual_disposal_name: manualDisposalName,
         packaging_method: formData.packaging_method || null,
         hazard_level: formData.hazard_level || null,
         waste_state: formData.waste_state?.startsWith('manual:') 
@@ -634,6 +661,7 @@ export const useCreateShipment = () => {
     generators,
     recyclers,
     transporters,
+    disposalFacilities,
     drivers,
     driverOrganization,
     driverInfo,
@@ -649,11 +677,13 @@ export const useCreateShipment = () => {
     generatorOptions,
     recyclerOptions,
     transporterOptions,
+    disposalFacilityOptions,
     
     // Handlers
     handleGeneratorChange,
     handleRecyclerChange,
     handleTransporterChange,
+    handleDisposalFacilityChange,
     handleSubmit,
     getCurrentGeneratorInfo,
     getCurrentRecyclerInfo,
