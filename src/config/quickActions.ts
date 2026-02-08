@@ -108,6 +108,7 @@ export const adminQuickActions: QuickActionConfig[] = [
   { id: 'my-requests', title: 'مركز الموافقات', subtitle: 'جميع الطلبات المعلقة', icon: ClipboardList, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'secondary' },
   { id: 'company-approvals', title: 'موافقات الشركات', subtitle: 'قبول أو رفض تسجيل الجهات', icon: Building2, path: '/dashboard/company-approvals', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'secondary' },
   { id: 'driver-approvals', title: 'موافقات السائقين', subtitle: 'اعتماد السائقين الجدد', icon: UserPlus, path: '/dashboard/driver-approvals', iconBgClass: 'bg-gradient-to-br from-cyan-500 to-blue-600', category: 'secondary' },
+  { id: 'terms-acceptances', title: 'موافقات الشروط والأحكام', subtitle: 'متابعة موافقات جميع الجهات', icon: FileCheck, path: '/dashboard/terms-acceptances', iconBgClass: 'bg-gradient-to-br from-purple-500 to-violet-600', category: 'secondary' },
   { id: 'document-verification', title: 'التحقق من المستندات', subtitle: 'فحص الوثائق والتراخيص', icon: Shield, path: '/dashboard/document-verification', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'secondary' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'مسح وتحقق من أي مستند', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'secondary' },
   

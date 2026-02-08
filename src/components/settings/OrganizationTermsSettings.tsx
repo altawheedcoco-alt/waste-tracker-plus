@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   FileText, 
@@ -12,7 +13,9 @@ import {
   Phone, 
   Briefcase,
   Shield,
-  Image
+  Image,
+  Users,
+  ArrowLeft
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +28,9 @@ import { ar } from 'date-fns/locale';
 import TermsDocumentDialog from '@/components/terms/TermsDocumentDialog';
 
 const OrganizationTermsSettings = () => {
-  const { organization } = useAuth();
+  const { organization, roles } = useAuth();
+  const navigate = useNavigate();
+  const isAdmin = roles.includes('admin');
   const [showTermsDialog, setShowTermsDialog] = useState(false);
 
   // Fetch terms acceptance for current organization
@@ -47,6 +52,82 @@ const OrganizationTermsSettings = () => {
     },
     enabled: !!organization?.id,
   });
+
+  // Admin section - always show for admins
+  if (isAdmin) {
+    return (
+      <div className="space-y-6">
+        {/* Admin Card - View All Acceptances */}
+        <Card className="border-primary/30 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" />
+              إدارة جميع موافقات الشروط والأحكام
+            </CardTitle>
+            <CardDescription>
+              كمدير للنظام، يمكنك عرض جميع موافقات الشروط والأحكام لجميع الجهات المسجلة
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4 p-4 bg-background rounded-lg border">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1 text-right">
+                <p className="font-medium">جميع موافقات الجهات</p>
+                <p className="text-sm text-muted-foreground">
+                  عرض وإدارة موافقات الشروط والأحكام لجميع الجهات المولدة والناقلة والمدورة
+                </p>
+              </div>
+            </div>
+            <Button 
+              onClick={() => navigate('/dashboard/terms-acceptances')}
+              className="w-full gap-2"
+              size="lg"
+            >
+              <FileText className="h-5 w-5" />
+              عرض جميع الموافقات
+              <ArrowLeft className="h-4 w-4 mr-auto" />
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Current organization acceptance if exists */}
+        {termsAcceptance && organization && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                موافقة منظمتك الحالية
+              </CardTitle>
+              <CardDescription>
+                وثيقة الموافقة الخاصة بـ {organization.name}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3 flex-wrap mb-4">
+                <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-700">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  تم الموافقة
+                </Badge>
+                <Badge variant="outline">
+                  الإصدار {termsAcceptance.terms_version}
+                </Badge>
+              </div>
+              <Button 
+                variant="outline"
+                onClick={() => setShowTermsDialog(true)}
+                className="gap-2"
+              >
+                <ExternalLink className="h-4 w-4" />
+                عرض الوثيقة
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
