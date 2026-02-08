@@ -196,10 +196,12 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
                   <span className="text-xs text-amber-700">
                     هل تحتاج مساعدة بشرية؟
                   </span>
-                  <Button size="sm" variant="outline" className="h-7 text-xs">
-                    <Headphones className="h-3 w-3 ml-1" />
-                    تحدث مع الدعم
-                  </Button>
+                  <a href="tel:+201009671329">
+                    <Button size="sm" variant="outline" className="h-7 text-xs">
+                      <Headphones className="h-3 w-3 ml-1" />
+                      اتصل: 01009671329
+                    </Button>
+                  </a>
                 </div>
               </div>
             )}
