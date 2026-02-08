@@ -61,12 +61,15 @@ serve(async (req) => {
         fullName: 'سائق التوصيل',
         role: 'driver' as const,
         orgType: 'transporter' as const,
-        orgName: null, // Will be linked to transporter org
+        orgName: null,
       },
     ];
 
     const createdAccounts: any[] = [];
     let transporterOrgId: string | null = null;
+    let generatorOrgId: string | null = null;
+    let recyclerOrgId: string | null = null;
+    let driverRecordId: string | null = null;
 
     for (const account of demoAccounts) {
       console.log(`Processing account: ${account.email}`);
@@ -142,9 +145,13 @@ serve(async (req) => {
           }
         }
 
-        // Store transporter org ID for driver
+        // Store org IDs for shipments
         if (account.orgType === 'transporter') {
           transporterOrgId = organizationId;
+        } else if (account.orgType === 'generator') {
+          generatorOrgId = organizationId;
+        } else if (account.orgType === 'recycler') {
+          recyclerOrgId = organizationId;
         }
       }
 
@@ -254,7 +261,7 @@ serve(async (req) => {
             .single();
 
           if (!existingDriver) {
-            await supabase
+            const { data: newDriver } = await supabase
               .from('drivers')
               .insert({
                 profile_id: profile.id,
@@ -263,8 +270,16 @@ serve(async (req) => {
                 vehicle_type: 'شاحنة كبيرة',
                 vehicle_plate: 'أ ب ج 1234',
                 is_available: true,
-              });
+              })
+              .select()
+              .single();
+            
+            if (newDriver) {
+              driverRecordId = newDriver.id;
+            }
             console.log(`Created driver record for: ${account.email}`);
+          } else {
+            driverRecordId = existingDriver.id;
           }
         }
       }
@@ -277,13 +292,223 @@ serve(async (req) => {
       });
     }
 
+    // Create 10 demo shipments with correct enum values
+    // shipment_status: 'new' | 'approved' | 'collecting' | 'in_transit' | 'delivered' | 'confirmed'
+    // waste_type: 'plastic' | 'paper' | 'metal' | 'glass' | 'electronic' | 'organic' | 'chemical' | 'medical' | 'construction' | 'other'
+    console.log('Creating demo shipments...');
+    
+    if (transporterOrgId && generatorOrgId && recyclerOrgId) {
+      const demoShipments = [
+        {
+          shipment_number: 'SHP-DEMO-001',
+          status: 'new',
+          waste_type: 'paper',
+          quantity: 500,
+          unit: 'kg',
+          pickup_address: 'المنطقة الصناعية الأولى، الرياض',
+          pickup_city: 'الرياض',
+          delivery_address: 'مصنع إعادة التدوير، جدة',
+          delivery_city: 'جدة',
+          hazard_level: 'low',
+          notes: 'نفايات ورقية من مكاتب إدارية',
+          price_per_unit: 2.5,
+          total_value: 1250,
+        },
+        {
+          shipment_number: 'SHP-DEMO-002',
+          status: 'approved',
+          waste_type: 'plastic',
+          quantity: 1200,
+          unit: 'kg',
+          pickup_address: 'مصنع البلاستيك، الدمام',
+          pickup_city: 'الدمام',
+          delivery_address: 'مركز إعادة التدوير الأخضر، الرياض',
+          delivery_city: 'الرياض',
+          hazard_level: 'low',
+          notes: 'بلاستيك صناعي قابل لإعادة التدوير',
+          price_per_unit: 3.0,
+          total_value: 3600,
+          approved_at: new Date().toISOString(),
+        },
+        {
+          shipment_number: 'SHP-DEMO-003',
+          status: 'in_transit',
+          waste_type: 'metal',
+          quantity: 2000,
+          unit: 'kg',
+          pickup_address: 'ورشة المعادن، جدة',
+          pickup_city: 'جدة',
+          delivery_address: 'مصهر المعادن، الدمام',
+          delivery_city: 'الدمام',
+          hazard_level: 'medium',
+          notes: 'خردة معدنية متنوعة',
+          price_per_unit: 5.0,
+          total_value: 10000,
+          approved_at: new Date(Date.now() - 86400000).toISOString(),
+          in_transit_at: new Date().toISOString(),
+        },
+        {
+          shipment_number: 'SHP-DEMO-004',
+          status: 'delivered',
+          waste_type: 'glass',
+          quantity: 800,
+          unit: 'kg',
+          pickup_address: 'مصنع الزجاج، الرياض',
+          pickup_city: 'الرياض',
+          delivery_address: 'مركز إعادة تدوير الزجاج، جدة',
+          delivery_city: 'جدة',
+          hazard_level: 'low',
+          notes: 'زجاج مكسور من خط الإنتاج',
+          price_per_unit: 1.5,
+          total_value: 1200,
+          approved_at: new Date(Date.now() - 172800000).toISOString(),
+          in_transit_at: new Date(Date.now() - 86400000).toISOString(),
+          delivered_at: new Date().toISOString(),
+        },
+        {
+          shipment_number: 'SHP-DEMO-005',
+          status: 'confirmed',
+          waste_type: 'electronic',
+          quantity: 300,
+          unit: 'kg',
+          pickup_address: 'شركة الإلكترونيات، الدمام',
+          pickup_city: 'الدمام',
+          delivery_address: 'مركز تدوير الإلكترونيات، الرياض',
+          delivery_city: 'الرياض',
+          hazard_level: 'high',
+          notes: 'نفايات إلكترونية تحتاج معالجة خاصة',
+          price_per_unit: 15.0,
+          total_value: 4500,
+          approved_at: new Date(Date.now() - 259200000).toISOString(),
+          in_transit_at: new Date(Date.now() - 172800000).toISOString(),
+          delivered_at: new Date(Date.now() - 86400000).toISOString(),
+          confirmed_at: new Date().toISOString(),
+        },
+        {
+          shipment_number: 'SHP-DEMO-006',
+          status: 'new',
+          waste_type: 'organic',
+          quantity: 1500,
+          unit: 'kg',
+          pickup_address: 'مطعم الضيافة، مكة المكرمة',
+          pickup_city: 'مكة المكرمة',
+          delivery_address: 'مصنع السماد العضوي، المدينة المنورة',
+          delivery_city: 'المدينة المنورة',
+          hazard_level: 'low',
+          notes: 'نفايات غذائية عضوية',
+          price_per_unit: 0.5,
+          total_value: 750,
+        },
+        {
+          shipment_number: 'SHP-DEMO-007',
+          status: 'approved',
+          waste_type: 'chemical',
+          quantity: 100,
+          unit: 'kg',
+          pickup_address: 'مختبر الكيمياء، الرياض',
+          pickup_city: 'الرياض',
+          delivery_address: 'مركز معالجة النفايات الخطرة، الدمام',
+          delivery_city: 'الدمام',
+          hazard_level: 'high',
+          notes: 'مواد كيميائية تحتاج معالجة خاصة - يتطلب تصريح',
+          price_per_unit: 50.0,
+          total_value: 5000,
+          approved_at: new Date().toISOString(),
+        },
+        {
+          shipment_number: 'SHP-DEMO-008',
+          status: 'collecting',
+          waste_type: 'other',
+          quantity: 3000,
+          unit: 'kg',
+          pickup_address: 'مركز التسوق الكبير، جدة',
+          pickup_city: 'جدة',
+          delivery_address: 'محطة فرز النفايات، الرياض',
+          delivery_city: 'الرياض',
+          hazard_level: 'low',
+          notes: 'نفايات مختلطة تحتاج فرز',
+          price_per_unit: 1.0,
+          total_value: 3000,
+          approved_at: new Date(Date.now() - 43200000).toISOString(),
+          collection_started_at: new Date().toISOString(),
+        },
+        {
+          shipment_number: 'SHP-DEMO-009',
+          status: 'new',
+          waste_type: 'paper',
+          quantity: 750,
+          unit: 'kg',
+          pickup_address: 'مطبعة الأمل، المدينة المنورة',
+          pickup_city: 'المدينة المنورة',
+          delivery_address: 'مصنع إعادة تدوير الورق، الرياض',
+          delivery_city: 'الرياض',
+          hazard_level: 'low',
+          notes: 'ورق طباعة وكرتون',
+          price_per_unit: 2.0,
+          total_value: 1500,
+        },
+        {
+          shipment_number: 'SHP-DEMO-010',
+          status: 'delivered',
+          waste_type: 'plastic',
+          quantity: 2500,
+          unit: 'kg',
+          pickup_address: 'مصنع التعبئة والتغليف، الدمام',
+          pickup_city: 'الدمام',
+          delivery_address: 'مصنع إعادة تدوير البلاستيك، جدة',
+          delivery_city: 'جدة',
+          hazard_level: 'low',
+          notes: 'عبوات بلاستيكية فارغة',
+          price_per_unit: 2.5,
+          total_value: 6250,
+          approved_at: new Date(Date.now() - 345600000).toISOString(),
+          in_transit_at: new Date(Date.now() - 259200000).toISOString(),
+          delivered_at: new Date(Date.now() - 86400000).toISOString(),
+        },
+      ];
+
+      for (const shipment of demoShipments) {
+        // Check if shipment already exists
+        const { data: existingShipment } = await supabase
+          .from('shipments')
+          .select('id')
+          .eq('shipment_number', shipment.shipment_number)
+          .single();
+
+        if (!existingShipment) {
+          const { error: shipmentError } = await supabase
+            .from('shipments')
+            .insert({
+              ...shipment,
+              transporter_id: transporterOrgId,
+              generator_id: generatorOrgId,
+              recycler_id: recyclerOrgId,
+              driver_id: driverRecordId,
+              pickup_date: new Date(Date.now() + Math.random() * 604800000).toISOString().split('T')[0],
+              expected_delivery_date: new Date(Date.now() + 604800000 + Math.random() * 604800000).toISOString().split('T')[0],
+            });
+
+          if (shipmentError) {
+            console.error(`Error creating shipment ${shipment.shipment_number}:`, shipmentError);
+          } else {
+            console.log(`Created shipment: ${shipment.shipment_number}`);
+          }
+        } else {
+          console.log(`Shipment ${shipment.shipment_number} already exists`);
+        }
+      }
+    } else {
+      console.log('Skipping shipments - missing required organization IDs');
+    }
+
     console.log('Demo data seeding completed!');
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'تم إنشاء الحسابات التجريبية بنجاح',
+        message: 'تم إنشاء الحسابات والشحنات التجريبية بنجاح',
         accounts: createdAccounts,
+        shipmentsCreated: transporterOrgId && generatorOrgId && recyclerOrgId ? 10 : 0,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
