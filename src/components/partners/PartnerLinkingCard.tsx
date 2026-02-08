@@ -162,6 +162,18 @@ const PartnerLinkingCard = () => {
         throw new Error('لا يمكنك ربط منظمتك بنفسها');
       }
 
+      // منع ربط الجهات من نفس النوع
+      if (partnerOrg.organization_type === organization.organization_type) {
+        const typeLabels: Record<string, string> = {
+          generator: 'جهة مولدة',
+          transporter: 'جهة ناقلة', 
+          recycler: 'جهة مدورة',
+          disposal: 'جهة تخلص نهائي',
+        };
+        const typeLabel = typeLabels[organization.organization_type] || organization.organization_type;
+        throw new Error(`لا يمكن ربط ${typeLabel} بـ${typeLabel} أخرى`);
+      }
+
       // التحقق من وجود شراكة سابقة
       const { data: existingList, error: checkError } = await supabase
         .from('verified_partnerships')
