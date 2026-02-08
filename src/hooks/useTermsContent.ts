@@ -8,7 +8,7 @@ export interface TermsSection {
 
 export interface TermsContent {
   id: string;
-  organization_type: 'generator' | 'transporter' | 'recycler';
+  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
   version: string;
   sections: TermsSection[];
   is_active: boolean;
@@ -20,7 +20,7 @@ export interface TermsContent {
  * Hook to fetch terms content from database
  * Falls back to static content if database fetch fails
  */
-export function useTermsContent(organizationType: 'generator' | 'transporter' | 'recycler') {
+export function useTermsContent(organizationType: 'generator' | 'transporter' | 'recycler' | 'disposal') {
   return useQuery({
     queryKey: ['terms-content', organizationType],
     queryFn: async (): Promise<TermsContent | null> => {

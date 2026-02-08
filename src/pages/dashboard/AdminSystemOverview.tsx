@@ -61,7 +61,7 @@ interface Organization {
   address: string;
   city: string;
   region: string | null;
-  organization_type: 'generator' | 'transporter' | 'recycler';
+  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
   is_verified: boolean;
   is_active: boolean;
   commercial_register: string | null;

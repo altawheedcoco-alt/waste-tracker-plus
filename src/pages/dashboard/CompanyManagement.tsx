@@ -45,7 +45,7 @@ interface Organization {
   id: string;
   name: string;
   name_en: string | null;
-  organization_type: 'generator' | 'transporter' | 'recycler';
+  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
   email: string;
   phone: string;
   city: string;
