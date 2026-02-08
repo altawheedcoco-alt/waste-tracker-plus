@@ -129,42 +129,53 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       return;
     }
 
-    const defaultStyles = `
+    // Collect all stylesheets from the current page
+    const styleSheets = Array.from(document.styleSheets);
+    let collectedStyles = '';
+    
+    styleSheets.forEach(sheet => {
+      try {
+        if (sheet.cssRules) {
+          const rules = Array.from(sheet.cssRules);
+          rules.forEach(rule => {
+            collectedStyles += rule.cssText + '\n';
+          });
+        }
+      } catch (e) {
+        // Skip cross-origin stylesheets
+        if (sheet.href) {
+          collectedStyles += `@import url("${sheet.href}");\n`;
+        }
+      }
+    });
+
+    const printStyles = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
       
       @page {
         size: A4;
-        margin: 15mm 20mm;
+        margin: 10mm;
       }
       
-      * { 
-        margin: 0; 
-        padding: 0; 
-        box-sizing: border-box; 
-        font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
       }
       
-      body { 
-        direction: rtl; 
-        background: white;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+      body {
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        font-family: 'Cairo', sans-serif !important;
       }
       
-      table { 
-        width: 100%; 
-        border-collapse: collapse; 
-      }
-      
-      th, td { 
-        border: 1px solid #ddd; 
-        padding: 6px 8px; 
-        text-align: right; 
-        font-size: 11px; 
-      }
-      
-      th { 
-        background-color: #f5f5f5 !important; 
+      .print-container {
+        width: 100%;
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 10mm;
+        box-sizing: border-box;
       }
       
       img {
@@ -172,14 +183,10 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
         height: auto;
       }
       
-      .print\\:break-inside-avoid {
-        break-inside: avoid;
-      }
-      
-      @media print { 
-        body { 
-          padding: 0; 
+      @media print {
+        body {
           margin: 0;
+          padding: 0;
         }
         
         .no-print {
@@ -188,7 +195,7 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       }
     `;
 
-    const content = element.innerHTML;
+    const content = element.outerHTML;
     printWindow.document.write(`
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -196,17 +203,32 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>طباعة الوثيقة</title>
-          <style>${styles || defaultStyles}</style>
+          <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+          <style>
+            ${collectedStyles}
+            ${styles || printStyles}
+          </style>
         </head>
-        <body>${content}</body>
+        <body>
+          <div class="print-container">
+            ${content}
+          </div>
+        </body>
       </html>
     `);
     printWindow.document.close();
     
     // Wait for fonts and images to load
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+      }, 300);
+    };
+    
+    // Fallback if onload doesn't fire
     setTimeout(() => {
       printWindow.print();
-    }, 500);
+    }, 1000);
   }, []);
 
   return { 
