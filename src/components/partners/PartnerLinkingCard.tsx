@@ -259,7 +259,8 @@ const PartnerLinkingCard = () => {
     }
   };
 
-  const getPartnerFromPartnership = (partnership: VerifiedPartnership) => {
+  const getPartnerFromPartnership = (partnership: VerifiedPartnership | null) => {
+    if (!partnership) return null;
     if (partnership.requester_org_id === organization?.id) {
       return partnership.partner_organization;
     }
