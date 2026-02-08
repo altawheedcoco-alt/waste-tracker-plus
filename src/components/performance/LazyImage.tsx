@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -8,12 +8,17 @@ interface LazyImageProps {
   className?: string;
   placeholderClassName?: string;
   fallbackSrc?: string;
+  priority?: boolean;
+  blur?: boolean;
   onLoad?: () => void;
   onError?: () => void;
 }
 
+// Image cache for instant re-renders
+const imageCache = new Set<string>();
+
 /**
- * مكون صورة مع تحميل كسول وتأثيرات انتقالية
+ * مكون صورة محسّن مع تحميل كسول وتخزين مؤقت
  * يحسن الأداء عبر تحميل الصور عند الحاجة فقط
  */
 const LazyImage = memo(({
@@ -22,15 +27,37 @@ const LazyImage = memo(({
   className,
   placeholderClassName,
   fallbackSrc = '/placeholder.svg',
+  priority = false,
+  blur = true,
   onLoad,
   onError,
 }: LazyImageProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(() => imageCache.has(src));
   const [hasError, setHasError] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [isInView, setIsInView] = useState(priority);
+  const imgRef = useRef<HTMLDivElement>(null);
 
+  // Preload image when in view
   useEffect(() => {
+    if (!isInView || !src || isLoaded) return;
+
+    const img = new Image();
+    img.src = src;
+    img.onload = () => {
+      imageCache.add(src);
+      setIsLoaded(true);
+      onLoad?.();
+    };
+    img.onerror = () => {
+      setHasError(true);
+      onError?.();
+    };
+  }, [isInView, src, isLoaded, onLoad, onError]);
+
+  // Intersection observer for lazy loading
+  useEffect(() => {
+    if (priority || isInView) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -40,7 +67,7 @@ const LazyImage = memo(({
       },
       {
         rootMargin: '100px',
-        threshold: 0.1,
+        threshold: 0.01,
       }
     );
 
@@ -49,17 +76,7 @@ const LazyImage = memo(({
     }
 
     return () => observer.disconnect();
-  }, []);
-
-  const handleLoad = () => {
-    setIsLoaded(true);
-    onLoad?.();
-  };
-
-  const handleError = () => {
-    setHasError(true);
-    onError?.();
-  };
+  }, [priority, isInView]);
 
   const imageSrc = hasError ? fallbackSrc : src;
 
@@ -81,13 +98,14 @@ const LazyImage = memo(({
           src={imageSrc}
           alt={alt}
           className={cn(
-            'w-full h-full object-cover transition-opacity duration-300',
-            isLoaded ? 'opacity-100' : 'opacity-0'
+            'w-full h-full object-cover transition-all duration-200',
+            isLoaded ? 'opacity-100' : 'opacity-0',
+            blur && !isLoaded && 'blur-sm scale-105',
+            isLoaded && 'blur-0 scale-100'
           )}
-          onLoad={handleLoad}
-          onError={handleError}
-          loading="lazy"
+          loading={priority ? 'eager' : 'lazy'}
           decoding="async"
+          fetchPriority={priority ? 'high' : 'auto'}
         />
       )}
     </div>
