@@ -58,12 +58,24 @@ export const useDocumentEndorsement = () => {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
-  // Create document endorsement
+  // Create document endorsement with security validation
   const createEndorsement = useCallback(async (
     request: EndorsementRequest
   ): Promise<EndorsementResult | null> => {
     if (!organization?.id || !profile?.user_id) {
       toast.error('يجب تسجيل الدخول لإنشاء اعتماد');
+      return null;
+    }
+
+    // Verify user has signing authority
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('can_sign_documents, signature_authority_level')
+      .eq('user_id', profile.user_id)
+      .single();
+
+    if (profileError || !profileData?.can_sign_documents) {
+      toast.error('ليس لديك صلاحية توقيع المستندات');
       return null;
     }
 
