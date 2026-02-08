@@ -112,11 +112,11 @@ const SupportWidget = () => {
               </div>
               {/* Direct Call Button */}
               <a 
-                href="tel:+201009671329"
+                href="tel:+201500045579"
                 className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors text-sm font-medium"
               >
                 <Phone className="h-4 w-4" />
-                اتصل الآن: 01009671329
+                اتصل الآن: 01500045579
               </a>
             </div>
 
