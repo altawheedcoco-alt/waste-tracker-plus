@@ -160,22 +160,23 @@ const BulkCertificateDialog = ({
       const shipmentIds = selectedShipments.map(s => s.id);
 
       if (isReceipt) {
-        // Create bulk receipts
+        // Create bulk receipts - using only valid columns from shipment_receipts table
         const receipts = selectedShipments.map(shipment => ({
           shipment_id: shipment.id,
           receipt_number: `RCP-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          template_type: 'aggregate',
-          status: 'issued',
+          status: 'confirmed',
           actual_weight: shipment.quantity,
+          declared_weight: shipment.quantity,
+          waste_type: shipment.waste_type,
           notes: `شهادة مجمعة - ${reportNumber}`,
-          signature_url: includeSignature ? selectedSignature : null,
-          stamp_url: includeStamp ? selectedStamp : null,
-          issued_at: new Date().toISOString(),
+          pickup_date: new Date().toISOString(),
+          transporter_id: organization?.id || null,
+          generator_id: shipment.generator?.name ? null : null, // Will be fetched from shipment
         }));
 
         const { error } = await supabase
           .from('shipment_receipts')
-          .insert(receipts);
+          .insert(receipts as any);
 
         if (error) throw error;
       } else {
