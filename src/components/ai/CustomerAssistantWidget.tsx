@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import ReactMarkdown from 'react-markdown';
+import ConversationRatingDialog from './ConversationRatingDialog';
 import {
   MessageCircle,
   X,
@@ -16,6 +17,9 @@ import {
   Sparkles,
   Headphones,
   RefreshCw,
+  PhoneCall,
+  Ticket,
+  Navigation,
 } from 'lucide-react';
 
 interface CustomerAssistantWidgetProps {
@@ -28,7 +32,17 @@ interface CustomerAssistantWidgetProps {
 const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const { isLoading, messages, suggestions, shouldEscalate, sendMessage, clearChat } = useCustomerAssistant();
+  const { 
+    isLoading, 
+    messages, 
+    suggestions, 
+    shouldEscalate, 
+    showRating,
+    sendMessage, 
+    clearChat,
+    submitRating,
+    setShowRating
+  } = useCustomerAssistant();
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +71,35 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
   const handleSuggestionClick = async (suggestion: string) => {
     setInput('');
     await sendMessage(suggestion, context);
+  };
+
+  const handleAction = (action: { type: string; label: string; data?: any }) => {
+    switch (action.type) {
+      case 'call_support':
+        window.open('tel:+201500045579', '_blank');
+        break;
+      case 'create_ticket':
+        window.location.href = '/dashboard/support';
+        break;
+      case 'navigate':
+        if (action.data?.path) {
+          window.location.href = action.data.path;
+        }
+        break;
+      case 'track_shipment':
+        window.location.href = '/dashboard/shipments';
+        break;
+    }
+  };
+
+  const getActionIcon = (type: string) => {
+    switch (type) {
+      case 'call_support': return PhoneCall;
+      case 'create_ticket': return Ticket;
+      case 'navigate': return Navigation;
+      case 'track_shipment': return Navigation;
+      default: return Navigation;
+    }
   };
 
   return (
@@ -88,6 +131,11 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
             >
               <Bot className="h-6 w-6" />
               <Sparkles className="h-3 w-3 absolute -top-1 -right-1 text-amber-300" />
+              {messages.length > 0 && (
+                <span className="absolute -top-2 -left-2 w-5 h-5 bg-destructive rounded-full text-xs flex items-center justify-center text-destructive-foreground">
+                  {messages.length}
+                </span>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -122,6 +170,7 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
                   size="icon"
                   className="text-white hover:bg-white/20"
                   onClick={clearChat}
+                  title="محادثة جديدة"
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
@@ -167,6 +216,27 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
                         <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
                           <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
+                        
+                        {/* Actions */}
+                        {msg.role === 'assistant' && msg.actions && msg.actions.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-border/50">
+                            {msg.actions.map((action, actionIdx) => {
+                              const Icon = getActionIcon(action.type);
+                              return (
+                                <Button
+                                  key={actionIdx}
+                                  size="sm"
+                                  variant="secondary"
+                                  className="h-7 text-xs"
+                                  onClick={() => handleAction(action)}
+                                >
+                                  <Icon className="w-3 h-3 ml-1" />
+                                  {action.label}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   ))}
@@ -193,13 +263,13 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
             {shouldEscalate && (
               <div className="px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border-t">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-amber-700">
-                    هل تحتاج مساعدة بشرية؟
+                  <span className="text-xs text-amber-700 dark:text-amber-300">
+                    تم تصعيد طلبك للدعم البشري
                   </span>
                   <a href="tel:+201500045579">
                     <Button size="sm" variant="outline" className="h-7 text-xs">
                       <Headphones className="h-3 w-3 ml-1" />
-                      اتصل: 01500045579
+                      اتصل الآن
                     </Button>
                   </a>
                 </div>
@@ -207,7 +277,7 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
             )}
 
             {/* Suggestions */}
-            {suggestions.length > 0 && messages.length > 0 && (
+            {suggestions.length > 0 && messages.length > 0 && !isLoading && (
               <div className="px-4 py-2 border-t">
                 <div className="flex flex-wrap gap-1">
                   {suggestions.slice(0, 3).map((suggestion, idx) => (
@@ -252,6 +322,13 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Rating Dialog */}
+      <ConversationRatingDialog
+        open={showRating}
+        onOpenChange={setShowRating}
+        onSubmit={submitRating}
+      />
     </>
   );
 };

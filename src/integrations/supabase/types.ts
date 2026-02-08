@@ -1845,6 +1845,117 @@ export type Database = {
           },
         ]
       }
+      customer_conversation_messages: {
+        Row: {
+          actions: Json | null
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+          suggestions: Json | null
+        }
+        Insert: {
+          actions?: Json | null
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+          suggestions?: Json | null
+        }
+        Update: {
+          actions?: Json | null
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          suggestions?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_conversation_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "customer_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_conversations: {
+        Row: {
+          context: Json | null
+          created_at: string
+          ended_at: string | null
+          escalated_at: string | null
+          escalated_to_ticket_id: string | null
+          id: string
+          organization_id: string | null
+          rated_at: string | null
+          rating: number | null
+          rating_feedback: string | null
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          ended_at?: string | null
+          escalated_at?: string | null
+          escalated_to_ticket_id?: string | null
+          id?: string
+          organization_id?: string | null
+          rated_at?: string | null
+          rating?: number | null
+          rating_feedback?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          ended_at?: string | null
+          escalated_at?: string | null
+          escalated_to_ticket_id?: string | null
+          id?: string
+          organization_id?: string | null
+          rated_at?: string | null
+          rating?: number | null
+          rating_feedback?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_conversations_escalated_to_ticket_id_fkey"
+            columns: ["escalated_to_ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "customer_conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           address: string | null
