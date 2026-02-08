@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useSupportTickets, useSupportStats, SupportTicket, TicketStatus, TicketPriority } from '@/hooks/useSupportTickets';
 import { useQuickReplies } from '@/hooks/useQuickReplies';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -20,23 +22,24 @@ import { ar } from 'date-fns/locale';
 import {
   Headphones,
   Search,
-  Filter,
   Inbox,
   Clock,
   CheckCircle2,
   AlertTriangle,
   Star,
   TrendingUp,
-  Users,
   MessageSquare,
   Zap,
   Building2,
   ArrowUpRight,
   RefreshCw,
   Loader2,
+  Bot,
+  MessagesSquare,
 } from 'lucide-react';
 import TicketDetailDialog from './TicketDetailDialog';
 import QuickReplyManager from './QuickReplyManager';
+import AIConversationsPanel from './AIConversationsPanel';
 
 const statusConfig: Record<TicketStatus, { label: string; color: string; bgColor: string }> = {
   open: { label: 'مفتوحة', color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900/30' },
@@ -70,6 +73,24 @@ const AdminSupportCenter = () => {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('tickets');
 
+  // Fetch AI conversations stats
+  const { data: conversationsStats } = useQuery({
+    queryKey: ['ai-conversations-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('customer_conversations')
+        .select('status', { count: 'exact' });
+      
+      if (error) throw error;
+      
+      const active = data?.filter(c => c.status === 'active').length || 0;
+      const escalated = data?.filter(c => c.status === 'escalated').length || 0;
+      const closed = data?.filter(c => c.status === 'closed').length || 0;
+      
+      return { active, escalated, closed, total: data?.length || 0 };
+    }
+  });
+
   const filteredTickets = tickets.filter(ticket => {
     if (statusFilter !== 'all' && ticket.status !== statusFilter) return false;
     if (priorityFilter !== 'all' && ticket.priority !== priorityFilter) return false;
@@ -86,7 +107,6 @@ const AdminSupportCenter = () => {
   });
 
   const urgentTickets = tickets.filter(t => t.priority === 'urgent' && t.status !== 'resolved' && t.status !== 'closed');
-  const openTickets = tickets.filter(t => t.status === 'open');
 
   return (
     <div className="space-y-6">
@@ -97,9 +117,9 @@ const AdminSupportCenter = () => {
             <Headphones className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">مركز الدعم الفني</h1>
+            <h1 className="text-2xl font-bold">مركز الدعم الموحد</h1>
             <p className="text-sm text-muted-foreground">
-              إدارة تذاكر الدعم والردود الجاهزة
+              محادثات AI + تذاكر الدعم + الردود الجاهزة
             </p>
           </div>
         </div>
@@ -110,12 +130,21 @@ const AdminSupportCenter = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <Card>
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Bot className="h-4 w-4 text-emerald-500" />
+              <span className="text-sm text-muted-foreground">محادثات نشطة</span>
+            </div>
+            <p className="text-2xl font-bold mt-1">{conversationsStats?.active || 0}</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
               <Inbox className="h-4 w-4 text-blue-500" />
-              <span className="text-sm text-muted-foreground">مفتوحة</span>
+              <span className="text-sm text-muted-foreground">تذاكر مفتوحة</span>
             </div>
             <p className="text-2xl font-bold mt-1">{stats?.open || 0}</p>
           </CardContent>
@@ -133,9 +162,9 @@ const AdminSupportCenter = () => {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-red-500" />
-              <span className="text-sm text-muted-foreground">عاجلة</span>
+              <span className="text-sm text-muted-foreground">تصعيدات AI</span>
             </div>
-            <p className="text-2xl font-bold mt-1 text-red-600">{stats?.urgent || 0}</p>
+            <p className="text-2xl font-bold mt-1 text-red-600">{conversationsStats?.escalated || 0}</p>
           </CardContent>
         </Card>
         <Card>
@@ -187,6 +216,7 @@ const AdminSupportCenter = () => {
                 onClick={() => {
                   setPriorityFilter('urgent');
                   setStatusFilter('all');
+                  setActiveTab('tickets');
                 }}
               >
                 عرض التذاكر العاجلة
@@ -199,6 +229,10 @@ const AdminSupportCenter = () => {
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
+          <TabsTrigger value="conversations" className="gap-2">
+            <MessagesSquare className="h-4 w-4" />
+            محادثات AI ({conversationsStats?.total || 0})
+          </TabsTrigger>
           <TabsTrigger value="tickets" className="gap-2">
             <MessageSquare className="h-4 w-4" />
             التذاكر ({tickets.length})
@@ -212,6 +246,10 @@ const AdminSupportCenter = () => {
             الردود الجاهزة
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="conversations" className="mt-4">
+          <AIConversationsPanel />
+        </TabsContent>
 
         <TabsContent value="tickets" className="mt-4">
           <Card>
@@ -312,7 +350,6 @@ interface TicketCardProps {
 
 const TicketCard = ({ ticket, onClick }: TicketCardProps) => {
   const status = statusConfig[ticket.status];
-  const priority = priorityConfig[ticket.priority];
   
   return (
     <button
@@ -336,6 +373,12 @@ const TicketCard = ({ ticket, onClick }: TicketCardProps) => {
             {ticket.priority === 'high' && (
               <Badge className="bg-orange-100 text-orange-600 text-xs">
                 عالية
+              </Badge>
+            )}
+            {ticket.title?.includes('تصعيد من المساعد') && (
+              <Badge variant="outline" className="text-xs gap-1">
+                <Bot className="h-3 w-3" />
+                تصعيد AI
               </Badge>
             )}
           </div>
