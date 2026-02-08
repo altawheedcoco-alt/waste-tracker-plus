@@ -40,6 +40,14 @@ serve(async (req) => {
         orgName: 'شركة التوليد للنفايات',
       },
       {
+        email: 'generator2@demo.com',
+        password: 'generator123456',
+        fullName: 'سعيد أحمد - الجهة المولدة 2',
+        role: 'company_admin' as const,
+        orgType: 'generator' as const,
+        orgName: 'مصنع الصناعات البلاستيكية',
+      },
+      {
         email: 'transporter@demo.com',
         password: 'transporter123456',
         fullName: 'محمد علي - الناقل',
