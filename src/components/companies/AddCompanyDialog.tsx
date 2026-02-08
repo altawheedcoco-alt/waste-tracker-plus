@@ -127,7 +127,7 @@ export default function AddCompanyDialog({
   const onSubmit = async (data: CompanyFormData) => {
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('organizations').insert({
+      const { error } = await supabase.from('organizations').insert([{
         name: data.name,
         name_en: data.name_en || null,
         organization_type: data.organization_type,
@@ -156,7 +156,7 @@ export default function AddCompanyDialog({
         agent_national_id: data.agent_national_id || null,
         is_verified: data.is_verified,
         is_active: data.is_active,
-      });
+      }]);
 
       if (error) throw error;
 

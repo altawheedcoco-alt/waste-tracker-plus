@@ -366,7 +366,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data: orgData, error: orgError } = await supabase
         .from('organizations')
-        .insert({
+        .insert([{
           name: data.organizationName,
           name_en: data.organizationNameEn,
           organization_type: data.organizationType,
@@ -395,7 +395,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           agent_national_id: data.agentNationalId,
           is_verified: false,
           is_active: false,
-        })
+        }])
         .select()
         .single();
 
