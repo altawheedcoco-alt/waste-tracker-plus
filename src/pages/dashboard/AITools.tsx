@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, BarChart3, Lightbulb, CalendarDays, Brain, FileText } from 'lucide-react';
+import { Bot, BarChart3, Lightbulb, CalendarDays, Brain, FileText, Sparkles } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import WasteAnalytics from '@/components/ai/WasteAnalytics';
@@ -8,6 +8,7 @@ import WasteReductionAdvisor from '@/components/ai/WasteReductionAdvisor';
 import WasteTypeDetailedAnalytics from '@/components/ai/WasteTypeDetailedAnalytics';
 import AIInsightsDashboard from '@/components/ai/AIInsightsDashboard';
 import SmartDocumentUpload from '@/components/ai/SmartDocumentUpload';
+import AdvancedAIDashboard from '@/components/ai/AdvancedAIDashboard';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { toast } from 'sonner';
 
@@ -38,8 +39,12 @@ const AITools = () => {
           </div>
         </motion.div>
 
-        <Tabs defaultValue="insights" className="w-full" dir="rtl">
-          <TabsList className={`grid grid-cols-5 w-full max-w-3xl`}>
+        <Tabs defaultValue="advanced" className="w-full" dir="rtl">
+          <TabsList className={`grid grid-cols-6 w-full max-w-4xl`}>
+            <TabsTrigger value="advanced" className="flex items-center gap-2 text-xs md:text-sm">
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden sm:inline">تحليلات متقدمة</span>
+            </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-2 text-xs md:text-sm">
               <Brain className="w-4 h-4" />
               <span className="hidden sm:inline">رؤى ذكية</span>
@@ -61,6 +66,10 @@ const AITools = () => {
               <span className="hidden sm:inline">توصيات</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="advanced" className="mt-6">
+            <AdvancedAIDashboard />
+          </TabsContent>
 
           <TabsContent value="insights" className="mt-6">
             <AIInsightsDashboard />

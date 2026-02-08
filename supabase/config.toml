@@ -86,3 +86,15 @@ verify_jwt = false
 
 [functions.ai-customer-assistant]
 verify_jwt = false
+
+[functions.ai-anomaly-detector]
+verify_jwt = false
+
+[functions.ai-demand-forecaster]
+verify_jwt = false
+
+[functions.ai-price-optimizer]
+verify_jwt = false
+
+[functions.ai-capacity-planner]
+verify_jwt = false
