@@ -63,7 +63,7 @@ import {
 } from 'lucide-react';
 import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
 import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
-import WasteTypeCombobox from '@/components/shipments/WasteTypeCombobox';
+import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 
 interface Partner {
   id: string;
@@ -632,7 +632,7 @@ const ShipmentLinksManager = () => {
                           <Package className="h-4 w-4" />
                           نوع المخلفات (التصنيف الكامل)
                         </Label>
-                        <WasteTypeCombobox
+                        <FlexibleWasteTypeSelector
                           value={presetWasteCategory || ''}
                           onChange={(wasteType, hazardLevel, wasteDescription) => {
                             setPresetWasteType(wasteType);

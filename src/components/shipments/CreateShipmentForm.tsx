@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Loader2, MapPin, RefreshCw, User, Truck } from 'lucide-react';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
-import WasteTypeCombobox from '@/components/shipments/WasteTypeCombobox';
+import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
 import EnhancedLocationPicker from '@/components/shipments/EnhancedLocationPicker';
 import LocationPicker from '@/components/maps/LocationPicker';
@@ -278,8 +278,8 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
       <div className="space-y-4">
         <div>
           <Label>نوع المخلف *</Label>
-          <WasteTypeCombobox
-            value={formData.waste_type ? `${formData.waste_type}:${formData.waste_description?.split(' - ')[0] || ''}` : ''}
+          <FlexibleWasteTypeSelector
+            value={formData.waste_description || ''}
             onChange={(wasteType, hazardLevel, wasteDescription) => {
               setFormData(prev => ({ 
                 ...prev, 

@@ -4,6 +4,9 @@
  * Updated according to Law No. 202 of 2020 for Waste Management
  * 
  * Reference: Egyptian Environmental Affairs Agency (EEAA) - https://www.eeaa.gov.eg
+ * 
+ * نظام مرن: فئات رئيسية + وصف حر
+ * المستخدم يختار الفئة الرئيسية ويكتب الوصف بحرية
  */
 
 import type { Database } from '@/integrations/supabase/types';
@@ -30,6 +33,47 @@ export interface WasteCategoryInfo {
   category: WasteCategory;
   subcategories: WasteSubcategory[];
 }
+
+// ============================================
+// الفئات الرئيسية المبسطة (للاستخدام في المحدد المرن)
+// ============================================
+
+export interface MainCategory {
+  id: WasteType;
+  name: string;
+  nameShort: string;
+  code: string;
+  isHazardous: boolean;
+  keywords: string[];
+}
+
+export const mainCategories: MainCategory[] = [
+  // غير خطرة
+  { id: 'organic', name: 'أخشاب', nameShort: 'خشب', code: 'WD', isHazardous: false, keywords: ['خشب', 'اخشاب', 'بالت', 'بالتات', 'كونتر', 'حبيبي', 'صندوق', 'mdf'] },
+  { id: 'plastic', name: 'بلاستيك', nameShort: 'بلاستيك', code: 'PL', isHazardous: false, keywords: ['بلاستيك', 'plastic', 'pet', 'hdpe', 'pvc', 'نايلون', 'اكياس', 'عبوات'] },
+  { id: 'paper', name: 'ورق وكرتون', nameShort: 'ورق', code: 'PA', isHazardous: false, keywords: ['ورق', 'كرتون', 'paper', 'cardboard', 'كراتين', 'علب'] },
+  { id: 'metal', name: 'معادن', nameShort: 'معادن', code: 'MT', isHazardous: false, keywords: ['معدن', 'حديد', 'ألومنيوم', 'نحاس', 'ستانلس', 'خردة', 'سكراب'] },
+  { id: 'glass', name: 'زجاج', nameShort: 'زجاج', code: 'GL', isHazardous: false, keywords: ['زجاج', 'glass', 'قوارير', 'زجاجات'] },
+  { id: 'construction', name: 'مخلفات بناء وهدم', nameShort: 'بناء', code: 'CN', isHazardous: false, keywords: ['بناء', 'هدم', 'خرسانة', 'طوب', 'بلاط', 'سيراميك'] },
+  { id: 'other', name: 'مخلفات متنوعة', nameShort: 'متنوع', code: 'OT', isHazardous: false, keywords: ['متنوع', 'مختلط', 'اخرى', 'قماش', 'اثاث'] },
+  // خطرة
+  { id: 'chemical', name: 'مخلفات كيميائية', nameShort: 'كيميائي', code: 'CH', isHazardous: true, keywords: ['كيميائي', 'مذيب', 'حمض', 'قلوي', 'مبيد', 'زيت ملوث', 'طلاء'] },
+  { id: 'electronic', name: 'مخلفات إلكترونية', nameShort: 'إلكتروني', code: 'EL', isHazardous: true, keywords: ['إلكتروني', 'بطارية', 'بطاريات', 'شاشة', 'كمبيوتر', 'موبايل'] },
+  { id: 'medical', name: 'مخلفات طبية', nameShort: 'طبي', code: 'MD', isHazardous: true, keywords: ['طبي', 'صيدلي', 'إبر', 'أدوية', 'مستشفى', 'عيادة'] },
+];
+
+// الكشف التلقائي عن الفئة من الوصف
+export const detectMainCategory = (description: string): MainCategory | null => {
+  const desc = description.toLowerCase().trim();
+  for (const cat of mainCategories) {
+    for (const keyword of cat.keywords) {
+      if (desc.includes(keyword.toLowerCase())) {
+        return cat;
+      }
+    }
+  }
+  return null;
+};
 
 // ============================================
 // HAZARDOUS WASTE CATEGORIES
