@@ -64,6 +64,7 @@ import { toast } from 'sonner';
 // Lazy load the live tracking map dialog and inline map
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 const ShipmentInlineTrackingMap = lazy(() => import('./ShipmentInlineTrackingMap'));
+const GPSTrackingStatusWidget = lazy(() => import('@/components/tracking/GPSTrackingStatusWidget'));
 
 interface ShipmentCardProps {
   shipment: {
@@ -551,6 +552,17 @@ const ShipmentCard = ({
                         <span>التتبع مقفل</span>
                       </div>
                     )}
+                    {/* GPS Tracking Status Widget */}
+                    <Suspense fallback={null}>
+                      <GPSTrackingStatusWidget
+                        shipmentId={shipment.id}
+                        driverId={shipment.driver_id || null}
+                        compact={true}
+                        onClick={() => {
+                          navigate(`/dashboard/s/${shipment.shipment_number}?tab=tracking`);
+                        }}
+                      />
+                    </Suspense>
                     {/* Map Button - only if maps allowed */}
                     {visibility.canViewMaps && (
                       <Button
