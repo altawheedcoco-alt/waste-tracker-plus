@@ -8887,6 +8887,10 @@ export type Database = {
         Args: { retention_days?: number }
         Returns: number
       }
+      are_partners: {
+        Args: { _org_id_1: string; _org_id_2: string }
+        Returns: boolean
+      }
       auto_approve_expired_shipments: { Args: never; Returns: undefined }
       can_access_contract: {
         Args: { _contract_id: string; _user_id: string }
@@ -8950,6 +8954,15 @@ export type Database = {
       }
       can_access_ticket: {
         Args: { _ticket_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_view_organization: { Args: { _org_id: string }; Returns: boolean }
+      can_view_shipment: {
+        Args: {
+          _generator_id: string
+          _recycler_id: string
+          _transporter_id: string
+        }
         Returns: boolean
       }
       check_api_rate_limit: {
@@ -9025,6 +9038,7 @@ export type Database = {
           unit_price: number
         }[]
       }
+      get_current_user_org_id: { Args: never; Returns: string }
       get_daily_shipment_stats: {
         Args: { _end_date?: string; _org_id: string; _start_date?: string }
         Returns: {
@@ -9138,6 +9152,7 @@ export type Database = {
           role_in_organization: string
         }[]
       }
+      get_user_partner_ids: { Args: never; Returns: string[] }
       get_waste_type_analytics: {
         Args: { _org_id?: string }
         Returns: {
