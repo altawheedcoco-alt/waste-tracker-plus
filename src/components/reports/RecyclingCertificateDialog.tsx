@@ -41,6 +41,8 @@ import {
 } from 'lucide-react';
 import RecyclingCertificatePrint from './RecyclingCertificatePrint';
 import CreateTemplateDialog from './CreateTemplateDialog';
+import RecyclingTemplatesLibrary from './RecyclingTemplatesLibrary';
+import type { RecyclingReportTemplate } from '@/lib/recyclingReportTemplates';
 
 interface Shipment {
   id: string;
@@ -541,34 +543,30 @@ const RecyclingCertificateDialog = ({
               </TabsList>
             </div>
 
-            {/* Templates Tab */}
             <TabsContent value="templates" className="mt-0">
               <ScrollArea className="h-[60vh] px-6 py-4">
                 <div className="space-y-6">
-                  {/* Category Filter */}
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <Label className="text-sm">تصفية حسب التصنيف:</Label>
-                    <div className="flex gap-2 flex-wrap">
-                      <Badge 
-                        variant={categoryFilter === 'all' ? 'default' : 'outline'}
-                        className="cursor-pointer"
-                        onClick={() => setCategoryFilter('all')}
-                      >
-                        الكل
-                      </Badge>
-                      {Object.entries(wasteCategoryLabels).filter(([k]) => k !== 'all').map(([key, { label, icon: Icon, color }]) => (
-                        <Badge 
-                          key={key}
-                          variant={categoryFilter === key ? 'default' : 'outline'}
-                          className={`cursor-pointer ${categoryFilter === key ? '' : color}`}
-                          onClick={() => setCategoryFilter(key)}
-                        >
-                          <Icon className="w-3 h-3 ml-1" />
-                          {label}
-                        </Badge>
-                      ))}
-                    </div>
+                  {/* مكتبة القوالب الجاهزة (100+ قالب) */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <Recycle className="w-5 h-5 text-primary" />
+                      مكتبة القوالب الجاهزة
+                      <Badge variant="secondary" className="mr-2">100+ قالب</Badge>
+                    </h3>
+                    
+                    <RecyclingTemplatesLibrary
+                      wasteType={shipment.waste_type}
+                      onSelectTemplate={(template: RecyclingReportTemplate) => {
+                        setOpeningDeclaration(template.opening_declaration || '');
+                        setProcessingDetails(template.processing_details_template || '');
+                        setClosingDeclaration(template.closing_declaration || '');
+                        setActiveTab('write');
+                        toast.success(`تم تحميل قالب: ${template.name}`);
+                      }}
+                    />
                   </div>
+
+                  <Separator />
 
                   {/* Custom Templates */}
                   <div className="space-y-3">
@@ -609,56 +607,6 @@ const RecyclingCertificateDialog = ({
                         </CardContent>
                       </Card>
                     )}
-                  </div>
-
-                  <Separator />
-
-                  {/* System Templates */}
-                  <div className="space-y-3">
-                    <h3 className="font-semibold flex items-center gap-2">
-                      <Recycle className="w-5 h-5 text-green-600" />
-                      قوالب النظام
-                    </h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {systemTemplatesList.length > 0 ? (
-                        systemTemplatesList.map(t => renderTemplateCard(t, true))
-                      ) : (
-                        // Show local system templates if none in DB
-                        systemTemplates
-                          .filter(t => categoryFilter === 'all' || t.waste_category === categoryFilter || t.waste_category === 'all')
-                          .map((t, i) => (
-                            <Card 
-                              key={i}
-                              className="cursor-pointer transition-all hover:shadow-md"
-                              onClick={() => {
-                                setOpeningDeclaration(t.opening_declaration || '');
-                                setProcessingDetails(t.processing_details_template || '');
-                                setClosingDeclaration(t.closing_declaration || '');
-                                setActiveTab('write');
-                              }}
-                            >
-                              <CardHeader className="pb-2">
-                                <div className="flex items-start justify-between gap-2">
-                                  <CardTitle className="text-sm font-medium">{t.name}</CardTitle>
-                                  <Badge variant="outline" className={wasteCategoryLabels[t.waste_category]?.color}>
-                                    {React.createElement(wasteCategoryLabels[t.waste_category]?.icon, { className: "w-3 h-3 ml-1" })}
-                                    {wasteCategoryLabels[t.waste_category]?.label}
-                                  </Badge>
-                                </div>
-                              </CardHeader>
-                              <CardContent className="pt-0">
-                                <p className="text-xs text-muted-foreground line-clamp-2">
-                                  {t.description}
-                                </p>
-                                <Badge variant="secondary" className="mt-2 text-xs">
-                                  قالب النظام
-                                </Badge>
-                              </CardContent>
-                            </Card>
-                          ))
-                      )}
-                    </div>
                   </div>
                 </div>
               </ScrollArea>
