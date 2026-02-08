@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Radio, Settings, Plug, Activity, Car, FileText } from 'lucide-react';
+import { Radio, Settings, Plug, Activity, Car, FileText, HelpCircle, History } from 'lucide-react';
 import GPSDeviceManager from './GPSDeviceManager';
 import GPSDeviceRegistration from './GPSDeviceRegistration';
 import GPSConnectionTester from './GPSConnectionTester';
 import GPSProtocolGuide from './GPSProtocolGuide';
 import GPSVehicleBinding from './GPSVehicleBinding';
 import GPSTrackingDashboard from './GPSTrackingDashboard';
+import GPSHelpGuideDialog from './GPSHelpGuideDialog';
+import VehicleMovementLog from './VehicleMovementLog';
+import { Button } from '@/components/ui/button';
 
 const GPSSettingsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('devices');
@@ -15,7 +18,7 @@ const GPSSettingsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-3">
             <Radio className="w-7 h-7 text-primary" />
@@ -24,6 +27,26 @@ const GPSSettingsPage: React.FC = () => {
           <p className="text-muted-foreground mt-1">
             ربط وإدارة أجهزة GPS المثبتة في السيارات للتتبع المباشر
           </p>
+        </div>
+        
+        {/* Action Buttons */}
+        <div className="flex items-center gap-3">
+          <GPSHelpGuideDialog
+            trigger={
+              <Button variant="outline" className="gap-2">
+                <HelpCircle className="w-4 h-4" />
+                دليل الربط
+              </Button>
+            }
+          />
+          <VehicleMovementLog
+            trigger={
+              <Button variant="default" className="gap-2">
+                <History className="w-4 h-4" />
+                سجل التحركات
+              </Button>
+            }
+          />
         </div>
       </div>
 
