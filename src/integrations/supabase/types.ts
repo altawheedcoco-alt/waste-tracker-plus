@@ -3567,6 +3567,206 @@ export type Database = {
           },
         ]
       }
+      gps_device_types: {
+        Row: {
+          config_schema: Json
+          created_at: string
+          default_port: number | null
+          documentation_url: string | null
+          id: string
+          is_active: boolean | null
+          manufacturer: string
+          name: string
+          parser_type: string
+          protocol: string
+          sample_payload: Json | null
+        }
+        Insert: {
+          config_schema?: Json
+          created_at?: string
+          default_port?: number | null
+          documentation_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          manufacturer: string
+          name: string
+          parser_type?: string
+          protocol: string
+          sample_payload?: Json | null
+        }
+        Update: {
+          config_schema?: Json
+          created_at?: string
+          default_port?: number | null
+          documentation_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          manufacturer?: string
+          name?: string
+          parser_type?: string
+          protocol?: string
+          sample_payload?: Json | null
+        }
+        Relationships: []
+      }
+      gps_devices: {
+        Row: {
+          api_endpoint: string | null
+          api_key: string | null
+          battery_level: number | null
+          connection_config: Json | null
+          created_at: string
+          device_name: string
+          device_serial: string
+          device_type: string
+          driver_id: string | null
+          id: string
+          is_active: boolean | null
+          last_location: Json | null
+          last_ping_at: string | null
+          metadata: Json | null
+          organization_id: string
+          protocol: string
+          signal_strength: number | null
+          updated_at: string
+        }
+        Insert: {
+          api_endpoint?: string | null
+          api_key?: string | null
+          battery_level?: number | null
+          connection_config?: Json | null
+          created_at?: string
+          device_name: string
+          device_serial: string
+          device_type?: string
+          driver_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_location?: Json | null
+          last_ping_at?: string | null
+          metadata?: Json | null
+          organization_id: string
+          protocol?: string
+          signal_strength?: number | null
+          updated_at?: string
+        }
+        Update: {
+          api_endpoint?: string | null
+          api_key?: string | null
+          battery_level?: number | null
+          connection_config?: Json | null
+          created_at?: string
+          device_name?: string
+          device_serial?: string
+          device_type?: string
+          driver_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_location?: Json | null
+          last_ping_at?: string | null
+          metadata?: Json | null
+          organization_id?: string
+          protocol?: string
+          signal_strength?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gps_devices_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gps_devices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "gps_devices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gps_location_logs: {
+        Row: {
+          accuracy: number | null
+          altitude: number | null
+          created_at: string
+          device_id: string
+          driver_id: string | null
+          heading: number | null
+          id: string
+          latitude: number
+          longitude: number
+          raw_data: Json | null
+          recorded_at: string
+          shipment_id: string | null
+          source: string
+          speed: number | null
+        }
+        Insert: {
+          accuracy?: number | null
+          altitude?: number | null
+          created_at?: string
+          device_id: string
+          driver_id?: string | null
+          heading?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          raw_data?: Json | null
+          recorded_at?: string
+          shipment_id?: string | null
+          source?: string
+          speed?: number | null
+        }
+        Update: {
+          accuracy?: number | null
+          altitude?: number | null
+          created_at?: string
+          device_id?: string
+          driver_id?: string | null
+          heading?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          raw_data?: Json | null
+          recorded_at?: string
+          shipment_id?: string | null
+          source?: string
+          speed?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gps_location_logs_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "gps_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gps_location_logs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gps_location_logs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       industrial_facilities: {
         Row: {
           address: string | null
@@ -6559,6 +6759,63 @@ export type Database = {
             foreignKeyName: "shipment_receipts_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipment_tracking_config: {
+        Row: {
+          anomaly_detection_enabled: boolean | null
+          created_at: string
+          fallback_enabled: boolean | null
+          gps_device_id: string | null
+          id: string
+          location_sync_interval: number | null
+          max_source_deviation: number | null
+          primary_source: string | null
+          shipment_id: string
+          tracking_source: string
+          updated_at: string
+        }
+        Insert: {
+          anomaly_detection_enabled?: boolean | null
+          created_at?: string
+          fallback_enabled?: boolean | null
+          gps_device_id?: string | null
+          id?: string
+          location_sync_interval?: number | null
+          max_source_deviation?: number | null
+          primary_source?: string | null
+          shipment_id: string
+          tracking_source?: string
+          updated_at?: string
+        }
+        Update: {
+          anomaly_detection_enabled?: boolean | null
+          created_at?: string
+          fallback_enabled?: boolean | null
+          gps_device_id?: string | null
+          id?: string
+          location_sync_interval?: number | null
+          max_source_deviation?: number | null
+          primary_source?: string | null
+          shipment_id?: string
+          tracking_source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_tracking_config_gps_device_id_fkey"
+            columns: ["gps_device_id"]
+            isOneToOne: false
+            referencedRelation: "gps_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_tracking_config_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: true
             referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
