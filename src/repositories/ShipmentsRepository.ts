@@ -19,6 +19,7 @@ export interface Shipment {
   generator_id?: string;
   transporter_id?: string;
   recycler_id?: string;
+  disposal_facility_id?: string;
   driver_id?: string;
   price_per_unit?: number;
   total_price?: number;
@@ -29,6 +30,7 @@ export interface Shipment {
   created_at: string;
   updated_at: string;
   organization_id: string;
+  manual_disposal_name?: string;
 }
 
 export interface ShipmentFilters {
