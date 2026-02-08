@@ -74,3 +74,15 @@ verify_jwt = false
 
 [functions.ai-document-classifier]
 verify_jwt = false
+
+[functions.ai-route-optimizer]
+verify_jwt = false
+
+[functions.ai-smart-scheduler]
+verify_jwt = false
+
+[functions.ai-maintenance-predictor]
+verify_jwt = false
+
+[functions.ai-customer-assistant]
+verify_jwt = false
