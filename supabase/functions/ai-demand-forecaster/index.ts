@@ -1,0 +1,206 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+};
+
+interface HistoricalData {
+  date: string;
+  shipmentCount: number;
+  totalWeight: number;
+  totalRevenue: number;
+  wasteTypes?: Record<string, number>;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { historicalData, forecastPeriod = 'weekly', organizationId } = await req.json();
+    
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    console.log(`Forecasting demand for ${forecastPeriod} period...`);
+
+    const systemPrompt = `أنت خبير في التنبؤ بالطلب وتحليل البيانات الزمنية لقطاع النقل وإدارة المخلفات.
+
+مهمتك تحليل البيانات التاريخية والتنبؤ بـ:
+1. **حجم الشحنات المتوقع**: عدد الشحنات اليومية/الأسبوعية/الشهرية
+2. **أوقات الذروة**: تحديد الفترات الأكثر نشاطاً
+3. **الموسمية**: اكتشاف الأنماط الموسمية
+4. **الاتجاهات**: النمو أو الانخفاض المتوقع
+5. **التوصيات**: كيفية الاستعداد للفترات القادمة
+
+استخدم أساليب التحليل الإحصائي للوصول لتنبؤات دقيقة.`;
+
+    const userPrompt = `قم بتحليل البيانات التاريخية التالية والتنبؤ بالطلب المستقبلي:
+
+البيانات التاريخية:
+${JSON.stringify(historicalData, null, 2)}
+
+فترة التنبؤ المطلوبة: ${forecastPeriod}
+
+قدم:
+1. توقعات الطلب للفترة القادمة
+2. تحليل الموسمية والاتجاهات
+3. أوقات الذروة المتوقعة
+4. توصيات لتوزيع الموارد`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "demand_forecast",
+              description: "تقرير التنبؤ بالطلب المستقبلي",
+              parameters: {
+                type: "object",
+                properties: {
+                  forecasts: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        period: { type: "string", description: "الفترة الزمنية (تاريخ أو نطاق)" },
+                        predictedShipments: { type: "number", description: "عدد الشحنات المتوقع" },
+                        predictedWeight: { type: "number", description: "الوزن المتوقع بالطن" },
+                        predictedRevenue: { type: "number", description: "الإيرادات المتوقعة" },
+                        confidence: { type: "number", description: "نسبة الثقة (0-100)" },
+                        isPeakPeriod: { type: "boolean", description: "هل هي فترة ذروة" }
+                      },
+                      required: ["period", "predictedShipments", "confidence"]
+                    }
+                  },
+                  trends: {
+                    type: "object",
+                    properties: {
+                      overallTrend: { 
+                        type: "string", 
+                        enum: ["increasing", "stable", "decreasing"],
+                        description: "الاتجاه العام"
+                      },
+                      growthRate: { type: "number", description: "معدل النمو المتوقع %" },
+                      seasonalPatterns: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            pattern: { type: "string", description: "وصف النمط" },
+                            impact: { type: "string", description: "تأثير النمط" }
+                          }
+                        }
+                      }
+                    },
+                    required: ["overallTrend", "growthRate"]
+                  },
+                  peakAnalysis: {
+                    type: "object",
+                    properties: {
+                      peakDays: { 
+                        type: "array", 
+                        items: { type: "string" },
+                        description: "أيام الذروة" 
+                      },
+                      peakHours: { 
+                        type: "array", 
+                        items: { type: "string" },
+                        description: "ساعات الذروة" 
+                      },
+                      lowActivityPeriods: { 
+                        type: "array", 
+                        items: { type: "string" },
+                        description: "فترات النشاط المنخفض" 
+                      }
+                    }
+                  },
+                  resourceRecommendations: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        resource: { type: "string", description: "نوع المورد" },
+                        currentCapacity: { type: "string", description: "السعة الحالية" },
+                        recommendedCapacity: { type: "string", description: "السعة الموصى بها" },
+                        action: { type: "string", description: "الإجراء المطلوب" },
+                        priority: { type: "string", enum: ["low", "medium", "high"] }
+                      },
+                      required: ["resource", "action", "priority"]
+                    }
+                  },
+                  summary: {
+                    type: "string",
+                    description: "ملخص التنبؤات والتوصيات"
+                  }
+                },
+                required: ["forecasts", "trends", "resourceRecommendations", "summary"]
+              }
+            }
+          }
+        ],
+        tool_choice: { type: "function", function: { name: "demand_forecast" } }
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "تم تجاوز حد الطلبات، يرجى المحاولة لاحقاً" }), {
+          status: 429,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "يرجى إضافة رصيد للاستمرار في استخدام الخدمة" }), {
+          status: 402,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const errorText = await response.text();
+      console.error("AI gateway error:", response.status, errorText);
+      throw new Error(`AI gateway error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    
+    if (toolCall?.function?.arguments) {
+      const result = JSON.parse(toolCall.function.arguments);
+      console.log(`Generated ${result.forecasts?.length || 0} forecast periods`);
+      
+      return new Response(JSON.stringify({
+        success: true,
+        ...result,
+        forecastedAt: new Date().toISOString()
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    throw new Error("Invalid response from AI");
+
+  } catch (error) {
+    console.error("Demand forecast error:", error);
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : "حدث خطأ أثناء التنبؤ بالطلب" 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
