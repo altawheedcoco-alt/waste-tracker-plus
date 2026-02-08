@@ -9,6 +9,7 @@ import RecyclerDashboard from '@/components/dashboard/RecyclerDashboard';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import DriverDashboard from '@/components/dashboard/DriverDashboard';
 import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
+import CallLogWidget from '@/components/calls/CallLogWidget';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { Loader2 } from 'lucide-react';
 
@@ -84,6 +85,9 @@ const Dashboard = () => {
       <DashboardLayout>
         {renderDashboard()}
       </DashboardLayout>
+      
+      {/* Call Log Widget */}
+      <CallLogWidget />
     </>
   );
 };
