@@ -1,6 +1,6 @@
 /// <reference types="@types/google.maps" />
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 
 interface GoogleMapsContextType {
   isLoaded: boolean;
@@ -25,10 +25,10 @@ let isScriptLoading = false;
 let isScriptLoaded = false;
 
 export const GoogleMapsProvider = ({ children }: GoogleMapsProviderProps) => {
-  const [isLoaded, setIsLoaded] = useState(isScriptLoaded);
-  const [loadError, setLoadError] = useState<Error | null>(null);
+  const [isLoaded, setIsLoaded] = React.useState(isScriptLoaded);
+  const [loadError, setLoadError] = React.useState<Error | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Check if already loaded
     if (window.google?.maps) {
       setIsLoaded(true);
