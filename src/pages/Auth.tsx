@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car } from 'lucide-react';
+import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import logo from '@/assets/logo.png';
 import { z } from 'zod';
@@ -575,12 +575,13 @@ const Auth = () => {
                     </div>
                     
                     {/* الحسابات الأساسية */}
-                    <div className="grid grid-cols-5 gap-2 mt-4">
+                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-4">
                       {[
                         { email: 'admin@demo.com', password: 'admin123456', icon: Shield, label: 'المدير', color: 'bg-red-500 hover:bg-red-600' },
                         { email: 'generator@demo.com', password: 'generator123456', icon: Building2, label: 'المولدة', color: 'bg-blue-500 hover:bg-blue-600' },
                         { email: 'transporter@demo.com', password: 'transporter123456', icon: Truck, label: 'الناقلة', color: 'bg-amber-500 hover:bg-amber-600' },
                         { email: 'recycler@demo.com', password: 'recycler123456', icon: Recycle, label: 'المدورة', color: 'bg-emerald-500 hover:bg-emerald-600' },
+                        { email: 'disposal@demo.com', password: 'disposal123456', icon: Factory, label: 'التخلص', color: 'bg-rose-600 hover:bg-rose-700' },
                         { email: 'driver@demo.com', password: 'driver123456', icon: Car, label: 'السائق', color: 'bg-purple-500 hover:bg-purple-600' },
                       ].map((demo) => (
                         <motion.button
