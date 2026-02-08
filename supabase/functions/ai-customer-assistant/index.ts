@@ -16,6 +16,7 @@ interface AssistantRequest {
   conversationHistory?: ChatMessage[];
   userId?: string;
   organizationId?: string;
+  conversationId?: string;
   context?: {
     shipmentId?: string;
     ticketId?: string;
@@ -31,6 +32,7 @@ interface AssistantResponse {
     data?: any;
   }>;
   escalateToHuman?: boolean;
+  ticketId?: string;
 }
 
 serve(async (req) => {
@@ -49,17 +51,20 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const body: AssistantRequest = await req.json();
-    const { message, conversationHistory = [], userId, organizationId, context } = body;
+    const { message, conversationHistory = [], userId, organizationId, conversationId, context } = body;
 
     console.log('Customer assistant request:', { 
       messageLength: message.length, 
       historyLength: conversationHistory.length,
       userId,
-      organizationId
+      organizationId,
+      conversationId
     });
 
     // Build context information
     let contextInfo = "";
+    let orgName = "";
+    let orgType = "";
     
     // Fetch user/org info if available
     if (organizationId) {
@@ -70,6 +75,8 @@ serve(async (req) => {
         .single();
       
       if (org) {
+        orgName = org.name;
+        orgType = org.organization_type;
         contextInfo += `\nالمستخدم من منظمة: ${org.name} (${getOrgTypeLabel(org.organization_type)})`;
       }
     }
@@ -101,15 +108,29 @@ serve(async (req) => {
       }
     }
 
+    // Get previous support tickets
+    if (organizationId) {
+      const { data: recentTickets } = await supabase
+        .from('support_tickets')
+        .select('id, subject, status, priority')
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      if (recentTickets && recentTickets.length > 0) {
+        contextInfo += `\nتذاكر دعم سابقة: ${recentTickets.map(t => `${t.subject} (${t.status})`).join('، ')}`;
+      }
+    }
+
     // Build messages for AI
-    const systemPrompt = `أنت مساعد خدمة العملاء الذكي لمنصة إدارة النفايات والشحنات. مهمتك مساعدة المستخدمين بإجاباتك الودية والمفيدة.
+    const systemPrompt = `أنت مساعد خدمة العملاء الذكي لمنصة iRecycle لإدارة النفايات والشحنات. مهمتك مساعدة المستخدمين بإجاباتك الودية والمفيدة.
 
 قدراتك:
 1. الإجابة على الأسئلة حول الشحنات وحالتها
 2. شرح كيفية استخدام المنصة
 3. المساعدة في حل المشكلات الشائعة
 4. توجيه المستخدم للخطوات الصحيحة
-5. تصعيد الأمور المعقدة للدعم البشري
+5. تصعيد الأمور المعقدة للدعم البشري عند الضرورة
 
 قواعد الرد:
 - كن ودوداً ومهنياً
@@ -117,12 +138,20 @@ serve(async (req) => {
 - إذا لم تعرف الإجابة، اعترف بذلك واقترح التحدث مع الدعم
 - استخدم اللغة العربية الفصحى البسيطة
 - قدم اقتراحات للأسئلة التالية المحتملة
+- إذا كانت المشكلة معقدة أو تحتاج تدخل بشري، قم بتصعيدها
+
+متى يجب التصعيد لدعم بشري:
+- مشاكل تقنية لا يمكنك حلها
+- شكاوى جدية أو عملاء غاضبين
+- طلبات استثنائية خارج صلاحياتك
+- مشاكل مالية أو فواتير
+- عندما يطلب العميل التحدث مع شخص
 
 ${contextInfo ? `\nمعلومات السياق:${contextInfo}` : ''}`;
 
     const messages: ChatMessage[] = [
       { role: 'system', content: systemPrompt },
-      ...conversationHistory.slice(-10), // Keep last 10 messages
+      ...conversationHistory.slice(-10),
       { role: 'user', content: message }
     ];
 
@@ -151,7 +180,7 @@ ${contextInfo ? `\nمعلومات السياق:${contextInfo}` : ''}`;
                   suggestions: {
                     type: "array",
                     items: { type: "string" },
-                    description: "أسئلة مقترحة يمكن للعميل طرحها"
+                    description: "أسئلة مقترحة يمكن للعميل طرحها (2-3 أسئلة)"
                   },
                   actions: {
                     type: "array",
@@ -167,6 +196,10 @@ ${contextInfo ? `\nمعلومات السياق:${contextInfo}` : ''}`;
                   escalateToHuman: {
                     type: "boolean",
                     description: "هل يحتاج تصعيد لدعم بشري"
+                  },
+                  escalationReason: {
+                    type: "string",
+                    description: "سبب التصعيد إن وجد"
                   }
                 },
                 required: ["reply"]
@@ -204,11 +237,18 @@ ${contextInfo ? `\nمعلومات السياق:${contextInfo}` : ''}`;
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
 
     let response: AssistantResponse;
+    let escalationReason = "";
 
     if (toolCall) {
-      response = JSON.parse(toolCall.function.arguments);
+      const parsed = JSON.parse(toolCall.function.arguments);
+      response = {
+        reply: parsed.reply,
+        suggestions: parsed.suggestions,
+        actions: parsed.actions,
+        escalateToHuman: parsed.escalateToHuman
+      };
+      escalationReason = parsed.escalationReason || "";
     } else {
-      // Fallback response
       response = {
         reply: aiData.choices?.[0]?.message?.content || "مرحباً! كيف يمكنني مساعدتك اليوم؟",
         suggestions: [
@@ -228,10 +268,59 @@ ${contextInfo ? `\nمعلومات السياق:${contextInfo}` : ''}`;
       ];
     }
 
+    // Auto-create support ticket on escalation
+    if (response.escalateToHuman && userId && organizationId) {
+      try {
+        const { data: ticket, error: ticketError } = await supabase
+          .from('support_tickets')
+          .insert({
+            organization_id: organizationId,
+            subject: `تصعيد من المساعد الذكي: ${message.substring(0, 50)}...`,
+            description: `سبب التصعيد: ${escalationReason || 'طلب العميل التحدث مع الدعم'}\n\nالرسالة الأصلية: ${message}`,
+            priority: 'high',
+            status: 'open',
+            category: 'escalation'
+          })
+          .select()
+          .single();
+
+        if (!ticketError && ticket) {
+          response.ticketId = ticket.id;
+          response.reply += `\n\nتم إنشاء تذكرة دعم رقم #${ticket.id.substring(0, 8)} وسيتواصل معك فريقنا قريباً.`;
+
+          // Update conversation with ticket link
+          if (conversationId) {
+            await supabase
+              .from('customer_conversations')
+              .update({ 
+                escalated_to_ticket_id: ticket.id,
+                status: 'escalated',
+                escalated_at: new Date().toISOString()
+              })
+              .eq('id', conversationId);
+          }
+
+          // Create notification for admin
+          await supabase
+            .from('notifications')
+            .insert({
+              type: 'escalation',
+              title: 'تصعيد جديد من المساعد الذكي',
+              message: `تم تصعيد محادثة من ${orgName || 'عميل'} - ${message.substring(0, 100)}`,
+              data: { ticketId: ticket.id, conversationId, organizationId },
+              priority: 'high'
+            });
+        }
+      } catch (ticketErr) {
+        console.error('Error creating escalation ticket:', ticketErr);
+      }
+    }
+
     console.log('Customer assistant response generated:', {
       replyLength: response.reply.length,
       suggestionsCount: response.suggestions?.length,
-      escalate: response.escalateToHuman
+      escalate: response.escalateToHuman,
+      ticketCreated: !!response.ticketId
     });
 
     return new Response(JSON.stringify(response), {
@@ -245,7 +334,7 @@ ${contextInfo ? `\nمعلومات السياق:${contextInfo}` : ''}`;
       escalateToHuman: true,
       suggestions: ["التحدث مع الدعم الفني"]
     }), {
-      status: 200, // Return 200 with error message to prevent client errors
+      status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
