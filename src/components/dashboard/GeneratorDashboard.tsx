@@ -15,7 +15,7 @@ import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPr
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartRequestDialog from './SmartRequestDialog';
-import ChatWidget from '@/components/chat/ChatWidget';
+// ChatWidget is now global in App.tsx
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 
 interface ShipmentStats {
@@ -367,8 +367,7 @@ const GeneratorDashboard = () => {
         onOpenChange={setShowDepositDialog}
       />
 
-      {/* Chat Widget */}
-      <ChatWidget />
+      {/* Chat Widget - Now global in App.tsx */}
     </div>
   );
 };

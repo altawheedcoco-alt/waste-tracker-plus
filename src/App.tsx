@@ -117,7 +117,7 @@ const AdminGuide = lazy(() => import("./pages/guide/AdminGuide"));
 
 // Lazy loaded heavy components (deferred)
 const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
-const ChatWidget = lazy(() => import("./components/chat/ChatWidget"));
+const EnhancedChatWidget = lazy(() => import("./components/chat/EnhancedChatWidget"));
 const BetaBanner = lazy(() => import("./components/BetaBanner"));
 const AccessibilityPanel = lazy(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel })));
 
@@ -267,7 +267,7 @@ const App = memo(() => (
       </Suspense>
       <Suspense fallback={null}>
         <AIChatbot />
-        <ChatWidget />
+        <EnhancedChatWidget />
         <BetaBanner />
         <AccessibilityPanel />
         
