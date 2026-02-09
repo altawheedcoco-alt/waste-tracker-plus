@@ -33,6 +33,7 @@ import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RouteOptimizerPanel from '@/components/ai/RouteOptimizerPanel';
 import SmartSchedulerPanel from '@/components/ai/SmartSchedulerPanel';
+import PartnerRatingsWidget from '@/components/partners/PartnerRatingsWidget';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const TransporterDashboard = () => {
@@ -132,7 +133,8 @@ const TransporterDashboard = () => {
           <PartnerProfitabilityPanel />
         </TabsContent>
 
-        <TabsContent value="partners" className="mt-6">
+        <TabsContent value="partners" className="space-y-4 mt-6">
+          <PartnerRatingsWidget />
           <PartnersView />
         </TabsContent>
 

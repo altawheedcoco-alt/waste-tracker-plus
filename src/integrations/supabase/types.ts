@@ -2067,6 +2067,82 @@ export type Database = {
           },
         ]
       }
+      delivery_confirmations: {
+        Row: {
+          condition_notes: string | null
+          confirmation_type: string
+          confirmed_at: string
+          confirmed_by_organization_id: string
+          confirmed_by_user_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          photo_url: string | null
+          receiver_name: string | null
+          receiver_national_id: string | null
+          shipment_id: string
+          signature_url: string | null
+          weight_at_delivery: number | null
+          weight_unit: string | null
+        }
+        Insert: {
+          condition_notes?: string | null
+          confirmation_type?: string
+          confirmed_at?: string
+          confirmed_by_organization_id: string
+          confirmed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          receiver_name?: string | null
+          receiver_national_id?: string | null
+          shipment_id: string
+          signature_url?: string | null
+          weight_at_delivery?: number | null
+          weight_unit?: string | null
+        }
+        Update: {
+          condition_notes?: string | null
+          confirmation_type?: string
+          confirmed_at?: string
+          confirmed_by_organization_id?: string
+          confirmed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          photo_url?: string | null
+          receiver_name?: string | null
+          receiver_national_id?: string | null
+          shipment_id?: string
+          signature_url?: string | null
+          weight_at_delivery?: number | null
+          weight_unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_confirmations_confirmed_by_organization_id_fkey"
+            columns: ["confirmed_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "delivery_confirmations_confirmed_by_organization_id_fkey"
+            columns: ["confirmed_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_confirmations_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposits: {
         Row: {
           account_number: string | null
@@ -6321,6 +6397,84 @@ export type Database = {
             columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_ratings: {
+        Row: {
+          comment: string | null
+          communication_rating: number | null
+          created_at: string
+          id: string
+          overall_rating: number
+          punctuality_rating: number | null
+          quality_rating: number | null
+          rated_organization_id: string
+          rater_organization_id: string
+          shipment_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          id?: string
+          overall_rating: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          rated_organization_id: string
+          rater_organization_id: string
+          shipment_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          id?: string
+          overall_rating?: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          rated_organization_id?: string
+          rater_organization_id?: string
+          shipment_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_ratings_rated_organization_id_fkey"
+            columns: ["rated_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_ratings_rated_organization_id_fkey"
+            columns: ["rated_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_ratings_rater_organization_id_fkey"
+            columns: ["rater_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_ratings_rater_organization_id_fkey"
+            columns: ["rater_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_ratings_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
