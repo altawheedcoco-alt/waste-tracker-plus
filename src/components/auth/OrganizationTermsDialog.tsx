@@ -82,10 +82,13 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   
   const [uploadingImages, setUploadingImages] = useState(false);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
+  const [uploadedSignaturePreview, setUploadedSignaturePreview] = useState<string | null>(null);
+  const [signatureMode, setSignatureMode] = useState<'electronic' | 'upload'>('electronic');
   
   const idFrontInputRef = useRef<HTMLInputElement>(null);
   const idBackInputRef = useRef<HTMLInputElement>(null);
   const selfieInputRef = useRef<HTMLInputElement>(null);
+  const signatureUploadRef = useRef<HTMLInputElement>(null);
   const signaturePadRef = useRef<SignaturePadRef>(null);
 
   const termsSections = useMemo(() => {
@@ -255,6 +258,20 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
     reader.onloadend = () => {
       setSelfiePreview(reader.result as string);
       setSelfieFile(file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSignatureUpload = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('يرجى اختيار صورة صالحة للتوقيع'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('حجم الملف يجب أن يكون أقل من 5 ميجابايت'); return; }
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const dataUrl = reader.result as string;
+      const enhanced = await enhanceImage(dataUrl);
+      setUploadedSignaturePreview(enhanced);
+      setSignatureDataUrl(enhanced);
     };
     reader.readAsDataURL(file);
   };
@@ -952,11 +969,67 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
               </ScrollArea>
 
               <div className="border-t bg-muted/20 px-6 py-4 space-y-3">
-                <div className="space-y-1.5">
+                {/* Signature Mode Toggle */}
+                <div className="space-y-2">
                   <Label className="flex items-center gap-1.5 text-xs font-semibold">
-                    <PenTool className="w-3.5 h-3.5" /> التوقيع اليدوي
+                    <PenTool className="w-3.5 h-3.5" /> التوقيع
                   </Label>
-                  <SignaturePad ref={signaturePadRef} onSignatureChange={setSignatureDataUrl} width={500} height={100} />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => { setSignatureMode('electronic'); setUploadedSignaturePreview(null); setSignatureDataUrl(null); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                        signatureMode === 'electronic'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-muted-foreground/20 text-muted-foreground hover:bg-accent/50'
+                      }`}
+                    >
+                      <PenTool className="w-3.5 h-3.5" />
+                      توقيع إلكتروني
+                    </button>
+                    <button
+                      onClick={() => { setSignatureMode('upload'); signaturePadRef.current?.clear(); setSignatureDataUrl(null); }}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                        signatureMode === 'upload'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-muted-foreground/20 text-muted-foreground hover:bg-accent/50'
+                      }`}
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      رفع توقيع ورقي
+                    </button>
+                  </div>
+
+                  {signatureMode === 'electronic' ? (
+                    <SignaturePad ref={signaturePadRef} onSignatureChange={setSignatureDataUrl} width={500} height={100} />
+                  ) : (
+                    <div>
+                      <input ref={signatureUploadRef} type="file" accept="image/*" className="hidden"
+                        onChange={(e) => handleSignatureUpload(e.target.files?.[0] || null)} />
+                      {uploadedSignaturePreview ? (
+                        <div className="relative border-2 border-green-300 rounded-xl overflow-hidden bg-white">
+                          <img src={uploadedSignaturePreview} alt="التوقيع" className="w-full h-24 object-contain p-2" />
+                          <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                            <Check className="w-2.5 h-2.5" /> تم الرفع
+                          </div>
+                          <button
+                            onClick={() => { setUploadedSignaturePreview(null); setSignatureDataUrl(null); }}
+                            className="absolute top-1.5 right-1.5 text-[9px] text-muted-foreground hover:text-destructive bg-white/80 rounded-full px-1.5 py-0.5"
+                          >
+                            تغيير
+                          </button>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => signatureUploadRef.current?.click()}
+                          className="border-2 border-dashed border-muted-foreground/20 rounded-xl py-6 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-accent/30 transition-all"
+                        >
+                          <Upload className="w-6 h-6 text-muted-foreground/40" />
+                          <p className="text-xs text-muted-foreground">اضغط لرفع صورة التوقيع المكتوب على ورقة</p>
+                          <p className="text-[9px] text-muted-foreground/60">يُفضل خلفية بيضاء وحبر أسود أو أزرق</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex items-start gap-2.5">
