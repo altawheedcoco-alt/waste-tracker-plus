@@ -403,7 +403,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       
       setUploadingImages(false);
 
-      const { error } = await supabase.from('terms_acceptances').insert({
+      const { data: insertedData, error } = await supabase.from('terms_acceptances').insert({
         user_id: user.id, 
         organization_id: organization.id, 
         organization_type: organization.organization_type,
@@ -418,7 +418,16 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
         signer_id_back_url: idBackUrl,
         signer_signature_url: signatureUrl, 
         verified_match: faceMatchResult?.faces_match || false,
-      });
+        selfie_url: selfiePreview ? await uploadDataUrl(selfiePreview, `${basePath}/selfie-${timestamp}`) : null,
+        business_doc_urls: businessDocUrls,
+        business_doc_type: businessDocData.documentType || null,
+        delegation_data: delegationData.isDelegate ? {
+          type: delegationData.delegationType,
+          delegation_urls: delegationUrls,
+          parties: partyDocUrls,
+        } : null,
+        ai_review_status: 'pending',
+      }).select('id').single();
       if (error) throw error;
 
       await supabase.from('profiles').update({ 
@@ -426,6 +435,44 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
         id_card_front_url: idFrontUrl, 
         id_card_back_url: idBackUrl 
       }).eq('id', profile.id);
+
+      // Trigger AI review in background
+      if (insertedData?.id) {
+        supabase.functions.invoke('ai-onboarding-review', {
+          body: {
+            acceptance_id: insertedData.id,
+            signer_name: signerName || profile.full_name,
+            national_id: nationalId,
+            organization_name: organization.name,
+            organization_type: organization.organization_type,
+            has_id_front: !!idFrontUrl,
+            has_id_back: !!idBackUrl,
+            has_selfie: !!selfiePreview,
+            has_signature: !!signatureUrl,
+            face_match: faceMatchResult?.faces_match || false,
+            face_match_confidence: faceMatchResult?.match_confidence || 0,
+            has_business_doc: businessDocUrls.length > 0,
+            business_doc_type: businessDocData.documentType,
+            business_doc_pages_count: businessDocUrls.length,
+            has_delegation: delegationData.isDelegate,
+            delegation_type: delegationData.delegationType,
+            delegation_parties_count: delegationData.parties.length,
+            signer_position: signerPosition,
+            signer_phone: signerPhone,
+            id_verification_confidence: frontResult?.confidence || 0,
+          }
+        }).then(async ({ data: reviewData }) => {
+          if (reviewData?.success) {
+            const review = reviewData.review;
+            await supabase.from('terms_acceptances').update({
+              ai_review_score: review.overall_score,
+              ai_review_status: review.status,
+              ai_review_reasons: review.checks,
+              ai_review_summary: review.summary,
+            }).eq('id', insertedData.id);
+          }
+        }).catch(err => console.error('AI review error:', err));
+      }
 
       toast.success('تم تسجيل موافقتك على الشروط والأحكام بنجاح');
       onAccept();
