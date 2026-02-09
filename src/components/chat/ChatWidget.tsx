@@ -123,25 +123,25 @@ const ChatWidget = () => {
 
   return (
     <>
-      {/* Chat Button - Positioned bottom-left, offset for mobile nav */}
+      {/* Chat Button - Responsive positioning with safe area support */}
       <motion.button
         onClick={handleOpen}
-        className="fixed bottom-4 left-4 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-4 left-3 sm:left-4 z-40 w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         aria-label="فتح المحادثات"
       >
-        <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+        <MessageCircle className="w-4 h-4 sm:w-6 sm:h-6" />
       </motion.button>
 
-      {/* Chat Window */}
+      {/* Chat Window - Full width on mobile with proper spacing */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-20 left-4 right-4 sm:right-auto sm:left-4 z-50 sm:w-96 h-[60vh] sm:h-[500px] max-h-[500px] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] sm:bottom-20 left-2 right-2 sm:right-auto sm:left-4 z-50 sm:w-96 h-[50vh] sm:h-[500px] max-h-[500px] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="bg-primary text-primary-foreground p-4 flex items-center justify-between">
