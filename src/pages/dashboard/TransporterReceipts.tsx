@@ -93,11 +93,16 @@ const TransporterReceipts = () => {
   useEffect(() => {
     if (organization?.id) {
       loadReceipts();
+    } else {
+      setLoading(false);
     }
   }, [organization?.id]);
 
   const loadReceipts = async () => {
+    if (!organization?.id) return;
+    setLoading(true);
     try {
+      console.log('Loading receipts for org:', organization.id);
       const { data, error } = await supabase
         .from('shipment_receipts')
         .select(`
@@ -116,11 +121,15 @@ const TransporterReceipts = () => {
           transporter:organizations!shipment_receipts_transporter_id_fkey(id, name),
           driver:drivers(id, profile:profiles(full_name))
         `)
-        .eq('transporter_id', organization?.id)
+        .eq('transporter_id', organization.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setReceipts(data as unknown as Receipt[]);
+      if (error) {
+        console.error('Receipt query error:', error);
+        throw error;
+      }
+      console.log('Receipts loaded:', data?.length || 0);
+      setReceipts((data || []) as unknown as Receipt[]);
     } catch (error) {
       console.error('Error loading receipts:', error);
     } finally {

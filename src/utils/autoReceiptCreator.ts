@@ -45,10 +45,12 @@ export async function autoCreateReceipt(
     generator_id: generatorId,
     waste_type: shipment.waste_type || 'other',
     declared_weight: shipment.quantity || 0,
+    actual_weight: shipment.quantity || 0,
     unit: shipment.unit || 'ton',
-    pickup_date: new Date().toISOString().split('T')[0],
+    pickup_date: new Date().toISOString(),
     status: 'pending',
     notes: 'تم الإنشاء تلقائياً عند استلام الشحنة',
+    created_by: userId || null,
   };
 
   const { error } = await supabase
