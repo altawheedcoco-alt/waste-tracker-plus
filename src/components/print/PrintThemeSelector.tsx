@@ -16,9 +16,10 @@ interface PrintThemeSelectorProps {
   onOpenChange: (open: boolean) => void;
   onSelect: (themeId: PrintThemeId) => void;
   selectedTheme?: PrintThemeId;
+  documentTitle?: string;
 }
 
-const ThemePreviewCard = ({ theme, isSelected, onClick }: { theme: PrintTheme; isSelected: boolean; onClick: () => void }) => {
+const ThemePreviewCard = ({ theme, isSelected, onClick, documentTitle }: { theme: PrintTheme; isSelected: boolean; onClick: () => void; documentTitle: string }) => {
   const isGradient = theme.colors.headerBg.includes('gradient');
 
   return (
@@ -51,7 +52,7 @@ const ThemePreviewCard = ({ theme, isSelected, onClick }: { theme: PrintTheme; i
           }}
         >
           <p className="text-[10px] font-bold truncate" style={{ fontFamily: theme.fonts.heading }}>
-            {theme.preview} شهادة إعادة التدوير
+            {theme.preview} {documentTitle}
           </p>
         </div>
 
@@ -100,7 +101,7 @@ const ThemePreviewCard = ({ theme, isSelected, onClick }: { theme: PrintTheme; i
   );
 };
 
-const PrintThemeSelector = ({ open, onOpenChange, onSelect, selectedTheme = 'corporate' }: PrintThemeSelectorProps) => {
+const PrintThemeSelector = ({ open, onOpenChange, onSelect, selectedTheme = 'corporate', documentTitle = 'مستند رسمي' }: PrintThemeSelectorProps) => {
   const [selected, setSelected] = useState<PrintThemeId>(selectedTheme);
 
   const handleConfirm = () => {
@@ -128,6 +129,7 @@ const PrintThemeSelector = ({ open, onOpenChange, onSelect, selectedTheme = 'cor
               theme={theme}
               isSelected={selected === theme.id}
               onClick={() => setSelected(theme.id)}
+              documentTitle={documentTitle}
             />
           ))}
         </div>
