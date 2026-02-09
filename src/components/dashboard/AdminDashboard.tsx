@@ -25,9 +25,11 @@ import {
   AdminShipmentSearch,
   StatCard,
 } from './admin';
+import AdminEntityList from './admin/AdminEntityList';
 import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 import {
   Package,
+  Factory,
   Building2,
   Truck,
   Users,
@@ -297,8 +299,20 @@ const AdminDashboard = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="generators" className="gap-1">
+            <Factory className="h-3 w-3" />
+            المولدين ({stats.generatorCount})
+          </TabsTrigger>
+          <TabsTrigger value="transporters" className="gap-1">
+            <Truck className="h-3 w-3" />
+            الناقلين ({stats.transporterCount})
+          </TabsTrigger>
+          <TabsTrigger value="recyclers" className="gap-1">
+            <Recycle className="h-3 w-3" />
+            المعالجين ({stats.recyclerCount})
+          </TabsTrigger>
           <TabsTrigger value="partners">الشركاء</TabsTrigger>
           <TabsTrigger value="tracking">تتبع السائقين</TabsTrigger>
         </TabsList>
@@ -313,6 +327,18 @@ const AdminDashboard = () => {
             shipments={recentShipments} 
             onRefresh={fetchDashboardData} 
           />
+        </TabsContent>
+
+        <TabsContent value="generators" className="space-y-6 mt-6">
+          <AdminEntityList orgType="generator" />
+        </TabsContent>
+
+        <TabsContent value="transporters" className="space-y-6 mt-6">
+          <AdminEntityList orgType="transporter" />
+        </TabsContent>
+
+        <TabsContent value="recyclers" className="space-y-6 mt-6">
+          <AdminEntityList orgType="recycler" />
         </TabsContent>
 
         <TabsContent value="partners" className="space-y-6 mt-6">
