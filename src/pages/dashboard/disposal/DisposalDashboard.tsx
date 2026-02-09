@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Factory, Package, Clock, CheckCircle, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Factory, Package, Clock, CheckCircle, TrendingUp } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -41,7 +41,7 @@ const DisposalDashboard = () => {
   });
 
   // Fetch operations stats
-  const { data: operationsStats } = useQuery({
+  const { data: operationsStats, isLoading: statsLoading } = useQuery({
     queryKey: ['disposal-operations-stats', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return null;
@@ -61,20 +61,13 @@ const DisposalDashboard = () => {
     enabled: !!organization?.id
   });
 
-  // Realtime subscription for disposal_operations
+  // Realtime subscription
   useEffect(() => {
     if (!organization?.id) return;
 
     const channel = supabase
       .channel('disposal-ops-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'disposal_operations',
-          filter: `organization_id=eq.${organization.id}`,
-        },
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'disposal_operations', filter: `organization_id=eq.${organization.id}` },
         () => {
           queryClient.invalidateQueries({ queryKey: ['disposal-operations-stats'] });
           queryClient.invalidateQueries({ queryKey: ['disposal-recent-operations'] });
@@ -82,53 +75,26 @@ const DisposalDashboard = () => {
           queryClient.invalidateQueries({ queryKey: ['disposal-processing-ops'] });
         }
       )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'disposal_incoming_requests',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['disposal-incoming-pending'] });
-        }
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'disposal_incoming_requests' },
+        () => { queryClient.invalidateQueries({ queryKey: ['disposal-incoming-pending'] }); }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [organization?.id, queryClient]);
 
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['disposal-operations-stats'] });
+    queryClient.invalidateQueries({ queryKey: ['disposal-facility'] });
+    queryClient.invalidateQueries({ queryKey: ['disposal-recent-operations'] });
+    queryClient.invalidateQueries({ queryKey: ['disposal-daily-operations'] });
+  };
+
   const statsCards: StatCardItem[] = [
-    {
-      title: 'إجمالي العمليات',
-      value: operationsStats?.total || 0,
-      icon: Package,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10'
-    },
-    {
-      title: 'قيد المعالجة',
-      value: operationsStats?.processing || 0,
-      icon: Clock,
-      color: 'text-amber-500',
-      bgColor: 'bg-amber-500/10'
-    },
-    {
-      title: 'مكتملة',
-      value: operationsStats?.completed || 0,
-      icon: CheckCircle,
-      color: 'text-green-500',
-      bgColor: 'bg-green-500/10'
-    },
-    {
-      title: 'إجمالي الكميات (طن)',
-      value: operationsStats?.totalQuantity?.toFixed(1) || '0',
-      icon: TrendingUp,
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-500/10'
-    },
+    { title: 'إجمالي العمليات', value: operationsStats?.total || 0, icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+    { title: 'قيد المعالجة', value: operationsStats?.processing || 0, icon: Clock, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
+    { title: 'مكتملة', value: operationsStats?.completed || 0, icon: CheckCircle, color: 'text-green-500', bgColor: 'bg-green-500/10' },
+    { title: 'إجمالي الكميات', value: operationsStats?.totalQuantity?.toFixed(1) || '0', subtitle: 'طن', icon: TrendingUp, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
   ];
 
   return (
@@ -136,7 +102,6 @@ const DisposalDashboard = () => {
       <div className="space-y-6 p-4 md:p-6" dir="rtl">
         <BackButton />
 
-        {/* Header */}
         <FacilityDashboardHeader
           userName={profile?.full_name || ''}
           orgName={organization?.name || ''}
@@ -145,56 +110,32 @@ const DisposalDashboard = () => {
           iconGradient="from-red-500 to-orange-600"
           facility={facility}
           onSmartWeightUpload={() => setShowSmartWeightUpload(true)}
+          onRefresh={handleRefresh}
         />
 
-        {/* Facility Capacity */}
         {facility && <FacilityCapacityCard facility={facility} />}
 
-        {/* Stats Cards */}
-        <StatsCardsGrid stats={statsCards} />
+        <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
 
-        {/* Daily Operations Summary - Disposal specific */}
         <DisposalDailyOperations />
-
-        {/* Operational Alerts */}
         <OperationalAlertsWidget />
-
-        {/* Driver Code Lookup */}
         <DriverCodeLookup />
-
-        {/* Incoming Requests & Processing Operations */}
         <DisposalIncomingPanel facilityId={facility?.id} />
-
-        {/* Pending Approvals Widget */}
         <PendingApprovalsWidget />
 
-        {/* Quick Actions Grid */}
         <QuickActionsGrid
-          actions={useQuickActions({
-            type: 'disposal',
-            handlers: {
-              openDepositDialog: () => setShowDepositDialog(true),
-              openSmartWeightUpload: () => setShowSmartWeightUpload(true),
-            },
-          })}
+          actions={useQuickActions({ type: 'disposal', handlers: {
+            openDepositDialog: () => setShowDepositDialog(true),
+            openSmartWeightUpload: () => setShowSmartWeightUpload(true),
+          }})}
           title="الإجراءات السريعة"
           subtitle="وظائف التخلص النهائي المستخدمة بكثرة"
         />
 
-        {/* Recent Operations */}
         <DisposalRecentOperations />
 
-        {/* Smart Weight Upload Dialog */}
-        <SmartWeightUpload
-          open={showSmartWeightUpload}
-          onOpenChange={setShowSmartWeightUpload}
-        />
-
-        {/* Deposit Dialog */}
-        <AddDepositDialog
-          open={showDepositDialog}
-          onOpenChange={setShowDepositDialog}
-        />
+        <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
+        <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
       </div>
     </DashboardLayout>
   );
