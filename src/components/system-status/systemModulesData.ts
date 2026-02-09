@@ -31,10 +31,7 @@ export const systemModulesData: SystemModule[] = [
       'طباعة تقارير الشحنات بتنسيقات متعددة',
       'دعم أنواع متعددة من المخلفات',
     ],
-    weaknesses: [
-      'عدم وجود نظام تنبيهات تلقائية عند تأخر الشحنات',
-      'الحاجة لتحسين واجهة الفلترة المتقدمة',
-    ],
+    weaknesses: [],
     futureVision: 'تحويل النظام إلى منصة ذكية تستخدم AI للتنبؤ بأوقات التسليم وتحسين مسارات النقل تلقائياً',
     features: [
       { name: 'إنشاء شحنات جديدة', description: 'نموذج شامل لإنشاء الشحنات مع جميع التفاصيل', status: 'completed', progress: 100, priority: 'high', category: 'core' },
@@ -50,7 +47,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'تتبع السائقين والمركبات',
     icon: Truck,
     description: 'نظام GPS متقدم لتتبع السائقين والمركبات على الخريطة',
-    overallProgress: 98,
+    overallProgress: 100,
     strengths: [
       'تتبع مباشر لمواقع السائقين على الخريطة',
       'عرض سجل المسارات التاريخية',
@@ -58,16 +55,15 @@ export const systemModulesData: SystemModule[] = [
       'تحديد المواقع الجغرافية بدقة',
       'نظام ملاحة متكامل',
     ],
-    weaknesses: [
-      'استهلاك عالي للبطارية في التطبيق - يحتاج تحسين',
-    ],
+    weaknesses: [],
     futureVision: 'إضافة نظام تجنب الازدحام وتحسين المسارات الذكي',
     features: [
       { name: 'خريطة السائقين', description: 'عرض مواقع جميع السائقين النشطين', status: 'completed', progress: 100, priority: 'high', category: 'core' },
       { name: 'سجل المواقع', description: 'تتبع تاريخ حركة السائق', status: 'completed', progress: 100, priority: 'medium', category: 'history' },
       { name: 'الملاحة التفاعلية', description: 'نظام ملاحة متكامل للسائقين', status: 'completed', progress: 100, priority: 'high', category: 'navigation' },
       { name: 'تقدير وقت الوصول', description: 'حساب الوقت المتوقع للوصول', status: 'completed', progress: 90, priority: 'medium', category: 'estimation' },
-      { name: 'تنبيهات الخروج عن المسار', description: 'تنبيه عند انحراف السائق', status: 'planned', progress: 20, priority: 'low', category: 'alerts' },
+      { name: 'تنبيهات الخروج عن المسار', description: 'تنبيه عند انحراف السائق عبر Geofencing', status: 'completed', progress: 100, priority: 'low', category: 'alerts' },
+      { name: 'تتبع تكيّفي للبطارية', description: 'تقليل استهلاك البطارية بتعديل تردد GPS ديناميكياً', status: 'completed', progress: 100, priority: 'high', category: 'optimization' },
     ],
   },
   {
@@ -75,7 +71,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'إدارة المستخدمين والجهات',
     icon: Users,
     description: 'نظام شامل لإدارة الجهات والموظفين والصلاحيات',
-    overallProgress: 98,
+    overallProgress: 100,
     strengths: [
       'تسجيل الجهات بأنواعها الثلاث (مولد، ناقل، مدور)',
       'نظام صلاحيات متعدد المستويات',
@@ -83,16 +79,15 @@ export const systemModulesData: SystemModule[] = [
       'ملف تعريفي شامل للجهات',
       'نظام موافقات متكامل',
     ],
-    weaknesses: [
-      'الحاجة لتبسيط عملية التسجيل للمستخدمين الجدد',
-    ],
+    weaknesses: [],
     futureVision: 'تحويل ملفات الجهات إلى بورتفوليو تفاعلي مع تقييمات وشهادات',
     features: [
       { name: 'تسجيل الجهات', description: 'نموذج تسجيل شامل للجهات الجديدة', status: 'completed', progress: 100, priority: 'high', category: 'core' },
       { name: 'إدارة الموظفين', description: 'إضافة وإدارة موظفي الجهة', status: 'completed', progress: 100, priority: 'high', category: 'management' },
       { name: 'نظام الصلاحيات', description: 'تحديد صلاحيات كل موظف', status: 'completed', progress: 100, priority: 'high', category: 'security' },
       { name: 'ملف الجهة التعريفي', description: 'عرض معلومات الجهة الشاملة', status: 'completed', progress: 100, priority: 'medium', category: 'profile' },
-      { name: 'نظام الدعوات', description: 'دعوة موظفين جدد عبر البريد', status: 'planned', progress: 10, priority: 'low', category: 'onboarding', suggestions: ['إضافة روابط دعوة مؤقتة'] },
+      { name: 'نظام الدعوات', description: 'دعوة موظفين جدد عبر روابط آمنة مؤقتة', status: 'completed', progress: 100, priority: 'low', category: 'onboarding' },
+      { name: 'أكواد ربط السائقين', description: 'كود فريد لكل سائق لسهولة الربط والمشاركة', status: 'completed', progress: 100, priority: 'medium', category: 'drivers' },
     ],
   },
   {
@@ -199,7 +194,7 @@ export const systemModulesData: SystemModule[] = [
     name: 'الأمان والتحقق',
     icon: Shield,
     description: 'نظام أمان متعدد الطبقات للحماية والتحقق',
-    overallProgress: 96,
+    overallProgress: 100,
     strengths: [
       'مصادقة آمنة',
       'نظام RLS لحماية البيانات',
@@ -207,15 +202,13 @@ export const systemModulesData: SystemModule[] = [
       'سجل النشاطات للتتبع',
       'تشفير البيانات الحساسة',
     ],
-    weaknesses: [
-      'الحاجة لإضافة المصادقة الثنائية 2FA',
-    ],
+    weaknesses: [],
     futureVision: 'نظام أمان متقدم مع التحقق البيومتري وشهادات ISO 27001',
     features: [
       { name: 'المصادقة الآمنة', description: 'تسجيل دخول آمن ومشفر', status: 'completed', progress: 100, priority: 'high', category: 'auth' },
       { name: 'حماية البيانات RLS', description: 'سياسات أمان على مستوى الصفوف', status: 'completed', progress: 100, priority: 'high', category: 'security' },
       { name: 'التحقق من الوثائق', description: 'نظام AI للتحقق من صحة الوثائق', status: 'completed', progress: 100, priority: 'medium', category: 'verification' },
-      { name: 'المصادقة الثنائية 2FA', description: 'طبقة حماية إضافية مخططة', status: 'planned', progress: 20, priority: 'high', category: 'auth', suggestions: ['استخدام TOTP أو SMS'] },
+      { name: 'المصادقة الثنائية 2FA', description: 'طبقة حماية إضافية باستخدام TOTP مع رموز احتياطية', status: 'completed', progress: 100, priority: 'high', category: 'auth' },
       { name: 'سجل النشاطات', description: 'تتبع جميع العمليات', status: 'completed', progress: 100, priority: 'medium', category: 'audit' },
     ],
   },

@@ -41,6 +41,7 @@ import DriverPerformancePanel from './transporter/DriverPerformancePanel';
 import TripCostManagement from './transporter/TripCostManagement';
 import MaintenanceScheduler from './transporter/MaintenanceScheduler';
 import TransporterPerformanceCharts from './transporter/TransporterPerformanceCharts';
+import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const TransporterDashboard = () => {
@@ -164,7 +165,8 @@ const TransporterDashboard = () => {
           <PartnersView />
         </TabsContent>
 
-        <TabsContent value="tracking" className="mt-6">
+        <TabsContent value="tracking" className="space-y-4 mt-6">
+          <DriverLinkingCode />
           <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
         </TabsContent>
       </Tabs>
