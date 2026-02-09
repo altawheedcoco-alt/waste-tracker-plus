@@ -21,6 +21,7 @@ import RecyclerIncomingPanel from './recycler/RecyclerIncomingPanel';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 import {
   Package,
   Recycle,
@@ -280,6 +281,9 @@ const RecyclerDashboard = () => {
 
       {/* Operational Alerts */}
       <OperationalAlertsWidget />
+
+      {/* Driver Linking Codes */}
+      <DriverLinkingCode />
 
       {/* Incoming Shipments & Awaiting Confirmation */}
       <RecyclerIncomingPanel />
