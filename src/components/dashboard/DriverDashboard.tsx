@@ -30,6 +30,7 @@ import TrackingWatcherIndicator from '@/components/tracking/TrackingWatcherIndic
 import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPicker';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
+import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
 
 // Lazy load components for better performance
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -319,6 +320,9 @@ const DriverDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Driver Linking Code */}
+      <DriverOwnLinkingCode />
 
       {/* My Shipments Quick Access Card */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">

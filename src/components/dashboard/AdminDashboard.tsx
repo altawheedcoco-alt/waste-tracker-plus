@@ -20,6 +20,7 @@ import {
   AdminTrackingTab,
   StatCard,
 } from './admin';
+import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 import {
   Package,
   Building2,
@@ -293,6 +294,7 @@ const AdminDashboard = () => {
         </TabsContent>
 
         <TabsContent value="tracking" className="space-y-6 mt-6">
+          <DriverLinkingCode />
           <AdminTrackingTab 
             activeDrivers={stats.activeDrivers}
             totalDrivers={stats.totalDrivers}
