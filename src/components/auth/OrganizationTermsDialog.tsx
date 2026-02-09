@@ -32,6 +32,7 @@ import SignaturePad, { SignaturePadRef } from '@/components/signature/SignatureP
 import { useIDVerification, type ExtractedIDData } from '@/hooks/useIDVerification';
 import { processReceiptImage } from '@/lib/imageProcessing';
 import DelegationSection, { type DelegationData } from '@/components/auth/DelegationSection';
+import BusinessDocumentSection, { type BusinessDocumentData } from '@/components/auth/BusinessDocumentSection';
 
 interface OrganizationTermsDialogProps {
   open: boolean;
@@ -91,6 +92,12 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
     delegationPages: [],
     delegationEnhancedPages: [],
     parties: [],
+  });
+  const [businessDocData, setBusinessDocData] = useState<BusinessDocumentData>({
+    documentType: '',
+    pages: [],
+    enhancedPages: [],
+    fileTypes: [],
   });
   const idFrontInputRef = useRef<HTMLInputElement>(null);
   const idBackInputRef = useRef<HTMLInputElement>(null);
@@ -298,6 +305,8 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
     if (!idFrontFile) { toast.error('يرجى رفع صورة وجه البطاقة'); return; }
     if (!idBackFile) { toast.error('يرجى رفع صورة ظهر البطاقة'); return; }
     if (!frontResult?.is_valid_document) { toast.error('لم يتم التحقق من وجه البطاقة بعد'); return; }
+    if (!businessDocData.documentType) { toast.error('يرجى تحديد نوع المستند التجاري'); return; }
+    if (businessDocData.pages.length === 0) { toast.error('يرجى رفع صورة أو ملف المستند التجاري (بطاقة ضريبية / سجل تجاري / وثيقة بيانات)'); return; }
     setStep('selfie');
   };
 
@@ -357,6 +366,16 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       ]);
       
       if (!idFrontUrl || !idBackUrl) throw new Error('فشل في رفع صور البطاقة');
+
+      // Upload business documents
+      let businessDocUrls: string[] = [];
+      if (businessDocData.pages.length > 0) {
+        businessDocUrls = await Promise.all(
+          businessDocData.enhancedPages.map((page, i) =>
+            uploadDataUrl(page, `${basePath}/business-doc-${businessDocData.documentType}-page-${i + 1}-${timestamp}`)
+          )
+        ).then(urls => urls.filter(Boolean) as string[]);
+      }
 
       // Upload delegation documents if applicable
       let delegationUrls: string[] = [];
@@ -419,7 +438,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
     }
   };
 
-  const identityComplete = nationalId.length === 14 && signerPhone.trim() && signerPosition.trim() && idFrontFile && idBackFile && frontResult?.is_valid_document;
+  const identityComplete = nationalId.length === 14 && signerPhone.trim() && signerPosition.trim() && idFrontFile && idBackFile && frontResult?.is_valid_document && businessDocData.documentType && businessDocData.pages.length > 0;
   const selfieComplete = selfiePreview && faceMatchResult?.faces_match;
 
   const getStepLabel = () => {
@@ -719,6 +738,9 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                       />
                     </div>
                   </div>
+
+                  {/* Business Document Section */}
+                  <BusinessDocumentSection data={businessDocData} onUpdate={setBusinessDocData} />
 
                   {/* Delegation / Proxy Section */}
                   <DelegationSection delegationData={delegationData} onUpdate={setDelegationData} />
