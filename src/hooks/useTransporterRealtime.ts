@@ -38,7 +38,7 @@ export const useTransporterRealtime = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: profileId ? `user_id=eq.${profileId}` : undefined,
+          ...(profileId ? { filter: `user_id=eq.${profileId}` } : {}),
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['transporter-notifications'] });
