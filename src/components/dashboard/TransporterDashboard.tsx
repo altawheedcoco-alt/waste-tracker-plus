@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import {
@@ -51,6 +52,9 @@ const TransporterDashboard = () => {
       openDepositDialog: () => setShowDepositDialog(true),
     },
   });
+
+  // Realtime subscriptions
+  useTransporterRealtime();
 
   const handleRefresh = () => {
     refetchShipments();
