@@ -123,12 +123,21 @@ const RecyclerGuide = lazy(() => import("./pages/guide/RecyclerGuide"));
 const DriverGuide = lazy(() => import("./pages/guide/DriverGuide"));
 const AdminGuide = lazy(() => import("./pages/guide/AdminGuide"));
 
-// Lazy loaded heavy components (deferred)
-const AIChatbot = lazy(() => import("./components/ai/AIChatbot"));
-const EnhancedChatWidget = lazy(() => import("./components/chat/EnhancedChatWidget"));
-const UnifiedSupportWidget = lazy(() => import("./components/ai/UnifiedSupportWidget"));
-const BetaBanner = lazy(() => import("./components/BetaBanner"));
-const AccessibilityPanel = lazy(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel })));
+// Lazy loaded heavy components (deferred) with retry on failure
+const lazyRetry = (importFn: () => Promise<any>, retries = 2): Promise<any> =>
+  importFn().catch((err: any) => {
+    if (retries > 0) {
+      return new Promise(resolve => setTimeout(resolve, 1000)).then(() => lazyRetry(importFn, retries - 1));
+    }
+    console.error('Failed to load module after retries:', err);
+    return { default: () => null };
+  });
+
+const AIChatbot = lazy(() => lazyRetry(() => import("./components/ai/AIChatbot")));
+const EnhancedChatWidget = lazy(() => lazyRetry(() => import("./components/chat/EnhancedChatWidget")));
+const UnifiedSupportWidget = lazy(() => lazyRetry(() => import("./components/ai/UnifiedSupportWidget")));
+const BetaBanner = lazy(() => lazyRetry(() => import("./components/BetaBanner")));
+const AccessibilityPanel = lazy(() => lazyRetry(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel }))));
 
 // Optimized QueryClient with aggressive caching
 const queryClient = new QueryClient({
