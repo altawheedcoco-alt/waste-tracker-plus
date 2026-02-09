@@ -7556,6 +7556,30 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          description: string | null
+          id: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          id: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       points_transactions: {
         Row: {
           action_description: string | null
