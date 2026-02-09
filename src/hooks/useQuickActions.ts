@@ -17,7 +17,7 @@ type ActionHandlers = {
 };
 
 interface UseQuickActionsOptions {
-  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver';
+  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal';
   handlers?: ActionHandlers;
   category?: 'primary' | 'secondary' | 'utility' | 'all';
   limit?: number;
