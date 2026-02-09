@@ -179,6 +179,36 @@ export const recyclerQuickActions: QuickActionConfig[] = [
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
 ];
 
+// ============= DISPOSAL QUICK ACTIONS =============
+// جهة التخلص النهائي: التركيز على استقبال ومعالجة المخلفات الخطرة
+export const disposalQuickActions: QuickActionConfig[] = [
+  // 1️⃣ العمليات الأساسية
+  { id: 'disposal-operations', title: 'عمليات التخلص', subtitle: 'عرض وإدارة جميع العمليات', icon: Package, path: '/dashboard/disposal/operations', iconBgClass: 'bg-gradient-to-br from-red-500 to-orange-600', category: 'primary' },
+  { id: 'disposal-new-operation', title: 'تسجيل عملية جديدة', subtitle: 'تسجيل عملية تخلص جديدة', icon: Plus, path: '/dashboard/disposal/operations/new', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'disposal-incoming', title: 'الطلبات الواردة', subtitle: 'طلبات التخلص من الشركاء', icon: Truck, path: '/dashboard/disposal/incoming-requests', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'primary' },
+  { id: 'disposal-certificates', title: 'شهادات التخلص', subtitle: 'إصدار وإدارة شهادات التخلص', icon: FileCheck, path: '/dashboard/disposal/certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+
+  // 2️⃣ الأدوات الذكية
+  { id: 'smart-weight-upload', title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: 'openSmartWeightUpload', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'primary' },
+  { id: 'external-records', title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600', category: 'secondary' },
+
+  // 3️⃣ المالية والعقود
+  { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'secondary' },
+  { id: 'contracts', title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
+
+  // 4️⃣ التقارير والتحليلات
+  { id: 'disposal-reports', title: 'التقارير', subtitle: 'تقارير التخلص والأداء', icon: BarChart3, path: '/dashboard/disposal/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'secondary' },
+  { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'utility' },
+
+  // 5️⃣ إدارة الفريق
+  { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
+  { id: 'partners', title: 'الشركاء', subtitle: 'الجهات المولدة والناقلة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'utility' },
+  { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
+  { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
+];
+
 // ============= DRIVER QUICK ACTIONS =============
 // السائق: التركيز على الملاحة والشحنات والتواصل
 export const driverQuickActions: QuickActionConfig[] = [
@@ -211,7 +241,7 @@ export const driverQuickActions: QuickActionConfig[] = [
  * Get quick actions by user type
  */
 export function getQuickActionsByType(
-  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver'
+  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal'
 ): QuickActionConfig[] {
   switch (type) {
     case 'admin':
@@ -224,6 +254,8 @@ export function getQuickActionsByType(
       return recyclerQuickActions;
     case 'driver':
       return driverQuickActions;
+    case 'disposal':
+      return disposalQuickActions;
     default:
       return generatorQuickActions;
   }

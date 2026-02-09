@@ -21,7 +21,7 @@ interface QuickActionsGridProps {
   actions: QuickAction[];
   title?: string;
   subtitle?: string;
-  userType?: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver';
+  userType?: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal';
   showCustomizer?: boolean;
 }
 

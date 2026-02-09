@@ -1,19 +1,18 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
+import FacilityDashboardHeader from './shared/FacilityDashboardHeader';
+import StatsCardsGrid, { StatCardItem } from './shared/StatsCardsGrid';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import CreateShipmentButton from './CreateShipmentButton';
-import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
-import SmartRequestDialog from './SmartRequestDialog';
-import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
-// ChatWidget is now global in App.tsx
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
@@ -22,33 +21,9 @@ import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
-import {
-  Package,
-  Recycle,
-  TrendingUp,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  Truck,
-  BarChart3,
-  FileText,
-  Eye,
-  Settings,
-  Bot,
-  Users,
-  Leaf,
-  Sparkles,
-  Scale,
-  FileSignature,
-  Banknote,
-} from 'lucide-react';
-
-interface ShipmentStats {
-  total: number;
-  incoming: number;
-  processing: number;
-  completed: number;
-}
+import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
+import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
+import { AlertCircle, Eye } from 'lucide-react';
 
 interface RecentShipment {
   id: string;
@@ -86,195 +61,90 @@ interface RecentShipment {
 
 const RecyclerDashboard = () => {
   const { profile, organization } = useAuth();
-  const [stats, setStats] = useState<ShipmentStats>({
-    total: 0,
-    incoming: 0,
-    processing: 0,
-    completed: 0,
-  });
-  const [recentShipments, setRecentShipments] = useState<RecentShipment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
+  const [showDepositDialog, setShowDepositDialog] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
-  const [showDepositDialog, setShowDepositDialog] = useState(false);
 
-  useEffect(() => {
-    if (organization?.id) {
-      fetchDashboardData();
-    }
-  }, [organization?.id]);
+  // Fetch shipments and stats
+  const { data: shipmentData, refetch: fetchDashboardData } = useQuery({
+    queryKey: ['recycler-dashboard', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return { shipments: [], stats: { total: 0, incoming: 0, processing: 0, completed: 0 } };
 
-  const fetchDashboardData = async () => {
-    try {
       const { data: shipments, error } = await supabase
         .from('shipments')
         .select(`
-          id,
-          shipment_number,
-          waste_type,
-          quantity,
-          unit,
-          status,
-          created_at,
-          pickup_address,
-          delivery_address,
-          pickup_date,
-          expected_delivery_date,
-          notes,
-          generator_notes,
-          recycler_notes,
-          waste_description,
-          hazard_level,
-          packaging_method,
-          disposal_method,
-          approved_at,
-          collection_started_at,
-          in_transit_at,
-          delivered_at,
-          confirmed_at,
-          manual_driver_name,
-          manual_vehicle_plate,
-          driver_id,
+          id, shipment_number, waste_type, quantity, unit, status, created_at,
+          pickup_address, delivery_address, pickup_date, expected_delivery_date,
+          notes, generator_notes, recycler_notes, waste_description, hazard_level,
+          packaging_method, disposal_method, approved_at, collection_started_at,
+          in_transit_at, delivered_at, confirmed_at, manual_driver_name, manual_vehicle_plate, driver_id,
           generator:organizations!shipments_generator_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
           transporter:organizations!shipments_transporter_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
           recycler:organizations!shipments_recycler_id_fkey(name, name_en, email, phone, secondary_phone, address, city, region, commercial_register, environmental_license, activity_type, production_capacity, representative_name, representative_phone, representative_email, representative_national_id, representative_position, stamp_url, signature_url, logo_url),
           driver:drivers(license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone))
         `)
-        .eq('recycler_id', organization?.id)
+        .eq('recycler_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
 
-      if (shipments) {
-        // Fetch recycling reports to check which shipments have reports
-        const shipmentIds = shipments.map(s => s.id);
-        const { data: reportsData } = await supabase
-          .from('recycling_reports')
-          .select('shipment_id')
-          .in('shipment_id', shipmentIds);
+      // Check which shipments have reports
+      const shipmentIds = shipments?.map(s => s.id) || [];
+      const { data: reportsData } = await supabase
+        .from('recycling_reports')
+        .select('shipment_id')
+        .in('shipment_id', shipmentIds);
 
-        const reportedShipmentIds = new Set(reportsData?.map(r => r.shipment_id) || []);
+      const reportedIds = new Set(reportsData?.map(r => r.shipment_id) || []);
+      const enriched = (shipments || []).map(s => ({ ...s, has_report: reportedIds.has(s.id) }));
 
-        const shipmentsWithReportStatus = shipments.map(s => ({
-          ...s,
-          has_report: reportedShipmentIds.has(s.id),
-        }));
+      const incomingStatuses = ['new', 'approved', 'in_transit'];
+      const processingStatuses = ['delivered'];
+      const completedStatuses = ['confirmed'];
 
-        setRecentShipments(shipmentsWithReportStatus as unknown as RecentShipment[]);
-
-        const incomingStatuses = ['new', 'approved', 'in_transit'];
-        const processingStatuses = ['delivered'];
-        const completedStatuses = ['confirmed'];
-
-        setStats({
-          total: shipments.length,
-          incoming: shipments.filter((s) => incomingStatuses.includes(s.status)).length,
-          processing: shipments.filter((s) => processingStatuses.includes(s.status)).length,
-          completed: shipments.filter((s) => completedStatuses.includes(s.status)).length,
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleConfirmShipment = async (shipmentId: string) => {
-    try {
-      const { error } = await supabase
-        .from('shipments')
-        .update({
-          status: 'confirmed',
-          confirmed_at: new Date().toISOString(),
-        })
-        .eq('id', shipmentId);
-
-      if (error) throw error;
-      fetchDashboardData();
-    } catch (error) {
-      console.error('Error confirming shipment:', error);
-    }
-  };
-
-  const statCards = [
-    {
-      title: 'إجمالي الشحنات',
-      value: stats.total,
-      icon: Package,
-      color: 'from-blue-500 to-blue-600',
+      return {
+        shipments: enriched as unknown as RecentShipment[],
+        stats: {
+          total: enriched.length,
+          incoming: enriched.filter(s => incomingStatuses.includes(s.status)).length,
+          processing: enriched.filter(s => processingStatuses.includes(s.status)).length,
+          completed: enriched.filter(s => completedStatuses.includes(s.status)).length,
+        }
+      };
     },
-    {
-      title: 'شحنات واردة',
-      value: stats.incoming,
-      icon: Truck,
-      color: 'from-amber-500 to-amber-600',
-    },
-    {
-      title: 'قيد المعالجة',
-      value: stats.processing,
-      icon: Clock,
-      color: 'from-purple-500 to-purple-600',
-    },
-    {
-      title: 'مؤكدة',
-      value: stats.completed,
-      icon: CheckCircle2,
-      color: 'from-emerald-500 to-emerald-600',
-    },
+    enabled: !!organization?.id,
+  });
+
+  const recentShipments = shipmentData?.shipments || [];
+  const stats = shipmentData?.stats || { total: 0, incoming: 0, processing: 0, completed: 0 };
+
+  const statCards: StatCardItem[] = [
+    { title: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+    { title: 'شحنات واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
+    { title: 'قيد المعالجة', value: stats.processing, icon: Clock, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+    { title: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10' },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Welcome section */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <CreateShipmentButton onSuccess={fetchDashboardData} />
-          <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
-          <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" className="gap-2">
-            <Sparkles className="w-4 h-4" />
-            رفع الوزنة الذكي
-          </Button>
-        </div>
-        <div className="text-right">
-          <h1 className="text-2xl font-bold">مرحباً، {profile?.full_name}</h1>
-          <p className="text-muted-foreground">
-            {organization?.name} - الجهة المدورة
-          </p>
-        </div>
-      </div>
+      {/* Header */}
+      <FacilityDashboardHeader
+        userName={profile?.full_name || ''}
+        orgName={organization?.name || ''}
+        orgLabel="الجهة المدورة"
+        icon={Recycle}
+        iconGradient="from-emerald-500 to-green-600"
+        onSmartWeightUpload={() => setShowSmartWeightUpload(true)}
+        onRefresh={() => fetchDashboardData()}
+      />
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat, index) => (
-          <motion.div
-            key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card className="relative overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">{stat.title}</p>
-                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
-                  </div>
-                  <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white`}
-                  >
-                    <stat.icon className="w-6 h-6" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+      {/* Stats Cards */}
+      <StatsCardsGrid stats={statCards} />
 
       {/* Daily Operations Summary */}
       <DailyOperationsSummary />
@@ -288,7 +158,7 @@ const RecyclerDashboard = () => {
       {/* Incoming Shipments & Awaiting Confirmation */}
       <RecyclerIncomingPanel />
 
-      {/* Pending Approvals Widget - For Recycler */}
+      {/* Pending Approvals Widget */}
       <PendingApprovalsWidget />
 
       {/* Quick Actions Grid */}
@@ -311,31 +181,22 @@ const RecyclerDashboard = () => {
             <div className="flex items-center gap-2 flex-wrap">
               <BulkCertificateButton
                 shipments={recentShipments.map(s => ({
-                  id: s.id,
-                  shipment_number: s.shipment_number,
-                  status: s.status,
-                  created_at: s.created_at,
-                  waste_type: s.waste_type,
-                  quantity: s.quantity,
-                  unit: s.unit,
-                  delivered_at: s.delivered_at,
-                  confirmed_at: s.confirmed_at,
+                  id: s.id, shipment_number: s.shipment_number, status: s.status,
+                  created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
+                  unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
                   has_report: s.has_report,
                   generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
                   transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
                   recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
                 }))}
                 type="certificate"
-                onSuccess={fetchDashboardData}
+                onSuccess={() => fetchDashboardData()}
               />
-              <RecyclerBulkStatusDropdown 
+              <RecyclerBulkStatusDropdown
                 shipments={recentShipments.map(s => ({
-                  id: s.id,
-                  status: s.status,
-                  created_at: s.created_at,
-                  waste_type: s.waste_type,
+                  id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type,
                 }))}
-                onStatusChange={fetchDashboardData}
+                onStatusChange={() => fetchDashboardData()}
               />
               <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard/shipments'}>
                 <Eye className="ml-2 h-4 w-4" />
@@ -352,18 +213,11 @@ const RecyclerDashboard = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              جاري التحميل...
-            </div>
-          ) : recentShipments.length === 0 ? (
+          {recentShipments.length === 0 ? (
             <div className="text-center py-8">
               <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                يمكنك إنشاء شحنة جديدة أو انتظار الشحنات الواردة
-              </p>
-              <CreateShipmentButton className="mt-4" onSuccess={fetchDashboardData} />
+              <CreateShipmentButton className="mt-4" onSuccess={() => fetchDashboardData()} />
             </div>
           ) : (
             <div className="space-y-4">
@@ -371,7 +225,7 @@ const RecyclerDashboard = () => {
                 <ShipmentCard
                   key={shipment.id}
                   shipment={shipment}
-                  onStatusChange={fetchDashboardData}
+                  onStatusChange={() => fetchDashboardData()}
                 />
               ))}
             </div>
@@ -379,34 +233,23 @@ const RecyclerDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Print Dialog */}
+      {/* Dialogs */}
       <EnhancedShipmentPrintView
         isOpen={showPrintDialog}
         onClose={() => setShowPrintDialog(false)}
         shipment={selectedShipment as any}
       />
-
-      {/* Smart Weight Upload Dialog */}
       <SmartWeightUpload
         open={showSmartWeightUpload}
         onOpenChange={setShowSmartWeightUpload}
       />
-
-      {/* Recycling Certificate Report Dialog */}
       {reportShipment && (
         <RecyclingCertificateDialog
           isOpen={showReportDialog}
-          onClose={() => {
-            setShowReportDialog(false);
-            setReportShipment(null);
-          }}
+          onClose={() => { setShowReportDialog(false); setReportShipment(null); }}
           shipment={reportShipment as any}
         />
       )}
-
-      {/* Chat Widget - Now global in App.tsx */}
-
-      {/* Deposit Dialog */}
       <AddDepositDialog
         open={showDepositDialog}
         onOpenChange={setShowDepositDialog}
