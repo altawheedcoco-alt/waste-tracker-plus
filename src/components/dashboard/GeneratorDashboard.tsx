@@ -17,6 +17,8 @@ import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartRequestDialog from './SmartRequestDialog';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import GeneratorTrackingWidget from './generator/GeneratorTrackingWidget';
+import DailyOperationsSummary from './operations/DailyOperationsSummary';
+import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 // ChatWidget is now global in App.tsx
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 
@@ -309,6 +311,12 @@ const GeneratorDashboard = () => {
           </motion.div>
         ))}
       </ResponsiveGrid>
+
+      {/* Daily Operations Summary */}
+      <DailyOperationsSummary />
+
+      {/* Operational Alerts */}
+      <OperationalAlertsWidget />
 
       {/* Active Shipment Tracking */}
       <GeneratorTrackingWidget />

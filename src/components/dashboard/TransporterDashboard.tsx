@@ -34,6 +34,9 @@ import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RouteOptimizerPanel from '@/components/ai/RouteOptimizerPanel';
 import SmartSchedulerPanel from '@/components/ai/SmartSchedulerPanel';
 import PartnerRatingsWidget from '@/components/partners/PartnerRatingsWidget';
+import DailyOperationsSummary from './operations/DailyOperationsSummary';
+import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import FleetUtilizationWidget from './operations/FleetUtilizationWidget';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const TransporterDashboard = () => {
@@ -72,6 +75,12 @@ const TransporterDashboard = () => {
     <div className="space-y-4 sm:space-y-6">
       <TransporterHeader organizationName={organization?.name || ''} />
 
+      {/* Daily Operations Summary */}
+      <DailyOperationsSummary />
+
+      {/* Operational Alerts */}
+      <OperationalAlertsWidget />
+
       {/* SLA Alerts - highest priority */}
       <TransporterSLAAlerts shipments={shipments} />
 
@@ -92,6 +101,9 @@ const TransporterDashboard = () => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          {/* Fleet Utilization */}
+          <FleetUtilizationWidget />
+
           <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => setShipmentStatusFilter(f === 'active' ? 'in_transit' : f)} />
 
           <TransporterKPICards
