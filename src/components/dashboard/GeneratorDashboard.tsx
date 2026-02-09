@@ -21,6 +21,7 @@ import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 // ChatWidget is now global in App.tsx
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
+import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 
 interface ShipmentStats {
   total: number;
@@ -317,6 +318,9 @@ const GeneratorDashboard = () => {
 
       {/* Operational Alerts */}
       <OperationalAlertsWidget />
+
+      {/* Driver Linking Codes */}
+      <DriverLinkingCode />
 
       {/* Active Shipment Tracking */}
       <GeneratorTrackingWidget />
