@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Loader2, Scale, Check, ArrowLeft, Sparkles, Building, Truck, User, FileText, MapPin, Clock, Package, Calendar } from 'lucide-react';
+import { Camera, Upload, Loader2, Scale, Check, ArrowLeft, Sparkles, Building, Truck, User, FileText, MapPin, Clock, Package, Calendar, ImageIcon, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
@@ -43,13 +43,11 @@ const SmartWeightUpload = ({ open, onOpenChange }: SmartWeightUploadProps) => {
   const [image, setImage] = useState<string | null>(null);
   const [extractedData, setExtractedData] = useState<WeightData | null>(null);
   const { isLoading, extractWeightData } = useAIAssistant();
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processFile = async (file: File) => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
@@ -67,6 +65,24 @@ const SmartWeightUpload = ({ open, onOpenChange }: SmartWeightUploadProps) => {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const openCamera = () => {
+    cameraInputRef.current?.click();
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
   };
 
   const handleProceedToShipment = () => {
@@ -188,25 +204,31 @@ const SmartWeightUpload = ({ open, onOpenChange }: SmartWeightUploadProps) => {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Upload Area */}
-          <div 
-            onClick={() => !isLoading && fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
-              isLoading 
-                ? 'border-primary/50 bg-primary/5 cursor-wait' 
-                : 'border-border hover:border-primary cursor-pointer'
-            }`}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileChange}
-              className="hidden"
-              disabled={isLoading}
-            />
-            
+          {/* Hidden Inputs */}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleCameraCapture}
+            className="hidden"
+            disabled={isLoading}
+          />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,.pdf"
+            onChange={handleFileSelect}
+            className="hidden"
+            disabled={isLoading}
+          />
+
+          {/* Upload Area - Shows result or upload options */}
+          <div className={`border-2 border-dashed rounded-xl p-6 text-center transition-all ${
+            isLoading 
+              ? 'border-primary/50 bg-primary/5' 
+              : 'border-border'
+          }`}>
             <AnimatePresence mode="wait">
               {isLoading ? (
                 <motion.div
@@ -262,14 +284,42 @@ const SmartWeightUpload = ({ open, onOpenChange }: SmartWeightUploadProps) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="space-y-3"
+                  className="space-y-4"
                 >
                   <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                    <Upload className="w-7 h-7 text-primary" />
+                    <Sparkles className="w-7 h-7 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium">اضغط لرفع صورة إيصال الميزان</p>
-                    <p className="text-sm text-muted-foreground">أو التقط صورة بالكاميرا</p>
+                    <p className="font-medium">اختر طريقة رفع صورة الوزنة</p>
+                    <p className="text-sm text-muted-foreground">سيتم استخراج البيانات تلقائياً بالذكاء الاصطناعي</p>
+                  </div>
+                  
+                  {/* Upload Options - Two Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <Button 
+                      onClick={openFilePicker}
+                      variant="outline"
+                      className="flex-1 gap-2 h-14"
+                      disabled={isLoading}
+                    >
+                      <FolderOpen className="w-5 h-5" />
+                      <div className="text-right">
+                        <p className="font-medium">من الملفات</p>
+                        <p className="text-xs text-muted-foreground">صور أو مستندات</p>
+                      </div>
+                    </Button>
+                    <Button 
+                      onClick={openCamera}
+                      variant="default"
+                      className="flex-1 gap-2 h-14"
+                      disabled={isLoading}
+                    >
+                      <Camera className="w-5 h-5" />
+                      <div className="text-right">
+                        <p className="font-medium">من الكاميرا</p>
+                        <p className="text-xs opacity-80">التقط صورة مباشرة</p>
+                      </div>
+                    </Button>
                   </div>
                 </motion.div>
               )}
