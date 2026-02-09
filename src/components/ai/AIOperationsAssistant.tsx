@@ -163,12 +163,25 @@ const AIOperationsAssistant = () => {
     if (!printWindow) return;
     printWindow.document.write(`
       <html dir="rtl"><head><title>تقرير النظام الشخصي السريع</title>
-      <style>body{font-family:Arial,sans-serif;padding:40px;line-height:1.8;direction:rtl}
-      table{border-collapse:collapse;width:100%;margin:16px 0}
-      td,th{border:1px solid #ddd;padding:8px;text-align:right}
-      th{background:#f5f5f5}h1,h2,h3{color:#1a5632}</style></head>
-      <body><h1>تقرير النظام الشخصي السريع</h1>
-      <p>التاريخ: ${new Date().toLocaleDateString('ar-SA')}</p><hr/>
+      <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+      <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: 'Cairo', Arial, sans-serif; padding: 40px; line-height: 2; direction: rtl; color: #1a1a1a; font-size: 13px; }
+        h1 { font-size: 18px; font-weight: 700; color: #1a5632; border-bottom: 3px solid #1a5632; padding-bottom: 8px; margin-bottom: 20px; }
+        h2 { font-size: 15px; font-weight: 700; color: #1a5632; border-right: 4px solid #1a5632; padding-right: 12px; margin-top: 24px; margin-bottom: 10px; }
+        h3 { font-size: 14px; font-weight: 600; color: #333; margin-top: 16px; margin-bottom: 6px; }
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px 12px; text-align: right; font-size: 12px; }
+        th { background: #e8f5e9; font-weight: 700; color: #1a5632; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        strong { color: #1a5632; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
+        blockquote { border-right: 4px solid #1a5632; padding-right: 16px; color: #666; font-style: italic; }
+        ul, ol { padding-right: 24px; }
+        li { margin-bottom: 4px; }
+        p { margin-bottom: 8px; }
+      </style></head>
+      <body>
       <div>${lastAssistant.content.replace(/\n/g, '<br/>')}</div>
       </body></html>`);
     printWindow.document.close();
@@ -336,14 +349,39 @@ const AIOperationsAssistant = () => {
                         <Sparkles className="w-3.5 h-3.5 text-primary" />
                       )}
                     </div>
-                    <div className={`max-w-[85%] rounded-xl p-3 ${
+                    <div className={`max-w-[90%] rounded-xl ${
                       msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                        ? 'bg-primary text-primary-foreground p-3'
+                        : 'bg-white border border-border shadow-sm p-0'
                     }`}>
-                      <div className="prose prose-sm max-w-none text-inherit [&_table]:w-full [&_td]:border [&_td]:border-border [&_td]:p-2 [&_th]:border [&_th]:border-border [&_th]:p-2 [&_th]:bg-muted">
+                      {msg.role === 'assistant' ? (
+                        <div 
+                          className="a4-document bg-white text-foreground font-[Cairo,sans-serif] text-[13px] leading-[1.9] px-8 py-6"
+                          style={{ 
+                            minHeight: '200px',
+                            direction: 'rtl',
+                          }}
+                        >
+                          <div className="prose prose-sm max-w-none text-inherit
+                            [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-primary [&_h1]:border-b-2 [&_h1]:border-primary/30 [&_h1]:pb-2 [&_h1]:mb-4
+                            [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-primary/90 [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:border-r-4 [&_h2]:border-primary [&_h2]:pr-3
+                            [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-4 [&_h3]:mb-1
+                            [&_table]:w-full [&_table]:border-collapse [&_table]:my-3
+                            [&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-1.5 [&_td]:text-xs
+                            [&_th]:border [&_th]:border-border [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:bg-primary/10 [&_th]:font-bold [&_th]:text-primary
+                            [&_hr]:my-4 [&_hr]:border-border
+                            [&_strong]:text-primary/90
+                            [&_ul]:pr-5 [&_ol]:pr-5
+                            [&_li]:mb-1
+                            [&_p]:mb-2 [&_p]:text-foreground/90
+                            [&_blockquote]:border-r-4 [&_blockquote]:border-primary/40 [&_blockquote]:pr-4 [&_blockquote]:text-muted-foreground [&_blockquote]:italic
+                          ">
+                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          </div>
+                        </div>
+                      ) : (
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
-                      </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}
