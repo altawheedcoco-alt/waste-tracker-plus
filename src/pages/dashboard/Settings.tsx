@@ -34,6 +34,7 @@ import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySe
 import OrganizationTermsSettings from '@/components/settings/OrganizationTermsSettings';
 import TwoFactorSetup from '@/components/security/TwoFactorSetup';
 import PagePasswordSettings from '@/components/security/PagePasswordSettings';
+import PinCodeSettings from '@/components/security/PinCodeSettings';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import AdvancedAppearanceSettings from '@/components/settings/AdvancedAppearanceSettings';
 
@@ -603,6 +604,7 @@ const Settings = () => {
 
         {/* Security Tab */}
         <TabsContent value="security" className="space-y-6">
+          <PinCodeSettings />
           <TwoFactorSetup />
           <PagePasswordSettings />
         </TabsContent>

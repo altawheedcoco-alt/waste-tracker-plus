@@ -10,6 +10,7 @@ import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import DriverDashboard from '@/components/dashboard/DriverDashboard';
 import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
 import PagePasswordGate from '@/components/security/PagePasswordGate';
+import PinVerificationGate from '@/components/security/PinVerificationGate';
 import CallLogWidget from '@/components/calls/CallLogWidget';
 import AIOperationsAssistant from '@/components/ai/AIOperationsAssistant';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
@@ -75,28 +76,30 @@ const Dashboard = () => {
   };
 
   return (
-    <>
-      {/* Terms acceptance dialog for all organization types */}
-      {requiresAcceptance && organizationType && (
-        <OrganizationTermsDialog 
-          open={requiresAcceptance} 
-          onAccept={markAsAccepted}
-          organizationType={organizationType}
-        />
-      )}
-      
-      <DashboardLayout>
-        <PagePasswordGate>
-          {renderDashboard()}
-        </PagePasswordGate>
-      </DashboardLayout>
-      
-      {/* Call Log Widget */}
-      <CallLogWidget />
-      
-      {/* AI Operations Assistant - for transporter, recycler, admin */}
-      {showAIAssistant && <AIOperationsAssistant />}
-    </>
+    <PinVerificationGate>
+      <>
+        {/* Terms acceptance dialog for all organization types */}
+        {requiresAcceptance && organizationType && (
+          <OrganizationTermsDialog 
+            open={requiresAcceptance} 
+            onAccept={markAsAccepted}
+            organizationType={organizationType}
+          />
+        )}
+        
+        <DashboardLayout>
+          <PagePasswordGate>
+            {renderDashboard()}
+          </PagePasswordGate>
+        </DashboardLayout>
+        
+        {/* Call Log Widget */}
+        <CallLogWidget />
+        
+        {/* AI Operations Assistant - for transporter, recycler, admin */}
+        {showAIAssistant && <AIOperationsAssistant />}
+      </>
+    </PinVerificationGate>
   );
 };
 

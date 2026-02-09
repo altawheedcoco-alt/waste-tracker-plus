@@ -6702,6 +6702,79 @@ export type Database = {
           },
         ]
       }
+      pin_backup_codes: {
+        Row: {
+          code_hash: string
+          created_at: string | null
+          id: string
+          is_used: boolean | null
+          used_at: string | null
+          user_pin_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          used_at?: string | null
+          user_pin_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          used_at?: string | null
+          user_pin_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pin_backup_codes_user_pin_id_fkey"
+            columns: ["user_pin_id"]
+            isOneToOne: false
+            referencedRelation: "user_pin_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pin_recovery_methods: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          recovery_data: Json | null
+          recovery_type: string
+          updated_at: string | null
+          user_pin_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          recovery_data?: Json | null
+          recovery_type: string
+          updated_at?: string | null
+          user_pin_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          recovery_data?: Json | null
+          recovery_type?: string
+          updated_at?: string | null
+          user_pin_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pin_recovery_methods_user_pin_id_fkey"
+            columns: ["user_pin_id"]
+            isOneToOne: false
+            referencedRelation: "user_pin_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_posts: {
         Row: {
           content: string | null
@@ -8711,6 +8784,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_pin_codes: {
+        Row: {
+          created_at: string | null
+          failed_attempts: number | null
+          id: string
+          is_active: boolean | null
+          locked_until: string | null
+          pin_hash: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          failed_attempts?: number | null
+          id?: string
+          is_active?: boolean | null
+          locked_until?: string | null
+          pin_hash: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          failed_attempts?: number | null
+          id?: string
+          is_active?: boolean | null
+          locked_until?: string | null
+          pin_hash?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_quick_action_preferences: {
         Row: {
