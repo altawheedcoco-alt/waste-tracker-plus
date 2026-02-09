@@ -19,6 +19,8 @@ import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
 import RecyclerIncomingPanel from './recycler/RecyclerIncomingPanel';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
+import DailyOperationsSummary from './operations/DailyOperationsSummary';
+import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import {
   Package,
   Recycle,
@@ -272,6 +274,12 @@ const RecyclerDashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Daily Operations Summary */}
+      <DailyOperationsSummary />
+
+      {/* Operational Alerts */}
+      <OperationalAlertsWidget />
 
       {/* Incoming Shipments & Awaiting Confirmation */}
       <RecyclerIncomingPanel />
