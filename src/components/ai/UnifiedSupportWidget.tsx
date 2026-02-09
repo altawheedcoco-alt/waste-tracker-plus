@@ -136,9 +136,9 @@ const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - Responsive positioning */}
       <motion.button
-        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-primary to-emerald-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-6 right-3 sm:right-6 z-50 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-primary to-emerald-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center touch-manipulation"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -151,7 +151,7 @@ const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </motion.div>
           ) : (
             <motion.div
@@ -161,7 +161,7 @@ const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
               exit={{ rotate: -90, opacity: 0 }}
               className="relative"
             >
-              <Headphones className="h-6 w-6" />
+              <Headphones className="h-5 w-5 sm:h-6 sm:w-6" />
               {hasNotifications && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
                   {activeTickets.length + (messages.length > 0 ? 1 : 0)}
@@ -172,14 +172,14 @@ const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
         </AnimatePresence>
       </motion.button>
 
-      {/* Widget Panel */}
+      {/* Widget Panel - Full width on mobile */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-24 left-6 z-50 w-[380px] bg-background border rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] sm:bottom-24 left-2 right-2 sm:left-auto sm:right-6 z-50 sm:w-[380px] bg-background border rounded-2xl shadow-2xl overflow-hidden max-h-[70vh] sm:max-h-none"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-primary to-emerald-500 text-white p-4">

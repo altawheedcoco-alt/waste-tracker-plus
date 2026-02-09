@@ -144,17 +144,17 @@ const EnhancedChatWidget = () => {
 
   const widgetSize = isExpanded 
     ? isMobile 
-      ? 'fixed inset-0 z-50' 
+      ? 'fixed inset-2 z-50' 
       : 'fixed bottom-4 left-4 z-50 w-[600px] h-[700px]'
     : isMobile
-      ? 'fixed bottom-20 left-2 right-2 z-50 h-[70vh]'
+      ? 'fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-2 right-2 z-50 h-[60vh]'
       : 'fixed bottom-20 left-4 z-50 w-[380px] h-[550px]';
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - Hidden on mobile to reduce clutter (ChatWidget is primary) */}
       <AnimatePresence>
-        {!isOpen && (
+        {!isOpen && !isMobile && (
           <motion.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -164,7 +164,7 @@ const EnhancedChatWidget = () => {
             onClick={handleOpen}
             className={cn(
               "fixed z-40 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center",
-              isMobile ? "bottom-4 left-4 w-14 h-14" : "bottom-6 left-6 w-14 h-14"
+              "bottom-6 left-6 w-14 h-14"
             )}
           >
             <MessageCircle className="w-6 h-6" />
