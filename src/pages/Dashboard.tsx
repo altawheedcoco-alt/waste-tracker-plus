@@ -14,12 +14,14 @@ import PinVerificationGate from '@/components/security/PinVerificationGate';
 import CallLogWidget from '@/components/calls/CallLogWidget';
 import AIOperationsAssistant from '@/components/ai/AIOperationsAssistant';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
+import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, organization, loading, roles } = useAuth();
   const navigate = useNavigate();
   const { requiresAcceptance, loading: termsLoading, markAsAccepted, organizationType } = useTermsAcceptance();
+  const { enabled: aiAssistantEnabled } = usePlatformSetting('ai_assistant_enabled');
 
   useEffect(() => {
     // Only redirect if we're sure the user is not logged in
@@ -50,7 +52,7 @@ const Dashboard = () => {
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
   const orgType = organization?.organization_type as string | undefined;
-  const showAIAssistant = isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal';
+  const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal');
 
   const renderDashboard = () => {
     // Show admin dashboard for admin users

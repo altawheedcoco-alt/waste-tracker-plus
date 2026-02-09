@@ -28,6 +28,9 @@ import {
 import AdminEntityList from './admin/AdminEntityList';
 import AdminCredentialControl from './admin/AdminCredentialControl';
 import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
+import { usePlatformSetting } from '@/hooks/usePlatformSetting';
+import { Switch } from '@/components/ui/switch';
+import { toast as sonnerToast } from 'sonner';
 import {
   Package,
   Factory,
@@ -105,6 +108,7 @@ interface UserProfile {
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { enabled: aiEnabled, toggle: toggleAI } = usePlatformSetting('ai_assistant_enabled');
   const [stats, setStats] = useState<DashboardStats>({
     totalShipments: 0,
     activeShipments: 0,
@@ -246,6 +250,17 @@ const AdminDashboard = () => {
           <p className="text-primary">مرحباً بك، مدير النظام</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/50">
+            <Bot className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">المساعد الذكي</span>
+            <Switch
+              checked={aiEnabled}
+              onCheckedChange={(checked) => {
+                toggleAI(checked);
+                sonnerToast(checked ? 'تم تفعيل المساعد الذكي' : 'تم إيقاف المساعد الذكي');
+              }}
+            />
+          </div>
           <AdminCredentialControl />
           <AdminDashboardSwitcher />
           <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
