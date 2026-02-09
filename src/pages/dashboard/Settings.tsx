@@ -17,7 +17,8 @@ import {
   FileText,
   Lock,
   Zap,
-  Brush
+  Brush,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -37,6 +38,7 @@ import PagePasswordSettings from '@/components/security/PagePasswordSettings';
 import PinCodeSettings from '@/components/security/PinCodeSettings';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import AdvancedAppearanceSettings from '@/components/settings/AdvancedAppearanceSettings';
+import NotificationChannelsSettings from '@/components/settings/NotificationChannelsSettings';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -150,7 +152,7 @@ const Settings = () => {
       <Tabs defaultValue="themes" className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid overflow-x-auto",
-          isTransporter ? "grid-cols-10" : "grid-cols-9"
+          isTransporter ? "grid-cols-11" : "grid-cols-10"
         )}>
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
@@ -192,6 +194,10 @@ const Settings = () => {
               <span className="hidden sm:inline">الصلاحيات</span>
             </TabsTrigger>
           )}
+          <TabsTrigger value="notifications-channels" className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            <span className="hidden sm:inline">قنوات الإشعارات</span>
+          </TabsTrigger>
           <TabsTrigger value="terms" className="gap-2">
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">الشروط والأحكام</span>
@@ -615,6 +621,11 @@ const Settings = () => {
             <PartnerVisibilitySettings />
           </TabsContent>
         )}
+
+        {/* Notification Channels Tab */}
+        <TabsContent value="notifications-channels" className="space-y-6">
+          <NotificationChannelsSettings />
+        </TabsContent>
 
         {/* Terms and Conditions Tab */}
         <TabsContent value="terms" className="space-y-6">
