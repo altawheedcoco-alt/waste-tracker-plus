@@ -962,6 +962,45 @@ export type Database = {
           },
         ]
       }
+      backup_logs: {
+        Row: {
+          backup_type: string
+          completed_at: string | null
+          created_by: string | null
+          error_message: string | null
+          file_size_bytes: number | null
+          github_commit_url: string | null
+          id: string
+          started_at: string
+          status: string
+          tables_backed_up: string[] | null
+        }
+        Insert: {
+          backup_type?: string
+          completed_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          github_commit_url?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          tables_backed_up?: string[] | null
+        }
+        Update: {
+          backup_type?: string
+          completed_at?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          file_size_bytes?: number | null
+          github_commit_url?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          tables_backed_up?: string[] | null
+        }
+        Relationships: []
+      }
       biometric_credentials: {
         Row: {
           biometric_type: string
