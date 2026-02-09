@@ -40,16 +40,16 @@ const FloatingActionsStack = memo(({
   const iconSize = isMobile ? 16 : 22;
   const gap = isMobile ? 'gap-2' : 'gap-3';
   
-  // Position classes based on device and position prop - with safe area support
+  // Position classes based on device and position prop - moved higher on mobile to avoid overlap
   const getPositionClasses = () => {
     if (position === 'bottom-right') {
       return isMobile 
-        ? 'bottom-[calc(9rem+env(safe-area-inset-bottom))] right-3' 
+        ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))] right-3' 
         : 'bottom-6 right-6';
     }
-    // bottom-left (default) - stacked above other widgets
+    // bottom-left (default) - stacked above other widgets with more spacing
     return isMobile 
-      ? 'bottom-[calc(9rem+env(safe-area-inset-bottom))] left-3' // Stack above other widgets
+      ? 'bottom-[calc(11rem+env(safe-area-inset-bottom))] left-3' // Higher on mobile to avoid FAB overlap
       : isTablet 
         ? 'bottom-6 left-20' // Clear of sidebar
         : 'bottom-6 left-24'; // Desktop with sidebar

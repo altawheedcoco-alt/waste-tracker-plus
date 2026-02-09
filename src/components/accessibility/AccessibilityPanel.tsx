@@ -36,11 +36,11 @@ export const AccessibilityPanel = () => {
         <Button
           variant="outline"
           size="icon"
-          className="fixed bottom-36 left-4 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg bg-background touch-manipulation"
+          className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] sm:bottom-52 left-3 sm:left-4 z-40 w-10 h-10 sm:w-14 sm:h-14 rounded-full shadow-lg bg-background touch-manipulation"
           data-accessibility-trigger
           aria-label="إعدادات إمكانية الوصول"
         >
-          <Accessibility className="h-5 w-5" />
+          <Accessibility className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-80">

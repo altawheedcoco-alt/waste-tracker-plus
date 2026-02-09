@@ -854,8 +854,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
           </AnimatePresence>
 
-          {/* Page content - Responsive padding with proper overflow handling */}
-          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto`}>
+          {/* Page content - Responsive padding with proper overflow handling and bottom spacing for FABs */}
+          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto pb-24 sm:pb-6`}>
             <DashboardBreadcrumb />
             <div className="w-full max-w-full">
               {children}
