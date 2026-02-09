@@ -18,6 +18,11 @@ import {
   AdminRecentShipments,
   AdminPartnersTab,
   AdminTrackingTab,
+  AdminDailyOperationsSummary,
+  AdminOperationalAlerts,
+  AdminActiveTracking,
+  AdminPendingApprovals,
+  AdminShipmentSearch,
   StatCard,
 } from './admin';
 import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
@@ -263,6 +268,31 @@ const AdminDashboard = () => {
           transporterCount={stats.transporterCount}
           recyclerCount={stats.recyclerCount}
         />
+      </motion.div>
+
+      {/* Daily Operations Summary - All Orgs */}
+      <motion.div variants={itemVariants}>
+        <AdminDailyOperationsSummary />
+      </motion.div>
+
+      {/* Operational Alerts - All Orgs */}
+      <motion.div variants={itemVariants}>
+        <AdminOperationalAlerts />
+      </motion.div>
+
+      {/* Shipment Search & Print */}
+      <motion.div variants={itemVariants}>
+        <AdminShipmentSearch />
+      </motion.div>
+
+      {/* Active Tracking - All Orgs */}
+      <motion.div variants={itemVariants}>
+        <AdminActiveTracking />
+      </motion.div>
+
+      {/* Pending Approvals - All Orgs */}
+      <motion.div variants={itemVariants}>
+        <AdminPendingApprovals />
       </motion.div>
 
       {/* Tabs */}
