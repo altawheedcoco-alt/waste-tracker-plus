@@ -1,52 +1,130 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Eye, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle, Eye, Plus, Search, ChevronLeft, ChevronRight, RefreshCw, Download, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkStatusChangeDropdown from '@/components/shipments/BulkStatusChangeDropdown';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 interface TransporterShipmentsListProps {
   shipments: TransporterShipment[];
   isLoading: boolean;
   onRefresh: () => void;
+  statusFilter?: string;
 }
 
 const PAGE_SIZE = 5;
 
-const TransporterShipmentsList = ({ shipments, isLoading, onRefresh }: TransporterShipmentsListProps) => {
+const STATUS_TABS = [
+  { value: 'all', label: 'الكل' },
+  { value: 'new', label: 'جديدة' },
+  { value: 'approved', label: 'معتمدة' },
+  { value: 'in_transit', label: 'قيد النقل' },
+  { value: 'delivered', label: 'تم التسليم' },
+  { value: 'confirmed', label: 'مؤكدة' },
+];
+
+const STATUS_LABELS: Record<string, string> = {
+  new: 'جديدة', approved: 'معتمدة', in_transit: 'قيد النقل',
+  delivered: 'تم التسليم', confirmed: 'مؤكدة', cancelled: 'ملغاة',
+};
+
+const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilter: externalStatusFilter }: TransporterShipmentsListProps) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeStatus, setActiveStatus] = useState(externalStatusFilter || 'all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Filter shipments by search
+  // Sync external filter
+  useMemo(() => {
+    if (externalStatusFilter) setActiveStatus(externalStatusFilter);
+  }, [externalStatusFilter]);
+
+  // Count per status
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: shipments.length };
+    shipments.forEach(s => {
+      counts[s.status] = (counts[s.status] || 0) + 1;
+    });
+    return counts;
+  }, [shipments]);
+
+  // Filter by status + search
   const filteredShipments = useMemo(() => {
-    if (!searchQuery.trim()) return shipments;
-    const q = searchQuery.toLowerCase();
-    return shipments.filter(s =>
-      s.shipment_number?.toLowerCase().includes(q) ||
-      s.waste_type?.toLowerCase().includes(q) ||
-      s.generator?.name?.toLowerCase().includes(q) ||
-      s.recycler?.name?.toLowerCase().includes(q) ||
-      s.driver?.profile?.full_name?.toLowerCase().includes(q) ||
-      s.pickup_address?.toLowerCase().includes(q) ||
-      s.delivery_address?.toLowerCase().includes(q)
-    );
-  }, [shipments, searchQuery]);
+    let result = shipments;
+    if (activeStatus !== 'all') {
+      result = result.filter(s => s.status === activeStatus);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(s =>
+        s.shipment_number?.toLowerCase().includes(q) ||
+        s.waste_type?.toLowerCase().includes(q) ||
+        s.generator?.name?.toLowerCase().includes(q) ||
+        s.recycler?.name?.toLowerCase().includes(q) ||
+        s.driver?.profile?.full_name?.toLowerCase().includes(q) ||
+        s.pickup_address?.toLowerCase().includes(q) ||
+        s.delivery_address?.toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [shipments, searchQuery, activeStatus]);
 
   const totalPages = Math.max(1, Math.ceil(filteredShipments.length / PAGE_SIZE));
   const paginatedShipments = filteredShipments.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  // Reset page when search changes
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setCurrentPage(1);
   };
+
+  const handleStatusChange = (status: string) => {
+    setActiveStatus(status);
+    setCurrentPage(1);
+  };
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    onRefresh();
+    setTimeout(() => setIsRefreshing(false), 1000);
+  }, [onRefresh]);
+
+  const handleExportExcel = useCallback(() => {
+    if (filteredShipments.length === 0) {
+      toast.error('لا توجد بيانات للتصدير');
+      return;
+    }
+
+    const exportData = filteredShipments.map(s => ({
+      'رقم الشحنة': s.shipment_number,
+      'الحالة': STATUS_LABELS[s.status] || s.status,
+      'نوع المخلف': s.waste_type,
+      'الكمية': s.quantity,
+      'الوحدة': s.unit,
+      'المولد': s.generator?.name || '-',
+      'المدور': s.recycler?.name || '-',
+      'السائق': s.driver?.profile?.full_name || s.manual_driver_name || '-',
+      'لوحة المركبة': s.driver?.vehicle_plate || s.manual_vehicle_plate || '-',
+      'عنوان الاستلام': s.pickup_address || '-',
+      'عنوان التسليم': s.delivery_address || '-',
+      'تاريخ الإنشاء': s.created_at ? new Date(s.created_at).toLocaleDateString('ar-SA') : '-',
+      'تاريخ التسليم': s.delivered_at ? new Date(s.delivered_at).toLocaleDateString('ar-SA') : '-',
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'الشحنات');
+    XLSX.writeFile(wb, `شحنات_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success(`تم تصدير ${filteredShipments.length} شحنة بنجاح`);
+  }, [filteredShipments]);
 
   return (
     <Card>
@@ -54,17 +132,21 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh }: Transport
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportExcel}
+                disabled={filteredShipments.length === 0}
+                className="text-xs sm:text-sm"
+              >
+                <Download className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                تصدير Excel
+              </Button>
               <BulkCertificateButton
                 shipments={paginatedShipments.map(s => ({
-                  id: s.id,
-                  shipment_number: s.shipment_number,
-                  status: s.status,
-                  created_at: s.created_at,
-                  waste_type: s.waste_type,
-                  quantity: s.quantity,
-                  unit: s.unit,
-                  delivered_at: s.delivered_at,
-                  has_receipt: s.has_receipt,
+                  id: s.id, shipment_number: s.shipment_number, status: s.status,
+                  created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
+                  unit: s.unit, delivered_at: s.delivered_at, has_receipt: s.has_receipt,
                   generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
                   transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
                   recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
@@ -74,15 +156,16 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh }: Transport
               />
               <BulkStatusChangeDropdown
                 shipments={paginatedShipments.map(s => ({
-                  id: s.id,
-                  status: s.status,
-                  created_at: s.created_at,
-                  waste_type: s.waste_type,
+                  id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type,
                 }))}
                 onStatusChange={onRefresh}
               />
+              <Button variant="ghost" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                <RefreshCw className={`ml-1 h-3 w-3 sm:h-4 sm:w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">تحديث</span>
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/transporter-shipments')}>
-                <Eye className="ml-2 h-4 w-4" />
+                <Eye className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 عرض الكل
               </Button>
             </div>
@@ -93,6 +176,30 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh }: Transport
               </CardTitle>
               <CardDescription>الشحنات المدارة بواسطة شركة النقل الخاصة بك</CardDescription>
             </div>
+          </div>
+
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+            <Filter className="h-4 w-4 text-muted-foreground ml-1" />
+            {STATUS_TABS.map(tab => (
+              <Button
+                key={tab.value}
+                variant={activeStatus === tab.value ? 'default' : 'outline'}
+                size="sm"
+                className="text-xs h-7 px-2.5"
+                onClick={() => handleStatusChange(tab.value)}
+              >
+                {tab.label}
+                {(statusCounts[tab.value] ?? 0) > 0 && (
+                  <Badge
+                    variant={activeStatus === tab.value ? 'secondary' : 'outline'}
+                    className="mr-1 text-[10px] h-4 px-1 min-w-[1.25rem] justify-center"
+                  >
+                    {statusCounts[tab.value]}
+                  </Badge>
+                )}
+              </Button>
+            ))}
           </div>
 
           {/* Search */}
@@ -118,9 +225,9 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh }: Transport
           <div className="text-center py-8">
             <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground">
-              {searchQuery ? 'لا توجد نتائج مطابقة للبحث' : 'لا توجد شحنات حتى الآن'}
+              {searchQuery || activeStatus !== 'all' ? 'لا توجد نتائج مطابقة للفلتر' : 'لا توجد شحنات حتى الآن'}
             </p>
-            {!searchQuery && (
+            {!searchQuery && activeStatus === 'all' && (
               <Button variant="eco" className="mt-4" onClick={() => navigate('/dashboard/shipments/new')}>
                 <Plus className="ml-2 h-4 w-4" />
                 إنشاء أول شحنة

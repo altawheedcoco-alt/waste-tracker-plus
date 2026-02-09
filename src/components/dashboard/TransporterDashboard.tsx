@@ -34,6 +34,7 @@ const TransporterDashboard = () => {
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [statusShipment, setStatusShipment] = useState<TransporterShipment | null>(null);
+  const [shipmentStatusFilter, setShipmentStatusFilter] = useState<string | undefined>();
 
   // Data fetching with react-query
   const { data: shipments = [], isLoading: shipmentsLoading, refetch: refetchShipments } = useTransporterShipments();
@@ -71,7 +72,7 @@ const TransporterDashboard = () => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-          <TransporterStatsGrid stats={stats} isLoading={statsLoading} />
+          <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => setShipmentStatusFilter(f === 'active' ? 'in_transit' : f)} />
 
           <TransporterKPICards
             financials={financials}
@@ -90,6 +91,7 @@ const TransporterDashboard = () => {
             shipments={shipments}
             isLoading={shipmentsLoading}
             onRefresh={handleRefresh}
+            statusFilter={shipmentStatusFilter}
           />
 
           <TransporterAggregateReport shipments={shipments} />
