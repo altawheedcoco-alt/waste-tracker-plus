@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Eye, Plus, Search, ChevronLeft, ChevronRight, RefreshCw, Download, Filter } from 'lucide-react';
+import { AlertCircle, Eye, Plus, Search, ChevronLeft, ChevronRight, RefreshCw, Download, Filter, Printer, Settings2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkStatusChangeDropdown from '@/components/shipments/BulkStatusChangeDropdown';
@@ -18,6 +18,8 @@ interface TransporterShipmentsListProps {
   isLoading: boolean;
   onRefresh: () => void;
   statusFilter?: string;
+  onPrintShipment?: (shipment: TransporterShipment) => void;
+  onChangeStatus?: (shipment: TransporterShipment) => void;
 }
 
 const PAGE_SIZE = 5;
@@ -36,7 +38,7 @@ const STATUS_LABELS: Record<string, string> = {
   delivered: 'تم التسليم', confirmed: 'مؤكدة', cancelled: 'ملغاة',
 };
 
-const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilter: externalStatusFilter }: TransporterShipmentsListProps) => {
+const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilter: externalStatusFilter, onPrintShipment, onChangeStatus }: TransporterShipmentsListProps) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -237,11 +239,38 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilte
         ) : (
           <div className="space-y-4">
             {paginatedShipments.map((shipment) => (
-              <ShipmentCard
-                key={shipment.id}
-                shipment={shipment}
-                onStatusChange={onRefresh}
-              />
+              <div key={shipment.id} className="space-y-1">
+                <ShipmentCard
+                  shipment={shipment}
+                  onStatusChange={onRefresh}
+                />
+                {(onPrintShipment || onChangeStatus) && (
+                  <div className="flex items-center gap-2 px-2 pb-1">
+                    {onPrintShipment && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7 gap-1"
+                        onClick={() => onPrintShipment(shipment)}
+                      >
+                        <Printer className="h-3 w-3" />
+                        طباعة
+                      </Button>
+                    )}
+                    {onChangeStatus && !['confirmed', 'cancelled'].includes(shipment.status) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-7 gap-1"
+                        onClick={() => onChangeStatus(shipment)}
+                      >
+                        <Settings2 className="h-3 w-3" />
+                        تغيير الحالة
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
             ))}
 
             {/* Pagination */}

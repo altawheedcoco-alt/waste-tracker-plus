@@ -136,6 +136,14 @@ const TransporterDashboard = () => {
             isLoading={shipmentsLoading}
             onRefresh={handleRefresh}
             statusFilter={shipmentStatusFilter}
+            onPrintShipment={(s) => {
+              setSelectedShipment(s);
+              setShowPrintDialog(true);
+            }}
+            onChangeStatus={(s) => {
+              setStatusShipment(s);
+              setShowStatusDialog(true);
+            }}
           />
 
           <TransporterAggregateReport shipments={shipments} />
