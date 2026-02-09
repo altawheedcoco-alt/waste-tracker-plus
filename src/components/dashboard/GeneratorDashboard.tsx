@@ -16,6 +16,7 @@ import ShipmentCard from '@/components/shipments/ShipmentCard';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartRequestDialog from './SmartRequestDialog';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
+import GeneratorTrackingWidget from './generator/GeneratorTrackingWidget';
 // ChatWidget is now global in App.tsx
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 
@@ -308,6 +309,9 @@ const GeneratorDashboard = () => {
           </motion.div>
         ))}
       </ResponsiveGrid>
+
+      {/* Active Shipment Tracking */}
+      <GeneratorTrackingWidget />
 
       {/* Pending Approvals Widget - For Generator */}
       <PendingApprovalsWidget />
