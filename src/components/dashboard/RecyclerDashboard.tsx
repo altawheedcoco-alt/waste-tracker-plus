@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Sparkles } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -69,20 +69,12 @@ const RecyclerDashboard = () => {
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
 
-  // Realtime subscription for shipments
+  // Realtime subscription
   useEffect(() => {
     if (!organization?.id) return;
-
     const channel = supabase
       .channel('recycler-shipments-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'shipments',
-          filter: `recycler_id=eq.${organization.id}`,
-        },
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments', filter: `recycler_id=eq.${organization.id}` },
         () => {
           queryClient.invalidateQueries({ queryKey: ['recycler-dashboard'] });
           queryClient.invalidateQueries({ queryKey: ['recycler-incoming'] });
@@ -90,14 +82,10 @@ const RecyclerDashboard = () => {
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [organization?.id, queryClient]);
 
-  // Fetch shipments and stats
-  const { data: shipmentData, refetch: fetchDashboardData } = useQuery({
+  const { data: shipmentData, refetch: fetchDashboardData, isLoading: shipmentsLoading } = useQuery({
     queryKey: ['recycler-dashboard', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return { shipments: [], stats: { total: 0, incoming: 0, processing: 0, completed: 0 } };
@@ -121,7 +109,6 @@ const RecyclerDashboard = () => {
 
       if (error) throw error;
 
-      // Check which shipments have reports
       const shipmentIds = shipments?.map(s => s.id) || [];
       const { data: reportsData } = await supabase
         .from('recycling_reports')
@@ -131,17 +118,13 @@ const RecyclerDashboard = () => {
       const reportedIds = new Set(reportsData?.map(r => r.shipment_id) || []);
       const enriched = (shipments || []).map(s => ({ ...s, has_report: reportedIds.has(s.id) }));
 
-      const incomingStatuses = ['new', 'approved', 'in_transit'];
-      const processingStatuses = ['delivered'];
-      const completedStatuses = ['confirmed'];
-
       return {
         shipments: enriched as unknown as RecentShipment[],
         stats: {
           total: enriched.length,
-          incoming: enriched.filter(s => incomingStatuses.includes(s.status)).length,
-          processing: enriched.filter(s => processingStatuses.includes(s.status)).length,
-          completed: enriched.filter(s => completedStatuses.includes(s.status)).length,
+          incoming: enriched.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length,
+          processing: enriched.filter(s => s.status === 'delivered').length,
+          completed: enriched.filter(s => s.status === 'confirmed').length,
         }
       };
     },
@@ -158,9 +141,14 @@ const RecyclerDashboard = () => {
     { title: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10' },
   ];
 
+  const handleRefresh = () => {
+    fetchDashboardData();
+    queryClient.invalidateQueries({ queryKey: ['recycler-incoming'] });
+    queryClient.invalidateQueries({ queryKey: ['recycler-awaiting-confirm'] });
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <FacilityDashboardHeader
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
@@ -168,36 +156,22 @@ const RecyclerDashboard = () => {
         icon={Recycle}
         iconGradient="from-emerald-500 to-green-600"
         onSmartWeightUpload={() => setShowSmartWeightUpload(true)}
-        onRefresh={() => fetchDashboardData()}
+        onRefresh={handleRefresh}
       />
 
-      {/* Stats Cards */}
-      <StatsCardsGrid stats={statCards} />
+      <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
 
-      {/* Daily Operations Summary */}
       <DailyOperationsSummary />
-
-      {/* Operational Alerts */}
       <OperationalAlertsWidget />
-
-      {/* Driver Code Lookup */}
       <DriverCodeLookup />
-
-      {/* Incoming Shipments & Awaiting Confirmation */}
       <RecyclerIncomingPanel />
-
-      {/* Pending Approvals Widget */}
       <PendingApprovalsWidget />
 
-      {/* Quick Actions Grid */}
       <QuickActionsGrid
-        actions={useQuickActions({
-          type: 'recycler',
-          handlers: {
-            openDepositDialog: () => setShowDepositDialog(true),
-            openSmartWeightUpload: () => setShowSmartWeightUpload(true),
-          },
-        })}
+        actions={useQuickActions({ type: 'recycler', handlers: {
+          openDepositDialog: () => setShowDepositDialog(true),
+          openSmartWeightUpload: () => setShowSmartWeightUpload(true),
+        }})}
         title="الإجراءات السريعة"
         subtitle="وظائف التدوير المستخدمة بكثرة"
       />
@@ -218,13 +192,11 @@ const RecyclerDashboard = () => {
                   recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
                 }))}
                 type="certificate"
-                onSuccess={() => fetchDashboardData()}
+                onSuccess={handleRefresh}
               />
               <RecyclerBulkStatusDropdown
-                shipments={recentShipments.map(s => ({
-                  id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type,
-                }))}
-                onStatusChange={() => fetchDashboardData()}
+                shipments={recentShipments.map(s => ({ id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type }))}
+                onStatusChange={handleRefresh}
               />
               <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard/shipments'}>
                 <Eye className="ml-2 h-4 w-4" />
@@ -241,20 +213,22 @@ const RecyclerDashboard = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {recentShipments.length === 0 ? (
+          {shipmentsLoading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="animate-pulse h-24 bg-muted rounded-lg" />
+              ))}
+            </div>
+          ) : recentShipments.length === 0 ? (
             <div className="text-center py-8">
               <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
-              <CreateShipmentButton className="mt-4" onSuccess={() => fetchDashboardData()} />
+              <CreateShipmentButton className="mt-4" onSuccess={handleRefresh} />
             </div>
           ) : (
             <div className="space-y-4">
               {recentShipments.map((shipment) => (
-                <ShipmentCard
-                  key={shipment.id}
-                  shipment={shipment}
-                  onStatusChange={() => fetchDashboardData()}
-                />
+                <ShipmentCard key={shipment.id} shipment={shipment} onStatusChange={handleRefresh} />
               ))}
             </div>
           )}
@@ -262,15 +236,8 @@ const RecyclerDashboard = () => {
       </Card>
 
       {/* Dialogs */}
-      <EnhancedShipmentPrintView
-        isOpen={showPrintDialog}
-        onClose={() => setShowPrintDialog(false)}
-        shipment={selectedShipment as any}
-      />
-      <SmartWeightUpload
-        open={showSmartWeightUpload}
-        onOpenChange={setShowSmartWeightUpload}
-      />
+      <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
+      <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       {reportShipment && (
         <RecyclingCertificateDialog
           isOpen={showReportDialog}
@@ -278,10 +245,7 @@ const RecyclerDashboard = () => {
           shipment={reportShipment as any}
         />
       )}
-      <AddDepositDialog
-        open={showDepositDialog}
-        onOpenChange={setShowDepositDialog}
-      />
+      <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
     </div>
   );
 };
