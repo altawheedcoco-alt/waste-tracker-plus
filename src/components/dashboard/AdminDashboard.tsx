@@ -26,6 +26,7 @@ import {
   StatCard,
 } from './admin';
 import AdminEntityList from './admin/AdminEntityList';
+import AdminCredentialControl from './admin/AdminCredentialControl';
 import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 import {
   Package,
@@ -245,6 +246,7 @@ const AdminDashboard = () => {
           <p className="text-primary">مرحباً بك، مدير النظام</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
+          <AdminCredentialControl />
           <AdminDashboardSwitcher />
           <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
           <Button variant="outline" onClick={() => navigate('/dashboard/shipments')}>
