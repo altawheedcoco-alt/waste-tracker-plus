@@ -7,8 +7,14 @@ import {
   useTransporterStats,
   useTransporterNotifications,
 } from '@/hooks/useTransporterDashboard';
+import {
+  useTransporterFinancials,
+  useTransporterKPIs,
+  useDriversSummary,
+} from '@/hooks/useTransporterExtended';
 import TransporterHeader from './transporter/TransporterHeader';
 import TransporterStatsGrid from './transporter/TransporterStatsGrid';
+import TransporterKPICards from './transporter/TransporterKPICards';
 import TransporterNotifications from './transporter/TransporterNotifications';
 import TransporterShipmentsList from './transporter/TransporterShipmentsList';
 import TransporterAggregateReport from './transporter/TransporterAggregateReport';
@@ -33,6 +39,9 @@ const TransporterDashboard = () => {
   const { data: shipments = [], isLoading: shipmentsLoading, refetch: refetchShipments } = useTransporterShipments();
   const { data: stats, isLoading: statsLoading } = useTransporterStats(shipments);
   const { data: notifications = [] } = useTransporterNotifications();
+  const { data: financials, isLoading: financialsLoading } = useTransporterFinancials();
+  const { data: kpis, isLoading: kpisLoading } = useTransporterKPIs();
+  const { data: driversSummary = [], isLoading: driversLoading } = useDriversSummary();
 
   // Quick actions
   const quickActions = useQuickActions({
@@ -64,6 +73,13 @@ const TransporterDashboard = () => {
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
           <TransporterStatsGrid stats={stats} isLoading={statsLoading} />
 
+          <TransporterKPICards
+            financials={financials}
+            kpis={kpis}
+            financialsLoading={financialsLoading}
+            kpisLoading={kpisLoading}
+          />
+
           <QuickActionsGrid
             actions={quickActions}
             title="الإجراءات السريعة"
@@ -76,7 +92,7 @@ const TransporterDashboard = () => {
             onRefresh={handleRefresh}
           />
 
-          <TransporterAggregateReport />
+          <TransporterAggregateReport shipments={shipments} />
         </TabsContent>
 
         <TabsContent value="partners" className="mt-6">
@@ -84,7 +100,7 @@ const TransporterDashboard = () => {
         </TabsContent>
 
         <TabsContent value="tracking" className="mt-6">
-          <TransporterDriverTracking />
+          <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
         </TabsContent>
       </Tabs>
 
