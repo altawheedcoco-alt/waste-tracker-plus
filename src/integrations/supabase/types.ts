@@ -9654,6 +9654,28 @@ export type Database = {
           waste_type: string
         }[]
       }
+      get_gps_device_types: {
+        Args: never
+        Returns: {
+          config_schema: Json
+          created_at: string
+          default_port: number | null
+          documentation_url: string | null
+          id: string
+          is_active: boolean | null
+          manufacturer: string
+          name: string
+          parser_type: string
+          protocol: string
+          sample_payload: Json | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "gps_device_types"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_monthly_invoice_stats: {
         Args: { _org_id: string }
         Returns: {
