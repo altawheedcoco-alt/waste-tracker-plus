@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Plus, Trash2, Lock, Unlock, Key, Settings2 } from 'lucide-react';
+import { Shield, Plus, Trash2, Lock, Unlock, Key, Eye, EyeOff } from 'lucide-react';
 import { usePagePasswords, availablePages, recoveryTypeLabels } from '@/hooks/usePagePasswords';
 
 const PagePasswordSettings = () => {
@@ -18,6 +18,7 @@ const PagePasswordSettings = () => {
   const [selectedPage, setSelectedPage] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(true);
   const [recoveryConfig, setRecoveryConfig] = useState<Record<string, { enabled: boolean; data: Record<string, any> }>>({
     email: { enabled: true, data: {} },
     phone: { enabled: false, data: { phone: '' } },
@@ -177,10 +178,17 @@ const PagePasswordSettings = () => {
                 </Select>
               </div>
 
+              <div className="flex justify-end">
+                <Button variant="ghost" size="sm" onClick={() => setShowPassword(!showPassword)} className="gap-1 text-xs">
+                  {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  {showPassword ? 'إخفاء' : 'إظهار'}
+                </Button>
+              </div>
+
               <div className="space-y-2">
                 <Label>كلمة المرور</Label>
                 <Input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
                   placeholder="أدخل كلمة مرور قوية"
@@ -191,7 +199,7 @@ const PagePasswordSettings = () => {
               <div className="space-y-2">
                 <Label>تأكيد كلمة المرور</Label>
                 <Input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   placeholder="أعد إدخال كلمة المرور"
