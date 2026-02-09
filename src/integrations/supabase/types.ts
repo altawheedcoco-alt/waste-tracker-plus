@@ -7863,6 +7863,8 @@ export type Database = {
           confirmed_at: string | null
           created_at: string | null
           created_by: string | null
+          delay_notified: boolean | null
+          delay_reason: string | null
           delivered_at: string | null
           delivery_address: string | null
           delivery_city: string | null
@@ -7949,6 +7951,8 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          delay_notified?: boolean | null
+          delay_reason?: string | null
           delivered_at?: string | null
           delivery_address?: string | null
           delivery_city?: string | null
@@ -8035,6 +8039,8 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          delay_notified?: boolean | null
+          delay_reason?: string | null
           delivered_at?: string | null
           delivery_address?: string | null
           delivery_city?: string | null

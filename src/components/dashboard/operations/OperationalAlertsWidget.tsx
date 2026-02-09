@@ -91,6 +91,48 @@ const OperationalAlertsWidget = () => {
         });
       });
 
+      // 4. Delayed shipments (past expected delivery date)
+      const { data: delayedShipments } = await supabase
+        .from('shipments')
+        .select('id, shipment_number, expected_delivery_date, status')
+        .eq(orgField, organization!.id)
+        .in('status', ['new', 'approved', 'in_transit', 'confirmed'])
+        .not('expected_delivery_date', 'is', null)
+        .lt('expected_delivery_date', now.toISOString())
+        .limit(10);
+
+      delayedShipments?.forEach(s => {
+        const expectedDate = new Date(s.expected_delivery_date!);
+        const hoursLate = Math.round((now.getTime() - expectedDate.getTime()) / (1000 * 60 * 60));
+        result.push({
+          id: `delayed-${s.id}`,
+          type: 'overdue',
+          severity: hoursLate > 48 ? 'critical' : 'warning',
+          message: `شحنة ${s.shipment_number} متأخرة عن موعد التسليم`,
+          detail: `متأخرة بـ ${formatDistanceToNow(expectedDate, { locale: ar })} (الحالة: ${s.status})`,
+          timestamp: expectedDate,
+        });
+      });
+
+      // 5. Unverified documents
+      const { data: unverifiedDocs } = await supabase
+        .from('organization_documents')
+        .select('id, document_type, created_at')
+        .eq('organization_id', organization!.id)
+        .eq('verification_status', 'pending')
+        .limit(3);
+
+      unverifiedDocs?.forEach(doc => {
+        result.push({
+          id: `doc-${doc.id}`,
+          type: 'unverified',
+          severity: 'info',
+          message: `وثيقة "${doc.document_type}" بانتظار التحقق`,
+          detail: `مرفوعة ${formatDistanceToNow(new Date(doc.created_at), { locale: ar, addSuffix: true })}`,
+          timestamp: new Date(doc.created_at),
+        });
+      });
+
       // Sort by severity then timestamp
       const severityOrder = { critical: 0, warning: 1, info: 2 };
       return result.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
