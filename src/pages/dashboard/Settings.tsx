@@ -33,6 +33,7 @@ import NotificationSoundSettings from '@/components/settings/NotificationSoundSe
 import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
 import OrganizationTermsSettings from '@/components/settings/OrganizationTermsSettings';
 import TwoFactorSetup from '@/components/security/TwoFactorSetup';
+import PagePasswordSettings from '@/components/security/PagePasswordSettings';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import AdvancedAppearanceSettings from '@/components/settings/AdvancedAppearanceSettings';
 
@@ -603,6 +604,7 @@ const Settings = () => {
         {/* Security Tab */}
         <TabsContent value="security" className="space-y-6">
           <TwoFactorSetup />
+          <PagePasswordSettings />
         </TabsContent>
 
         {/* Partner Visibility Tab - Only for Transporters */}

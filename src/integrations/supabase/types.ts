@@ -5806,6 +5806,130 @@ export type Database = {
         }
         Relationships: []
       }
+      page_password_backup_codes: {
+        Row: {
+          code_hash: string
+          created_at: string | null
+          id: string
+          is_used: boolean | null
+          page_password_id: string
+          used_at: string | null
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          page_password_id: string
+          used_at?: string | null
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string | null
+          id?: string
+          is_used?: boolean | null
+          page_password_id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_password_backup_codes_page_password_id_fkey"
+            columns: ["page_password_id"]
+            isOneToOne: false
+            referencedRelation: "page_passwords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_password_recovery: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          page_password_id: string
+          recovery_data: Json | null
+          recovery_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          page_password_id: string
+          recovery_data?: Json | null
+          recovery_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          page_password_id?: string
+          recovery_data?: Json | null
+          recovery_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_password_recovery_page_password_id_fkey"
+            columns: ["page_password_id"]
+            isOneToOne: false
+            referencedRelation: "page_passwords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_passwords: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          page_name: string
+          page_path: string
+          password_hash: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          page_name: string
+          page_path: string
+          password_hash: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          page_name?: string
+          page_path?: string
+          password_hash?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_passwords_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "page_passwords_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_account_settings: {
         Row: {
           account_status: string | null
