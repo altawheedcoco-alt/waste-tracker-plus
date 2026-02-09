@@ -37,6 +37,10 @@ import PartnerRatingsWidget from '@/components/partners/PartnerRatingsWidget';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import FleetUtilizationWidget from './operations/FleetUtilizationWidget';
+import DriverPerformancePanel from './transporter/DriverPerformancePanel';
+import TripCostManagement from './transporter/TripCostManagement';
+import MaintenanceScheduler from './transporter/MaintenanceScheduler';
+import TransporterPerformanceCharts from './transporter/TransporterPerformanceCharts';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const TransporterDashboard = () => {
@@ -94,6 +98,7 @@ const TransporterDashboard = () => {
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
         <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
           <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="performance" className="text-xs sm:text-sm whitespace-nowrap">الأداء والتكاليف</TabsTrigger>
           <TabsTrigger value="calendar" className="text-xs sm:text-sm whitespace-nowrap">التقويم</TabsTrigger>
           <TabsTrigger value="intelligence" className="text-xs sm:text-sm whitespace-nowrap">الذكاء والأتمتة</TabsTrigger>
           <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الشركاء</TabsTrigger>
@@ -103,6 +108,9 @@ const TransporterDashboard = () => {
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
           {/* Fleet Utilization */}
           <FleetUtilizationWidget />
+
+          {/* Performance Charts */}
+          <TransporterPerformanceCharts />
 
           <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => setShipmentStatusFilter(f === 'active' ? 'in_transit' : f)} />
 
@@ -130,6 +138,12 @@ const TransporterDashboard = () => {
           />
 
           <TransporterAggregateReport shipments={shipments} />
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-4 mt-6">
+          <DriverPerformancePanel />
+          <TripCostManagement />
+          <MaintenanceScheduler />
         </TabsContent>
 
         <TabsContent value="calendar" className="space-y-4 mt-6">
