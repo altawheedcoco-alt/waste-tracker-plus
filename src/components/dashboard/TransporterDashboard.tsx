@@ -17,6 +17,9 @@ import TransporterHeader from './transporter/TransporterHeader';
 import TransporterStatsGrid from './transporter/TransporterStatsGrid';
 import TransporterKPICards from './transporter/TransporterKPICards';
 import TransporterNotifications from './transporter/TransporterNotifications';
+import TransporterSLAAlerts from './transporter/TransporterSLAAlerts';
+import TransporterIncomingRequests from './transporter/TransporterIncomingRequests';
+import TransporterPartnerSummary from './transporter/TransporterPartnerSummary';
 import TransporterShipmentsList from './transporter/TransporterShipmentsList';
 import TransporterAggregateReport from './transporter/TransporterAggregateReport';
 import TransporterDriverTracking from './transporter/TransporterDriverTracking';
@@ -64,6 +67,12 @@ const TransporterDashboard = () => {
     <div className="space-y-4 sm:space-y-6">
       <TransporterHeader organizationName={organization?.name || ''} />
 
+      {/* SLA Alerts - highest priority */}
+      <TransporterSLAAlerts shipments={shipments} />
+
+      {/* Incoming Requests */}
+      <TransporterIncomingRequests />
+
       <TransporterNotifications notifications={notifications} />
 
       <DocumentVerificationWidget />
@@ -84,6 +93,9 @@ const TransporterDashboard = () => {
             financialsLoading={financialsLoading}
             kpisLoading={kpisLoading}
           />
+
+          {/* Partner Financial Summary */}
+          <TransporterPartnerSummary />
 
           <QuickActionsGrid
             actions={quickActions}
