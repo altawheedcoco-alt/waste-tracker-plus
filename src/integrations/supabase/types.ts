@@ -9449,13 +9449,24 @@ export type Database = {
       terms_acceptances: {
         Row: {
           accepted_at: string
+          admin_review_notes: string | null
+          admin_reviewed_at: string | null
+          admin_reviewed_by: string | null
+          ai_review_reasons: Json | null
+          ai_review_score: number | null
+          ai_review_status: string | null
+          ai_review_summary: string | null
+          business_doc_type: string | null
+          business_doc_urls: Json | null
           created_at: string
+          delegation_data: Json | null
           full_name: string
           id: string
           ip_address: string | null
           organization_id: string | null
           organization_name: string
           organization_type: string
+          selfie_url: string | null
           signer_id_back_url: string | null
           signer_id_front_url: string | null
           signer_national_id: string | null
@@ -9469,13 +9480,24 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string
+          admin_review_notes?: string | null
+          admin_reviewed_at?: string | null
+          admin_reviewed_by?: string | null
+          ai_review_reasons?: Json | null
+          ai_review_score?: number | null
+          ai_review_status?: string | null
+          ai_review_summary?: string | null
+          business_doc_type?: string | null
+          business_doc_urls?: Json | null
           created_at?: string
+          delegation_data?: Json | null
           full_name: string
           id?: string
           ip_address?: string | null
           organization_id?: string | null
           organization_name: string
           organization_type: string
+          selfie_url?: string | null
           signer_id_back_url?: string | null
           signer_id_front_url?: string | null
           signer_national_id?: string | null
@@ -9489,13 +9511,24 @@ export type Database = {
         }
         Update: {
           accepted_at?: string
+          admin_review_notes?: string | null
+          admin_reviewed_at?: string | null
+          admin_reviewed_by?: string | null
+          ai_review_reasons?: Json | null
+          ai_review_score?: number | null
+          ai_review_status?: string | null
+          ai_review_summary?: string | null
+          business_doc_type?: string | null
+          business_doc_urls?: Json | null
           created_at?: string
+          delegation_data?: Json | null
           full_name?: string
           id?: string
           ip_address?: string | null
           organization_id?: string | null
           organization_name?: string
           organization_type?: string
+          selfie_url?: string | null
           signer_id_back_url?: string | null
           signer_id_front_url?: string | null
           signer_national_id?: string | null

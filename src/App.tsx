@@ -120,6 +120,7 @@ const Gamification = lazy(() => import("./pages/dashboard/Gamification"));
 const IoTSettings = lazy(() => import("./pages/dashboard/IoTSettings"));
 const EInvoice = lazy(() => import("./pages/dashboard/EInvoice"));
 const CustomerPortal = lazy(() => import("./pages/dashboard/CustomerPortal"));
+const OnboardingReview = lazy(() => import("./pages/dashboard/OnboardingReview"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -286,6 +287,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/iot-settings" element={<IoTSettings />} />
         <Route path="/dashboard/e-invoice" element={<EInvoice />} />
         <Route path="/dashboard/customer-portal" element={<CustomerPortal />} />
+        <Route path="/dashboard/onboarding-review" element={<OnboardingReview />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
