@@ -622,8 +622,8 @@ const ShipmentDetailsPage = () => {
             </Card>
           )}
 
-          {/* Recycler Info */}
-          {shipment.recycler && (
+          {/* Recycler Info - hidden if visibility restricted */}
+          {shipment.recycler && visibility.canViewRecyclerInfo && (
             <Card>
               <CardHeader className="text-right">
                 <CardTitle className="flex items-center gap-2 justify-end">

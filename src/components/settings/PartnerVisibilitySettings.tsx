@@ -42,7 +42,7 @@ const PartnerVisibilitySettings = () => {
 
   const handleToggle = (
     partnerId: string, 
-    field: 'can_view_maps' | 'can_view_tracking' | 'can_view_routes' | 'can_view_driver_location' | 'can_view_shipment_details' | 'can_view_driver_info' | 'can_view_vehicle_info' | 'can_view_estimated_arrival' | 'can_receive_notifications' | 'can_view_reports',
+    field: 'can_view_maps' | 'can_view_tracking' | 'can_view_routes' | 'can_view_driver_location' | 'can_view_shipment_details' | 'can_view_driver_info' | 'can_view_vehicle_info' | 'can_view_estimated_arrival' | 'can_receive_notifications' | 'can_view_reports' | 'can_view_recycler_info',
     currentValue: boolean
   ) => {
     const newValue = !currentValue;
@@ -84,6 +84,7 @@ const PartnerVisibilitySettings = () => {
         can_view_estimated_arrival: enable,
         can_receive_notifications: enable,
         can_view_reports: enable,
+        can_view_recycler_info: enable,
       }
     }));
 
@@ -99,6 +100,7 @@ const PartnerVisibilitySettings = () => {
       can_view_estimated_arrival: enable,
       can_receive_notifications: enable,
       can_view_reports: enable,
+      can_view_recycler_info: enable,
     });
   };
 
@@ -349,6 +351,21 @@ const PartnerVisibilitySettings = () => {
                         disabled={isUpdating}
                       />
                     </div>
+
+                    {/* Recycler Info - only show for generator partners */}
+                    {partner.organization_type === 'generator' && (
+                      <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border-2 border-dashed border-primary/20">
+                        <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_recycler_info') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                          <Recycle className="w-4 h-4" />
+                        </div>
+                        <Label className="text-xs text-center">رؤية جهة التدوير</Label>
+                        <Switch
+                          checked={getSettingValue(partner, 'can_view_recycler_info')}
+                          onCheckedChange={() => handleToggle(partner.id, 'can_view_recycler_info', getSettingValue(partner, 'can_view_recycler_info'))}
+                          disabled={isUpdating}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Status indicator */}
