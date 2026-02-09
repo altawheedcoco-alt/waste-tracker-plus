@@ -31,6 +31,7 @@ import { useTermsContent } from '@/hooks/useTermsContent';
 import SignaturePad, { SignaturePadRef } from '@/components/signature/SignaturePad';
 import { useIDVerification, type ExtractedIDData } from '@/hooks/useIDVerification';
 import { processReceiptImage } from '@/lib/imageProcessing';
+import DelegationSection, { type DelegationData } from '@/components/auth/DelegationSection';
 
 interface OrganizationTermsDialogProps {
   open: boolean;
@@ -84,7 +85,13 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [uploadedSignaturePreview, setUploadedSignaturePreview] = useState<string | null>(null);
   const [signatureMode, setSignatureMode] = useState<'electronic' | 'upload'>('electronic');
-  
+  const [delegationData, setDelegationData] = useState<DelegationData>({
+    isDelegate: false,
+    delegationType: null,
+    delegationPages: [],
+    delegationEnhancedPages: [],
+    parties: [],
+  });
   const idFrontInputRef = useRef<HTMLInputElement>(null);
   const idBackInputRef = useRef<HTMLInputElement>(null);
   const selfieInputRef = useRef<HTMLInputElement>(null);
@@ -319,8 +326,18 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
 
   const handleAcceptTerms = async () => {
     if (!agreed) { toast.error('يجب الموافقة على الشروط والأحكام للمتابعة'); return; }
-    if (!signatureDataUrl || signaturePadRef.current?.isEmpty()) { toast.error('يرجى التوقيع في خانة التوقيع اليدوي'); return; }
+    if (!signatureDataUrl && signatureMode === 'electronic' && signaturePadRef.current?.isEmpty()) { toast.error('يرجى التوقيع'); return; }
+    if (!signatureDataUrl) { toast.error('يرجى التوقيع أو رفع صورة التوقيع'); return; }
     if (!user || !profile || !organization) { toast.error('حدث خطأ في بيانات المستخدم'); return; }
+
+    // Validate delegation if enabled
+    if (delegationData.isDelegate) {
+      if (!delegationData.delegationType) { toast.error('يرجى تحديد نوع التمثيل القانوني'); return; }
+      if (delegationData.delegationPages.length === 0) { toast.error('يرجى رفع صور التوكيل أو التفويض'); return; }
+      if (delegationData.parties.length === 0) { toast.error('يرجى إضافة بيانات الأطراف'); return; }
+      const incompleteParty = delegationData.parties.find(p => !p.name || !p.nationalId || !p.idFrontPreview || !p.idBackPreview);
+      if (incompleteParty) { toast.error(`يرجى استكمال بيانات وصور بطاقة "${incompleteParty.name || 'أحد الأطراف'}"`); return; }
+    }
 
     setSubmitting(true);
     setUploadingImages(true);
@@ -329,7 +346,6 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       const timestamp = Date.now();
       const basePath = `${organization.id}/${user.id}`;
       
-      // Upload enhanced images
       const frontToUpload = idFrontEnhanced || idFrontPreview!;
       const backToUpload = idBackEnhanced || idBackPreview!;
       
@@ -341,6 +357,30 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       ]);
       
       if (!idFrontUrl || !idBackUrl) throw new Error('فشل في رفع صور البطاقة');
+
+      // Upload delegation documents if applicable
+      let delegationUrls: string[] = [];
+      let partyDocUrls: { partyName: string; role: string; front: string | null; back: string | null }[] = [];
+      
+      if (delegationData.isDelegate) {
+        // Upload delegation pages
+        delegationUrls = await Promise.all(
+          delegationData.delegationEnhancedPages.map((page, i) =>
+            uploadDataUrl(page, `${basePath}/delegation-page-${i + 1}-${timestamp}`)
+          )
+        ).then(urls => urls.filter(Boolean) as string[]);
+
+        // Upload party ID cards
+        partyDocUrls = await Promise.all(
+          delegationData.parties.map(async (party) => {
+            const [front, back] = await Promise.all([
+              party.idFrontEnhanced ? uploadDataUrl(party.idFrontEnhanced, `${basePath}/party-${party.role}-${party.nationalId}-front-${timestamp}`) : Promise.resolve(null),
+              party.idBackEnhanced ? uploadDataUrl(party.idBackEnhanced, `${basePath}/party-${party.role}-${party.nationalId}-back-${timestamp}`) : Promise.resolve(null),
+            ]);
+            return { partyName: party.name, role: party.role, front, back };
+          })
+        );
+      }
       
       setUploadingImages(false);
 
@@ -679,6 +719,9 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                       />
                     </div>
                   </div>
+
+                  {/* Delegation / Proxy Section */}
+                  <DelegationSection delegationData={delegationData} onUpdate={setDelegationData} />
 
                   {/* Registered User Info */}
                   {profile && (
