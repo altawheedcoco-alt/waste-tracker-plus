@@ -23,12 +23,16 @@ import TransporterPartnerSummary from './transporter/TransporterPartnerSummary';
 import TransporterShipmentsList from './transporter/TransporterShipmentsList';
 import TransporterAggregateReport from './transporter/TransporterAggregateReport';
 import TransporterDriverTracking from './transporter/TransporterDriverTracking';
+import ShipmentCalendarWidget from './transporter/ShipmentCalendarWidget';
+import PartnerProfitabilityPanel from './transporter/PartnerProfitabilityPanel';
 import QuickActionsGrid from './QuickActionsGrid';
 import PartnersView from './PartnersView';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
+import RouteOptimizerPanel from '@/components/ai/RouteOptimizerPanel';
+import SmartSchedulerPanel from '@/components/ai/SmartSchedulerPanel';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const TransporterDashboard = () => {
@@ -80,6 +84,8 @@ const TransporterDashboard = () => {
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
         <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
           <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="calendar" className="text-xs sm:text-sm whitespace-nowrap">التقويم</TabsTrigger>
+          <TabsTrigger value="intelligence" className="text-xs sm:text-sm whitespace-nowrap">الذكاء والأتمتة</TabsTrigger>
           <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الشركاء</TabsTrigger>
           <TabsTrigger value="tracking" className="text-xs sm:text-sm whitespace-nowrap">تتبع السائقين</TabsTrigger>
         </TabsList>
@@ -111,6 +117,19 @@ const TransporterDashboard = () => {
           />
 
           <TransporterAggregateReport shipments={shipments} />
+        </TabsContent>
+
+        <TabsContent value="calendar" className="space-y-4 mt-6">
+          <ShipmentCalendarWidget />
+        </TabsContent>
+
+        <TabsContent value="intelligence" className="space-y-4 mt-6">
+          <SmartSchedulerPanel />
+          <RouteOptimizerPanel
+            driverId=""
+            destinations={[]}
+          />
+          <PartnerProfitabilityPanel />
         </TabsContent>
 
         <TabsContent value="partners" className="mt-6">
