@@ -8858,6 +8858,95 @@ export type Database = {
           },
         ]
       }
+      trip_costs: {
+        Row: {
+          created_at: string
+          distance_km: number | null
+          driver_id: string | null
+          fuel_cost: number | null
+          id: string
+          labor_cost: number | null
+          maintenance_cost: number | null
+          notes: string | null
+          organization_id: string
+          other_costs: number | null
+          profit: number | null
+          revenue: number | null
+          shipment_id: string | null
+          toll_fees: number | null
+          total_cost: number | null
+          trip_date: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          distance_km?: number | null
+          driver_id?: string | null
+          fuel_cost?: number | null
+          id?: string
+          labor_cost?: number | null
+          maintenance_cost?: number | null
+          notes?: string | null
+          organization_id: string
+          other_costs?: number | null
+          profit?: number | null
+          revenue?: number | null
+          shipment_id?: string | null
+          toll_fees?: number | null
+          total_cost?: number | null
+          trip_date?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          distance_km?: number | null
+          driver_id?: string | null
+          fuel_cost?: number | null
+          id?: string
+          labor_cost?: number | null
+          maintenance_cost?: number | null
+          notes?: string | null
+          organization_id?: string
+          other_costs?: number | null
+          profit?: number | null
+          revenue?: number | null
+          shipment_id?: string | null
+          toll_fees?: number | null
+          total_cost?: number | null
+          trip_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_costs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_costs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "trip_costs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trip_costs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       two_factor_attempts: {
         Row: {
           attempt_type: string
@@ -9055,6 +9144,82 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      vehicle_maintenance: {
+        Row: {
+          cost: number | null
+          created_at: string
+          description: string | null
+          driver_id: string | null
+          id: string
+          maintenance_type: string
+          next_maintenance_date: string | null
+          next_maintenance_km: number | null
+          notes: string | null
+          odometer_km: number | null
+          organization_id: string
+          performed_at: string
+          status: string
+          updated_at: string
+          vehicle_plate: string
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          driver_id?: string | null
+          id?: string
+          maintenance_type: string
+          next_maintenance_date?: string | null
+          next_maintenance_km?: number | null
+          notes?: string | null
+          odometer_km?: number | null
+          organization_id: string
+          performed_at?: string
+          status?: string
+          updated_at?: string
+          vehicle_plate: string
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          description?: string | null
+          driver_id?: string | null
+          id?: string
+          maintenance_type?: string
+          next_maintenance_date?: string | null
+          next_maintenance_km?: number | null
+          notes?: string | null
+          odometer_km?: number | null
+          organization_id?: string
+          performed_at?: string
+          status?: string
+          updated_at?: string
+          vehicle_plate?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_maintenance_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_maintenance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vehicle_maintenance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       verified_partnerships: {
         Row: {
