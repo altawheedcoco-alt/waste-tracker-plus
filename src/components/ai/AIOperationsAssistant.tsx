@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import ReactMarkdown from 'react-markdown';
+import TableStyleSelector, { getTableStyleClasses, type TableStyle } from './TableStyleSelector';
 import {
   Sparkles, X, Send, Loader2, Bot, User,
   FileText, BarChart3, Calendar, ClipboardList,
@@ -27,6 +28,23 @@ const TASK_PRESETS: { type: TaskType; label: string; icon: any; description: str
   { type: 'schedule', label: 'جدولة عمليات', icon: Calendar, description: 'توزيع أحمال وتخصيص موارد' },
 ];
 
+// Clean AI output from unwanted markdown artifacts
+const cleanContent = (content: string): string => {
+  return content
+    // Remove standalone asterisk lines like "***" or "* * *"
+    .replace(/^\s*\*\s*\*\s*\*\s*$/gm, '---')
+    // Remove excessive dashes (more than 3)
+    .replace(/^-{4,}$/gm, '---')
+    // Clean lines that start with "- **text**" pattern (convert to clean text)
+    .replace(/^-\s+\*\*(.+?)\*\*\s*$/gm, '**$1**')
+    // Remove standalone stars at line start when not a list
+    .replace(/^\*\s+(?!\*)/gm, '')
+    // Clean triple+ stars used as decorators
+    .replace(/\*{3,}/g, '')
+    // Remove orphan bullet points that are just dashes
+    .replace(/^-\s*$/gm, '');
+};
+
 const AIOperationsAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -34,6 +52,7 @@ const AIOperationsAssistant = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTask, setActiveTask] = useState<TaskType>('general');
   const [showPresets, setShowPresets] = useState(true);
+  const [tableStyle, setTableStyle] = useState<TableStyle>('classic');
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { organization } = useAuth();
@@ -250,6 +269,7 @@ const AIOperationsAssistant = () => {
                 <div className="flex items-center gap-1">
                   {messages.length > 0 && (
                     <>
+                      <TableStyleSelector activeStyle={tableStyle} onStyleChange={setTableStyle} />
                       <Button variant="ghost" size="icon" onClick={copyLastResponse} title="نسخ آخر رد">
                         <Copy className="w-4 h-4" />
                       </Button>
@@ -362,21 +382,8 @@ const AIOperationsAssistant = () => {
                             direction: 'rtl',
                           }}
                         >
-                          <div className="prose prose-sm max-w-none text-inherit
-                            [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-primary [&_h1]:border-b-2 [&_h1]:border-primary/30 [&_h1]:pb-2 [&_h1]:mb-4
-                            [&_h2]:text-base [&_h2]:font-bold [&_h2]:text-primary/90 [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:border-r-4 [&_h2]:border-primary [&_h2]:pr-3
-                            [&_h3]:text-sm [&_h3]:font-semibold [&_h3]:text-foreground [&_h3]:mt-4 [&_h3]:mb-1
-                            [&_table]:w-full [&_table]:border-collapse [&_table]:my-3
-                            [&_td]:border [&_td]:border-border [&_td]:px-3 [&_td]:py-1.5 [&_td]:text-xs
-                            [&_th]:border [&_th]:border-border [&_th]:px-3 [&_th]:py-2 [&_th]:text-xs [&_th]:bg-primary/10 [&_th]:font-bold [&_th]:text-primary
-                            [&_hr]:my-4 [&_hr]:border-border
-                            [&_strong]:text-primary/90
-                            [&_ul]:pr-5 [&_ol]:pr-5
-                            [&_li]:mb-1
-                            [&_p]:mb-2 [&_p]:text-foreground/90
-                            [&_blockquote]:border-r-4 [&_blockquote]:border-primary/40 [&_blockquote]:pr-4 [&_blockquote]:text-muted-foreground [&_blockquote]:italic
-                          ">
-                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                          <div className={`prose prose-sm max-w-none text-inherit ${getTableStyleClasses(tableStyle)}`}>
+                            <ReactMarkdown>{cleanContent(msg.content)}</ReactMarkdown>
                           </div>
                         </div>
                       ) : (
