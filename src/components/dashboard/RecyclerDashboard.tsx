@@ -17,6 +17,7 @@ import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidge
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
+import RecyclerIncomingPanel from './recycler/RecyclerIncomingPanel';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import {
   Package,
@@ -271,6 +272,9 @@ const RecyclerDashboard = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Incoming Shipments & Awaiting Confirmation */}
+      <RecyclerIncomingPanel />
 
       {/* Pending Approvals Widget - For Recycler */}
       <PendingApprovalsWidget />
