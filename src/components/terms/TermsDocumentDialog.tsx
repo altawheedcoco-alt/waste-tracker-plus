@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Printer, Download, X } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import TermsDocumentPrint from './TermsDocumentPrint';
+import PrintThemeSelector from '@/components/print/PrintThemeSelector';
+import { type PrintThemeId } from '@/lib/printThemes';
 
 interface TermsAcceptanceData {
   id: string;
@@ -38,7 +40,8 @@ interface TermsDocumentDialogProps {
 
 const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = false }: TermsDocumentDialogProps) => {
   const printRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, printContent, isExporting } = usePDFExport({
+  const [themeOpen, setThemeOpen] = useState(false);
+  const { exportToPDF, printWithTheme, isExporting } = usePDFExport({
     filename: `terms-acceptance-${acceptance?.id?.slice(0, 8) || 'document'}`,
     orientation: 'portrait',
     format: 'a4',
@@ -47,9 +50,7 @@ const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = f
   if (!acceptance) return null;
 
   const handlePrint = () => {
-    if (printRef.current) {
-      printContent(printRef.current);
-    }
+    setThemeOpen(true);
   };
 
   const handleDownload = () => {
@@ -99,6 +100,12 @@ const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = f
           <TermsDocumentPrint ref={printRef} acceptance={acceptance} showSignature={showSignature} />
         </ScrollArea>
       </DialogContent>
+
+      <PrintThemeSelector
+        open={themeOpen}
+        onOpenChange={setThemeOpen}
+        onSelect={(themeId) => printWithTheme(printRef.current, themeId)}
+      />
     </Dialog>
   );
 };
