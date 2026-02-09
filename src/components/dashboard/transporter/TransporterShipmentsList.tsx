@@ -237,37 +237,46 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilte
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {paginatedShipments.map((shipment) => (
-              <div key={shipment.id} className="space-y-1">
+              <div key={shipment.id} className="group relative rounded-lg border border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md overflow-hidden">
                 <ShipmentCard
                   shipment={shipment}
                   onStatusChange={onRefresh}
                 />
                 {(onPrintShipment || onChangeStatus) && (
-                  <div className="flex items-center gap-2 px-2 pb-1">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/40 border-t border-border/30">
                     {onPrintShipment && (
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        className="text-xs h-7 gap-1"
-                        onClick={() => onPrintShipment(shipment)}
+                        className="text-xs h-7 gap-1.5 rounded-full px-3 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); onPrintShipment(shipment); }}
                       >
-                        <Printer className="h-3 w-3" />
+                        <Printer className="h-3.5 w-3.5" />
                         طباعة
                       </Button>
                     )}
                     {onChangeStatus && !['confirmed', 'cancelled'].includes(shipment.status) && (
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        className="text-xs h-7 gap-1"
-                        onClick={() => onChangeStatus(shipment)}
+                        className="text-xs h-7 gap-1.5 rounded-full px-3 hover:bg-accent hover:text-accent-foreground hover:border-accent/50 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); onChangeStatus(shipment); }}
                       >
-                        <Settings2 className="h-3 w-3" />
+                        <Settings2 className="h-3.5 w-3.5" />
                         تغيير الحالة
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 gap-1.5 rounded-full px-3 hover:bg-secondary hover:text-secondary-foreground mr-auto transition-colors"
+                      onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      التفاصيل
+                    </Button>
                   </div>
                 )}
               </div>
