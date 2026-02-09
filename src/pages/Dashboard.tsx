@@ -9,6 +9,7 @@ import RecyclerDashboard from '@/components/dashboard/RecyclerDashboard';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import DriverDashboard from '@/components/dashboard/DriverDashboard';
 import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
+import PagePasswordGate from '@/components/security/PagePasswordGate';
 import CallLogWidget from '@/components/calls/CallLogWidget';
 import AIOperationsAssistant from '@/components/ai/AIOperationsAssistant';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
@@ -85,7 +86,9 @@ const Dashboard = () => {
       )}
       
       <DashboardLayout>
-        {renderDashboard()}
+        <PagePasswordGate>
+          {renderDashboard()}
+        </PagePasswordGate>
       </DashboardLayout>
       
       {/* Call Log Widget */}
