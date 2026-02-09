@@ -18,6 +18,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import {
   FileCheck,
   Plus,
   Search,
@@ -29,10 +34,14 @@ import {
   Package,
   Building2,
   FolderOpen,
+  ChevronDown,
+  Settings2,
 } from 'lucide-react';
 import ReceiptCard from '@/components/receipts/ReceiptCard';
 import CreateReceiptDialog from '@/components/receipts/CreateReceiptDialog';
 import ReceiptDetailsDialog from '@/components/receipts/ReceiptDetailsDialog';
+import ReceiptConfigPanel from '@/components/receipts/ReceiptConfigPanel';
+import ShipmentReceiptManager from '@/components/receipts/ShipmentReceiptManager';
 
 interface Receipt {
   id: string;
@@ -76,6 +85,10 @@ const TransporterReceipts = () => {
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedGeneratorId, setSelectedGeneratorId] = useState('all');
+  const [configOpen, setConfigOpen] = useState(false);
+  const [autoReceiptEnabled, setAutoReceiptEnabled] = useState(true);
+  const [autoOnDelivered, setAutoOnDelivered] = useState(true);
+  const [autoOnInTransit, setAutoOnInTransit] = useState(false);
 
   useEffect(() => {
     if (organization?.id) {
@@ -191,11 +204,35 @@ const TransporterReceipts = () => {
               إدارة شهادات استلام الشحنات مصنفة حسب الجهة المولدة
             </p>
           </div>
-          <Button onClick={() => navigate('/dashboard/create-receipt')}>
-            <Plus className="h-4 w-4 ml-2" />
-            إنشاء شهادة جديدة
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setConfigOpen(!configOpen)} className="gap-1">
+              <Settings2 className="h-4 w-4" />
+              إعدادات
+              <ChevronDown className={`h-3 w-3 transition-transform ${configOpen ? 'rotate-180' : ''}`} />
+            </Button>
+            <Button onClick={() => navigate('/dashboard/create-receipt')}>
+              <Plus className="h-4 w-4 ml-2" />
+              إنشاء شهادة جديدة
+            </Button>
+          </div>
         </div>
+
+        {/* Config Panel - Collapsible */}
+        <Collapsible open={configOpen} onOpenChange={setConfigOpen}>
+          <CollapsibleContent>
+            <ReceiptConfigPanel
+              autoReceiptEnabled={autoReceiptEnabled}
+              onAutoReceiptChange={setAutoReceiptEnabled}
+              autoOnDelivered={autoOnDelivered}
+              onAutoOnDeliveredChange={setAutoOnDelivered}
+              autoOnInTransit={autoOnInTransit}
+              onAutoOnInTransitChange={setAutoOnInTransit}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Shipment Receipt Manager */}
+        <ShipmentReceiptManager onReceiptsChanged={loadReceipts} />
 
         {/* Generator Accounts Tabs */}
         <Card>
