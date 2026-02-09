@@ -116,6 +116,10 @@ const NewDisposalOperation = lazy(() => import("./pages/dashboard/disposal/NewDi
 const DisposalIncomingRequests = lazy(() => import("./pages/dashboard/disposal/DisposalIncomingRequests"));
 const DisposalCertificates = lazy(() => import("./pages/dashboard/disposal/DisposalCertificates"));
 const DisposalReports = lazy(() => import("./pages/dashboard/disposal/DisposalReports"));
+const Gamification = lazy(() => import("./pages/dashboard/Gamification"));
+const IoTSettings = lazy(() => import("./pages/dashboard/IoTSettings"));
+const EInvoice = lazy(() => import("./pages/dashboard/EInvoice"));
+const CustomerPortal = lazy(() => import("./pages/dashboard/CustomerPortal"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -278,6 +282,10 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/disposal/certificates" element={<DisposalCertificates />} />
         <Route path="/dashboard/disposal/certificates/new" element={<DisposalCertificates />} />
         <Route path="/dashboard/disposal/reports" element={<DisposalReports />} />
+        <Route path="/dashboard/gamification" element={<Gamification />} />
+        <Route path="/dashboard/iot-settings" element={<IoTSettings />} />
+        <Route path="/dashboard/e-invoice" element={<EInvoice />} />
+        <Route path="/dashboard/customer-portal" element={<CustomerPortal />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />

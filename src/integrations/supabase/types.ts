@@ -1001,6 +1001,57 @@ export type Database = {
         }
         Relationships: []
       }
+      badges: {
+        Row: {
+          category: string
+          color: string
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          icon: string
+          id: string
+          is_active: boolean
+          name: string
+          name_ar: string
+          points_reward: number
+          rarity: string
+          requirement_type: string
+          requirement_value: number
+        }
+        Insert: {
+          category?: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          name_ar: string
+          points_reward?: number
+          rarity?: string
+          requirement_type: string
+          requirement_value?: number
+        }
+        Update: {
+          category?: string
+          color?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          name_ar?: string
+          points_reward?: number
+          rarity?: string
+          requirement_type?: string
+          requirement_value?: number
+        }
+        Relationships: []
+      }
       biometric_credentials: {
         Row: {
           biometric_type: string
@@ -1990,6 +2041,72 @@ export type Database = {
             foreignKeyName: "customer_conversations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_portal_settings: {
+        Row: {
+          allow_document_download: boolean
+          allow_invoices_view: boolean
+          allow_service_requests: boolean
+          allow_shipment_tracking: boolean
+          created_at: string
+          id: string
+          is_enabled: boolean
+          organization_id: string
+          portal_logo_url: string | null
+          portal_name: string | null
+          primary_color: string | null
+          require_approval_for_requests: boolean
+          updated_at: string
+          welcome_message: string | null
+        }
+        Insert: {
+          allow_document_download?: boolean
+          allow_invoices_view?: boolean
+          allow_service_requests?: boolean
+          allow_shipment_tracking?: boolean
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          organization_id: string
+          portal_logo_url?: string | null
+          portal_name?: string | null
+          primary_color?: string | null
+          require_approval_for_requests?: boolean
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Update: {
+          allow_document_download?: boolean
+          allow_invoices_view?: boolean
+          allow_service_requests?: boolean
+          allow_shipment_tracking?: boolean
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          organization_id?: string
+          portal_logo_url?: string | null
+          portal_name?: string | null
+          primary_color?: string | null
+          require_approval_for_requests?: boolean
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_portal_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "customer_portal_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -3323,6 +3440,142 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e_invoice_settings: {
+        Row: {
+          activity_code: string | null
+          branch_id: string | null
+          client_id: string | null
+          client_secret_encrypted: string | null
+          created_at: string
+          environment: string
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          organization_id: string
+          tax_registration_number: string | null
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity_code?: string | null
+          branch_id?: string | null
+          client_id?: string | null
+          client_secret_encrypted?: string | null
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          organization_id: string
+          tax_registration_number?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity_code?: string | null
+          branch_id?: string | null
+          client_id?: string | null
+          client_secret_encrypted?: string | null
+          created_at?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          organization_id?: string
+          tax_registration_number?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e_invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "e_invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      e_invoice_submissions: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          eta_response: Json | null
+          eta_status: string | null
+          id: string
+          internal_id: string | null
+          invoice_id: string | null
+          last_checked_at: string | null
+          organization_id: string
+          signed_document: Json | null
+          status: string
+          submission_uuid: string | null
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          eta_response?: Json | null
+          eta_status?: string | null
+          id?: string
+          internal_id?: string | null
+          invoice_id?: string | null
+          last_checked_at?: string | null
+          organization_id: string
+          signed_document?: Json | null
+          status?: string
+          submission_uuid?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          eta_response?: Json | null
+          eta_status?: string | null
+          id?: string
+          internal_id?: string | null
+          invoice_id?: string | null
+          last_checked_at?: string | null
+          organization_id?: string
+          signed_document?: Json | null
+          status?: string
+          submission_uuid?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e_invoice_submissions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e_invoice_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "e_invoice_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -4719,6 +4972,267 @@ export type Database = {
           },
           {
             foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iot_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string
+          device_id: string
+          id: string
+          is_acknowledged: boolean
+          message: string
+          organization_id: string
+          reading_id: string | null
+          severity: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string
+          device_id: string
+          id?: string
+          is_acknowledged?: boolean
+          message: string
+          organization_id: string
+          reading_id?: string | null
+          severity?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          device_id?: string
+          id?: string
+          is_acknowledged?: boolean
+          message?: string
+          organization_id?: string
+          reading_id?: string | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iot_alerts_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "iot_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iot_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "iot_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iot_alerts_reading_id_fkey"
+            columns: ["reading_id"]
+            isOneToOne: false
+            referencedRelation: "iot_readings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iot_devices: {
+        Row: {
+          battery_level: number | null
+          config: Json | null
+          created_at: string
+          device_name: string
+          device_serial: string | null
+          device_type: string
+          firmware_version: string | null
+          id: string
+          is_active: boolean
+          last_reading_at: string | null
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          organization_id: string
+          protocol: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          battery_level?: number | null
+          config?: Json | null
+          created_at?: string
+          device_name: string
+          device_serial?: string | null
+          device_type: string
+          firmware_version?: string | null
+          id?: string
+          is_active?: boolean
+          last_reading_at?: string | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          organization_id: string
+          protocol?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          battery_level?: number | null
+          config?: Json | null
+          created_at?: string
+          device_name?: string
+          device_serial?: string | null
+          device_type?: string
+          firmware_version?: string | null
+          id?: string
+          is_active?: boolean
+          last_reading_at?: string | null
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          organization_id?: string
+          protocol?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iot_devices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "iot_devices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iot_readings: {
+        Row: {
+          device_id: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          reading_type: string
+          received_at: string
+          recorded_at: string
+          unit: string
+          value: number
+        }
+        Insert: {
+          device_id: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          reading_type: string
+          received_at?: string
+          recorded_at?: string
+          unit: string
+          value: number
+        }
+        Update: {
+          device_id?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          reading_type?: string
+          received_at?: string
+          recorded_at?: string
+          unit?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iot_readings_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "iot_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iot_readings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "iot_readings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leaderboard_cache: {
+        Row: {
+          badges_count: number
+          id: string
+          level: number
+          organization_id: string | null
+          period_key: string
+          period_type: string
+          rank: number | null
+          total_points: number
+          updated_at: string
+          user_id: string
+          user_name: string | null
+        }
+        Insert: {
+          badges_count?: number
+          id?: string
+          level?: number
+          organization_id?: string | null
+          period_key: string
+          period_type?: string
+          rank?: number | null
+          total_points?: number
+          updated_at?: string
+          user_id: string
+          user_name?: string | null
+        }
+        Update: {
+          badges_count?: number
+          id?: string
+          level?: number
+          organization_id?: string | null
+          period_key?: string
+          period_type?: string
+          rank?: number | null
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboard_cache_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "leaderboard_cache_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -7042,6 +7556,219 @@ export type Database = {
           },
         ]
       }
+      points_transactions: {
+        Row: {
+          action_description: string | null
+          action_type: string
+          created_at: string
+          id: string
+          organization_id: string | null
+          points: number
+          reference_id: string | null
+          reference_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_description?: string | null
+          action_type: string
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          points: number
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_description?: string | null
+          action_type?: string
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          points?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "points_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_access_tokens: {
+        Row: {
+          created_at: string
+          customer_id: string | null
+          email: string | null
+          expires_at: string | null
+          external_partner_id: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          organization_id: string
+          permissions: string[] | null
+          phone: string | null
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id?: string | null
+          email?: string | null
+          expires_at?: string | null
+          external_partner_id?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name: string
+          organization_id: string
+          permissions?: string[] | null
+          phone?: string | null
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string | null
+          email?: string | null
+          expires_at?: string | null
+          external_partner_id?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          organization_id?: string
+          permissions?: string[] | null
+          phone?: string | null
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_access_tokens_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_access_tokens_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_access_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "portal_access_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_service_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          description: string
+          estimated_quantity: number | null
+          handled_by: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          pickup_address: string | null
+          pickup_date: string | null
+          portal_token_id: string | null
+          priority: string
+          request_number: string
+          request_type: string
+          status: string
+          updated_at: string
+          waste_type: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          description: string
+          estimated_quantity?: number | null
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          pickup_address?: string | null
+          pickup_date?: string | null
+          portal_token_id?: string | null
+          priority?: string
+          request_number: string
+          request_type: string
+          status?: string
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string
+          estimated_quantity?: number | null
+          handled_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          pickup_address?: string | null
+          pickup_date?: string | null
+          portal_token_id?: string | null
+          priority?: string
+          request_number?: string
+          request_type?: string
+          status?: string
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_service_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "portal_service_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_service_requests_portal_token_id_fkey"
+            columns: ["portal_token_id"]
+            isOneToOne: false
+            referencedRelation: "portal_access_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_posts: {
         Row: {
           content: string | null
@@ -9131,6 +9858,38 @@ export type Database = {
         }
         Relationships: []
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          is_featured: boolean
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          is_featured?: boolean
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          is_featured?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_organizations: {
         Row: {
           created_at: string
@@ -9214,6 +9973,69 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_points: {
+        Row: {
+          created_at: string
+          current_level: number
+          id: string
+          last_activity_date: string | null
+          level_name: string
+          longest_streak: number
+          organization_id: string | null
+          points_this_month: number
+          points_this_week: number
+          streak_days: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          last_activity_date?: string | null
+          level_name?: string
+          longest_streak?: number
+          organization_id?: string | null
+          points_this_month?: number
+          points_this_week?: number
+          streak_days?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_level?: number
+          id?: string
+          last_activity_date?: string | null
+          level_name?: string
+          longest_streak?: number
+          organization_id?: string | null
+          points_this_month?: number
+          points_this_week?: number
+          streak_days?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_points_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "user_points_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_quick_action_preferences: {
         Row: {
