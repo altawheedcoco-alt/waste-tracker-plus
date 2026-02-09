@@ -146,7 +146,7 @@ const ReceiptDetailsDialog = ({
           <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">رقم الشهادة</p>
+                <p className="text-sm text-muted-foreground">رقم شهادة الاستلام</p>
                 <p className="text-2xl font-bold text-primary">{receipt.receipt_number}</p>
               </div>
               <div className="text-left">
@@ -165,8 +165,10 @@ const ReceiptDetailsDialog = ({
                 <Package className="w-4 h-4 text-primary" />
                 معلومات الشحنة
               </h3>
-              <div className="p-3 rounded-lg bg-muted/50">
-                <p className="font-medium">{receipt.shipment.shipment_number}</p>
+              <div className="p-3 rounded-lg bg-muted/50 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium">{receipt.shipment.shipment_number}</p>
+                </div>
               </div>
             </div>
           )}
@@ -278,6 +280,7 @@ const ReceiptDetailsDialog = ({
         open={themeOpen}
         onOpenChange={setThemeOpen}
         onSelect={handleThemedPrint}
+        documentTitle="شهادة استلام شحنة"
       />
     </Dialog>
   );

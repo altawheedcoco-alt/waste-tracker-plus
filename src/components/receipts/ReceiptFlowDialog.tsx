@@ -390,6 +390,15 @@ const ReceiptFlowDialog = ({
                     <p className="text-muted-foreground">الكمية المصرحة</p>
                     <p className="font-medium">{shipment.quantity} {shipment.unit}</p>
                   </div>
+                  <div>
+                    <p className="text-muted-foreground">تاريخ الإنشاء</p>
+                    <p className="font-medium">
+                      {shipment.created_at ? format(new Date(shipment.created_at), 'dd/MM/yyyy', { locale: ar }) : '-'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm">
                   {shipment.pickup_address && (
                     <div>
                       <p className="text-muted-foreground flex items-center gap-1">
@@ -399,7 +408,36 @@ const ReceiptFlowDialog = ({
                       <p className="font-medium text-xs truncate">{shipment.pickup_address}</p>
                     </div>
                   )}
+                  {shipment.delivery_address && (
+                    <div>
+                      <p className="text-muted-foreground flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        موقع التسليم
+                      </p>
+                      <p className="font-medium text-xs truncate">{shipment.delivery_address}</p>
+                    </div>
+                  )}
                 </div>
+
+                {shipment.driver?.profile?.full_name && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground flex items-center gap-1">
+                      <Truck className="w-3 h-3" />
+                      السائق
+                    </p>
+                    <p className="font-medium">{shipment.driver.profile.full_name}</p>
+                  </div>
+                )}
+
+                {shipment.recycler?.name && (
+                  <div className="text-sm">
+                    <p className="text-muted-foreground flex items-center gap-1">
+                      <Building2 className="w-3 h-3" />
+                      جهة التدوير
+                    </p>
+                    <p className="font-medium">{shipment.recycler.name}</p>
+                  </div>
+                )}
               </div>
 
               {/* Actual Weight */}
