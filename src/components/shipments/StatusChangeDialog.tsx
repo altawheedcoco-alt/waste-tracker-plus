@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
@@ -104,6 +105,16 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: Stat
 
       if (logError) {
         console.error('Error logging status change:', logError);
+      }
+
+      // Auto-create receipt when transporter delivers/receives shipment
+      if (['delivered', 'in_transit'].includes(dbStatus) && organization?.organization_type === 'transporter') {
+        try {
+          await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+        } catch (receiptError) {
+          console.error('Auto receipt creation failed:', receiptError);
+          // Don't block the status change if receipt creation fails
+        }
       }
 
       toast.success(`تم تحديث الحالة إلى "${statusConfig?.labelAr || selectedStatus}"`);
