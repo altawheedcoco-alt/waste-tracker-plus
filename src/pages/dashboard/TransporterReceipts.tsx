@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -27,6 +27,8 @@ import {
   Clock,
   AlertCircle,
   Package,
+  Building2,
+  FolderOpen,
 } from 'lucide-react';
 import ReceiptCard from '@/components/receipts/ReceiptCard';
 import CreateReceiptDialog from '@/components/receipts/CreateReceiptDialog';
@@ -73,6 +75,7 @@ const TransporterReceipts = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedGeneratorId, setSelectedGeneratorId] = useState('all');
 
   useEffect(() => {
     if (organization?.id) {
@@ -112,6 +115,22 @@ const TransporterReceipts = () => {
     }
   };
 
+  // Group generators
+  const generators = useMemo(() => {
+    const map = new Map<string, { id: string; name: string; count: number }>();
+    receipts.forEach(r => {
+      if (r.generator) {
+        const existing = map.get(r.generator.id);
+        if (existing) {
+          existing.count++;
+        } else {
+          map.set(r.generator.id, { id: r.generator.id, name: r.generator.name, count: 1 });
+        }
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  }, [receipts]);
+
   const handleView = (id: string) => {
     const receipt = receipts.find(r => r.id === id);
     if (receipt) {
@@ -128,23 +147,34 @@ const TransporterReceipts = () => {
     }
   };
 
-  const filteredReceipts = receipts.filter(receipt => {
-    const matchesSearch =
-      receipt.receipt_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      receipt.generator?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      receipt.shipment?.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredReceipts = useMemo(() => {
+    return receipts.filter(receipt => {
+      const matchesSearch =
+        receipt.receipt_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        receipt.generator?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        receipt.shipment?.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || receipt.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || receipt.status === statusFilter;
+      const matchesGenerator = selectedGeneratorId === 'all' || receipt.generator?.id === selectedGeneratorId;
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus && matchesGenerator;
+    });
+  }, [receipts, searchQuery, statusFilter, selectedGeneratorId]);
 
-  const stats = {
-    total: receipts.length,
-    pending: receipts.filter(r => r.status === 'pending').length,
-    confirmed: receipts.filter(r => r.status === 'confirmed').length,
-    disputed: receipts.filter(r => r.status === 'disputed').length,
-  };
+  // Stats for selected generator or all
+  const stats = useMemo(() => {
+    const target = selectedGeneratorId === 'all' ? receipts : receipts.filter(r => r.generator?.id === selectedGeneratorId);
+    return {
+      total: target.length,
+      pending: target.filter(r => r.status === 'pending').length,
+      confirmed: target.filter(r => r.status === 'confirmed').length,
+      disputed: target.filter(r => r.status === 'disputed').length,
+    };
+  }, [receipts, selectedGeneratorId]);
+
+  const selectedGeneratorName = selectedGeneratorId === 'all' 
+    ? 'جميع الجهات المولدة' 
+    : generators.find(g => g.id === selectedGeneratorId)?.name || '';
 
   return (
     <DashboardLayout>
@@ -158,7 +188,7 @@ const TransporterReceipts = () => {
               شهادات استلام الشحنات
             </h1>
             <p className="text-muted-foreground">
-              إدارة شهادات استلام الشحنات من الجهات المولدة
+              إدارة شهادات استلام الشحنات مصنفة حسب الجهة المولدة
             </p>
           </div>
           <Button onClick={() => navigate('/dashboard/create-receipt')}>
@@ -167,7 +197,45 @@ const TransporterReceipts = () => {
           </Button>
         </div>
 
-        {/* Stats */}
+        {/* Generator Accounts Tabs */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FolderOpen className="h-5 w-5 text-primary" />
+              حسابات الجهات المولدة
+            </CardTitle>
+            <CardDescription>اختر جهة مولدة لعرض شهاداتها المستقلة</CardDescription>
+          </CardHeader>
+          <CardContent className="pb-4">
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedGeneratorId === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedGeneratorId('all')}
+                className="gap-1"
+              >
+                <Package className="h-3.5 w-3.5" />
+                الكل
+                <Badge variant="secondary" className="mr-1 text-xs">{receipts.length}</Badge>
+              </Button>
+              {generators.map(gen => (
+                <Button
+                  key={gen.id}
+                  variant={selectedGeneratorId === gen.id ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedGeneratorId(gen.id)}
+                  className="gap-1"
+                >
+                  <Building2 className="h-3.5 w-3.5" />
+                  {gen.name}
+                  <Badge variant="secondary" className="mr-1 text-xs">{gen.count}</Badge>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats for selected generator */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
@@ -215,6 +283,26 @@ const TransporterReceipts = () => {
           </Card>
         </div>
 
+        {/* Selected generator header */}
+        {selectedGeneratorId !== 'all' && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold">{selectedGeneratorName}</p>
+                  <p className="text-sm text-muted-foreground">حساب الشهادات المستقل</p>
+                </div>
+              </div>
+              <Badge variant="outline" className="text-lg px-4 py-1">
+                {stats.total} شهادة
+              </Badge>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Filters */}
         <Card>
           <CardContent className="p-4">
@@ -250,7 +338,7 @@ const TransporterReceipts = () => {
         {/* Receipts List */}
         <Card>
           <CardHeader>
-            <CardTitle>قائمة الشهادات</CardTitle>
+            <CardTitle>قائمة الشهادات {selectedGeneratorId !== 'all' ? `- ${selectedGeneratorName}` : ''}</CardTitle>
             <CardDescription>{filteredReceipts.length} شهادة</CardDescription>
           </CardHeader>
           <CardContent>
@@ -263,7 +351,9 @@ const TransporterReceipts = () => {
                 <FileCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-semibold mb-2">لا توجد شهادات</h3>
                 <p className="text-muted-foreground mb-4">
-                  لم يتم إنشاء أي شهادات استلام بعد
+                  {selectedGeneratorId !== 'all' 
+                    ? `لم يتم إصدار شهادات لـ ${selectedGeneratorName} بعد`
+                    : 'لم يتم إنشاء أي شهادات استلام بعد'}
                 </p>
                 <Button onClick={() => navigate('/dashboard/create-receipt')}>
                   <Plus className="h-4 w-4 ml-2" />
@@ -283,7 +373,7 @@ const TransporterReceipts = () => {
                       receipt={receipt}
                       onView={handleView}
                       onPrint={handlePrint}
-                      showGenerator={true}
+                      showGenerator={selectedGeneratorId === 'all'}
                     />
                   </motion.div>
                 ))}
