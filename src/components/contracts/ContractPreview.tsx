@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { ContractTemplate, contractCategoryLabels } from '@/hooks/useContractTemplates';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import PrintThemeSelector from '@/components/print/PrintThemeSelector';
+import { type PrintThemeId } from '@/lib/printThemes';
 
 interface ContractPreviewProps {
   open: boolean;
@@ -48,7 +50,8 @@ const ContractPreview = ({
   saving
 }: ContractPreviewProps) => {
   const printRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, printContent, isExporting } = usePDFExport({
+  const [themeOpen, setThemeOpen] = useState(false);
+  const { exportToPDF, printContent, printWithTheme, isExporting } = usePDFExport({
     filename: `عقد_${contractNumber}`,
     orientation: 'portrait',
     scale: 2
@@ -316,7 +319,7 @@ const ContractPreview = ({
         <DialogFooter className="flex-row gap-2">
           <Button 
             variant="outline" 
-            onClick={() => printContent(printRef.current, printStyles)}
+            onClick={() => setThemeOpen(true)}
             disabled={isExporting}
           >
             <Printer className="w-4 h-4 ml-1" />
@@ -337,6 +340,12 @@ const ContractPreview = ({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      <PrintThemeSelector
+        open={themeOpen}
+        onOpenChange={setThemeOpen}
+        onSelect={(themeId) => printWithTheme(printRef.current, themeId)}
+      />
     </Dialog>
   );
 };

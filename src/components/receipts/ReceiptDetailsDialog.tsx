@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { usePDFExport } from '@/hooks/usePDFExport';
+import PrintThemeSelector from '@/components/print/PrintThemeSelector';
+import { type PrintThemeId } from '@/lib/printThemes';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
@@ -49,6 +52,12 @@ const ReceiptDetailsDialog = ({
 }: ReceiptDetailsDialogProps) => {
   const { profile } = useAuth();
   const [confirming, setConfirming] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
+  const { printWithTheme, exportToPDF, isExporting } = usePDFExport({
+    filename: `receipt-${receipt?.receipt_number || 'doc'}`,
+    orientation: 'portrait',
+  });
 
   if (!receipt) return null;
 
@@ -95,14 +104,21 @@ const ReceiptDetailsDialog = ({
   };
 
   const handlePrint = () => {
-    const printContent = generateReceiptPrintHTML(receipt);
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
+    setThemeOpen(true);
+  };
+
+  const handleThemedPrint = (themeId: PrintThemeId) => {
+    if (printRef.current) {
+      printWithTheme(printRef.current, themeId);
+    } else {
+      // Fallback to legacy print
+      const printContent = generateReceiptPrintHTML(receipt);
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        setTimeout(() => { printWindow.print(); }, 500);
+      }
     }
   };
 
@@ -125,7 +141,7 @@ const ReceiptDetailsDialog = ({
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div ref={printRef} className="space-y-6">
           {/* Receipt Header */}
           <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
             <div className="flex items-center justify-between">
@@ -257,6 +273,12 @@ const ReceiptDetailsDialog = ({
           </div>
         </div>
       </DialogContent>
+
+      <PrintThemeSelector
+        open={themeOpen}
+        onOpenChange={setThemeOpen}
+        onSelect={handleThemedPrint}
+      />
     </Dialog>
   );
 };

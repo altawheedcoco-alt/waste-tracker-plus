@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
+import { generateThemeCSS, getThemeById, type PrintThemeId } from '@/lib/printThemes';
 
 interface UsePDFExportOptions {
   filename?: string;
@@ -142,57 +143,20 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
           });
         }
       } catch (e) {
-        // Skip cross-origin stylesheets
         if (sheet.href) {
           collectedStyles += `@import url("${sheet.href}");\n`;
         }
       }
     });
 
-    const printStyles = `
+    const defaultPrintStyles = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-      
-      @page {
-        size: A4;
-        margin: 10mm;
-      }
-      
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-      
-      body {
-        margin: 0;
-        padding: 0;
-        background: white !important;
-        font-family: 'Cairo', sans-serif !important;
-      }
-      
-      .print-container {
-        width: 100%;
-        max-width: 210mm;
-        margin: 0 auto;
-        padding: 10mm;
-        box-sizing: border-box;
-      }
-      
-      img {
-        max-width: 100%;
-        height: auto;
-      }
-      
-      @media print {
-        body {
-          margin: 0;
-          padding: 0;
-        }
-        
-        .no-print {
-          display: none !important;
-        }
-      }
+      @page { size: A4; margin: 10mm; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+      body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; }
+      .print-container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 10mm; box-sizing: border-box; }
+      img { max-width: 100%; height: auto; }
+      @media print { body { margin: 0; padding: 0; } .no-print { display: none !important; } }
     `;
 
     const content = element.outerHTML;
@@ -203,38 +167,35 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>طباعة الوثيقة</title>
-          <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-          <style>
-            ${collectedStyles}
-            ${styles || printStyles}
-          </style>
+          <style>${collectedStyles}\n${styles || defaultPrintStyles}</style>
         </head>
         <body>
-          <div class="print-container">
-            ${content}
-          </div>
+          <div class="print-container">${content}</div>
         </body>
       </html>
     `);
     printWindow.document.close();
     
-    // Wait for fonts and images to load
-    printWindow.onload = () => {
-      setTimeout(() => {
-        printWindow.print();
-      }, 300);
-    };
-    
-    // Fallback if onload doesn't fire
-    setTimeout(() => {
-      printWindow.print();
-    }, 1000);
+    printWindow.onload = () => { setTimeout(() => { printWindow.print(); }, 300); };
+    setTimeout(() => { printWindow.print(); }, 1000);
   }, []);
+
+  /** Print with a specific theme applied */
+  const printWithTheme = useCallback((element: HTMLElement | null, themeId: PrintThemeId) => {
+    if (!element) {
+      toast.error('لا يوجد محتوى للطباعة');
+      return;
+    }
+    const theme = getThemeById(themeId);
+    const themeCSS = generateThemeCSS(theme);
+    printContent(element, themeCSS);
+  }, [printContent]);
 
   return { 
     exportToPDF, 
     previewPDF, 
     printContent,
+    printWithTheme,
     isExporting 
   };
 };

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,8 @@ import { ContractTemplate, partnerTypeLabels, contractCategoryLabels } from '@/h
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import logoImg from '@/assets/logo.png';
+import PrintThemeSelector from '@/components/print/PrintThemeSelector';
+import { type PrintThemeId } from '@/lib/printThemes';
 
 interface TemplatePreviewDialogProps {
   open: boolean;
@@ -47,7 +49,8 @@ const TemplatePreviewDialog = ({
   onEdit 
 }: TemplatePreviewDialogProps) => {
   const printRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, printContent, isExporting } = usePDFExport({
+  const [themeOpen, setThemeOpen] = useState(false);
+  const { exportToPDF, printWithTheme, isExporting } = usePDFExport({
     filename: template?.name || 'template',
     orientation: 'portrait',
     format: 'a4',
@@ -68,36 +71,7 @@ const TemplatePreviewDialog = ({
   const categoryColor = getCategoryColor();
 
   const handlePrint = () => {
-    printContent(printRef.current, `
-      @page { size: A4; margin: 20mm 15mm; }
-      * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-      body { padding: 0; direction: rtl; background: white; }
-      .print-container { padding: 25px; }
-      .print-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px double #16a34a; padding-bottom: 15px; margin-bottom: 20px; }
-      .print-logo { height: 50px; }
-      .print-title-section { text-align: center; flex: 1; padding: 0 15px; }
-      .print-title { font-size: 22px; font-weight: bold; color: #16a34a; margin-bottom: 6px; }
-      .print-subtitle { font-size: 12px; color: #666; }
-      .print-verification { font-family: monospace; font-size: 11px; color: #16a34a; margin-top: 8px; padding: 4px 10px; background: #f0fdf4; border-radius: 4px; display: inline-block; }
-      .print-qr-section { text-align: center; }
-      .print-barcode-section { text-align: center; }
-      .confidential-banner { text-align: center; background: linear-gradient(135deg, #dc2626, #991b1b); color: white; padding: 8px; font-size: 11px; font-weight: bold; margin: 15px 0; border-radius: 4px; }
-      .section { margin-bottom: 18px; page-break-inside: avoid; }
-      .section-title { font-size: 13px; font-weight: bold; color: #16a34a; margin-bottom: 8px; padding: 8px 14px; background: linear-gradient(90deg, #f0fdf4, #dcfce7); border-right: 4px solid #16a34a; border-radius: 0 4px 4px 0; }
-      .section-content { font-size: 11px; line-height: 1.9; padding: 12px; background: #fafafa; border-radius: 4px; border: 1px solid #e5e7eb; white-space: pre-wrap; text-align: justify; }
-      .badges { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
-      .badge { padding: 5px 14px; border-radius: 20px; font-size: 10px; background: #e5e7eb; }
-      .settings-bar { display: flex; justify-content: center; gap: 20px; padding: 10px; background: #f9fafb; border-radius: 6px; margin-bottom: 15px; }
-      .platform-rights { margin-top: 25px; padding: 15px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #16a34a; border-radius: 8px; text-align: center; }
-      .platform-rights-title { font-size: 12px; font-weight: bold; color: #16a34a; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-      .platform-rights-content { font-size: 10px; color: #374151; line-height: 1.7; }
-      .footer { margin-top: 20px; padding-top: 15px; border-top: 2px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 10px; color: #666; }
-      @media print { 
-        body { padding: 0; } 
-        .print-container { padding: 0; }
-        .section { page-break-inside: avoid; }
-      }
-    `);
+    setThemeOpen(true);
   };
 
   const handleExportPDF = () => {
@@ -373,6 +347,12 @@ const TemplatePreviewDialog = ({
           </div>
         </DialogFooter>
       </DialogContent>
+
+      <PrintThemeSelector
+        open={themeOpen}
+        onOpenChange={setThemeOpen}
+        onSelect={(themeId) => printWithTheme(printRef.current, themeId)}
+      />
     </Dialog>
   );
 };
