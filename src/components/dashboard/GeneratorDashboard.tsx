@@ -5,7 +5,7 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote } from 'lucide-react';
+import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid from './QuickActionsGrid';
@@ -223,7 +223,7 @@ const GeneratorDashboard = () => {
     }
   };
 
-  const handleViewShipment = (shipment: RecentShipment) => {
+  const handlePrintShipment = (shipment: RecentShipment) => {
     setSelectedShipment(shipment);
     setShowPrintDialog(true);
   };
@@ -355,13 +355,34 @@ const GeneratorDashboard = () => {
               <p className="text-muted-foreground">لا توجد شحنات حتى الآن</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {recentShipments.map((shipment) => (
-                <ShipmentCard
-                  key={shipment.id}
-                  shipment={shipment}
-                  onStatusChange={fetchDashboardData}
-                />
+                <div key={shipment.id} className="group relative rounded-lg border border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md overflow-hidden">
+                  <ShipmentCard
+                    shipment={shipment}
+                    onStatusChange={fetchDashboardData}
+                  />
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/40 border-t border-border/30">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 gap-1.5 rounded-full px-3 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
+                      onClick={(e) => { e.stopPropagation(); handlePrintShipment(shipment); }}
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      طباعة
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7 gap-1.5 rounded-full px-3 hover:bg-secondary hover:text-secondary-foreground mr-auto transition-colors"
+                      onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      التفاصيل
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           )}
