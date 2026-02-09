@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { KeyRound, Shield, Trash2, CheckCircle2 } from 'lucide-react';
+import { KeyRound, Shield, Trash2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { useUserPin } from '@/hooks/useUserPin';
 import { recoveryTypeLabels } from '@/hooks/usePagePasswords';
 
@@ -17,6 +17,7 @@ const PinCodeSettings = () => {
   const [setupOpen, setSetupOpen] = useState(false);
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [showPin, setShowPin] = useState(true);
   const [recoveryConfig, setRecoveryConfig] = useState<Record<string, { enabled: boolean; data: Record<string, any> }>>({
     email: { enabled: true, data: {} },
     phone: { enabled: false, data: { phone: '' } },
@@ -117,13 +118,19 @@ const PinCodeSettings = () => {
             </TabsList>
 
             <TabsContent value="pin" className="space-y-4 mt-4">
+              <div className="flex justify-end">
+                <Button variant="ghost" size="sm" onClick={() => setShowPin(!showPin)} className="gap-1 text-xs">
+                  {showPin ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                  {showPin ? 'إخفاء' : 'إظهار'}
+                </Button>
+              </div>
               <div className="space-y-2">
                 <Label>رمز التعريف (6 أرقام)</Label>
                 <Input
-                  type="password"
+                  type={showPin ? 'text' : 'password'}
                   value={pin}
                   onChange={e => handlePinInput(e.target.value, setPin)}
-                  placeholder="● ● ● ● ● ●"
+                  placeholder="أدخل 6 أرقام"
                   className="text-center text-2xl tracking-[0.5em] font-mono"
                   maxLength={6}
                   inputMode="numeric"
@@ -138,10 +145,10 @@ const PinCodeSettings = () => {
               <div className="space-y-2">
                 <Label>تأكيد الرمز</Label>
                 <Input
-                  type="password"
+                  type={showPin ? 'text' : 'password'}
                   value={confirmPin}
                   onChange={e => handlePinInput(e.target.value, setConfirmPin)}
-                  placeholder="● ● ● ● ● ●"
+                  placeholder="أعد إدخال الرمز"
                   className="text-center text-2xl tracking-[0.5em] font-mono"
                   maxLength={6}
                   inputMode="numeric"
