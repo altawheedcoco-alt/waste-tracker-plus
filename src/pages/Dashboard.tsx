@@ -10,6 +10,7 @@ import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import DriverDashboard from '@/components/dashboard/DriverDashboard';
 import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
 import CallLogWidget from '@/components/calls/CallLogWidget';
+import AIOperationsAssistant from '@/components/ai/AIOperationsAssistant';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { Loader2 } from 'lucide-react';
 
@@ -46,6 +47,7 @@ const Dashboard = () => {
 
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
+  const showAIAssistant = isAdmin || organization?.organization_type === 'transporter' || organization?.organization_type === 'recycler';
 
   const renderDashboard = () => {
     // Show admin dashboard for admin users
@@ -88,6 +90,9 @@ const Dashboard = () => {
       
       {/* Call Log Widget */}
       <CallLogWidget />
+      
+      {/* AI Operations Assistant - for transporter, recycler, admin */}
+      {showAIAssistant && <AIOperationsAssistant />}
     </>
   );
 };
