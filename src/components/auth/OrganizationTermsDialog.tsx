@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dialog,
@@ -16,40 +16,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { 
-  FileText, 
-  Shield, 
-  Scale, 
-  CheckCircle,
-  AlertTriangle,
-  Loader2,
-  Factory,
-  Truck,
-  Recycle,
-  Upload,
-  CreditCard,
-  User,
-  Phone,
-  Briefcase,
-  PenTool,
-  ChevronLeft,
-  ChevronRight,
-  Lock,
-  Camera,
-  Check
+  FileText, Shield, Scale, CheckCircle, AlertTriangle, Loader2,
+  Factory, Truck, Recycle, Upload, CreditCard, User, Phone,
+  Briefcase, PenTool, ChevronLeft, ChevronRight, Lock, Camera,
+  Check, ScanLine, Sparkles, Eye, UserCheck, ImagePlus
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
-  getTermsSections,
-  getTermsTitle,
-  getOrganizationTypeLabel,
-  getAgreementText,
-  legalReferences,
-  CURRENT_TERMS_VERSION,
-  OrganizationType
+  getTermsSections, getTermsTitle, getOrganizationTypeLabel,
+  getAgreementText, legalReferences, CURRENT_TERMS_VERSION, OrganizationType
 } from '@/data/organizationTermsContent';
 import { useTermsContent } from '@/hooks/useTermsContent';
 import SignaturePad, { SignaturePadRef } from '@/components/signature/SignaturePad';
+import { useIDVerification, type ExtractedIDData } from '@/hooks/useIDVerification';
+import { processReceiptImage } from '@/lib/imageProcessing';
 
 interface OrganizationTermsDialogProps {
   open: boolean;
@@ -57,26 +38,54 @@ interface OrganizationTermsDialogProps {
   organizationType: OrganizationType;
 }
 
+type Step = 'identity' | 'selfie' | 'terms';
+
 const OrganizationTermsDialog = ({ open, onAccept, organizationType }: OrganizationTermsDialogProps) => {
   const { user, profile, organization } = useAuth();
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [step, setStep] = useState<'identity' | 'terms'>('identity');
+  const [step, setStep] = useState<Step>('identity');
   
   const { data: dbTermsContent, isLoading: isLoadingTerms } = useTermsContent(organizationType);
+  const { isVerifying, frontResult, backResult, faceMatchResult, mergedData, verifyDocument, verifyFaceMatch, reset: resetVerification } = useIDVerification();
   
   const [nationalId, setNationalId] = useState('');
   const [signerPhone, setSignerPhone] = useState('');
   const [signerPosition, setSignerPosition] = useState('');
+  const [signerName, setSignerName] = useState('');
+  const [signerAddress, setSignerAddress] = useState('');
+  const [signerDob, setSignerDob] = useState('');
+  const [signerGender, setSignerGender] = useState('');
+  const [signerReligion, setSignerReligion] = useState('');
+  const [signerMaritalStatus, setSignerMaritalStatus] = useState('');
+  const [signerGovernorate, setSignerGovernorate] = useState('');
+  const [signerIdExpiry, setSignerIdExpiry] = useState('');
+  
   const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [idFrontPreview, setIdFrontPreview] = useState<string | null>(null);
   const [idBackPreview, setIdBackPreview] = useState<string | null>(null);
+  const [idFrontEnhanced, setIdFrontEnhanced] = useState<string | null>(null);
+  const [idBackEnhanced, setIdBackEnhanced] = useState<string | null>(null);
+  const [enhancingFront, setEnhancingFront] = useState(false);
+  const [enhancingBack, setEnhancingBack] = useState(false);
+  const [verifyingFront, setVerifyingFront] = useState(false);
+  const [verifyingBack, setVerifyingBack] = useState(false);
+  
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [verifyingFace, setVerifyingFace] = useState(false);
+  const selfieVideoRef = useRef<HTMLVideoElement>(null);
+  const selfieCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  
   const [uploadingImages, setUploadingImages] = useState(false);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   
   const idFrontInputRef = useRef<HTMLInputElement>(null);
   const idBackInputRef = useRef<HTMLInputElement>(null);
+  const selfieInputRef = useRef<HTMLInputElement>(null);
   const signaturePadRef = useRef<SignaturePadRef>(null);
 
   const termsSections = useMemo(() => {
@@ -115,27 +124,162 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
     }
   };
 
-  const handleFileChange = (type: 'front' | 'back', file: File | null) => {
+  // Enhanced image processing (CamScanner-like)
+  const enhanceImage = async (imageDataUrl: string): Promise<string> => {
+    try {
+      const result = await processReceiptImage(imageDataUrl, {
+        enhanceContrast: true,
+        sharpen: true,
+        denoise: true,
+        whiteBalance: true,
+        binarize: false,
+        edgeDetection: false,
+      });
+      return result.processed;
+    } catch {
+      return imageDataUrl;
+    }
+  };
+
+  const handleFileChange = async (type: 'front' | 'back', file: File | null) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) { toast.error('يرجى اختيار ملف صورة صالح'); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error('حجم الملف يجب أن يكون أقل من 5 ميجابايت'); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error('حجم الملف يجب أن يكون أقل من 10 ميجابايت'); return; }
+    
     const reader = new FileReader();
-    reader.onloadend = () => {
-      if (type === 'front') { setIdFrontFile(file); setIdFrontPreview(reader.result as string); }
-      else { setIdBackFile(file); setIdBackPreview(reader.result as string); }
+    reader.onloadend = async () => {
+      const dataUrl = reader.result as string;
+      
+      if (type === 'front') {
+        setIdFrontFile(file);
+        setIdFrontPreview(dataUrl);
+        setEnhancingFront(true);
+        
+        // Enhance image
+        const enhanced = await enhanceImage(dataUrl);
+        setIdFrontEnhanced(enhanced);
+        setEnhancingFront(false);
+        
+        // Verify with AI
+        setVerifyingFront(true);
+        const result = await verifyDocument(enhanced, 'front');
+        setVerifyingFront(false);
+        
+        if (result?.extracted_data) {
+          autoFillFromExtraction(result.extracted_data);
+        }
+      } else {
+        setIdBackFile(file);
+        setIdBackPreview(dataUrl);
+        setEnhancingBack(true);
+        
+        const enhanced = await enhanceImage(dataUrl);
+        setIdBackEnhanced(enhanced);
+        setEnhancingBack(false);
+        
+        setVerifyingBack(true);
+        const result = await verifyDocument(enhanced, 'back');
+        setVerifyingBack(false);
+        
+        if (result?.extracted_data) {
+          autoFillFromExtraction(result.extracted_data);
+        }
+      }
     };
     reader.readAsDataURL(file);
   };
 
+  const autoFillFromExtraction = (data: ExtractedIDData) => {
+    if (data.national_id && data.national_id.length === 14) setNationalId(data.national_id);
+    if (data.full_name_ar) setSignerName(data.full_name_ar);
+    if (data.address) setSignerAddress(data.address);
+    if (data.date_of_birth) setSignerDob(data.date_of_birth);
+    if (data.gender) setSignerGender(data.gender);
+    if (data.religion) setSignerReligion(data.religion);
+    if (data.marital_status) setSignerMaritalStatus(data.marital_status);
+    if (data.governorate) setSignerGovernorate(data.governorate);
+    if (data.expiry_date) setSignerIdExpiry(data.expiry_date);
+    if (data.job_title) setSignerPosition(prev => prev || data.job_title!);
+  };
+
   const validateNationalId = (id: string) => /^\d{14}$/.test(id);
 
-  const handleProceedToTerms = () => {
+  // Camera for selfie
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } 
+      });
+      if (selfieVideoRef.current) {
+        selfieVideoRef.current.srcObject = stream;
+        selfieVideoRef.current.play();
+      }
+      setCameraStream(stream);
+      setCameraActive(true);
+    } catch {
+      toast.error('لا يمكن الوصول إلى الكاميرا. يرجى السماح بالوصول أو رفع صورة بدلاً من ذلك.');
+    }
+  };
+
+  const stopCamera = useCallback(() => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      setCameraStream(null);
+    }
+    setCameraActive(false);
+  }, [cameraStream]);
+
+  const captureSelfie = () => {
+    if (!selfieVideoRef.current || !selfieCanvasRef.current) return;
+    const video = selfieVideoRef.current;
+    const canvas = selfieCanvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(video, 0, 0);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    setSelfiePreview(dataUrl);
+    
+    // Convert to file
+    canvas.toBlob(blob => {
+      if (blob) setSelfieFile(new File([blob], 'selfie.jpg', { type: 'image/jpeg' }));
+    }, 'image/jpeg', 0.9);
+    
+    stopCamera();
+  };
+
+  const handleSelfieUpload = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('يرجى اختيار صورة صالحة'); return; }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelfiePreview(reader.result as string);
+      setSelfieFile(file);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleVerifyFace = async () => {
+    if (!idFrontPreview || !selfiePreview) return;
+    setVerifyingFace(true);
+    await verifyFaceMatch(idFrontEnhanced || idFrontPreview, selfiePreview);
+    setVerifyingFace(false);
+  };
+
+  const handleProceedToSelfie = () => {
     if (!nationalId.trim()) { toast.error('يرجى إدخال الرقم القومي'); return; }
     if (!validateNationalId(nationalId)) { toast.error('الرقم القومي يجب أن يتكون من 14 رقم'); return; }
     if (!signerPhone.trim()) { toast.error('يرجى إدخال رقم الهاتف'); return; }
     if (!signerPosition.trim()) { toast.error('يرجى إدخال المسمى الوظيفي'); return; }
     if (!idFrontFile) { toast.error('يرجى رفع صورة وجه البطاقة'); return; }
     if (!idBackFile) { toast.error('يرجى رفع صورة ظهر البطاقة'); return; }
+    if (!frontResult?.is_valid_document) { toast.error('لم يتم التحقق من وجه البطاقة بعد'); return; }
+    setStep('selfie');
+  };
+
+  const handleProceedToTerms = () => {
+    if (!selfiePreview) { toast.error('يرجى التقاط صورة شخصية'); return; }
+    if (!faceMatchResult?.faces_match) { toast.error('يرجى التحقق من تطابق الوجه أولاً'); return; }
     setStep('terms');
   };
 
@@ -148,6 +292,14 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
     return publicUrl;
   };
 
+  const uploadDataUrl = async (dataUrl: string, path: string): Promise<string | null> => {
+    try {
+      const blob = await fetch(dataUrl).then(r => r.blob());
+      const file = new File([blob], `${path}.jpg`, { type: 'image/jpeg' });
+      return uploadImage(file, path);
+    } catch { return null; }
+  };
+
   const handleAcceptTerms = async () => {
     if (!agreed) { toast.error('يجب الموافقة على الشروط والأحكام للمتابعة'); return; }
     if (!signatureDataUrl || signaturePadRef.current?.isEmpty()) { toast.error('يرجى التوقيع في خانة التوقيع اليدوي'); return; }
@@ -158,30 +310,46 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
 
     try {
       const timestamp = Date.now();
-      const idFrontUrl = await uploadImage(idFrontFile!, `${organization.id}/${user.id}/id-front-${timestamp}`);
-      const idBackUrl = await uploadImage(idBackFile!, `${organization.id}/${user.id}/id-back-${timestamp}`);
+      const basePath = `${organization.id}/${user.id}`;
+      
+      // Upload enhanced images
+      const frontToUpload = idFrontEnhanced || idFrontPreview!;
+      const backToUpload = idBackEnhanced || idBackPreview!;
+      
+      const [idFrontUrl, idBackUrl, selfieUrl, signatureUrl] = await Promise.all([
+        uploadDataUrl(frontToUpload, `${basePath}/id-front-${timestamp}`),
+        uploadDataUrl(backToUpload, `${basePath}/id-back-${timestamp}`),
+        selfiePreview ? uploadDataUrl(selfiePreview, `${basePath}/selfie-${timestamp}`) : Promise.resolve(null),
+        signatureDataUrl ? uploadDataUrl(signatureDataUrl, `${basePath}/signature-${timestamp}`) : Promise.resolve(null),
+      ]);
+      
       if (!idFrontUrl || !idBackUrl) throw new Error('فشل في رفع صور البطاقة');
       
-      let signatureUrl: string | null = null;
-      if (signatureDataUrl) {
-        const signatureBlob = await fetch(signatureDataUrl).then(r => r.blob());
-        const signatureFile = new File([signatureBlob], 'signature.png', { type: 'image/png' });
-        signatureUrl = await uploadImage(signatureFile, `${organization.id}/${user.id}/signature-${timestamp}`);
-      }
-      
       setUploadingImages(false);
-      const verifiedMatch = profile.full_name?.trim().toLowerCase() === profile.full_name?.trim().toLowerCase();
 
       const { error } = await supabase.from('terms_acceptances').insert({
-        user_id: user.id, organization_id: organization.id, organization_type: organization.organization_type,
-        organization_name: organization.name, full_name: profile.full_name, terms_version: currentTermsVersion,
-        user_agent: navigator.userAgent, signer_national_id: nationalId, signer_phone: signerPhone,
-        signer_position: signerPosition, signer_id_front_url: idFrontUrl, signer_id_back_url: idBackUrl,
-        signer_signature_url: signatureUrl, verified_match: verifiedMatch,
+        user_id: user.id, 
+        organization_id: organization.id, 
+        organization_type: organization.organization_type,
+        organization_name: organization.name, 
+        full_name: signerName || profile.full_name, 
+        terms_version: currentTermsVersion,
+        user_agent: navigator.userAgent, 
+        signer_national_id: nationalId, 
+        signer_phone: signerPhone,
+        signer_position: signerPosition, 
+        signer_id_front_url: idFrontUrl, 
+        signer_id_back_url: idBackUrl,
+        signer_signature_url: signatureUrl, 
+        verified_match: faceMatchResult?.faces_match || false,
       });
       if (error) throw error;
 
-      await supabase.from('profiles').update({ national_id: nationalId, id_card_front_url: idFrontUrl, id_card_back_url: idBackUrl }).eq('id', profile.id);
+      await supabase.from('profiles').update({ 
+        national_id: nationalId, 
+        id_card_front_url: idFrontUrl, 
+        id_card_back_url: idBackUrl 
+      }).eq('id', profile.id);
 
       toast.success('تم تسجيل موافقتك على الشروط والأحكام بنجاح');
       onAccept();
@@ -194,8 +362,16 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
     }
   };
 
-  // Check identity form completion
-  const identityComplete = nationalId.length === 14 && signerPhone.trim() && signerPosition.trim() && idFrontFile && idBackFile;
+  const identityComplete = nationalId.length === 14 && signerPhone.trim() && signerPosition.trim() && idFrontFile && idBackFile && frontResult?.is_valid_document;
+  const selfieComplete = selfiePreview && faceMatchResult?.faces_match;
+
+  const getStepLabel = () => {
+    switch (step) {
+      case 'identity': return 'التحقق من الهوية';
+      case 'selfie': return 'التحقق من الوجه';
+      case 'terms': return termsTitle;
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
@@ -204,11 +380,9 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
-        {/* Compact Header */}
+        {/* Header */}
         <div className={`bg-gradient-to-l ${getOrgColor()} text-white px-6 py-5 relative overflow-hidden`}>
-          {/* Subtle pattern overlay */}
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 80%, white 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-          
           <div className="relative z-10">
             <div className="flex items-center justify-center gap-2.5 mb-3">
               <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
@@ -217,32 +391,35 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
               <DialogTitle className="text-xl font-bold">آي ريسايكل</DialogTitle>
             </div>
             <DialogDescription className="text-white/90 text-center text-sm">
-              {step === 'identity' ? 'التحقق من هوية الموقّع' : termsTitle}
+              {getStepLabel()}
             </DialogDescription>
             
-            {/* Step Indicator */}
-            <div className="flex items-center justify-center gap-3 mt-4">
-              <button
-                onClick={() => step === 'terms' && setStep('identity')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  step === 'identity' 
-                    ? 'bg-white text-gray-800 shadow-md' 
-                    : 'bg-white/20 text-white/90 hover:bg-white/30 cursor-pointer'
-                }`}
-              >
-                {step === 'terms' && <Check className="w-3 h-3" />}
-                <User className="w-3 h-3" />
-                التحقق من الهوية
-              </button>
-              <ChevronLeft className="w-4 h-4 text-white/50" />
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                step === 'terms' 
-                  ? 'bg-white text-gray-800 shadow-md' 
-                  : 'bg-white/10 text-white/50'
-              }`}>
-                <FileText className="w-3 h-3" />
-                الشروط والأحكام
-              </div>
+            {/* 3-Step Indicator */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              {(['identity', 'selfie', 'terms'] as Step[]).map((s, i) => {
+                const labels = ['التحقق من الهوية', 'التحقق من الوجه', 'الشروط والأحكام'];
+                const icons = [<CreditCard key="id" className="w-3 h-3" />, <UserCheck key="face" className="w-3 h-3" />, <FileText key="terms" className="w-3 h-3" />];
+                const isActive = step === s;
+                const isDone = (['identity', 'selfie', 'terms'].indexOf(step) > i);
+                return (
+                  <div key={s} className="flex items-center gap-1.5">
+                    {i > 0 && <ChevronLeft className="w-3 h-3 text-white/30" />}
+                    <button
+                      onClick={() => isDone && setStep(s)}
+                      disabled={!isDone}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
+                        isActive ? 'bg-white text-gray-800 shadow-md' 
+                        : isDone ? 'bg-white/20 text-white/90 hover:bg-white/30 cursor-pointer' 
+                        : 'bg-white/10 text-white/40'
+                      }`}
+                    >
+                      {isDone && <Check className="w-2.5 h-2.5" />}
+                      {icons[i]}
+                      <span className="hidden sm:inline">{labels[i]}</span>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -250,27 +427,200 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
         <AnimatePresence mode="wait">
           {/* ====== IDENTITY STEP ====== */}
           {step === 'identity' && (
-            <motion.div
-              key="identity"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ScrollArea className="h-[52vh] px-6">
+            <motion.div key="identity" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+              <ScrollArea className="h-[50vh] px-6">
                 <div className="py-5 space-y-5" dir="rtl">
                   {/* Info banner */}
                   <div className="flex items-start gap-3 p-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900">
                     <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center shrink-0">
-                      <Lock className="w-4 h-4 text-blue-600" />
+                      <ScanLine className="w-4 h-4 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm text-blue-800 dark:text-blue-200">التحقق من الهوية مطلوب</p>
+                      <p className="font-semibold text-sm text-blue-800 dark:text-blue-200">مسح ذكي للبطاقة الشخصية</p>
                       <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
-                        يرجى إدخال بياناتك الشخصية ورفع صورة البطاقة للتوثيق القانوني
+                        ارفع صور البطاقة وسيتم التحقق واستخراج البيانات تلقائياً بتقنية الذكاء الاصطناعي مع تحسين جودة الصور
                       </p>
                     </div>
                   </div>
+
+                  {/* ID Card Upload with AI Verification */}
+                  <div>
+                    <Label className="text-xs font-medium flex items-center gap-1.5 mb-3">
+                      <Camera className="w-3.5 h-3.5 text-muted-foreground" />
+                      صور البطاقة الشخصية / جواز السفر
+                    </Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* Front */}
+                      <div>
+                        <input ref={idFrontInputRef} type="file" accept="image/*" capture="environment" className="hidden"
+                          onChange={(e) => handleFileChange('front', e.target.files?.[0] || null)} />
+                        <div
+                          onClick={() => !verifyingFront && !enhancingFront && idFrontInputRef.current?.click()}
+                          className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
+                            frontResult?.is_valid_document 
+                              ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
+                              : idFrontPreview 
+                                ? 'border-amber-400 bg-amber-50/50' 
+                                : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
+                          }`}
+                        >
+                          {idFrontPreview ? (
+                            <div className="relative">
+                              <img src={idFrontEnhanced || idFrontPreview} alt="وجه البطاقة" className="w-full h-32 object-cover" />
+                              {(enhancingFront || verifyingFront) && (
+                                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+                                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                                  <span className="text-[10px] text-white font-medium">
+                                    {enhancingFront ? 'تحسين الصورة...' : 'التحقق بالذكاء الاصطناعي...'}
+                                  </span>
+                                </div>
+                              )}
+                              {frontResult?.is_valid_document && !verifyingFront && !enhancingFront && (
+                                <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                  <Check className="w-2.5 h-2.5" /> تم التحقق
+                                </div>
+                              )}
+                              {idFrontEnhanced && !enhancingFront && (
+                                <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                  <Sparkles className="w-2.5 h-2.5" /> محسّنة
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-7 gap-2">
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Upload className="w-5 h-5 text-muted-foreground/50" />
+                              </div>
+                              <p className="text-[11px] text-muted-foreground font-medium">وجه البطاقة</p>
+                              <p className="text-[9px] text-muted-foreground/60">صوّر أو ارفع</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Back */}
+                      <div>
+                        <input ref={idBackInputRef} type="file" accept="image/*" capture="environment" className="hidden"
+                          onChange={(e) => handleFileChange('back', e.target.files?.[0] || null)} />
+                        <div
+                          onClick={() => !verifyingBack && !enhancingBack && idBackInputRef.current?.click()}
+                          className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
+                            backResult?.is_valid_document 
+                              ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
+                              : idBackPreview 
+                                ? 'border-amber-400 bg-amber-50/50' 
+                                : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
+                          }`}
+                        >
+                          {idBackPreview ? (
+                            <div className="relative">
+                              <img src={idBackEnhanced || idBackPreview} alt="ظهر البطاقة" className="w-full h-32 object-cover" />
+                              {(enhancingBack || verifyingBack) && (
+                                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+                                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                                  <span className="text-[10px] text-white font-medium">
+                                    {enhancingBack ? 'تحسين الصورة...' : 'التحقق بالذكاء الاصطناعي...'}
+                                  </span>
+                                </div>
+                              )}
+                              {backResult?.is_valid_document && !verifyingBack && !enhancingBack && (
+                                <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                  <Check className="w-2.5 h-2.5" /> تم التحقق
+                                </div>
+                              )}
+                              {idBackEnhanced && !enhancingBack && (
+                                <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                  <Sparkles className="w-2.5 h-2.5" /> محسّنة
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center py-7 gap-2">
+                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                <Upload className="w-5 h-5 text-muted-foreground/50" />
+                              </div>
+                              <p className="text-[11px] text-muted-foreground font-medium">ظهر البطاقة</p>
+                              <p className="text-[9px] text-muted-foreground/60">صوّر أو ارفع</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* AI verification warnings */}
+                    {frontResult && frontResult.warnings?.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {frontResult.warnings.map((w, i) => (
+                          <p key={i} className="text-[10px] text-amber-600 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3 shrink-0" /> {w}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Auto-filled data from OCR */}
+                  {(frontResult || backResult) && (
+                    <div className="rounded-xl border-2 border-green-200 dark:border-green-900 bg-green-50/50 dark:bg-green-950/20 p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-4 h-4 text-green-600" />
+                        <span className="text-xs font-semibold text-green-800 dark:text-green-200">بيانات مستخرجة بالذكاء الاصطناعي</span>
+                        <Badge variant="outline" className="text-[9px] border-green-300 text-green-700">
+                          ثقة {frontResult?.confidence || backResult?.confidence}%
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {signerName && (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">الاسم الكامل</p>
+                            <p className="text-xs font-semibold">{signerName}</p>
+                          </div>
+                        )}
+                        {signerDob && (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">تاريخ الميلاد</p>
+                            <p className="text-xs font-semibold">{signerDob}</p>
+                          </div>
+                        )}
+                        {signerGender && (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">النوع</p>
+                            <p className="text-xs font-semibold">{signerGender}</p>
+                          </div>
+                        )}
+                        {signerAddress && (
+                          <div className="space-y-0.5 col-span-2">
+                            <p className="text-[10px] text-muted-foreground">العنوان</p>
+                            <p className="text-xs font-semibold">{signerAddress}</p>
+                          </div>
+                        )}
+                        {signerReligion && (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">الديانة</p>
+                            <p className="text-xs font-semibold">{signerReligion}</p>
+                          </div>
+                        )}
+                        {signerMaritalStatus && (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">الحالة الاجتماعية</p>
+                            <p className="text-xs font-semibold">{signerMaritalStatus}</p>
+                          </div>
+                        )}
+                        {signerGovernorate && (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">المحافظة</p>
+                            <p className="text-xs font-semibold">{signerGovernorate}</p>
+                          </div>
+                        )}
+                        {signerIdExpiry && (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-muted-foreground">تاريخ الانتهاء</p>
+                            <p className="text-xs font-semibold">{signerIdExpiry}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Form Fields */}
                   <div className="space-y-4">
@@ -280,119 +630,40 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                           <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
                           الرقم القومي (14 رقم)
                         </Label>
-                        <Input
-                          id="national-id"
-                          value={nationalId}
+                        <Input id="national-id" value={nationalId}
                           onChange={(e) => setNationalId(e.target.value.replace(/\D/g, '').slice(0, 14))}
                           placeholder="أدخل الرقم القومي"
-                          className={`text-left font-mono text-sm h-10 ${
-                            nationalId && validateNationalId(nationalId) ? 'border-green-500 focus-visible:ring-green-500' : ''
-                          }`}
-                          dir="ltr"
-                          maxLength={14}
+                          className={`text-left font-mono text-sm h-10 ${nationalId && validateNationalId(nationalId) ? 'border-green-500 focus-visible:ring-green-500' : ''}`}
+                          dir="ltr" maxLength={14}
                         />
                         {nationalId && !validateNationalId(nationalId) && (
                           <p className="text-[11px] text-destructive">يجب أن يتكون من 14 رقم</p>
                         )}
                       </div>
-                      
                       <div className="space-y-1.5">
                         <Label htmlFor="signer-phone" className="text-xs font-medium flex items-center gap-1.5">
                           <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                           رقم الهاتف
                         </Label>
-                        <Input
-                          id="signer-phone"
-                          value={signerPhone}
+                        <Input id="signer-phone" value={signerPhone}
                           onChange={(e) => setSignerPhone(e.target.value)}
-                          placeholder="أدخل رقم الهاتف"
-                          className="text-left text-sm h-10"
-                          dir="ltr"
+                          placeholder="أدخل رقم الهاتف" className="text-left text-sm h-10" dir="ltr"
                         />
                       </div>
                     </div>
-                    
                     <div className="space-y-1.5">
                       <Label htmlFor="signer-position" className="text-xs font-medium flex items-center gap-1.5">
                         <Briefcase className="w-3.5 h-3.5 text-muted-foreground" />
                         المسمى الوظيفي
                       </Label>
-                      <Input
-                        id="signer-position"
-                        value={signerPosition}
+                      <Input id="signer-position" value={signerPosition}
                         onChange={(e) => setSignerPosition(e.target.value)}
-                        placeholder="مثال: المدير التنفيذي، مدير العمليات"
-                        className="text-sm h-10"
+                        placeholder="مثال: المدير التنفيذي، مدير العمليات" className="text-sm h-10"
                       />
                     </div>
                   </div>
 
-                  {/* ID Card Upload - Improved */}
-                  <div>
-                    <Label className="text-xs font-medium flex items-center gap-1.5 mb-3">
-                      <Camera className="w-3.5 h-3.5 text-muted-foreground" />
-                      صور البطاقة الشخصية
-                    </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Front */}
-                      <div>
-                        <input ref={idFrontInputRef} type="file" accept="image/*" className="hidden"
-                          onChange={(e) => handleFileChange('front', e.target.files?.[0] || null)} />
-                        <div
-                          onClick={() => idFrontInputRef.current?.click()}
-                          className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
-                            idFrontPreview 
-                              ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
-                              : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
-                          }`}
-                        >
-                          {idFrontPreview ? (
-                            <div className="relative">
-                              <img src={idFrontPreview} alt="وجه البطاقة" className="w-full h-28 object-cover" />
-                              <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                <Check className="w-3 h-3 text-white" />
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-6 gap-1.5">
-                              <Upload className="w-6 h-6 text-muted-foreground/50" />
-                              <p className="text-[11px] text-muted-foreground">وجه البطاقة</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Back */}
-                      <div>
-                        <input ref={idBackInputRef} type="file" accept="image/*" className="hidden"
-                          onChange={(e) => handleFileChange('back', e.target.files?.[0] || null)} />
-                        <div
-                          onClick={() => idBackInputRef.current?.click()}
-                          className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
-                            idBackPreview 
-                              ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
-                              : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
-                          }`}
-                        >
-                          {idBackPreview ? (
-                            <div className="relative">
-                              <img src={idBackPreview} alt="ظهر البطاقة" className="w-full h-28 object-cover" />
-                              <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                                <Check className="w-3 h-3 text-white" />
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-6 gap-1.5">
-                              <Upload className="w-6 h-6 text-muted-foreground/50" />
-                              <p className="text-[11px] text-muted-foreground">ظهر البطاقة</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Registered User Info - Compact */}
+                  {/* Registered User Info */}
                   {profile && (
                     <div className="rounded-xl border bg-muted/30 p-3.5">
                       <div className="flex items-center gap-2 mb-2.5">
@@ -414,12 +685,167 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                 </div>
               </ScrollArea>
 
-              {/* Identity Footer */}
               <div className="border-t bg-muted/20 px-6 py-4">
-                <Button
-                  onClick={handleProceedToTerms}
+                <Button onClick={handleProceedToSelfie}
                   className={`w-full gap-2 h-11 text-sm font-semibold bg-gradient-to-l ${getOrgColor()} hover:opacity-90 transition-opacity`}
-                  disabled={!identityComplete}
+                  disabled={!identityComplete || isVerifying}
+                >
+                  {isVerifying ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> جاري التحقق...</>
+                  ) : (
+                    <><span>متابعة للتحقق من الوجه</span><ChevronLeft className="w-4 h-4" /></>
+                  )}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ====== SELFIE STEP ====== */}
+          {step === 'selfie' && (
+            <motion.div key="selfie" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+              <ScrollArea className="h-[50vh] px-6">
+                <div className="py-5 space-y-5" dir="rtl">
+                  <div className="flex items-start gap-3 p-3.5 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900">
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center shrink-0">
+                      <UserCheck className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm text-purple-800 dark:text-purple-200">التحقق من الهوية بالصورة الشخصية</p>
+                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-0.5">
+                        التقط صورة شخصية واضحة لمقارنتها مع صورة البطاقة والتأكد من هويتك
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Camera / Selfie capture */}
+                  <div className="flex flex-col items-center gap-4">
+                    {!selfiePreview ? (
+                      <>
+                        {cameraActive ? (
+                          <div className="relative w-full max-w-sm">
+                            <video ref={selfieVideoRef} autoPlay playsInline muted 
+                              className="w-full rounded-xl border-2 border-purple-300 aspect-[4/3] object-cover" 
+                              style={{ transform: 'scaleX(-1)' }}
+                            />
+                            <canvas ref={selfieCanvasRef} className="hidden" />
+                            <div className="absolute bottom-3 inset-x-0 flex justify-center gap-3">
+                              <Button onClick={captureSelfie} size="lg"
+                                className="rounded-full w-14 h-14 bg-white text-purple-600 hover:bg-purple-50 shadow-lg border-4 border-purple-400"
+                              >
+                                <Camera className="w-6 h-6" />
+                              </Button>
+                              <Button onClick={stopCamera} variant="destructive" size="sm" className="rounded-full">
+                                إلغاء
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center gap-3 py-6">
+                            <div className="w-24 h-24 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
+                              <Camera className="w-10 h-10 text-purple-400" />
+                            </div>
+                            <div className="flex gap-3">
+                              <Button onClick={startCamera} variant="default" className="gap-2 bg-purple-600 hover:bg-purple-700">
+                                <Camera className="w-4 h-4" /> فتح الكاميرا
+                              </Button>
+                              <div>
+                                <input ref={selfieInputRef} type="file" accept="image/*" className="hidden"
+                                  onChange={(e) => handleSelfieUpload(e.target.files?.[0] || null)} />
+                                <Button onClick={() => selfieInputRef.current?.click()} variant="outline" className="gap-2">
+                                  <ImagePlus className="w-4 h-4" /> رفع صورة
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="relative">
+                          <img src={selfiePreview} alt="صورة شخصية" 
+                            className="w-40 h-40 rounded-full object-cover border-4 border-purple-300 shadow-lg" 
+                          />
+                          {faceMatchResult?.faces_match && (
+                            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-lg border-2 border-white">
+                              <Check className="w-5 h-5 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelfiePreview(null); setSelfieFile(null); }}
+                          className="text-xs text-muted-foreground"
+                        >
+                          إعادة التقاط
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Face match button & result */}
+                  {selfiePreview && !faceMatchResult && (
+                    <Button onClick={handleVerifyFace} disabled={verifyingFace}
+                      className="w-full gap-2 bg-purple-600 hover:bg-purple-700 h-11"
+                    >
+                      {verifyingFace ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> جاري مقارنة الوجه...</>
+                      ) : (
+                        <><UserCheck className="w-4 h-4" /> التحقق من تطابق الوجه</>
+                      )}
+                    </Button>
+                  )}
+
+                  {faceMatchResult && (
+                    <div className={`rounded-xl border-2 p-4 text-center ${
+                      faceMatchResult.faces_match 
+                        ? 'border-green-300 bg-green-50 dark:bg-green-950/20' 
+                        : 'border-red-300 bg-red-50 dark:bg-red-950/20'
+                    }`}>
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        {faceMatchResult.faces_match ? (
+                          <><CheckCircle className="w-5 h-5 text-green-600" /><span className="text-sm font-bold text-green-800">تم التحقق - الوجه مطابق ✓</span></>
+                        ) : (
+                          <><AlertTriangle className="w-5 h-5 text-red-600" /><span className="text-sm font-bold text-red-800">الوجه غير مطابق</span></>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">{faceMatchResult.details}</p>
+                      <Badge variant="outline" className="mt-2 text-[10px]">
+                        نسبة التطابق: {faceMatchResult.match_confidence}%
+                      </Badge>
+                      {!faceMatchResult.faces_match && (
+                        <Button variant="outline" size="sm" className="mt-3 text-xs"
+                          onClick={() => { setSelfiePreview(null); setSelfieFile(null); setVerifyingFace(false); }}
+                        >
+                          إعادة المحاولة
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Side by side comparison */}
+                  {selfiePreview && idFrontPreview && (
+                    <div className="flex items-center justify-center gap-4 py-2">
+                      <div className="text-center">
+                        <img src={idFrontEnhanced || idFrontPreview} alt="صورة البطاقة" className="w-20 h-20 rounded-lg object-cover border" />
+                        <p className="text-[10px] text-muted-foreground mt-1">صورة البطاقة</p>
+                      </div>
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <Eye className="w-4 h-4" />
+                      </div>
+                      <div className="text-center">
+                        <img src={selfiePreview} alt="الصورة الشخصية" className="w-20 h-20 rounded-lg object-cover border" />
+                        <p className="text-[10px] text-muted-foreground mt-1">الصورة الشخصية</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+
+              <div className="border-t bg-muted/20 px-6 py-4 flex gap-2.5">
+                <Button variant="outline" onClick={() => { stopCamera(); setStep('identity'); }} className="gap-1.5 text-xs h-10">
+                  <ChevronRight className="w-3.5 h-3.5" /> رجوع
+                </Button>
+                <Button onClick={handleProceedToTerms}
+                  className={`flex-1 gap-2 h-10 text-sm font-semibold bg-gradient-to-l ${getOrgColor()} hover:opacity-90`}
+                  disabled={!selfieComplete}
                 >
                   <span>متابعة للشروط والأحكام</span>
                   <ChevronLeft className="w-4 h-4" />
@@ -430,16 +856,9 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
 
           {/* ====== TERMS STEP ====== */}
           {step === 'terms' && (
-            <motion.div
-              key="terms"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ScrollArea className="h-[48vh] px-6">
+            <motion.div key="terms" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} transition={{ duration: 0.2 }}>
+              <ScrollArea className="h-[44vh] px-6">
                 <div className="py-5 space-y-5" dir="rtl">
-                  {/* Warning banner */}
                   <div className="flex items-start gap-3 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900">
                     <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900 flex items-center justify-center shrink-0">
                       <AlertTriangle className="w-4 h-4 text-amber-600" />
@@ -449,16 +868,9 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                     </p>
                   </div>
 
-                  {/* Terms Sections - Cleaner */}
                   <div className="space-y-4">
                     {termsSections.map((section, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.03 }}
-                        className="group"
-                      >
+                      <motion.div key={index} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }} className="group">
                         <div className="flex items-start gap-2.5 mb-2">
                           <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                             <span className="text-xs font-bold text-primary">{index + 1}</span>
@@ -467,9 +879,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                         </div>
                         <div className="space-y-1.5 pr-8">
                           {section.content.map((paragraph, pIndex) => (
-                            <p key={pIndex} className="text-xs text-muted-foreground leading-relaxed">
-                              {paragraph}
-                            </p>
+                            <p key={pIndex} className="text-xs text-muted-foreground leading-relaxed">{paragraph}</p>
                           ))}
                         </div>
                         {index < termsSections.length - 1 && <Separator className="mt-4" />}
@@ -477,7 +887,6 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                     ))}
                   </div>
 
-                  {/* Legal References */}
                   <div className="rounded-xl border bg-muted/30 p-3.5">
                     <div className="flex items-center gap-2 mb-2.5">
                       <Scale className="w-4 h-4 text-primary" />
@@ -493,7 +902,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                     </div>
                   </div>
 
-                  {/* Signer Summary - Compact card */}
+                  {/* Signer Summary */}
                   {organization && profile && (
                     <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-4">
                       <h4 className="font-semibold text-xs text-center mb-3 flex items-center justify-center gap-1.5">
@@ -507,7 +916,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                         </div>
                         <div className="space-y-0.5">
                           <p className="text-[10px] text-muted-foreground">الاسم</p>
-                          <p className="text-xs font-semibold truncate">{profile.full_name}</p>
+                          <p className="text-xs font-semibold truncate">{signerName || profile.full_name}</p>
                         </div>
                         <div className="space-y-0.5">
                           <p className="text-[10px] text-muted-foreground">المنصب</p>
@@ -526,65 +935,49 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                           <p className="text-xs font-semibold">{new Date().toLocaleDateString('ar-EG')}</p>
                         </div>
                       </div>
-                      
-                      {/* ID Cards mini preview */}
                       <div className="flex items-center justify-center gap-3 mt-3">
-                        {idFrontPreview && <img src={idFrontPreview} alt="وجه" className="h-12 rounded border object-cover" />}
-                        {idBackPreview && <img src={idBackPreview} alt="ظهر" className="h-12 rounded border object-cover" />}
+                        {idFrontPreview && <img src={idFrontEnhanced || idFrontPreview} alt="وجه" className="h-12 rounded border object-cover" />}
+                        {idBackPreview && <img src={idBackEnhanced || idBackPreview} alt="ظهر" className="h-12 rounded border object-cover" />}
+                        {selfiePreview && <img src={selfiePreview} alt="صورة شخصية" className="h-12 w-12 rounded-full border object-cover" />}
                       </div>
+                      {faceMatchResult?.faces_match && (
+                        <div className="flex items-center justify-center gap-1 mt-2 text-green-600">
+                          <CheckCircle className="w-3 h-3" />
+                          <span className="text-[10px] font-medium">تم التحقق من تطابق الوجه ({faceMatchResult.match_confidence}%)</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               </ScrollArea>
 
-              {/* Terms Footer */}
               <div className="border-t bg-muted/20 px-6 py-4 space-y-3">
-                {/* Signature */}
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1.5 text-xs font-semibold">
-                    <PenTool className="w-3.5 h-3.5" />
-                    التوقيع اليدوي
+                    <PenTool className="w-3.5 h-3.5" /> التوقيع اليدوي
                   </Label>
-                  <SignaturePad 
-                    ref={signaturePadRef}
-                    onSignatureChange={setSignatureDataUrl}
-                    width={500}
-                    height={100}
-                  />
+                  <SignaturePad ref={signaturePadRef} onSignatureChange={setSignatureDataUrl} width={500} height={100} />
                 </div>
 
                 <div className="flex items-start gap-2.5">
-                  <Checkbox
-                    id="terms-agree"
-                    checked={agreed}
-                    onCheckedChange={(checked) => setAgreed(checked as boolean)}
-                    className="mt-0.5"
-                  />
+                  <Checkbox id="terms-agree" checked={agreed} onCheckedChange={(checked) => setAgreed(checked as boolean)} className="mt-0.5" />
                   <label htmlFor="terms-agree" className="text-[11px] cursor-pointer leading-relaxed text-muted-foreground">
                     {agreementText}
                   </label>
                 </div>
 
                 <div className="flex gap-2.5">
-                  <Button variant="outline" onClick={() => setStep('identity')} className="gap-1.5 text-xs h-10">
-                    <ChevronRight className="w-3.5 h-3.5" />
-                    رجوع
+                  <Button variant="outline" onClick={() => setStep('selfie')} className="gap-1.5 text-xs h-10">
+                    <ChevronRight className="w-3.5 h-3.5" /> رجوع
                   </Button>
-                  <Button
-                    onClick={handleAcceptTerms}
+                  <Button onClick={handleAcceptTerms}
                     disabled={!agreed || submitting || !signatureDataUrl}
                     className={`flex-1 gap-2 h-10 text-xs font-semibold bg-gradient-to-l ${getOrgColor()} hover:opacity-90`}
                   >
                     {submitting ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        {uploadingImages ? 'جاري رفع الصور...' : 'جاري التسجيل...'}
-                      </>
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" />{uploadingImages ? 'جاري رفع الصور...' : 'جاري التسجيل...'}</>
                     ) : (
-                      <>
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        الموافقة والمتابعة
-                      </>
+                      <><CheckCircle className="w-3.5 h-3.5" />الموافقة والمتابعة</>
                     )}
                   </Button>
                 </div>
