@@ -35,21 +35,21 @@ const FloatingActionsStack = memo(({
   
   if (visibleActions.length === 0) return null;
 
-  // Responsive sizing
-  const buttonSize = isMobile ? 'w-12 h-12' : 'w-14 h-14';
-  const iconSize = isMobile ? 18 : 22;
+  // Responsive sizing - smaller on mobile
+  const buttonSize = isMobile ? 'w-10 h-10' : 'w-14 h-14';
+  const iconSize = isMobile ? 16 : 22;
   const gap = isMobile ? 'gap-2' : 'gap-3';
   
-  // Position classes based on device and position prop
+  // Position classes based on device and position prop - with safe area support
   const getPositionClasses = () => {
     if (position === 'bottom-right') {
       return isMobile 
-        ? 'bottom-4 right-4' 
+        ? 'bottom-[calc(9rem+env(safe-area-inset-bottom))] right-3' 
         : 'bottom-6 right-6';
     }
-    // bottom-left (default) - offset to avoid chat widget
+    // bottom-left (default) - stacked above other widgets
     return isMobile 
-      ? 'bottom-20 left-4' // Above mobile nav/chat
+      ? 'bottom-[calc(9rem+env(safe-area-inset-bottom))] left-3' // Stack above other widgets
       : isTablet 
         ? 'bottom-6 left-20' // Clear of sidebar
         : 'bottom-6 left-24'; // Desktop with sidebar

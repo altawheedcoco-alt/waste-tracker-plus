@@ -104,9 +104,9 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - Responsive positioning */}
       <motion.button
-        className="fixed bottom-24 left-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+        className="fixed bottom-[calc(7rem+env(safe-area-inset-bottom))] sm:bottom-24 left-3 sm:left-6 z-40 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center touch-manipulation"
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -119,7 +119,7 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </motion.div>
           ) : (
             <motion.div
@@ -129,10 +129,10 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
               exit={{ rotate: -90, opacity: 0 }}
               className="relative"
             >
-              <Bot className="h-6 w-6" />
-              <Sparkles className="h-3 w-3 absolute -top-1 -right-1 text-amber-300" />
+              <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
+              <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 absolute -top-1 -right-1 text-amber-300" />
               {messages.length > 0 && (
-                <span className="absolute -top-2 -left-2 w-5 h-5 bg-destructive rounded-full text-xs flex items-center justify-center text-destructive-foreground">
+                <span className="absolute -top-2 -left-2 w-4 h-4 sm:w-5 sm:h-5 bg-destructive rounded-full text-[10px] sm:text-xs flex items-center justify-center text-destructive-foreground">
                   {messages.length}
                 </span>
               )}
@@ -141,14 +141,14 @@ const CustomerAssistantWidget = ({ context }: CustomerAssistantWidgetProps) => {
         </AnimatePresence>
       </motion.button>
 
-      {/* Chat Panel */}
+      {/* Chat Panel - Responsive with full width on mobile */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-44 left-6 z-40 w-[360px] bg-background border rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed bottom-[calc(10rem+env(safe-area-inset-bottom))] sm:bottom-44 left-2 right-2 sm:right-auto sm:left-6 z-40 sm:w-[360px] bg-background border rounded-2xl shadow-2xl overflow-hidden max-h-[60vh] sm:max-h-none"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white p-4">

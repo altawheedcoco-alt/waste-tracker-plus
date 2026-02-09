@@ -1072,3 +1072,99 @@
 .optimize-rendering {
   contain: layout style paint;
 }
+
+/* ========================================
+   Mobile Responsive Fixes - إصلاحات الجوال
+   ======================================== */
+
+/* Prevent horizontal overflow on mobile */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Floating widgets container - stacked layout on mobile */
+@media (max-width: 640px) {
+  /* Ensure proper stacking of floating elements */
+  .floating-widgets-container {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+    position: fixed;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    left: 0.75rem;
+    z-index: 40;
+  }
+
+  /* Smaller touch targets on mobile but still accessible */
+  .floating-widget-btn {
+    @apply w-10 h-10;
+  }
+
+  /* Full-width dialogs on mobile */
+  .floating-dialog {
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    width: auto !important;
+    max-height: 60vh !important;
+  }
+
+  /* Prevent content from being hidden behind floating buttons */
+  main {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Tablet responsive adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .floating-widgets-container {
+    bottom: 1.5rem;
+    left: 1.5rem;
+    gap: 0.75rem;
+  }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-left {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+}
+
+/* Viewport height fix for mobile browsers */
+.h-screen-safe {
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height */
+}
+
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Container max-width on all screen sizes */
+.container-responsive {
+  max-width: 100%;
+  margin: 0 auto;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    max-width: 1280px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
