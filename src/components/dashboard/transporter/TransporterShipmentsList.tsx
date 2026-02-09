@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +44,7 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilte
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Sync external filter
-  useMemo(() => {
+  useEffect(() => {
     if (externalStatusFilter) setActiveStatus(externalStatusFilter);
   }, [externalStatusFilter]);
 
