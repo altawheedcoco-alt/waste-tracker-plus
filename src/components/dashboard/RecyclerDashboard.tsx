@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Recycle, Package, Truck, Clock, CheckCircle2, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import FacilityDashboardHeader from './shared/FacilityDashboardHeader';
 import StatsCardsGrid, { StatCardItem } from './shared/StatsCardsGrid';
 import QuickActionsGrid from './QuickActionsGrid';
@@ -61,12 +61,40 @@ interface RecentShipment {
 
 const RecyclerDashboard = () => {
   const { profile, organization } = useAuth();
+  const queryClient = useQueryClient();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
+
+  // Realtime subscription for shipments
+  useEffect(() => {
+    if (!organization?.id) return;
+
+    const channel = supabase
+      .channel('recycler-shipments-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'shipments',
+          filter: `recycler_id=eq.${organization.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['recycler-dashboard'] });
+          queryClient.invalidateQueries({ queryKey: ['recycler-incoming'] });
+          queryClient.invalidateQueries({ queryKey: ['recycler-awaiting-confirm'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [organization?.id, queryClient]);
 
   // Fetch shipments and stats
   const { data: shipmentData, refetch: fetchDashboardData } = useQuery({
