@@ -49,7 +49,8 @@ const Dashboard = () => {
 
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
-  const showAIAssistant = isAdmin || organization?.organization_type === 'transporter' || organization?.organization_type === 'recycler';
+  const orgType = organization?.organization_type as string | undefined;
+  const showAIAssistant = isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal';
 
   const renderDashboard = () => {
     // Show admin dashboard for admin users
@@ -63,12 +64,16 @@ const Dashboard = () => {
     }
 
     // Show role-specific dashboard for other users
-    switch (organization?.organization_type) {
+    switch (orgType) {
       case 'generator':
         return <GeneratorDashboard />;
       case 'transporter':
         return <TransporterDashboard />;
       case 'recycler':
+        return <RecyclerDashboard />;
+      case 'disposal':
+        // Disposal uses a dedicated page at /dashboard/disposal
+        // but also show recycler-like view here for consistency
         return <RecyclerDashboard />;
       default:
         return <GeneratorDashboard />;
