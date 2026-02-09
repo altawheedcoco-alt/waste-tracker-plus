@@ -23,6 +23,7 @@ export interface VisibilityPermissions {
   canViewEstimatedArrival: boolean;
   canReceiveNotifications: boolean;
   canViewReports: boolean;
+  canViewRecyclerInfo: boolean;
   isLoading: boolean;
   isOwner: boolean;
 }
@@ -38,6 +39,7 @@ const DEFAULT_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> 
   canViewEstimatedArrival: true,
   canReceiveNotifications: true,
   canViewReports: true,
+  canViewRecyclerInfo: true,
 };
 
 const BLOCKED_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> = {
@@ -51,6 +53,7 @@ const BLOCKED_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> 
   canViewEstimatedArrival: false,
   canReceiveNotifications: false,
   canViewReports: false,
+  canViewRecyclerInfo: false,
 };
 
 /**
@@ -113,6 +116,7 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
           canViewEstimatedArrival: settings.can_view_estimated_arrival ?? true,
           canReceiveNotifications: settings.can_receive_notifications ?? true,
           canViewReports: settings.can_view_reports ?? true,
+          canViewRecyclerInfo: settings.can_view_recycler_info ?? true,
         },
         isOwner: false,
       };
@@ -177,6 +181,7 @@ export function useTransporterVisibility(transporterId: string | undefined): Vis
           canViewEstimatedArrival: settings.can_view_estimated_arrival ?? true,
           canReceiveNotifications: settings.can_receive_notifications ?? true,
           canViewReports: settings.can_view_reports ?? true,
+          canViewRecyclerInfo: settings.can_view_recycler_info ?? true,
         },
         isOwner: false,
       };
@@ -247,5 +252,6 @@ export async function checkVisibility(
     canViewEstimatedArrival: settings.can_view_estimated_arrival ?? true,
     canReceiveNotifications: settings.can_receive_notifications ?? true,
     canViewReports: settings.can_view_reports ?? true,
+    canViewRecyclerInfo: settings.can_view_recycler_info ?? true,
   };
 }

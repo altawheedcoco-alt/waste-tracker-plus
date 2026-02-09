@@ -493,7 +493,7 @@ const ShipmentCard = ({
                       />
                     )}
                     {/* Recycler Approval Badge */}
-                    {shipment.recycler_id && (
+                    {shipment.recycler_id && visibility.canViewRecyclerInfo && (
                       <ShipmentApprovalBadge
                         status={shipment.recycler_approval_status}
                         approvalAt={shipment.recycler_approval_at}
@@ -542,10 +542,18 @@ const ShipmentCard = ({
                       <span>{shipment.transporter?.name || '-'}</span>
                       <Truck className="w-4 h-4" />
                     </div>
-                    <div className="flex items-center gap-1 justify-end text-muted-foreground">
-                      <span>{shipment.recycler?.name || '-'}</span>
-                      <Recycle className="w-4 h-4" />
-                    </div>
+                    {visibility.canViewRecyclerInfo && (
+                      <div className="flex items-center gap-1 justify-end text-muted-foreground">
+                        <span>{shipment.recycler?.name || '-'}</span>
+                        <Recycle className="w-4 h-4" />
+                      </div>
+                    )}
+                    {!visibility.canViewRecyclerInfo && !visibility.isOwner && (
+                      <div className="flex items-center gap-1 justify-end text-muted-foreground/50">
+                        <span>مخفي</span>
+                        <Lock className="w-3 h-3" />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground justify-end flex-wrap">

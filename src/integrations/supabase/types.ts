@@ -6486,6 +6486,7 @@ export type Database = {
           can_view_driver_location: boolean
           can_view_estimated_arrival: boolean
           can_view_maps: boolean
+          can_view_recycler_info: boolean
           can_view_reports: boolean
           can_view_routes: boolean
           can_view_shipment_details: boolean
@@ -6504,6 +6505,7 @@ export type Database = {
           can_view_driver_location?: boolean
           can_view_estimated_arrival?: boolean
           can_view_maps?: boolean
+          can_view_recycler_info?: boolean
           can_view_reports?: boolean
           can_view_routes?: boolean
           can_view_shipment_details?: boolean
@@ -6522,6 +6524,7 @@ export type Database = {
           can_view_driver_location?: boolean
           can_view_estimated_arrival?: boolean
           can_view_maps?: boolean
+          can_view_recycler_info?: boolean
           can_view_reports?: boolean
           can_view_routes?: boolean
           can_view_shipment_details?: boolean

@@ -18,6 +18,7 @@ export interface PartnerVisibilitySetting {
   can_view_estimated_arrival: boolean;
   can_receive_notifications: boolean;
   can_view_reports: boolean;
+  can_view_recycler_info: boolean;
   created_at: string;
   updated_at: string;
   created_by: string | null;
@@ -41,6 +42,7 @@ export interface UpdateVisibilityInput {
   can_view_estimated_arrival?: boolean;
   can_receive_notifications?: boolean;
   can_view_reports?: boolean;
+  can_view_recycler_info?: boolean;
 }
 
 export const usePartnerVisibility = () => {
@@ -121,6 +123,7 @@ export const usePartnerVisibility = () => {
             can_view_estimated_arrival: true,
             can_receive_notifications: true,
             can_view_reports: true,
+            can_view_recycler_info: true,
           },
           hasCustomSettings: !!existingSetting,
         };
@@ -157,6 +160,7 @@ export const usePartnerVisibility = () => {
             can_view_estimated_arrival: input.can_view_estimated_arrival,
             can_receive_notifications: input.can_receive_notifications,
             can_view_reports: input.can_view_reports,
+            can_view_recycler_info: input.can_view_recycler_info,
             updated_at: new Date().toISOString(),
           })
           .eq('id', existing.id);
@@ -179,6 +183,7 @@ export const usePartnerVisibility = () => {
             can_view_estimated_arrival: input.can_view_estimated_arrival ?? true,
             can_receive_notifications: input.can_receive_notifications ?? true,
             can_view_reports: input.can_view_reports ?? true,
+            can_view_recycler_info: input.can_view_recycler_info ?? true,
             created_by: profile.id,
           });
 
