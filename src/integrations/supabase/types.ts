@@ -4750,6 +4750,116 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_channels: {
+        Row: {
+          channel_type: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          notify_contract_alerts: boolean | null
+          notify_payment_updates: boolean | null
+          notify_shipment_updates: boolean | null
+          notify_system_alerts: boolean | null
+          organization_id: string | null
+          phone_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          channel_type: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          notify_contract_alerts?: boolean | null
+          notify_payment_updates?: boolean | null
+          notify_shipment_updates?: boolean | null
+          notify_system_alerts?: boolean | null
+          organization_id?: string | null
+          phone_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          channel_type?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          notify_contract_alerts?: boolean | null
+          notify_payment_updates?: boolean | null
+          notify_shipment_updates?: boolean | null
+          notify_system_alerts?: boolean | null
+          organization_id?: string | null
+          phone_number?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_channels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "notification_channels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_delivery_log: {
+        Row: {
+          channel_type: string
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          external_id: string | null
+          id: string
+          notification_id: string | null
+          recipient_phone: string | null
+          recipient_user_id: string | null
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          channel_type: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          notification_id?: string | null
+          recipient_phone?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          channel_type?: string
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          external_id?: string | null
+          id?: string
+          notification_id?: string | null
+          recipient_phone?: string | null
+          recipient_user_id?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_delivery_log_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string | null

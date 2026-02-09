@@ -1,8 +1,18 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, Shield, Clock, BarChart3, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+
+const benefits = [
+  { icon: Shield, text: "متوافق 100% مع القانون المصري" },
+  { icon: Clock, text: "تفعيل فوري خلال دقائق" },
+  { icon: BarChart3, text: "تقارير وتحليلات ذكية" },
+  { icon: Headphones, text: "دعم فني على مدار الساعة" },
+];
 
 const CTA = () => {
+  const navigate = useNavigate();
+
   return (
     <section id="contact" className="py-24 relative overflow-hidden">
       <div className="container px-4">
@@ -32,45 +42,66 @@ const CTA = () => {
           />
 
           {/* Content */}
-          <div className="relative py-16 px-8 md:py-20 md:px-16 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white font-medium text-sm mb-6">
-                <Sparkles className="w-4 h-4" />
-                ابدأ رحلتك معنا
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                انضم إلى مئات الشركات في مصر
-                <br />
-                التي تثق في حلولنا لإدارة النفايات
-              </h2>
-              
-              <p className="text-white/80 text-lg max-w-2xl mx-auto mb-10">
-                سجل شركتك الآن واحصل على نظام متوافق مع متطلبات جهاز تنظيم إدارة المخلفات المصري
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button
-                  size="xl"
-                  className="bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl group"
-                >
-                  تسجيل شركة جديدة
-                  <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                </Button>
-                <Button
-                  size="xl"
-                  variant="outline"
-                  className="border-2 border-white text-white hover:bg-white/10 bg-transparent"
-                >
-                  تسجيل الدخول
-                </Button>
-              </div>
-            </motion.div>
+          <div className="relative py-16 px-8 md:py-20 md:px-16">
+            <div className="max-w-4xl mx-auto text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white font-medium text-sm mb-6">
+                  <Sparkles className="w-4 h-4" />
+                  ابدأ رحلتك معنا
+                </div>
+                
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+                  انضم إلى مئات الشركات في مصر
+                  <br />
+                  التي تثق في حلولنا لإدارة المخلفات
+                </h2>
+                
+                <p className="text-white/80 text-lg max-w-2xl mx-auto mb-8">
+                  سجل شركتك الآن واحصل على نظام متوافق مع متطلبات جهاز تنظيم إدارة المخلفات المصري
+                </p>
+
+                {/* Benefits Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+                  {benefits.map((benefit, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                      className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/10 backdrop-blur-sm"
+                    >
+                      <benefit.icon className="w-5 h-5 text-white" />
+                      <span className="text-white/90 text-xs font-medium">{benefit.text}</span>
+                    </motion.div>
+                  ))}
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <Button
+                    size="xl"
+                    className="bg-white text-primary hover:bg-white/90 shadow-lg hover:shadow-xl group"
+                    onClick={() => navigate('/auth?mode=register')}
+                  >
+                    تسجيل شركة جديدة
+                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                  </Button>
+                  <Button
+                    size="xl"
+                    variant="outline"
+                    className="border-2 border-white text-white hover:bg-white/10 bg-transparent"
+                    onClick={() => navigate('/auth?mode=login')}
+                  >
+                    تسجيل الدخول
+                  </Button>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </motion.div>
       </div>
