@@ -482,22 +482,31 @@ export const wasteTypeLabels: Record<string, string> = {
 };
 
 // Waste type labels specific to disposal facilities (التخلص النهائي)
+// جهة التخلص النهائي هي جهة مستقبلة لكل أنواع المخلفات (خطرة وغير خطرة) حسب ترخيصها
 export const disposalWasteTypeLabels: Record<string, string> = {
-  hazardous_solid: 'مخلفات خطرة صلبة',
-  hazardous_liquid: 'مخلفات خطرة سائلة',
-  medical: 'مخلفات طبية ورعاية صحية',
+  // === المخلفات الخطرة ===
   chemical: 'مخلفات كيميائية',
+  electronic: 'مخلفات إلكترونية',
+  medical: 'مخلفات طبية ورعاية صحية',
+  industrial: 'مخلفات صناعية خطرة',
   pharmaceutical: 'مخلفات دوائية',
   sludge: 'حمأة صناعية',
-  incineration_ash: 'رماد حرق',
-  contaminated_soil: 'تربة ملوثة',
-  industrial_non_recyclable: 'مخلفات صناعية غير قابلة للتدوير',
   asbestos: 'مخلفات أسبستوس',
   radioactive: 'مخلفات مشعة',
   petroleum: 'مخلفات بترولية',
+  contaminated_soil: 'تربة ملوثة',
+  incineration_ash: 'رماد حرق',
+  hazardous_solid: 'مخلفات خطرة صلبة',
+  hazardous_liquid: 'مخلفات خطرة سائلة',
+  // === المخلفات غير الخطرة ===
+  plastic: 'بلاستيك',
+  paper: 'ورق وكرتون',
+  metal: 'معادن',
+  glass: 'زجاج',
+  organic: 'مخلفات عضوية وأخشاب',
+  construction: 'مخلفات بناء وهدم',
   expired_products: 'منتجات منتهية الصلاحية',
-  electronic_hazardous: 'مخلفات إلكترونية خطرة',
-  other_non_recyclable: 'مخلفات أخرى غير قابلة للتدوير',
+  other: 'مخلفات أخرى',
 };
 
 // Disposal methods (طرق التخلص النهائي)
