@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import StoryCircles from '@/components/stories/StoryCircles';
 import { Recycle, Package, Truck, Clock, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -150,6 +151,7 @@ const RecyclerDashboard = () => {
 
   return (
     <div className="space-y-6">
+      <StoryCircles />
       <FacilityDashboardHeader
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
