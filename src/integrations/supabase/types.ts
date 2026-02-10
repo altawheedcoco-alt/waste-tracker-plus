@@ -2601,8 +2601,13 @@ export type Database = {
         Row: {
           accepted_hazard_levels: string[] | null
           accepted_waste_types: string[] | null
+          activity_specific_license_expiry: string | null
+          activity_specific_license_number: string | null
+          activity_specific_license_type: string | null
+          activity_specific_license_url: string | null
           address: string | null
           city: string | null
+          commercial_register_number: string | null
           contact_person: string | null
           contact_position: string | null
           created_at: string
@@ -2611,11 +2616,17 @@ export type Database = {
           current_fill_percentage: number | null
           daily_capacity_tons: number | null
           eeaa_rating: string | null
+          eia_permit_expiry: string | null
+          eia_permit_number: string | null
+          eia_permit_url: string | null
           email: string | null
           environmental_license_url: string | null
           facility_type: string
           google_maps_url: string | null
           governorate: string | null
+          hazardous_license_expiry: string | null
+          hazardous_license_number: string | null
+          hazardous_license_url: string | null
           id: string
           inspection_result: string | null
           is_verified: boolean | null
@@ -2631,6 +2642,9 @@ export type Database = {
           name_en: string | null
           notes: string | null
           operating_hours: Json | null
+          operation_license_expiry: string | null
+          operation_license_number: string | null
+          operation_license_url: string | null
           organization_id: string | null
           phone: string | null
           phone_secondary: string | null
@@ -2639,17 +2653,26 @@ export type Database = {
           pricing_notes: string | null
           rejected_waste_types: string[] | null
           status: string | null
+          tax_card_number: string | null
           total_capacity_tons: number | null
           updated_at: string
           verified_at: string | null
           verified_by: string | null
           website: string | null
+          wmra_license_expiry: string | null
+          wmra_license_number: string | null
+          wmra_license_url: string | null
         }
         Insert: {
           accepted_hazard_levels?: string[] | null
           accepted_waste_types?: string[] | null
+          activity_specific_license_expiry?: string | null
+          activity_specific_license_number?: string | null
+          activity_specific_license_type?: string | null
+          activity_specific_license_url?: string | null
           address?: string | null
           city?: string | null
+          commercial_register_number?: string | null
           contact_person?: string | null
           contact_position?: string | null
           created_at?: string
@@ -2658,11 +2681,17 @@ export type Database = {
           current_fill_percentage?: number | null
           daily_capacity_tons?: number | null
           eeaa_rating?: string | null
+          eia_permit_expiry?: string | null
+          eia_permit_number?: string | null
+          eia_permit_url?: string | null
           email?: string | null
           environmental_license_url?: string | null
           facility_type?: string
           google_maps_url?: string | null
           governorate?: string | null
+          hazardous_license_expiry?: string | null
+          hazardous_license_number?: string | null
+          hazardous_license_url?: string | null
           id?: string
           inspection_result?: string | null
           is_verified?: boolean | null
@@ -2678,6 +2707,9 @@ export type Database = {
           name_en?: string | null
           notes?: string | null
           operating_hours?: Json | null
+          operation_license_expiry?: string | null
+          operation_license_number?: string | null
+          operation_license_url?: string | null
           organization_id?: string | null
           phone?: string | null
           phone_secondary?: string | null
@@ -2686,17 +2718,26 @@ export type Database = {
           pricing_notes?: string | null
           rejected_waste_types?: string[] | null
           status?: string | null
+          tax_card_number?: string | null
           total_capacity_tons?: number | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
           website?: string | null
+          wmra_license_expiry?: string | null
+          wmra_license_number?: string | null
+          wmra_license_url?: string | null
         }
         Update: {
           accepted_hazard_levels?: string[] | null
           accepted_waste_types?: string[] | null
+          activity_specific_license_expiry?: string | null
+          activity_specific_license_number?: string | null
+          activity_specific_license_type?: string | null
+          activity_specific_license_url?: string | null
           address?: string | null
           city?: string | null
+          commercial_register_number?: string | null
           contact_person?: string | null
           contact_position?: string | null
           created_at?: string
@@ -2705,11 +2746,17 @@ export type Database = {
           current_fill_percentage?: number | null
           daily_capacity_tons?: number | null
           eeaa_rating?: string | null
+          eia_permit_expiry?: string | null
+          eia_permit_number?: string | null
+          eia_permit_url?: string | null
           email?: string | null
           environmental_license_url?: string | null
           facility_type?: string
           google_maps_url?: string | null
           governorate?: string | null
+          hazardous_license_expiry?: string | null
+          hazardous_license_number?: string | null
+          hazardous_license_url?: string | null
           id?: string
           inspection_result?: string | null
           is_verified?: boolean | null
@@ -2725,6 +2772,9 @@ export type Database = {
           name_en?: string | null
           notes?: string | null
           operating_hours?: Json | null
+          operation_license_expiry?: string | null
+          operation_license_number?: string | null
+          operation_license_url?: string | null
           organization_id?: string | null
           phone?: string | null
           phone_secondary?: string | null
@@ -2733,11 +2783,15 @@ export type Database = {
           pricing_notes?: string | null
           rejected_waste_types?: string[] | null
           status?: string | null
+          tax_card_number?: string | null
           total_capacity_tons?: number | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
           website?: string | null
+          wmra_license_expiry?: string | null
+          wmra_license_number?: string | null
+          wmra_license_url?: string | null
         }
         Relationships: [
           {

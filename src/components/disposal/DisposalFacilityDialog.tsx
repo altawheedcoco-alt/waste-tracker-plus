@@ -72,6 +72,25 @@ interface DisposalFacility {
   status: string;
   is_verified: boolean;
   notes?: string;
+  // التراخيص القانونية
+  wmra_license_number?: string;
+  wmra_license_expiry?: string;
+  wmra_license_url?: string;
+  eia_permit_number?: string;
+  eia_permit_expiry?: string;
+  eia_permit_url?: string;
+  operation_license_number?: string;
+  operation_license_expiry?: string;
+  operation_license_url?: string;
+  hazardous_license_number?: string;
+  hazardous_license_expiry?: string;
+  hazardous_license_url?: string;
+  commercial_register_number?: string;
+  tax_card_number?: string;
+  activity_specific_license_number?: string;
+  activity_specific_license_type?: string;
+  activity_specific_license_expiry?: string;
+  activity_specific_license_url?: string;
 }
 
 interface DisposalFacilityDialogProps {
@@ -117,6 +136,55 @@ const hazardLabels: Record<string, string> = {
   highly_hazardous: 'شديدة الخطورة',
   infectious: 'معدية',
 };
+
+// مكون عرض ترخيص واحد
+function LicenseBlock({ number, title, authority, licenseNumber, expiry, url }: {
+  number: number;
+  title: string;
+  authority: string;
+  licenseNumber?: string;
+  expiry?: string;
+  url?: string;
+}) {
+  const isExpired = expiry ? new Date(expiry) < new Date() : false;
+  const isExpiringSoon = expiry ? new Date(expiry) < new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) : false;
+
+  return (
+    <div className={cn(
+      "border rounded-lg p-4 space-y-2",
+      isExpired && "border-destructive/50 bg-destructive/5",
+      !isExpired && isExpiringSoon && "border-amber-400/50 bg-amber-50/50 dark:bg-amber-950/10"
+    )}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs font-mono">ترخيص رقم {number}</Badge>
+          <h4 className="font-semibold text-sm">{title}</h4>
+        </div>
+        {isExpired && <Badge variant="destructive" className="text-xs">منتهي</Badge>}
+        {!isExpired && isExpiringSoon && <Badge className="bg-amber-100 text-amber-700 text-xs">قارب الانتهاء</Badge>}
+      </div>
+      <p className="text-xs text-muted-foreground">{authority}</p>
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <span className="text-muted-foreground">الرقم: </span>
+          <span className="font-mono">{licenseNumber || '—'}</span>
+        </div>
+        <div>
+          <span className="text-muted-foreground">ينتهي: </span>
+          <span className={cn(isExpired && "text-destructive font-medium")}>
+            {expiry ? new Date(expiry).toLocaleDateString('ar-EG') : '—'}
+          </span>
+        </div>
+      </div>
+      {url && (
+        <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary hover:underline">
+          <ExternalLink className="w-3 h-3" />
+          عرض المرفق
+        </a>
+      )}
+    </div>
+  );
+}
 
 export default function DisposalFacilityDialog({
   facility,
@@ -168,8 +236,9 @@ export default function DisposalFacilityDialog({
           <Tabs defaultValue="info" className="w-full">
             <TabsList className="w-full">
               <TabsTrigger value="info" className="flex-1">المعلومات</TabsTrigger>
+              <TabsTrigger value="licenses" className="flex-1">التراخيص</TabsTrigger>
               <TabsTrigger value="capacity" className="flex-1">السعة والأسعار</TabsTrigger>
-              <TabsTrigger value="waste" className="flex-1">أنواع المخلفات</TabsTrigger>
+              <TabsTrigger value="waste" className="flex-1">المخلفات</TabsTrigger>
             </TabsList>
 
             <TabsContent value="info" className="space-y-4 mt-4">
@@ -245,42 +314,6 @@ export default function DisposalFacilityDialog({
                 </div>
               </div>
 
-              <Separator />
-
-              {/* License Info */}
-              <div className="space-y-3">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <FileCheck className="w-4 h-4" />
-                  التراخيص والاعتماد
-                </h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  {facility.license_number && (
-                    <div>
-                      <span className="text-muted-foreground">رقم الترخيص:</span>
-                      <span className="font-mono mr-2">{facility.license_number}</span>
-                    </div>
-                  )}
-                  {facility.license_authority && (
-                    <div>
-                      <span className="text-muted-foreground">جهة الترخيص:</span>
-                      <span className="mr-2">{facility.license_authority}</span>
-                    </div>
-                  )}
-                  {facility.iso_certification && (
-                    <div>
-                      <span className="text-muted-foreground">شهادة ISO:</span>
-                      <span className="mr-2">{facility.iso_certification}</span>
-                    </div>
-                  )}
-                  {facility.eeaa_rating && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">تقييم جهاز البيئة:</span>
-                      <Badge variant="outline">{facility.eeaa_rating}</Badge>
-                    </div>
-                  )}
-                </div>
-              </div>
-
               {facility.notes && (
                 <>
                   <Separator />
@@ -289,6 +322,108 @@ export default function DisposalFacilityDialog({
                     <p className="text-sm text-muted-foreground">{facility.notes}</p>
                   </div>
                 </>
+              )}
+            </TabsContent>
+
+            {/* التراخيص القانونية */}
+            <TabsContent value="licenses" className="space-y-4 mt-4">
+              {/* ترخيص رقم 1 */}
+              <LicenseBlock
+                number={1}
+                title="ترخيص مزاولة نشاط إدارة المخلفات"
+                authority="جهاز تنظيم إدارة المخلفات (WMRA)"
+                licenseNumber={facility.wmra_license_number}
+                expiry={facility.wmra_license_expiry}
+                url={facility.wmra_license_url}
+              />
+              {/* ترخيص رقم 2 */}
+              <LicenseBlock
+                number={2}
+                title="التصريح البيئي (تقييم الأثر البيئي)"
+                authority="جهاز شؤون البيئة (EEAA)"
+                licenseNumber={facility.eia_permit_number}
+                expiry={facility.eia_permit_expiry}
+                url={facility.eia_permit_url}
+              />
+              {/* ترخيص رقم 3 */}
+              <LicenseBlock
+                number={3}
+                title="ترخيص تشغيل المنشأة"
+                authority="المحافظة / الهيئة المحلية"
+                licenseNumber={facility.operation_license_number}
+                expiry={facility.operation_license_expiry}
+                url={facility.operation_license_url}
+              />
+              {/* ترخيص رقم 4 */}
+              <LicenseBlock
+                number={4}
+                title="ترخيص استقبال المخلفات الخطرة"
+                authority="جهاز تنظيم إدارة المخلفات"
+                licenseNumber={facility.hazardous_license_number}
+                expiry={facility.hazardous_license_expiry}
+                url={facility.hazardous_license_url}
+              />
+              {/* ترخيص رقم 5 */}
+              <div className="border rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs font-mono">ترخيص رقم 5</Badge>
+                  <h4 className="font-semibold text-sm">السجل التجاري والبطاقة الضريبية</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">السجل التجاري: </span>
+                    <span className="font-mono">{facility.commercial_register_number || '—'}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">البطاقة الضريبية: </span>
+                    <span className="font-mono">{facility.tax_card_number || '—'}</span>
+                  </div>
+                </div>
+              </div>
+              {/* ترخيص رقم 6 */}
+              <LicenseBlock
+                number={6}
+                title={`ترخيص نشاط متخصص${facility.activity_specific_license_type ? ` (${facility.activity_specific_license_type})` : ''}`}
+                authority="حسب نوع النشاط (محرقة / مدفن / معالجة)"
+                licenseNumber={facility.activity_specific_license_number}
+                expiry={facility.activity_specific_license_expiry}
+                url={facility.activity_specific_license_url}
+              />
+
+              {/* Legacy fields */}
+              {(facility.iso_certification || facility.eeaa_rating || facility.license_number) && (
+                <div className="border rounded-lg p-4 space-y-2 bg-muted/30">
+                  <h4 className="font-semibold text-sm flex items-center gap-2">
+                    <Star className="w-4 h-4" />
+                    اعتمادات إضافية
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    {facility.license_number && (
+                      <div>
+                        <span className="text-muted-foreground">رقم الترخيص العام: </span>
+                        <span className="font-mono">{facility.license_number}</span>
+                      </div>
+                    )}
+                    {facility.license_authority && (
+                      <div>
+                        <span className="text-muted-foreground">جهة الترخيص: </span>
+                        <span>{facility.license_authority}</span>
+                      </div>
+                    )}
+                    {facility.iso_certification && (
+                      <div>
+                        <span className="text-muted-foreground">شهادة ISO: </span>
+                        <span>{facility.iso_certification}</span>
+                      </div>
+                    )}
+                    {facility.eeaa_rating && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-muted-foreground">تقييم جهاز البيئة: </span>
+                        <Badge variant="outline">{facility.eeaa_rating}</Badge>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </TabsContent>
 
