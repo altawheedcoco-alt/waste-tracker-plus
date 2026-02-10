@@ -50,7 +50,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: Stat
   const [loading, setLoading] = useState(false);
 
   const currentStatusConfig = getStatusConfig(shipment.status);
-  const organizationType = organization?.organization_type || 'generator';
+  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
   const availableStatuses = getAvailableNextStatuses(shipment.status, organizationType);
   const canChange = canChangeStatus(shipment.status, organizationType);
 
@@ -135,8 +135,10 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: Stat
     onClose();
   };
 
-  const getPhaseLabel = (phase: 'transporter' | 'recycler') => {
-    return phase === 'transporter' ? 'مرحلة النقل' : 'مرحلة التدوير';
+  const getPhaseLabel = (phase: 'transporter' | 'recycler' | 'disposal') => {
+    if (phase === 'transporter') return 'مرحلة النقل';
+    if (phase === 'disposal') return 'مرحلة التخلص النهائي';
+    return 'مرحلة التدوير';
   };
 
   const renderStatusButton = (status: StatusConfig, isAvailable: boolean) => {
@@ -219,16 +221,18 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: Stat
             <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground">
               <AlertCircle className="w-4 h-4" />
               <span>
-                أنت تعمل كـ <strong>{organizationType === 'transporter' ? 'جهة نقل' : organizationType === 'recycler' ? 'جهة تدوير' : 'جهة مولدة'}</strong>
+                أنت تعمل كـ <strong>{organizationType === 'transporter' ? 'جهة نقل' : organizationType === 'recycler' ? 'جهة تدوير' : organizationType === 'disposal' ? 'جهة تخلص نهائي' : 'جهة مولدة'}</strong>
               </span>
             </div>
             {!canChange && (
               <p className="text-sm text-muted-foreground mt-2">
                 {organizationType === 'generator' 
                   ? 'الجهات المولدة لا يمكنها تغيير حالات الشحنات'
-                  : organizationType === 'transporter' && currentStatusConfig?.phase === 'recycler'
-                  ? 'هذه الشحنة في مرحلة التدوير - فقط جهة التدوير يمكنها تغيير الحالة'
+                  : organizationType === 'transporter' && (currentStatusConfig?.phase === 'recycler' || currentStatusConfig?.phase === 'disposal')
+                  ? 'هذه الشحنة في مرحلة الوجهة - فقط جهة الاستلام يمكنها تغيير الحالة'
                   : organizationType === 'recycler' && currentStatusConfig?.phase === 'transporter'
+                  ? 'هذه الشحنة في مرحلة النقل - فقط جهة النقل يمكنها تغيير الحالة'
+                  : organizationType === 'disposal' && currentStatusConfig?.phase === 'transporter'
                   ? 'هذه الشحنة في مرحلة النقل - فقط جهة النقل يمكنها تغيير الحالة'
                   : 'لا توجد حالات متاحة للتغيير'
                 }
