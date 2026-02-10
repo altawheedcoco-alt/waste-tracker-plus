@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { calculateHaversineDistance } from '@/lib/mapUtils';
 import { TrackingMode, TrackingState, GeofenceZone } from '@/types/tracking';
+import { getTabChannelName } from '@/lib/tabSession';
 
 interface UseRealtimeTrackingOptions {
   shipmentId: string;
@@ -209,7 +210,7 @@ export const useRealtimeTracking = ({
     if (!enabled || !driverId) return;
 
     const channel = supabase
-      .channel(`realtime-tracking-${shipmentId}`)
+      .channel(getTabChannelName(`realtime-tracking-${shipmentId}`))
       .on(
         'postgres_changes',
         {

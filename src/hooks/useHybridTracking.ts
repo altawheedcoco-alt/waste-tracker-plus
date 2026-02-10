@@ -9,6 +9,7 @@ import {
   GPSDevice 
 } from '@/types/gpsTracking';
 import { toast } from 'sonner';
+import { getTabChannelName } from '@/lib/tabSession';
 
 interface UseHybridTrackingOptions {
   shipmentId: string;
@@ -119,7 +120,7 @@ export const useHybridTracking = ({
     if (!enabled || !config?.gps_device_id) return;
 
     const channel = supabase
-      .channel(`gps-location-${config.gps_device_id}`)
+      .channel(getTabChannelName(`gps-location-${config.gps_device_id}`))
       .on(
         'postgres_changes',
         {
@@ -153,7 +154,7 @@ export const useHybridTracking = ({
     if (!enabled || !driverId) return;
 
     const channel = supabase
-      .channel(`driver-location-${driverId}`)
+      .channel(getTabChannelName(`driver-location-${driverId}`))
       .on(
         'postgres_changes',
         {
