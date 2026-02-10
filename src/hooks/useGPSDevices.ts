@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { getTabChannelName } from '@/lib/tabSession';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { GPSDevice, GPSDeviceType } from '@/types/gpsTracking';
@@ -163,7 +164,7 @@ export const useGPSDevices = () => {
     if (!profile?.organization_id) return;
 
     const channel = supabase
-      .channel('gps-devices-changes')
+      .channel(getTabChannelName('gps-devices-changes'))
       .on(
         'postgres_changes',
         {
