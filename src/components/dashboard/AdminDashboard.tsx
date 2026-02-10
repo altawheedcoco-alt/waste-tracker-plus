@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
+import StoryCircles from '@/components/stories/StoryCircles';
 // ChatWidget is now global in App.tsx
 import SmartRequestDialog from './SmartRequestDialog';
 import AdminDashboardSwitcher from './admin/AdminDashboardSwitcher';
@@ -243,6 +244,11 @@ const AdminDashboard = () => {
       animate="visible"
       className="space-y-6"
     >
+      {/* Stories */}
+      <motion.div variants={itemVariants}>
+        <StoryCircles />
+      </motion.div>
+
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="text-right">

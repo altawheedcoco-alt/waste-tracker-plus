@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
 import { useAuth } from '@/contexts/AuthContext';
@@ -78,6 +79,8 @@ const TransporterDashboard = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Stories */}
+      <StoryCircles />
       <TransporterHeader organizationName={organization?.name || ''} />
 
       {/* Daily Operations Summary */}

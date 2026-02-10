@@ -51,6 +51,7 @@ import {
   Brain,
   Sparkles,
   Shield,
+  CircleDot,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -259,6 +260,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
+    { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'driver-stories' },
     { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'driver-support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'driver-about' },
@@ -322,6 +324,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
     { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
+    { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'stories' },
     { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
     { icon: LinkIcon, label: 'روابط الإيداع السريع', path: '/dashboard/quick-deposit-links', key: 'quick-deposit-links' },
     { icon: Zap, label: 'روابط الشحنات السريعة', path: '/dashboard/quick-shipment-links', key: 'quick-shipment-links' },

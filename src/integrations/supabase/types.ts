@@ -9225,6 +9225,112 @@ export type Database = {
           },
         ]
       }
+      stories: {
+        Row: {
+          background_color: string | null
+          caption: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          is_active: boolean
+          media_type: string
+          media_url: string
+          organization_id: string | null
+          text_content: string | null
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          background_color?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          media_type?: string
+          media_url: string
+          organization_id?: string | null
+          text_content?: string | null
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          background_color?: string | null
+          caption?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean
+          media_type?: string
+          media_url?: string
+          organization_id?: string | null
+          text_content?: string | null
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "stories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      story_views: {
+        Row: {
+          id: string
+          story_id: string
+          viewed_at: string
+          viewer_organization_id: string | null
+          viewer_user_id: string
+        }
+        Insert: {
+          id?: string
+          story_id: string
+          viewed_at?: string
+          viewer_organization_id?: string | null
+          viewer_user_id: string
+        }
+        Update: {
+          id?: string
+          story_id?: string
+          viewed_at?: string
+          viewer_organization_id?: string | null
+          viewer_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_story_id_fkey"
+            columns: ["story_id"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "story_views_viewer_organization_id_fkey"
+            columns: ["viewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "story_views_viewer_organization_id_fkey"
+            columns: ["viewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submission_rate_limits: {
         Row: {
           created_at: string

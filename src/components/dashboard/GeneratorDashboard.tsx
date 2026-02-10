@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import StoryCircles from '@/components/stories/StoryCircles';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
@@ -268,6 +269,8 @@ const GeneratorDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Stories */}
+      <StoryCircles />
       {/* Welcome section - Responsive */}
       <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'}`}>
         <div className={`flex items-center gap-2 ${isMobile ? 'order-2' : ''}`}>
