@@ -82,6 +82,7 @@ import DepositButton from '@/components/deposits/DepositButton';
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
 import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
+import GlobalRefreshButton from './GlobalRefreshButton';
 import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomizer';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 
@@ -692,6 +693,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
             {/* Right side - Responsive spacing */}
             <div className={`flex items-center ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
+              {/* Global Refresh Button */}
+              <GlobalRefreshButton />
+
               {/* Network Status Indicator */}
               <OfflineIndicator />
 
