@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -75,7 +76,7 @@ const GeneratorReceipts = () => {
       
       // Subscribe to realtime updates
       const channel = supabase
-        .channel('generator-receipts')
+        .channel(getTabChannelName('generator-receipts'))
         .on(
           'postgres_changes',
           {

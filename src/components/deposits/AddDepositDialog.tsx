@@ -154,7 +154,7 @@ export default function AddDepositDialog({
   // Check for saved data on mount
   useEffect(() => {
     if (profile?.organization_id) {
-      const savedData = localStorage.getItem(SAVED_DATA_KEY);
+      const savedData = sessionStorage.getItem(SAVED_DATA_KEY);
       if (savedData) {
         setHasSavedData(true);
       }
@@ -173,7 +173,7 @@ export default function AddDepositDialog({
   // Load saved depositor data
   const loadSavedData = () => {
     try {
-      const savedData = localStorage.getItem(SAVED_DATA_KEY);
+      const savedData = sessionStorage.getItem(SAVED_DATA_KEY);
       if (savedData) {
         const parsed = JSON.parse(savedData);
         if (parsed.depositorName) form.setValue('depositorName', parsed.depositorName);
@@ -204,7 +204,7 @@ export default function AddDepositDialog({
         branchName: data.branchName,
         transferMethod: data.transferMethod,
       };
-      localStorage.setItem(SAVED_DATA_KEY, JSON.stringify(dataToSave));
+      sessionStorage.setItem(SAVED_DATA_KEY, JSON.stringify(dataToSave));
       setHasSavedData(true);
     } catch (error) {
       console.error('Error saving data:', error);
@@ -213,7 +213,7 @@ export default function AddDepositDialog({
 
   // Clear saved data
   const clearSavedData = () => {
-    localStorage.removeItem(SAVED_DATA_KEY);
+    sessionStorage.removeItem(SAVED_DATA_KEY);
     setHasSavedData(false);
     toast.success('تم حذف البيانات المحفوظة');
   };

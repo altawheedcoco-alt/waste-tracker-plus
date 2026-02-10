@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Viewer {
@@ -30,7 +31,7 @@ export const useDriverPresence = ({
   useEffect(() => {
     if (!driverId) return;
 
-    const channelName = `driver-tracking:${driverId}`;
+    const channelName = getTabChannelName(`driver-tracking:${driverId}`);
     
     const channel = supabase.channel(channelName, {
       config: {

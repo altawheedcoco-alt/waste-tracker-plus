@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { 
   Package, 
   Truck, 
@@ -87,7 +88,7 @@ const ShipmentStatusTimeline = ({ shipment, showCard = true, showProgressMilesto
 
     // Subscribe to real-time updates
     const channel = supabase
-      .channel(`timeline-logs-${shipment.id}`)
+      .channel(getTabChannelName(`timeline-logs-${shipment.id}`))
       .on(
         'postgres_changes',
         {

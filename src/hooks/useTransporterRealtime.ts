@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
@@ -17,7 +18,7 @@ export const useTransporterRealtime = () => {
     if (!orgId) return;
 
     const channel = supabase
-      .channel('transporter-dashboard-realtime')
+      .channel(getTabChannelName('transporter-dashboard-realtime'))
       .on(
         'postgres_changes',
         {

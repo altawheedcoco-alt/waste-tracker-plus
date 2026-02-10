@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { calculateHaversineDistance } from '@/lib/mapUtils';
 import { TrackingState } from '@/types/tracking';
@@ -228,7 +229,7 @@ export const useAITracking = ({
     if (!enabled || !driverId) return;
 
     const channel = supabase
-      .channel(`ai-tracking-${shipmentId}`)
+      .channel(getTabChannelName(`ai-tracking-${shipmentId}`))
       .on(
         'postgres_changes',
         {

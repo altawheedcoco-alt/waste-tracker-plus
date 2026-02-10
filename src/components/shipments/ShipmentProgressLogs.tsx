@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -122,7 +123,7 @@ const ShipmentProgressLogs = ({
     if (!shipmentId) return;
 
     const channel = supabase
-      .channel(`logs-${shipmentId}`)
+      .channel(getTabChannelName(`logs-${shipmentId}`))
       .on(
         'postgres_changes',
         {

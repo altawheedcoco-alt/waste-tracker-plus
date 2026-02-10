@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -84,7 +85,7 @@ const DriverTracking = () => {
     fetchDrivers();
     // Real-time subscription for location updates
     const channel = supabase
-      .channel('driver-locations-realtime')
+      .channel(getTabChannelName('driver-locations-realtime'))
       .on(
         'postgres_changes',
         {

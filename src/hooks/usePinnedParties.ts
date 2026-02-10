@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { tabStorage } from '@/lib/tabSession';
 
 interface PinnedParty {
   id: string;
@@ -33,13 +34,12 @@ export const usePinnedParties = () => {
   });
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from sessionStorage on mount (tab-isolated)
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = tabStorage.getJSON<PinnedPartiesData>(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
-        setPinnedParties(parsed);
+        setPinnedParties(stored);
       }
     } catch (error) {
       console.error('Error loading pinned parties:', error);
@@ -47,10 +47,10 @@ export const usePinnedParties = () => {
     setIsLoaded(true);
   }, []);
 
-  // Save to localStorage whenever pinnedParties changes
+  // Save to sessionStorage whenever pinnedParties changes (tab-isolated)
   const saveToStorage = useCallback((data: PinnedPartiesData) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      tabStorage.setJSON(STORAGE_KEY, data);
     } catch (error) {
       console.error('Error saving pinned parties:', error);
     }

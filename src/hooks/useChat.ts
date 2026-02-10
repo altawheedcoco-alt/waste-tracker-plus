@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -286,7 +287,7 @@ export const useChat = () => {
     if (!currentPartnerId || !organization) return;
 
     const channel = supabase
-      .channel(`direct-messages-${currentPartnerId}`)
+      .channel(getTabChannelName(`direct-messages-${currentPartnerId}`))
       .on(
         'postgres_changes',
         {
@@ -354,7 +355,7 @@ export const useChat = () => {
     if (!user || !organization) return;
 
     const channel = supabase
-      .channel('all-direct-messages-notifications')
+      .channel(getTabChannelName('all-direct-messages-notifications'))
       .on(
         'postgres_changes',
         {

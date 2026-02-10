@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { calculateHaversineDistance } from '@/lib/mapUtils';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -171,7 +172,7 @@ export const useAutoProgressLogger = ({
     if (!enabled || !driverId || !shipmentId) return;
 
     const channel = supabase
-      .channel(`auto-progress-${shipmentId}`)
+      .channel(getTabChannelName(`auto-progress-${shipmentId}`))
       .on(
         'postgres_changes',
         {

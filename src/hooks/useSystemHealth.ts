@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useEffect, useState } from 'react';
 
 export interface ModuleHealth {
@@ -89,7 +90,7 @@ export const useSystemHealth = () => {
   // Subscribe to realtime updates
   useEffect(() => {
     const channel = supabase
-      .channel('system-health-updates')
+      .channel(getTabChannelName('system-health-updates'))
       .on(
         'postgres_changes',
         {

@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -209,7 +210,7 @@ export const useDriverAutoAssign = (transporterOrgId: string | null) => {
     if (!transporterOrgId) return;
 
     const channel = supabase
-      .channel('driver-availability')
+      .channel(getTabChannelName('driver-availability'))
       .on(
         'postgres_changes',
         {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { playNotificationSound, mapNotificationTypeToSound } from '@/hooks/useNotificationSound';
@@ -161,7 +162,7 @@ export const useNotifications = () => {
 
     // Subscribe to new notifications
     const channel = supabase
-      .channel('notifications-realtime')
+      .channel(getTabChannelName('notifications-realtime'))
       .on(
         'postgres_changes',
         {

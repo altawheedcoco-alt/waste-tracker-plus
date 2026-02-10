@@ -13,6 +13,7 @@ import {
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 
 // Lazy load the map dialog for better performance
 const LiveTrackingMapDialog = lazy(() => import('./LiveTrackingMapDialog'));
@@ -72,7 +73,7 @@ const LiveTrackingButton = ({
     
     // Subscribe to realtime updates
     const channel = supabase
-      .channel(`driver-location-${driverId}`)
+      .channel(getTabChannelName(`driver-location-${driverId}`))
       .on(
         'postgres_changes',
         {
