@@ -85,14 +85,14 @@ const Dashboard = () => {
   return (
     <PinVerificationGate>
       <>
-        {/* Terms acceptance dialog for all organization types */}
-        {requiresAcceptance && organizationType && (
+        {/* Terms acceptance dialog - temporarily disabled until project completion */}
+        {/* {requiresAcceptance && organizationType && (
           <OrganizationTermsDialog 
             open={requiresAcceptance} 
             onAccept={markAsAccepted}
             organizationType={organizationType}
           />
-        )}
+        )} */}
         
         <DashboardLayout>
           <PagePasswordGate>
