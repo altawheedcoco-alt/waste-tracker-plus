@@ -26,7 +26,7 @@ const companySignupSchema = z.object({
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   fullName: z.string().min(2, 'الاسم يجب أن يكون حرفين على الأقل'),
   phone: z.string().min(10, 'رقم الهاتف غير صالح'),
-  organizationType: z.enum(['generator', 'transporter', 'recycler']),
+  organizationType: z.enum(['generator', 'transporter', 'recycler', 'disposal']),
   organizationName: z.string().min(2, 'اسم المنشأة مطلوب'),
   organizationEmail: z.string().email('بريد المنشأة غير صالح'),
   organizationPhone: z.string().min(10, 'رقم هاتف المنشأة غير صالح'),
@@ -415,6 +415,13 @@ const Auth = () => {
       icon: Recycle,
       color: 'from-emerald-500 to-emerald-600',
     },
+    {
+      value: 'disposal',
+      label: 'جهة التخلص النهائي',
+      description: 'المدافن الصحية والمحارق والمعالجة',
+      icon: Factory,
+      color: 'from-rose-500 to-red-600',
+    },
   ];
 
   const registrationTypes = [
@@ -582,7 +589,7 @@ const Auth = () => {
                         { email: 'generator2@demo.com', password: 'generator123456', icon: Building2, label: 'مولدة 2', color: 'bg-sky-500 hover:bg-sky-600' },
                         { email: 'transporter@demo.com', password: 'transporter123456', icon: Truck, label: 'الناقلة', color: 'bg-amber-500 hover:bg-amber-600' },
                         { email: 'recycler@demo.com', password: 'recycler123456', icon: Recycle, label: 'المدورة', color: 'bg-emerald-500 hover:bg-emerald-600' },
-                        { email: 'disposal@demo.com', password: 'disposal123456', icon: Factory, label: 'الأمان', color: 'bg-rose-600 hover:bg-rose-700' },
+                        { email: 'disposal@demo.com', password: 'disposal123456', icon: Factory, label: 'شركة الأمان', color: 'bg-rose-600 hover:bg-rose-700' },
                         { email: 'driver@demo.com', password: 'driver123456', icon: Car, label: 'السائق', color: 'bg-purple-500 hover:bg-purple-600' },
                       ].map((demo) => (
                         <motion.button
