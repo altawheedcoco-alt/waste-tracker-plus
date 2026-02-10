@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useViewerPresence } from '@/hooks/useDriverPresence';
@@ -228,7 +229,7 @@ const LiveTrackingMapDialog = memo(({
     if (!isOpen || !driverId) return;
 
     const channel = supabase
-      .channel(`live-tracking-${driverId}`)
+      .channel(getTabChannelName(`live-tracking-${driverId}`))
       .on(
         'postgres_changes',
         {

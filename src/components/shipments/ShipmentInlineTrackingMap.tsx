@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -274,7 +275,7 @@ const ShipmentInlineTrackingMap = memo(({
     if (!driverId || !isExpanded) return;
 
     const channel = supabase
-      .channel(`inline-tracking-${shipmentId}`)
+      .channel(getTabChannelName(`inline-tracking-${shipmentId}`))
       .on(
         'postgres_changes',
         {
