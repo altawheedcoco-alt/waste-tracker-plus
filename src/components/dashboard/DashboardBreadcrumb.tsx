@@ -1,6 +1,7 @@
-import { useLocation, Link } from 'react-router-dom';
-import { ChevronLeft, Home } from 'lucide-react';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { ChevronLeft, Home, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,16 +37,40 @@ const routeLabels: Record<string, string> = {
 
 const DashboardBreadcrumb = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
+  // Don't show on main dashboard
   if (pathnames.length <= 1) return null;
+
+  const handleBack = () => {
+    if (window.history.state && window.history.state.idx > 0) {
+      navigate(-1);
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-4"
+      className="mb-4 flex items-center gap-3"
     >
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleBack}
+        className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0 px-2"
+      >
+        <ArrowRight className="h-4 w-4" />
+        رجوع
+      </Button>
+
+      <div className="h-4 w-px bg-border" />
+
+      {/* Breadcrumb */}
       <Breadcrumb>
         <BreadcrumbList className="text-sm">
           <BreadcrumbItem>
