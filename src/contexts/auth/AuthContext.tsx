@@ -350,6 +350,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setOrganization(null);
           setUserOrganizations([]);
           setRoles([]);
+          // Clear tab-scoped org so next login picks up the correct org
+          sessionStorage.removeItem('__tab_active_org_id');
         }
       }
     );
