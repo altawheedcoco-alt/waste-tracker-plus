@@ -43,6 +43,7 @@ import {
   Info,
   QrCode,
   ScanLine,
+  Trophy,
 } from 'lucide-react';
 
 export interface QuickActionConfig {
@@ -89,6 +90,7 @@ export const transporterQuickActions: QuickActionConfig[] = [
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
+  { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
 // ============= ADMIN QUICK ACTIONS =============
@@ -126,6 +128,7 @@ export const adminQuickActions: QuickActionConfig[] = [
   { id: 'waste-types', title: 'أنواع المخلفات', subtitle: 'تحرير التصنيفات والفئات', icon: Recycle, path: '/dashboard/waste-types', iconBgClass: 'bg-gradient-to-br from-lime-500 to-green-600', category: 'utility' },
   { id: 'contracts', title: 'جميع العقود', subtitle: 'مراقبة عقود كل الجهات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-violet-600', category: 'utility' },
   { id: 'navigation-demo', title: 'محاكاة الملاحة', subtitle: 'اختبار نظام التتبع', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'utility' },
+  { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير لكافة الجهات', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
 // ============= GENERATOR QUICK ACTIONS =============
@@ -151,6 +154,7 @@ export const generatorQuickActions: QuickActionConfig[] = [
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
+  { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
 // ============= RECYCLER QUICK ACTIONS =============
@@ -177,6 +181,7 @@ export const recyclerQuickActions: QuickActionConfig[] = [
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
+  { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
 // ============= DISPOSAL QUICK ACTIONS =============
@@ -207,6 +212,7 @@ export const disposalQuickActions: QuickActionConfig[] = [
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
+  { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
 // ============= DRIVER QUICK ACTIONS =============
