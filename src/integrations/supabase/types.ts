@@ -7793,6 +7793,85 @@ export type Database = {
           },
         ]
       }
+      pride_certificates: {
+        Row: {
+          certificate_number: string
+          certificate_type: string
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_printed: boolean | null
+          issued_at: string
+          milestone_tons: number
+          organization_id: string
+          organization_type: string
+          printed_at: string | null
+          printed_by: string | null
+          title: string
+          title_ar: string
+          total_quantity_kg: number
+        }
+        Insert: {
+          certificate_number: string
+          certificate_type?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_printed?: boolean | null
+          issued_at?: string
+          milestone_tons: number
+          organization_id: string
+          organization_type: string
+          printed_at?: string | null
+          printed_by?: string | null
+          title: string
+          title_ar: string
+          total_quantity_kg: number
+        }
+        Update: {
+          certificate_number?: string
+          certificate_type?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_printed?: boolean | null
+          issued_at?: string
+          milestone_tons?: number
+          organization_id?: string
+          organization_type?: string
+          printed_at?: string | null
+          printed_by?: string | null
+          title?: string
+          title_ar?: string
+          total_quantity_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pride_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "pride_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pride_certificates_printed_by_fkey"
+            columns: ["printed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_posts: {
         Row: {
           content: string | null
