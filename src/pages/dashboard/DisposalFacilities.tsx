@@ -64,6 +64,20 @@ interface DisposalFacility {
   status: string;
   is_verified: boolean;
   notes?: string;
+  // التراخيص
+  wmra_license_number?: string;
+  wmra_license_expiry?: string;
+  eia_permit_number?: string;
+  eia_permit_expiry?: string;
+  operation_license_number?: string;
+  operation_license_expiry?: string;
+  hazardous_license_number?: string;
+  hazardous_license_expiry?: string;
+  commercial_register_number?: string;
+  tax_card_number?: string;
+  activity_specific_license_number?: string;
+  activity_specific_license_type?: string;
+  activity_specific_license_expiry?: string;
 }
 
 const facilityTypeLabels: Record<string, { label: string; icon: any; color: string }> = {
