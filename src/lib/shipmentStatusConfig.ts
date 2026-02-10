@@ -15,6 +15,10 @@ import {
   Cog,
   Recycle,
   CheckCheck,
+  Search,
+  Tags,
+  Flame,
+  ShieldCheck,
 } from 'lucide-react';
 
 // All possible shipment statuses
@@ -35,7 +39,15 @@ export type ShipmentStatus =
   | 'sorting'        // قيد الفرز
   | 'processing'     // قيد المعالجة
   | 'recycling'      // قيد التدوير
-  | 'completed';     // الاكتمال
+  | 'completed'      // الاكتمال
+  // Disposal statuses (التخلص النهائي)
+  | 'disposal_receiving'    // استقبال المخلفات
+  | 'disposal_weighing'     // وزن المخلفات
+  | 'disposal_inspection'   // فحص المخلفات
+  | 'disposal_classification' // تصنيف المخلفات
+  | 'disposal_treatment'    // معالجة المخلفات
+  | 'disposal_final'        // دفن/حرق
+  | 'disposal_completed';   // اكتمال التخلص
 
 export interface StatusConfig {
   key: ShipmentStatus;
@@ -46,7 +58,7 @@ export interface StatusConfig {
   bgClass: string;
   textClass: string;
   borderClass: string;
-  phase: 'transporter' | 'recycler';
+  phase: 'transporter' | 'recycler' | 'disposal';
   order: number;
 }
 
@@ -238,8 +250,96 @@ export const recyclerStatuses: StatusConfig[] = [
   },
 ];
 
+// Disposal phase statuses (جهة التخلص النهائي)
+export const disposalStatuses: StatusConfig[] = [
+  {
+    key: 'disposal_receiving',
+    label: 'Receiving',
+    labelAr: 'استقبال المخلفات',
+    icon: Inbox,
+    colorClass: 'bg-red-400',
+    bgClass: 'bg-red-50 dark:bg-red-900/40',
+    textClass: 'text-red-900 dark:text-red-100',
+    borderClass: 'border-red-300 dark:border-red-600',
+    phase: 'disposal',
+    order: 20
+  },
+  {
+    key: 'disposal_weighing',
+    label: 'Weighing',
+    labelAr: 'وزن المخلفات',
+    icon: Scale,
+    colorClass: 'bg-orange-400',
+    bgClass: 'bg-orange-50 dark:bg-orange-900/40',
+    textClass: 'text-orange-900 dark:text-orange-100',
+    borderClass: 'border-orange-300 dark:border-orange-600',
+    phase: 'disposal',
+    order: 21
+  },
+  {
+    key: 'disposal_inspection',
+    label: 'Inspection',
+    labelAr: 'فحص المخلفات',
+    icon: Search,
+    colorClass: 'bg-amber-400',
+    bgClass: 'bg-amber-50 dark:bg-amber-900/40',
+    textClass: 'text-amber-900 dark:text-amber-100',
+    borderClass: 'border-amber-300 dark:border-amber-600',
+    phase: 'disposal',
+    order: 22
+  },
+  {
+    key: 'disposal_classification',
+    label: 'Classification',
+    labelAr: 'تصنيف المخلفات',
+    icon: Tags,
+    colorClass: 'bg-yellow-400',
+    bgClass: 'bg-yellow-50 dark:bg-yellow-900/40',
+    textClass: 'text-yellow-900 dark:text-yellow-100',
+    borderClass: 'border-yellow-300 dark:border-yellow-600',
+    phase: 'disposal',
+    order: 23
+  },
+  {
+    key: 'disposal_treatment',
+    label: 'Treatment',
+    labelAr: 'معالجة المخلفات',
+    icon: Cog,
+    colorClass: 'bg-violet-400',
+    bgClass: 'bg-violet-50 dark:bg-violet-900/40',
+    textClass: 'text-violet-900 dark:text-violet-100',
+    borderClass: 'border-violet-300 dark:border-violet-600',
+    phase: 'disposal',
+    order: 24
+  },
+  {
+    key: 'disposal_final',
+    label: 'Final Disposal',
+    labelAr: 'دفن / حرق',
+    icon: Flame,
+    colorClass: 'bg-rose-500',
+    bgClass: 'bg-rose-50 dark:bg-rose-900/40',
+    textClass: 'text-rose-900 dark:text-rose-100',
+    borderClass: 'border-rose-300 dark:border-rose-600',
+    phase: 'disposal',
+    order: 25
+  },
+  {
+    key: 'disposal_completed',
+    label: 'Disposal Completed',
+    labelAr: 'اكتمال التخلص',
+    icon: ShieldCheck,
+    colorClass: 'bg-green-500',
+    bgClass: 'bg-green-100 dark:bg-green-900/50',
+    textClass: 'text-green-900 dark:text-green-100',
+    borderClass: 'border-green-400 dark:border-green-600',
+    phase: 'disposal',
+    order: 26
+  },
+];
+
 // All statuses combined in order
-export const allStatuses: StatusConfig[] = [...transporterStatuses, ...recyclerStatuses];
+export const allStatuses: StatusConfig[] = [...transporterStatuses, ...recyclerStatuses, ...disposalStatuses];
 
 // Get status config by key
 export const getStatusConfig = (status: string): StatusConfig | undefined => {
@@ -247,14 +347,16 @@ export const getStatusConfig = (status: string): StatusConfig | undefined => {
 };
 
 // Get statuses by phase
-export const getStatusesByPhase = (phase: 'transporter' | 'recycler'): StatusConfig[] => {
-  return phase === 'transporter' ? transporterStatuses : recyclerStatuses;
+export const getStatusesByPhase = (phase: 'transporter' | 'recycler' | 'disposal'): StatusConfig[] => {
+  if (phase === 'transporter') return transporterStatuses;
+  if (phase === 'disposal') return disposalStatuses;
+  return recyclerStatuses;
 };
 
 // Get available next statuses based on current status and organization type
 export const getAvailableNextStatuses = (
   currentStatus: string,
-  organizationType: 'generator' | 'transporter' | 'recycler' | 'admin'
+  organizationType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin'
 ): StatusConfig[] => {
   const currentConfig = getStatusConfig(currentStatus);
   if (!currentConfig) return allStatuses; // If no current config, allow all statuses
@@ -273,21 +375,30 @@ export const getAvailableNextStatuses = (
     if (currentConfig.phase === 'transporter') {
       return transporterStatuses.filter(s => s.key !== currentStatus);
     }
-    // Transporter can also move back to transporter statuses from recycler phase
+    // Transporter can also move back to transporter statuses from other phases
     return transporterStatuses;
   }
 
   // Recycler can change all recycler phase statuses
   if (organizationType === 'recycler') {
-    // If current status is delivering (last transporter status) or any recycler status
     if (currentConfig.key === 'delivering' || currentConfig.phase === 'recycler') {
       return recyclerStatuses.filter(s => s.key !== currentStatus);
     }
-    // If still in transporter phase, recycler can start with receiving
     if (currentConfig.phase === 'transporter') {
       return recyclerStatuses;
     }
     return recyclerStatuses;
+  }
+
+  // Disposal can change all disposal phase statuses
+  if (organizationType === 'disposal') {
+    if (currentConfig.key === 'delivering' || currentConfig.phase === 'disposal') {
+      return disposalStatuses.filter(s => s.key !== currentStatus);
+    }
+    if (currentConfig.phase === 'transporter') {
+      return disposalStatuses;
+    }
+    return disposalStatuses;
   }
 
   return [];
@@ -296,7 +407,7 @@ export const getAvailableNextStatuses = (
 // Check if organization can change status
 export const canChangeStatus = (
   currentStatus: string,
-  organizationType: 'generator' | 'transporter' | 'recycler' | 'admin'
+  organizationType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin'
 ): boolean => {
   // Admin can always change status
   if (organizationType === 'admin') return true;
@@ -304,17 +415,16 @@ export const canChangeStatus = (
 };
 
 // Get phase for a status
-export const getStatusPhase = (status: string): 'transporter' | 'recycler' | null => {
+export const getStatusPhase = (status: string): 'transporter' | 'recycler' | 'disposal' | null => {
   const config = getStatusConfig(status);
   return config?.phase || null;
 };
 
 // Legacy status mapping (for backward compatibility with existing data)
-// Maps old DB enum values to new UI status keys
 export const legacyStatusMapping: Record<string, ShipmentStatus> = {
   'new': 'pending',
   'approved': 'registered',
-  'collecting': 'in_transit', // collecting now maps directly to in_transit
+  'collecting': 'in_transit',
   'in_transit': 'in_transit',
   'delivered': 'received',
   'confirmed': 'completed',
@@ -337,6 +447,14 @@ export const reverseStatusMapping: Record<ShipmentStatus, string> = {
   'processing': 'delivered',
   'recycling': 'delivered',
   'completed': 'confirmed',
+  // Disposal statuses map to DB statuses
+  'disposal_receiving': 'delivered',
+  'disposal_weighing': 'delivered',
+  'disposal_inspection': 'delivered',
+  'disposal_classification': 'delivered',
+  'disposal_treatment': 'delivered',
+  'disposal_final': 'delivered',
+  'disposal_completed': 'confirmed',
 };
 
 // Map legacy status to new status (for display)
@@ -349,7 +467,7 @@ export const mapToDbStatus = (status: ShipmentStatus): string => {
   return reverseStatusMapping[status] || status;
 };
 
-// Waste type labels
+// Waste type labels (general - for recyclers)
 export const wasteTypeLabels: Record<string, string> = {
   plastic: 'بلاستيك',
   paper: 'ورق',
@@ -361,4 +479,35 @@ export const wasteTypeLabels: Record<string, string> = {
   medical: 'طبية',
   construction: 'مخلفات بناء',
   other: 'أخرى',
+};
+
+// Waste type labels specific to disposal facilities (التخلص النهائي)
+export const disposalWasteTypeLabels: Record<string, string> = {
+  hazardous_solid: 'مخلفات خطرة صلبة',
+  hazardous_liquid: 'مخلفات خطرة سائلة',
+  medical: 'مخلفات طبية ورعاية صحية',
+  chemical: 'مخلفات كيميائية',
+  pharmaceutical: 'مخلفات دوائية',
+  sludge: 'حمأة صناعية',
+  incineration_ash: 'رماد حرق',
+  contaminated_soil: 'تربة ملوثة',
+  industrial_non_recyclable: 'مخلفات صناعية غير قابلة للتدوير',
+  asbestos: 'مخلفات أسبستوس',
+  radioactive: 'مخلفات مشعة',
+  petroleum: 'مخلفات بترولية',
+  expired_products: 'منتجات منتهية الصلاحية',
+  electronic_hazardous: 'مخلفات إلكترونية خطرة',
+  other_non_recyclable: 'مخلفات أخرى غير قابلة للتدوير',
+};
+
+// Disposal methods (طرق التخلص النهائي)
+export const disposalMethodLabels: Record<string, string> = {
+  sanitary_landfill: 'الدفن الصحي الآمن',
+  incineration: 'الحرق المتحكم فيه',
+  chemical_treatment: 'المعالجة الكيميائية',
+  thermal_treatment: 'المعالجة الحرارية',
+  encapsulation: 'التغليف والتثبيت',
+  deep_well_injection: 'الحقن في الآبار العميقة',
+  biological_treatment: 'المعالجة البيولوجية',
+  solidification: 'التصلب والتثبيت',
 };
