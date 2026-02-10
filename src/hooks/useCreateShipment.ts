@@ -23,7 +23,10 @@ export interface Driver {
   vehicle_plate: string | null;
 }
 
+export type DestinationType = 'recycling' | 'disposal';
+
 export interface ShipmentFormData {
+  destination_type: DestinationType;
   generator_id: string;
   transporter_id: string;
   recycler_id: string;
@@ -141,6 +144,7 @@ export const useCreateShipment = () => {
   ].filter(Boolean).join(' | ');
 
   const [formData, setFormData] = useState<ShipmentFormData>({
+    destination_type: 'recycling',
     generator_id: '',
     transporter_id: '',
     recycler_id: '',
@@ -480,7 +484,23 @@ export const useCreateShipment = () => {
   };
 
   const handleDisposalFacilityChange = (value: string) => {
-    setFormData(prev => ({ ...prev, disposal_facility_id: value }));
+    if (value.startsWith('manual:')) {
+      setFormData(prev => ({
+        ...prev,
+        disposal_facility_id: value,
+        // If disposal is the primary destination, update delivery address
+        ...(prev.destination_type === 'disposal' ? { delivery_address: '' } : {}),
+      }));
+    } else {
+      const facility = disposalFacilities.find(d => d.id === value);
+      setFormData(prev => ({
+        ...prev,
+        disposal_facility_id: value,
+        ...(prev.destination_type === 'disposal' && facility 
+          ? { delivery_address: `${facility.address}, ${facility.city}` } 
+          : {}),
+      }));
+    }
   };
 
   const getWasteStateLabel = (state: string): string => {
@@ -496,7 +516,11 @@ export const useCreateShipment = () => {
   const handleSubmit = async (e: React.FormEvent, onSuccess?: () => void, onClose?: () => void) => {
     e.preventDefault();
 
-    if (!formData.generator_id || !formData.recycler_id || !formData.waste_type || !formData.quantity) {
+    const destinationFieldMissing = formData.destination_type === 'recycling' 
+      ? !formData.recycler_id 
+      : !formData.disposal_facility_id;
+
+    if (!formData.generator_id || destinationFieldMissing || !formData.waste_type || !formData.quantity) {
       toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
     }

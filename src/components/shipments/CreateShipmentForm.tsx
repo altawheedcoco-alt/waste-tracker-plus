@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, MapPin, RefreshCw, User, Truck } from 'lucide-react';
+import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame } from 'lucide-react';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
@@ -16,8 +16,10 @@ import {
   disposalMethods, 
   packagingMethods, 
   driverInputTypes,
-  type WasteType 
+  type WasteType,
+  type DestinationType,
 } from '@/hooks/useCreateShipment';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface CreateShipmentFormProps {
   onSuccess?: () => void;
@@ -74,7 +76,47 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
         />
       )}
 
-      {/* Row 1: Generator, Transporter, Recycler */}
+      {/* Destination Type Selector - for transporters */}
+      {(organization?.organization_type === 'transporter' || isAdmin) && (
+        <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5 space-y-3">
+          <Label className="text-base font-semibold">وجهة الشحنة *</Label>
+          <RadioGroup
+            value={formData.destination_type}
+            onValueChange={(v) => {
+              setFormData(prev => ({
+                ...prev,
+                destination_type: v as DestinationType,
+                // Clear the non-selected destination
+                ...(v === 'recycling' ? { disposal_facility_id: '' } : { recycler_id: '' }),
+                delivery_address: '',
+              }));
+            }}
+            className="flex gap-6"
+          >
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="recycling" id="dest-recycling" />
+              <Label htmlFor="dest-recycling" className="flex items-center gap-2 cursor-pointer font-medium">
+                <Recycle className="h-5 w-5 text-primary" />
+                إلى التدوير
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <RadioGroupItem value="disposal" id="dest-disposal" />
+              <Label htmlFor="dest-disposal" className="flex items-center gap-2 cursor-pointer font-medium">
+                <Flame className="h-5 w-5 text-destructive" />
+                إلى التخلص النهائي
+              </Label>
+            </div>
+          </RadioGroup>
+          <p className="text-xs text-muted-foreground">
+            {formData.destination_type === 'recycling' 
+              ? 'سيتم توجيه الشحنة لجهة إعادة التدوير وتطبيق مراحل التدوير'
+              : 'سيتم توجيه الشحنة لجهة التخلص النهائي وتطبيق مراحل التخلص (استقبال ← وزن ← فحص ← تصنيف ← معالجة ← دفن/حرق ← اكتمال)'}
+          </p>
+        </div>
+      )}
+
+      {/* Row 1: Generator, Transporter, Destination (Recycler OR Disposal) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <Label>الشركة المولدة *</Label>
@@ -108,38 +150,59 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
           )}
         </div>
 
-        <div>
-          <Label>شركة إعادة التدوير *</Label>
-          <ComboboxWithInput
-            options={recyclerOptions}
-            value={formData.recycler_id}
-            onValueChange={handleRecyclerChange}
-            placeholder="اختر أو أدخل شركة إعادة التدوير"
-            searchPlaceholder="ابحث عن شركة..."
-            emptyMessage="لا توجد شركات"
-            manualInputLabel="إدخال يدوي"
-          />
-        </div>
+        {/* Show Recycler or Disposal based on destination_type */}
+        {formData.destination_type === 'recycling' ? (
+          <div>
+            <Label>شركة إعادة التدوير *</Label>
+            <ComboboxWithInput
+              options={recyclerOptions}
+              value={formData.recycler_id}
+              onValueChange={handleRecyclerChange}
+              placeholder="اختر أو أدخل شركة إعادة التدوير"
+              searchPlaceholder="ابحث عن شركة..."
+              emptyMessage="لا توجد شركات"
+              manualInputLabel="إدخال يدوي"
+            />
+          </div>
+        ) : (
+          <div>
+            <Label>جهة التخلص النهائي *</Label>
+            <ComboboxWithInput
+              options={disposalFacilityOptions}
+              value={formData.disposal_facility_id}
+              onValueChange={handleDisposalFacilityChange}
+              placeholder="اختر أو أدخل جهة التخلص النهائي"
+              searchPlaceholder="ابحث عن مدفن أو محرقة..."
+              emptyMessage="لا توجد جهات تخلص"
+              manualInputLabel="إدخال يدوي"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              المدافن والمحارق المرخصة للمخلفات الخطرة والطبية
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Row 2: Disposal Facility */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label>شركة التخلص النهائي (اختياري)</Label>
-          <ComboboxWithInput
-            options={disposalFacilityOptions}
-            value={formData.disposal_facility_id}
-            onValueChange={handleDisposalFacilityChange}
-            placeholder="اختر أو أدخل جهة التخلص النهائي"
-            searchPlaceholder="ابحث عن مدفن أو محرقة..."
-            emptyMessage="لا توجد جهات تخلص"
-            manualInputLabel="إدخال يدوي"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            المدافن والمحارق المرخصة للمخلفات الخطرة والطبية
-          </p>
+      {/* Optional secondary destination (recycler can optionally have disposal, and vice versa) */}
+      {formData.destination_type === 'recycling' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label>جهة التخلص النهائي (اختياري)</Label>
+            <ComboboxWithInput
+              options={disposalFacilityOptions}
+              value={formData.disposal_facility_id}
+              onValueChange={handleDisposalFacilityChange}
+              placeholder="اختر أو أدخل جهة التخلص النهائي"
+              searchPlaceholder="ابحث عن مدفن أو محرقة..."
+              emptyMessage="لا توجد جهات تخلص"
+              manualInputLabel="إدخال يدوي"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              في حال وجود مخلفات غير قابلة للتدوير
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Driver Data Section - Shows when user is a driver */}
       {isDriver && driverInfo && (
@@ -431,15 +494,28 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
           )}
         </div>
         <div>
-          {formData.recycler_id ? (
+          {/* Delivery location based on destination type */}
+          {(formData.destination_type === 'recycling' ? formData.recycler_id : formData.disposal_facility_id) ? (
             <EnhancedLocationPicker
-              organizationId={formData.recycler_id}
-              organizationName={recyclers.find(r => r.id === formData.recycler_id)?.name || ''}
-              organizationAddress={recyclers.find(r => r.id === formData.recycler_id)?.address || ''}
-              organizationCity={recyclers.find(r => r.id === formData.recycler_id)?.city || ''}
+              organizationId={formData.destination_type === 'recycling' ? formData.recycler_id : formData.disposal_facility_id}
+              organizationName={
+                formData.destination_type === 'recycling'
+                  ? recyclers.find(r => r.id === formData.recycler_id)?.name || ''
+                  : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.name || ''
+              }
+              organizationAddress={
+                formData.destination_type === 'recycling'
+                  ? recyclers.find(r => r.id === formData.recycler_id)?.address || ''
+                  : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.address || ''
+              }
+              organizationCity={
+                formData.destination_type === 'recycling'
+                  ? recyclers.find(r => r.id === formData.recycler_id)?.city || ''
+                  : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.city || ''
+              }
               value={formData.delivery_address}
               onChange={(address) => setFormData(prev => ({ ...prev, delivery_address: address }))}
-              label="موقع التسليم (الجهة المُعيدة)"
+              label={formData.destination_type === 'recycling' ? 'موقع التسليم (جهة التدوير)' : 'موقع التسليم (جهة التخلص النهائي)'}
               placeholder="اختر موقع التسليم"
             />
           ) : (
@@ -448,7 +524,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
               <LocationPicker
                 value={formData.delivery_address}
                 onChange={(address) => setFormData(prev => ({ ...prev, delivery_address: address }))}
-                placeholder="اختر الجهة المُعيدة أولاً"
+                placeholder={formData.destination_type === 'recycling' ? 'اختر جهة التدوير أولاً' : 'اختر جهة التخلص أولاً'}
               />
             </div>
           )}
