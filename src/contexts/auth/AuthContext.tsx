@@ -244,12 +244,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
 
         // Determine which organization to load
-        const activeOrgId = profileData.active_organization_id || profileData.organization_id;
+        // Priority: tab-scoped sessionStorage > DB active_organization_id > profile organization_id
+        const tabOrgId = sessionStorage.getItem('__tab_active_org_id');
+        const activeOrgId = tabOrgId || profileData.active_organization_id || profileData.organization_id;
         
         if (activeOrgId) {
           fetchOrganization(activeOrgId).then(org => {
             if (org) {
               setOrganization(org);
+              // Persist to this tab's session so it stays isolated
+              sessionStorage.setItem('__tab_active_org_id', activeOrgId);
             }
           });
         }
@@ -285,6 +289,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (newOrg) {
         setOrganization(newOrg);
         setProfile(prev => prev ? { ...prev, active_organization_id: organizationId, organization_id: organizationId } : null);
+        // Store in sessionStorage so only THIS tab switches
+        sessionStorage.setItem('__tab_active_org_id', organizationId);
         toast.success(`تم التبديل إلى ${newOrg.name}`);
         window.location.reload();
         return true;
