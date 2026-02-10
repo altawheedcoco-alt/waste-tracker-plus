@@ -14,6 +14,7 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { format, formatDistanceToNow, differenceInMinutes } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -113,7 +114,7 @@ export default function PendingApprovalsWidget() {
 
     // Subscribe to realtime updates
     const channel = supabase
-      .channel('pending-approvals')
+      .channel(getTabChannelName('pending-approvals'))
       .on(
         'postgres_changes',
         {

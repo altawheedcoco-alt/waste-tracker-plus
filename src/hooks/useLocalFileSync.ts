@@ -27,8 +27,8 @@ export function useLocalFileSync() {
   useEffect(() => {
     setIsSupported('showDirectoryPicker' in window);
     
-    // Load synced files list
-    const saved = localStorage.getItem(SYNCED_FILES_KEY);
+    // Load synced files list (tab-scoped)
+    const saved = sessionStorage.getItem(SYNCED_FILES_KEY);
     if (saved) {
       setSyncedFiles(JSON.parse(saved));
     }
@@ -56,7 +56,7 @@ export function useLocalFileSync() {
       try {
         // @ts-ignore
         if (navigator.storage && navigator.storage.getDirectory) {
-          localStorage.setItem(STORAGE_KEY, 'granted');
+          sessionStorage.setItem(STORAGE_KEY, 'granted');
         }
       } catch (e) {
         console.log('Cannot persist directory handle');
@@ -121,7 +121,7 @@ export function useLocalFileSync() {
 
       const updatedFiles = [...syncedFiles.filter(f => f.name !== fileName), newFile];
       setSyncedFiles(updatedFiles);
-      localStorage.setItem(SYNCED_FILES_KEY, JSON.stringify(updatedFiles));
+      sessionStorage.setItem(SYNCED_FILES_KEY, JSON.stringify(updatedFiles));
 
       toast.success(`تم حفظ الملف محلياً: ${fileName}`);
       return true;
@@ -184,7 +184,7 @@ export function useLocalFileSync() {
    */
   const disconnectFolder = useCallback(() => {
     setDirectoryHandle(null);
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
     toast.info('تم إلغاء ربط المجلد المحلي');
   }, []);
 

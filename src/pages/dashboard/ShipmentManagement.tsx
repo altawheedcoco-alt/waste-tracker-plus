@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { normalizeShipments } from '@/lib/supabaseHelpers';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -270,7 +271,7 @@ const ShipmentManagement = () => {
 
   const setupRealtimeSubscription = () => {
     const channel = supabase
-      .channel('shipments-changes')
+      .channel(getTabChannelName('shipments-changes'))
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'shipments' },

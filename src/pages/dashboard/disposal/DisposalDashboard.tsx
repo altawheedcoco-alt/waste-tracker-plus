@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import FacilityDashboardHeader from '@/components/dashboard/shared/FacilityDashboardHeader';
 import FacilityCapacityCard from '@/components/dashboard/shared/FacilityCapacityCard';
@@ -66,7 +67,7 @@ const DisposalDashboard = () => {
     if (!organization?.id) return;
 
     const channel = supabase
-      .channel('disposal-ops-realtime')
+      .channel(getTabChannelName('disposal-ops-realtime'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'disposal_operations', filter: `organization_id=eq.${organization.id}` },
         () => {
           queryClient.invalidateQueries({ queryKey: ['disposal-operations-stats'] });

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import FacilityDashboardHeader from './shared/FacilityDashboardHeader';
 import StatsCardsGrid, { StatCardItem } from './shared/StatsCardsGrid';
@@ -73,7 +74,7 @@ const RecyclerDashboard = () => {
   useEffect(() => {
     if (!organization?.id) return;
     const channel = supabase
-      .channel('recycler-shipments-realtime')
+      .channel(getTabChannelName('recycler-shipments-realtime'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments', filter: `recycler_id=eq.${organization.id}` },
         () => {
           queryClient.invalidateQueries({ queryKey: ['recycler-dashboard'] });

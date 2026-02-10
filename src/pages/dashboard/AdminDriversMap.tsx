@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -87,7 +88,7 @@ const AdminDriversMap = () => {
     
     // Subscribe to real-time location updates
     const channel = supabase
-      .channel('driver-locations')
+      .channel(getTabChannelName('driver-locations'))
       .on(
         'postgres_changes',
         {

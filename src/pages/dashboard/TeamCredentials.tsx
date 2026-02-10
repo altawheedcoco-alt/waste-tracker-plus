@@ -52,7 +52,7 @@ interface TeamMember {
 // Password storage for newly created members (in-memory, would need proper storage in production)
 const getStoredCredentials = (): Record<string, string> => {
   try {
-    const stored = localStorage.getItem('team_credentials');
+    const stored = sessionStorage.getItem('team_credentials');
     return stored ? JSON.parse(stored) : {};
   } catch {
     return {};
@@ -62,7 +62,7 @@ const getStoredCredentials = (): Record<string, string> => {
 const storeCredentials = (email: string, password: string) => {
   const current = getStoredCredentials();
   current[email] = password;
-  localStorage.setItem('team_credentials', JSON.stringify(current));
+  sessionStorage.setItem('team_credentials', JSON.stringify(current));
 };
 
 const TeamCredentials = () => {

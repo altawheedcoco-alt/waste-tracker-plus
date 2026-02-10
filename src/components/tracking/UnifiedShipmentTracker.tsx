@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -162,7 +163,7 @@ const UnifiedShipmentTracker = ({
     if (!shipment.driver_id) return;
 
     const channel = supabase
-      .channel(`shipment-tracking-${shipment.id}`)
+      .channel(getTabChannelName(`shipment-tracking-${shipment.id}`))
       .on(
         'postgres_changes',
         {

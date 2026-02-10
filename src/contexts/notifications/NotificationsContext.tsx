@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface Notification {
@@ -157,7 +158,7 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
     fetchNotifications();
 
     const channel = supabase
-      .channel('notifications-changes')
+      .channel(getTabChannelName('notifications-changes'))
       .on(
         'postgres_changes',
         {

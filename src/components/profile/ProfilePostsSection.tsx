@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -110,7 +111,7 @@ export default function ProfilePostsSection({
 
   const subscribeToRealtime = () => {
     const channel = supabase
-      .channel('profile-posts-changes')
+      .channel(getTabChannelName('profile-posts-changes'))
       .on(
         'postgres_changes',
         {

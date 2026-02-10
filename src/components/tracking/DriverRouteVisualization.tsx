@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
 import { supabase } from '@/integrations/supabase/client';
+import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -333,7 +334,7 @@ const DriverRouteVisualization = memo(({
     if (!driverId) return;
 
     const channel = supabase
-      .channel(`route-viz-${shipmentId}`)
+      .channel(getTabChannelName(`route-viz-${shipmentId}`))
       .on(
         'postgres_changes',
         {
