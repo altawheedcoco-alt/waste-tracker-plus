@@ -17,6 +17,7 @@ import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
+import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import StoryCircles from '@/components/stories/StoryCircles';
 
 interface DisposalDashboardProps {
@@ -124,6 +125,9 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       {facility && <FacilityCapacityCard facility={facility} />}
 
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
+
+      {/* Automation Toggle */}
+      <AutomationSettingsDialog organizationType="disposal" />
 
       <DisposalDailyOperations />
       <OperationalAlertsWidget />
