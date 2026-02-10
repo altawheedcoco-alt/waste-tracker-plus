@@ -8,6 +8,7 @@ import TransporterDashboard from '@/components/dashboard/TransporterDashboard';
 import RecyclerDashboard from '@/components/dashboard/RecyclerDashboard';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
 import DriverDashboard from '@/components/dashboard/DriverDashboard';
+import DisposalDashboard from '@/components/dashboard/DisposalDashboard';
 import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
 import PagePasswordGate from '@/components/security/PagePasswordGate';
 import PinVerificationGate from '@/components/security/PinVerificationGate';
@@ -74,9 +75,7 @@ const Dashboard = () => {
       case 'recycler':
         return <RecyclerDashboard />;
       case 'disposal':
-        // Disposal uses a dedicated page at /dashboard/disposal
-        // but also show recycler-like view here for consistency
-        return <RecyclerDashboard />;
+        return <DisposalDashboard embedded />;
       default:
         return <GeneratorDashboard />;
     }

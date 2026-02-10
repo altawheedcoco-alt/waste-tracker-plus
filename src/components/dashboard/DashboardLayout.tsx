@@ -52,6 +52,7 @@ import {
   Sparkles,
   Shield,
   CircleDot,
+  Factory,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -177,19 +178,22 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   const isAdmin = roles.includes('admin');
   const isTransporter = organization?.organization_type === 'transporter';
+  const isDisposal = (organization?.organization_type as string) === 'disposal';
   const isDriver = roles.includes('driver');
 
   const getOrganizationIcon = () => {
     if (isAdmin) {
       return Settings;
     }
-    switch (organization?.organization_type) {
+    switch (organization?.organization_type as string) {
       case 'generator':
         return Building2;
       case 'transporter':
         return Truck;
       case 'recycler':
         return Recycle;
+      case 'disposal':
+        return Factory;
       default:
         return Building2;
     }
@@ -199,13 +203,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     if (isAdmin) {
       return 'جهة الإدارة والمراقبة';
     }
-    switch (organization?.organization_type) {
+    switch (organization?.organization_type as string) {
       case 'generator':
         return 'الجهة المولدة';
       case 'transporter':
         return 'الجهة الناقلة';
       case 'recycler':
         return 'الجهة المدورة';
+      case 'disposal':
+        return 'جهة التخلص النهائي';
       default:
         return 'جهة';
     }
@@ -218,13 +224,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     if (isDriver && !organization) {
       return 'سائق';
     }
-    switch (organization?.organization_type) {
+    switch (organization?.organization_type as string) {
       case 'generator':
         return 'الجهة المولدة';
       case 'transporter':
         return 'الجهة الناقلة';
       case 'recycler':
         return 'الجهة المدورة';
+      case 'disposal':
+        return 'جهة التخلص النهائي';
       default:
         return 'الجهة';
     }
@@ -274,7 +282,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Newspaper, label: 'المنشورات', path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
     { icon: Rss, label: 'تايم لاين الشركاء', path: '/dashboard/partners-timeline', key: 'partners-timeline' },
     { icon: Handshake, label: 'الشركاء', path: '/dashboard/partners', badge: partnersCount, key: 'partners' },
-    ...(organization?.organization_type === 'transporter'
+    ...((organization?.organization_type as string) === 'transporter'
       ? [
           { icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments', key: 'transporter-shipments' },
           { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
@@ -284,10 +292,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'transporter-certs' },
           { icon: Fingerprint, label: 'الرسم الغيوشي للمستندات', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
         ]
-      : organization?.organization_type === 'recycler'
+      : (organization?.organization_type as string) === 'recycler'
       ? [
           { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'recycler-shipments' },
           { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs' },
+        ]
+      : (organization?.organization_type as string) === 'disposal'
+      ? [
+          { icon: Factory, label: 'عمليات التخلص', path: '/dashboard/disposal/operations', key: 'disposal-operations' },
+          { icon: Package, label: 'الطلبات الواردة', path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming' },
+          { icon: FolderCheck, label: 'شهادات التخلص', path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
+          { icon: BarChart3, label: 'تقارير التخلص', path: '/dashboard/disposal/reports', key: 'disposal-reports' },
         ]
       : [
           { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'generator-shipments' },
