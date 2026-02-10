@@ -582,7 +582,7 @@ const Auth = () => {
                         { email: 'generator2@demo.com', password: 'generator123456', icon: Building2, label: 'مولدة 2', color: 'bg-sky-500 hover:bg-sky-600' },
                         { email: 'transporter@demo.com', password: 'transporter123456', icon: Truck, label: 'الناقلة', color: 'bg-amber-500 hover:bg-amber-600' },
                         { email: 'recycler@demo.com', password: 'recycler123456', icon: Recycle, label: 'المدورة', color: 'bg-emerald-500 hover:bg-emerald-600' },
-                        { email: 'disposal@demo.com', password: 'disposal123456', icon: Factory, label: 'التخلص', color: 'bg-rose-600 hover:bg-rose-700' },
+                        { email: 'disposal@demo.com', password: 'disposal123456', icon: Factory, label: 'الأمان', color: 'bg-rose-600 hover:bg-rose-700' },
                         { email: 'driver@demo.com', password: 'driver123456', icon: Car, label: 'السائق', color: 'bg-purple-500 hover:bg-purple-600' },
                       ].map((demo) => (
                         <motion.button
