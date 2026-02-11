@@ -43,6 +43,9 @@ import TripCostManagement from './transporter/TripCostManagement';
 import MaintenanceScheduler from './transporter/MaintenanceScheduler';
 import TransporterPerformanceCharts from './transporter/TransporterPerformanceCharts';
 import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
+import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
+import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
+import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const TransporterDashboard = () => {
@@ -107,6 +110,7 @@ const TransporterDashboard = () => {
           <TabsTrigger value="intelligence" className="text-xs sm:text-sm whitespace-nowrap">الذكاء والأتمتة</TabsTrigger>
           <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الشركاء</TabsTrigger>
           <TabsTrigger value="tracking" className="text-xs sm:text-sm whitespace-nowrap">تتبع السائقين</TabsTrigger>
+          <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap">الامتثال القانوني</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
@@ -179,6 +183,12 @@ const TransporterDashboard = () => {
         <TabsContent value="tracking" className="space-y-4 mt-6">
           <DriverLinkingCode />
           <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+        </TabsContent>
+
+        <TabsContent value="compliance" className="space-y-4 mt-6">
+          <VehicleComplianceManager />
+          <DriverComplianceManager />
+          <IncidentReportManager />
         </TabsContent>
       </Tabs>
 
