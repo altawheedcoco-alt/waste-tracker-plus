@@ -1,22 +1,29 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import GeneratorDashboard from '@/components/dashboard/GeneratorDashboard';
-import TransporterDashboard from '@/components/dashboard/TransporterDashboard';
-import RecyclerDashboard from '@/components/dashboard/RecyclerDashboard';
-import AdminDashboard from '@/components/dashboard/AdminDashboard';
-import DriverDashboard from '@/components/dashboard/DriverDashboard';
-import DisposalDashboard from '@/components/dashboard/DisposalDashboard';
-import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
 import PagePasswordGate from '@/components/security/PagePasswordGate';
 import PinVerificationGate from '@/components/security/PinVerificationGate';
-import CallLogWidget from '@/components/calls/CallLogWidget';
-import AIOperationsAssistant from '@/components/ai/AIOperationsAssistant';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Loader2 } from 'lucide-react';
+
+// Lazy load heavy dashboard components - only one renders per user role
+const GeneratorDashboard = lazy(() => import('@/components/dashboard/GeneratorDashboard'));
+const TransporterDashboard = lazy(() => import('@/components/dashboard/TransporterDashboard'));
+const RecyclerDashboard = lazy(() => import('@/components/dashboard/RecyclerDashboard'));
+const AdminDashboard = lazy(() => import('@/components/dashboard/AdminDashboard'));
+const DriverDashboard = lazy(() => import('@/components/dashboard/DriverDashboard'));
+const DisposalDashboard = lazy(() => import('@/components/dashboard/DisposalDashboard'));
+const CallLogWidget = lazy(() => import('@/components/calls/CallLogWidget'));
+const AIOperationsAssistant = lazy(() => import('@/components/ai/AIOperationsAssistant'));
+
+const DashboardLoader = () => (
+  <div className="flex items-center justify-center py-20">
+    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+  </div>
+);
 
 const Dashboard = () => {
   const { user, organization, loading, roles } = useAuth();
@@ -25,13 +32,11 @@ const Dashboard = () => {
   const { enabled: aiAssistantEnabled } = usePlatformSetting('ai_assistant_enabled');
 
   useEffect(() => {
-    // Only redirect if we're sure the user is not logged in
     if (!loading && !user) {
       navigate('/auth', { replace: true });
     }
   }, [user, loading, navigate]);
 
-  // Show loading only during initial auth check
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -45,7 +50,6 @@ const Dashboard = () => {
     );
   }
 
-  // If no user after loading, don't render anything (redirect will happen)
   if (!user) {
     return null;
   }
@@ -56,54 +60,32 @@ const Dashboard = () => {
   const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal');
 
   const renderDashboard = () => {
-    // Show admin dashboard for admin users
-    if (isAdmin) {
-      return <AdminDashboard />;
-    }
-
-    // Show driver dashboard for drivers
-    if (isDriver) {
-      return <DriverDashboard />;
-    }
-
-    // Show role-specific dashboard for other users
+    if (isAdmin) return <AdminDashboard />;
+    if (isDriver) return <DriverDashboard />;
     switch (orgType) {
-      case 'generator':
-        return <GeneratorDashboard />;
-      case 'transporter':
-        return <TransporterDashboard />;
-      case 'recycler':
-        return <RecyclerDashboard />;
-      case 'disposal':
-        return <DisposalDashboard embedded />;
-      default:
-        return <GeneratorDashboard />;
+      case 'generator': return <GeneratorDashboard />;
+      case 'transporter': return <TransporterDashboard />;
+      case 'recycler': return <RecyclerDashboard />;
+      case 'disposal': return <DisposalDashboard embedded />;
+      default: return <GeneratorDashboard />;
     }
   };
 
   return (
     <PinVerificationGate>
       <>
-        {/* Terms acceptance dialog - temporarily disabled until project completion */}
-        {/* {requiresAcceptance && organizationType && (
-          <OrganizationTermsDialog 
-            open={requiresAcceptance} 
-            onAccept={markAsAccepted}
-            organizationType={organizationType}
-          />
-        )} */}
-        
         <DashboardLayout>
           <PagePasswordGate>
-            {renderDashboard()}
+            <Suspense fallback={<DashboardLoader />}>
+              {renderDashboard()}
+            </Suspense>
           </PagePasswordGate>
         </DashboardLayout>
         
-        {/* Call Log Widget */}
-        <CallLogWidget />
-        
-        {/* AI Operations Assistant - for transporter, recycler, admin */}
-        {showAIAssistant && <AIOperationsAssistant />}
+        <Suspense fallback={null}>
+          <CallLogWidget />
+          {showAIAssistant && <AIOperationsAssistant />}
+        </Suspense>
       </>
     </PinVerificationGate>
   );
