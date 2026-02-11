@@ -1,16 +1,21 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
-import { FileCheck, DollarSign, CheckCircle, Download, QrCode, Eye, Package, Lock, AlertTriangle, Receipt } from 'lucide-react';
+import { FileCheck, DollarSign, CheckCircle, Download, QrCode, Eye, Package, Lock, AlertTriangle, Receipt, Printer, FileText } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useReactToPrint } from 'react-to-print';
+import { useAuth } from '@/contexts/AuthContext';
+import DisposalCertificatePrint from '@/components/disposal/DisposalCertificatePrint';
+import DisposalAccountStatementPrint from '@/components/disposal/DisposalAccountStatementPrint';
 
 interface CompletionFinanceTabProps {
   facilityId?: string | null;
@@ -20,9 +25,30 @@ interface CompletionFinanceTabProps {
 
 const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: CompletionFinanceTabProps) => {
   const queryClient = useQueryClient();
+  const { organization } = useAuth();
   const [showDualVerify, setShowDualVerify] = useState(false);
   const [supervisorPassword, setSupervisorPassword] = useState('');
   const [pendingCertOp, setPendingCertOp] = useState<any>(null);
+  const [showCertPreview, setShowCertPreview] = useState(false);
+  const [previewCertData, setPreviewCertData] = useState<any>(null);
+  const [showStatementPreview, setShowStatementPreview] = useState(false);
+
+  const certPrintRef = useRef<HTMLDivElement>(null);
+  const statementPrintRef = useRef<HTMLDivElement>(null);
+
+  const handlePrintCert = useReactToPrint({ contentRef: certPrintRef });
+  const handlePrintStatement = useReactToPrint({ contentRef: statementPrintRef });
+
+  // Facility details
+  const { data: facility } = useQuery({
+    queryKey: ['mc-facility-detail', facilityId],
+    queryFn: async () => {
+      if (!facilityId) return null;
+      const { data } = await supabase.from('disposal_facilities').select('*').eq('id', facilityId).single();
+      return data;
+    },
+    enabled: !!facilityId,
+  });
 
   // Completed operations
   const { data: completedOps = [] } = useQuery({
@@ -73,19 +99,46 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
       });
       if (error) throw error;
       await supabase.from('disposal_operations').update({ certificate_number: certNum }).eq('id', op.id);
-      return certNum;
+      return { certNum, verificationCode, op };
     },
-    onSuccess: (certNum) => {
-      toast.success(`تم إصدار الشهادة وإرسال نسخة لبريد العميل. رقم: ${certNum}`);
+    onSuccess: ({ certNum, verificationCode, op }) => {
+      toast.success(`تم إصدار الشهادة. رقم: ${certNum}`);
       setShowDualVerify(false);
       setSupervisorPassword('');
+      // Auto-show the certificate preview
+      setPreviewCertData({
+        certificate_number: certNum,
+        verification_code: verificationCode,
+        issue_date: new Date().toISOString(),
+        waste_type: op.waste_type,
+        waste_description: op.waste_description,
+        disposal_method: op.disposal_method,
+        quantity: op.quantity,
+        unit: op.unit,
+        environmental_compliance_score: 95,
+        operation_number: op.operation_number,
+        facility_name: facility?.name || organization?.name,
+        facility_address: facility?.address,
+      facility_license: facility?.activity_specific_license_number,
+      client_name: op.client_name || '-',
+        hazard_level: op.hazard_level,
+        incineration_temperature: op.incineration_temperature,
+        landfill_cell_id: op.landfill_cell_id,
+        processing_started_at: op.processing_started_at,
+        processing_completed_at: op.processing_completed_at,
+        receiving_officer: op.receiving_officer,
+        weight_ticket_number: op.weight_ticket_number,
+        stamp_url: organization?.stamp_url,
+        signature_url: organization?.signature_url,
+      });
+      setShowCertPreview(true);
       queryClient.invalidateQueries({ queryKey: ['mc-completed-ops'] });
       queryClient.invalidateQueries({ queryKey: ['mc-certificates'] });
     },
     onError: () => toast.error('فشل إصدار الشهادة'),
   });
 
-  // Billing / post to accounts
+  // Billing
   const billingMutation = useMutation({
     mutationFn: async (op: any) => {
       const pricePerTon = 450;
@@ -117,13 +170,39 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
     if (pendingCertOp) issueCertMutation.mutate(pendingCertOp);
   };
 
+  const handleViewCert = (cert: any) => {
+    setPreviewCertData({
+      certificate_number: cert.certificate_number,
+      verification_code: cert.verification_code,
+      issue_date: cert.issue_date,
+      waste_type: cert.waste_type,
+      waste_description: cert.waste_description,
+      disposal_method: cert.disposal_method,
+      quantity: cert.quantity,
+      unit: cert.unit,
+      environmental_compliance_score: cert.environmental_compliance_score,
+      facility_name: facility?.name || organization?.name,
+      facility_address: facility?.address,
+      facility_license: facility?.activity_specific_license_number,
+      client_name: cert.organization?.name || '-',
+      stamp_url: organization?.stamp_url,
+      signature_url: organization?.signature_url,
+    });
+    setShowCertPreview(true);
+  };
+
   const opsWithoutCert = completedOps.filter((o: any) => !o.certificate_number);
   const totalBilling = completedOps.reduce((acc: number, o: any) => acc + (o.cost || 0), 0);
 
+  // Statement data
+  const statementNumber = `STMT-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const periodFrom = completedOps.length > 0 ? completedOps[completedOps.length - 1]?.created_at : new Date().toISOString();
+  const periodTo = new Date().toISOString();
+
   return (
     <div className="space-y-6">
-      {/* 2 Big Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* 3 Big Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="border-green-200 dark:border-green-800/40">
           <CardContent className="p-6 text-center">
             <div className="w-16 h-16 rounded-2xl bg-green-100 dark:bg-green-900/30 mx-auto mb-3 flex items-center justify-center">
@@ -143,6 +222,15 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
             </div>
             <h3 className="font-bold text-lg mb-1">ترحيل للحسابات</h3>
             <p className="text-xs text-muted-foreground">تحويل العملية من "تشغيل" إلى "فاتورة مالية"</p>
+          </CardContent>
+        </Card>
+        <Card className="border-blue-200 dark:border-blue-800/40 cursor-pointer hover:shadow-md transition-shadow" onClick={() => setShowStatementPreview(true)}>
+          <CardContent className="p-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 mx-auto mb-3 flex items-center justify-center">
+              <FileText className="w-8 h-8 text-blue-600" />
+            </div>
+            <h3 className="font-bold text-lg mb-1">طباعة كشف حساب شامل</h3>
+            <p className="text-xs text-muted-foreground">تقرير محاسبي رسمي بجميع العمليات والمبالغ</p>
           </CardContent>
         </Card>
       </div>
@@ -239,9 +327,12 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
               {certificates.map((cert: any) => (
                 <div key={cert.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
                   <div className="flex items-center gap-1">
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="عرض"><Eye className="w-4 h-4" /></Button>
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="QR"><QrCode className="w-4 h-4" /></Button>
-                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="تحميل"><Download className="w-4 h-4" /></Button>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="عرض وطباعة" onClick={() => handleViewCert(cert)}>
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title="طباعة" onClick={() => { handleViewCert(cert); setTimeout(() => handlePrintCert(), 500); }}>
+                      <Printer className="w-4 h-4" />
+                    </Button>
                   </div>
                   <div className="text-right flex-1 mr-3">
                     <div className="flex items-center gap-2 justify-end">
@@ -259,7 +350,52 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
         </CardContent>
       </Card>
 
-      {/* Dual Verification for Certificate */}
+      {/* Certificate Preview Dialog */}
+      <Dialog open={showCertPreview} onOpenChange={setShowCertPreview}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto p-0" dir="rtl">
+          <DialogHeader className="p-4 pb-0">
+            <div className="flex items-center justify-between">
+              <Button size="sm" className="gap-2" onClick={() => handlePrintCert()}>
+                <Printer className="w-4 h-4" /> طباعة الشهادة
+              </Button>
+              <DialogTitle>معاينة شهادة التخلص الآمن</DialogTitle>
+            </div>
+          </DialogHeader>
+          <div ref={certPrintRef}>
+            {previewCertData && <DisposalCertificatePrint data={previewCertData} />}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Account Statement Preview Dialog */}
+      <Dialog open={showStatementPreview} onOpenChange={setShowStatementPreview}>
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto p-0" dir="rtl">
+          <DialogHeader className="p-4 pb-0">
+            <div className="flex items-center justify-between">
+              <Button size="sm" className="gap-2" onClick={() => handlePrintStatement()}>
+                <Printer className="w-4 h-4" /> طباعة كشف الحساب
+              </Button>
+              <DialogTitle>كشف حساب شامل — التخلص الآمن</DialogTitle>
+            </div>
+          </DialogHeader>
+          <div ref={statementPrintRef}>
+            <DisposalAccountStatementPrint
+              operations={completedOps}
+              facilityName={facility?.name || organization?.name || '-'}
+              facilityAddress={facility?.address}
+              facilityLicense={facility?.activity_specific_license_number}
+              clientName="-"
+              statementNumber={statementNumber}
+              periodFrom={periodFrom}
+              periodTo={periodTo}
+              stamp_url={organization?.stamp_url}
+              signature_url={organization?.signature_url}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dual Verification */}
       <AlertDialog open={showDualVerify} onOpenChange={setShowDualVerify}>
         <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
