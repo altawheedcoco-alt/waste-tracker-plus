@@ -46,6 +46,7 @@ import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
 import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
+import SignalMonitorWidget from '@/components/tracking/SignalMonitorWidget';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const TransporterDashboard = () => {
@@ -181,6 +182,7 @@ const TransporterDashboard = () => {
         </TabsContent>
 
         <TabsContent value="tracking" className="space-y-4 mt-6">
+          <SignalMonitorWidget />
           <DriverLinkingCode />
           <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
         </TabsContent>
