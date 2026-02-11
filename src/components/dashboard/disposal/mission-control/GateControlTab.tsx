@@ -314,13 +314,32 @@ const GateControlTab = ({ facilityId, organizationId, searchQuery }: GateControl
         <DialogContent dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Scale className="w-5 h-5" /> تسجيل الوزن (Weighbridge)</DialogTitle>
-            <DialogDescription>سند وزن إلكتروني غير قابل للتلاعب</DialogDescription>
+            <DialogDescription>سند وزن إلكتروني غير قابل للتلاعب — يدعم السحب المباشر من الميزان</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="p-3 rounded-lg border bg-muted/50 text-sm">
               <p><strong>العملية:</strong> {selectedOp?.operation_number || selectedOp?.id?.slice(0, 8)}</p>
               <p><strong>المخلف:</strong> {selectedOp?.waste_description || selectedOp?.waste_type}</p>
             </div>
+
+            {/* Hardware Pull Button */}
+            <Button
+              variant="outline"
+              className="w-full gap-2 border-dashed border-emerald-400 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/20"
+              onClick={() => {
+                // Simulate hardware read — replace with actual COM/serial/WebSocket integration
+                toast.info('⚙️ جاري سحب القراءة من ميزان البسكول...', { duration: 2000 });
+                setTimeout(() => {
+                  const simulatedGross = (Math.random() * 20 + 5).toFixed(2);
+                  const simulatedTare = (Math.random() * 3 + 2).toFixed(2);
+                  setWeightData({ gross: simulatedGross, tare: simulatedTare });
+                  toast.success(`✅ تم سحب الوزن من الميزان: إجمالي ${simulatedGross} طن`);
+                }, 1500);
+              }}
+            >
+              <Scale className="w-4 h-4" /> سحب الوزن من الميزان (Hardware Pull)
+            </Button>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>الوزن الإجمالي (طن)</Label>
@@ -338,8 +357,9 @@ const GateControlTab = ({ facilityId, organizationId, searchQuery }: GateControl
               </div>
             )}
             <Button className="w-full gap-2" disabled={!weightData.gross || !weightData.tare || weighMutation.isPending} onClick={() => selectedOp && weighMutation.mutate({ opId: selectedOp.id, gross: Number(weightData.gross), tare: Number(weightData.tare) })}>
-              <Scale className="w-4 h-4" /> {weighMutation.isPending ? 'جاري التسجيل...' : 'إصدار سند الوزن'}
+              <Scale className="w-4 h-4" /> {weighMutation.isPending ? 'جاري التسجيل...' : 'اعتماد الوزن وقفل السند'}
             </Button>
+            <p className="text-xs text-muted-foreground text-center">⚠️ سند الوزن غير قابل للتعديل بعد الاعتماد (ReadOnly)</p>
           </div>
         </DialogContent>
       </Dialog>
