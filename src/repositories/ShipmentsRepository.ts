@@ -137,15 +137,26 @@ export const ShipmentsRepository = {
     completed: number;
     cancelled: number;
   }> {
-    const [total, pending, inTransit, completed, cancelled] = await Promise.all([
-      baseRepo.count({ organization_id: organizationId }),
-      baseRepo.count({ organization_id: organizationId, status: 'pending' }),
-      baseRepo.count({ organization_id: organizationId, status: 'in_transit' }),
-      baseRepo.count({ organization_id: organizationId, status: 'completed' }),
-      baseRepo.count({ organization_id: organizationId, status: 'cancelled' }),
-    ]);
+    // Single query to get all statuses, then count client-side (1 query instead of 5)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - deep type instantiation workaround
+    const result = await supabase.from('shipments').select('status').eq('organization_id', organizationId);
+    const data = (result.data || []) as { status: string }[];
+    const error = result.error;
 
-    return { total, pending, inTransit, completed, cancelled };
+    if (error) {
+      console.error('Error fetching shipment stats:', error);
+      throw error;
+    }
+
+    const rows = (data || []) as { status: string }[];
+    return {
+      total: rows.length,
+      pending: rows.filter(r => r.status === 'pending').length,
+      inTransit: rows.filter(r => r.status === 'in_transit').length,
+      completed: rows.filter(r => r.status === 'completed').length,
+      cancelled: rows.filter(r => r.status === 'cancelled').length,
+    };
   },
 
   async getRecentShipments(organizationId: string, limit = 10): Promise<Shipment[]> {
