@@ -1453,6 +1453,250 @@ export type Database = {
           },
         ]
       }
+      carbon_emission_factors: {
+        Row: {
+          category: string
+          created_at: string
+          emission_factor: number
+          factor_name: string
+          factor_name_ar: string
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          scope: number
+          source: string
+          sub_category: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          emission_factor: number
+          factor_name: string
+          factor_name_ar: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          scope?: number
+          source?: string
+          sub_category: string
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          emission_factor?: number
+          factor_name?: string
+          factor_name_ar?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          scope?: number
+          source?: string
+          sub_category?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      carbon_footprint_records: {
+        Row: {
+          calculation_date: string
+          created_at: string
+          disposal_details: Json | null
+          disposal_emissions: number | null
+          disposal_method: string | null
+          document_hash: string | null
+          fuel_consumed_liters: number | null
+          fuel_type: string | null
+          generation_details: Json | null
+          generation_emissions: number | null
+          id: string
+          net_impact: number | null
+          organization_id: string
+          recycling_details: Json | null
+          recycling_emissions: number | null
+          recycling_savings: number | null
+          shipment_id: string | null
+          total_emissions: number | null
+          total_savings: number | null
+          transport_details: Json | null
+          transport_distance_km: number | null
+          transport_emissions: number | null
+          updated_at: string
+          vehicle_type: string | null
+          verified: boolean | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          calculation_date?: string
+          created_at?: string
+          disposal_details?: Json | null
+          disposal_emissions?: number | null
+          disposal_method?: string | null
+          document_hash?: string | null
+          fuel_consumed_liters?: number | null
+          fuel_type?: string | null
+          generation_details?: Json | null
+          generation_emissions?: number | null
+          id?: string
+          net_impact?: number | null
+          organization_id: string
+          recycling_details?: Json | null
+          recycling_emissions?: number | null
+          recycling_savings?: number | null
+          shipment_id?: string | null
+          total_emissions?: number | null
+          total_savings?: number | null
+          transport_details?: Json | null
+          transport_distance_km?: number | null
+          transport_emissions?: number | null
+          updated_at?: string
+          vehicle_type?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          calculation_date?: string
+          created_at?: string
+          disposal_details?: Json | null
+          disposal_emissions?: number | null
+          disposal_method?: string | null
+          document_hash?: string | null
+          fuel_consumed_liters?: number | null
+          fuel_type?: string | null
+          generation_details?: Json | null
+          generation_emissions?: number | null
+          id?: string
+          net_impact?: number | null
+          organization_id?: string
+          recycling_details?: Json | null
+          recycling_emissions?: number | null
+          recycling_savings?: number | null
+          shipment_id?: string | null
+          total_emissions?: number | null
+          total_savings?: number | null
+          transport_details?: Json | null
+          transport_distance_km?: number | null
+          transport_emissions?: number | null
+          updated_at?: string
+          vehicle_type?: string | null
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carbon_footprint_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "carbon_footprint_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carbon_footprint_records_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carbon_summary: {
+        Row: {
+          carbon_intensity: number | null
+          created_at: string
+          id: string
+          net_impact: number | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          period_type: string | null
+          recycling_rate: number | null
+          report_generated: boolean | null
+          report_url: string | null
+          scope1_emissions: number | null
+          scope2_emissions: number | null
+          scope3_emissions: number | null
+          total_emissions: number | null
+          total_landfilled_tons: number | null
+          total_recycled_tons: number | null
+          total_savings: number | null
+          total_waste_tons: number | null
+          updated_at: string
+        }
+        Insert: {
+          carbon_intensity?: number | null
+          created_at?: string
+          id?: string
+          net_impact?: number | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          period_type?: string | null
+          recycling_rate?: number | null
+          report_generated?: boolean | null
+          report_url?: string | null
+          scope1_emissions?: number | null
+          scope2_emissions?: number | null
+          scope3_emissions?: number | null
+          total_emissions?: number | null
+          total_landfilled_tons?: number | null
+          total_recycled_tons?: number | null
+          total_savings?: number | null
+          total_waste_tons?: number | null
+          updated_at?: string
+        }
+        Update: {
+          carbon_intensity?: number | null
+          created_at?: string
+          id?: string
+          net_impact?: number | null
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          period_type?: string | null
+          recycling_rate?: number | null
+          report_generated?: boolean | null
+          report_url?: string | null
+          scope1_emissions?: number | null
+          scope2_emissions?: number | null
+          scope3_emissions?: number | null
+          total_emissions?: number | null
+          total_landfilled_tons?: number | null
+          total_recycled_tons?: number | null
+          total_savings?: number | null
+          total_waste_tons?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carbon_summary_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "carbon_summary_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
