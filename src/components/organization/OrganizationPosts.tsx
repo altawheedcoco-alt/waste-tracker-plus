@@ -161,23 +161,19 @@ const OrganizationPosts = ({
   };
 
   const uploadFiles = async (): Promise<string[]> => {
+    const { uploadFile } = await import('@/utils/optimizedUpload');
     const urls: string[] = [];
     
     for (const file of selectedFiles) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${organizationId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const ext = file.name.split('.').pop();
+      const fileName = `${organizationId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
       
-      const { error } = await supabase.storage
-        .from('organization-posts')
-        .upload(fileName, file);
+      const result = await uploadFile(file, {
+        bucket: 'organization-posts',
+        path: fileName,
+      });
 
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('organization-posts')
-        .getPublicUrl(fileName);
-
-      urls.push(publicUrl);
+      urls.push(result.publicUrl);
     }
 
     return urls;

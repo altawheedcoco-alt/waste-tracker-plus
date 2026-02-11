@@ -137,17 +137,14 @@ const SignaturesStampsManager = () => {
       const folderPath = dialogType === 'signature' ? 'signatures' : 'stamps';
       const filePath = `${folderPath}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('organization-documents')
-        .upload(filePath, file);
+      const { uploadFile } = await import('@/utils/optimizedUpload');
+      const result = await uploadFile(file, {
+        bucket: 'organization-documents',
+        path: filePath,
+        compressionOptions: { maxWidth: 800, quality: 0.9 },
+      });
 
-      if (uploadError) throw uploadError;
-
-      const { data: publicUrl } = supabase.storage
-        .from('organization-documents')
-        .getPublicUrl(filePath);
-
-      const url = publicUrl.publicUrl;
+      const url = result.publicUrl;
       setPreviewUrl(url);
 
       if (dialogType === 'signature') {

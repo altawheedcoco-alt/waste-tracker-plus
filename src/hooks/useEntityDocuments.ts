@@ -126,21 +126,19 @@ export function useEntityDocuments(filters: DocumentFilters = {}) {
         throw new Error('يجب تسجيل الدخول أولاً');
       }
 
-      // Upload file to storage
+      // Upload file to storage with auto-compression
+      const { uploadFile } = await import('@/utils/optimizedUpload');
       const fileExt = params.file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
       const filePath = `${organization.id}/${params.partnerId || params.externalPartnerId || 'general'}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('entity-documents')
-        .upload(filePath, params.file);
-
-      if (uploadError) throw uploadError;
+      const uploadResult = await uploadFile(params.file, {
+        bucket: 'entity-documents',
+        path: filePath,
+      });
 
       // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('entity-documents')
-        .getPublicUrl(filePath);
+      const fileUrl = uploadResult.publicUrl;
 
       // Create document record
       const { data, error } = await supabase
@@ -153,7 +151,7 @@ export function useEntityDocuments(filters: DocumentFilters = {}) {
           document_category: params.documentCategory,
           title: params.title,
           description: params.description,
-          file_url: urlData.publicUrl,
+          file_url: fileUrl,
           file_name: params.file.name,
           file_type: params.file.type,
           file_size: params.file.size,
