@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Search, Package, Truck, Scale, Flame, DollarSign, Clock, CheckCircle, XCircle, FlaskConical, Mountain, FileCheck, Play, AlertTriangle, Lock } from 'lucide-react';
+import { Shield, Search, Package, Truck, Scale, Flame, DollarSign, Clock, CheckCircle, XCircle, FlaskConical, Mountain, FileCheck, Play, AlertTriangle, Lock, OctagonX, Bell, FileArchive } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { useAuth } from '@/contexts/AuthContext';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, differenceInDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 import GateControlTab from '@/components/dashboard/disposal/mission-control/GateControlTab';
 import LabTreatmentTab from '@/components/dashboard/disposal/mission-control/LabTreatmentTab';
@@ -24,8 +27,11 @@ import EnvironmentalTab from '@/components/dashboard/disposal/mission-control/En
 
 const DisposalMissionControl = () => {
   const { organization } = useAuth();
+  const queryClient = useQueryClient();
   const [globalSearch, setGlobalSearch] = useState('');
   const [activeTab, setActiveTab] = useState('gate');
+  const [showEmergencyConfirm, setShowEmergencyConfirm] = useState(false);
+  const [emergencyPassword, setEmergencyPassword] = useState('');
 
   const { data: facility } = useQuery({
     queryKey: ['disposal-facility', organization?.id],
@@ -80,6 +86,72 @@ const DisposalMissionControl = () => {
     enabled: !!organization?.id,
   });
 
+  // License expiry alerts (fleet vehicles + contracts)
+  const { data: expiryAlerts = [] } = useQuery({
+    queryKey: ['mc-expiry-alerts', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const alerts: { type: string; label: string; expiry: string; daysLeft: number }[] = [];
+      
+      // Fleet vehicle hazmat licenses
+      const { data: vehicles } = await supabase
+        .from('disposal_fleet_vehicles')
+        .select('plate_number, hazmat_license_expiry, maintenance_due_date')
+        .eq('organization_id', organization.id);
+      
+      (vehicles || []).forEach((v: any) => {
+        if (v.hazmat_license_expiry) {
+          const days = differenceInDays(new Date(v.hazmat_license_expiry), new Date());
+          if (days <= 30) alerts.push({ type: 'license', label: `ترخيص خطرة — ${v.plate_number}`, expiry: v.hazmat_license_expiry, daysLeft: days });
+        }
+        if (v.maintenance_due_date) {
+          const days = differenceInDays(new Date(v.maintenance_due_date), new Date());
+          if (days <= 14) alerts.push({ type: 'maintenance', label: `صيانة — ${v.plate_number}`, expiry: v.maintenance_due_date, daysLeft: days });
+        }
+      });
+
+      // Facility license
+      if ((facility as any)?.activity_specific_license_expiry) {
+        const days = differenceInDays(new Date((facility as any).activity_specific_license_expiry), new Date());
+        if (days <= 60) alerts.push({ type: 'license', label: 'ترخيص المنشأة', expiry: (facility as any).activity_specific_license_expiry, daysLeft: days });
+      }
+
+      // MRO low stock
+      const { data: lowStock } = await supabase
+        .from('mro_inventory')
+        .select('item_name, current_stock, minimum_stock')
+        .eq('organization_id', organization.id);
+      
+      (lowStock || []).forEach((item: any) => {
+        if (item.minimum_stock > 0 && item.current_stock <= item.minimum_stock) {
+          alerts.push({ type: 'stock', label: `مخزون منخفض — ${item.item_name}`, expiry: '', daysLeft: -1 });
+        }
+      });
+
+      return alerts.sort((a, b) => a.daysLeft - b.daysLeft);
+    },
+    enabled: !!organization?.id,
+  });
+
+  // Emergency mode - halt all processing operations
+  const emergencyMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('disposal_operations')
+        .update({ status: 'pending', updated_at: new Date().toISOString() })
+        .eq('organization_id', organization!.id)
+        .eq('status', 'processing');
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.error('🚨 تم تفعيل وضع الطوارئ — أُوقفت جميع العمليات الجارية');
+      setShowEmergencyConfirm(false);
+      setEmergencyPassword('');
+      queryClient.invalidateQueries({ queryKey: ['mc-summary-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['mc-timeline'] });
+    },
+  });
+
   const getTimelineIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle className="w-4 h-4 text-green-500" />;
@@ -115,16 +187,44 @@ const DisposalMissionControl = () => {
               <p className="text-muted-foreground text-sm">{facility?.name || 'منشأة التخلص النهائي'}</p>
             </div>
           </div>
-          <div className="relative w-full md:w-80">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="بحث (رقم شحنة، عميل، بيان...)"
-              value={globalSearch}
-              onChange={(e) => setGlobalSearch(e.target.value)}
-              className="pr-10"
-            />
+          <div className="flex items-center gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 shadow-lg" onClick={() => setShowEmergencyConfirm(true)}>
+              <OctagonX className="w-4 h-4" /> وضع الطوارئ
+            </Button>
+            <div className="relative w-full md:w-72">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="بحث (رقم شحنة، عميل...)"
+                value={globalSearch}
+                onChange={(e) => setGlobalSearch(e.target.value)}
+                className="pr-10"
+              />
+            </div>
           </div>
         </motion.div>
+
+        {/* Expiry & Stock Alerts Banner */}
+        {expiryAlerts.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <Card className="border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/10">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Bell className="w-4 h-4 text-amber-600" />
+                  <span className="font-bold text-sm text-amber-700 dark:text-amber-400">تنبيهات الصلاحيات والمخزون ({expiryAlerts.length})</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {expiryAlerts.slice(0, 6).map((alert: any, i: number) => (
+                    <Badge key={i} variant="outline" className={`text-xs ${alert.daysLeft < 0 ? 'border-red-400 text-red-600' : alert.daysLeft <= 7 ? 'border-red-300 text-red-500' : 'border-amber-300 text-amber-600'}`}>
+                      {alert.type === 'stock' ? '📦' : alert.daysLeft <= 0 ? '🔴' : '🟡'} {alert.label}
+                      {alert.daysLeft >= 0 && <span className="mr-1">({alert.daysLeft} يوم)</span>}
+                    </Badge>
+                  ))}
+                  {expiryAlerts.length > 6 && <Badge variant="outline" className="text-xs">+{expiryAlerts.length - 6} أخرى</Badge>}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* 4 Summary Cards - TOP */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -242,6 +342,38 @@ const DisposalMissionControl = () => {
           </Card>
         </motion.div>
       </div>
+
+      {/* Emergency Mode AlertDialog */}
+      <AlertDialog open={showEmergencyConfirm} onOpenChange={setShowEmergencyConfirm}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <OctagonX className="w-6 h-6" /> تفعيل وضع الطوارئ
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right space-y-2">
+              <p>سيتم إيقاف <strong>جميع العمليات الجارية</strong> فوراً (حرق، معالجة كيميائية)، وإعادتها لحالة "بانتظار".</p>
+              <p className="text-red-600 font-medium">⚠️ هذا الإجراء لا يمكن التراجع عنه تلقائياً.</p>
+              <div className="mt-3 space-y-2">
+                <label className="text-sm font-medium">أدخل كلمة مرور المشرف للتأكيد:</label>
+                <Input type="password" placeholder="كلمة مرور المشرف" value={emergencyPassword} onChange={(e) => setEmergencyPassword(e.target.value)} className="border-red-300" />
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white gap-2"
+              onClick={() => {
+                if (emergencyPassword.length < 4) { toast.error('يرجى إدخال كلمة مرور المشرف'); return; }
+                emergencyMutation.mutate();
+              }}
+              disabled={emergencyMutation.isPending}
+            >
+              <OctagonX className="w-4 h-4" /> {emergencyMutation.isPending ? 'جاري الإيقاف...' : 'تأكيد إيقاف الطوارئ'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
