@@ -4078,6 +4078,79 @@ export type Database = {
           },
         ]
       }
+      driver_signal_status: {
+        Row: {
+          battery_level: number | null
+          consecutive_failures: number | null
+          created_at: string
+          driver_id: string
+          id: string
+          is_online: boolean
+          last_latitude: number | null
+          last_longitude: number | null
+          last_seen_at: string
+          organization_id: string
+          signal_lost_at: string | null
+          signal_lost_notified: boolean | null
+          tracking_mode: string | null
+          updated_at: string
+        }
+        Insert: {
+          battery_level?: number | null
+          consecutive_failures?: number | null
+          created_at?: string
+          driver_id: string
+          id?: string
+          is_online?: boolean
+          last_latitude?: number | null
+          last_longitude?: number | null
+          last_seen_at?: string
+          organization_id: string
+          signal_lost_at?: string | null
+          signal_lost_notified?: boolean | null
+          tracking_mode?: string | null
+          updated_at?: string
+        }
+        Update: {
+          battery_level?: number | null
+          consecutive_failures?: number | null
+          created_at?: string
+          driver_id?: string
+          id?: string
+          is_online?: boolean
+          last_latitude?: number | null
+          last_longitude?: number | null
+          last_seen_at?: string
+          organization_id?: string
+          signal_lost_at?: string | null
+          signal_lost_notified?: boolean | null
+          tracking_mode?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_signal_status_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: true
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_signal_status_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_signal_status_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       drivers: {
         Row: {
           created_at: string | null
@@ -12188,6 +12261,16 @@ export type Database = {
           failed_attempts: number
           is_blocked: boolean
           last_attempt: string
+        }[]
+      }
+      check_driver_signal_loss: {
+        Args: { timeout_minutes?: number }
+        Returns: {
+          driver_id: string
+          driver_name: string
+          last_seen_at: string
+          minutes_offline: number
+          organization_id: string
         }[]
       }
       cleanup_old_api_request_logs: { Args: never; Returns: number }
