@@ -5932,6 +5932,97 @@ export type Database = {
           },
         ]
       }
+      legal_licenses: {
+        Row: {
+          allowed_waste_codes: string[] | null
+          created_at: string
+          created_by: string | null
+          document_file_name: string | null
+          document_url: string | null
+          expiry_date: string | null
+          facility_id: string | null
+          id: string
+          issue_date: string | null
+          issuing_authority: string
+          license_category: string
+          license_name: string
+          license_name_en: string | null
+          license_number: string | null
+          notes: string | null
+          organization_id: string
+          reminder_sent_at: string | null
+          renewal_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_waste_codes?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          document_file_name?: string | null
+          document_url?: string | null
+          expiry_date?: string | null
+          facility_id?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_authority: string
+          license_category: string
+          license_name: string
+          license_name_en?: string | null
+          license_number?: string | null
+          notes?: string | null
+          organization_id: string
+          reminder_sent_at?: string | null
+          renewal_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_waste_codes?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          document_file_name?: string | null
+          document_url?: string | null
+          expiry_date?: string | null
+          facility_id?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_authority?: string
+          license_category?: string
+          license_name?: string
+          license_name_en?: string | null
+          license_number?: string | null
+          notes?: string | null
+          organization_id?: string
+          reminder_sent_at?: string | null
+          renewal_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_licenses_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "legal_licenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "legal_licenses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materialized_view_refresh_log: {
         Row: {
           duration_ms: number | null
