@@ -2,7 +2,7 @@ import { Suspense, lazy, memo } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
@@ -148,23 +148,9 @@ const UnifiedSupportWidget = lazy(() => lazyRetry(() => import("./components/ai/
 const BetaBanner = lazy(() => lazyRetry(() => import("./components/BetaBanner")));
 const AccessibilityPanel = lazy(() => lazyRetry(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel }))));
 
-// Optimized QueryClient with aggressive caching
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 10, // 10 minutes - longer cache
-      gcTime: 1000 * 60 * 60, // 1 hour garbage collection
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      retry: 1,
-      networkMode: 'offlineFirst',
-    },
-    mutations: {
-      networkMode: 'offlineFirst',
-    },
-  },
-});
+// Smart QueryClient with adaptive caching per data category
+import { createSmartQueryClient } from '@/lib/queryCacheConfig';
+const queryClient = createSmartQueryClient();
 
 // Memoized providers wrapper for performance
 const Providers = memo(({ children }: { children: React.ReactNode }) => (
