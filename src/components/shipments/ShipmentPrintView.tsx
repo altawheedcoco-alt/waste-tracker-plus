@@ -7,6 +7,8 @@ import { ar } from 'date-fns/locale';
 import { QRCodeCanvas } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import PrintThemeSelector from './PrintThemeSelector';
+import { getThemeById } from './printThemes';
 
 interface ShipmentData {
   id: string;
@@ -136,6 +138,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const barcodeRef = useRef<HTMLDivElement>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
+  const [themeId, setThemeId] = useState('eco-green');
+  const theme = getThemeById(themeId);
   
   const { exportToPDF, isExporting } = usePDFExport({
     filename: `tracking-form-${shipment?.shipment_number || 'document'}`,
@@ -198,17 +202,17 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
         <style>
           @page { size: A4; margin: 5mm; }
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 6pt; direction: rtl; background: white; color: #1a1a1a; line-height: 1.2; }
+          body { font-family: ${theme.font}; font-size: 6pt; direction: rtl; background: white; color: #1a1a1a; line-height: 1.2; }
           .page { width: 100%; max-width: 210mm; margin: 0 auto; }
           table { width: 100%; border-collapse: collapse; margin-bottom: 3px; }
-          th, td { border: 1px solid #d1d5db; padding: 2px 3px; text-align: right; font-size: 6pt; }
-          .section-header { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); color: white; font-weight: bold; font-size: 7pt; text-align: center; padding: 2px; }
-          .label-cell { background: #f9fafb; font-weight: 600; color: #4b5563; }
-          .party-header-gen { background: #3b82f6; color: white; font-weight: bold; font-size: 7pt; text-align: center; }
-          .party-header-trans { background: #eab308; color: white; font-weight: bold; font-size: 7pt; text-align: center; }
-          .party-header-rec { background: #22c55e; color: white; font-weight: bold; font-size: 7pt; text-align: center; }
+          th, td { border: 1px solid ${theme.colors.border}; padding: 2px 3px; text-align: right; font-size: 6pt; }
+          .section-header { background: ${theme.colors.headerBg}; color: ${theme.colors.headerText}; font-weight: bold; font-size: 7pt; text-align: center; padding: 2px; }
+          .label-cell { background: ${theme.colors.labelBg}; font-weight: 600; color: ${theme.colors.labelText}; }
+          .party-header-gen { background: ${theme.colors.generatorBg}; color: ${theme.colors.generatorText}; font-weight: bold; font-size: 7pt; text-align: center; }
+          .party-header-trans { background: ${theme.colors.transporterBg}; color: ${theme.colors.transporterText}; font-weight: bold; font-size: 7pt; text-align: center; }
+          .party-header-rec { background: ${theme.colors.recyclerBg}; color: ${theme.colors.recyclerText}; font-weight: bold; font-size: 7pt; text-align: center; }
           .signature-cell { text-align: center; vertical-align: bottom; height: 35px; }
-          .footer { text-align: center; font-size: 5pt; color: #9ca3af; margin-top: 3px; padding-top: 3px; border-top: 1px solid #e5e7eb; }
+          .footer { text-align: center; font-size: 5pt; color: ${theme.colors.footerText}; margin-top: 3px; padding-top: 3px; border-top: 1px solid ${theme.colors.borderLight}; }
           @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
         </style>
       </head>
@@ -248,9 +252,12 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 justify-end">
-            <span>طباعة نموذج تتبع الشحنة</span>
-            <Printer className="w-5 h-5" />
+          <DialogTitle className="flex items-center gap-2 justify-between">
+            <PrintThemeSelector selectedThemeId={themeId} onSelect={setThemeId} />
+            <div className="flex items-center gap-2">
+              <span>طباعة نموذج تتبع الشحنة</span>
+              <Printer className="w-5 h-5" />
+            </div>
           </DialogTitle>
         </DialogHeader>
 
@@ -274,13 +281,13 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                     <div style={{ fontSize: '6pt', color: '#374151', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
                   </td>
                   <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
-                    <div style={{ fontSize: '14pt', fontWeight: 'bold', color: '#16a34a', marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
+                    <div style={{ fontSize: '14pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
                     <div style={{ fontSize: '9pt', color: '#6b7280', marginBottom: '6px' }}>Waste Transport Tracking Form</div>
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ background: '#dcfce7', color: '#166534', padding: '3px 12px', borderRadius: '4px', fontSize: '8pt', fontWeight: '600', border: '1px solid #86efac' }}>
+                      <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '3px 12px', borderRadius: theme.borderRadius, fontSize: '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: '#16a34a', color: 'white', padding: '3px 12px', borderRadius: '4px', fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
+                      <span style={{ background: theme.colors.primary, color: theme.colors.headerText, padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
@@ -297,7 +304,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#a3a23a', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #8b8a32' }}>بيانات الشحنة</td>
+                  <td colSpan={8} style={{ background: theme.colors.shipmentBg, color: theme.colors.shipmentText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>بيانات الشحنة</td>
                 </tr>
                 <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', width: '10%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>نوع المخلفات</td>
@@ -330,9 +337,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#3b82f6', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #2563eb' }}>
+                  <td colSpan={8} style={{ background: theme.colors.generatorBg, color: theme.colors.generatorText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>
                     بيانات الجهة المولدة: {shipment.generator?.name || '-'}
-                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#dbeafe', color: '#1e40af', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
+                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: theme.colors.generatorLight, color: theme.colors.generatorBg, padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
@@ -368,7 +375,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#eab308', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #ca8a04' }}>
+                  <td colSpan={8} style={{ background: theme.colors.transporterBg, color: theme.colors.transporterText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>
                     بيانات الجهة الناقلة: {shipment.transporter?.name || '-'}
                   </td>
                 </tr>
@@ -406,9 +413,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#22c55e', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #16a34a' }}>
+                  <td colSpan={8} style={{ background: theme.colors.recyclerBg, color: theme.colors.recyclerText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>
                     بيانات جهة التدوير: {shipment.recycler?.name || '-'}
-                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
+                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: theme.colors.recyclerLight, color: theme.colors.recyclerBg, padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
@@ -446,17 +453,17 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={3} style={{ background: '#166534', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #14532d' }}>الأختام والتوقيعات</td>
+                  <td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>الأختام والتوقيعات</td>
                 </tr>
                 <tr>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '600', color: '#1e40af', marginBottom: '4px' }}>الجهة المولدة</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: `1px solid ${theme.colors.border}`, background: theme.colors.labelBg }}>
+                    <div style={{ fontSize: '7pt', fontWeight: '600', color: theme.colors.generatorBg, marginBottom: '4px' }}>الجهة المولدة</div>
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>الجهة الناقلة</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: `1px solid ${theme.colors.border}`, background: theme.colors.labelBg }}>
+                    <div style={{ fontSize: '7pt', fontWeight: '600', color: theme.colors.transporterBg, marginBottom: '4px' }}>الجهة الناقلة</div>
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '600', color: '#166534', marginBottom: '4px' }}>جهة التدوير</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: `1px solid ${theme.colors.border}`, background: theme.colors.labelBg }}>
+                    <div style={{ fontSize: '7pt', fontWeight: '600', color: theme.colors.recyclerBg, marginBottom: '4px' }}>جهة التدوير</div>
                   </td>
                 </tr>
                 <tr>
