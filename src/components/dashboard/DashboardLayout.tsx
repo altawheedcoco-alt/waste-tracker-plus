@@ -347,6 +347,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Truck, label: 'روابط السائقين السريعة', path: '/dashboard/quick-driver-links', key: 'quick-driver-links' },
     { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
+    { icon: Activity, label: 'حالة نظامك', path: '/dashboard/system-status', key: 'all-system-status' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
     { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
