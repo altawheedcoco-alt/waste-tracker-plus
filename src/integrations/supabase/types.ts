@@ -809,6 +809,84 @@ export type Database = {
         }
         Relationships: []
       }
+      authorized_signatories: {
+        Row: {
+          activated_at: string | null
+          authority_level: string
+          can_sign_certificates: boolean | null
+          can_sign_contracts: boolean | null
+          can_sign_invoices: boolean | null
+          can_sign_shipments: boolean | null
+          created_at: string
+          created_by: string | null
+          deactivated_at: string | null
+          full_name: string
+          id: string
+          is_active: boolean | null
+          job_title: string | null
+          national_id: string | null
+          organization_id: string
+          signature_image_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          authority_level?: string
+          can_sign_certificates?: boolean | null
+          can_sign_contracts?: boolean | null
+          can_sign_invoices?: boolean | null
+          can_sign_shipments?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          national_id?: string | null
+          organization_id: string
+          signature_image_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          authority_level?: string
+          can_sign_certificates?: boolean | null
+          can_sign_contracts?: boolean | null
+          can_sign_invoices?: boolean | null
+          can_sign_shipments?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          deactivated_at?: string | null
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          national_id?: string | null
+          organization_id?: string
+          signature_image_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "authorized_signatories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "authorized_signatories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       award_letter_items: {
         Row: {
           award_letter_id: string
@@ -4064,19 +4142,32 @@ export type Database = {
           biometric_verified: boolean | null
           created_at: string
           device_info: string | null
+          document_hash: string | null
           document_id: string
           document_type: string
           id: string
           ip_address: string | null
           organization_id: string | null
+          platform_seal_number: string | null
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          signatory_id: string | null
+          signature_hash: string | null
           signature_image_url: string | null
           signature_method: string
+          signature_text: string | null
           signed_by: string | null
           signer_name: string
+          signer_national_id: string | null
           signer_role: string | null
+          signer_title: string | null
           stamp_applied: boolean | null
+          stamp_image_url: string | null
           stamp_verified_biometrically: boolean | null
+          status: string | null
           timestamp_signed: string
+          user_agent: string | null
         }
         Insert: {
           biometric_type?: string | null
@@ -4084,19 +4175,32 @@ export type Database = {
           biometric_verified?: boolean | null
           created_at?: string
           device_info?: string | null
+          document_hash?: string | null
           document_id: string
           document_type: string
           id?: string
           ip_address?: string | null
           organization_id?: string | null
+          platform_seal_number?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          signatory_id?: string | null
+          signature_hash?: string | null
           signature_image_url?: string | null
           signature_method: string
+          signature_text?: string | null
           signed_by?: string | null
           signer_name: string
+          signer_national_id?: string | null
           signer_role?: string | null
+          signer_title?: string | null
           stamp_applied?: boolean | null
+          stamp_image_url?: string | null
           stamp_verified_biometrically?: boolean | null
+          status?: string | null
           timestamp_signed?: string
+          user_agent?: string | null
         }
         Update: {
           biometric_type?: string | null
@@ -4104,19 +4208,32 @@ export type Database = {
           biometric_verified?: boolean | null
           created_at?: string
           device_info?: string | null
+          document_hash?: string | null
           document_id?: string
           document_type?: string
           id?: string
           ip_address?: string | null
           organization_id?: string | null
+          platform_seal_number?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          signatory_id?: string | null
+          signature_hash?: string | null
           signature_image_url?: string | null
           signature_method?: string
+          signature_text?: string | null
           signed_by?: string | null
           signer_name?: string
+          signer_national_id?: string | null
           signer_role?: string | null
+          signer_title?: string | null
           stamp_applied?: boolean | null
+          stamp_image_url?: string | null
           stamp_verified_biometrically?: boolean | null
+          status?: string | null
           timestamp_signed?: string
+          user_agent?: string | null
         }
         Relationships: [
           {
@@ -4131,6 +4248,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_signatures_signatory_id_fkey"
+            columns: ["signatory_id"]
+            isOneToOne: false
+            referencedRelation: "authorized_signatories"
             referencedColumns: ["id"]
           },
         ]
@@ -10889,6 +11013,76 @@ export type Database = {
           },
         ]
       }
+      signature_audit_log: {
+        Row: {
+          action: string
+          actor_device: string | null
+          actor_ip: string | null
+          actor_name: string | null
+          actor_user_agent: string | null
+          actor_user_id: string | null
+          created_at: string
+          details: Json | null
+          document_id: string | null
+          document_type: string | null
+          id: string
+          organization_id: string | null
+          signature_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_device?: string | null
+          actor_ip?: string | null
+          actor_name?: string | null
+          actor_user_agent?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          document_id?: string | null
+          document_type?: string | null
+          id?: string
+          organization_id?: string | null
+          signature_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_device?: string | null
+          actor_ip?: string | null
+          actor_name?: string | null
+          actor_user_agent?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          document_id?: string | null
+          document_type?: string | null
+          id?: string
+          organization_id?: string | null
+          signature_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "signature_audit_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_audit_log_signature_id_fkey"
+            columns: ["signature_id"]
+            isOneToOne: false
+            referencedRelation: "document_signatures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       slot_bookings: {
         Row: {
           booked_by_organization_id: string
@@ -13018,6 +13212,7 @@ export type Database = {
       }
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
+      generate_seal_number: { Args: never; Returns: string }
       generate_system_seal_number: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }
       get_admin_dashboard_stats: {

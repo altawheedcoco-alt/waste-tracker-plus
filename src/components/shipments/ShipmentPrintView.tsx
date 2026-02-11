@@ -1,7 +1,11 @@
 import { useRef, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Printer, Download } from 'lucide-react';
+import { Printer, Download, PenTool } from 'lucide-react';
+import UniversalSignatureDialog from '@/components/signatures/UniversalSignatureDialog';
+import SignatureBadges from '@/components/signatures/SignatureBadges';
+import { saveDocumentSignature, getDocumentSignatures } from '@/components/signatures/signatureService';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -139,6 +143,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
   const [themeId, setThemeId] = useState('eco-green');
+  const [signDialogOpen, setSignDialogOpen] = useState(false);
+  const [signatures, setSignatures] = useState<any[]>([]);
+  const [signingLoading, setSigningLoading] = useState(false);
   const theme = getThemeById(themeId);
   
   const { exportToPDF, isExporting } = usePDFExport({
@@ -183,6 +190,39 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
       }
     }
   }, [shipment?.id]);
+
+  // Load existing signatures
+  useEffect(() => {
+    if (shipment?.id && isOpen) {
+      getDocumentSignatures('shipment', shipment.id).then(setSignatures);
+    }
+  }, [shipment?.id, isOpen]);
+
+  const handleSignDocument = async (signatureData: any) => {
+    if (!shipment) return;
+    setSigningLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase.from('profiles').select('organization_id').eq('id', user.id).single();
+      if (!profile?.organization_id) return;
+
+      const result = await saveDocumentSignature({
+        signatureData,
+        documentType: 'shipment',
+        documentId: shipment.id,
+        organizationId: profile.organization_id,
+        userId: user.id,
+      });
+
+      if (result.success) {
+        setSignDialogOpen(false);
+        getDocumentSignatures('shipment', shipment.id).then(setSignatures);
+      }
+    } finally {
+      setSigningLoading(false);
+    }
+  };
 
   if (!shipment) return null;
 
@@ -503,8 +543,20 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
           </div>
         </div>
 
+        {/* Signatures display */}
+        {signatures.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap px-1">
+            <span className="text-xs text-muted-foreground">التوقيعات:</span>
+            <SignatureBadges signatures={signatures} />
+          </div>
+        )}
+
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>إغلاق</Button>
+          <Button variant="outline" onClick={() => setSignDialogOpen(true)} className="gap-2">
+            <PenTool className="w-4 h-4" />
+            توقيع وختم
+          </Button>
           <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
             <Download className="w-4 h-4" />
             تصدير PDF
@@ -514,6 +566,19 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             طباعة
           </Button>
         </DialogFooter>
+
+        {/* Signature Dialog */}
+        <UniversalSignatureDialog
+          open={signDialogOpen}
+          onOpenChange={setSignDialogOpen}
+          onSign={handleSignDocument}
+          documentType="shipment"
+          documentId={shipment.id}
+          documentTitle={`نموذج تتبع - ${shipment.shipment_number}`}
+          organizationId=""
+          organizationStampUrl={shipment.generator?.stamp_url || shipment.transporter?.stamp_url || shipment.recycler?.stamp_url}
+          loading={signingLoading}
+        />
       </DialogContent>
     </Dialog>
   );
