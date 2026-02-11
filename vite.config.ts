@@ -13,6 +13,74 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+  build: {
+    target: 'es2020',
+    cssCodeSplit: true,
+    sourcemap: false,
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // React core - rarely changes, cached long-term
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'react-core';
+          }
+          // Router
+          if (id.includes('react-router')) {
+            return 'router';
+          }
+          // UI library (Radix + shadcn primitives)
+          if (id.includes('@radix-ui/')) {
+            return 'ui-primitives';
+          }
+          // Charts & visualization
+          if (id.includes('recharts') || id.includes('d3-')) {
+            return 'charts';
+          }
+          // Data fetching
+          if (id.includes('@tanstack/react-query')) {
+            return 'query';
+          }
+          // Supabase SDK
+          if (id.includes('@supabase/')) {
+            return 'supabase';
+          }
+          // Animation
+          if (id.includes('framer-motion')) {
+            return 'animation';
+          }
+          // PDF/Export
+          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('xlsx')) {
+            return 'export';
+          }
+          // Icons
+          if (id.includes('lucide-react')) {
+            return 'icons';
+          }
+          // Forms
+          if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
+            return 'forms';
+          }
+          // QR/Barcode
+          if (id.includes('qrcode') || id.includes('html5-qrcode') || id.includes('react-barcode')) {
+            return 'qr-barcode';
+          }
+          // Markdown
+          if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype') || id.includes('unified') || id.includes('micromark') || id.includes('mdast')) {
+            return 'markdown';
+          }
+          // Date utilities
+          if (id.includes('date-fns') || id.includes('react-day-picker')) {
+            return 'date-utils';
+          }
+          // Remaining vendor
+          if (id.includes('node_modules/')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     mode === "development" && componentTagger(),
@@ -51,7 +119,7 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json}"],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api/, /^\/supabase/, /^\/~oauth/],
@@ -63,13 +131,8 @@ export default defineConfig(({ mode }) => ({
             handler: "CacheFirst",
             options: {
               cacheName: "google-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
@@ -77,53 +140,34 @@ export default defineConfig(({ mode }) => ({
             handler: "CacheFirst",
             options: {
               cacheName: "gstatic-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            // Cache images
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
             handler: "CacheFirst",
             options: {
               cacheName: "images-cache",
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-              },
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
             },
           },
           {
-            // Cache API responses with network-first strategy
             urlPattern: /\/rest\/v1\/.*/i,
             handler: "NetworkFirst",
             options: {
               cacheName: "api-cache",
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 5, // 5 minutes
-              },
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 },
               networkTimeoutSeconds: 10,
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
-            // Cache static assets
             urlPattern: /\/assets\/.*/i,
             handler: "CacheFirst",
             options: {
               cacheName: "static-assets-cache",
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 7, // 7 days
-              },
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7 },
             },
           },
         ],
@@ -133,12 +177,10 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // Force a single React instance across all dependencies
       react: path.resolve(__dirname, "./node_modules/react"),
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
       "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime"),
     },
-    // Prevent duplicate React instances
     dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
 }));
