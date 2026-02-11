@@ -23,7 +23,7 @@ const PrintThemeSelector = ({ selectedThemeId, onSelect }: PrintThemeSelectorPro
       </PopoverTrigger>
       <PopoverContent className="w-96 p-2" align="start" dir="rtl">
         <div className="text-sm font-semibold mb-2 px-2">اختر سمة الطباعة ({PRINT_THEMES.length} تصميم)</div>
-        <ScrollArea className="max-h-[350px]">
+        <ScrollArea className="h-[320px] pr-2" dir="rtl">
           <div className="grid grid-cols-3 gap-1.5 p-1">
             {PRINT_THEMES.map((theme) => (
               <button
