@@ -11967,6 +11967,76 @@ export type Database = {
           },
         ]
       }
+      weight_disputes: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          difference_percentage: number
+          generator_weight: number
+          id: string
+          organization_id: string
+          recycler_weight: number
+          resolved_at: string | null
+          resolved_by: string | null
+          shipment_id: string
+          status: string
+          threshold_percentage: number
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          difference_percentage: number
+          generator_weight: number
+          id?: string
+          organization_id: string
+          recycler_weight: number
+          resolved_at?: string | null
+          resolved_by?: string | null
+          shipment_id: string
+          status?: string
+          threshold_percentage?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          difference_percentage?: number
+          generator_weight?: number
+          id?: string
+          organization_id?: string
+          recycler_weight?: number
+          resolved_at?: string | null
+          resolved_by?: string | null
+          shipment_id?: string
+          status?: string
+          threshold_percentage?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weight_disputes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "weight_disputes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weight_disputes_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       mv_admin_dashboard: {
