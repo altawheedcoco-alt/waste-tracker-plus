@@ -118,20 +118,16 @@ export default function CreateProfilePostDialog({
 
       // Upload media file if exists
       if (selectedFile) {
+        const { uploadFile } = await import('@/utils/optimizedUpload');
         const fileExt = selectedFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('profile-media')
-          .upload(fileName, selectedFile);
+        const result = await uploadFile(selectedFile, {
+          bucket: 'profile-media',
+          path: fileName,
+        });
 
-        if (uploadError) throw uploadError;
-
-        const { data: urlData } = supabase.storage
-          .from('profile-media')
-          .getPublicUrl(fileName);
-
-        mediaUrl = urlData.publicUrl;
+        mediaUrl = result.publicUrl;
       }
 
       // Create post

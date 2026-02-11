@@ -107,16 +107,16 @@ const PartnerRatingDialog = ({
   };
 
   const uploadPhotos = async (): Promise<string[]> => {
+    const { uploadFile } = await import('@/utils/optimizedUpload');
     const urls: string[] = [];
     for (const file of evidencePhotos) {
       const ext = file.name.split('.').pop();
       const path = `${shipmentId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage
-        .from('rating-evidence')
-        .upload(path, file);
-      if (error) throw error;
-      const { data } = supabase.storage.from('rating-evidence').getPublicUrl(path);
-      urls.push(data.publicUrl);
+      const result = await uploadFile(file, {
+        bucket: 'rating-evidence',
+        path,
+      });
+      urls.push(result.publicUrl);
     }
     return urls;
   };
