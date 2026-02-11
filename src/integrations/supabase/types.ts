@@ -5442,6 +5442,103 @@ export type Database = {
         }
         Relationships: []
       }
+      inspection_logs: {
+        Row: {
+          corrective_actions: string | null
+          created_at: string
+          created_by: string | null
+          facility_id: string | null
+          findings: string | null
+          follow_up_date: string | null
+          follow_up_notes: string | null
+          id: string
+          inspection_date: string
+          inspection_type: string | null
+          inspector_authority: string
+          inspector_name: string | null
+          is_resolved: boolean | null
+          organization_id: string
+          photos: string[] | null
+          recommendations: string | null
+          report_file_name: string | null
+          report_url: string | null
+          result: string | null
+          risk_level: string | null
+          updated_at: string
+          violations: string[] | null
+        }
+        Insert: {
+          corrective_actions?: string | null
+          created_at?: string
+          created_by?: string | null
+          facility_id?: string | null
+          findings?: string | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          id?: string
+          inspection_date: string
+          inspection_type?: string | null
+          inspector_authority: string
+          inspector_name?: string | null
+          is_resolved?: boolean | null
+          organization_id: string
+          photos?: string[] | null
+          recommendations?: string | null
+          report_file_name?: string | null
+          report_url?: string | null
+          result?: string | null
+          risk_level?: string | null
+          updated_at?: string
+          violations?: string[] | null
+        }
+        Update: {
+          corrective_actions?: string | null
+          created_at?: string
+          created_by?: string | null
+          facility_id?: string | null
+          findings?: string | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_type?: string | null
+          inspector_authority?: string
+          inspector_name?: string | null
+          is_resolved?: boolean | null
+          organization_id?: string
+          photos?: string[] | null
+          recommendations?: string | null
+          report_file_name?: string | null
+          report_url?: string | null
+          result?: string | null
+          risk_level?: string | null
+          updated_at?: string
+          violations?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_logs_facility_id_fkey"
+            columns: ["facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inspection_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "inspection_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           created_at: string
