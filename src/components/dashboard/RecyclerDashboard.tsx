@@ -26,6 +26,10 @@ import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import { AlertCircle, Eye } from 'lucide-react';
+import LegalComplianceWidget from '@/components/dashboard/generator/LegalComplianceWidget';
+import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
+import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
+import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 
 interface RecentShipment {
   id: string;
@@ -237,6 +241,12 @@ const RecyclerDashboard = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Legal Compliance */}
+      <LegalComplianceWidget />
+      <VehicleComplianceManager />
+      <DriverComplianceManager />
+      <IncidentReportManager />
 
       {/* Dialogs */}
       <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
