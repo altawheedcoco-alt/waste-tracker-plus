@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { isHazardousWasteType } from '@/lib/wasteClassification';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +15,8 @@ export interface Organization {
   name: string;
   address: string;
   city: string;
+  hazardous_certified?: boolean;
+  is_suspended?: boolean;
 }
 
 export interface Driver {
@@ -338,11 +341,12 @@ export const useCreateShipment = () => {
       if (isAdmin) {
         const { data: transporterData } = await supabase
           .from('organizations')
-          .select('id, name, address, city')
+          .select('id, name, address, city, hazardous_certified, is_suspended')
           .eq('organization_type', 'transporter')
           .eq('is_verified', true)
-          .eq('is_active', true);
-        if (transporterData) setTransporters(transporterData);
+          .eq('is_active', true)
+          .eq('is_suspended', false);
+        if (transporterData) setTransporters(transporterData as unknown as Organization[]);
       }
 
       if (!isDriver && organization?.id) {
@@ -435,10 +439,17 @@ export const useCreateShipment = () => {
     [recyclers]
   );
 
-  const transporterOptions = useMemo(() => 
-    transporters.map(t => ({ value: t.id, label: t.name, sublabel: t.city })),
-    [transporters]
-  );
+  const transporterOptions = useMemo(() => {
+    const isHazardous = formData.waste_type ? isHazardousWasteType(formData.waste_type) : false;
+    const filtered = isHazardous 
+      ? transporters.filter(t => t.hazardous_certified === true)
+      : transporters;
+    return filtered.map(t => ({ 
+      value: t.id, 
+      label: t.name + (t.hazardous_certified ? ' 🛡️' : ''), 
+      sublabel: t.city + (isHazardous ? ' (مرخص للمخلفات الخطرة)' : '')
+    }));
+  }, [transporters, formData.waste_type]);
 
   const disposalFacilityOptions = useMemo(() => 
     disposalFacilities.map(d => ({ value: d.id, label: d.name, sublabel: d.city })),
