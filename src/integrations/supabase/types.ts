@@ -2620,6 +2620,8 @@ export type Database = {
           eia_permit_number: string | null
           eia_permit_url: string | null
           email: string | null
+          emission_thresholds: Json | null
+          environmental_alerts: Json | null
           environmental_license_url: string | null
           facility_type: string
           google_maps_url: string | null
@@ -2631,6 +2633,7 @@ export type Database = {
           inspection_result: string | null
           is_verified: boolean | null
           iso_certification: string | null
+          landfill_cells: Json | null
           last_inspection_date: string | null
           latitude: number | null
           license_authority: string | null
@@ -2685,6 +2688,8 @@ export type Database = {
           eia_permit_number?: string | null
           eia_permit_url?: string | null
           email?: string | null
+          emission_thresholds?: Json | null
+          environmental_alerts?: Json | null
           environmental_license_url?: string | null
           facility_type?: string
           google_maps_url?: string | null
@@ -2696,6 +2701,7 @@ export type Database = {
           inspection_result?: string | null
           is_verified?: boolean | null
           iso_certification?: string | null
+          landfill_cells?: Json | null
           last_inspection_date?: string | null
           latitude?: number | null
           license_authority?: string | null
@@ -2750,6 +2756,8 @@ export type Database = {
           eia_permit_number?: string | null
           eia_permit_url?: string | null
           email?: string | null
+          emission_thresholds?: Json | null
+          environmental_alerts?: Json | null
           environmental_license_url?: string | null
           facility_type?: string
           google_maps_url?: string | null
@@ -2761,6 +2769,7 @@ export type Database = {
           inspection_result?: string | null
           is_verified?: boolean | null
           iso_certification?: string | null
+          landfill_cells?: Json | null
           last_inspection_date?: string | null
           latitude?: number | null
           license_authority?: string | null
@@ -2976,21 +2985,37 @@ export type Database = {
           disposal_date: string
           disposal_facility_id: string | null
           disposal_method: string | null
+          emissions_reading: Json | null
           environmental_impact_score: number | null
           hazard_level: string | null
           id: string
+          incineration_temperature: number | null
+          lab_analysis_date: string | null
+          lab_sample_result: string | null
+          lab_sample_taken: boolean | null
+          landfill_cell_id: string | null
           manifest_number: string | null
           notes: string | null
+          operation_number: string | null
           operation_type: string
           organization_id: string | null
+          processing_completed_at: string | null
+          processing_path: string | null
+          processing_started_at: string | null
           quantity: number
           receiving_officer: string | null
           shipment_id: string | null
           status: string | null
           unit: string | null
           updated_at: string
+          verified_at: string | null
+          verified_by: string | null
           waste_description: string | null
           waste_type: string | null
+          weight_gross: number | null
+          weight_net: number | null
+          weight_tare: number | null
+          weight_ticket_number: string | null
         }
         Insert: {
           certificate_number?: string | null
@@ -3001,21 +3026,37 @@ export type Database = {
           disposal_date?: string
           disposal_facility_id?: string | null
           disposal_method?: string | null
+          emissions_reading?: Json | null
           environmental_impact_score?: number | null
           hazard_level?: string | null
           id?: string
+          incineration_temperature?: number | null
+          lab_analysis_date?: string | null
+          lab_sample_result?: string | null
+          lab_sample_taken?: boolean | null
+          landfill_cell_id?: string | null
           manifest_number?: string | null
           notes?: string | null
+          operation_number?: string | null
           operation_type?: string
           organization_id?: string | null
+          processing_completed_at?: string | null
+          processing_path?: string | null
+          processing_started_at?: string | null
           quantity: number
           receiving_officer?: string | null
           shipment_id?: string | null
           status?: string | null
           unit?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           waste_description?: string | null
           waste_type?: string | null
+          weight_gross?: number | null
+          weight_net?: number | null
+          weight_tare?: number | null
+          weight_ticket_number?: string | null
         }
         Update: {
           certificate_number?: string | null
@@ -3026,21 +3067,37 @@ export type Database = {
           disposal_date?: string
           disposal_facility_id?: string | null
           disposal_method?: string | null
+          emissions_reading?: Json | null
           environmental_impact_score?: number | null
           hazard_level?: string | null
           id?: string
+          incineration_temperature?: number | null
+          lab_analysis_date?: string | null
+          lab_sample_result?: string | null
+          lab_sample_taken?: boolean | null
+          landfill_cell_id?: string | null
           manifest_number?: string | null
           notes?: string | null
+          operation_number?: string | null
           operation_type?: string
           organization_id?: string | null
+          processing_completed_at?: string | null
+          processing_path?: string | null
+          processing_started_at?: string | null
           quantity?: number
           receiving_officer?: string | null
           shipment_id?: string | null
           status?: string | null
           unit?: string | null
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           waste_description?: string | null
           waste_type?: string | null
+          weight_gross?: number | null
+          weight_net?: number | null
+          weight_tare?: number | null
+          weight_ticket_number?: string | null
         }
         Relationships: [
           {
