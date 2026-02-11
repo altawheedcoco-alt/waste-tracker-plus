@@ -33,6 +33,8 @@ import {
   ShipmentStatus,
 } from '@/lib/shipmentStatusConfig';
 import { calculateHaversineDistance } from '@/lib/mapUtils';
+import WeighbridgePhotoUpload from './WeighbridgePhotoUpload';
+import { checkWeightDispute, createWeightDispute } from '@/lib/weightDisputeLogic';
 
 interface StatusChangeDialogProps {
   isOpen: boolean;
@@ -45,9 +47,11 @@ interface StatusChangeDialogProps {
     delivery_longitude?: number | null;
     gps_delivery_lat?: number | null;
     gps_delivery_lng?: number | null;
+    quantity?: number | null;
+    generator_id?: string | null;
   };
   onStatusChanged?: () => void;
-  geofenceRadius?: number; // in meters, default 200
+  geofenceRadius?: number;
 }
 
 const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofenceRadius = 200 }: StatusChangeDialogProps) => {
@@ -55,6 +59,11 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pickupPhotoUrl, setPickupPhotoUrl] = useState<string | null>(null);
+  const [pickupPhotoMeta, setPickupPhotoMeta] = useState<any>(null);
+  const [deliveryPhotoUrl, setDeliveryPhotoUrl] = useState<string | null>(null);
+  const [deliveryPhotoMeta, setDeliveryPhotoMeta] = useState<any>(null);
+  const [recyclerWeight, setRecyclerWeight] = useState('');
   const [geofenceCheck, setGeofenceCheck] = useState<{
     checking: boolean;
     isInside: boolean | null;
@@ -115,7 +124,21 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     }
   }, [selectedStatus, organizationType, hasDeliveryCoords, checkGeofence]);
 
+  // Determine if photo is required for current status change
+  const requiresPhoto = (() => {
+    if (!selectedStatus) return { pickup: false, delivery: false };
+    const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
+    const isTransporter = organizationType === 'transporter';
+    if (!isTransporter) return { pickup: false, delivery: false };
+    return {
+      pickup: dbStatus === 'in_transit',
+      delivery: ['delivered', 'confirmed'].includes(dbStatus),
+    };
+  })();
+
   // Determine if delivery button should be blocked
+  const isPhotoMissing = (requiresPhoto.pickup && !pickupPhotoUrl) || (requiresPhoto.delivery && !deliveryPhotoUrl);
+
   const isDeliveryBlocked = (() => {
     if (!selectedStatus) return false;
     const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
@@ -123,6 +146,13 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     const isTransporter = organizationType === 'transporter';
     if (!isDeliveryStatus || !isTransporter || !hasDeliveryCoords) return false;
     return geofenceCheck.checking || geofenceCheck.isInside === false;
+  })();
+
+  // Show recycler weight input for recycler confirming delivery
+  const showRecyclerWeightInput = (() => {
+    if (!selectedStatus) return false;
+    const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
+    return organizationType === 'recycler' && dbStatus === 'confirmed';
   })();
 
   const currentStatusConfig = getStatusConfig(shipment.status);
@@ -140,18 +170,20 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
       return;
     }
 
+    if (isPhotoMissing) {
+      toast.error('يجب رفع صورة إيصال الميزان للمتابعة');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Map UI status to DB status
       const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
       console.log('Updating shipment status:', { selectedStatus, dbStatus, shipmentId: shipment.id });
       
-      // Build update object based on status
       const updateData: Record<string, any> = {
         status: dbStatus,
       };
 
-      // Set timestamp fields based on new status
       const now = new Date().toISOString();
       const timestampFields: Record<string, string> = {
         'approved': 'approved_at',
@@ -164,15 +196,56 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         updateData[timestampFields[dbStatus]] = now;
       }
 
-      // Update shipment
+      // Add photo URLs and metadata
+      if (pickupPhotoUrl) {
+        updateData.pickup_weighbridge_photo_url = pickupPhotoUrl;
+        updateData.pickup_weighbridge_metadata = pickupPhotoMeta;
+      }
+      if (deliveryPhotoUrl) {
+        updateData.delivery_weighbridge_photo_url = deliveryPhotoUrl;
+        updateData.delivery_weighbridge_metadata = deliveryPhotoMeta;
+      }
+
+      // Check weight dispute when recycler confirms with weight
+      if (showRecyclerWeightInput && recyclerWeight && shipment.quantity) {
+        const recyclerW = parseFloat(recyclerWeight);
+        const generatorW = shipment.quantity;
+        const disputeResult = checkWeightDispute(generatorW, recyclerW);
+
+        if (disputeResult.hasDispute) {
+          // Auto-hold: don't change status, create dispute
+          try {
+            await createWeightDispute(
+              shipment.id,
+              organization?.id || '',
+              generatorW,
+              recyclerW,
+              disputeResult.differencePercentage
+            );
+          } catch (err) {
+            console.error('Dispute creation error:', err);
+          }
+          toast.warning(
+            `⚠️ تم تعليق الشحنة تلقائياً! فرق الوزن ${disputeResult.differencePercentage}% (المولد: ${generatorW} كجم، المدور: ${recyclerW} كجم). تم إبلاغ الإدارة للمراجعة.`,
+            { duration: 8000 }
+          );
+          onStatusChanged?.();
+          handleClose();
+          setLoading(false);
+          return;
+        }
+
+        updateData.recycler_received_weight = recyclerW;
+        updateData.generator_declared_weight = generatorW;
+      }
+
       const { error: updateError } = await supabase
         .from('shipments')
-        .update(updateData)
+        .update(updateData as any)
         .eq('id', shipment.id);
 
       if (updateError) throw updateError;
 
-      // Log the status change
       const statusConfig = getStatusConfig(selectedStatus);
       const { error: logError } = await supabase
         .from('shipment_logs')
@@ -187,13 +260,11 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         console.error('Error logging status change:', logError);
       }
 
-      // Auto-create receipt when transporter delivers/receives shipment
       if (['delivered', 'in_transit'].includes(dbStatus) && organization?.organization_type === 'transporter') {
         try {
           await autoCreateReceipt(shipment.id, organization.id, profile?.id);
         } catch (receiptError) {
           console.error('Auto receipt creation failed:', receiptError);
-          // Don't block the status change if receipt creation fails
         }
       }
 
@@ -212,6 +283,11 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   const handleClose = () => {
     setSelectedStatus(null);
     setNotes('');
+    setPickupPhotoUrl(null);
+    setPickupPhotoMeta(null);
+    setDeliveryPhotoUrl(null);
+    setDeliveryPhotoMeta(null);
+    setRecyclerWeight('');
     onClose();
   };
 
@@ -384,6 +460,63 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             </div>
           )}
 
+          {/* Weighbridge Photo Upload - Pickup */}
+          {requiresPhoto.pickup && (
+            <WeighbridgePhotoUpload
+              shipmentId={shipment.id}
+              type="pickup"
+              label="صورة إيصال ميزان الاستلام"
+              required
+              onPhotoUploaded={(url, meta) => { setPickupPhotoUrl(url); setPickupPhotoMeta(meta); }}
+            />
+          )}
+
+          {/* Weighbridge Photo Upload - Delivery */}
+          {requiresPhoto.delivery && (
+            <WeighbridgePhotoUpload
+              shipmentId={shipment.id}
+              type="delivery"
+              label="صورة إيصال ميزان التسليم"
+              required
+              onPhotoUploaded={(url, meta) => { setDeliveryPhotoUrl(url); setDeliveryPhotoMeta(meta); }}
+            />
+          )}
+
+          {/* Recycler Weight Input for Dispute Check */}
+          {showRecyclerWeightInput && (
+            <div className="text-right space-y-2">
+              <Label htmlFor="recyclerWeight">
+                الوزن المستلم (كجم) <span className="text-destructive">*</span>
+              </Label>
+              <input
+                id="recyclerWeight"
+                type="number"
+                step="0.01"
+                min="0"
+                value={recyclerWeight}
+                onChange={(e) => setRecyclerWeight(e.target.value)}
+                placeholder="أدخل الوزن الفعلي المستلم..."
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                dir="ltr"
+              />
+              {shipment.quantity && (
+                <p className="text-xs text-muted-foreground">
+                  الوزن المعلن من المولد: <strong>{shipment.quantity} كجم</strong>
+                  {recyclerWeight && (
+                    <span className={cn(
+                      'mr-2',
+                      Math.abs(((parseFloat(recyclerWeight) - shipment.quantity) / shipment.quantity) * 100) > 5
+                        ? 'text-destructive font-bold'
+                        : 'text-emerald-600'
+                    )}>
+                      (فرق: {Math.abs(((parseFloat(recyclerWeight) - shipment.quantity) / shipment.quantity) * 100).toFixed(1)}%)
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Notes */}
           {canChange && availableStatuses.length > 0 && (
             <div className="text-right">
@@ -408,7 +541,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
               <Button 
                 variant="eco" 
                 onClick={handleStatusChange}
-                disabled={!selectedStatus || loading || isDeliveryBlocked}
+                disabled={!selectedStatus || loading || isDeliveryBlocked || isPhotoMissing || (showRecyclerWeightInput && !recyclerWeight)}
               >
                 {loading ? (
                   <>
