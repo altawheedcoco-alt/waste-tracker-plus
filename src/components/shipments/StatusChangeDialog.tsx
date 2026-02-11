@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Lock,
+  MapPin,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -31,6 +32,7 @@ import {
   mapToDbStatus,
   ShipmentStatus,
 } from '@/lib/shipmentStatusConfig';
+import { calculateHaversineDistance } from '@/lib/mapUtils';
 
 interface StatusChangeDialogProps {
   isOpen: boolean;
@@ -39,24 +41,102 @@ interface StatusChangeDialogProps {
     id: string;
     shipment_number: string;
     status: string;
+    delivery_latitude?: number | null;
+    delivery_longitude?: number | null;
+    gps_delivery_lat?: number | null;
+    gps_delivery_lng?: number | null;
   };
   onStatusChanged?: () => void;
+  geofenceRadius?: number; // in meters, default 200
 }
 
-const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: StatusChangeDialogProps) => {
+const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofenceRadius = 200 }: StatusChangeDialogProps) => {
   const { profile, organization } = useAuth();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [geofenceCheck, setGeofenceCheck] = useState<{
+    checking: boolean;
+    isInside: boolean | null;
+    distance: number | null;
+    error: string | null;
+  }>({ checking: false, isInside: null, distance: null, error: null });
+
+  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
+
+  // Get delivery coordinates from shipment
+  const deliveryLat = shipment.gps_delivery_lat ?? shipment.delivery_latitude;
+  const deliveryLng = shipment.gps_delivery_lng ?? shipment.delivery_longitude;
+  const hasDeliveryCoords = deliveryLat != null && deliveryLng != null;
+
+  // Check geofence when "delivered" is selected
+  const checkGeofence = useCallback(async () => {
+    if (!hasDeliveryCoords) {
+      setGeofenceCheck({ checking: false, isInside: true, distance: null, error: null });
+      return;
+    }
+
+    setGeofenceCheck(prev => ({ ...prev, checking: true, error: null }));
+
+    if (!navigator.geolocation) {
+      setGeofenceCheck({ checking: false, isInside: false, distance: null, error: 'الموقع الجغرافي غير متاح' });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const distanceKm = calculateHaversineDistance(latitude, longitude, deliveryLat!, deliveryLng!);
+        const distanceM = distanceKm * 1000;
+        const isInside = distanceM <= geofenceRadius;
+
+        setGeofenceCheck({ checking: false, isInside, distance: Math.round(distanceM), error: null });
+
+        if (!isInside) {
+          toast.error(`أنت تبعد ${Math.round(distanceM)} متر عن موقع التسليم. يجب أن تكون ضمن ${geofenceRadius} متر.`);
+        }
+      },
+      (geoError) => {
+        setGeofenceCheck({ checking: false, isInside: false, distance: null, error: geoError.message || 'تعذر الحصول على الموقع' });
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+    );
+  }, [hasDeliveryCoords, deliveryLat, deliveryLng, geofenceRadius]);
+
+  // Trigger geofence check when "delivered" or "confirmed" is selected by transporter
+  useEffect(() => {
+    const isDeliveryStatus = selectedStatus && ['delivered', 'confirmed'].includes(mapToDbStatus(selectedStatus as ShipmentStatus));
+    const isTransporter = organizationType === 'transporter';
+
+    if (isDeliveryStatus && isTransporter && hasDeliveryCoords) {
+      checkGeofence();
+    } else {
+      setGeofenceCheck({ checking: false, isInside: null, distance: null, error: null });
+    }
+  }, [selectedStatus, organizationType, hasDeliveryCoords, checkGeofence]);
+
+  // Determine if delivery button should be blocked
+  const isDeliveryBlocked = (() => {
+    if (!selectedStatus) return false;
+    const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
+    const isDeliveryStatus = ['delivered', 'confirmed'].includes(dbStatus);
+    const isTransporter = organizationType === 'transporter';
+    if (!isDeliveryStatus || !isTransporter || !hasDeliveryCoords) return false;
+    return geofenceCheck.checking || geofenceCheck.isInside === false;
+  })();
 
   const currentStatusConfig = getStatusConfig(shipment.status);
-  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
   const availableStatuses = getAvailableNextStatuses(shipment.status, organizationType);
   const canChange = canChangeStatus(shipment.status, organizationType);
 
   const handleStatusChange = async () => {
     if (!selectedStatus) {
       toast.error('يرجى اختيار الحالة الجديدة');
+      return;
+    }
+
+    if (isDeliveryBlocked) {
+      toast.error('يجب أن تكون داخل نطاق موقع التسليم لتأكيد التسليم');
       return;
     }
 
@@ -264,6 +344,46 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: Stat
             </div>
           )}
 
+          {/* Geofence Warning */}
+          {selectedStatus && geofenceCheck.isInside === false && !geofenceCheck.checking && (
+            <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/5 text-right">
+              <div className="flex items-center gap-2 justify-end text-destructive font-medium text-sm">
+                <span>⚠️ أنت خارج نطاق التسليم</span>
+                <MapPin className="w-4 h-4" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {geofenceCheck.distance != null
+                  ? `المسافة: ${geofenceCheck.distance} متر (الحد المسموح: ${geofenceRadius} متر)`
+                  : geofenceCheck.error || 'تعذر التحقق من الموقع'}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={checkGeofence}
+              >
+                <MapPin className="w-3 h-3 ml-1" />
+                إعادة التحقق من الموقع
+              </Button>
+            </div>
+          )}
+
+          {geofenceCheck.checking && (
+            <div className="p-3 rounded-lg border bg-muted/50 text-center">
+              <Loader2 className="w-4 h-4 animate-spin mx-auto mb-1" />
+              <p className="text-xs text-muted-foreground">جاري التحقق من الموقع الجغرافي...</p>
+            </div>
+          )}
+
+          {geofenceCheck.isInside === true && geofenceCheck.distance != null && (
+            <div className="p-3 rounded-lg border border-emerald-300 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800 text-right">
+              <div className="flex items-center gap-2 justify-end text-emerald-700 dark:text-emerald-400 font-medium text-sm">
+                <span>✅ أنت داخل نطاق التسليم ({geofenceCheck.distance} متر)</span>
+                <MapPin className="w-4 h-4" />
+              </div>
+            </div>
+          )}
+
           {/* Notes */}
           {canChange && availableStatuses.length > 0 && (
             <div className="text-right">
@@ -288,7 +408,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged }: Stat
               <Button 
                 variant="eco" 
                 onClick={handleStatusChange}
-                disabled={!selectedStatus || loading}
+                disabled={!selectedStatus || loading || isDeliveryBlocked}
               >
                 {loading ? (
                   <>
