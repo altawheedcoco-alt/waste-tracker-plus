@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, CheckCircle2, XCircle, Clock, Plus, FileText, Building2 } from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle2, XCircle, Clock, Plus, FileText, Building2, ClipboardList, Ban } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import LicenseManagementDialog from './LicenseManagementDialog';
+import { useComplianceGate } from '@/hooks/useComplianceGate';
 
 interface LegalLicense {
   id: string;
@@ -70,6 +71,18 @@ const LegalComplianceWidget = () => {
   const { organization } = useAuth();
   const orgId = organization?.id;
   const [showManagement, setShowManagement] = useState(false);
+  const { status: complianceStatus } = useComplianceGate();
+
+  // Fetch inspection count
+  const { data: inspectionCount = 0 } = useQuery({
+    queryKey: ['inspection-count', orgId],
+    queryFn: async () => {
+      if (!orgId) return 0;
+      const { count } = await supabase.from('inspection_logs').select('*', { count: 'exact', head: true }).eq('organization_id', orgId);
+      return count || 0;
+    },
+    enabled: !!orgId,
+  });
 
   const { data: licenses = [], isLoading, refetch } = useQuery({
     queryKey: ['legal-licenses', orgId],
@@ -135,13 +148,33 @@ const LegalComplianceWidget = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Operations Blocked Banner */}
+          {complianceStatus.blockOperations && (
+            <div className="p-3 rounded-lg bg-red-100 dark:bg-red-950/30 border-2 border-red-400 dark:border-red-700">
+              <div className="flex items-center gap-2 justify-end">
+                <p className="text-sm font-bold text-red-700 dark:text-red-400">العمليات معلقة - تراخيص سيادية منتهية</p>
+                <Ban className="w-5 h-5 text-red-600" />
+              </div>
+              <p className="text-[10px] text-red-600 text-right mt-1">
+                لا يمكن إصدار مانيفست أو شهادة تخلص حتى تجديد التراخيص المنتهية
+              </p>
+            </div>
+          )}
+
           {/* Compliance Score */}
           <div className="p-4 rounded-xl bg-card border">
             <div className="flex items-center justify-between mb-3">
-              <div className={`text-3xl font-bold ${
-                stats.score >= 80 ? 'text-emerald-600' : stats.score >= 50 ? 'text-amber-600' : 'text-red-600'
-              }`}>
-                {stats.score}%
+              <div className="flex items-center gap-3">
+                <div className={`text-3xl font-bold ${
+                  stats.score >= 80 ? 'text-emerald-600' : stats.score >= 50 ? 'text-amber-600' : 'text-red-600'
+                }`}>
+                  {stats.score}%
+                </div>
+                {inspectionCount > 0 && (
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <ClipboardList className="w-3 h-3" /> {inspectionCount} تفتيش
+                  </Badge>
+                )}
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium">نسبة الامتثال القانوني</p>
