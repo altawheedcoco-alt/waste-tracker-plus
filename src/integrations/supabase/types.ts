@@ -8304,12 +8304,18 @@ export type Database = {
           comment: string | null
           communication_rating: number | null
           created_at: string
+          evidence_photos: string[] | null
           id: string
+          is_public: boolean
           overall_rating: number
           punctuality_rating: number | null
           quality_rating: number | null
           rated_organization_id: string
           rater_organization_id: string
+          review_notes: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           shipment_id: string
           updated_at: string
         }
@@ -8317,12 +8323,18 @@ export type Database = {
           comment?: string | null
           communication_rating?: number | null
           created_at?: string
+          evidence_photos?: string[] | null
           id?: string
+          is_public?: boolean
           overall_rating: number
           punctuality_rating?: number | null
           quality_rating?: number | null
           rated_organization_id: string
           rater_organization_id: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           shipment_id: string
           updated_at?: string
         }
@@ -8330,12 +8342,18 @@ export type Database = {
           comment?: string | null
           communication_rating?: number | null
           created_at?: string
+          evidence_photos?: string[] | null
           id?: string
+          is_public?: boolean
           overall_rating?: number
           punctuality_rating?: number | null
           quality_rating?: number | null
           rated_organization_id?: string
           rater_organization_id?: string
+          review_notes?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           shipment_id?: string
           updated_at?: string
         }
@@ -8366,6 +8384,13 @@ export type Database = {
             columns: ["rater_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_ratings_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
