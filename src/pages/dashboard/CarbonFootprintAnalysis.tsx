@@ -80,6 +80,40 @@ const CARBON_FACTORS_FALLBACK = {
   egypt_grid_per_kwh: 0.489,
 };
 
+// Map DB factors to usable format
+const buildFactorsFromDB = (dbFactors: any[]): typeof CARBON_FACTORS_FALLBACK => {
+  const factors = { ...CARBON_FACTORS_FALLBACK };
+  for (const f of dbFactors) {
+    if (f.category === 'transport_fuel' && f.sub_category === 'diesel') {
+      factors.diesel_per_liter = f.emission_factor;
+    }
+    if (f.category === 'electricity' && f.sub_category === 'egypt_grid') {
+      factors.egypt_grid_per_kwh = f.emission_factor;
+    }
+    if (f.category === 'waste_recycling') {
+      const keyMap: Record<string, string> = {
+        plastic_recycling: 'plastic', paper_recycling: 'paper',
+        metal_recycling: 'metal', aluminum_recycling: 'aluminum',
+        glass_recycling: 'glass', organic_composting: 'organic',
+        e_waste_recycling: 'electronic', textile_recycling: 'textile',
+      };
+      const k = keyMap[f.sub_category];
+      if (k) (factors.recycling_savings as any)[k] = f.emission_factor / 1000; // convert kg/ton to ton
+    }
+    if (f.category === 'waste_landfill') {
+      const keyMap: Record<string, string> = {
+        plastic_landfill: 'plastic', paper_cardboard: 'paper',
+        organic_waste: 'organic', mixed_msw: 'mixed',
+        hazardous_waste: 'hazardous', wood_waste: 'wood',
+        textile_waste: 'textile',
+      };
+      const k = keyMap[f.sub_category];
+      if (k) (factors.landfill_emissions as any)[k] = f.emission_factor / 1000;
+    }
+  }
+  return factors;
+};
+
 const wasteTypeLabels: Record<string, string> = {
   plastic: 'بلاستيك',
   paper: 'ورق',
@@ -120,15 +154,17 @@ const CarbonFootprintAnalysis = () => {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(['generator', 'transporter', 'recycler']);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(['generator', 'transporter', 'recycler', 'disposal']);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [carbonData, setCarbonData] = useState<CarbonData | null>(null);
+  const [dbFactors, setDbFactors] = useState<typeof CARBON_FACTORS_FALLBACK>(CARBON_FACTORS_FALLBACK);
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchOrganizations();
+    fetchEmissionFactors();
     // Set default date range (last 12 months)
     const now = new Date();
     const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
@@ -136,11 +172,25 @@ const CarbonFootprintAnalysis = () => {
     setDateTo(now.toISOString().split('T')[0]);
   }, []);
 
+  const fetchEmissionFactors = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('carbon_emission_factors')
+        .select('*')
+        .eq('is_active', true);
+      if (!error && data && data.length > 0) {
+        setDbFactors(buildFactorsFromDB(data));
+      }
+    } catch (err) {
+      console.error('Error loading emission factors, using fallback:', err);
+    }
+  };
+
   useEffect(() => {
     if (dateFrom && dateTo) {
       calculateCarbonFootprint();
     }
-  }, [selectedOrgs, selectedTypes, dateFrom, dateTo]);
+  }, [selectedOrgs, selectedTypes, dateFrom, dateTo, dbFactors]);
 
   const fetchOrganizations = async () => {
     try {
@@ -172,7 +222,12 @@ const CarbonFootprintAnalysis = () => {
           generator_id,
           transporter_id,
           recycler_id,
-          disposal_method
+          disposal_facility_id,
+          disposal_method,
+          pickup_latitude,
+          pickup_longitude,
+          delivery_latitude,
+          delivery_longitude
         `);
 
       if (dateFrom) {
@@ -197,27 +252,30 @@ const CarbonFootprintAnalysis = () => {
       
       if (selectedOrgs.length > 0) {
         filteredShipments = filteredShipments.filter(s =>
-          selectedOrgs.includes(s.generator_id) ||
-          selectedOrgs.includes(s.transporter_id) ||
-          selectedOrgs.includes(s.recycler_id)
+          selectedOrgs.includes(s.generator_id || '') ||
+          selectedOrgs.includes(s.transporter_id || '') ||
+          selectedOrgs.includes(s.recycler_id || '') ||
+          selectedOrgs.includes(s.disposal_facility_id || '')
         );
       }
 
-      if (selectedTypes.length < 3) {
+      if (selectedTypes.length < 4) {
         filteredShipments = filteredShipments.filter(s => {
-          const generatorOrg = orgMap.get(s.generator_id);
-          const transporterOrg = orgMap.get(s.transporter_id);
-          const recyclerOrg = orgMap.get(s.recycler_id);
+          const generatorOrg = orgMap.get(s.generator_id || '');
+          const transporterOrg = orgMap.get(s.transporter_id || '');
+          const recyclerOrg = orgMap.get(s.recycler_id || '');
+          const disposalOrg = orgMap.get(s.disposal_facility_id || '');
           
           return (
             (selectedTypes.includes('generator') && generatorOrg) ||
             (selectedTypes.includes('transporter') && transporterOrg) ||
-            (selectedTypes.includes('recycler') && recyclerOrg)
+            (selectedTypes.includes('recycler') && recyclerOrg) ||
+            (selectedTypes.includes('disposal') && disposalOrg)
           );
         });
       }
 
-      // Calculate emissions
+      // Calculate emissions using DB factors
       let totalEmissions = 0;
       let totalSavings = 0;
       let transportEmissions = 0;
@@ -230,14 +288,24 @@ const CarbonFootprintAnalysis = () => {
         const quantity = Number(shipment.quantity) || 0;
         const wasteType = shipment.waste_type as string || 'other';
         
-        // Calculate processing emissions using IPCC factors
-        const processingFactor = (CARBON_FACTORS_FALLBACK.waste_processing as Record<string, number>)[wasteType] || 1.0;
+        // Calculate processing emissions using DB-loaded IPCC factors
+        const processingFactor = (dbFactors.waste_processing as Record<string, number>)[wasteType] || 1.0;
         const shipmentProcessingEmissions = quantity * processingFactor;
         processingEmissions += shipmentProcessingEmissions;
 
-        // Transport emissions: diesel 2.68 kg CO2e/L, ~0.3 L/km for trucks
-        const estimatedDistance = 50; // km fallback
-        const shipmentTransportEmissions = quantity * CARBON_FACTORS_FALLBACK.transport_per_km_ton * estimatedDistance / 1000;
+        // Transport emissions: calculate distance from coordinates or use 50km fallback
+        let distanceKm = 50;
+        if (shipment.pickup_latitude && shipment.delivery_latitude) {
+          const R = 6371;
+          const dLat = ((shipment.delivery_latitude - shipment.pickup_latitude) * Math.PI) / 180;
+          const dLon = ((shipment.delivery_longitude! - shipment.pickup_longitude!) * Math.PI) / 180;
+          const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos((shipment.pickup_latitude * Math.PI) / 180) *
+            Math.cos((shipment.delivery_latitude * Math.PI) / 180) *
+            Math.sin(dLon / 2) ** 2;
+          distanceKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.3; // 1.3 road factor
+        }
+        const shipmentTransportEmissions = quantity * dbFactors.transport_per_km_ton * distanceKm / 1000;
         transportEmissions += shipmentTransportEmissions;
 
         const shipmentEmissions = shipmentProcessingEmissions + shipmentTransportEmissions;
@@ -245,7 +313,7 @@ const CarbonFootprintAnalysis = () => {
 
         // Calculate IPCC-based recycling savings
         const isRecycled = shipment.disposal_method === 'recycling' || shipment.status === 'confirmed';
-        const savingsFactor = (CARBON_FACTORS_FALLBACK.recycling_savings as Record<string, number>)[wasteType] || 0.5;
+        const savingsFactor = (dbFactors.recycling_savings as Record<string, number>)[wasteType] || 0.5;
         const shipmentSavings = isRecycled ? quantity * savingsFactor : 0;
         totalSavings += shipmentSavings;
 
@@ -257,7 +325,7 @@ const CarbonFootprintAnalysis = () => {
         emissionsByWasteType[wasteType].savings += shipmentSavings;
 
         // Aggregate by organization (generator)
-        const generatorOrg = orgMap.get(shipment.generator_id);
+        const generatorOrg = orgMap.get(shipment.generator_id || '');
         if (generatorOrg) {
           if (!emissionsByOrg[generatorOrg.id]) {
             emissionsByOrg[generatorOrg.id] = { emissions: 0, type: generatorOrg.organization_type };
@@ -266,7 +334,7 @@ const CarbonFootprintAnalysis = () => {
         }
 
         // Monthly trend
-        const month = new Date(shipment.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        const month = new Date(shipment.created_at || '').toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
         if (!monthlyData[month]) {
           monthlyData[month] = { emissions: 0, savings: 0 };
         }
@@ -344,14 +412,14 @@ const CarbonFootprintAnalysis = () => {
   };
 
   const generateReport = async () => {
+    if (!carbonData) return;
     setGenerating(true);
     try {
-      // Simulate report generation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      // Generate detailed report combining PDF + data summary
+      exportToPdf();
       toast({
-        title: 'تم إنشاء التقرير',
-        description: 'تم إعداد تقرير البصمة الكربونية بنجاح',
+        title: 'تم إنشاء التقرير المفصل',
+        description: 'يتم تحميل تقرير البصمة الكربونية المفصل بصيغة PDF',
       });
     } finally {
       setGenerating(false);
@@ -656,6 +724,14 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                     id="type-recycler"
                     checked={selectedTypes.includes('recycler')}
                     onCheckedChange={() => handleTypeToggle('recycler')}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="type-disposal" className="cursor-pointer">تخلص نهائي</Label>
+                  <Checkbox
+                    id="type-disposal"
+                    checked={selectedTypes.includes('disposal')}
+                    onCheckedChange={() => handleTypeToggle('disposal')}
                   />
                 </div>
               </div>
