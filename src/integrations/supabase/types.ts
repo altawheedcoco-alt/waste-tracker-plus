@@ -10264,7 +10264,11 @@ export type Database = {
           disposal_method: string | null
           disposal_type: string | null
           disposed_at: string | null
+          driver_earnings: number | null
           driver_id: string | null
+          escrow_held_at: string | null
+          escrow_released_at: string | null
+          escrow_status: string | null
           expected_delivery_date: string | null
           generator_approval_at: string | null
           generator_approval_status: string | null
@@ -10361,7 +10365,11 @@ export type Database = {
           disposal_method?: string | null
           disposal_type?: string | null
           disposed_at?: string | null
+          driver_earnings?: number | null
           driver_id?: string | null
+          escrow_held_at?: string | null
+          escrow_released_at?: string | null
+          escrow_status?: string | null
           expected_delivery_date?: string | null
           generator_approval_at?: string | null
           generator_approval_status?: string | null
@@ -10458,7 +10466,11 @@ export type Database = {
           disposal_method?: string | null
           disposal_type?: string | null
           disposed_at?: string | null
+          driver_earnings?: number | null
           driver_id?: string | null
+          escrow_held_at?: string | null
+          escrow_released_at?: string | null
+          escrow_status?: string | null
           expected_delivery_date?: string | null
           generator_approval_at?: string | null
           generator_approval_status?: string | null
