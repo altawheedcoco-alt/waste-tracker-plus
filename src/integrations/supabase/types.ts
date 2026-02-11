@@ -8180,6 +8180,66 @@ export type Database = {
           },
         ]
       }
+      pdf_archives: {
+        Row: {
+          archived_by: string | null
+          checksum: string | null
+          created_at: string
+          document_number: string
+          document_type: string
+          file_name: string
+          file_size_bytes: number | null
+          id: string
+          organization_id: string
+          pdf_base64: string
+          related_operation_id: string | null
+          related_shipment_id: string | null
+        }
+        Insert: {
+          archived_by?: string | null
+          checksum?: string | null
+          created_at?: string
+          document_number: string
+          document_type: string
+          file_name: string
+          file_size_bytes?: number | null
+          id?: string
+          organization_id: string
+          pdf_base64: string
+          related_operation_id?: string | null
+          related_shipment_id?: string | null
+        }
+        Update: {
+          archived_by?: string | null
+          checksum?: string | null
+          created_at?: string
+          document_number?: string
+          document_type?: string
+          file_name?: string
+          file_size_bytes?: number | null
+          id?: string
+          organization_id?: string
+          pdf_base64?: string
+          related_operation_id?: string | null
+          related_shipment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_archives_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "pdf_archives_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pin_backup_codes: {
         Row: {
           code_hash: string
