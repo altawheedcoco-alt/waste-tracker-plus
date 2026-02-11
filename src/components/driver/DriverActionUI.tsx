@@ -17,10 +17,12 @@ import {
   Loader2,
   Package,
   Mic,
+  ShieldCheck,
 } from 'lucide-react';
 import { mapToDbStatus, getStatusConfig, ShipmentStatus } from '@/lib/shipmentStatusConfig';
 import VoiceToTextInput from './VoiceToTextInput';
 import ShipmentImageAnalyzer from './ShipmentImageAnalyzer';
+import VehiclePlateVerification from './VehiclePlateVerification';
 
 interface ShipmentInfo {
   id: string;
@@ -31,6 +33,9 @@ interface ShipmentInfo {
   pickup_location?: string;
   delivery_location?: string;
   generator_id?: string;
+  driver_id?: string;
+  manual_vehicle_plate?: string;
+  plate_verified?: boolean;
 }
 
 interface DriverActionUIProps {
@@ -48,6 +53,7 @@ interface StageAction {
   description: string;
   requiresPhoto?: boolean;
   requiresQR?: boolean;
+  requiresPlateVerification?: boolean;
 }
 
 const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUIProps) => {
@@ -55,6 +61,8 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
   const [loading, setLoading] = useState(false);
   const [voiceNotes, setVoiceNotes] = useState('');
   const [showVoice, setShowVoice] = useState(false);
+  const [showPlateVerification, setShowPlateVerification] = useState(false);
+  const [plateVerified, setPlateVerified] = useState(shipment.plate_verified || false);
   const [showImageAI, setShowImageAI] = useState(false);
 
   const currentAction: StageAction | null = useMemo(() => {
@@ -62,11 +70,14 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
       approved: {
         key: 'start_trip',
         nextStatus: 'in_transit',
-        label: 'بدء الرحلة',
-        icon: Play,
+        label: plateVerified ? 'بدء الرحلة' : 'التحقق من المركبة وبدء الرحلة',
+        icon: plateVerified ? Play : ShieldCheck,
         color: 'bg-emerald-500 hover:bg-emerald-600',
-        description: 'ابدأ بمسح كود الاستلام من المولد',
+        description: plateVerified
+          ? '✅ تم التحقق من اللوحة — ابدأ بمسح كود الاستلام'
+          : '🔒 يجب التحقق من لوحة المركبة أولاً',
         requiresQR: true,
+        requiresPlateVerification: !plateVerified,
       },
       in_transit: {
         key: 'arrive',
@@ -94,6 +105,12 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
 
   const handleMainAction = async () => {
     if (!currentAction) return;
+
+    // Gate: require plate verification before starting trip
+    if (currentAction.requiresPlateVerification) {
+      setShowPlateVerification(true);
+      return;
+    }
 
     if (currentAction.requiresQR && onScanQR) {
       onScanQR();
@@ -262,6 +279,22 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
           )}
         </div>
       </CardContent>
+
+      {/* Vehicle Plate Verification Dialog */}
+      {shipment.manual_vehicle_plate && (
+        <VehiclePlateVerification
+          isOpen={showPlateVerification}
+          onClose={() => setShowPlateVerification(false)}
+          shipmentId={shipment.id}
+          expectedPlate={shipment.manual_vehicle_plate}
+          driverId={shipment.driver_id}
+          onVerified={(match) => {
+            setPlateVerified(true);
+            setShowPlateVerification(false);
+            toast.success('تم التحقق — يمكنك الآن بدء الرحلة');
+          }}
+        />
+      )}
     </Card>
   );
 };

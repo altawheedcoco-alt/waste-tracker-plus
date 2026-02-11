@@ -10274,6 +10274,7 @@ export type Database = {
           pickup_date: string | null
           pickup_latitude: number | null
           pickup_longitude: number | null
+          plate_verified: boolean | null
           price_per_unit: number | null
           price_source: string | null
           quantity: number | null
@@ -10370,6 +10371,7 @@ export type Database = {
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
+          plate_verified?: boolean | null
           price_per_unit?: number | null
           price_source?: string | null
           quantity?: number | null
@@ -10466,6 +10468,7 @@ export type Database = {
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
+          plate_verified?: boolean | null
           price_per_unit?: number | null
           price_source?: string | null
           quantity?: number | null
@@ -12190,6 +12193,72 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_plate_verifications: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          driver_id: string | null
+          expected_plate: string
+          gps_latitude: number | null
+          gps_longitude: number | null
+          id: string
+          is_match: boolean
+          override_by: string | null
+          override_reason: string | null
+          photo_url: string | null
+          scanned_plate: string | null
+          shipment_id: string
+          verified_at: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          driver_id?: string | null
+          expected_plate: string
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_match?: boolean
+          override_by?: string | null
+          override_reason?: string | null
+          photo_url?: string | null
+          scanned_plate?: string | null
+          shipment_id: string
+          verified_at?: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          driver_id?: string | null
+          expected_plate?: string
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_match?: boolean
+          override_by?: string | null
+          override_reason?: string | null
+          photo_url?: string | null
+          scanned_plate?: string | null
+          shipment_id?: string
+          verified_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_plate_verifications_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_plate_verifications_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
