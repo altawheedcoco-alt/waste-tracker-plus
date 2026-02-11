@@ -12,7 +12,7 @@ import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 // Offline & Performance components
 const OfflineIndicator = lazy(() => import("./components/offline/OfflineIndicator"));
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
-const PerformanceOptimizer = lazy(() => import("./components/performance/PerformanceOptimizer"));
+const MobileOptimizations = lazy(() => import("./components/mobile/MobileOptimizations"));
 
 // Minimal loading component - optimized for speed
 const PageLoader = memo(() => (
@@ -306,7 +306,7 @@ const App = memo(() => (
         <OfflineBanner />
       </Suspense>
       <Suspense fallback={null}>
-        <PerformanceOptimizer>{null}</PerformanceOptimizer>
+        <MobileOptimizations>{null}</MobileOptimizations>
       </Suspense>
     </BrowserRouter>
   </Providers>
