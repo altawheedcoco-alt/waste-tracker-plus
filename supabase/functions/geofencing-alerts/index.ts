@@ -235,9 +235,88 @@ Deno.serve(async (req) => {
         )
       }
 
+      case 'check-gps-signal': {
+        // Check for drivers who haven't sent location in 3+ minutes
+        const { organization_id } = data
+        if (!organization_id) {
+          return new Response(
+            JSON.stringify({ error: 'organization_id is required' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+
+        // Get active shipments
+        const { data: activeShipments } = await supabase
+          .from('shipments')
+          .select('id, shipment_number, driver_id, status')
+          .or(`organization_id.eq.${organization_id},recycler_id.eq.${organization_id}`)
+          .in('status', ['in_transit', 'collecting'])
+
+        const signalLostAlerts: any[] = []
+        const thresholdMs = 3 * 60 * 1000 // 3 minutes
+
+        for (const shipment of activeShipments || []) {
+          if (!shipment.driver_id) continue
+
+          const { data: lastLog } = await supabase
+            .from('driver_location_logs')
+            .select('recorded_at')
+            .eq('driver_id', shipment.driver_id)
+            .order('recorded_at', { ascending: false })
+            .limit(1)
+            .single()
+
+          if (lastLog) {
+            const timeSince = Date.now() - new Date(lastLog.recorded_at).getTime()
+            if (timeSince > thresholdMs) {
+              // Mark GPS as lost
+              await supabase.from('shipments').update({
+                gps_active_throughout: false,
+                gps_signal_lost_at: new Date(Date.now() - timeSince).toISOString()
+              }).eq('id', shipment.id)
+
+              signalLostAlerts.push({
+                shipment_id: shipment.id,
+                shipment_number: shipment.shipment_number,
+                driver_id: shipment.driver_id,
+                minutes_since_last: Math.round(timeSince / 60000)
+              })
+            }
+          }
+        }
+
+        // Notify admins
+        if (signalLostAlerts.length > 0) {
+          const { data: adminUsers } = await supabase
+            .from('user_organizations')
+            .select('user_id')
+            .eq('organization_id', organization_id)
+            .limit(5)
+
+          for (const admin of adminUsers || []) {
+            for (const alert of signalLostAlerts) {
+              await supabase.from('notifications').insert({
+                user_id: admin.user_id,
+                title: '🔴 فقدان إشارة GPS',
+                message: `السائق في شحنة ${alert.shipment_number} فقد الإشارة منذ ${alert.minutes_since_last} دقيقة`,
+                type: 'gps_signal_lost',
+                shipment_id: alert.shipment_id
+              })
+            }
+          }
+        }
+
+        console.log(`[Geofencing] GPS check: ${signalLostAlerts.length} signal losses detected`)
+
+        return new Response(
+          JSON.stringify({ success: true, signal_lost: signalLostAlerts }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       default:
         return new Response(
-          JSON.stringify({ error: 'Invalid action. Use: check-location, get-nearby-locations' }),
+          JSON.stringify({ error: 'Invalid action. Use: check-location, get-nearby-locations, check-gps-signal' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
     }

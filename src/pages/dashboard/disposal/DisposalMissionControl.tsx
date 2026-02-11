@@ -27,6 +27,7 @@ import EnvironmentalTab from '@/components/dashboard/disposal/mission-control/En
 import OperationModeSwitch from '@/components/dashboard/disposal/mission-control/OperationModeSwitch';
 import RulesEngineTab from '@/components/dashboard/disposal/mission-control/RulesEngineTab';
 import AutomationAuditTab from '@/components/dashboard/disposal/mission-control/AutomationAuditTab';
+import ComplianceMonitorTab from '@/components/dashboard/disposal/mission-control/ComplianceMonitorTab';
 
 const DisposalMissionControl = () => {
   const { organization } = useAuth();
@@ -285,6 +286,9 @@ const DisposalMissionControl = () => {
               <TabsTrigger value="audit" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-slate-600 data-[state=active]:text-white">
                 📊 مراقبة الأتمتة
               </TabsTrigger>
+              <TabsTrigger value="compliance" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-rose-600 data-[state=active]:text-white">
+                🛡️ الرقابة
+              </TabsTrigger>
               {facility?.owns_transport_fleet && (
                 <TabsTrigger value="logistics" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
                   🚛 النقل
@@ -318,6 +322,9 @@ const DisposalMissionControl = () => {
             </TabsContent>
             <TabsContent value="audit" className="mt-4">
               <AutomationAuditTab organizationId={organization?.id} />
+            </TabsContent>
+            <TabsContent value="compliance" className="mt-4">
+              <ComplianceMonitorTab facilityId={facility?.id} organizationId={organization?.id} />
             </TabsContent>
             {facility?.owns_transport_fleet && (
               <TabsContent value="logistics" className="mt-4">

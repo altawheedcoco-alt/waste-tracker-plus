@@ -10248,6 +10248,7 @@ export type Database = {
           cancelled_at: string | null
           cancelled_by: string | null
           collection_started_at: string | null
+          compliance_verified: boolean | null
           confirmed_at: string | null
           created_at: string | null
           created_by: string | null
@@ -10277,10 +10278,12 @@ export type Database = {
           generator_notes: string | null
           generator_qr_code: string | null
           generator_rejection_reason: string | null
+          gps_active_throughout: boolean | null
           gps_delivery_lat: number | null
           gps_delivery_lng: number | null
           gps_pickup_lat: number | null
           gps_pickup_lng: number | null
+          gps_signal_lost_at: string | null
           hazard_level: string | null
           id: string
           in_transit_at: string | null
@@ -10337,6 +10340,9 @@ export type Database = {
           weighbridge_tare_weight: number | null
           weighbridge_ticket_number: string | null
           weighbridge_verified: boolean | null
+          weight_at_destination: number | null
+          weight_at_source: number | null
+          weight_discrepancy_pct: number | null
         }
         Insert: {
           account_notes?: string | null
@@ -10349,6 +10355,7 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           collection_started_at?: string | null
+          compliance_verified?: boolean | null
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -10378,10 +10385,12 @@ export type Database = {
           generator_notes?: string | null
           generator_qr_code?: string | null
           generator_rejection_reason?: string | null
+          gps_active_throughout?: boolean | null
           gps_delivery_lat?: number | null
           gps_delivery_lng?: number | null
           gps_pickup_lat?: number | null
           gps_pickup_lng?: number | null
+          gps_signal_lost_at?: string | null
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
@@ -10438,6 +10447,9 @@ export type Database = {
           weighbridge_tare_weight?: number | null
           weighbridge_ticket_number?: string | null
           weighbridge_verified?: boolean | null
+          weight_at_destination?: number | null
+          weight_at_source?: number | null
+          weight_discrepancy_pct?: number | null
         }
         Update: {
           account_notes?: string | null
@@ -10450,6 +10462,7 @@ export type Database = {
           cancelled_at?: string | null
           cancelled_by?: string | null
           collection_started_at?: string | null
+          compliance_verified?: boolean | null
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -10479,10 +10492,12 @@ export type Database = {
           generator_notes?: string | null
           generator_qr_code?: string | null
           generator_rejection_reason?: string | null
+          gps_active_throughout?: boolean | null
           gps_delivery_lat?: number | null
           gps_delivery_lng?: number | null
           gps_pickup_lat?: number | null
           gps_pickup_lng?: number | null
+          gps_signal_lost_at?: string | null
           hazard_level?: string | null
           id?: string
           in_transit_at?: string | null
@@ -10539,6 +10554,9 @@ export type Database = {
           weighbridge_tare_weight?: number | null
           weighbridge_ticket_number?: string | null
           weighbridge_verified?: boolean | null
+          weight_at_destination?: number | null
+          weight_at_source?: number | null
+          weight_discrepancy_pct?: number | null
         }
         Relationships: [
           {
