@@ -116,16 +116,27 @@ export const SOUND_LABELS: Record<NotificationSoundType, string> = {
 };
 
 let audioContext: AudioContext | null = null;
+let audioUnlocked = false;
 
 const getAudioContext = (): AudioContext => {
   if (!audioContext) {
     audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
-  // Resume context if suspended (required after user interaction)
-  if (audioContext.state === 'suspended') {
-    audioContext.resume();
-  }
   return audioContext;
+};
+
+// Must be called from a user gesture handler to unlock audio
+const ensureAudioUnlocked = async (): Promise<boolean> => {
+  try {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+    audioUnlocked = ctx.state === 'running';
+    return audioUnlocked;
+  } catch {
+    return false;
+  }
 };
 
 const playTone = (
@@ -195,13 +206,13 @@ export const playNotificationSound = async (type: NotificationSoundType = 'defau
   if (!soundSettings[type]) return;
   
   try {
-    const ctx = getAudioContext();
-    
-    // Ensure audio context is running
-    if (ctx.state === 'suspended') {
-      await ctx.resume();
+    const unlocked = await ensureAudioUnlocked();
+    if (!unlocked) {
+      console.warn('🔇 Audio context not unlocked yet - needs user gesture first');
+      return;
     }
     
+    const ctx = getAudioContext();
     const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
     const now = ctx.currentTime;
     
@@ -224,13 +235,10 @@ export const playNotificationSound = async (type: NotificationSoundType = 'defau
 // Preview a specific sound
 export const previewNotificationSound = async (type: NotificationSoundType) => {
   try {
+    const unlocked = await ensureAudioUnlocked();
+    if (!unlocked) return;
+    
     const ctx = getAudioContext();
-    
-    // Ensure audio context is running
-    if (ctx.state === 'suspended') {
-      await ctx.resume();
-    }
-    
     const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
     const now = ctx.currentTime;
     
@@ -252,14 +260,7 @@ export const previewNotificationSound = async (type: NotificationSoundType) => {
 
 // Initialize/unlock audio context (required by most browsers; needs a user gesture)
 export const initNotificationAudio = async () => {
-  try {
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') {
-      await ctx.resume();
-    }
-  } catch (error) {
-    console.warn('Could not init notification audio:', error);
-  }
+  await ensureAudioUnlocked();
 };
 
 export const setNotificationSoundEnabled = (enabled: boolean) => {
