@@ -24,6 +24,9 @@ import LandfillCellsTab from '@/components/dashboard/disposal/mission-control/La
 import ByProductsTab from '@/components/dashboard/disposal/mission-control/ByProductsTab';
 import MROInventoryTab from '@/components/dashboard/disposal/mission-control/MROInventoryTab';
 import EnvironmentalTab from '@/components/dashboard/disposal/mission-control/EnvironmentalTab';
+import OperationModeSwitch from '@/components/dashboard/disposal/mission-control/OperationModeSwitch';
+import RulesEngineTab from '@/components/dashboard/disposal/mission-control/RulesEngineTab';
+import AutomationAuditTab from '@/components/dashboard/disposal/mission-control/AutomationAuditTab';
 
 const DisposalMissionControl = () => {
   const { organization } = useAuth();
@@ -187,14 +190,17 @@ const DisposalMissionControl = () => {
               <p className="text-muted-foreground text-sm">{facility?.name || 'منشأة التخلص النهائي'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Operation Mode Switch */}
+            <OperationModeSwitch facilityId={facility?.id} currentMode={(facility as any)?.operation_mode || 'hybrid'} />
+
             <Button variant="destructive" size="sm" className="gap-2 shadow-lg" onClick={() => setShowEmergencyConfirm(true)}>
-              <OctagonX className="w-4 h-4" /> وضع الطوارئ
+              <OctagonX className="w-4 h-4" /> طوارئ
             </Button>
-            <div className="relative w-full md:w-72">
+            <div className="relative w-full md:w-60">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="بحث (رقم شحنة، عميل...)"
+                placeholder="بحث..."
                 value={globalSearch}
                 onChange={(e) => setGlobalSearch(e.target.value)}
                 className="pr-10"
@@ -271,7 +277,13 @@ const DisposalMissionControl = () => {
                 🔧 المخزن الفني
               </TabsTrigger>
               <TabsTrigger value="environmental" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-teal-600 data-[state=active]:text-white">
-                🌍 البيئة والانبعاثات
+                🌍 البيئة
+              </TabsTrigger>
+              <TabsTrigger value="rules" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-violet-600 data-[state=active]:text-white">
+                ⚙️ القواعد
+              </TabsTrigger>
+              <TabsTrigger value="audit" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-slate-600 data-[state=active]:text-white">
+                📊 مراقبة الأتمتة
               </TabsTrigger>
               {facility?.owns_transport_fleet && (
                 <TabsTrigger value="logistics" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
@@ -300,6 +312,12 @@ const DisposalMissionControl = () => {
             </TabsContent>
             <TabsContent value="environmental" className="mt-4">
               <EnvironmentalTab facilityId={facility?.id} facility={facility} />
+            </TabsContent>
+            <TabsContent value="rules" className="mt-4">
+              <RulesEngineTab facilityId={facility?.id} organizationId={organization?.id} />
+            </TabsContent>
+            <TabsContent value="audit" className="mt-4">
+              <AutomationAuditTab organizationId={organization?.id} />
             </TabsContent>
             {facility?.owns_transport_fleet && (
               <TabsContent value="logistics" className="mt-4">
