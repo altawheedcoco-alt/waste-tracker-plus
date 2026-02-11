@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
+import FakeGPSDetector, { SpoofDetectionResult } from '@/lib/fakeGPSDetector';
 interface GPSConfig {
   driverId: string;
   enabled: boolean;
@@ -17,6 +17,8 @@ interface GPSState {
   lastPosition: GeolocationPosition | null;
   batteryMode: 'high' | 'balanced' | 'low';
   error: string | null;
+  spoofDetection: SpoofDetectionResult | null;
+  isBlocked: boolean;
 }
 
 /**
@@ -41,7 +43,11 @@ export function useAdaptiveGPS(config: GPSConfig) {
     lastPosition: null,
     batteryMode: 'balanced',
     error: null,
+    spoofDetection: null,
+    isBlocked: false,
   });
+
+  const fakeGPSDetectorRef = useRef(new FakeGPSDetector());
 
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -61,6 +67,20 @@ export function useAdaptiveGPS(config: GPSConfig) {
 
   const sendLocationUpdate = useCallback(
     async (position: GeolocationPosition) => {
+      // Run spoof detection
+      const spoofResult = fakeGPSDetectorRef.current.analyze(position);
+      if (spoofResult.isSuspicious && (spoofResult.riskLevel === 'high' || spoofResult.riskLevel === 'critical')) {
+        console.warn('[AdaptiveGPS] Spoof detected:', spoofResult.reasons);
+        setState(prev => ({
+          ...prev,
+          spoofDetection: spoofResult,
+          isBlocked: true,
+        }));
+        return; // Don't send spoofed location
+      }
+
+      setState(prev => ({ ...prev, spoofDetection: spoofResult, isBlocked: false }));
+
       const now = Date.now();
       const { latitude, longitude, speed, heading, accuracy } = position.coords;
 
