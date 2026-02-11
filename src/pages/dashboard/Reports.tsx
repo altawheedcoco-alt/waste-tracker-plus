@@ -62,6 +62,7 @@ import {
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import OfficialReportPrint from '@/components/reports/OfficialReportPrint';
+import RegulatoryExport from '@/components/reports/RegulatoryExport';
 
 interface ReportData {
   shipmentsByStatus: { name: string; value: number; color: string }[];
@@ -261,7 +262,7 @@ const Reports = () => {
   const exportReport = () => {
     toast({
       title: 'جاري التحضير',
-      description: 'سيتم تحميل التقرير قريباً',
+      description: 'استخدم أداة التصدير التنظيمي أدناه',
     });
   };
 
@@ -481,6 +482,10 @@ const Reports = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Summary Cards */}
+        {/* Regulatory Export Tool */}
+        <RegulatoryExport />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

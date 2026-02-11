@@ -22,6 +22,7 @@ interface GoogleMapsDriverTrackingProps {
   center?: { lat: number; lng: number };
   className?: string;
   height?: string;
+  showHeatmap?: boolean;
 }
 
 const GoogleMapsDriverTracking = memo(({
@@ -31,11 +32,13 @@ const GoogleMapsDriverTracking = memo(({
   center = { lat: 30.0444, lng: 31.2357 },
   className = '',
   height = '500px',
+  showHeatmap = false,
 }: GoogleMapsDriverTrackingProps) => {
   const { isLoaded, loadError } = useGoogleMaps();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
+  const heatmapRef = useRef<google.maps.visualization.HeatmapLayer | null>(null);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
   // Initialize map
@@ -117,6 +120,49 @@ const GoogleMapsDriverTracking = memo(({
       mapInstanceRef.current.setZoom(14);
     }
   }, [drivers, selectedDriver, isLoaded, onSelectDriver]);
+
+  // Heatmap layer
+  useEffect(() => {
+    if (!mapInstanceRef.current || !isLoaded) return;
+
+    if (heatmapRef.current) {
+      heatmapRef.current.setMap(null);
+      heatmapRef.current = null;
+    }
+
+    if (!showHeatmap) return;
+
+    const heatmapData = drivers
+      .filter(d => d.latitude && d.longitude)
+      .map(d => new window.google.maps.LatLng(d.latitude!, d.longitude!));
+
+    if (heatmapData.length === 0) return;
+
+    try {
+      heatmapRef.current = new window.google.maps.visualization.HeatmapLayer({
+        data: heatmapData,
+        map: mapInstanceRef.current,
+        radius: 40,
+        opacity: 0.7,
+        gradient: [
+          'rgba(0, 255, 0, 0)',
+          'rgba(0, 255, 0, 1)',
+          'rgba(255, 255, 0, 1)',
+          'rgba(255, 165, 0, 1)',
+          'rgba(255, 0, 0, 1)',
+        ],
+      });
+    } catch (e) {
+      console.warn('Heatmap visualization library not available');
+    }
+
+    return () => {
+      if (heatmapRef.current) {
+        heatmapRef.current.setMap(null);
+      }
+    };
+  }, [drivers, showHeatmap, isLoaded]);
+
 
   if (loadError) {
     return (
