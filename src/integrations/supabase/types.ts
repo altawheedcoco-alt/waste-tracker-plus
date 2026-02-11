@@ -7535,14 +7535,18 @@ export type Database = {
           environmental_license: string | null
           establishment_registration: string | null
           field_of_work: string | null
+          hazardous_certified: boolean | null
           headquarters: string | null
           id: string
           ida_license: string | null
           industrial_registry: string | null
           is_active: boolean | null
+          is_suspended: boolean | null
           is_verified: boolean | null
           land_transport_license: string | null
+          license_expiry_date: string | null
           license_number: string | null
+          license_renewal_url: string | null
           logo_url: string | null
           name: string
           name_en: string | null
@@ -7561,6 +7565,8 @@ export type Database = {
           secondary_phone: string | null
           signature_url: string | null
           stamp_url: string | null
+          suspended_at: string | null
+          suspension_reason: string | null
           tax_card: string | null
           updated_at: string | null
           vision: string | null
@@ -7589,14 +7595,18 @@ export type Database = {
           environmental_license?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
+          hazardous_certified?: boolean | null
           headquarters?: string | null
           id?: string
           ida_license?: string | null
           industrial_registry?: string | null
           is_active?: boolean | null
+          is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
+          license_expiry_date?: string | null
           license_number?: string | null
+          license_renewal_url?: string | null
           logo_url?: string | null
           name: string
           name_en?: string | null
@@ -7615,6 +7625,8 @@ export type Database = {
           secondary_phone?: string | null
           signature_url?: string | null
           stamp_url?: string | null
+          suspended_at?: string | null
+          suspension_reason?: string | null
           tax_card?: string | null
           updated_at?: string | null
           vision?: string | null
@@ -7643,14 +7655,18 @@ export type Database = {
           environmental_license?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
+          hazardous_certified?: boolean | null
           headquarters?: string | null
           id?: string
           ida_license?: string | null
           industrial_registry?: string | null
           is_active?: boolean | null
+          is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
+          license_expiry_date?: string | null
           license_number?: string | null
+          license_renewal_url?: string | null
           logo_url?: string | null
           name?: string
           name_en?: string | null
@@ -7669,6 +7685,8 @@ export type Database = {
           secondary_phone?: string | null
           signature_url?: string | null
           stamp_url?: string | null
+          suspended_at?: string | null
+          suspension_reason?: string | null
           tax_card?: string | null
           updated_at?: string | null
           vision?: string | null
