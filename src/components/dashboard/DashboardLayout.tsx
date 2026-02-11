@@ -53,6 +53,7 @@ import {
   Shield,
   CircleDot,
   Factory,
+  WifiOff,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -348,6 +349,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Activity, label: 'حالة نظامك', path: '/dashboard/system-status', key: 'all-system-status' },
+    { icon: WifiOff, label: 'وضع عدم الاتصال', path: '/dashboard/offline-mode', key: 'offline-mode' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
     { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
