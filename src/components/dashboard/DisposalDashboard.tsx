@@ -21,6 +21,10 @@ import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import StoryCircles from '@/components/stories/StoryCircles';
+import LegalComplianceWidget from '@/components/dashboard/generator/LegalComplianceWidget';
+import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
+import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
+import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 
 interface DisposalDashboardProps {
   embedded?: boolean;
@@ -154,6 +158,12 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       />
 
       <DisposalRecentOperations />
+
+      {/* Legal Compliance */}
+      <LegalComplianceWidget />
+      <VehicleComplianceManager />
+      <DriverComplianceManager />
+      <IncidentReportManager />
 
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
