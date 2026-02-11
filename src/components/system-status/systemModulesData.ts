@@ -144,6 +144,9 @@ export const systemModulesData: SystemModule[] = [
       { name: 'تصدير Excel', description: 'تصدير البيانات لـ Excel مع دعم RTL والعربية', status: 'completed', progress: 100, priority: 'medium', category: 'export' },
       { name: 'تحليلات AI', description: 'تحليل ذكي للبيانات والتوقعات مع اتجاهات الأداء', status: 'completed', progress: 100, priority: 'high', category: 'ai' },
       { name: 'تقارير WMRA', description: 'تقارير موافقة لجهاز تنظيم إدارة المخلفات المصري', status: 'completed', progress: 100, priority: 'high', category: 'regulatory' },
+      { name: 'تحليلات مالية متقدمة', description: 'إيرادات ومصروفات وصافي ربح مع مقارنات زمنية', status: 'completed', progress: 100, priority: 'high', category: 'financial' },
+      { name: 'تحليلات تشغيلية', description: 'Radar Chart للكفاءة ومؤشرات الإنجاز والإلغاء وأداء الشركاء', status: 'completed', progress: 100, priority: 'high', category: 'operational' },
+      { name: 'تحليلات بيئية', description: 'بصمة كربونية واتجاهات الانبعاثات ونقاط الاستدامة', status: 'completed', progress: 100, priority: 'high', category: 'environmental' },
     ],
   },
   {
