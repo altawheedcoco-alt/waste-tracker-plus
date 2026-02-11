@@ -5,6 +5,7 @@ import { Camera, Loader2, Image as ImageIcon, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { compressImage, formatFileSize } from '@/utils/imageCompression';
 
 interface AnalysisResult {
   waste_type?: string;
@@ -43,8 +44,14 @@ const ShipmentImageAnalyzer = ({ onAnalysis, className }: ShipmentImageAnalyzerP
     setResult(null);
 
     try {
+      // ضغط الصورة قبل الإرسال للتحليل
+      const compressed = await compressImage(file, { maxWidth: 1280, quality: 0.75 });
+      if (compressed.compressionRatio > 0) {
+        console.log(`📦 تم ضغط الصورة: ${formatFileSize(compressed.originalSize)} → ${formatFileSize(compressed.compressedSize)} (${compressed.compressionRatio}%)`);
+      }
+
       const formData = new FormData();
-      formData.append('image', file);
+      formData.append('image', compressed.file);
 
       const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch(

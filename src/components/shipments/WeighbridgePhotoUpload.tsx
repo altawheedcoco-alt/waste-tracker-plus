@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Camera, Upload, CheckCircle2, Loader2, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { compressImage, formatFileSize } from '@/utils/imageCompression';
 
 interface PhotoMetadata {
   latitude: number | null;
@@ -85,12 +86,19 @@ const WeighbridgePhotoUpload = ({
     try {
       const photoMetadata = await captureMetadata();
       
-      const fileExt = file.name.split('.').pop();
+      // ضغط الصورة قبل الرفع
+      const compressed = await compressImage(file, { maxWidth: 1920, quality: 0.8 });
+      if (compressed.compressionRatio > 0) {
+        console.log(`📦 تم ضغط الصورة: ${formatFileSize(compressed.originalSize)} → ${formatFileSize(compressed.compressedSize)} (${compressed.compressionRatio}%)`);
+      }
+      const finalFile = compressed.file;
+
+      const fileExt = finalFile.name.split('.').pop();
       const fileName = `${shipmentId}/${type}_${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('weighbridge-photos')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, finalFile, { upsert: true });
 
       if (uploadError) throw uploadError;
 
