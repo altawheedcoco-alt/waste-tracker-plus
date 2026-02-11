@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import EmergencyAlertPanel from '@/components/notifications/EmergencyAlertPanel';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
@@ -80,6 +81,7 @@ const AdminDriversMap = () => {
   const [filterStatus, setFilterStatus] = useState<'all' | 'available' | 'busy'>('all');
   const [filterOrganization, setFilterOrganization] = useState<string>('all');
   const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
+  const [showHeatmap, setShowHeatmap] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -228,10 +230,19 @@ const AdminDriversMap = () => {
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <Button onClick={fetchDrivers} variant="outline" className="gap-2">
-            <RefreshCcw className="w-4 h-4" />
-            تحديث
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={fetchDrivers} variant="outline" className="gap-2">
+              <RefreshCcw className="w-4 h-4" />
+              تحديث
+            </Button>
+            <Button
+              onClick={() => setShowHeatmap(!showHeatmap)}
+              variant={showHeatmap ? 'default' : 'outline'}
+              className="gap-2"
+            >
+              🔥 خريطة حرارية
+            </Button>
+          </div>
           <div className="text-right">
             <h1 className="text-3xl font-bold flex items-center gap-2 justify-end">
               <MapPin className="w-8 h-8 text-primary" />
@@ -372,6 +383,7 @@ const AdminDriversMap = () => {
                   selectedDriver={selectedDriver as MapDriver | null}
                   onSelectDriver={(driver) => setSelectedDriver(driver as unknown as AdminDriver)}
                   center={{ lat: 30.0444, lng: 31.2357 }}
+                  showHeatmap={showHeatmap}
                 />
               )}
             </CardContent>
@@ -571,6 +583,9 @@ const AdminDriversMap = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Emergency Alert Panel */}
+        <EmergencyAlertPanel />
       </motion.div>
     </DashboardLayout>
   );
