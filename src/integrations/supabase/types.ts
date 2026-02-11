@@ -3869,6 +3869,82 @@ export type Database = {
           },
         ]
       }
+      driver_compliance_docs: {
+        Row: {
+          created_at: string
+          doc_number: string | null
+          doc_type: string
+          document_url: string | null
+          driver_id: string
+          expiry_date: string | null
+          id: string
+          issue_date: string | null
+          issuing_authority: string | null
+          notes: string | null
+          organization_id: string
+          status: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_number?: string | null
+          doc_type: string
+          document_url?: string | null
+          driver_id: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          organization_id: string
+          status?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_number?: string | null
+          doc_type?: string
+          document_url?: string | null
+          driver_id?: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          organization_id?: string
+          status?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_compliance_docs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_compliance_docs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_compliance_docs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_location_logs: {
         Row: {
           accuracy: number | null
@@ -11062,6 +11138,123 @@ export type Database = {
           },
         ]
       }
+      transport_incidents: {
+        Row: {
+          authority_notified: boolean | null
+          authority_reference: string | null
+          corrective_actions: string | null
+          created_at: string
+          description: string | null
+          driver_id: string | null
+          id: string
+          immediate_actions: string | null
+          incident_at: string
+          incident_type: string
+          latitude: number | null
+          location_address: string | null
+          longitude: number | null
+          organization_id: string
+          photo_urls: string[] | null
+          reported_at: string
+          reported_by: string | null
+          resolved_at: string | null
+          severity: string
+          shipment_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          authority_notified?: boolean | null
+          authority_reference?: string | null
+          corrective_actions?: string | null
+          created_at?: string
+          description?: string | null
+          driver_id?: string | null
+          id?: string
+          immediate_actions?: string | null
+          incident_at?: string
+          incident_type: string
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          organization_id: string
+          photo_urls?: string[] | null
+          reported_at?: string
+          reported_by?: string | null
+          resolved_at?: string | null
+          severity?: string
+          shipment_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          authority_notified?: boolean | null
+          authority_reference?: string | null
+          corrective_actions?: string | null
+          created_at?: string
+          description?: string | null
+          driver_id?: string | null
+          id?: string
+          immediate_actions?: string | null
+          incident_at?: string
+          incident_type?: string
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          organization_id?: string
+          photo_urls?: string[] | null
+          reported_at?: string
+          reported_by?: string | null
+          resolved_at?: string | null
+          severity?: string
+          shipment_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_incidents_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transport_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_incidents_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_incidents_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_compliance"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_costs: {
         Row: {
           created_at: string
@@ -11443,6 +11636,122 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      vehicle_compliance: {
+        Row: {
+          compliance_status: string
+          created_at: string
+          driver_id: string | null
+          gps_device_id: string | null
+          gps_registered_with_authority: boolean | null
+          has_fire_extinguisher: boolean | null
+          has_first_aid_kit: boolean | null
+          has_hazard_placards: boolean | null
+          has_sand_box: boolean | null
+          has_spill_kit: boolean | null
+          hazmat_license_expiry: string | null
+          hazmat_license_number: string | null
+          hazmat_license_url: string | null
+          id: string
+          insurance_expiry: string | null
+          insurance_number: string | null
+          insurance_url: string | null
+          last_inspection_date: string | null
+          notes: string | null
+          organization_id: string
+          placard_types: string[] | null
+          plate_number: string
+          updated_at: string
+          vehicle_license_expiry: string | null
+          vehicle_license_url: string | null
+          vehicle_type: string
+        }
+        Insert: {
+          compliance_status?: string
+          created_at?: string
+          driver_id?: string | null
+          gps_device_id?: string | null
+          gps_registered_with_authority?: boolean | null
+          has_fire_extinguisher?: boolean | null
+          has_first_aid_kit?: boolean | null
+          has_hazard_placards?: boolean | null
+          has_sand_box?: boolean | null
+          has_spill_kit?: boolean | null
+          hazmat_license_expiry?: string | null
+          hazmat_license_number?: string | null
+          hazmat_license_url?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          insurance_number?: string | null
+          insurance_url?: string | null
+          last_inspection_date?: string | null
+          notes?: string | null
+          organization_id: string
+          placard_types?: string[] | null
+          plate_number: string
+          updated_at?: string
+          vehicle_license_expiry?: string | null
+          vehicle_license_url?: string | null
+          vehicle_type?: string
+        }
+        Update: {
+          compliance_status?: string
+          created_at?: string
+          driver_id?: string | null
+          gps_device_id?: string | null
+          gps_registered_with_authority?: boolean | null
+          has_fire_extinguisher?: boolean | null
+          has_first_aid_kit?: boolean | null
+          has_hazard_placards?: boolean | null
+          has_sand_box?: boolean | null
+          has_spill_kit?: boolean | null
+          hazmat_license_expiry?: string | null
+          hazmat_license_number?: string | null
+          hazmat_license_url?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          insurance_number?: string | null
+          insurance_url?: string | null
+          last_inspection_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          placard_types?: string[] | null
+          plate_number?: string
+          updated_at?: string
+          vehicle_license_expiry?: string | null
+          vehicle_license_url?: string | null
+          vehicle_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_compliance_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_compliance_gps_device_id_fkey"
+            columns: ["gps_device_id"]
+            isOneToOne: false
+            referencedRelation: "gps_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_compliance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vehicle_compliance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_maintenance: {
         Row: {
