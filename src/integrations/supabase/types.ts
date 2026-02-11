@@ -2496,6 +2496,139 @@ export type Database = {
           },
         ]
       }
+      disposal_automation_log: {
+        Row: {
+          action_details: Json | null
+          action_taken: string
+          ai_suggestion: string | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          execution_mode: string
+          human_approved: boolean | null
+          id: string
+          operation_id: string | null
+          organization_id: string
+          rule_id: string | null
+        }
+        Insert: {
+          action_details?: Json | null
+          action_taken: string
+          ai_suggestion?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          execution_mode: string
+          human_approved?: boolean | null
+          id?: string
+          operation_id?: string | null
+          organization_id: string
+          rule_id?: string | null
+        }
+        Update: {
+          action_details?: Json | null
+          action_taken?: string
+          ai_suggestion?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          execution_mode?: string
+          human_approved?: boolean | null
+          id?: string
+          operation_id?: string | null
+          organization_id?: string
+          rule_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_automation_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_automation_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_automation_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposal_automation_rules: {
+        Row: {
+          action_config: Json
+          action_type: string
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          last_triggered_at: string | null
+          organization_id: string
+          priority: number
+          rule_name: string
+          times_triggered: number
+          updated_at: string
+        }
+        Insert: {
+          action_config?: Json
+          action_type: string
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          organization_id: string
+          priority?: number
+          rule_name: string
+          times_triggered?: number
+          updated_at?: string
+        }
+        Update: {
+          action_config?: Json
+          action_type?: string
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          organization_id?: string
+          priority?: number
+          rule_name?: string
+          times_triggered?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_automation_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_automation_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disposal_byproducts: {
         Row: {
           byproduct_type: string
@@ -2804,6 +2937,7 @@ export type Database = {
           operation_license_expiry: string | null
           operation_license_number: string | null
           operation_license_url: string | null
+          operation_mode: string
           organization_id: string | null
           owns_transport_fleet: boolean | null
           phone: string | null
@@ -2875,6 +3009,7 @@ export type Database = {
           operation_license_expiry?: string | null
           operation_license_number?: string | null
           operation_license_url?: string | null
+          operation_mode?: string
           organization_id?: string | null
           owns_transport_fleet?: boolean | null
           phone?: string | null
@@ -2946,6 +3081,7 @@ export type Database = {
           operation_license_expiry?: string | null
           operation_license_number?: string | null
           operation_license_url?: string | null
+          operation_mode?: string
           organization_id?: string | null
           owns_transport_fleet?: boolean | null
           phone?: string | null
