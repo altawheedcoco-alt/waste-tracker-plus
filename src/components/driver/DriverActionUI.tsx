@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,28 +64,66 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
   const [showPlateVerification, setShowPlateVerification] = useState(false);
   const [plateVerified, setPlateVerified] = useState(shipment.plate_verified || false);
   const [showImageAI, setShowImageAI] = useState(false);
+  const [loadingPhotoUrl, setLoadingPhotoUrl] = useState<string | null>(null);
+  const [deliveryWeighbridgeUrl, setDeliveryWeighbridgeUrl] = useState<string | null>(null);
+  const loadingPhotoRef = useRef<HTMLInputElement>(null);
+  const deliveryPhotoRef = useRef<HTMLInputElement>(null);
+
+  // === STAGE 3: Upload loading photo handler ===
+  const handleLoadingPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const fileName = `loading-${shipment.id}-${Date.now()}.jpg`;
+      await supabase.storage.from('weighbridge-photos').upload(`loading/${fileName}`, file);
+      const url = supabase.storage.from('weighbridge-photos').getPublicUrl(`loading/${fileName}`).data.publicUrl;
+      setLoadingPhotoUrl(url);
+      toast.success('📸 تم رفع صورة الحمولة بنجاح');
+    } catch {
+      toast.error('فشل رفع الصورة');
+    }
+  };
+
+  // === STAGE 6: Upload delivery weighbridge photo handler ===
+  const handleDeliveryPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const fileName = `delivery-${shipment.id}-${Date.now()}.jpg`;
+      await supabase.storage.from('weighbridge-photos').upload(`delivery/${fileName}`, file);
+      const url = supabase.storage.from('weighbridge-photos').getPublicUrl(`delivery/${fileName}`).data.publicUrl;
+      setDeliveryWeighbridgeUrl(url);
+      toast.success('📸 تم رفع صورة ميزان الاستلام');
+    } catch {
+      toast.error('فشل رفع الصورة');
+    }
+  };
 
   const currentAction: StageAction | null = useMemo(() => {
     const statusMap: Record<string, StageAction> = {
       approved: {
         key: 'start_trip',
         nextStatus: 'in_transit',
-        label: plateVerified ? 'بدء الرحلة' : 'التحقق من المركبة وبدء الرحلة',
-        icon: plateVerified ? Play : ShieldCheck,
+        label: !plateVerified ? 'التحقق من المركبة' : !loadingPhotoUrl ? '📸 تصوير الحمولة والميزان' : 'بدء الرحلة',
+        icon: !plateVerified ? ShieldCheck : !loadingPhotoUrl ? Camera : Play,
         color: 'bg-emerald-500 hover:bg-emerald-600',
-        description: plateVerified
-          ? '✅ تم التحقق من اللوحة — ابدأ بمسح كود الاستلام'
-          : '🔒 يجب التحقق من لوحة المركبة أولاً',
+        description: !plateVerified
+          ? '🔒 يجب التحقق من لوحة المركبة أولاً'
+          : !loadingPhotoUrl
+          ? '📸 يجب تصوير الحمولة والميزان قبل بدء الرحلة (صورة حية)'
+          : '✅ تم التحقق — ابدأ بمسح كود الاستلام',
         requiresQR: true,
         requiresPlateVerification: !plateVerified,
       },
       in_transit: {
         key: 'arrive',
         nextStatus: 'delivered',
-        label: 'تأكيد الوصول والتسليم',
-        icon: MapPin,
+        label: !deliveryWeighbridgeUrl ? '📸 تصوير ميزان الاستلام' : 'تأكيد الوصول والتسليم',
+        icon: !deliveryWeighbridgeUrl ? Camera : MapPin,
         color: 'bg-blue-500 hover:bg-blue-600',
-        description: 'امسح كود التسليم عند الوصول لموقع الاستلام',
+        description: !deliveryWeighbridgeUrl
+          ? '📸 يجب رفع صورة ميزان الاستلام عند الوصول'
+          : 'امسح كود التسليم عند الوصول لموقع الاستلام',
         requiresQR: true,
         requiresPhoto: true,
       },
@@ -99,7 +137,7 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
       },
     };
     return statusMap[shipment.status] || null;
-  }, [shipment.status]);
+  }, [shipment.status, plateVerified, loadingPhotoUrl, deliveryWeighbridgeUrl]);
 
   const statusConfig = getStatusConfig(shipment.status);
 
@@ -109,6 +147,18 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
     // Gate: require plate verification before starting trip
     if (currentAction.requiresPlateVerification) {
       setShowPlateVerification(true);
+      return;
+    }
+
+    // === STAGE 3: Require loading photo before starting trip ===
+    if (shipment.status === 'approved' && !loadingPhotoUrl) {
+      loadingPhotoRef.current?.click();
+      return;
+    }
+
+    // === STAGE 6: Require delivery weighbridge photo before confirming arrival ===
+    if (shipment.status === 'in_transit' && !deliveryWeighbridgeUrl) {
+      deliveryPhotoRef.current?.click();
       return;
     }
 
@@ -129,6 +179,10 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
         confirmed: 'confirmed_at',
       };
       if (timestamps[dbStatus]) updateData[timestamps[dbStatus]] = now;
+
+      // Attach compliance photos
+      if (loadingPhotoUrl) updateData['pickup_photo_url'] = loadingPhotoUrl;
+      if (deliveryWeighbridgeUrl) updateData['delivery_photo_url'] = deliveryWeighbridgeUrl;
 
       const { error } = await supabase
         .from('shipments')
@@ -213,7 +267,28 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
                 {currentAction.label}
               </Button>
 
-              {/* Quick tools row */}
+              {/* Hidden file inputs for compliance photos */}
+              <input ref={loadingPhotoRef} type="file" accept="image/*" capture="environment" onChange={handleLoadingPhoto} className="hidden" />
+              <input ref={deliveryPhotoRef} type="file" accept="image/*" capture="environment" onChange={handleDeliveryPhoto} className="hidden" />
+
+              {/* Loading photo preview (Stage 3) */}
+              {loadingPhotoUrl && shipment.status === 'approved' && (
+                <div className="flex items-center gap-2 p-2 rounded-lg border border-emerald-300 bg-emerald-50">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <span className="text-sm text-emerald-700 font-medium">✅ تم رفع صورة الحمولة</span>
+                  <img src={loadingPhotoUrl} alt="صورة الحمولة" className="h-10 w-10 rounded object-cover mr-auto" />
+                </div>
+              )}
+
+              {/* Delivery weighbridge photo preview (Stage 6) */}
+              {deliveryWeighbridgeUrl && shipment.status === 'in_transit' && (
+                <div className="flex items-center gap-2 p-2 rounded-lg border border-emerald-300 bg-emerald-50">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  <span className="text-sm text-emerald-700 font-medium">✅ تم رفع صورة ميزان الاستلام</span>
+                  <img src={deliveryWeighbridgeUrl} alt="صورة الميزان" className="h-10 w-10 rounded object-cover mr-auto" />
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   variant="outline"

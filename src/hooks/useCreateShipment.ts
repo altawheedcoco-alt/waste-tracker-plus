@@ -536,6 +536,43 @@ export const useCreateShipment = () => {
       return;
     }
 
+    // === STAGE 1: Verify generator license is not expired ===
+    const isManualGen = formData.generator_id.startsWith('manual:');
+    if (!isManualGen && formData.generator_id) {
+      const { data: genOrg } = await supabase
+        .from('organizations')
+        .select('license_expiry_date, is_suspended, name')
+        .eq('id', formData.generator_id)
+        .maybeSingle();
+
+      if (genOrg?.is_suspended) {
+        toast.error(`⛔ حساب "${genOrg.name}" معطّل — لا يمكن إنشاء شحنة`);
+        return;
+      }
+      if (genOrg?.license_expiry_date) {
+        const expiry = new Date(genOrg.license_expiry_date);
+        if (expiry < new Date()) {
+          toast.error(`⛔ ترخيص "${genOrg.name}" منتهي بتاريخ ${genOrg.license_expiry_date} — لا يمكن إنشاء شحنة`);
+          return;
+        }
+      }
+    }
+
+    // === STAGE 2: Verify vehicle type matches waste type ===
+    const selectedDriverId = driverInputType === 'select' ? formData.driver_id : null;
+    if (selectedDriverId) {
+      const selectedDriver = drivers.find(d => d.id === selectedDriverId);
+      const isHazardous = formData.waste_type ? isHazardousWasteType(formData.waste_type) : false;
+      
+      if (isHazardous && selectedDriver?.vehicle_type) {
+        const closedTypes = ['closed_truck', 'tanker', 'hazmat_truck', 'refrigerated'];
+        if (!closedTypes.includes(selectedDriver.vehicle_type)) {
+          toast.error(`⚠️ المركبة (${selectedDriver.vehicle_type}) غير مناسبة لنقل مخلفات خطرة — يلزم مركبة مغلقة/صهريج`);
+          return;
+        }
+      }
+    }
+
     const isManualGenerator = formData.generator_id.startsWith('manual:');
     const isManualRecycler = formData.recycler_id.startsWith('manual:');
     const isManualTransporter = formData.transporter_id.startsWith('manual:');
