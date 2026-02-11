@@ -18,6 +18,9 @@ import DocumentVerificationWidget from './DocumentVerificationWidget';
 import SmartRequestDialog from './SmartRequestDialog';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import GeneratorTrackingWidget from './generator/GeneratorTrackingWidget';
+import DisposalRadarWidget from './generator/DisposalRadarWidget';
+import ESGReportWidget from './generator/ESGReportWidget';
+import LegalArchiveWidget from './generator/LegalArchiveWidget';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 // ChatWidget is now global in App.tsx
@@ -328,6 +331,12 @@ const GeneratorDashboard = () => {
       {/* Active Shipment Tracking */}
       <GeneratorTrackingWidget />
 
+      {/* Disposal Status Radar */}
+      <DisposalRadarWidget />
+
+      {/* ESG Sustainability Report */}
+      <ESGReportWidget />
+
       {/* Pending Approvals Widget - For Generator */}
       <PendingApprovalsWidget />
 
@@ -337,6 +346,9 @@ const GeneratorDashboard = () => {
         title="الإجراءات السريعة"
         subtitle="الوظائف المستخدمة بكثرة"
       />
+
+      {/* Legal Archive */}
+      <LegalArchiveWidget />
 
       {/* Recent shipments */}
       <Card>
