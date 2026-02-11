@@ -74,6 +74,7 @@ const Settings = lazy(() => import("./pages/dashboard/Settings"));
 const PrideCertificates = lazy(() => import("./pages/dashboard/PrideCertificates"));
 const ReportsGuide = lazy(() => import("./pages/dashboard/ReportsGuide"));
 const AboutPlatform = lazy(() => import("./pages/dashboard/AboutPlatform"));
+const OfflineMode = lazy(() => import("./pages/dashboard/OfflineMode"));
 const DriverProfile = lazy(() => import("./pages/dashboard/DriverProfile"));
 const DriverData = lazy(() => import("./pages/dashboard/DriverData"));
 const ExternalRecords = lazy(() => import("./pages/dashboard/ExternalRecords"));
@@ -248,6 +249,7 @@ const AppRoutes = memo(() => (
      <Route path="/dashboard/settings" element={<Settings />} />
      <Route path="/dashboard/pride-certificates" element={<PrideCertificates />} />
     <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
+    <Route path="/dashboard/offline-mode" element={<OfflineMode />} />
     <Route path="/dashboard/reports-guide" element={<ReportsGuide />} />
     <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
     <Route path="/dashboard/driver-data" element={<DriverData />} />
