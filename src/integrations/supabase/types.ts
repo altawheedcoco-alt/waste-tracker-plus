@@ -2649,6 +2649,7 @@ export type Database = {
           operation_license_number: string | null
           operation_license_url: string | null
           organization_id: string | null
+          owns_transport_fleet: boolean | null
           phone: string | null
           phone_secondary: string | null
           photos: Json | null
@@ -2658,6 +2659,8 @@ export type Database = {
           status: string | null
           tax_card_number: string | null
           total_capacity_tons: number | null
+          transport_flat_rate: number | null
+          transport_price_per_km: number | null
           updated_at: string
           verified_at: string | null
           verified_by: string | null
@@ -2717,6 +2720,7 @@ export type Database = {
           operation_license_number?: string | null
           operation_license_url?: string | null
           organization_id?: string | null
+          owns_transport_fleet?: boolean | null
           phone?: string | null
           phone_secondary?: string | null
           photos?: Json | null
@@ -2726,6 +2730,8 @@ export type Database = {
           status?: string | null
           tax_card_number?: string | null
           total_capacity_tons?: number | null
+          transport_flat_rate?: number | null
+          transport_price_per_km?: number | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -2785,6 +2791,7 @@ export type Database = {
           operation_license_number?: string | null
           operation_license_url?: string | null
           organization_id?: string | null
+          owns_transport_fleet?: boolean | null
           phone?: string | null
           phone_secondary?: string | null
           photos?: Json | null
@@ -2794,6 +2801,8 @@ export type Database = {
           status?: string | null
           tax_card_number?: string | null
           total_capacity_tons?: number | null
+          transport_flat_rate?: number | null
+          transport_price_per_km?: number | null
           updated_at?: string
           verified_at?: string | null
           verified_by?: string | null
@@ -2873,6 +2882,92 @@ export type Database = {
           },
           {
             foreignKeyName: "disposal_facility_reviews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposal_fleet_vehicles: {
+        Row: {
+          capacity_tons: number | null
+          created_at: string
+          disposal_facility_id: string | null
+          driver_id: string | null
+          hazmat_license_expiry: string | null
+          hazmat_license_number: string | null
+          id: string
+          maintenance_due_date: string | null
+          model: string | null
+          notes: string | null
+          organization_id: string
+          plate_number: string
+          status: string | null
+          updated_at: string
+          vehicle_type: string | null
+          year: number | null
+        }
+        Insert: {
+          capacity_tons?: number | null
+          created_at?: string
+          disposal_facility_id?: string | null
+          driver_id?: string | null
+          hazmat_license_expiry?: string | null
+          hazmat_license_number?: string | null
+          id?: string
+          maintenance_due_date?: string | null
+          model?: string | null
+          notes?: string | null
+          organization_id: string
+          plate_number: string
+          status?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+          year?: number | null
+        }
+        Update: {
+          capacity_tons?: number | null
+          created_at?: string
+          disposal_facility_id?: string | null
+          driver_id?: string | null
+          hazmat_license_expiry?: string | null
+          hazmat_license_number?: string | null
+          id?: string
+          maintenance_due_date?: string | null
+          model?: string | null
+          notes?: string | null
+          organization_id?: string
+          plate_number?: string
+          status?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_fleet_vehicles_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_fleet_vehicles_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_fleet_vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_fleet_vehicles_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -3126,6 +3221,127 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposal_trips: {
+        Row: {
+          arrived_at: string | null
+          client_address: string | null
+          client_name: string | null
+          created_at: string
+          departed_at: string | null
+          disposal_cost: number | null
+          disposal_facility_id: string | null
+          distance_km: number | null
+          driver_id: string | null
+          facility_lat: number | null
+          facility_lng: number | null
+          id: string
+          notes: string | null
+          operation_id: string | null
+          organization_id: string
+          picked_up_at: string | null
+          pickup_lat: number | null
+          pickup_lng: number | null
+          status: string | null
+          total_cost: number | null
+          transport_cost: number | null
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          arrived_at?: string | null
+          client_address?: string | null
+          client_name?: string | null
+          created_at?: string
+          departed_at?: string | null
+          disposal_cost?: number | null
+          disposal_facility_id?: string | null
+          distance_km?: number | null
+          driver_id?: string | null
+          facility_lat?: number | null
+          facility_lng?: number | null
+          id?: string
+          notes?: string | null
+          operation_id?: string | null
+          organization_id: string
+          picked_up_at?: string | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          status?: string | null
+          total_cost?: number | null
+          transport_cost?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          arrived_at?: string | null
+          client_address?: string | null
+          client_name?: string | null
+          created_at?: string
+          departed_at?: string | null
+          disposal_cost?: number | null
+          disposal_facility_id?: string | null
+          distance_km?: number | null
+          driver_id?: string | null
+          facility_lat?: number | null
+          facility_lng?: number | null
+          id?: string
+          notes?: string | null
+          operation_id?: string | null
+          organization_id?: string
+          picked_up_at?: string | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          status?: string | null
+          total_cost?: number | null
+          transport_cost?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_trips_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_trips_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_trips_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_trips_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_fleet_vehicles"
             referencedColumns: ["id"]
           },
         ]

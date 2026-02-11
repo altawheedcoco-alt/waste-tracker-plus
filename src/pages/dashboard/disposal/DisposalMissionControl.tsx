@@ -16,6 +16,7 @@ import { ar } from 'date-fns/locale';
 import GateControlTab from '@/components/dashboard/disposal/mission-control/GateControlTab';
 import LabTreatmentTab from '@/components/dashboard/disposal/mission-control/LabTreatmentTab';
 import CompletionFinanceTab from '@/components/dashboard/disposal/mission-control/CompletionFinanceTab';
+import LogisticsTab from '@/components/dashboard/disposal/mission-control/LogisticsTab';
 
 const DisposalMissionControl = () => {
   const { organization } = useAuth();
@@ -146,7 +147,7 @@ const DisposalMissionControl = () => {
         {/* 3-Screen Tabs - MIDDLE */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full flex h-auto gap-1 bg-muted/50 p-1.5 rounded-xl">
+            <TabsList className="w-full flex h-auto gap-1 bg-muted/50 p-1.5 rounded-xl flex-wrap">
               <TabsTrigger value="gate" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-red-500 data-[state=active]:text-white">
                 🚪 بوابة الاستقبال
               </TabsTrigger>
@@ -156,6 +157,11 @@ const DisposalMissionControl = () => {
               <TabsTrigger value="completion" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-green-600 data-[state=active]:text-white">
                 📜 الإغلاق والماليات
               </TabsTrigger>
+              {facility?.owns_transport_fleet && (
+                <TabsTrigger value="logistics" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                  🚛 اللوجستيات والنقل
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <TabsContent value="gate" className="mt-4">
@@ -167,6 +173,11 @@ const DisposalMissionControl = () => {
             <TabsContent value="completion" className="mt-4">
               <CompletionFinanceTab facilityId={facility?.id} organizationId={organization?.id} searchQuery={globalSearch} />
             </TabsContent>
+            {facility?.owns_transport_fleet && (
+              <TabsContent value="logistics" className="mt-4">
+                <LogisticsTab facilityId={facility?.id} organizationId={organization?.id} searchQuery={globalSearch} />
+              </TabsContent>
+            )}
           </Tabs>
         </motion.div>
 
