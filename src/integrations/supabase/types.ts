@@ -9422,6 +9422,57 @@ export type Database = {
         }
         Relationships: []
       }
+      recycler_timeslots: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean
+          max_capacity: number
+          organization_id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean
+          max_capacity?: number
+          organization_id: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          max_capacity?: number
+          organization_id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recycler_timeslots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "recycler_timeslots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recycling_reports: {
         Row: {
           closing_declaration: string | null
@@ -10236,6 +10287,7 @@ export type Database = {
           shipment_link_id: string | null
           shipment_number: string
           shipment_type: string | null
+          slot_booking_id: string | null
           status: Database["public"]["Enums"]["shipment_status"] | null
           submitter_name: string | null
           submitter_phone: string | null
@@ -10331,6 +10383,7 @@ export type Database = {
           shipment_link_id?: string | null
           shipment_number: string
           shipment_type?: string | null
+          slot_booking_id?: string | null
           status?: Database["public"]["Enums"]["shipment_status"] | null
           submitter_name?: string | null
           submitter_phone?: string | null
@@ -10426,6 +10479,7 @@ export type Database = {
           shipment_link_id?: string | null
           shipment_number?: string
           shipment_type?: string | null
+          slot_booking_id?: string | null
           status?: Database["public"]["Enums"]["shipment_status"] | null
           submitter_name?: string | null
           submitter_phone?: string | null
@@ -10511,6 +10565,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "shipments_slot_booking_id_fkey"
+            columns: ["slot_booking_id"]
+            isOneToOne: false
+            referencedRelation: "slot_bookings"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "shipments_transporter_id_fkey"
             columns: ["transporter_id"]
             isOneToOne: false
@@ -10522,6 +10583,112 @@ export type Database = {
             columns: ["transporter_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slot_bookings: {
+        Row: {
+          booked_by_organization_id: string
+          booked_by_user_id: string | null
+          booking_date: string
+          checked_in_at: string | null
+          checked_out_at: string | null
+          created_at: string
+          driver_name: string | null
+          driver_phone: string | null
+          end_time: string
+          id: string
+          notes: string | null
+          recycler_organization_id: string
+          shipment_id: string
+          start_time: string
+          status: string
+          timeslot_id: string
+          updated_at: string
+          vehicle_plate: string | null
+        }
+        Insert: {
+          booked_by_organization_id: string
+          booked_by_user_id?: string | null
+          booking_date: string
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          created_at?: string
+          driver_name?: string | null
+          driver_phone?: string | null
+          end_time: string
+          id?: string
+          notes?: string | null
+          recycler_organization_id: string
+          shipment_id: string
+          start_time: string
+          status?: string
+          timeslot_id: string
+          updated_at?: string
+          vehicle_plate?: string | null
+        }
+        Update: {
+          booked_by_organization_id?: string
+          booked_by_user_id?: string | null
+          booking_date?: string
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          created_at?: string
+          driver_name?: string | null
+          driver_phone?: string | null
+          end_time?: string
+          id?: string
+          notes?: string | null
+          recycler_organization_id?: string
+          shipment_id?: string
+          start_time?: string
+          status?: string
+          timeslot_id?: string
+          updated_at?: string
+          vehicle_plate?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slot_bookings_booked_by_organization_id_fkey"
+            columns: ["booked_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "slot_bookings_booked_by_organization_id_fkey"
+            columns: ["booked_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slot_bookings_recycler_organization_id_fkey"
+            columns: ["recycler_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "slot_bookings_recycler_organization_id_fkey"
+            columns: ["recycler_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slot_bookings_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slot_bookings_timeslot_id_fkey"
+            columns: ["timeslot_id"]
+            isOneToOne: false
+            referencedRelation: "recycler_timeslots"
             referencedColumns: ["id"]
           },
         ]
@@ -12467,6 +12634,10 @@ export type Database = {
           minutes_offline: number
           organization_id: string
         }[]
+      }
+      check_slot_availability: {
+        Args: { p_booking_date: string; p_timeslot_id: string }
+        Returns: number
       }
       cleanup_old_api_request_logs: { Args: never; Returns: number }
       count_recent_2fa_attempts: {
