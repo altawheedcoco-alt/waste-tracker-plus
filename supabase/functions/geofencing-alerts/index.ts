@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'check-location': {
-        const { driver_id, latitude, longitude, shipment_id } = data as DriverLocation & { shipment_id?: string }
+        const { driver_id, latitude, longitude, shipment_id, speed } = data as DriverLocation & { shipment_id?: string }
         
         if (!driver_id || latitude === undefined || longitude === undefined) {
           return new Response(
@@ -89,18 +89,12 @@ Deno.serve(async (req) => {
           .in('status', ['approved', 'collecting', 'in_transit'])
 
         const alerts: { type: string; message: string; shipment_id?: string; zone?: string }[] = []
-        const GEOFENCE_RADIUS = 200 // 200 meters default radius
+        const GEOFENCE_RADIUS = 200
 
         for (const shipment of shipments || []) {
           // Check pickup zone
           if (shipment.pickup_lat && shipment.pickup_lng && ['approved', 'collecting'].includes(shipment.status)) {
-            const distanceToPickup = calculateDistance(
-              latitude,
-              longitude,
-              shipment.pickup_lat,
-              shipment.pickup_lng
-            )
-
+            const distanceToPickup = calculateDistance(latitude, longitude, shipment.pickup_lat, shipment.pickup_lng)
             if (distanceToPickup <= GEOFENCE_RADIUS) {
               alerts.push({
                 type: 'entered_pickup_zone',
@@ -113,13 +107,8 @@ Deno.serve(async (req) => {
 
           // Check delivery zone
           if (shipment.delivery_lat && shipment.delivery_lng && shipment.status === 'in_transit') {
-            const distanceToDelivery = calculateDistance(
-              latitude,
-              longitude,
-              shipment.delivery_lat,
-              shipment.delivery_lng
-            )
-
+            const distanceToDelivery = calculateDistance(latitude, longitude, shipment.delivery_lat, shipment.delivery_lng)
+            
             if (distanceToDelivery <= GEOFENCE_RADIUS) {
               alerts.push({
                 type: 'entered_delivery_zone',
@@ -128,11 +117,56 @@ Deno.serve(async (req) => {
                 zone: 'delivery'
               })
             }
+
+            // ETA notification for recycler (within ~15 min / ~15km at avg speed)
+            const avgSpeedKmh = speed && speed > 0 ? speed * 3.6 : 40 // default 40 km/h
+            const etaMinutes = (distanceToDelivery / 1000) / avgSpeedKmh * 60
+            
+            if (etaMinutes <= 15 && etaMinutes > 0 && distanceToDelivery > GEOFENCE_RADIUS) {
+              // Check if we already sent an ETA notification recently (within 30 min)
+              const { data: recentNotif } = await supabase
+                .from('notifications')
+                .select('id')
+                .eq('shipment_id', shipment.id)
+                .eq('type', 'eta_alert')
+                .gte('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString())
+                .limit(1)
+
+              if (!recentNotif || recentNotif.length === 0) {
+                // Get recycler's admin user to notify
+                if (shipment.recycler_id) {
+                  const { data: recyclerUsers } = await supabase
+                    .from('user_organizations')
+                    .select('user_id')
+                    .eq('organization_id', shipment.recycler_id)
+                    .limit(5)
+
+                  for (const ru of recyclerUsers || []) {
+                    await supabase.from('notifications').insert({
+                      user_id: ru.user_id,
+                      title: '🚛 شاحنة في الطريق إليك',
+                      message: `شحنة رقم ${shipment.shipment_number} ستصل خلال ${Math.round(etaMinutes)} دقيقة تقريباً. يرجى تجهيز منطقة الاستلام والميزان.`,
+                      type: 'eta_alert',
+                      shipment_id: shipment.id
+                    })
+                  }
+
+                  alerts.push({
+                    type: 'eta_notification_sent',
+                    message: `تم إبلاغ المدور - ETA ${Math.round(etaMinutes)} دقيقة`,
+                    shipment_id: shipment.id,
+                    zone: 'delivery'
+                  })
+                  
+                  console.log(`[Geofencing] ETA alert sent to recycler for shipment ${shipment.shipment_number}: ${Math.round(etaMinutes)} min`)
+                }
+              }
+            }
           }
         }
 
-        // Create notifications for alerts
-        if (alerts.length > 0) {
+        // Create notifications for geofence alerts
+        if (alerts.filter(a => a.type.startsWith('entered_')).length > 0) {
           const { data: profile } = await supabase
             .from('profiles')
             .select('user_id')
@@ -140,7 +174,7 @@ Deno.serve(async (req) => {
             .single()
 
           if (profile?.user_id) {
-            for (const alert of alerts) {
+            for (const alert of alerts.filter(a => a.type.startsWith('entered_'))) {
               await supabase.from('notifications').insert({
                 user_id: profile.user_id,
                 title: alert.type === 'entered_pickup_zone' ? '📍 وصول لمنطقة الاستلام' : '🎯 وصول لمنطقة التسليم',
