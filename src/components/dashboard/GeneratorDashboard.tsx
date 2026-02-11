@@ -21,6 +21,7 @@ import GeneratorTrackingWidget from './generator/GeneratorTrackingWidget';
 import DisposalRadarWidget from './generator/DisposalRadarWidget';
 import ESGReportWidget from './generator/ESGReportWidget';
 import LegalArchiveWidget from './generator/LegalArchiveWidget';
+import LegalComplianceWidget from './generator/LegalComplianceWidget';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 // ChatWidget is now global in App.tsx
@@ -346,6 +347,9 @@ const GeneratorDashboard = () => {
         title="الإجراءات السريعة"
         subtitle="الوظائف المستخدمة بكثرة"
       />
+
+      {/* Legal Compliance Engine */}
+      <LegalComplianceWidget />
 
       {/* Legal Archive */}
       <LegalArchiveWidget />
