@@ -40,6 +40,7 @@ import {
   Building2,
 } from 'lucide-react';
 import EngineerVisionSection from '@/components/system-status/EngineerVisionSection';
+import BackButton from '@/components/ui/back-button';
 import { LiveHealthDashboard } from '@/components/system-status/LiveHealthDashboard';
 import { useNavigate } from 'react-router-dom';
 import { useSystemStats } from '@/hooks/useSystemStats';
@@ -76,6 +77,7 @@ const SystemStatus = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <BackButton />
             <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-white">
               <Activity className="w-8 h-8" />
             </div>
