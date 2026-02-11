@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Factory, Package, Clock, CheckCircle, TrendingUp } from 'lucide-react';
+import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import FacilityDashboardHeader from '@/components/dashboard/shared/FacilityDashboardHeader';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 import FacilityCapacityCard from '@/components/dashboard/shared/FacilityCapacityCard';
 import StatsCardsGrid, { StatCardItem } from '@/components/dashboard/shared/StatsCardsGrid';
 import DisposalIncomingPanel from '@/components/dashboard/disposal/DisposalIncomingPanel';
@@ -29,6 +31,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Fetch disposal facility linked to this organization
   const { data: facility } = useQuery({
@@ -110,6 +113,15 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   return (
     <div className="space-y-6" dir="rtl">
       <StoryCircles />
+
+      {/* Mission Control Button */}
+      <Button
+        className="w-full gap-3 h-14 text-base bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 shadow-lg"
+        onClick={() => navigate('/dashboard/disposal/mission-control')}
+      >
+        <Shield className="w-5 h-5" />
+        مركز القيادة — لوحة التحكم الشاملة
+      </Button>
 
       <FacilityDashboardHeader
         userName={profile?.full_name || ''}
