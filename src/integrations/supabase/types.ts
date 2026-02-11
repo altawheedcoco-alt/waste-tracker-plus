@@ -1935,6 +1935,92 @@ export type Database = {
           },
         ]
       }
+      custody_chain_events: {
+        Row: {
+          actor_organization_id: string | null
+          actor_user_id: string | null
+          created_at: string
+          device_info: string | null
+          event_type: string
+          gps_accuracy: number | null
+          gps_latitude: number | null
+          gps_longitude: number | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          photo_proof_url: string | null
+          previous_event_id: string | null
+          qr_code_data: string
+          qr_code_hash: string
+          shipment_id: string
+        }
+        Insert: {
+          actor_organization_id?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          device_info?: string | null
+          event_type: string
+          gps_accuracy?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          photo_proof_url?: string | null
+          previous_event_id?: string | null
+          qr_code_data: string
+          qr_code_hash: string
+          shipment_id: string
+        }
+        Update: {
+          actor_organization_id?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          device_info?: string | null
+          event_type?: string
+          gps_accuracy?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          photo_proof_url?: string | null
+          previous_event_id?: string | null
+          qr_code_data?: string
+          qr_code_hash?: string
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custody_chain_events_actor_organization_id_fkey"
+            columns: ["actor_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "custody_chain_events_actor_organization_id_fkey"
+            columns: ["actor_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custody_chain_events_previous_event_id_fkey"
+            columns: ["previous_event_id"]
+            isOneToOne: false
+            referencedRelation: "custody_chain_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custody_chain_events_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_conversation_messages: {
         Row: {
           actions: Json | null
@@ -10089,6 +10175,7 @@ export type Database = {
           confirmed_at: string | null
           created_at: string | null
           created_by: string | null
+          custody_chain_complete: boolean | null
           delay_notified: boolean | null
           delay_reason: string | null
           delivered_at: string | null
@@ -10108,6 +10195,7 @@ export type Database = {
           generator_auto_approve_deadline: string | null
           generator_id: string | null
           generator_notes: string | null
+          generator_qr_code: string | null
           generator_rejection_reason: string | null
           gps_delivery_lat: number | null
           gps_delivery_lng: number | null
@@ -10117,6 +10205,8 @@ export type Database = {
           id: string
           in_transit_at: string | null
           is_public_submission: boolean | null
+          manifest_generated_at: string | null
+          manifest_pdf_url: string | null
           manual_disposal_name: string | null
           manual_driver_name: string | null
           manual_generator_name: string | null
@@ -10141,6 +10231,7 @@ export type Database = {
           recycler_auto_approve_deadline: string | null
           recycler_id: string | null
           recycler_notes: string | null
+          recycler_receipt_qr: string | null
           recycler_rejection_reason: string | null
           shipment_link_id: string | null
           shipment_number: string
@@ -10149,7 +10240,9 @@ export type Database = {
           submitter_name: string | null
           submitter_phone: string | null
           total_value: number | null
+          transporter_delivery_qr: string | null
           transporter_id: string
+          transporter_pickup_qr: string | null
           unit: string | null
           updated_at: string | null
           waste_description: string | null
@@ -10177,6 +10270,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          custody_chain_complete?: boolean | null
           delay_notified?: boolean | null
           delay_reason?: string | null
           delivered_at?: string | null
@@ -10196,6 +10290,7 @@ export type Database = {
           generator_auto_approve_deadline?: string | null
           generator_id?: string | null
           generator_notes?: string | null
+          generator_qr_code?: string | null
           generator_rejection_reason?: string | null
           gps_delivery_lat?: number | null
           gps_delivery_lng?: number | null
@@ -10205,6 +10300,8 @@ export type Database = {
           id?: string
           in_transit_at?: string | null
           is_public_submission?: boolean | null
+          manifest_generated_at?: string | null
+          manifest_pdf_url?: string | null
           manual_disposal_name?: string | null
           manual_driver_name?: string | null
           manual_generator_name?: string | null
@@ -10229,6 +10326,7 @@ export type Database = {
           recycler_auto_approve_deadline?: string | null
           recycler_id?: string | null
           recycler_notes?: string | null
+          recycler_receipt_qr?: string | null
           recycler_rejection_reason?: string | null
           shipment_link_id?: string | null
           shipment_number: string
@@ -10237,7 +10335,9 @@ export type Database = {
           submitter_name?: string | null
           submitter_phone?: string | null
           total_value?: number | null
+          transporter_delivery_qr?: string | null
           transporter_id: string
+          transporter_pickup_qr?: string | null
           unit?: string | null
           updated_at?: string | null
           waste_description?: string | null
@@ -10265,6 +10365,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string | null
           created_by?: string | null
+          custody_chain_complete?: boolean | null
           delay_notified?: boolean | null
           delay_reason?: string | null
           delivered_at?: string | null
@@ -10284,6 +10385,7 @@ export type Database = {
           generator_auto_approve_deadline?: string | null
           generator_id?: string | null
           generator_notes?: string | null
+          generator_qr_code?: string | null
           generator_rejection_reason?: string | null
           gps_delivery_lat?: number | null
           gps_delivery_lng?: number | null
@@ -10293,6 +10395,8 @@ export type Database = {
           id?: string
           in_transit_at?: string | null
           is_public_submission?: boolean | null
+          manifest_generated_at?: string | null
+          manifest_pdf_url?: string | null
           manual_disposal_name?: string | null
           manual_driver_name?: string | null
           manual_generator_name?: string | null
@@ -10317,6 +10421,7 @@ export type Database = {
           recycler_auto_approve_deadline?: string | null
           recycler_id?: string | null
           recycler_notes?: string | null
+          recycler_receipt_qr?: string | null
           recycler_rejection_reason?: string | null
           shipment_link_id?: string | null
           shipment_number?: string
@@ -10325,7 +10430,9 @@ export type Database = {
           submitter_name?: string | null
           submitter_phone?: string | null
           total_value?: number | null
+          transporter_delivery_qr?: string | null
           transporter_id?: string
+          transporter_pickup_qr?: string | null
           unit?: string | null
           updated_at?: string | null
           waste_description?: string | null

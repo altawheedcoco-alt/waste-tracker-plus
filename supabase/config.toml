@@ -107,3 +107,9 @@ verify_jwt = false
 
 [functions.ai-operations-assistant]
 verify_jwt = false
+
+[functions.check-license-expiry]
+verify_jwt = false
+
+[functions.generate-manifest-pdf]
+verify_jwt = false
