@@ -2496,6 +2496,89 @@ export type Database = {
           },
         ]
       }
+      disposal_byproducts: {
+        Row: {
+          byproduct_type: string
+          created_at: string
+          disposal_facility_id: string | null
+          disposal_method: string | null
+          disposed_at: string | null
+          hazard_level: string | null
+          id: string
+          notes: string | null
+          operation_id: string | null
+          organization_id: string
+          quantity: number
+          status: string | null
+          storage_location: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          byproduct_type: string
+          created_at?: string
+          disposal_facility_id?: string | null
+          disposal_method?: string | null
+          disposed_at?: string | null
+          hazard_level?: string | null
+          id?: string
+          notes?: string | null
+          operation_id?: string | null
+          organization_id: string
+          quantity?: number
+          status?: string | null
+          storage_location?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          byproduct_type?: string
+          created_at?: string
+          disposal_facility_id?: string | null
+          disposal_method?: string | null
+          disposed_at?: string | null
+          hazard_level?: string | null
+          id?: string
+          notes?: string | null
+          operation_id?: string | null
+          organization_id?: string
+          quantity?: number
+          status?: string | null
+          storage_location?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_byproducts_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_byproducts_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_byproducts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_byproducts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disposal_certificates: {
         Row: {
           certificate_number: string
@@ -2590,6 +2673,79 @@ export type Database = {
           },
           {
             foreignKeyName: "disposal_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disposal_custody_signatures: {
+        Row: {
+          created_at: string
+          device_info: string | null
+          id: string
+          ip_address: string | null
+          notes: string | null
+          operation_id: string | null
+          organization_id: string
+          signature_image_url: string | null
+          signature_method: string | null
+          signed_at: string
+          signer_name: string
+          signer_role: string | null
+          signer_user_id: string | null
+          step: string
+        }
+        Insert: {
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          operation_id?: string | null
+          organization_id: string
+          signature_image_url?: string | null
+          signature_method?: string | null
+          signed_at?: string
+          signer_name: string
+          signer_role?: string | null
+          signer_user_id?: string | null
+          step: string
+        }
+        Update: {
+          created_at?: string
+          device_info?: string | null
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          operation_id?: string | null
+          organization_id?: string
+          signature_image_url?: string | null
+          signature_method?: string | null
+          signed_at?: string
+          signer_name?: string
+          signer_role?: string | null
+          signer_user_id?: string | null
+          step?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disposal_custody_signatures_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disposal_custody_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "disposal_custody_signatures_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -5510,6 +5666,79 @@ export type Database = {
           },
         ]
       }
+      landfill_cells: {
+        Row: {
+          cell_code: string
+          closed_at: string | null
+          created_at: string
+          disposal_facility_id: string | null
+          id: string
+          notes: string | null
+          opened_at: string | null
+          organization_id: string
+          sector: string | null
+          status: string | null
+          total_capacity_tons: number
+          updated_at: string
+          used_capacity_tons: number
+          waste_types_allowed: string[] | null
+        }
+        Insert: {
+          cell_code: string
+          closed_at?: string | null
+          created_at?: string
+          disposal_facility_id?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          organization_id: string
+          sector?: string | null
+          status?: string | null
+          total_capacity_tons?: number
+          updated_at?: string
+          used_capacity_tons?: number
+          waste_types_allowed?: string[] | null
+        }
+        Update: {
+          cell_code?: string
+          closed_at?: string | null
+          created_at?: string
+          disposal_facility_id?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          organization_id?: string
+          sector?: string | null
+          status?: string | null
+          total_capacity_tons?: number
+          updated_at?: string
+          used_capacity_tons?: number
+          waste_types_allowed?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landfill_cells_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landfill_cells_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "landfill_cells_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leaderboard_cache: {
         Row: {
           badges_count: number
@@ -5590,6 +5819,147 @@ export type Database = {
           view_name?: string
         }
         Relationships: []
+      }
+      mro_inventory: {
+        Row: {
+          category: string | null
+          created_at: string
+          current_stock: number
+          disposal_facility_id: string | null
+          id: string
+          item_name: string
+          last_restocked_at: string | null
+          minimum_stock: number | null
+          notes: string | null
+          organization_id: string
+          sku: string | null
+          supplier: string | null
+          unit: string | null
+          unit_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          current_stock?: number
+          disposal_facility_id?: string | null
+          id?: string
+          item_name: string
+          last_restocked_at?: string | null
+          minimum_stock?: number | null
+          notes?: string | null
+          organization_id: string
+          sku?: string | null
+          supplier?: string | null
+          unit?: string | null
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          current_stock?: number
+          disposal_facility_id?: string | null
+          id?: string
+          item_name?: string
+          last_restocked_at?: string | null
+          minimum_stock?: number | null
+          notes?: string | null
+          organization_id?: string
+          sku?: string | null
+          supplier?: string | null
+          unit?: string | null
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mro_inventory_disposal_facility_id_fkey"
+            columns: ["disposal_facility_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_facilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mro_inventory_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "mro_inventory_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mro_usage_log: {
+        Row: {
+          created_at: string
+          id: string
+          mro_item_id: string
+          notes: string | null
+          operation_id: string | null
+          organization_id: string
+          quantity_used: number
+          used_at: string
+          used_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mro_item_id: string
+          notes?: string | null
+          operation_id?: string | null
+          organization_id: string
+          quantity_used?: number
+          used_at?: string
+          used_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mro_item_id?: string
+          notes?: string | null
+          operation_id?: string | null
+          organization_id?: string
+          quantity_used?: number
+          used_at?: string
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mro_usage_log_mro_item_id_fkey"
+            columns: ["mro_item_id"]
+            isOneToOne: false
+            referencedRelation: "mro_inventory"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mro_usage_log_operation_id_fkey"
+            columns: ["operation_id"]
+            isOneToOne: false
+            referencedRelation: "disposal_operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mro_usage_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "mro_usage_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_channels: {
         Row: {

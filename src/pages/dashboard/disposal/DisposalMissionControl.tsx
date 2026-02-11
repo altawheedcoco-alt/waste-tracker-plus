@@ -17,6 +17,10 @@ import GateControlTab from '@/components/dashboard/disposal/mission-control/Gate
 import LabTreatmentTab from '@/components/dashboard/disposal/mission-control/LabTreatmentTab';
 import CompletionFinanceTab from '@/components/dashboard/disposal/mission-control/CompletionFinanceTab';
 import LogisticsTab from '@/components/dashboard/disposal/mission-control/LogisticsTab';
+import LandfillCellsTab from '@/components/dashboard/disposal/mission-control/LandfillCellsTab';
+import ByProductsTab from '@/components/dashboard/disposal/mission-control/ByProductsTab';
+import MROInventoryTab from '@/components/dashboard/disposal/mission-control/MROInventoryTab';
+import EnvironmentalTab from '@/components/dashboard/disposal/mission-control/EnvironmentalTab';
 
 const DisposalMissionControl = () => {
   const { organization } = useAuth();
@@ -149,17 +153,29 @@ const DisposalMissionControl = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="w-full flex h-auto gap-1 bg-muted/50 p-1.5 rounded-xl flex-wrap">
               <TabsTrigger value="gate" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-red-500 data-[state=active]:text-white">
-                🚪 بوابة الاستقبال
+                🚪 الاستقبال
               </TabsTrigger>
               <TabsTrigger value="lab" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-amber-500 data-[state=active]:text-white">
-                🔬 المختبر والمعالجة
+                🔬 المختبر
               </TabsTrigger>
               <TabsTrigger value="completion" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-green-600 data-[state=active]:text-white">
-                📜 الإغلاق والماليات
+                📜 الإغلاق
+              </TabsTrigger>
+              <TabsTrigger value="landfill" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-emerald-700 data-[state=active]:text-white">
+                ⛏️ خلايا الدفن
+              </TabsTrigger>
+              <TabsTrigger value="byproducts" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-orange-500 data-[state=active]:text-white">
+                ♻️ مخلفات ثانوية
+              </TabsTrigger>
+              <TabsTrigger value="mro" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-indigo-600 data-[state=active]:text-white">
+                🔧 المخزن الفني
+              </TabsTrigger>
+              <TabsTrigger value="environmental" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-teal-600 data-[state=active]:text-white">
+                🌍 البيئة والانبعاثات
               </TabsTrigger>
               {facility?.owns_transport_fleet && (
                 <TabsTrigger value="logistics" className="flex-1 gap-2 py-3 text-sm data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-                  🚛 اللوجستيات والنقل
+                  🚛 النقل
                 </TabsTrigger>
               )}
             </TabsList>
@@ -172,6 +188,18 @@ const DisposalMissionControl = () => {
             </TabsContent>
             <TabsContent value="completion" className="mt-4">
               <CompletionFinanceTab facilityId={facility?.id} organizationId={organization?.id} searchQuery={globalSearch} />
+            </TabsContent>
+            <TabsContent value="landfill" className="mt-4">
+              <LandfillCellsTab facilityId={facility?.id} organizationId={organization?.id} />
+            </TabsContent>
+            <TabsContent value="byproducts" className="mt-4">
+              <ByProductsTab facilityId={facility?.id} organizationId={organization?.id} />
+            </TabsContent>
+            <TabsContent value="mro" className="mt-4">
+              <MROInventoryTab facilityId={facility?.id} organizationId={organization?.id} />
+            </TabsContent>
+            <TabsContent value="environmental" className="mt-4">
+              <EnvironmentalTab facilityId={facility?.id} facility={facility} />
             </TabsContent>
             {facility?.owns_transport_fleet && (
               <TabsContent value="logistics" className="mt-4">
