@@ -340,14 +340,19 @@ const ReceiptDetailsDialog = ({
                     <CheckCircle2 className="w-3.5 h-3.5 text-green-600 mr-auto" />
                   </div>
                   <p className="text-xs text-green-700 dark:text-green-400">
-                    موقّع بواسطة: {(declarationData as any).declared_by_name || 'مُوقّع'} 
-                    {(declarationData as any).created_at && (
-                      <> — {format(new Date((declarationData as any).created_at), 'dd/MM/yyyy HH:mm')}</>
+                    موقّع بواسطة: {(declarationData as any).driver_name || 'مُوقّع'} 
+                    {(declarationData as any).declared_at && (
+                      <> — {format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy HH:mm')}</>
                     )}
                   </p>
                   <p className="text-[10px] text-green-600 dark:text-green-500 mt-1">
-                    ختم: {(declarationData as any).integrity_hash?.substring(0, 16) || 'N/A'}...
+                    الناقل: {(declarationData as any).transporter_name || 'غير محدد'} | هوية السائق: {(declarationData as any).driver_national_id || 'غير محدد'}
                   </p>
+                  {(declarationData as any).generator_name && (
+                    <p className="text-[10px] text-green-600 dark:text-green-500">
+                      المولد: {(declarationData as any).generator_name} | النفايات: {(declarationData as any).waste_type} ({(declarationData as any).quantity} {(declarationData as any).unit || 'طن'})
+                    </p>
+                  )}
                 </div>
               )}
 
