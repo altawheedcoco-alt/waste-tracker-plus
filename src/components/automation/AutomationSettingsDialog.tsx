@@ -335,18 +335,26 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
     ));
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      // Save to database
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('تم حفظ إعدادات الأتمتة بنجاح');
-      setOpen(false);
-    } catch (error) {
-      toast.error('فشل في حفظ الإعدادات');
-    } finally {
-      setSaving(false);
-    }
+  const handleEnableAll = () => {
+    setSettings(prev => prev.map(s => ({ ...s, enabled: true })));
+    toast.success('تم تفعيل جميع الإجراءات');
+  };
+
+  const handleDisableAll = () => {
+    setSettings(prev => prev.map(s => ({ ...s, enabled: false })));
+    toast.success('تم إيقاف جميع الإجراءات');
+  };
+
+  const handleEnableCategory = (categoryId: string) => {
+    setSettings(prev => prev.map(s => 
+      s.category === categoryId ? { ...s, enabled: true } : s
+    ));
+  };
+
+  const handleDisableCategory = (categoryId: string) => {
+    setSettings(prev => prev.map(s => 
+      s.category === categoryId ? { ...s, enabled: false } : s
+    ));
   };
 
   const toggleCategory = (categoryId: string) => {
@@ -355,6 +363,19 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
         ? prev.filter(id => id !== categoryId)
         : [...prev, categoryId]
     );
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('تم حفظ إعدادات الأتمتة بنجاح');
+      setOpen(false);
+    } catch (error) {
+      toast.error('فشل في حفظ الإعدادات');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const filteredSettings = visibleSettings.filter(s => {
@@ -400,9 +421,34 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
                 فعّل الإجراءات التي تريد من النظام تنفيذها تلقائياً
               </DialogDescription>
             </div>
-            <Badge variant="outline" className="text-lg px-3 py-1">
-              {enabledCount} / {totalCount}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-lg px-3 py-1">
+                {enabledCount} / {totalCount}
+              </Badge>
+            </div>
+          </div>
+          {/* Master Enable/Disable Buttons */}
+          <div className="flex items-center gap-2 mt-3">
+            <Button
+              variant="default"
+              size="sm"
+              className="gap-2"
+              onClick={handleEnableAll}
+              disabled={enabledCount === totalCount}
+            >
+              <CheckCircle className="h-4 w-4" />
+              تفعيل الكل
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10"
+              onClick={handleDisableAll}
+              disabled={enabledCount === 0}
+            >
+              <XCircle className="h-4 w-4" />
+              إيقاف الكل
+            </Button>
           </div>
         </DialogHeader>
 
@@ -468,6 +514,24 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            onClick={(e) => { e.stopPropagation(); handleEnableCategory(category.id); }}
+                          >
+                            <CheckCircle className="h-3 w-3 ml-1" />
+                            تفعيل الكل
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                            onClick={(e) => { e.stopPropagation(); handleDisableCategory(category.id); }}
+                          >
+                            <XCircle className="h-3 w-3 ml-1" />
+                            إيقاف الكل
+                          </Button>
                           <Badge variant="secondary">
                             {enabledInCategory} / {categorySettings.length}
                           </Badge>
