@@ -366,10 +366,27 @@ const ReceiptDetailsDialog = ({
           <Separator />
 
           {/* Actions */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 no-print">
             <Button onClick={handlePrint} variant="outline" className="flex-1">
               <Printer className="w-4 h-4 ml-2" />
               طباعة
+            </Button>
+            <Button
+              onClick={() => {
+                if (printRef.current) {
+                  exportToPDF(printRef.current, `شهادة-استلام-${receipt.receipt_number}`);
+                }
+              }}
+              variant="default"
+              className="flex-1"
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 ml-2" />
+              )}
+              تحميل PDF
             </Button>
             {isGenerator && receipt.status === 'pending' && (
               <Button onClick={handleConfirm} className="flex-1" disabled={confirming}>
