@@ -86,6 +86,7 @@ import OfflineIndicator from '@/components/offline/OfflineIndicator';
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
 import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
 import GlobalRefreshButton from './GlobalRefreshButton';
+import LiveEventToast from '@/components/notifications/LiveEventToast';
 import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomizer';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 
@@ -471,6 +472,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-background flex flex-row-reverse" dir="rtl">
+        <LiveEventToast />
         {/* Desktop Sidebar - Hidden on mobile when using display mode */}
         <AnimatePresence>
           {(isSidebarOpen || !isMobile) && (
