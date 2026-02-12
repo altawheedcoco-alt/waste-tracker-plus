@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Printer } from 'lucide-react';
-import { PRINT_THEMES, type PrintThemeId, type PrintTheme } from '@/lib/printThemes';
+import { PRINT_THEMES, getThemesByEntity, type PrintThemeId, type PrintTheme } from '@/lib/printThemes';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ interface PrintThemeSelectorProps {
   onSelect: (themeId: PrintThemeId) => void;
   selectedTheme?: PrintThemeId;
   documentTitle?: string;
+  entityType?: 'generator' | 'transporter' | 'recycler' | 'disposal';
 }
 
 const ThemePreviewCard = ({ theme, isSelected, onClick, documentTitle }: { theme: PrintTheme; isSelected: boolean; onClick: () => void; documentTitle: string }) => {
@@ -101,7 +102,8 @@ const ThemePreviewCard = ({ theme, isSelected, onClick, documentTitle }: { theme
   );
 };
 
-const PrintThemeSelector = ({ open, onOpenChange, onSelect, selectedTheme = 'corporate', documentTitle = 'مستند رسمي' }: PrintThemeSelectorProps) => {
+const PrintThemeSelector = ({ open, onOpenChange, onSelect, selectedTheme = 'corporate', documentTitle = 'مستند رسمي', entityType }: PrintThemeSelectorProps) => {
+  const filteredThemes = entityType ? getThemesByEntity(entityType) : PRINT_THEMES;
   const [selected, setSelected] = useState<PrintThemeId>(selectedTheme);
 
   const handleConfirm = () => {
@@ -118,12 +120,12 @@ const PrintThemeSelector = ({ open, onOpenChange, onSelect, selectedTheme = 'cor
             اختر تنسيق الطباعة
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            اختر أحد الأنماط الستة لتطبيقه على المستند قبل الطباعة أو التصدير
+            اختر أحد الأنماط ({filteredThemes.length} تصميم) لتطبيقه على المستند قبل الطباعة أو التصدير
           </p>
         </DialogHeader>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
-          {PRINT_THEMES.map((theme) => (
+          {filteredThemes.map((theme) => (
             <ThemePreviewCard
               key={theme.id}
               theme={theme}
