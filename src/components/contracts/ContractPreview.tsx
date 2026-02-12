@@ -19,6 +19,7 @@ import { ContractTemplate, contractCategoryLabels } from '@/hooks/useContractTem
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from '@/components/print/PrintThemeSelector';
 import { type PrintThemeId } from '@/lib/printThemes';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 
 interface ContractPreviewProps {
   open: boolean;
@@ -333,6 +334,12 @@ const ContractPreview = ({
             {isExporting ? <Loader2 className="w-4 h-4 animate-spin ml-1" /> : <Download className="w-4 h-4 ml-1" />}
             تحميل PDF
           </Button>
+          <ShareDocumentButton
+            referenceId={contractNumber}
+            referenceType="contract"
+            documentTitle={`عقد ${(template as any)?.name || ''} - ${contractNumber}`}
+            variant="outline"
+          />
           <div className="flex-1" />
           <Button onClick={onSave} disabled={saving}>
             {saving ? <Loader2 className="w-4 h-4 animate-spin ml-1" /> : <FileText className="w-4 h-4 ml-1" />}

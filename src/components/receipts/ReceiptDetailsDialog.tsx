@@ -41,6 +41,7 @@ import {
   FileSignature,
 } from 'lucide-react';
 import { generateReceiptPrintHTML } from './ReceiptPrintTemplate';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 
 interface ReceiptDetailsDialogProps {
   open: boolean;
@@ -366,8 +367,8 @@ const ReceiptDetailsDialog = ({
           <Separator />
 
           {/* Actions */}
-          <div className="flex gap-3 no-print">
-            <Button onClick={handlePrint} variant="outline" className="flex-1">
+          <div className="flex gap-2 flex-wrap no-print">
+            <Button onClick={handlePrint} variant="outline" size="sm" className="flex-1 min-w-[100px]">
               <Printer className="w-4 h-4 ml-2" />
               طباعة
             </Button>
@@ -378,7 +379,8 @@ const ReceiptDetailsDialog = ({
                 }
               }}
               variant="default"
-              className="flex-1"
+              size="sm"
+              className="flex-1 min-w-[100px]"
               disabled={isExporting}
             >
               {isExporting ? (
@@ -388,8 +390,15 @@ const ReceiptDetailsDialog = ({
               )}
               تحميل PDF
             </Button>
+            <ShareDocumentButton
+              referenceId={receipt.receipt_number}
+              referenceType="receipt"
+              documentTitle={`شهادة استلام ${receipt.receipt_number}`}
+              size="sm"
+              className="flex-1 min-w-[100px]"
+            />
             {isGenerator && receipt.status === 'pending' && (
-              <Button onClick={handleConfirm} className="flex-1" disabled={confirming}>
+              <Button onClick={handleConfirm} size="sm" className="flex-1 min-w-[100px]" disabled={confirming}>
                 {confirming ? (
                   <>
                     <Loader2 className="w-4 h-4 ml-2 animate-spin" />

@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Printer, Download, X } from 'lucide-react';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import TermsDocumentPrint from './TermsDocumentPrint';
 import PrintThemeSelector from '@/components/print/PrintThemeSelector';
@@ -86,6 +87,12 @@ const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = f
                 <Download className="ml-2 h-4 w-4" />
                 تحميل PDF
               </Button>
+              <ShareDocumentButton
+                referenceId={acceptance.id}
+                referenceType="contract"
+                documentTitle={`وثيقة الشروط والأحكام - ${acceptance.organization_name || ''}`}
+                size="sm"
+              />
               <Button
                 variant="ghost"
                 size="icon"

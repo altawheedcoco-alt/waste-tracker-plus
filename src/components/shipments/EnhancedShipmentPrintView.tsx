@@ -31,6 +31,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import StampSignatureSettings, { StampSignatureConfig, defaultConfig } from './StampSignatureSettings';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 
 interface OrganizationData {
   name: string;
@@ -982,6 +983,12 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
             إغلاق
           </Button>
           <div className="flex items-center gap-2">
+            <ShareDocumentButton
+              referenceId={shipment.shipment_number}
+              referenceType="shipment"
+              documentTitle={`وثيقة شحنة ${shipment.shipment_number}`}
+              variant="outline"
+            />
             <Button variant="outline" onClick={handleDownloadPDF} disabled={isPDFExporting} className="gap-2">
               {isPDFExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               تحميل PDF
