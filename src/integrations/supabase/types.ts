@@ -10789,8 +10789,16 @@ export type Database = {
           recipient_organization_id: string
           reference_id: string | null
           reference_type: string | null
+          requires_signature: boolean | null
           sender_organization_id: string
           sender_user_id: string
+          signature_integrity_hash: string | null
+          signature_url: string | null
+          signed_at: string | null
+          signed_by: string | null
+          signer_name: string | null
+          stamp_applied: boolean | null
+          stamp_url: string | null
           status: string
           updated_at: string
           viewed_at: string | null
@@ -10810,8 +10818,16 @@ export type Database = {
           recipient_organization_id: string
           reference_id?: string | null
           reference_type?: string | null
+          requires_signature?: boolean | null
           sender_organization_id: string
           sender_user_id: string
+          signature_integrity_hash?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          signer_name?: string | null
+          stamp_applied?: boolean | null
+          stamp_url?: string | null
           status?: string
           updated_at?: string
           viewed_at?: string | null
@@ -10831,8 +10847,16 @@ export type Database = {
           recipient_organization_id?: string
           reference_id?: string | null
           reference_type?: string | null
+          requires_signature?: boolean | null
           sender_organization_id?: string
           sender_user_id?: string
+          signature_integrity_hash?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          signed_by?: string | null
+          signer_name?: string | null
+          stamp_applied?: boolean | null
+          stamp_url?: string | null
           status?: string
           updated_at?: string
           viewed_at?: string | null

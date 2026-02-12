@@ -23,6 +23,7 @@ import {
   FileText,
   CheckCircle2,
   Upload,
+  FileSignature,
 } from 'lucide-react';
 
 interface ShareDocumentDialogProps {
@@ -60,6 +61,7 @@ const ShareDocumentDialog = ({
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [requiresSignature, setRequiresSignature] = useState(false);
 
   useEffect(() => {
     if (open && profile?.organization_id) {
@@ -172,6 +174,7 @@ const ShareDocumentDialog = ({
           reference_id: referenceId || null,
           reference_type: referenceType || null,
           message: message.trim() || null,
+          requires_signature: requiresSignature,
         });
 
       if (error) throw error;
@@ -345,6 +348,22 @@ const ShareDocumentDialog = ({
               </div>
             </div>
           )}
+
+          {/* Require signature toggle */}
+          <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+            <input
+              type="checkbox"
+              id="requiresSignature"
+              checked={requiresSignature}
+              onChange={e => setRequiresSignature(e.target.checked)}
+              className="w-4 h-4 rounded border-muted-foreground"
+            />
+            <label htmlFor="requiresSignature" className="flex-1 cursor-pointer">
+              <p className="text-sm font-medium">طلب توقيع وختم من الجهة المستلمة</p>
+              <p className="text-xs text-muted-foreground">سيُطلب من المستلم توقيع المستند إلكترونياً</p>
+            </label>
+            <FileSignature className="w-5 h-5 text-muted-foreground" />
+          </div>
 
           {/* Message */}
           <div className="space-y-2">
