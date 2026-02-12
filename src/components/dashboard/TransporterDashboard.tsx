@@ -48,10 +48,16 @@ import DriverComplianceManager from '@/components/compliance/DriverComplianceMan
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 import SignalMonitorWidget from '@/components/tracking/SignalMonitorWidget';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
+import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
+import LegalComplianceWidget from './generator/LegalComplianceWidget';
+import LegalArchiveWidget from './generator/LegalArchiveWidget';
+import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
+import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 
 const TransporterDashboard = () => {
   const { organization } = useAuth();
   const [showDepositDialog, setShowDepositDialog] = useState(false);
+  const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<TransporterShipment | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
@@ -71,6 +77,7 @@ const TransporterDashboard = () => {
     type: 'transporter',
     handlers: {
       openDepositDialog: () => setShowDepositDialog(true),
+      openSmartWeightUpload: () => setShowSmartWeightUpload(true),
     },
   });
 
@@ -89,6 +96,9 @@ const TransporterDashboard = () => {
 
       {/* Daily Operations Summary */}
       <DailyOperationsSummary />
+
+      {/* Automation Settings */}
+      <AutomationSettingsDialog organizationType="transporter" />
 
       {/* Operational Alerts */}
       <OperationalAlertsWidget />
@@ -188,6 +198,8 @@ const TransporterDashboard = () => {
         </TabsContent>
 
         <TabsContent value="compliance" className="space-y-4 mt-6">
+          <LegalComplianceWidget />
+          <LegalArchiveWidget />
           <VehicleComplianceManager />
           <DriverComplianceManager />
           <IncidentReportManager />
@@ -217,6 +229,7 @@ const TransporterDashboard = () => {
         open={showDepositDialog}
         onOpenChange={setShowDepositDialog}
       />
+      <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
     </div>
   );
 };
