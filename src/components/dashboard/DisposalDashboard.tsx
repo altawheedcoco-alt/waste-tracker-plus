@@ -15,6 +15,7 @@ import DisposalDailyOperations from '@/components/dashboard/disposal/DisposalDai
 import DisposalRecentOperations from '@/components/dashboard/disposal/DisposalRecentOperations';
 import OperationalAlertsWidget from '@/components/dashboard/operations/OperationalAlertsWidget';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
+import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
@@ -224,6 +225,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
       <DisposalDailyOperations />
       <OperationalAlertsWidget />
+      <UnifiedDocumentSearch />
       <DriverCodeLookup />
       <DisposalIncomingPanel facilityId={facility?.id} />
       <PendingApprovalsWidget />

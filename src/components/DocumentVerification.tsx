@@ -1,123 +1,57 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Search, QrCode, FileCheck, FileX, Loader2, Shield, Camera, ExternalLink } from 'lucide-react';
+import { Search, QrCode, FileCheck, FileX, Loader2, Shield, Camera, Package, FileText, Receipt, Scale, Award, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { useQRVerification } from '@/hooks/useQRVerification';
+import { DOCUMENT_TYPE_LABELS, DocumentQRType } from '@/lib/documentQR';
 import { toast } from 'sonner';
 
-interface VerificationResult {
-  found: boolean;
-  shipment?: {
-    shipment_number: string;
-    waste_type: string;
-    quantity: number;
-    unit: string;
-    status: string;
-    created_at: string;
-    generator_name: string;
-    transporter_name: string;
-    recycler_name: string;
-  };
-}
-
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوي',
-  chemical: 'كيميائي',
-  medical: 'طبي',
-  construction: 'مخلفات بناء',
-  other: 'أخرى',
+const statusLabels: Record<string, string> = {
+  new: 'جديدة', approved: 'معتمدة', collecting: 'قيد التجميع',
+  in_transit: 'قيد النقل', delivered: 'تم التسليم', confirmed: 'مؤكدة',
+  cancelled: 'ملغية', active: 'نشط', expired: 'منتهي', draft: 'مسودة',
+  paid: 'مدفوعة', unpaid: 'غير مدفوعة', partial: 'مدفوعة جزئياً',
 };
 
-const statusLabels: Record<string, string> = {
-  new: 'جديدة',
-  approved: 'معتمدة',
-  collecting: 'قيد التجميع',
-  in_transit: 'قيد النقل',
-  delivered: 'تم التسليم',
-  confirmed: 'مؤكدة',
+const docTypeIcons: Record<string, React.ReactNode> = {
+  shipment: <Package className="w-4 h-4" />,
+  certificate: <FileCheck className="w-4 h-4" />,
+  receipt: <Receipt className="w-4 h-4" />,
+  contract: <FileText className="w-4 h-4" />,
+  invoice: <FileText className="w-4 h-4" />,
+  disposal: <Shield className="w-4 h-4" />,
+  award_letter: <Award className="w-4 h-4" />,
+  statement: <Scale className="w-4 h-4" />,
+  report: <FileText className="w-4 h-4" />,
+  entity_certificate: <Building2 className="w-4 h-4" />,
 };
 
 const DocumentVerification = () => {
   const navigate = useNavigate();
   const [documentNumber, setDocumentNumber] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<VerificationResult | null>(null);
+  const { loading, result, verify, reset } = useQRVerification();
 
   const handleVerify = async () => {
     if (!documentNumber.trim()) {
-      toast.error('يرجى إدخال رقم الوثيقة');
+      toast.error('يرجى إدخال رقم أو كود الوثيقة');
       return;
     }
-
-    setIsLoading(true);
-    setResult(null);
-
-    // Add SHP- prefix if not already present
-    const fullDocNumber = documentNumber.trim().toUpperCase().startsWith('SHP-') 
-      ? documentNumber.trim().toUpperCase() 
-      : `SHP-${documentNumber.trim().toUpperCase()}`;
-
-    try {
-      const { data, error } = await supabase
-        .from('shipments')
-        .select(`
-          shipment_number,
-          waste_type,
-          quantity,
-          unit,
-          status,
-          created_at,
-          generator:organizations!shipments_generator_id_fkey(name),
-          transporter:organizations!shipments_transporter_id_fkey(name),
-          recycler:organizations!shipments_recycler_id_fkey(name)
-        `)
-        .eq('shipment_number', fullDocNumber)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data) {
-        setResult({
-          found: true,
-          shipment: {
-            shipment_number: data.shipment_number,
-            waste_type: data.waste_type,
-            quantity: data.quantity,
-            unit: data.unit || 'كجم',
-            status: data.status || 'new',
-            created_at: data.created_at || '',
-            generator_name: (data.generator as any)?.name || 'غير محدد',
-            transporter_name: (data.transporter as any)?.name || 'غير محدد',
-            recycler_name: (data.recycler as any)?.name || 'غير محدد',
-          },
-        });
-        toast.success('تم التحقق من الوثيقة بنجاح');
-      } else {
-        setResult({ found: false });
-        toast.error('لم يتم العثور على وثيقة بهذا الرقم');
-      }
-    } catch (error) {
-      console.error('Verification error:', error);
-      toast.error('حدث خطأ أثناء التحقق');
-    } finally {
-      setIsLoading(false);
-    }
+    reset();
+    await verify(documentNumber.trim());
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleVerify();
-    }
+    if (e.key === 'Enter') handleVerify();
   };
+
+  const typeLabel = result?.type
+    ? DOCUMENT_TYPE_LABELS[result.type as DocumentQRType]?.ar || result.type
+    : '';
 
   return (
     <section className="py-16 bg-muted/30">
@@ -132,9 +66,9 @@ const DocumentVerification = () => {
             <Shield className="w-5 h-5" />
             <span className="font-medium">التحقق من صحة الوثائق</span>
           </div>
-          <h2 className="text-3xl font-bold mb-4">تحقق من صحة وثيقة الشحنة</h2>
+          <h2 className="text-3xl font-bold mb-4">تحقق من صحة أي وثيقة</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            يمكنك التحقق من صحة أي وثيقة شحنة من خلال إدخال رقم الوثيقة أو مسح رمز QR
+            أدخل رقم أي مستند — شحنة، شهادة تدوير، إيصال، فاتورة، عقد، خطاب ترسية — أو امسح رمز QR للتحقق الفوري
           </p>
         </motion.div>
 
@@ -149,10 +83,10 @@ const DocumentVerification = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileCheck className="w-6 h-6 text-primary" />
-                التحقق من الوثيقة
+                التحقق الشامل من الوثائق
               </CardTitle>
               <CardDescription>
-                أدخل رقم الوثيقة للتحقق من صحتها ومعرفة تفاصيلها
+                أدخل رقم الوثيقة (مثل SHP-xxx، INV-xxx، CNT-xxx، AWL-xxx...) أو أي كود تحقق
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -170,34 +104,28 @@ const DocumentVerification = () => {
 
                 <TabsContent value="number" className="space-y-4">
                   <div className="flex gap-3 items-center">
-                    <Button
-                      onClick={handleVerify}
-                      disabled={isLoading}
-                      size="lg"
-                      className="h-12 px-6"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                      ) : (
-                        <>
-                          <Search className="w-5 h-5 ml-2" />
-                          تحقق
-                        </>
+                    <Button onClick={handleVerify} disabled={loading} size="lg" className="h-12 px-6">
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                        <><Search className="w-5 h-5 ml-2" />تحقق</>
                       )}
                     </Button>
-                    <div className="flex-1 flex items-center gap-0 h-12">
-                      <Input
-                        placeholder="أدخل الرقم (مثال: 20260128-4098)"
-                        value={documentNumber}
-                        onChange={(e) => setDocumentNumber(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        className="flex-1 text-lg h-12 rounded-l-none border-l-0"
-                        dir="ltr"
-                      />
-                      <div className="bg-muted border border-input h-12 px-3 flex items-center rounded-l-md text-sm font-medium text-muted-foreground">
-                        SHP-
-                      </div>
-                    </div>
+                    <Input
+                      placeholder="أدخل رقم الوثيقة أو كود التحقق..."
+                      value={documentNumber}
+                      onChange={(e) => setDocumentNumber(e.target.value)}
+                      onKeyDown={handleKeyPress}
+                      className="flex-1 text-lg h-12"
+                      dir="ltr"
+                    />
+                  </div>
+                  {/* Supported types hints */}
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {['shipment', 'certificate', 'receipt', 'contract', 'invoice', 'disposal', 'award_letter'].map(t => (
+                      <Badge key={t} variant="outline" className="text-[10px] gap-1">
+                        {docTypeIcons[t]}
+                        {DOCUMENT_TYPE_LABELS[t as DocumentQRType]?.ar}
+                      </Badge>
+                    ))}
                   </div>
                 </TabsContent>
 
@@ -207,16 +135,12 @@ const DocumentVerification = () => {
                     <p className="text-muted-foreground mb-4">
                       امسح رمز QR الموجود على أي مستند للتحقق من صحته
                     </p>
-                    <Button 
-                      size="lg" 
-                      onClick={() => navigate('/scan')}
-                      className="gap-2"
-                    >
+                    <Button size="lg" onClick={() => navigate('/scan')} className="gap-2">
                       <Camera className="w-5 h-5" />
                       فتح الماسح الضوئي
                     </Button>
                     <p className="text-xs text-muted-foreground mt-4">
-                      يدعم: الشحنات، شهادات التدوير، إيصالات الاستلام، العقود
+                      يدعم جميع أنواع المستندات: شحنات، شهادات، إيصالات، عقود، فواتير، خطابات ترسية
                     </p>
                   </div>
                 </TabsContent>
@@ -229,7 +153,7 @@ const DocumentVerification = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="mt-6"
                 >
-                  {result.found && result.shipment ? (
+                  {result.isValid ? (
                     <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-6">
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
@@ -239,50 +163,45 @@ const DocumentVerification = () => {
                           <h3 className="font-bold text-green-700 dark:text-green-300">
                             وثيقة صحيحة ✓
                           </h3>
-                          <p className="text-sm text-green-600 dark:text-green-400">
-                            رقم الوثيقة: {result.shipment.shipment_number}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="gap-1 text-green-600 border-green-300">
+                              {docTypeIcons[result.type] || <FileText className="w-3 h-3" />}
+                              {typeLabel}
+                            </Badge>
+                            <span className="text-sm text-green-600 dark:text-green-400 font-mono">
+                              {result.reference}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">نوع النفايات:</span>
-                          <p className="font-medium">
-                            {wasteTypeLabels[result.shipment.waste_type] || result.shipment.waste_type}
-                          </p>
+                      {result.status && (
+                        <div className="mb-3">
+                          <span className="text-muted-foreground text-sm">الحالة: </span>
+                          <Badge variant="secondary">{statusLabels[result.status] || result.status}</Badge>
                         </div>
-                        <div>
-                          <span className="text-muted-foreground">الكمية:</span>
-                          <p className="font-medium">
-                            {result.shipment.quantity} {result.shipment.unit}
-                          </p>
+                      )}
+
+                      {result.data && (
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          {Object.entries(result.data as Record<string, any>)
+                            .filter(([k, v]) => v && typeof v !== 'object' && !['id', 'generator_id', 'transporter_id', 'recycler_id', 'organization_id', 'created_by'].includes(k))
+                            .slice(0, 8)
+                            .map(([key, value]) => (
+                              <div key={key}>
+                                <span className="text-muted-foreground text-xs">{key.replace(/_/g, ' ')}: </span>
+                                <p className="font-medium truncate">{String(value)}</p>
+                              </div>
+                            ))
+                          }
                         </div>
-                        <div>
-                          <span className="text-muted-foreground">الحالة:</span>
-                          <p className="font-medium">
-                            {statusLabels[result.shipment.status] || result.shipment.status}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">تاريخ الإنشاء:</span>
-                          <p className="font-medium">
-                            {new Date(result.shipment.created_at).toLocaleDateString('ar-SA')}
-                          </p>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">الجهة المولدة:</span>
-                          <p className="font-medium">{result.shipment.generator_name}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">شركة النقل:</span>
-                          <p className="font-medium">{result.shipment.transporter_name}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <span className="text-muted-foreground">جهة التدوير:</span>
-                          <p className="font-medium">{result.shipment.recycler_name}</p>
-                        </div>
-                      </div>
+                      )}
+
+                      {result.verifiedAt && (
+                        <p className="text-xs text-green-500 mt-3">
+                          تم التحقق في: {new Date(result.verifiedAt).toLocaleString('ar-SA')}
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-6">
@@ -291,11 +210,9 @@ const DocumentVerification = () => {
                           <FileX className="w-6 h-6 text-red-600 dark:text-red-400" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-red-700 dark:text-red-300">
-                            وثيقة غير موجودة ✗
-                          </h3>
+                          <h3 className="font-bold text-red-700 dark:text-red-300">وثيقة غير موجودة ✗</h3>
                           <p className="text-sm text-red-600 dark:text-red-400">
-                            لم يتم العثور على وثيقة بهذا الرقم في النظام
+                            {result.message || 'لم يتم العثور على وثيقة بهذا الرقم في النظام'}
                           </p>
                         </div>
                       </div>

@@ -36,6 +36,7 @@ import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import FleetUtilizationWidget from './operations/FleetUtilizationWidget';
 import TransporterPerformanceCharts from './transporter/TransporterPerformanceCharts';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -123,6 +124,7 @@ const TransporterDashboard = () => {
       </ErrorBoundary>
 
       <TransporterNotifications notifications={notifications} />
+      <UnifiedDocumentSearch />
       <DocumentVerificationWidget />
 
       <Tabs defaultValue="overview" className="w-full" dir="rtl">

@@ -24,6 +24,7 @@ import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
+import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import LegalComplianceWidget from '@/components/dashboard/generator/LegalComplianceWidget';
@@ -196,6 +197,7 @@ const RecyclerDashboard = () => {
 
       <DailyOperationsSummary />
       <OperationalAlertsWidget />
+      <UnifiedDocumentSearch />
       <DriverCodeLookup />
       <RecyclerIncomingPanel />
       <PendingApprovalsWidget />
