@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import {
   Package,
   Calendar,
   Scale,
+  ExternalLink,
 } from 'lucide-react';
 
 interface ReceiptCardProps {
@@ -31,19 +33,21 @@ interface ReceiptCardProps {
     unit: string;
     status: string;
     shipment?: {
+      id?: string;
       shipment_number: string;
-    };
+    } | null;
     generator?: {
+      id?: string;
       name: string;
-    };
+    } | null;
     transporter?: {
       name: string;
-    };
+    } | null;
     driver?: {
       profile?: {
         full_name: string;
-      };
-    };
+      } | null;
+    } | null;
   };
   onView: (id: string) => void;
   onPrint: (id: string) => void;
@@ -73,6 +77,7 @@ const ReceiptCard = ({
   showTransporter = false,
   showGenerator = true 
 }: ReceiptCardProps) => {
+  const navigate = useNavigate();
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'confirmed':
@@ -134,10 +139,19 @@ const ReceiptCard = ({
                   </Badge>
                 </div>
                 {receipt.shipment && (
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (receipt.shipment?.id) {
+                        navigate(`/dashboard/shipments/${receipt.shipment.id}`);
+                      }
+                    }}
+                    className="text-sm text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  >
                     <Package className="w-3 h-3" />
                     شحنة: {receipt.shipment.shipment_number}
-                  </p>
+                    <ExternalLink className="w-3 h-3" />
+                  </button>
                 )}
               </div>
             </div>
