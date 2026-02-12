@@ -223,7 +223,7 @@ Deno.serve(async (req) => {
         generator_id: demoOrgs.generator,
         transporter_id: demoOrgs.transporter,
         recycler_id: demoOrgs.recycler,
-        disposal_facility_id: demoOrgs.disposal || null,
+        disposal_facility_id: null,
         driver_id: driverIdToUse,
         created_by: user.id,
         waste_type: 'metal',
