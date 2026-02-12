@@ -10774,6 +10774,101 @@ export type Database = {
           },
         ]
       }
+      shared_documents: {
+        Row: {
+          created_at: string
+          document_description: string | null
+          document_title: string
+          document_type: string
+          file_name: string | null
+          file_size: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          message: string | null
+          recipient_organization_id: string
+          reference_id: string | null
+          reference_type: string | null
+          sender_organization_id: string
+          sender_user_id: string
+          status: string
+          updated_at: string
+          viewed_at: string | null
+          viewed_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_description?: string | null
+          document_title: string
+          document_type?: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          message?: string | null
+          recipient_organization_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+          sender_organization_id: string
+          sender_user_id: string
+          status?: string
+          updated_at?: string
+          viewed_at?: string | null
+          viewed_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_description?: string | null
+          document_title?: string
+          document_type?: string
+          file_name?: string | null
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          message?: string | null
+          recipient_organization_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          sender_organization_id?: string
+          sender_user_id?: string
+          status?: string
+          updated_at?: string
+          viewed_at?: string | null
+          viewed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_documents_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shared_documents_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_documents_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shared_documents_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_logs: {
         Row: {
           changed_by: string | null
