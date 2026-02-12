@@ -22,7 +22,9 @@ import {
   AlertCircle,
   Lock,
   MapPin,
+  ShieldOff,
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import {
   getStatusConfig,
@@ -68,6 +70,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   const [receivingPhotoMeta, setReceivingPhotoMeta] = useState<any>(null);
   const [showDeclaration, setShowDeclaration] = useState(false);
   const [recyclerWeight, setRecyclerWeight] = useState('');
+  const [manualOverride, setManualOverride] = useState(false);
   const [geofenceCheck, setGeofenceCheck] = useState<{
     checking: boolean;
     isInside: boolean | null;
@@ -166,8 +169,10 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   })();
 
   const currentStatusConfig = getStatusConfig(shipment.status);
-  const availableStatuses = getAvailableNextStatuses(shipment.status, organizationType);
-  const canChange = canChangeStatus(shipment.status, organizationType);
+  const availableStatuses = manualOverride 
+    ? allStatuses.filter(s => s.key !== shipment.status) 
+    : getAvailableNextStatuses(shipment.status, organizationType);
+  const canChange = manualOverride || canChangeStatus(shipment.status, organizationType);
 
   const handleStatusChange = async () => {
     if (!selectedStatus) {
@@ -175,19 +180,19 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
       return;
     }
 
-    if (isDeliveryBlocked) {
+    if (!manualOverride && isDeliveryBlocked) {
       toast.error('يجب أن تكون داخل نطاق موقع التسليم لتأكيد التسليم');
       return;
     }
 
-    if (isPhotoMissing) {
+    if (!manualOverride && isPhotoMissing) {
       toast.error('يجب رفع صورة إيصال الميزان للمتابعة');
       return;
     }
 
-    // Show delivery declaration for transporter when delivering
+    // Show delivery declaration for transporter when delivering (skip in manual mode)
     const dbStatusCheck = mapToDbStatus(selectedStatus as ShipmentStatus);
-    if (organizationType === 'transporter' && ['delivered', 'confirmed'].includes(dbStatusCheck)) {
+    if (!manualOverride && organizationType === 'transporter' && ['delivered', 'confirmed'].includes(dbStatusCheck)) {
       setShowDeclaration(true);
       return;
     }
@@ -432,6 +437,24 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             )}
           </div>
 
+          {/* Manual Override Toggle */}
+          <div className="flex items-center justify-between p-3 rounded-lg border border-dashed border-orange-300 dark:border-orange-700 bg-orange-50/50 dark:bg-orange-950/20">
+            <Switch
+              checked={manualOverride}
+              onCheckedChange={(checked) => {
+                setManualOverride(checked);
+                setSelectedStatus(null);
+              }}
+            />
+            <div className="flex items-center gap-2 text-right">
+              <div>
+                <p className="text-sm font-medium">تغيير يدوي بدون ضوابط</p>
+                <p className="text-xs text-muted-foreground">تجاوز جميع القيود والضوابط</p>
+              </div>
+              <ShieldOff className="w-5 h-5 text-orange-500" />
+            </div>
+          </div>
+
           {/* Available Statuses */}
           {canChange && availableStatuses.length > 0 ? (
             <div className="text-right">
@@ -587,7 +610,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
               <Button 
                 variant="eco" 
                 onClick={handleStatusChange}
-                disabled={!selectedStatus || loading || isDeliveryBlocked || isPhotoMissing || (showRecyclerWeightInput && !recyclerWeight)}
+                disabled={!selectedStatus || loading || (!manualOverride && (isDeliveryBlocked || isPhotoMissing || (showRecyclerWeightInput && !recyclerWeight)))}
               >
                 {loading ? (
                   <>
