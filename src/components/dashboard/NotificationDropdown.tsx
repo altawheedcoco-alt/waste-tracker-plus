@@ -1,3 +1,4 @@
+import { startTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,9 @@ const NotificationDropdown = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/dashboard/notifications');
+    startTransition(() => {
+      navigate('/dashboard/notifications');
+    });
   };
 
   return (

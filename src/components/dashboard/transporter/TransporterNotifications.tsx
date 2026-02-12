@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, startTransition } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +54,7 @@ const TransporterNotifications = ({ notifications }: TransporterNotificationsPro
               <Eye className="ml-1 h-3 w-3" />
               تحديد الكل كمقروء
             </Button>
-            <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/dashboard/notifications')}>
+            <Button variant="ghost" size="sm" className="text-xs" onClick={() => startTransition(() => navigate('/dashboard/notifications'))}>
               <ExternalLink className="ml-1 h-3 w-3" />
               عرض الكل
             </Button>
