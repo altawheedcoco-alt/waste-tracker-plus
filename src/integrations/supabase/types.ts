@@ -13510,6 +13510,7 @@ export type Database = {
         }[]
       }
       get_user_driver_id: { Args: { _user_id: string }; Returns: string }
+      get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_org_id_safe: { Args: { _user_id: string }; Returns: string }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_organization_id:
