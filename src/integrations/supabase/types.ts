@@ -13509,6 +13509,18 @@ export type Database = {
           unresolved_events: number
         }[]
       }
+      get_transporter_kpis: { Args: { p_org_id: string }; Returns: Json }
+      get_transporter_shipments_paginated: {
+        Args: {
+          p_org_id: string
+          p_page?: number
+          p_page_size?: number
+          p_search?: string
+          p_status?: string
+        }
+        Returns: Json
+      }
+      get_transporter_stats: { Args: { p_org_id: string }; Returns: Json }
       get_user_driver_id: { Args: { _user_id: string }; Returns: string }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_org_id_safe: { Args: { _user_id: string }; Returns: string }
