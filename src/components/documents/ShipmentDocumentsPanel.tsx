@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useShipmentDocuments, useDocumentTemplates, ShipmentDocSignature } from '@/hooks/useDocumentTemplates';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMentionableUsers } from '@/hooks/useMentionableUsers';
+import { useMentionNotifier } from '@/hooks/useMentionNotifier';
+import { MentionInput } from '@/components/ui/mention-input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -48,9 +51,12 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
   const { profile } = useAuth();
   const { documents, isLoading, attachTemplate, signDocument, allMandatoryCompleted } = useShipmentDocuments(shipmentId);
   const { templates } = useDocumentTemplates();
+  const { users: mentionableUsers } = useMentionableUsers();
+  const { notify: notifyMentions } = useMentionNotifier();
   const [showAttach, setShowAttach] = useState(false);
   const [showSign, setShowSign] = useState<ShipmentDocSignature | null>(null);
   const [signerName, setSignerName] = useState('');
+  const [signerNotes, setSignerNotes] = useState('');
   const [signerTitle, setSignerTitle] = useState('');
   const [signerNationalId, setSignerNationalId] = useState('');
 
@@ -70,10 +76,21 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
       },
       {
         onSuccess: () => {
+          // Send mention notifications if any
+          if (signerNotes.trim()) {
+            notifyMentions({
+              text: signerNotes,
+              users: mentionableUsers,
+              context: 'توقيع مستند شحنة',
+              referenceId: shipmentId,
+              referenceType: 'shipment',
+            });
+          }
           setShowSign(null);
           setSignerName('');
           setSignerTitle('');
           setSignerNationalId('');
+          setSignerNotes('');
         },
       }
     );
@@ -345,6 +362,16 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
             <div className="space-y-2">
               <Label>الرقم القومي (اختياري)</Label>
               <Input value={signerNationalId} onChange={e => setSignerNationalId(e.target.value)} dir="ltr" />
+            </div>
+            <div className="space-y-2">
+              <Label>ملاحظات (يمكنك الإشارة بـ @)</Label>
+              <MentionInput
+                value={signerNotes}
+                onChange={setSignerNotes}
+                users={mentionableUsers}
+                rows={2}
+                placeholder="أضف ملاحظة أو أشر لشخص بـ @..."
+              />
             </div>
           </div>
           <DialogFooter className="gap-2">
