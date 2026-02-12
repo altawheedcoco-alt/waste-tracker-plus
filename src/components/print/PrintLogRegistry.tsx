@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import {
-  FileText, Search, Printer, Download, Send, Filter,
-  Calendar, User, Hash, Eye, ChevronDown,
+  FileText, Search, Printer, Download, Send, 
+  ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+const PAGE_SIZE = 50;
+
 const actionLabels: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   print: { label: 'طباعة', icon: Printer, color: 'bg-blue-100 text-blue-700' },
   pdf_export: { label: 'تصدير PDF', icon: Download, color: 'bg-green-100 text-green-700' },
@@ -50,35 +52,48 @@ const PrintLogRegistry = () => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterAction, setFilterAction] = useState<string>('all');
+  const [page, setPage] = useState(0);
 
-  const { data: logs = [], isLoading } = useQuery({
-    queryKey: ['print-logs', profile?.organization_id],
+  const { data, isLoading } = useQuery({
+    queryKey: ['print-logs', profile?.organization_id, page, filterType, filterAction],
     queryFn: async () => {
-      if (!profile?.organization_id) return [];
-      const { data, error } = await supabase
-        .from('document_print_log' as any)
-        .select('*')
+      if (!profile?.organization_id) return { logs: [], count: 0 };
+
+      let query = supabase
+        .from('document_print_log')
+        .select('*', { count: 'exact' })
         .eq('organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
-        .limit(200);
+        .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+      if (filterType !== 'all') query = query.eq('document_type', filterType);
+      if (filterAction !== 'all') query = query.eq('action_type', filterAction);
+
+      const { data: logs, error, count } = await query;
       if (error) throw error;
-      return (data || []) as any[];
+      return { logs: logs || [], count: count || 0 };
     },
     enabled: !!profile?.organization_id,
   });
 
+  const logs = data?.logs || [];
+  const totalCount = data?.count || 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
   const filtered = useMemo(() => {
+    if (!search) return logs;
     return logs.filter((log: any) => {
-      const matchSearch = !search || 
-        log.print_tracking_code?.toLowerCase().includes(search.toLowerCase()) ||
+      return log.print_tracking_code?.toLowerCase().includes(search.toLowerCase()) ||
         log.document_number?.toLowerCase().includes(search.toLowerCase()) ||
         log.printed_by_name?.toLowerCase().includes(search.toLowerCase()) ||
         log.printed_by_employee_code?.toLowerCase().includes(search.toLowerCase());
-      const matchType = filterType === 'all' || log.document_type === filterType;
-      const matchAction = filterAction === 'all' || log.action_type === filterAction;
-      return matchSearch && matchType && matchAction;
     });
-  }, [logs, search, filterType, filterAction]);
+  }, [logs, search]);
+
+  const handleFilterChange = useCallback((setter: (v: string) => void) => (val: string) => {
+    setter(val);
+    setPage(0);
+  }, []);
 
   return (
     <Card>
@@ -88,7 +103,7 @@ const PrintLogRegistry = () => {
             <FileText className="w-5 h-5 text-primary" />
             سجل المطبوعات والمستندات
           </CardTitle>
-          <Badge variant="outline">{logs.length} سجل</Badge>
+          <Badge variant="outline">{totalCount} سجل</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -103,7 +118,7 @@ const PrintLogRegistry = () => {
               className="pr-9"
             />
           </div>
-          <Select value={filterType} onValueChange={setFilterType}>
+          <Select value={filterType} onValueChange={handleFilterChange(setFilterType)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="نوع المستند" />
             </SelectTrigger>
@@ -114,7 +129,7 @@ const PrintLogRegistry = () => {
               ))}
             </SelectContent>
           </Select>
-          <Select value={filterAction} onValueChange={setFilterAction}>
+          <Select value={filterAction} onValueChange={handleFilterChange(setFilterAction)}>
             <SelectTrigger className="w-[130px]">
               <SelectValue placeholder="نوع الإجراء" />
             </SelectTrigger>
@@ -197,6 +212,35 @@ const PrintLogRegistry = () => {
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-sm text-muted-foreground">
+              صفحة {page + 1} من {totalPages}
+            </span>
+            <div className="flex gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                disabled={page === 0}
+                onClick={() => setPage(p => p - 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                disabled={page >= totalPages - 1}
+                onClick={() => setPage(p => p + 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

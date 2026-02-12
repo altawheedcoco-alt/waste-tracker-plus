@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 
 /** Generate a unique print tracking code: PRN-YYMM-XXXXXX */
 const generateTrackingCode = (): string => {
@@ -32,7 +31,7 @@ export const usePrintTracking = () => {
     const employeeCode = user.id.slice(0, 8).toUpperCase();
 
     try {
-      const { error } = await supabase.from('document_print_log' as any).insert({
+      const { error } = await supabase.from('document_print_log').insert({
         organization_id: profile.organization_id,
         user_id: user.id,
         document_type: params.documentType,
