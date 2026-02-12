@@ -7230,7 +7230,9 @@ export type Database = {
           id: string
           is_read: boolean | null
           message: string
+          metadata: Json | null
           pdf_url: string | null
+          priority: string | null
           request_id: string | null
           shipment_id: string | null
           title: string
@@ -7242,7 +7244,9 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           message: string
+          metadata?: Json | null
           pdf_url?: string | null
+          priority?: string | null
           request_id?: string | null
           shipment_id?: string | null
           title: string
@@ -7254,7 +7258,9 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           message?: string
+          metadata?: Json | null
           pdf_url?: string | null
+          priority?: string | null
           request_id?: string | null
           shipment_id?: string | null
           title?: string
