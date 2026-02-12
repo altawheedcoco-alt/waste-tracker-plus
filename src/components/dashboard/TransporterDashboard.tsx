@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import {
-  useTransporterShipments,
-  useTransporterStats,
+  useTransporterShipmentsPaginated,
+  useTransporterStatsDB,
+  useTransporterKPIsDB,
+} from '@/hooks/useTransporterPaginated';
+import {
   useTransporterNotifications,
 } from '@/hooks/useTransporterDashboard';
 import {
   useTransporterFinancials,
-  useTransporterKPIs,
   useDriversSummary,
 } from '@/hooks/useTransporterExtended';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 import TransporterHeader from './transporter/TransporterHeader';
 import TransporterStatsGrid from './transporter/TransporterStatsGrid';
 import TransporterKPICards from './transporter/TransporterKPICards';
@@ -23,36 +26,47 @@ import TransporterIncomingRequests from './transporter/TransporterIncomingReques
 import TransporterPartnerSummary from './transporter/TransporterPartnerSummary';
 import TransporterShipmentsList from './transporter/TransporterShipmentsList';
 import TransporterAggregateReport from './transporter/TransporterAggregateReport';
-import TransporterDriverTracking from './transporter/TransporterDriverTracking';
-import ShipmentCalendarWidget from './transporter/ShipmentCalendarWidget';
-import PartnerProfitabilityPanel from './transporter/PartnerProfitabilityPanel';
 import QuickActionsGrid from './QuickActionsGrid';
-import PartnersView from './PartnersView';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
-import RouteOptimizerPanel from '@/components/ai/RouteOptimizerPanel';
-import SmartSchedulerPanel from '@/components/ai/SmartSchedulerPanel';
-import PartnerRatingsWidget from '@/components/partners/PartnerRatingsWidget';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import FleetUtilizationWidget from './operations/FleetUtilizationWidget';
-import DriverPerformancePanel from './transporter/DriverPerformancePanel';
-import TripCostManagement from './transporter/TripCostManagement';
-import MaintenanceScheduler from './transporter/MaintenanceScheduler';
 import TransporterPerformanceCharts from './transporter/TransporterPerformanceCharts';
-import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
-import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
-import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
-import IncidentReportManager from '@/components/compliance/IncidentReportManager';
-import SignalMonitorWidget from '@/components/tracking/SignalMonitorWidget';
-import { TransporterShipment } from '@/hooks/useTransporterDashboard';
-import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
-import LegalComplianceWidget from './generator/LegalComplianceWidget';
-import LegalArchiveWidget from './generator/LegalArchiveWidget';
-import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import { TransporterShipment } from '@/hooks/useTransporterDashboard';
+import { Skeleton } from '@/components/ui/skeleton';
+
+// Lazy load heavy tab content
+const DriverPerformancePanel = lazy(() => import('./transporter/DriverPerformancePanel'));
+const TripCostManagement = lazy(() => import('./transporter/TripCostManagement'));
+const MaintenanceScheduler = lazy(() => import('./transporter/MaintenanceScheduler'));
+const ShipmentCalendarWidget = lazy(() => import('./transporter/ShipmentCalendarWidget'));
+const SmartSchedulerPanel = lazy(() => import('@/components/ai/SmartSchedulerPanel'));
+const RouteOptimizerPanel = lazy(() => import('@/components/ai/RouteOptimizerPanel'));
+const PartnerProfitabilityPanel = lazy(() => import('./transporter/PartnerProfitabilityPanel'));
+const PartnerRatingsWidget = lazy(() => import('@/components/partners/PartnerRatingsWidget'));
+const PartnersView = lazy(() => import('./PartnersView'));
+const SignalMonitorWidget = lazy(() => import('@/components/tracking/SignalMonitorWidget'));
+const DriverLinkingCode = lazy(() => import('@/components/drivers/DriverLinkingCode'));
+const TransporterDriverTracking = lazy(() => import('./transporter/TransporterDriverTracking'));
+const LegalComplianceWidget = lazy(() => import('./generator/LegalComplianceWidget'));
+const LegalArchiveWidget = lazy(() => import('./generator/LegalArchiveWidget'));
+const VehicleComplianceManager = lazy(() => import('@/components/compliance/VehicleComplianceManager'));
+const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
+const IncidentReportManager = lazy(() => import('@/components/compliance/IncidentReportManager'));
+const TransporterAIInsights = lazy(() => import('@/components/ai/TransporterAIInsights'));
+const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
+const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertificateButton'));
+
+const TabFallback = () => (
+  <div className="space-y-4 mt-6">
+    <Skeleton className="h-32 w-full" />
+    <Skeleton className="h-48 w-full" />
+  </div>
+);
 
 const TransporterDashboard = () => {
   const { organization } = useAuth();
@@ -63,13 +77,16 @@ const TransporterDashboard = () => {
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [statusShipment, setStatusShipment] = useState<TransporterShipment | null>(null);
   const [shipmentStatusFilter, setShipmentStatusFilter] = useState<string | undefined>();
+  const [shipmentPage, setShipmentPage] = useState(1);
+  const [shipmentSearch, setShipmentSearch] = useState('');
 
-  // Data fetching with react-query
-  const { data: shipments = [], isLoading: shipmentsLoading, refetch: refetchShipments } = useTransporterShipments();
-  const { data: stats, isLoading: statsLoading } = useTransporterStats(shipments);
+  // Paginated data fetching
+  const { data: paginatedResult, isLoading: shipmentsLoading, refetch: refetchShipments } = useTransporterShipmentsPaginated(shipmentPage, shipmentStatusFilter, shipmentSearch);
+  const shipments = paginatedResult?.data || [];
+  const { data: stats, isLoading: statsLoading } = useTransporterStatsDB();
   const { data: notifications = [] } = useTransporterNotifications();
   const { data: financials, isLoading: financialsLoading } = useTransporterFinancials();
-  const { data: kpis, isLoading: kpisLoading } = useTransporterKPIs();
+  const { data: kpis, isLoading: kpisLoading } = useTransporterKPIsDB();
   const { data: driversSummary = [], isLoading: driversLoading } = useDriversSummary();
 
   // Quick actions
@@ -90,48 +107,51 @@ const TransporterDashboard = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Stories */}
       <StoryCircles />
       <TransporterHeader organizationName={organization?.name || ''} />
 
-      {/* Daily Operations Summary */}
-      <DailyOperationsSummary />
+      <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
+        <DailyOperationsSummary />
+      </ErrorBoundary>
 
-      {/* Automation Settings */}
       <AutomationSettingsDialog organizationType="transporter" />
 
-      {/* Operational Alerts */}
-      <OperationalAlertsWidget />
-
-      {/* SLA Alerts - highest priority */}
-      <TransporterSLAAlerts shipments={shipments} />
-
-      {/* Incoming Requests */}
-      <TransporterIncomingRequests />
+      <ErrorBoundary fallbackTitle="خطأ في التنبيهات">
+        <OperationalAlertsWidget />
+        <TransporterSLAAlerts shipments={shipments} />
+        <TransporterIncomingRequests />
+      </ErrorBoundary>
 
       <TransporterNotifications notifications={notifications} />
-
       <DocumentVerificationWidget />
 
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
         <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
           <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">نظرة عامة</TabsTrigger>
+          <TabsTrigger value="ai" className="text-xs sm:text-sm whitespace-nowrap gap-1">
+            🤖 الذكاء الاصطناعي
+          </TabsTrigger>
           <TabsTrigger value="performance" className="text-xs sm:text-sm whitespace-nowrap">الأداء والتكاليف</TabsTrigger>
           <TabsTrigger value="calendar" className="text-xs sm:text-sm whitespace-nowrap">التقويم</TabsTrigger>
-          <TabsTrigger value="intelligence" className="text-xs sm:text-sm whitespace-nowrap">الذكاء والأتمتة</TabsTrigger>
+          <TabsTrigger value="intelligence" className="text-xs sm:text-sm whitespace-nowrap">الأتمتة</TabsTrigger>
           <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الشركاء</TabsTrigger>
           <TabsTrigger value="tracking" className="text-xs sm:text-sm whitespace-nowrap">تتبع السائقين</TabsTrigger>
           <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap">الامتثال القانوني</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-          {/* Fleet Utilization */}
-          <FleetUtilizationWidget />
+          <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
+            <FleetUtilizationWidget />
+          </ErrorBoundary>
 
-          {/* Performance Charts */}
-          <TransporterPerformanceCharts />
+          <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
+            <TransporterPerformanceCharts />
+          </ErrorBoundary>
 
-          <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => setShipmentStatusFilter(f === 'active' ? 'in_transit' : f)} />
+          <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => {
+            setShipmentStatusFilter(f === 'active' ? 'in_transit' : f);
+            setShipmentPage(1);
+          }} />
 
           <TransporterKPICards
             financials={financials}
@@ -140,7 +160,6 @@ const TransporterDashboard = () => {
             kpisLoading={kpisLoading}
           />
 
-          {/* Partner Financial Summary */}
           <TransporterPartnerSummary />
 
           <QuickActionsGrid
@@ -149,60 +168,81 @@ const TransporterDashboard = () => {
             subtitle="إدارة الشحنات والسائقين والتقارير"
           />
 
-          <TransporterShipmentsList
-            shipments={shipments}
-            isLoading={shipmentsLoading}
-            onRefresh={handleRefresh}
-            statusFilter={shipmentStatusFilter}
-            onPrintShipment={(s) => {
-              setSelectedShipment(s);
-              setShowPrintDialog(true);
-            }}
-            onChangeStatus={(s) => {
-              setStatusShipment(s);
-              setShowStatusDialog(true);
-            }}
-          />
+          <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
+            <TransporterShipmentsList
+              shipments={shipments}
+              isLoading={shipmentsLoading}
+              onRefresh={handleRefresh}
+              statusFilter={shipmentStatusFilter}
+              onPrintShipment={(s) => {
+                setSelectedShipment(s);
+                setShowPrintDialog(true);
+              }}
+              onChangeStatus={(s) => {
+                setStatusShipment(s);
+                setShowStatusDialog(true);
+              }}
+            />
+          </ErrorBoundary>
 
           <TransporterAggregateReport shipments={shipments} />
         </TabsContent>
 
+        <TabsContent value="ai" className="space-y-4 mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <ErrorBoundary fallbackTitle="خطأ في تحليلات الذكاء الاصطناعي">
+              <TransporterAIInsights />
+            </ErrorBoundary>
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="performance" className="space-y-4 mt-6">
-          <DriverPerformancePanel />
-          <TripCostManagement />
-          <MaintenanceScheduler />
+          <Suspense fallback={<TabFallback />}>
+            <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
+              <DriverPerformancePanel />
+              <TripCostManagement />
+              <MaintenanceScheduler />
+            </ErrorBoundary>
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="calendar" className="space-y-4 mt-6">
-          <ShipmentCalendarWidget />
+          <Suspense fallback={<TabFallback />}>
+            <ShipmentCalendarWidget />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="intelligence" className="space-y-4 mt-6">
-          <SmartSchedulerPanel />
-          <RouteOptimizerPanel
-            driverId=""
-            destinations={[]}
-          />
-          <PartnerProfitabilityPanel />
+          <Suspense fallback={<TabFallback />}>
+            <SmartSchedulerPanel />
+            <RouteOptimizerPanel driverId="" destinations={[]} />
+            <PartnerProfitabilityPanel />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="partners" className="space-y-4 mt-6">
-          <PartnerRatingsWidget />
-          <PartnersView />
+          <Suspense fallback={<TabFallback />}>
+            <PartnerRatingsWidget />
+            <PartnersView />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="tracking" className="space-y-4 mt-6">
-          <SignalMonitorWidget />
-          <DriverLinkingCode />
-          <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+          <Suspense fallback={<TabFallback />}>
+            <SignalMonitorWidget />
+            <DriverLinkingCode />
+            <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="compliance" className="space-y-4 mt-6">
-          <LegalComplianceWidget />
-          <LegalArchiveWidget />
-          <VehicleComplianceManager />
-          <DriverComplianceManager />
-          <IncidentReportManager />
+          <Suspense fallback={<TabFallback />}>
+            <LegalComplianceWidget />
+            <LegalArchiveWidget />
+            <VehicleComplianceManager />
+            <DriverComplianceManager />
+            <IncidentReportManager />
+          </Suspense>
         </TabsContent>
       </Tabs>
 
@@ -229,7 +269,9 @@ const TransporterDashboard = () => {
         open={showDepositDialog}
         onOpenChange={setShowDepositDialog}
       />
-      <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
+      <Suspense fallback={null}>
+        <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
+      </Suspense>
     </div>
   );
 };
