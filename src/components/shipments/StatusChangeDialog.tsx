@@ -63,6 +63,8 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   const [pickupPhotoMeta, setPickupPhotoMeta] = useState<any>(null);
   const [deliveryPhotoUrl, setDeliveryPhotoUrl] = useState<string | null>(null);
   const [deliveryPhotoMeta, setDeliveryPhotoMeta] = useState<any>(null);
+  const [receivingPhotoUrl, setReceivingPhotoUrl] = useState<string | null>(null);
+  const [receivingPhotoMeta, setReceivingPhotoMeta] = useState<any>(null);
   const [recyclerWeight, setRecyclerWeight] = useState('');
   const [geofenceCheck, setGeofenceCheck] = useState<{
     checking: boolean;
@@ -126,18 +128,24 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
 
   // Determine if photo is required for current status change
   const requiresPhoto = (() => {
-    if (!selectedStatus) return { pickup: false, delivery: false };
+    if (!selectedStatus) return { pickup: false, delivery: false, receiving: false };
     const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
     const isTransporter = organizationType === 'transporter';
-    if (!isTransporter) return { pickup: false, delivery: false };
+    const isRecycler = organizationType === 'recycler';
+    const isDisposal = organizationType === 'disposal';
+
     return {
-      pickup: dbStatus === 'in_transit',
-      delivery: ['delivered', 'confirmed'].includes(dbStatus),
+      // Transporter: pickup weighbridge when starting transit
+      pickup: isTransporter && dbStatus === 'in_transit',
+      // Transporter: delivery weighbridge when delivering
+      delivery: isTransporter && ['delivered', 'confirmed'].includes(dbStatus),
+      // Recycler/Disposal: receiving weighbridge when confirming receipt
+      receiving: (isRecycler || isDisposal) && ['delivered', 'confirmed'].includes(dbStatus),
     };
   })();
 
   // Determine if delivery button should be blocked
-  const isPhotoMissing = (requiresPhoto.pickup && !pickupPhotoUrl) || (requiresPhoto.delivery && !deliveryPhotoUrl);
+  const isPhotoMissing = (requiresPhoto.pickup && !pickupPhotoUrl) || (requiresPhoto.delivery && !deliveryPhotoUrl) || (requiresPhoto.receiving && !receivingPhotoUrl);
 
   const isDeliveryBlocked = (() => {
     if (!selectedStatus) return false;
@@ -204,6 +212,10 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
       if (deliveryPhotoUrl) {
         updateData.delivery_weighbridge_photo_url = deliveryPhotoUrl;
         updateData.delivery_weighbridge_metadata = deliveryPhotoMeta;
+      }
+      if (receivingPhotoUrl) {
+        updateData.delivery_weighbridge_photo_url = receivingPhotoUrl;
+        updateData.delivery_weighbridge_metadata = receivingPhotoMeta;
       }
 
       // Check weight dispute when recycler confirms with weight
@@ -287,6 +299,8 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     setPickupPhotoMeta(null);
     setDeliveryPhotoUrl(null);
     setDeliveryPhotoMeta(null);
+    setReceivingPhotoUrl(null);
+    setReceivingPhotoMeta(null);
     setRecyclerWeight('');
     onClose();
   };
@@ -482,7 +496,17 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             />
           )}
 
-          {/* Recycler Weight Input for Dispute Check */}
+          {/* Weighbridge Photo Upload - Receiving (Recycler/Disposal) */}
+          {requiresPhoto.receiving && (
+            <WeighbridgePhotoUpload
+              shipmentId={shipment.id}
+              type="delivery"
+              label={organizationType === 'disposal' ? 'صورة إيصال ميزان الاستلام (التخلص النهائي)' : 'صورة إيصال ميزان الاستلام (المدوّر)'}
+              required
+              onPhotoUploaded={(url, meta) => { setReceivingPhotoUrl(url); setReceivingPhotoMeta(meta); }}
+            />
+          )}
+
           {showRecyclerWeightInput && (
             <div className="text-right space-y-2">
               <Label htmlFor="recyclerWeight">
