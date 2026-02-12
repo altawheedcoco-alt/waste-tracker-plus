@@ -154,7 +154,7 @@ import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
 
 // Memoized providers wrapper for performance
-const Providers = memo(({ children }: { children: React.ReactNode }) => (
+const Providers = memo(() => (
   <QueryClientProvider client={queryClient}>
     <GoogleMapsProvider>
       <ThemeSettingsProvider>
@@ -165,7 +165,20 @@ const Providers = memo(({ children }: { children: React.ReactNode }) => (
               <Sonner />
               <BrowserRouter>
                 <AuthProvider>
-                  <AppRoutes />
+                  <Suspense fallback={<PageLoader />}>
+                    <AppRoutes />
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <AIChatbot />
+                    <EnhancedChatWidget />
+                    <UnifiedSupportWidget />
+                    <BetaBanner />
+                    <AccessibilityPanel />
+                    <OfflineBanner />
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <MobileOptimizations>{null}</MobileOptimizations>
+                  </Suspense>
                 </AuthProvider>
               </BrowserRouter>
             </TooltipProvider>
@@ -294,27 +307,8 @@ const AppRoutes = memo(() => (
 ));
 AppRoutes.displayName = 'AppRoutes';
 
-// Main App with optimized structure
 const App = memo(() => (
-  <Providers>
-    <BrowserRouter>
-      <Suspense fallback={<PageLoader />}>
-        <AppRoutes />
-      </Suspense>
-      <Suspense fallback={null}>
-        <AIChatbot />
-        <EnhancedChatWidget />
-        <UnifiedSupportWidget />
-        <BetaBanner />
-        <AccessibilityPanel />
-        
-        <OfflineBanner />
-      </Suspense>
-      <Suspense fallback={null}>
-        <MobileOptimizations>{null}</MobileOptimizations>
-      </Suspense>
-    </BrowserRouter>
-  </Providers>
+  <Providers />
 ));
 App.displayName = 'App';
 
