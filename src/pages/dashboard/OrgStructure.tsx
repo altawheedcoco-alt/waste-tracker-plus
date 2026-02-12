@@ -50,7 +50,7 @@ const levelColors: Record<number, string> = {
 const OrgStructure = () => {
   const { profile } = useAuth();
   const { structure, isLoading, addDepartment, addPosition } = useOrgStructure();
-  const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
+  const [expandedDepts, setExpandedDepts] = useState<Set<string> | 'all'>('all');
   const [newDeptOpen, setNewDeptOpen] = useState(false);
   const [newPosOpen, setNewPosOpen] = useState(false);
   const [selectedDeptId, setSelectedDeptId] = useState<string>('');
@@ -62,6 +62,11 @@ const OrgStructure = () => {
 
   const toggleDept = (id: string) => {
     setExpandedDepts(prev => {
+      if (prev === 'all') {
+        const next = new Set(structure.map(d => d.id));
+        next.delete(id);
+        return next;
+      }
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -69,7 +74,9 @@ const OrgStructure = () => {
     });
   };
 
-  const expandAll = () => setExpandedDepts(new Set(structure.map(d => d.id)));
+  const isDeptExpanded = (id: string) => expandedDepts === 'all' || expandedDepts.has(id);
+
+  const expandAll = () => setExpandedDepts('all');
   const collapseAll = () => setExpandedDepts(new Set());
 
   const handleAddDept = () => {
@@ -163,7 +170,7 @@ const OrgStructure = () => {
         {structure.map((dept, idx) => {
           const IconComp = iconMap[dept.icon] || Building2;
           const colorClass = colorMap[dept.color] || colorMap.blue;
-          const isExpanded = expandedDepts.has(dept.id);
+          const isExpanded = isDeptExpanded(dept.id);
 
           return (
             <motion.div
