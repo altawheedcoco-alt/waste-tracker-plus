@@ -31,6 +31,7 @@ import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPi
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
+import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
 
 // Lazy load components for better performance
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -503,6 +504,9 @@ const DriverDashboard = () => {
           onSuccess={handleLocationSuccess}
         />
       )}
+
+      {/* Driver Assignment Priority Alert */}
+      <DriverAssignmentAlert />
     </div>
   );
 };

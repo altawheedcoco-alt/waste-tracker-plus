@@ -134,7 +134,7 @@ class ErrorTracker {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      await supabase.from('notifications').insert({
+      await (supabase.from('notifications') as any).insert({
         user_id: null, // للمدير
         title: `⚠️ خطأ ${error.severity === 'critical' ? 'حرج' : 'متكرر'}: ${error.category}`,
         message: `${error.message.substring(0, 200)}${error.occurrences > 1 ? ` (تكرر ${error.occurrences} مرات)` : ''}`,
