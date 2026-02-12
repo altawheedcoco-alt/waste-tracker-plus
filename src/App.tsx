@@ -6,6 +6,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { FocusMusicProvider } from "@/contexts/FocusMusicContext";
 import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 
@@ -157,15 +158,19 @@ const Providers = memo(({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={queryClient}>
     <GoogleMapsProvider>
       <ThemeSettingsProvider>
-        <FocusMusicProvider>
-          <TooltipProvider delayDuration={300}>
-            <AuthProvider>
+        <LanguageProvider>
+          <FocusMusicProvider>
+            <TooltipProvider delayDuration={300}>
               <Toaster />
               <Sonner />
-              {children}
-            </AuthProvider>
-          </TooltipProvider>
-        </FocusMusicProvider>
+              <BrowserRouter>
+                <AuthProvider>
+                  <AppRoutes />
+                </AuthProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </FocusMusicProvider>
+        </LanguageProvider>
       </ThemeSettingsProvider>
     </GoogleMapsProvider>
   </QueryClientProvider>
