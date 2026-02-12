@@ -69,6 +69,7 @@ import NotificationDropdown from './NotificationDropdown';
 import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
+import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
@@ -260,98 +261,131 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   );
 
   // Driver-specific menu items (simplified) - with unique keys
-  const driverMenuItems = [
+  const driverMenuItems: SidebarMenuItem[] = [
     { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard', key: 'driver-dashboard' },
     { icon: User, label: 'ملف السائق', path: '/dashboard/driver-profile', key: 'driver-profile' },
     { icon: Truck, label: 'بيانات السائق', path: '/dashboard/driver-data', key: 'driver-data' },
     { icon: Package, label: 'شحناتي', path: '/dashboard/transporter-shipments', key: 'driver-shipments' },
-    { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location', key: 'driver-location' },
-    { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'driver-saved-locations' },
-    { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
+    { icon: MapPin, label: 'الموقع والخرائط', path: '#', key: 'driver-location-group', children: [
+      { icon: MapPin, label: 'موقعي', path: '/dashboard/my-location', key: 'driver-location' },
+      { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'driver-saved-locations' },
+      { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
+    ]},
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
-    { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
-    { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'driver-stories' },
+    { icon: MessageCircle, label: 'التواصل', path: '#', key: 'driver-comm-group', children: [
+      { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
+      { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'driver-stories' },
+    ]},
     { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'driver-support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'driver-about' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'driver-settings' },
   ];
 
-  // Full menu items for organizations and admins - with unique keys
-  const fullMenuItems = [
+  // Full menu items for organizations and admins - with unique keys (GROUPED)
+  const fullMenuItems: SidebarMenuItem[] = [
     { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard', key: 'dashboard' },
-    { icon: Building2, label: 'ملف الجهة', path: '/dashboard/organization-profile', key: 'org-profile' },
-    { icon: Newspaper, label: 'المنشورات', path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
-    { icon: Rss, label: 'تايم لاين الشركاء', path: '/dashboard/partners-timeline', key: 'partners-timeline' },
-    { icon: Handshake, label: 'الشركاء', path: '/dashboard/partners', badge: partnersCount, key: 'partners' },
-    ...((organization?.organization_type as string) === 'transporter'
-      ? [
-          { icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments', key: 'transporter-shipments' },
-          { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
-          { icon: Users, label: 'السائقين', path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
-          { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
-          { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials', key: 'transporter-team' },
-          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'transporter-certs' },
-          { icon: Fingerprint, label: 'الرسم الغيوشي للمستندات', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
-        ]
-      : (organization?.organization_type as string) === 'recycler'
-      ? [
-          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'recycler-shipments' },
-          { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs' },
-        ]
-      : (organization?.organization_type as string) === 'disposal'
-      ? [
-          { icon: Factory, label: 'عمليات التخلص', path: '/dashboard/disposal/operations', key: 'disposal-operations' },
-          { icon: Package, label: 'الطلبات الواردة', path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming' },
-          { icon: FolderCheck, label: 'شهادات التخلص', path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
-          { icon: BarChart3, label: 'تقارير التخلص', path: '/dashboard/disposal/reports', key: 'disposal-reports' },
-        ]
-      : [
-          { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'generator-shipments' },
-          { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
-          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'generator-certs' },
-        ]),
-    // Add team credentials for all organization types with employees
-    ...(!isTransporter && !isAdmin ? [
+    { icon: Building2, label: 'الجهة', path: '#', key: 'org-group', children: [
+      { icon: Building2, label: 'ملف الجهة', path: '/dashboard/organization-profile', key: 'org-profile' },
+      { icon: Newspaper, label: 'المنشورات', path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
+      { icon: Rss, label: 'تايم لاين الشركاء', path: '/dashboard/partners-timeline', key: 'partners-timeline' },
+      { icon: Handshake, label: 'الشركاء', path: '/dashboard/partners', badge: partnersCount, key: 'partners' },
       { icon: Users, label: 'بيانات الفريق', path: '/dashboard/team-credentials', key: 'other-team' },
-    ] : []),
+    ]},
+    // Shipments & Certificates group - varies by org type
+    ...((organization?.organization_type as string) === 'transporter'
+      ? [{
+          icon: Package, label: 'الشحنات والعمليات', path: '#', key: 'transporter-ops-group', children: [
+            { icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments', key: 'transporter-shipments' },
+            { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
+            { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'transporter-certs' },
+            { icon: Fingerprint, label: 'الرسم الغيوشي للمستندات', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
+          ]
+        } as SidebarMenuItem,
+        {
+          icon: Users, label: 'السائقين', path: '#', key: 'transporter-drivers-group', children: [
+            { icon: Users, label: 'السائقين', path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
+            { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
+          ]
+        } as SidebarMenuItem]
+      : (organization?.organization_type as string) === 'recycler'
+      ? [{
+          icon: Package, label: 'الشحنات والشهادات', path: '#', key: 'recycler-ops-group', children: [
+            { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'recycler-shipments' },
+            { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs' },
+          ]
+        } as SidebarMenuItem]
+      : (organization?.organization_type as string) === 'disposal'
+      ? [{
+          icon: Factory, label: 'عمليات التخلص', path: '#', key: 'disposal-ops-group', children: [
+            { icon: Factory, label: 'عمليات التخلص', path: '/dashboard/disposal/operations', key: 'disposal-operations' },
+            { icon: Package, label: 'الطلبات الواردة', path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming' },
+            { icon: FolderCheck, label: 'شهادات التخلص', path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
+            { icon: BarChart3, label: 'تقارير التخلص', path: '/dashboard/disposal/reports', key: 'disposal-reports' },
+          ]
+        } as SidebarMenuItem]
+      : [{
+          icon: Package, label: 'الشحنات والشهادات', path: '#', key: 'generator-ops-group', children: [
+            { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', key: 'generator-shipments' },
+            { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
+            { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'generator-certs' },
+          ]
+        } as SidebarMenuItem]),
+    // Admin-specific
     ...(isAdmin
-      ? [
-          { icon: Brain, label: 'العين الذكية', path: '/dashboard/smart-insights', key: 'smart-insights' },
-          { icon: Shield, label: 'مراجعة التسجيل الذكية', path: '/dashboard/onboarding-review', key: 'onboarding-review' },
-          { icon: Activity, label: 'حالة النظام', path: '/dashboard/system-status', key: 'system-status' },
-          { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals', key: 'company-approvals' },
-          { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals', key: 'driver-approvals' },
-          { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents', key: 'org-docs' },
-          { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
-          { icon: Truck, label: 'خريطة السائقين', path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
-          { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'admin-certs' },
-          { icon: Video, label: 'أنشئ منشورك بضغطة زر', path: '/dashboard/video-generator', key: 'video-gen' },
-        ]
+      ? [{
+          icon: Shield, label: 'إدارة النظام', path: '#', key: 'admin-group', children: [
+            { icon: Brain, label: 'العين الذكية', path: '/dashboard/smart-insights', key: 'smart-insights' },
+            { icon: Shield, label: 'مراجعة التسجيل الذكية', path: '/dashboard/onboarding-review', key: 'onboarding-review' },
+            { icon: Activity, label: 'حالة النظام', path: '/dashboard/system-status', key: 'system-status' },
+            { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals', key: 'company-approvals' },
+            { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals', key: 'driver-approvals' },
+            { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents', key: 'org-docs' },
+            { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
+            { icon: Truck, label: 'خريطة السائقين', path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
+            { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', key: 'admin-certs' },
+            { icon: Video, label: 'أنشئ منشورك بضغطة زر', path: '/dashboard/video-generator', key: 'video-gen' },
+          ]
+        } as SidebarMenuItem]
       : []),
-    { icon: BarChart3, label: 'التقارير', path: '/dashboard/reports', key: 'reports' },
-    { icon: FileText, label: 'تقارير الشحنات', path: '/dashboard/shipment-reports', key: 'shipment-reports' },
-    { icon: ClipboardList, label: 'التقرير المجمع', path: '/dashboard/aggregate-report', key: 'aggregate-report' },
-    { icon: FileSpreadsheet, label: 'سجل المخلفات الغير خطرة', path: '/dashboard/non-hazardous-register', key: 'non-hazardous' },
-    { icon: AlertTriangle, label: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register', key: 'hazardous' },
-    { icon: Layers, label: 'تصنيف أنواع المخلفات', path: '/dashboard/waste-types', key: 'waste-types' },
-    { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'map-explorer' },
-    { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'saved-locations' },
+    // Reports group
+    { icon: BarChart3, label: 'التقارير', path: '#', key: 'reports-group', children: [
+      { icon: BarChart3, label: 'التقارير', path: '/dashboard/reports', key: 'reports' },
+      { icon: FileText, label: 'تقارير الشحنات', path: '/dashboard/shipment-reports', key: 'shipment-reports' },
+      { icon: ClipboardList, label: 'التقرير المجمع', path: '/dashboard/aggregate-report', key: 'aggregate-report' },
+      { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
+    ]},
+    // Waste registers group
+    { icon: FileSpreadsheet, label: 'سجلات المخلفات', path: '#', key: 'waste-group', children: [
+      { icon: FileSpreadsheet, label: 'سجل المخلفات الغير خطرة', path: '/dashboard/non-hazardous-register', key: 'non-hazardous' },
+      { icon: AlertTriangle, label: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register', key: 'hazardous' },
+      { icon: Layers, label: 'تصنيف أنواع المخلفات', path: '/dashboard/waste-types', key: 'waste-types' },
+    ]},
+    // Location group
+    { icon: MapPin, label: 'الموقع والخرائط', path: '#', key: 'location-group', children: [
+      { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'map-explorer' },
+      { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'saved-locations' },
+    ]},
+    // Quick links group
+    { icon: Zap, label: 'الروابط السريعة', path: '#', key: 'quick-links-group', children: [
+      { icon: LinkIcon, label: 'روابط الإيداع السريع', path: '/dashboard/quick-deposit-links', key: 'quick-deposit-links' },
+      { icon: Zap, label: 'روابط الشحنات السريعة', path: '/dashboard/quick-shipment-links', key: 'quick-shipment-links' },
+      { icon: Truck, label: 'روابط السائقين السريعة', path: '/dashboard/quick-driver-links', key: 'quick-driver-links' },
+    ]},
+    // Communication
+    { icon: MessageCircle, label: 'التواصل', path: '#', key: 'comm-group', children: [
+      { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
+      { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'stories' },
+    ]},
     { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'my-requests' },
     { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
     { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
-    { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
-    { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'stories' },
     { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
-    { icon: LinkIcon, label: 'روابط الإيداع السريع', path: '/dashboard/quick-deposit-links', key: 'quick-deposit-links' },
-    { icon: Zap, label: 'روابط الشحنات السريعة', path: '/dashboard/quick-shipment-links', key: 'quick-shipment-links' },
-    { icon: Truck, label: 'روابط السائقين السريعة', path: '/dashboard/quick-driver-links', key: 'quick-driver-links' },
     { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
     { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
     { icon: Activity, label: 'حالة نظامك', path: '/dashboard/system-status', key: 'all-system-status' },
     { icon: WifiOff, label: 'وضع عدم الاتصال', path: '/dashboard/offline-mode', key: 'offline-mode' },
     { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
-    { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
     { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
   ];
 
@@ -382,14 +416,27 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     return getSidebarItemsFromQuickActions(actions);
   }, [quickActionsType, quickActionPrefs, applyOrder]);
 
-  // Filter menu items based on search
+  // Filter menu items based on search (deep search into children)
+  const filterMenuItems = (items: SidebarMenuItem[], search: string): SidebarMenuItem[] => {
+    if (!search.trim()) return items;
+    const searchLower = search.toLowerCase();
+    return items.reduce<SidebarMenuItem[]>((acc, item) => {
+      if (item.label.toLowerCase().includes(searchLower)) {
+        acc.push(item);
+      } else if (item.children) {
+        const filteredChildren = item.children.filter(
+          child => child.label.toLowerCase().includes(searchLower)
+        );
+        if (filteredChildren.length > 0) {
+          acc.push({ ...item, children: filteredChildren });
+        }
+      }
+      return acc;
+    }, []);
+  };
+
   const filteredMenuItems = useMemo(() => {
-    if (!sidebarSearch.trim()) return menuItems;
-    const searchLower = sidebarSearch.toLowerCase();
-    return menuItems.filter((item: any) => 
-      item.label.toLowerCase().includes(searchLower) ||
-      item.path.toLowerCase().includes(searchLower)
-    );
+    return filterMenuItems(menuItems, sidebarSearch);
   }, [menuItems, sidebarSearch]);
 
   // Filter quick actions based on search
@@ -520,14 +567,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           {/* Navigation */}
           <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
             {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item: any) => (
-                <SidebarNavItem
-                  key={item.key || item.path}
-                  icon={item.icon}
-                  label={item.label}
-                  path={item.path}
+              filteredMenuItems.map((item: SidebarMenuItem) => (
+                <SidebarNavGroup
+                  key={item.key}
+                  item={item}
                   isCollapsed={!isSidebarOpen}
-                  badge={item.badge}
                 />
               ))
             ) : (
