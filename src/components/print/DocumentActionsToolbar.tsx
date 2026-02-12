@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { 
   Printer, Download, Send, FileText, Share2, Copy, 
-  Mail, MessageSquare, Palette, Eye, FileDown, Award
+  Mail, MessageSquare, Palette, FileDown, Award, Layout
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,18 +20,24 @@ import {
   TooltipProvider,
 } from '@/components/ui/tooltip';
 import PrintThemeSelector from './PrintThemeSelector';
+import LayoutTemplateSelector from './LayoutTemplateSelector';
 import { type PrintThemeId } from '@/lib/printThemes';
+import { type LayoutTemplateId } from '@/lib/layoutTemplates';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import { usePrintTracking } from '@/hooks/usePrintTracking';
 import { toast } from 'sonner';
 
 interface DocumentActionsToolbarProps {
   printRef: React.RefObject<HTMLDivElement>;
   documentTitle?: string;
   documentNumber?: string;
+  documentType?: string;
+  documentId?: string;
   entityType?: 'generator' | 'transporter' | 'recycler' | 'disposal';
   onSendEmail?: () => void;
   onSendWhatsApp?: () => void;
   onCreateCertificate?: () => void;
+  onLayoutChange?: (layoutId: LayoutTemplateId) => void;
   showCertificateAction?: boolean;
   compact?: boolean;
   className?: string;
@@ -41,35 +47,47 @@ const DocumentActionsToolbar = ({
   printRef,
   documentTitle = 'مستند',
   documentNumber,
+  documentType = 'document',
+  documentId,
   entityType,
   onSendEmail,
   onSendWhatsApp,
   onCreateCertificate,
+  onLayoutChange,
   showCertificateAction = false,
   compact = false,
   className = '',
 }: DocumentActionsToolbarProps) => {
   const [themeOpen, setThemeOpen] = useState(false);
+  const [layoutOpen, setLayoutOpen] = useState(false);
   const { exportToPDF, printWithTheme, printContent, isExporting } = usePDFExport({
     filename: documentTitle,
   });
+  const { logPrint } = usePrintTracking();
 
-  const handleQuickPrint = () => {
+  const handleQuickPrint = async () => {
     if (printRef.current) {
       printContent(printRef.current);
+      await logPrint({ documentType, documentId, documentNumber, actionType: 'print' });
     }
   };
 
-  const handleThemedPrint = (themeId: PrintThemeId) => {
+  const handleThemedPrint = async (themeId: PrintThemeId) => {
     if (printRef.current) {
       printWithTheme(printRef.current, themeId);
+      await logPrint({ documentType, documentId, documentNumber, themeId, actionType: 'print' });
     }
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (printRef.current) {
       exportToPDF(printRef.current, documentTitle);
+      await logPrint({ documentType, documentId, documentNumber, actionType: 'pdf_export' });
     }
+  };
+
+  const handleLayoutSelect = (layoutId: LayoutTemplateId) => {
+    onLayoutChange?.(layoutId);
   };
 
   const handleCopyContent = () => {
@@ -114,6 +132,17 @@ const DocumentActionsToolbar = ({
             </TooltipTrigger>
             <TooltipContent>اختيار تنسيق الطباعة</TooltipContent>
           </Tooltip>
+
+          {onLayoutChange && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={() => setLayoutOpen(true)} className="h-8 w-8">
+                  <Layout className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>تخطيط المستند</TooltipContent>
+            </Tooltip>
+          )}
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -168,7 +197,15 @@ const DocumentActionsToolbar = ({
             onOpenChange={setThemeOpen}
             onSelect={handleThemedPrint}
             documentTitle={documentTitle}
+            entityType={entityType}
           />
+          {onLayoutChange && (
+            <LayoutTemplateSelector
+              open={layoutOpen}
+              onOpenChange={setLayoutOpen}
+              onSelect={handleLayoutSelect}
+            />
+          )}
         </div>
       </TooltipProvider>
     );
@@ -187,6 +224,13 @@ const DocumentActionsToolbar = ({
           أنماط الطباعة
           <Badge variant="secondary" className="text-[10px] px-1 py-0">16</Badge>
         </Button>
+        {onLayoutChange && (
+          <Button variant="outline" size="sm" onClick={() => setLayoutOpen(true)} className="gap-1.5">
+            <Layout className="h-4 w-4" />
+            تخطيط المستند
+            <Badge variant="secondary" className="text-[10px] px-1 py-0">8</Badge>
+          </Button>
+        )}
       </div>
 
       <div className="h-6 w-px bg-border" />
@@ -249,7 +293,15 @@ const DocumentActionsToolbar = ({
         onOpenChange={setThemeOpen}
         onSelect={handleThemedPrint}
         documentTitle={documentTitle}
+        entityType={entityType}
       />
+      {onLayoutChange && (
+        <LayoutTemplateSelector
+          open={layoutOpen}
+          onOpenChange={setLayoutOpen}
+          onSelect={handleLayoutSelect}
+        />
+      )}
     </div>
   );
 };
