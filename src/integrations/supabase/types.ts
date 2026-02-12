@@ -4416,6 +4416,129 @@ export type Database = {
           },
         ]
       }
+      document_template_signatories: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean
+          party_type: string | null
+          position_id: string | null
+          role_title: string
+          role_title_en: string | null
+          sign_order: number
+          signatory_type: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          party_type?: string | null
+          position_id?: string | null
+          role_title: string
+          role_title_en?: string | null
+          sign_order?: number
+          signatory_type?: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          party_type?: string | null
+          position_id?: string | null
+          role_title?: string
+          role_title_en?: string | null
+          sign_order?: number
+          signatory_type?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_template_signatories_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "organization_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_template_signatories_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "document_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_templates: {
+        Row: {
+          auto_attach: boolean
+          content_template: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          is_mandatory: boolean
+          is_sequential: boolean
+          name: string
+          name_en: string | null
+          organization_id: string
+          sort_order: number
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          auto_attach?: boolean
+          content_template?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          is_sequential?: boolean
+          name: string
+          name_en?: string | null
+          organization_id: string
+          sort_order?: number
+          template_type?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_attach?: boolean
+          content_template?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          is_sequential?: boolean
+          name?: string
+          name_en?: string | null
+          organization_id?: string
+          sort_order?: number
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "document_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_verifications: {
         Row: {
           ai_analysis: Json | null
@@ -10898,6 +11021,164 @@ export type Database = {
             columns: ["sender_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipment_doc_signatures: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          integrity_hash: string | null
+          ip_address: string | null
+          is_required: boolean
+          notes: string | null
+          party_type: string | null
+          sign_order: number
+          signatory_template_id: string | null
+          signature_image_url: string | null
+          signature_method: string | null
+          signed_at: string | null
+          signer_name: string
+          signer_national_id: string | null
+          signer_title: string
+          signer_user_id: string | null
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          integrity_hash?: string | null
+          ip_address?: string | null
+          is_required?: boolean
+          notes?: string | null
+          party_type?: string | null
+          sign_order?: number
+          signatory_template_id?: string | null
+          signature_image_url?: string | null
+          signature_method?: string | null
+          signed_at?: string | null
+          signer_name: string
+          signer_national_id?: string | null
+          signer_title: string
+          signer_user_id?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          integrity_hash?: string | null
+          ip_address?: string | null
+          is_required?: boolean
+          notes?: string | null
+          party_type?: string | null
+          sign_order?: number
+          signatory_template_id?: string | null
+          signature_image_url?: string | null
+          signature_method?: string | null
+          signed_at?: string | null
+          signer_name?: string
+          signer_national_id?: string | null
+          signer_title?: string
+          signer_user_id?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_doc_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_doc_signatures_signatory_template_id_fkey"
+            columns: ["signatory_template_id"]
+            isOneToOne: false
+            referencedRelation: "document_template_signatories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipment_documents: {
+        Row: {
+          completed_at: string | null
+          completed_signatures: number
+          created_at: string
+          document_name: string
+          id: string
+          is_mandatory: boolean
+          is_sequential: boolean
+          organization_id: string
+          shipment_id: string
+          status: string
+          template_id: string | null
+          total_signatures_required: number
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_signatures?: number
+          created_at?: string
+          document_name: string
+          id?: string
+          is_mandatory?: boolean
+          is_sequential?: boolean
+          organization_id: string
+          shipment_id: string
+          status?: string
+          template_id?: string | null
+          total_signatures_required?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_signatures?: number
+          created_at?: string
+          document_name?: string
+          id?: string
+          is_mandatory?: boolean
+          is_sequential?: boolean
+          organization_id?: string
+          shipment_id?: string
+          status?: string
+          template_id?: string | null
+          total_signatures_required?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_documents_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_documents_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "document_templates"
             referencedColumns: ["id"]
           },
         ]

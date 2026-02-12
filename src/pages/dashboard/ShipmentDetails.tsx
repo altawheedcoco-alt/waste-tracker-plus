@@ -7,6 +7,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimeline';
 import ShipmentDocumentsTimeline from '@/components/shipments/ShipmentDocumentsTimeline';
+import ShipmentDocumentsPanel from '@/components/documents/ShipmentDocumentsPanel';
 import ShipmentProgressLogs from '@/components/shipments/ShipmentProgressLogs';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
@@ -291,6 +292,9 @@ const ShipmentDetailsPage = () => {
 
         {/* Documents Chain Timeline */}
         <ShipmentDocumentsTimeline shipment={shipment} onRefresh={fetchShipmentDetails} />
+
+        {/* Multi-Signature Documents Panel */}
+        <ShipmentDocumentsPanel shipmentId={shipment.id} shipmentStatus={shipment.status} />
 
         {/* Progress Logs - Auto-recorded milestones */}
         <ShipmentProgressLogs shipmentId={shipment.id} maxHeight={350} />

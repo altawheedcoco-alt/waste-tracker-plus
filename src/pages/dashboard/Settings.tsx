@@ -42,6 +42,7 @@ import AdvancedAppearanceSettings from '@/components/settings/AdvancedAppearance
 import NotificationChannelsSettings from '@/components/settings/NotificationChannelsSettings';
 import LanguageSettings from '@/components/settings/LanguageSettings';
 import { useLanguage } from '@/contexts/LanguageContext';
+import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -156,7 +157,7 @@ const Settings = () => {
       <Tabs defaultValue="themes" className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid overflow-x-auto",
-          isTransporter ? "grid-cols-12" : "grid-cols-11"
+          isTransporter ? "grid-cols-13" : "grid-cols-12"
         )}>
           <TabsTrigger value="language" className="gap-2">
             <Globe className="h-4 w-4" />
@@ -209,6 +210,10 @@ const Settings = () => {
           <TabsTrigger value="terms" className="gap-2">
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">{t('settings.terms')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="document-templates" className="gap-2">
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">قوالب المستندات</span>
           </TabsTrigger>
         </TabsList>
 
@@ -643,6 +648,11 @@ const Settings = () => {
         {/* Terms and Conditions Tab */}
         <TabsContent value="terms" className="space-y-6">
           <OrganizationTermsSettings />
+        </TabsContent>
+
+        {/* Document Templates Tab */}
+        <TabsContent value="document-templates" className="space-y-6">
+          <DocumentTemplateManager />
         </TabsContent>
       </Tabs>
     </div>
