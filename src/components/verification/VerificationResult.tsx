@@ -3,11 +3,9 @@ import { ar } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   FileText,
   Building2,
   Truck,
@@ -18,45 +16,25 @@ import {
   Package,
   Leaf,
   Shield,
-  Download,
   ExternalLink,
   Clock,
+  Receipt,
+  FileCheck,
+  Award,
+  CreditCard,
 } from 'lucide-react';
+
+export type VerificationDocType = 
+  | 'shipment' | 'certificate' | 'contract' | 'receipt' 
+  | 'report' | 'invoice' | 'disposal' | 'statement' 
+  | 'award_letter' | 'entity_certificate' | 'unknown';
 
 export interface VerificationData {
   isValid: boolean;
-  type: 'shipment' | 'certificate' | 'contract' | 'receipt' | 'report' | 'unknown';
+  type: VerificationDocType;
   reference: string;
   status?: string;
-  data?: {
-    // بيانات الشحنة
-    shipment_number?: string;
-    waste_type?: string;
-    quantity?: number;
-    unit?: string;
-    pickup_address?: string;
-    delivery_address?: string;
-    pickup_date?: string;
-    delivered_at?: string;
-    created_at?: string;
-    // الأطراف
-    generator?: { name: string; city?: string } | null;
-    transporter?: { name: string; city?: string } | null;
-    recycler?: { name: string; city?: string } | null;
-    // بيانات الشهادة
-    report_number?: string;
-    waste_category?: string;
-    recycler_organization?: { name: string } | null;
-    // بيانات العقد
-    contract_number?: string;
-    title?: string;
-    partner_name?: string;
-    start_date?: string;
-    end_date?: string;
-    // بيانات الإيصال
-    receipt_number?: string;
-    signed_at?: string;
-  } | null;
+  data?: Record<string, any> | null;
   message?: string;
   verifiedAt?: string;
 }
@@ -68,16 +46,9 @@ interface VerificationResultProps {
 }
 
 const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'مخلفات بناء',
-  other: 'أخرى',
+  plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
+  electronic: 'إلكترونيات', organic: 'عضوية', chemical: 'كيميائية',
+  medical: 'طبية', construction: 'مخلفات بناء', other: 'أخرى',
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
@@ -88,14 +59,23 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   confirmed: { label: 'مؤكدة', color: 'bg-emerald-100 text-emerald-800' },
   active: { label: 'نشط', color: 'bg-green-100 text-green-800' },
   expired: { label: 'منتهي', color: 'bg-red-100 text-red-800' },
+  paid: { label: 'مدفوعة', color: 'bg-green-100 text-green-800' },
+  pending: { label: 'معلقة', color: 'bg-yellow-100 text-yellow-800' },
+  overdue: { label: 'متأخرة', color: 'bg-red-100 text-red-800' },
+  draft: { label: 'مسودة', color: 'bg-gray-100 text-gray-800' },
 };
 
 const typeLabels: Record<string, { label: string; icon: any }> = {
   shipment: { label: 'شحنة', icon: Package },
   certificate: { label: 'شهادة تدوير', icon: Recycle },
   contract: { label: 'عقد', icon: FileText },
-  receipt: { label: 'إيصال استلام', icon: FileText },
+  receipt: { label: 'إيصال استلام', icon: Receipt },
   report: { label: 'تقرير مجمع', icon: FileText },
+  invoice: { label: 'فاتورة', icon: CreditCard },
+  disposal: { label: 'شهادة تخلص آمن', icon: Shield },
+  statement: { label: 'كشف حساب', icon: FileCheck },
+  award_letter: { label: 'خطاب ترسية', icon: Award },
+  entity_certificate: { label: 'شهادة جهة', icon: Building2 },
   unknown: { label: 'مستند', icon: FileText },
 };
 
@@ -130,6 +110,11 @@ const VerificationResult = ({ result, onScanAgain, onViewDetails }: Verification
 
           <div className="mt-4 inline-flex items-center gap-2 bg-white rounded-lg px-4 py-2 border">
             <TypeIcon className="w-4 h-4 text-primary" />
+            <span className="text-sm text-gray-500">نوع المستند: </span>
+            <Badge variant="outline">{typeLabels[result.type]?.label || 'مستند'}</Badge>
+          </div>
+
+          <div className="mt-2 inline-flex items-center gap-2 bg-white rounded-lg px-4 py-2 border">
             <span className="text-sm text-gray-500">رقم المرجع: </span>
             <span className="font-mono font-bold text-primary">{result.reference}</span>
           </div>
@@ -146,8 +131,8 @@ const VerificationResult = ({ result, onScanAgain, onViewDetails }: Verification
       {/* تفاصيل المستند */}
       {result.isValid && result.data && (
         <>
-          {/* بيانات الشحنة أو الشهادة */}
-          {(result.type === 'shipment' || result.type === 'certificate' || result.type === 'receipt') && (
+          {/* بيانات الشحنة أو الشهادة أو الإيصال أو التخلص */}
+          {['shipment', 'certificate', 'receipt', 'disposal'].includes(result.type) && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 justify-end">
@@ -315,6 +300,132 @@ const VerificationResult = ({ result, onScanAgain, onViewDetails }: Verification
                     <div>
                       <span className="text-sm text-muted-foreground">الطرف الآخر</span>
                       <p className="font-semibold">{result.data.partner_name}</p>
+                    </div>
+                  )}
+                  {result.data.start_date && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">تاريخ البدء</span>
+                      <p className="font-semibold">
+                        {format(new Date(result.data.start_date), 'PP', { locale: ar })}
+                      </p>
+                    </div>
+                  )}
+                  {result.data.end_date && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">تاريخ الانتهاء</span>
+                      <p className="font-semibold">
+                        {format(new Date(result.data.end_date), 'PP', { locale: ar })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* بيانات الفاتورة */}
+          {result.type === 'invoice' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 justify-end">
+                  <CreditCard className="w-5 h-5 text-primary" />
+                  بيانات الفاتورة
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {result.data.invoice_number && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">رقم الفاتورة</span>
+                      <p className="font-mono font-bold">{result.data.invoice_number}</p>
+                    </div>
+                  )}
+                  {result.status && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">الحالة</span>
+                      <div className="mt-1">
+                        <Badge className={statusLabels[result.status]?.color || 'bg-gray-100'}>
+                          {statusLabels[result.status]?.label || result.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  )}
+                  {result.data.total_amount && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">المبلغ الإجمالي</span>
+                      <p className="font-bold text-primary">
+                        {Number(result.data.total_amount).toLocaleString('ar-EG')} {result.data.currency || 'ج.م'}
+                      </p>
+                    </div>
+                  )}
+                  {result.data.organization_name && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">الجهة المصدرة</span>
+                      <p className="font-semibold">{result.data.organization_name}</p>
+                    </div>
+                  )}
+                  {result.data.partner_name && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">العميل</span>
+                      <p className="font-semibold">{result.data.partner_name}</p>
+                    </div>
+                  )}
+                  {result.data.issue_date && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">تاريخ الإصدار</span>
+                      <p className="font-semibold">
+                        {format(new Date(result.data.issue_date), 'PP', { locale: ar })}
+                      </p>
+                    </div>
+                  )}
+                  {result.data.due_date && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">تاريخ الاستحقاق</span>
+                      <p className="font-semibold">
+                        {format(new Date(result.data.due_date), 'PP', { locale: ar })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* بيانات خطاب الترسية */}
+          {result.type === 'award_letter' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 justify-end">
+                  <Award className="w-5 h-5 text-primary" />
+                  بيانات خطاب الترسية
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  {result.data.letter_number && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">رقم الخطاب</span>
+                      <p className="font-mono font-bold">{result.data.letter_number}</p>
+                    </div>
+                  )}
+                  {result.data.title && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">العنوان</span>
+                      <p className="font-semibold">{result.data.title}</p>
+                    </div>
+                  )}
+                  {result.data.organization_name && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">الجهة</span>
+                      <p className="font-semibold">{result.data.organization_name}</p>
+                    </div>
+                  )}
+                  {result.data.issue_date && (
+                    <div>
+                      <span className="text-sm text-muted-foreground">تاريخ الإصدار</span>
+                      <p className="font-semibold">
+                        {format(new Date(result.data.issue_date), 'PP', { locale: ar })}
+                      </p>
                     </div>
                   )}
                   {result.data.start_date && (

@@ -116,7 +116,7 @@ const AggregateCertificatesPrint = ({
           </div>
           <div style={{ width: '30%' }} className="flex justify-end">
             <QRCodeSVG 
-              value={`AGGREGATE-CERT:${reportNumber}|COUNT:${shipments.length}|QTY:${totalQuantity}`}
+              value={`${window.location.origin}/qr-verify?type=report&code=${encodeURIComponent(reportNumber)}`}
               size={70}
             />
           </div>

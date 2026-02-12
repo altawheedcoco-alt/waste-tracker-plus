@@ -24,11 +24,7 @@ const SystemEndorsementBadge = ({
 }: SystemEndorsementBadgeProps) => {
   const formattedDate = format(endorsedAt, 'PPpp', { locale: ar });
   
-  const qrData = JSON.stringify({
-    code: verificationCode,
-    seal: systemSealNumber,
-    url: verificationUrl,
-  });
+  const qrData = `${window.location.origin}/qr-verify?type=contract&code=${encodeURIComponent(verificationCode)}`;
 
   if (compact) {
     return (

@@ -118,7 +118,7 @@ const EntityCertificateTemplate = forwardRef<HTMLDivElement, EntityCertificateTe
     const IconComp = config.icon;
     const now = new Date();
     const issueDate = data.issueDate || format(now, 'PPP', { locale: ar });
-    const qrValue = `${window.location.origin}/verify?cert=${data.certificateNumber}&code=${data.verificationCode || data.certificateNumber}`;
+    const qrValue = `${window.location.origin}/qr-verify?type=entity_certificate&code=${encodeURIComponent(data.certificateNumber)}`;
 
     const borderStyle = designVariant === 'bordered'
       ? { border: `6px double ${config.accentColor}`, padding: '12mm' }
