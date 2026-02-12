@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,12 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileCheck, Search, Download, Eye, Printer, AlertCircle } from 'lucide-react';
+import { FileCheck, Search, Download, Eye, Printer, AlertCircle, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import DeliveryDeclarationViewDialog from '@/components/shipments/DeliveryDeclarationViewDialog';
 
 const DeliveryDeclarations = () => {
+  const navigate = useNavigate();
   const { organization } = useAuth();
   const [search, setSearch] = useState('');
   const [selectedDeclaration, setSelectedDeclaration] = useState<any>(null);
@@ -77,8 +79,12 @@ const DeliveryDeclarations = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="text-right">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2">
+          <ArrowRight className="w-4 h-4" />
+          رجوع
+        </Button>
+        <div className="text-right flex-1">
+          <h1 className="text-2xl font-bold flex items-center gap-2 justify-end">
             <FileCheck className="w-7 h-7 text-primary" />
             إقرارات التسليم
           </h1>
@@ -86,7 +92,7 @@ const DeliveryDeclarations = () => {
             جميع إقرارات تسليم الشحنات الموقعة من السائقين
           </p>
         </div>
-        <Badge variant="secondary" className="text-lg px-4 py-1">
+        <Badge variant="secondary" className="text-lg px-4 py-1 mr-4">
           {filtered.length} إقرار
         </Badge>
       </div>
