@@ -51,7 +51,7 @@ const levelColors: Record<number, string> = {
 const OrgStructure = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const { structure, isLoading, addDepartment, addPosition } = useOrgStructure();
+  const { structure, isLoading, addDepartment, addPosition, seedStructure } = useOrgStructure();
   const [expandedDepts, setExpandedDepts] = useState<Set<string> | 'all'>('all');
   const [newDeptOpen, setNewDeptOpen] = useState(false);
   const [newPosOpen, setNewPosOpen] = useState(false);
@@ -289,8 +289,17 @@ const OrgStructure = () => {
           <CardContent className="p-12 text-center">
             <Network className="h-16 w-16 mx-auto text-muted-foreground/30 mb-4" />
             <h3 className="text-lg font-semibold mb-2">لا يوجد هيكل تنظيمي بعد</h3>
-            <p className="text-muted-foreground mb-4">ابدأ بإضافة الأقسام والمناصب لتنظيم فريق العمل</p>
-            <Button onClick={() => setNewDeptOpen(true)}><Plus className="h-4 w-4 ml-1" />إضافة قسم</Button>
+            <p className="text-muted-foreground mb-4">يمكنك إنشاء الهيكل التنظيمي الافتراضي المتخصص لنوع جهتك أو البدء يدوياً</p>
+            <div className="flex items-center justify-center gap-3">
+              <Button variant="eco" onClick={() => seedStructure.mutate()} disabled={seedStructure.isPending}>
+                {seedStructure.isPending ? (
+                  <><span className="animate-spin mr-2">⏳</span> جاري الإنشاء...</>
+                ) : (
+                  <><Network className="h-4 w-4 ml-1" />إنشاء الهيكل الافتراضي</>
+                )}
+              </Button>
+              <Button variant="outline" onClick={() => setNewDeptOpen(true)}><Plus className="h-4 w-4 ml-1" />إضافة يدوياً</Button>
+            </div>
           </CardContent>
         </Card>
       )}

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { toast } from 'sonner';
+import { useCallback } from 'react';
 
 export interface Department {
   id: string;
@@ -43,9 +44,10 @@ export interface Position {
 }
 
 export function useOrgStructure(organizationId?: string) {
-  const { profile } = useAuth();
+  const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
   const orgId = organizationId || profile?.organization_id;
+  const orgType = organization?.organization_type || 'generator';
 
   const departmentsQuery = useQuery({
     queryKey: ['org-departments', orgId],
@@ -134,6 +136,26 @@ export function useOrgStructure(organizationId?: string) {
     },
   });
 
+  const seedStructure = useMutation({
+    mutationFn: async () => {
+      if (!orgId) throw new Error('No organization ID');
+      const { error } = await supabase.rpc('seed_org_structure', {
+        p_org_id: orgId,
+        p_org_type: orgType,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['org-departments', orgId] });
+      queryClient.invalidateQueries({ queryKey: ['org-positions', orgId] });
+      toast.success('تم إنشاء الهيكل التنظيمي الافتراضي بنجاح');
+    },
+    onError: (err: any) => {
+      console.error('Seed error:', err);
+      toast.error('حدث خطأ أثناء إنشاء الهيكل التنظيمي');
+    },
+  });
+
   return {
     structure,
     departments: departmentsQuery.data || [],
@@ -142,6 +164,7 @@ export function useOrgStructure(organizationId?: string) {
     addDepartment,
     addPosition,
     assignUser,
+    seedStructure,
     refetch: () => {
       departmentsQuery.refetch();
       positionsQuery.refetch();
