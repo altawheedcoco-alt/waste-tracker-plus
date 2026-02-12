@@ -91,6 +91,7 @@ const DocumentVerification = lazy(() => import("./pages/dashboard/DocumentVerifi
 const Verify = lazy(() => import("./pages/Verify"));
 const QRVerify = lazy(() => import("./pages/QRVerify"));
 const NavigationDemo = lazy(() => import("./pages/dashboard/NavigationDemo"));
+const DemoScenario = lazy(() => import("./pages/dashboard/DemoScenario"));
 const MapExplorer = lazy(() => import("./pages/dashboard/MapExplorer"));
 const SystemStatus = lazy(() => import("./pages/dashboard/SystemStatus"));
 const SupportCenter = lazy(() => import("./pages/dashboard/SupportCenter"));
@@ -268,6 +269,7 @@ const AppRoutes = memo(() => (
     <Route path="/dashboard/external-partner/:partnerId" element={<ExternalPartnerDetails />} />
         <Route path="/dashboard/document-verification" element={<DocumentVerification />} />
         <Route path="/dashboard/navigation-demo" element={<NavigationDemo />} />
+        <Route path="/dashboard/demo-scenario" element={<DemoScenario />} />
         <Route path="/dashboard/map-explorer" element={<MapExplorer />} />
         <Route path="/dashboard/system-status" element={<SystemStatus />} />
         <Route path="/dashboard/support" element={<SupportCenter />} />

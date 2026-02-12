@@ -131,6 +131,7 @@ export const adminQuickActions: QuickActionConfig[] = [
   { id: 'contracts', title: 'جميع العقود', subtitle: 'مراقبة عقود كل الجهات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-violet-600', category: 'utility' },
   { id: 'navigation-demo', title: 'محاكاة الملاحة', subtitle: 'اختبار نظام التتبع', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'utility' },
   { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير لكافة الجهات', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
+  { id: 'demo-scenario', title: 'تجربة افتراضية', subtitle: 'محاكاة شحنة كاملة بجميع الجهات', icon: Sparkles, path: '/dashboard/demo-scenario', iconBgClass: 'bg-gradient-to-br from-purple-500 to-pink-600', category: 'utility' },
 ];
 
 // ============= GENERATOR QUICK ACTIONS =============
