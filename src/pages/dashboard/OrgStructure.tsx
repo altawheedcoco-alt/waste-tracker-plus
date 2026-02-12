@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +13,7 @@ import {
   Crown, Settings, Truck, Users, Shield, Calculator, Headphones,
   Leaf, Package, FileText, DoorOpen, Factory, FlaskConical, Scale,
   Cog, Activity, FileCheck, Building2, Plus, User, ChevronDown, ChevronUp,
-  Network,
+  Network, ArrowRight,
 } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
@@ -48,6 +49,7 @@ const levelColors: Record<number, string> = {
 };
 
 const OrgStructure = () => {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const { structure, isLoading, addDepartment, addPosition } = useOrgStructure();
   const [expandedDepts, setExpandedDepts] = useState<Set<string> | 'all'>('all');
@@ -117,14 +119,19 @@ const OrgStructure = () => {
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Network className="h-7 w-7 text-primary" />
-            الهيكل التنظيمي
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {structure.length} قسم • {totalPositions} منصب • {filledPositions} مشغول
-          </p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Network className="h-7 w-7 text-primary" />
+              الهيكل التنظيمي
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {structure.length} قسم • {totalPositions} منصب • {filledPositions} مشغول
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={expandAll}>توسيع الكل</Button>
