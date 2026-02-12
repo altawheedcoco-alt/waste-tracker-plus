@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, memo } from 'react';
+import { useState, useMemo, useEffect, useCallback, memo, startTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -176,7 +176,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    startTransition(() => navigate('/'));
   };
 
   const isAdmin = roles.includes('admin');
@@ -823,15 +823,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/dashboard/organization-profile')} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => startTransition(() => navigate('/dashboard/organization-profile'))} className="cursor-pointer">
                     <Building2 className="ml-2 h-4 w-4" />
                     ملف الجهة
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/dashboard/settings')} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => startTransition(() => navigate('/dashboard/settings'))} className="cursor-pointer">
                     <User className="ml-2 h-4 w-4" />
                     الملف الشخصي
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/dashboard/settings')} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => startTransition(() => navigate('/dashboard/settings'))} className="cursor-pointer">
                     <Settings className="ml-2 h-4 w-4" />
                     الإعدادات
                   </DropdownMenuItem>
@@ -947,7 +947,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {
                 id: 'create-shipment',
                 icon: <Plus size={isMobile ? 20 : 24} />,
-                onClick: () => navigate('/dashboard/shipments/new'),
+                onClick: () => startTransition(() => navigate('/dashboard/shipments/new')),
                 label: 'إنشاء شحنة جديدة',
                 variant: 'primary',
                 visible: isTransporter || isDriver,
