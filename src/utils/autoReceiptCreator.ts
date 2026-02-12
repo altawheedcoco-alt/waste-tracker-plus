@@ -53,13 +53,43 @@ export async function autoCreateReceipt(
     created_by: userId || null,
   };
 
-  const { error } = await supabase
+  const { data: receiptData, error } = await supabase
     .from('shipment_receipts')
-    .insert(insertData as any);
+    .insert(insertData as any)
+    .select('id, receipt_number')
+    .single();
 
   if (error) {
     console.error('Auto receipt creation error:', error);
     throw error;
+  }
+
+  // Send notification to generator
+  if (generatorId) {
+    try {
+      // Find users belonging to the generator organization
+      const { data: generatorUsers } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('organization_id', generatorId)
+        .limit(10);
+
+      if (generatorUsers && generatorUsers.length > 0) {
+        const notifications = generatorUsers.map((u: any) => ({
+          user_id: u.user_id,
+          title: 'شهادة استلام جديدة',
+          message: `تم إصدار شهادة استلام ${receiptData?.receipt_number || receiptNumber} للشحنة ${shipment.shipment_number}`,
+          type: 'receipt_issued',
+          shipment_id: shipmentId,
+          is_read: false,
+        }));
+
+        await supabase.from('notifications').insert(notifications);
+      }
+    } catch (notifError) {
+      console.error('Failed to send receipt notification:', notifError);
+      // Don't throw - notification failure shouldn't block receipt creation
+    }
   }
 
   console.log('Auto receipt created for shipment:', shipmentId);

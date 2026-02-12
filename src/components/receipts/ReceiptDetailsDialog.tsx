@@ -1,12 +1,15 @@
 import { useState, useRef } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from '@/components/print/PrintThemeSelector';
 import { type PrintThemeId } from '@/lib/printThemes';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDeliveryDeclaration } from '@/hooks/useDeliveryDeclaration';
+import { QRCodeSVG } from 'qrcode.react';
 import {
   Dialog,
   DialogContent,
@@ -32,6 +35,10 @@ import {
   MapPin,
   User,
   Loader2,
+  ExternalLink,
+  ShieldCheck,
+  QrCode,
+  FileSignature,
 } from 'lucide-react';
 import { generateReceiptPrintHTML } from './ReceiptPrintTemplate';
 
@@ -51,6 +58,7 @@ const ReceiptDetailsDialog = ({
   isGenerator = false 
 }: ReceiptDetailsDialogProps) => {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
@@ -59,7 +67,13 @@ const ReceiptDetailsDialog = ({
     orientation: 'portrait',
   });
 
+  // Fetch linked delivery declaration
+  const shipmentId = receipt?.shipment?.id;
+  const { data: declarationData } = useDeliveryDeclaration(shipmentId);
+
   if (!receipt) return null;
+
+  const qrVerifyUrl = `${window.location.origin}/qr-verify?type=receipt&code=${encodeURIComponent(receipt.receipt_number)}`;
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -91,6 +105,31 @@ const ReceiptDetailsDialog = ({
         .eq('id', receipt.id);
 
       if (error) throw error;
+
+      // Send notification to transporter about confirmation
+      if (receipt.transporter?.id) {
+        try {
+          const { data: transporterUsers } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('organization_id', receipt.transporter.id)
+            .limit(10);
+
+          if (transporterUsers && transporterUsers.length > 0) {
+            const notifications = transporterUsers.map((u: any) => ({
+              user_id: u.user_id,
+              title: 'تأكيد شهادة الاستلام',
+              message: `تم تأكيد شهادة الاستلام ${receipt.receipt_number} من قبل الجهة المولدة`,
+              type: 'receipt_confirmed',
+              shipment_id: receipt.shipment?.id || null,
+              is_read: false,
+            }));
+            await supabase.from('notifications').insert(notifications);
+          }
+        } catch (e) {
+          console.error('Failed to notify transporter:', e);
+        }
+      }
 
       toast.success('تم تأكيد شهادة الاستلام');
       onConfirm?.();
@@ -248,6 +287,81 @@ const ReceiptDetailsDialog = ({
               <p className="text-muted-foreground p-3 rounded-lg bg-muted/50">{receipt.notes}</p>
             </div>
           )}
+
+          <Separator />
+
+          {/* QR Verification & Linked Documents */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* QR Code */}
+            <div className="flex flex-col items-center gap-2 p-4 rounded-lg border bg-muted/30">
+              <QrCode className="w-4 h-4 text-primary" />
+              <QRCodeSVG
+                value={qrVerifyUrl}
+                size={120}
+                level="M"
+                includeMargin
+              />
+              <p className="text-xs text-muted-foreground text-center">
+                امسح للتحقق من صلاحية الشهادة
+              </p>
+              <Badge variant="outline" className="text-[10px]">
+                <ShieldCheck className="w-3 h-3 ml-1" />
+                محمية بنظام التحقق الموحد
+              </Badge>
+            </div>
+
+            {/* Linked Documents */}
+            <div className="space-y-3">
+              {/* Link to Shipment */}
+              {receipt.shipment?.id && (
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2"
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate(`/dashboard/shipments/${receipt.shipment.id}`);
+                  }}
+                >
+                  <Package className="w-4 h-4 text-primary" />
+                  عرض الشحنة: {receipt.shipment.shipment_number}
+                  <ExternalLink className="w-3 h-3 mr-auto" />
+                </Button>
+              )}
+
+              {/* Link to Delivery Declaration */}
+              {declarationData && (
+                <div className="p-3 rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileSignature className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-semibold text-green-800 dark:text-green-300">
+                      إقرار التسليم القانوني
+                    </span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600 mr-auto" />
+                  </div>
+                  <p className="text-xs text-green-700 dark:text-green-400">
+                    موقّع بواسطة: {(declarationData as any).declared_by_name || 'مُوقّع'} 
+                    {(declarationData as any).created_at && (
+                      <> — {format(new Date((declarationData as any).created_at), 'dd/MM/yyyy HH:mm')}</>
+                    )}
+                  </p>
+                  <p className="text-[10px] text-green-600 dark:text-green-500 mt-1">
+                    ختم: {(declarationData as any).integrity_hash?.substring(0, 16) || 'N/A'}...
+                  </p>
+                </div>
+              )}
+
+              {!declarationData && receipt.shipment?.id && (
+                <div className="p-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600" />
+                    <span className="text-xs text-amber-700 dark:text-amber-400">
+                      لم يتم توقيع إقرار التسليم بعد
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
           <Separator />
 

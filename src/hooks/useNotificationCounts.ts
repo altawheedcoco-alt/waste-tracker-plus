@@ -20,6 +20,9 @@ const TYPE_TO_SECTION: Record<string, string[]> = {
   approval_request: ['company-approvals', 'driver-approvals', 'my-requests', 'requests-reg-group', 'admin-group'],
   // Documents
   document_uploaded: ['org-docs', 'admin-group'],
+  // Receipts
+  receipt_issued: ['transporter-receipts', 'generator-receipts', 'transporter-ops-group', 'generator-ops-group', 'recycler-ops-group'],
+  receipt_confirmed: ['transporter-receipts', 'generator-receipts', 'transporter-ops-group', 'generator-ops-group'],
   // General notifications
   general: ['notifications'],
 };
