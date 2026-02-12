@@ -320,7 +320,7 @@ const ReportCoverPage = ({
           {/* QR Code */}
           <div className="text-center">
             <QRCodeSVG
-              value={verificationUrl || `${window.location.origin}/verify?type=${reportType}&code=${reportNumber}`}
+              value={verificationUrl || `${window.location.origin}/qr-verify?type=${reportType}&code=${encodeURIComponent(reportNumber)}`}
               size={70}
               level="M"
               includeMargin={false}

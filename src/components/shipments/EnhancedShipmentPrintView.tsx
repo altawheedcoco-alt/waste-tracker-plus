@@ -185,7 +185,7 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
   const verificationCode = `SEC-${securityHash.slice(0, 4)}-${securityHash.slice(4, 8)}`;
   
   // QR Code data with verification URL
-  const qrData = `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}`;
+  const qrData = `${window.location.origin}/qr-verify?type=shipment&code=${encodeURIComponent(shipment.shipment_number)}`;
 
   // AI Optimization function
   const handleOptimizeWithAI = async () => {

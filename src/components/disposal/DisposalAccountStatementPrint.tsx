@@ -83,7 +83,7 @@ const DisposalAccountStatementPrint = ({
             </p>
           </div>
           <div style={{ width: '28%' }} className="flex justify-end">
-            <QRCodeSVG value={`STMT:${statementNumber}|OPS:${operations.length}|TOTAL:${totalCost}`} size={70} />
+            <QRCodeSVG value={`${window.location.origin}/qr-verify?type=statement&code=${encodeURIComponent(statementNumber)}`} size={70} />
           </div>
         </div>
       </div>

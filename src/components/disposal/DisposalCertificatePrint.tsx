@@ -44,7 +44,7 @@ const methodLabels: Record<string, string> = {
 };
 
 const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature = true }: DisposalCertificatePrintProps) => {
-  const qrValue = `SAFE-DISP:${data.certificate_number}|VER:${data.verification_code || ''}|QTY:${data.quantity}|METHOD:${data.disposal_method}`;
+  const qrValue = `${window.location.origin}/qr-verify?type=disposal&code=${encodeURIComponent(data.certificate_number)}`;
   const issueDate = format(new Date(data.issue_date), 'dd MMMM yyyy', { locale: ar });
 
   return (

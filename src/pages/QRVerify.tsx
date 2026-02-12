@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Leaf, ArrowLeft, Shield, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,19 @@ import { useQRVerification } from '@/hooks/useQRVerification';
 
 const QRVerify = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { loading, result, verify, reset } = useQRVerification();
   const [showScanner, setShowScanner] = useState(true);
+
+  // Auto-verify if URL has type and code params
+  useEffect(() => {
+    const type = searchParams.get('type');
+    const code = searchParams.get('code');
+    if (type && code) {
+      setShowScanner(false);
+      verify(`${window.location.origin}/qr-verify?type=${type}&code=${code}`);
+    }
+  }, [searchParams]);
 
   const handleScan = async (data: string) => {
     setShowScanner(false);
@@ -19,6 +30,8 @@ const QRVerify = () => {
 
   const handleScanAgain = () => {
     reset();
+    // Clear URL params
+    navigate('/qr-verify', { replace: true });
     setShowScanner(true);
   };
 

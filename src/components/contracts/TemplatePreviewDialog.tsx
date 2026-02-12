@@ -153,7 +153,7 @@ const TemplatePreviewDialog = ({
               {/* QR Code Section */}
               <div className="print-qr-section text-center">
                 <QRCodeSVG
-                  value={`${window.location.origin}/verify?type=template&code=${verificationCode}`}
+                  value={`${window.location.origin}/qr-verify?type=contract&code=${encodeURIComponent(verificationCode)}`}
                   size={70}
                   level="M"
                   includeMargin={false}

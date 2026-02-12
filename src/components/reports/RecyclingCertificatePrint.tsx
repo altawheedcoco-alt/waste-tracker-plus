@@ -279,7 +279,7 @@ const RecyclingCertificatePrint = ({
         {/* QR Code */}
         <div className="text-center print-qr">
           <QRCodeSVG
-            value={`${window.location.origin}/verify?type=certificate&code=${shipment.shipment_number}`}
+            value={`${window.location.origin}/qr-verify?type=certificate&code=${encodeURIComponent(shipment.shipment_number)}`}
             size={50}
             level="M"
             includeMargin={false}
