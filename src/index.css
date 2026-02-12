@@ -1203,3 +1203,65 @@ html, body {
     padding-right: 1.5rem;
   }
 }
+
+/* ========================================
+   Global A4 Print & PDF Styles
+   ======================================== */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+    font-family: 'Cairo', sans-serif !important;
+  }
+
+  .no-print,
+  nav,
+  aside,
+  header:not(.print-header),
+  footer:not(.print-footer),
+  [data-radix-popper-content-wrapper],
+  [role="dialog"] > button[class*="close"],
+  .sidebar,
+  .toast-container {
+    display: none !important;
+  }
+
+  .print-container,
+  [data-print-content] {
+    width: 100% !important;
+    max-width: 190mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+}
