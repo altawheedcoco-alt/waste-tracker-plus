@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +22,8 @@ import {
   QrCode,
   Settings2,
   ChevronDown,
-  Loader2
+  Loader2,
+  FileCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -163,6 +165,25 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
   const { exportToPDF, isExporting: isPDFExporting } = usePDFExport({
     filename: `شحنة-${shipment?.shipment_number || 'document'}`,
     orientation: 'portrait',
+  });
+
+  // Fetch delivery declaration for this shipment
+  const { data: declarationData } = useQuery({
+    queryKey: ['delivery-declaration-print', shipment?.id],
+    queryFn: async () => {
+      if (!shipment?.id) return null;
+      const { data, error } = await supabase
+        .from('delivery_declarations')
+        .select('*')
+        .eq('shipment_id', shipment.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) return null;
+      return data;
+    },
+    enabled: !!shipment?.id && isOpen,
+    staleTime: 1000 * 60 * 5,
   });
 
   if (!shipment) return null;
@@ -970,6 +991,30 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                           {shipment.recycler_notes}
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Delivery Declaration Section */}
+                {declarationData && (
+                  <div className="space-y-3 border-t-2 border-primary/30 pt-4 mt-4">
+                    <h3 className="font-bold text-right flex items-center gap-2 justify-end text-primary">
+                      <FileCheck className="w-5 h-5" />
+                      إقرار تسليم الشحنة
+                    </h3>
+                    <div className="p-4 border border-primary/20 rounded-lg bg-primary/5 space-y-3 text-sm text-right">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div><span className="text-muted-foreground">المُقِر: </span><strong>{(declarationData as any).driver_name || 'غير محدد'}</strong></div>
+                        <div><span className="text-muted-foreground">رقم الهوية: </span><strong>{(declarationData as any).driver_national_id || 'غير محدد'}</strong></div>
+                        <div><span className="text-muted-foreground">تاريخ الإقرار: </span><strong>{(declarationData as any).declared_at ? format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : '-'}</strong></div>
+                        <div><span className="text-muted-foreground">رقم الوثيقة: </span><strong>DEC-{(declarationData as any).id?.slice(0, 8).toUpperCase()}</strong></div>
+                      </div>
+                      <div className="text-xs whitespace-pre-wrap leading-relaxed border-t pt-2 mt-2 max-h-32 overflow-hidden">
+                        {(declarationData as any).declaration_text}
+                      </div>
+                      <div className="text-center text-xs text-muted-foreground border-t pt-2">
+                        ✅ تم التوقيع إلكترونياً - وثيقة مسجلة ومحمية رقمياً
+                      </div>
                     </div>
                   </div>
                 )}

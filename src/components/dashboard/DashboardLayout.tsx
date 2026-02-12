@@ -54,6 +54,7 @@ import {
   CircleDot,
   Factory,
   WifiOff,
+  FileCheck,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -303,6 +304,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           icon: Package, label: 'الشحنات والعمليات', path: '#', key: 'transporter-ops-group', badge: sectionBadges['transporter-ops-group'], children: [
             { icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments', badge: sectionBadges['transporter-shipments'], key: 'transporter-shipments' },
             { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
+            { icon: FileCheck, label: 'إقرارات التسليم', path: '/dashboard/delivery-declarations', key: 'transporter-declarations' },
             { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', badge: sectionBadges['transporter-certs'], key: 'transporter-certs' },
             { icon: Fingerprint, label: 'الرسم الغيوشي للمستندات', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
           ]
@@ -317,6 +319,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       ? [{
           icon: Package, label: 'الشحنات والشهادات', path: '#', key: 'recycler-ops-group', badge: sectionBadges['recycler-ops-group'], children: [
             { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', badge: sectionBadges['recycler-shipments'], key: 'recycler-shipments' },
+            { icon: FileCheck, label: 'إقرارات التسليم', path: '/dashboard/delivery-declarations', key: 'recycler-declarations' },
             { icon: FolderCheck, label: 'إصدار شهادات التدوير', path: '/dashboard/issue-recycling-certificates', badge: sectionBadges['issue-certs'], key: 'issue-certs' },
           ]
         } as SidebarMenuItem]
@@ -333,6 +336,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           icon: Package, label: 'الشحنات والشهادات', path: '#', key: 'generator-ops-group', badge: sectionBadges['generator-ops-group'], children: [
             { icon: Package, label: 'الشحنات', path: '/dashboard/shipments', badge: sectionBadges['generator-shipments'], key: 'generator-shipments' },
             { icon: FileText, label: 'شهادات استلام الشحنات', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
+            { icon: FileCheck, label: 'إقرارات التسليم', path: '/dashboard/delivery-declarations', key: 'generator-declarations' },
             { icon: FolderCheck, label: 'شهادات إعادة التدوير', path: '/dashboard/recycling-certificates', badge: sectionBadges['generator-certs'], key: 'generator-certs' },
           ]
         } as SidebarMenuItem]),
