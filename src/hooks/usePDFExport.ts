@@ -23,13 +23,37 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       scale = 2,
     } = options;
 
+    // A4 margins in mm
+    const marginMM = 10;
+
+    // Temporarily apply A4-like width constraint for accurate capture
+    const originalStyle = element.style.cssText;
+    element.style.width = '794px'; // A4 at 96dpi
+    element.style.maxWidth = '794px';
+    element.style.padding = '32px';
+    element.style.boxSizing = 'border-box';
+    element.style.backgroundColor = '#ffffff';
+
+    // Hide no-print elements
+    const noPrintEls = element.querySelectorAll('.no-print');
+    noPrintEls.forEach(el => (el as HTMLElement).style.display = 'none');
+
+    // Wait for reflow
+    await new Promise(r => setTimeout(r, 100));
+
     const canvas = await html2canvas(element, {
       scale,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
+      width: 794,
+      windowWidth: 794,
     });
+
+    // Restore original styles
+    element.style.cssText = originalStyle;
+    noPrintEls.forEach(el => (el as HTMLElement).style.display = '');
 
     const pdf = new jsPDF({
       orientation,
@@ -39,22 +63,24 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
+    const contentWidth = pageWidth - marginMM * 2;
+    const contentHeight = pageHeight - marginMM * 2;
 
     const imgData = canvas.toDataURL('image/png');
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    const imgWidth = contentWidth;
+    const imgHeight = (canvas.height * contentWidth) / canvas.width;
 
     let heightLeft = imgHeight;
     let position = 0;
 
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
+    heightLeft -= contentHeight;
 
     while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
+      position = -(imgHeight - heightLeft);
       pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
+      heightLeft -= contentHeight;
     }
 
     return pdf;
@@ -152,11 +178,16 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     const defaultPrintStyles = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
       @page { size: A4; margin: 10mm; }
-      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-      body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; }
-      .print-container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 10mm; box-sizing: border-box; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; box-sizing: border-box; }
+      body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; direction: rtl; }
+      .print-container { width: 190mm; max-width: 190mm; margin: 0 auto; padding: 5mm; box-sizing: border-box; }
+      .no-print { display: none !important; }
       img { max-width: 100%; height: auto; }
-      @media print { body { margin: 0; padding: 0; } .no-print { display: none !important; } }
+      table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
+      th, td { padding: 4px 8px; border: 1px solid #ddd; text-align: right; font-size: 11px; }
+      h1, h2, h3, h4, h5, h6 { page-break-after: avoid; }
+      @media print { body { margin: 0; padding: 0; } }
     `;
 
     const content = element.outerHTML;
