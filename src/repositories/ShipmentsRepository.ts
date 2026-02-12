@@ -130,7 +130,7 @@ export const ShipmentsRepository = {
       try {
         const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
         
-        if (status === 'in_transit' && shipment.generator_id) {
+        if ((status === 'approved' || status === 'registered') && shipment.generator_id) {
           await autoCreateGeneratorDeclaration(id, shipment.generator_id, userId);
         }
         if ((status === 'delivered' || status === 'confirmed') && shipment.recycler_id) {
