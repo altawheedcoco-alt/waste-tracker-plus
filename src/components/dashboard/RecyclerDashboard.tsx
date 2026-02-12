@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2 } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import FacilityDashboardHeader from './shared/FacilityDashboardHeader';
+import FacilityCapacityCard from './shared/FacilityCapacityCard';
 import StatsCardsGrid, { StatCardItem } from './shared/StatsCardsGrid';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
@@ -25,11 +26,11 @@ import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
-import { AlertCircle, Eye } from 'lucide-react';
 import LegalComplianceWidget from '@/components/dashboard/generator/LegalComplianceWidget';
 import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
 import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
+import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 
 interface RecentShipment {
   id: string;
@@ -68,12 +69,28 @@ interface RecentShipment {
 const RecyclerDashboard = () => {
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
+
+  // Fetch recycler facility (if registered as facility)
+  const { data: facility } = useQuery({
+    queryKey: ['recycler-facility', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return null;
+      const { data } = await supabase
+        .from('disposal_facilities')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .single();
+      return data;
+    },
+    enabled: !!organization?.id
+  });
 
   // Realtime subscription
   useEffect(() => {
@@ -151,22 +168,31 @@ const RecyclerDashboard = () => {
     fetchDashboardData();
     queryClient.invalidateQueries({ queryKey: ['recycler-incoming'] });
     queryClient.invalidateQueries({ queryKey: ['recycler-awaiting-confirm'] });
+    queryClient.invalidateQueries({ queryKey: ['recycler-facility'] });
   };
 
   return (
     <div className="space-y-6">
       <StoryCircles />
+
       <FacilityDashboardHeader
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
         orgLabel="الجهة المدورة"
         icon={Recycle}
         iconGradient="from-emerald-500 to-green-600"
+        facility={facility}
         onSmartWeightUpload={() => setShowSmartWeightUpload(true)}
         onRefresh={handleRefresh}
       />
 
+      {/* Facility Capacity - from disposal */}
+      {facility && <FacilityCapacityCard facility={facility} />}
+
       <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
+
+      {/* Automation Toggle - from disposal */}
+      <AutomationSettingsDialog organizationType="recycler" />
 
       <DailyOperationsSummary />
       <OperationalAlertsWidget />
@@ -205,7 +231,7 @@ const RecyclerDashboard = () => {
                 shipments={recentShipments.map(s => ({ id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type }))}
                 onStatusChange={handleRefresh}
               />
-              <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard/shipments'}>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
                 <Eye className="ml-2 h-4 w-4" />
                 عرض الكل
               </Button>
@@ -213,9 +239,9 @@ const RecyclerDashboard = () => {
             <div className="text-right">
               <CardTitle className="flex items-center gap-2 justify-end">
                 <Recycle className="w-5 h-5" />
-                الشحنات الواردة
+                الشحنات الواردة للتدوير
               </CardTitle>
-              <CardDescription>آخر 10 شحنات واردة إلى منشأتك</CardDescription>
+              <CardDescription>آخر 10 شحنات واردة إلى منشأة التدوير</CardDescription>
             </div>
           </div>
         </CardHeader>
