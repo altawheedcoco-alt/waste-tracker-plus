@@ -18,7 +18,8 @@ import {
   Lock,
   Zap,
   Brush,
-  MessageSquare
+  MessageSquare,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -39,6 +40,8 @@ import PinCodeSettings from '@/components/security/PinCodeSettings';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import AdvancedAppearanceSettings from '@/components/settings/AdvancedAppearanceSettings';
 import NotificationChannelsSettings from '@/components/settings/NotificationChannelsSettings';
+import LanguageSettings from '@/components/settings/LanguageSettings';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -123,6 +126,7 @@ const Settings = () => {
   } = useThemeSettings();
 
   const { organization } = useAuth();
+  const { t } = useLanguage();
   const isTransporter = organization?.organization_type === 'transporter';
 
   const applyPreset = (preset: typeof themePresets[0]) => {
@@ -139,70 +143,79 @@ const Settings = () => {
         <div className="flex items-center gap-3">
           <BackButton />
           <div>
-            <h1 className="text-2xl font-bold">الإعدادات</h1>
-            <p className="text-muted-foreground">تخصيص مظهر وإعدادات لوحة التحكم</p>
+            <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
+            <p className="text-muted-foreground">{t('settings.subtitle')}</p>
           </div>
         </div>
         <Button variant="outline" onClick={resetToDefaults}>
           <RotateCcw className="h-4 w-4 ml-2" />
-          استعادة الافتراضي
+          {t('settings.resetDefault')}
         </Button>
       </div>
 
       <Tabs defaultValue="themes" className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid overflow-x-auto",
-          isTransporter ? "grid-cols-11" : "grid-cols-10"
+          isTransporter ? "grid-cols-12" : "grid-cols-11"
         )}>
+          <TabsTrigger value="language" className="gap-2">
+            <Globe className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('settings.language')}</span>
+          </TabsTrigger>
           <TabsTrigger value="themes" className="gap-2">
             <Sparkles className="h-4 w-4" />
-            <span className="hidden sm:inline">ثيمات جاهزة</span>
+            <span className="hidden sm:inline">{t('settings.themes')}</span>
           </TabsTrigger>
           <TabsTrigger value="colors" className="gap-2">
             <Palette className="h-4 w-4" />
-            <span className="hidden sm:inline">الألوان</span>
+            <span className="hidden sm:inline">{t('settings.colors')}</span>
           </TabsTrigger>
           <TabsTrigger value="typography" className="gap-2">
             <Type className="h-4 w-4" />
-            <span className="hidden sm:inline">الخطوط</span>
+            <span className="hidden sm:inline">{t('settings.typography')}</span>
           </TabsTrigger>
           <TabsTrigger value="display" className="gap-2">
             <Eye className="h-4 w-4" />
-            <span className="hidden sm:inline">العرض</span>
+            <span className="hidden sm:inline">{t('settings.display')}</span>
           </TabsTrigger>
           {isTransporter && (
             <TabsTrigger value="advanced-appearance" className="gap-2">
               <Brush className="h-4 w-4" />
-              <span className="hidden sm:inline">الهوية البصرية</span>
+              <span className="hidden sm:inline">{t('settings.advancedAppearance')}</span>
             </TabsTrigger>
           )}
           <TabsTrigger value="sounds" className="gap-2">
             <Volume2 className="h-4 w-4" />
-            <span className="hidden sm:inline">الأصوات</span>
+            <span className="hidden sm:inline">{t('settings.sounds')}</span>
           </TabsTrigger>
           <TabsTrigger value="automation" className="gap-2">
             <Zap className="h-4 w-4" />
-            <span className="hidden sm:inline">الأتمتة</span>
+            <span className="hidden sm:inline">{t('settings.automation')}</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="gap-2">
             <Lock className="h-4 w-4" />
-            <span className="hidden sm:inline">الأمان</span>
+            <span className="hidden sm:inline">{t('settings.security')}</span>
           </TabsTrigger>
           {isTransporter && (
             <TabsTrigger value="visibility" className="gap-2">
               <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">الصلاحيات</span>
+              <span className="hidden sm:inline">{t('settings.visibility')}</span>
             </TabsTrigger>
           )}
           <TabsTrigger value="notifications-channels" className="gap-2">
             <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">قنوات الإشعارات</span>
+            <span className="hidden sm:inline">{t('settings.notificationChannels')}</span>
           </TabsTrigger>
           <TabsTrigger value="terms" className="gap-2">
             <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">الشروط والأحكام</span>
+            <span className="hidden sm:inline">{t('settings.terms')}</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Language Tab */}
+        <TabsContent value="language" className="space-y-6">
+          <LanguageSettings />
+        </TabsContent>
 
         {/* Theme Presets Tab */}
         <TabsContent value="themes" className="space-y-6">
