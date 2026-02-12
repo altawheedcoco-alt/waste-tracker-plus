@@ -128,6 +128,7 @@ const EInvoice = lazy(() => import("./pages/dashboard/EInvoice"));
 const CustomerPortal = lazy(() => import("./pages/dashboard/CustomerPortal"));
 const OnboardingReview = lazy(() => import("./pages/dashboard/OnboardingReview"));
 const Stories = lazy(() => import("./pages/dashboard/Stories"));
+const DeliveryDeclarations = lazy(() => import("./pages/dashboard/DeliveryDeclarations"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -283,6 +284,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/create-receipt" element={<CreateReceipt />} />
         <Route path="/dashboard/generator-receipts" element={<GeneratorReceipts />} />
         <Route path="/dashboard/guilloche-patterns" element={<GuillochePatterns />} />
+        <Route path="/dashboard/delivery-declarations" element={<DeliveryDeclarations />} />
         <Route path="/dashboard/smart-insights" element={<SmartInsights />} />
         <Route path="/dashboard/award-letters" element={<AwardLetters />} />
         <Route path="/dashboard/operations" element={<OperationsDashboard />} />
