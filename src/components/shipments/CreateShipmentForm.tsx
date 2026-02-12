@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame } from 'lucide-react';
+import GeneratorHandoverDialog from './GeneratorHandoverDialog';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
@@ -59,9 +60,15 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
     fetchDriverCurrentLocation,
     navigate,
     organization,
+    createdShipment,
+    setCreatedShipment,
   } = useCreateShipment();
 
+  const isGeneratorOrg = organization?.organization_type === 'generator';
+  const showHandoverDialog = isGeneratorOrg && !!createdShipment;
+
   return (
+    <>
     <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-6">
       {/* Pinned Parties Controls - for transporters */}
       {organization?.organization_type === 'transporter' && (
@@ -660,6 +667,41 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
         </Button>
       </div>
     </form>
+
+    {showHandoverDialog && createdShipment && (
+      <GeneratorHandoverDialog
+        open={showHandoverDialog}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCreatedShipment(null);
+            if (onSuccess) {
+              onSuccess();
+            } else {
+              navigate('/dashboard/shipments');
+            }
+          }
+        }}
+        shipment={{
+          id: createdShipment.id,
+          shipment_number: createdShipment.shipment_number,
+          waste_type: createdShipment.waste_type || '',
+          quantity: createdShipment.quantity || 0,
+          unit: createdShipment.unit,
+          transporter_name: createdShipment.transporter_name,
+          recycler_name: createdShipment.recycler_name,
+          disposal_name: createdShipment.disposal_name,
+        }}
+        onConfirmed={() => {
+          setCreatedShipment(null);
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            navigate('/dashboard/shipments');
+          }
+        }}
+      />
+    )}
+    </>
   );
 };
 

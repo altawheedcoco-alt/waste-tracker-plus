@@ -147,9 +147,13 @@ const DeliveryDeclarations = () => {
                       <Badge variant="outline" className="font-mono text-xs">
                         {declaration.shipment_number || 'غير محدد'}
                       </Badge>
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                      <Badge className={
+                        declaration.declaration_type === 'generator_handover'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                          : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      }>
                         <FileCheck className="w-3 h-3 ml-1" />
-                        موقع
+                        {declaration.declaration_type === 'generator_handover' ? 'إقرار مولّد' : 'إقرار ناقل'}
                       </Badge>
                       <span className="font-semibold">{declaration.driver_name || 'سائق غير محدد'}</span>
                     </div>
