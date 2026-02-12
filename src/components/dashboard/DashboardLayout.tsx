@@ -271,15 +271,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Bookmark, label: 'المواقع المحفوظة', path: '/dashboard/saved-locations', key: 'driver-saved-locations' },
       { icon: Search, label: 'الخريطة', path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
     ]},
-    { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
-    { icon: MessageCircle, label: 'التواصل', path: '#', key: 'driver-comm-group', children: [
+    { icon: Send, label: 'الطلبات والتواصل', path: '#', key: 'driver-requests-comm-group', children: [
+      { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'driver-requests' },
       { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'driver-chat' },
       { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'driver-stories' },
     ]},
-    { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'driver-support' },
-    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
-    { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'driver-about' },
-    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'driver-settings' },
+    { icon: Settings, label: 'النظام والدعم', path: '#', key: 'driver-system-group', children: [
+      { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'driver-support' },
+      { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
+      { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'driver-about' },
+      { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'driver-settings' },
+    ]},
   ];
 
   // Full menu items for organizations and admins - with unique keys (GROUPED)
@@ -377,16 +379,22 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: MessageCircle, label: 'المحادثات', path: '/dashboard/chat', key: 'chat' },
       { icon: CircleDot, label: 'الحالات', path: '/dashboard/stories', key: 'stories' },
     ]},
-    { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'my-requests' },
-    { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
-    { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
-    { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
-    { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
-    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
-    { icon: Activity, label: 'حالة نظامك', path: '/dashboard/system-status', key: 'all-system-status' },
-    { icon: WifiOff, label: 'وضع عدم الاتصال', path: '/dashboard/offline-mode', key: 'offline-mode' },
-    { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
-    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
+    // Requests & Regulatory group
+    { icon: Send, label: 'الطلبات والتنظيم', path: '#', key: 'requests-reg-group', children: [
+      { icon: Send, label: 'طلباتي', path: '/dashboard/my-requests', key: 'my-requests' },
+      { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
+      { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
+      { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', key: 'partner-accounts' },
+    ]},
+    // System & Support group
+    { icon: Settings, label: 'النظام والدعم', path: '#', key: 'system-support-group', children: [
+      { icon: Headphones, label: 'الدعم الفني', path: '/dashboard/support', key: 'support' },
+      { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
+      { icon: Activity, label: 'حالة نظامك', path: '/dashboard/system-status', key: 'all-system-status' },
+      { icon: WifiOff, label: 'وضع عدم الاتصال', path: '/dashboard/offline-mode', key: 'offline-mode' },
+      { icon: Info, label: 'عن المنصة', path: '/dashboard/about-platform', key: 'about-platform' },
+      { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', key: 'settings' },
+    ]},
   ];
 
   // Use driver menu if user is a driver (not admin)
