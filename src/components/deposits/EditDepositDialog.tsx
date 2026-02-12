@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import BankBranchSelector from './BankBranchSelector';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -544,34 +545,14 @@ export default function EditDepositDialog({
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="bankName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>اسم البنك</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="مثال: البنك الأهلي" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <BankBranchSelector
+                    bankName={form.watch('bankName') || ''}
+                    branchName={form.watch('branchName') || ''}
+                    onBankChange={(val) => form.setValue('bankName', val)}
+                    onBranchChange={(val) => form.setValue('branchName', val)}
+                  />
 
-                    <FormField
-                      control={form.control}
-                      name="branchName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>اسم الفرع</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="مثال: فرع مدينة نصر" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
 
                     <FormField
                       control={form.control}
