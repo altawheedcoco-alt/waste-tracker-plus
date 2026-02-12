@@ -19,7 +19,7 @@ export default {
   				'sans-serif'
   			],
   			sans: [
-  				'Inter',
+  				'Work Sans',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -41,7 +41,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'Space Mono',
+  				'Inconsolata',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
@@ -158,7 +158,7 @@ export default {
   					transform: 'scale(1)'
   				}
   			},
-  			'float': {
+  			float: {
   				'0%, 100%': {
   					transform: 'translateY(0)'
   				},
@@ -181,7 +181,7 @@ export default {
   			'fade-in': 'fade-in 0.6s ease-out forwards',
   			'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
   			'scale-in': 'scale-in 0.5s ease-out forwards',
-  			'float': 'float 3s ease-in-out infinite',
+  			float: 'float 3s ease-in-out infinite',
   			'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
   		},
   		boxShadow: {
