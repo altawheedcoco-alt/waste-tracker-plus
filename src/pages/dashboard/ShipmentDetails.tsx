@@ -6,6 +6,7 @@ import { fetchShipmentByIdOrNumber, EnrichedShipment } from '@/hooks/useShipment
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimeline';
+import ShipmentDocumentsTimeline from '@/components/shipments/ShipmentDocumentsTimeline';
 import ShipmentProgressLogs from '@/components/shipments/ShipmentProgressLogs';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
@@ -287,6 +288,9 @@ const ShipmentDetailsPage = () => {
 
         {/* Status Timeline */}
         <ShipmentStatusTimeline shipment={shipment} />
+
+        {/* Documents Chain Timeline */}
+        <ShipmentDocumentsTimeline shipment={shipment} onRefresh={fetchShipmentDetails} />
 
         {/* Progress Logs - Auto-recorded milestones */}
         <ShipmentProgressLogs shipmentId={shipment.id} maxHeight={350} />
