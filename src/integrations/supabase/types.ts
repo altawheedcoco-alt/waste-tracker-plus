@@ -2670,6 +2670,7 @@ export type Database = {
       }
       delivery_declarations: {
         Row: {
+          auto_generated: boolean
           created_at: string
           declaration_text: string
           declaration_type: string
@@ -2684,14 +2685,19 @@ export type Database = {
           ip_address: string | null
           quantity: number | null
           recycler_name: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           shipment_id: string
           shipment_number: string | null
+          status: string
           transporter_name: string | null
           unit: string | null
           user_agent: string | null
           waste_type: string | null
         }
         Insert: {
+          auto_generated?: boolean
           created_at?: string
           declaration_text: string
           declaration_type?: string
@@ -2706,14 +2712,19 @@ export type Database = {
           ip_address?: string | null
           quantity?: number | null
           recycler_name?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           shipment_id: string
           shipment_number?: string | null
+          status?: string
           transporter_name?: string | null
           unit?: string | null
           user_agent?: string | null
           waste_type?: string | null
         }
         Update: {
+          auto_generated?: boolean
           created_at?: string
           declaration_text?: string
           declaration_type?: string
@@ -2728,8 +2739,12 @@ export type Database = {
           ip_address?: string | null
           quantity?: number | null
           recycler_name?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           shipment_id?: string
           shipment_number?: string | null
+          status?: string
           transporter_name?: string | null
           unit?: string | null
           user_agent?: string | null
