@@ -85,6 +85,14 @@ const DriverDashboard = () => {
   const [showNavigationView, setShowNavigationView] = useState(false);
   const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<Shipment | null>(null);
 
+  const quickActions = useQuickActions({
+    type: 'driver',
+    handlers: {
+      openLiveMap: () => handleOpenLiveMap(),
+      openSettings: () => setShowSettingsDialog(true),
+    },
+  });
+
   const handleLocationSuccess = (location: { lat: number; lng: number }) => {
     setLastLocationUpdate(new Date());
   };
@@ -371,13 +379,7 @@ const DriverDashboard = () => {
 
       {/* Quick Actions Grid */}
       <QuickActionsGrid
-        actions={useQuickActions({
-          type: 'driver',
-          handlers: {
-            openLiveMap: () => handleOpenLiveMap(),
-            openSettings: () => setShowSettingsDialog(true),
-          },
-        })}
+        actions={quickActions}
         title="الإجراءات السريعة"
         subtitle="الوظائف المستخدمة بكثرة"
       />
