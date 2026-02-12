@@ -18,14 +18,12 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Get current user
     const userClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user }, error: userErr } = await userClient.auth.getUser();
     if (userErr || !user) throw new Error('Unauthorized');
 
-    // Get user profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, organization_id, full_name')
@@ -34,7 +32,6 @@ Deno.serve(async (req) => {
 
     if (!profile?.organization_id) throw new Error('No organization');
 
-    // Get current org
     const { data: currentOrg } = await supabase
       .from('organizations')
       .select('id, name, organization_type')
@@ -45,13 +42,14 @@ Deno.serve(async (req) => {
 
     const report: any[] = [];
     const now = new Date();
-    const addReport = (step: string, details: string, entity?: string) => {
-      report.push({ 
-        timestamp: new Date().toISOString(), 
-        step, 
-        details, 
+    const addReport = (step: string, details: string, entity?: string, scenario?: string) => {
+      report.push({
+        timestamp: new Date().toISOString(),
+        step,
+        details,
         entity: entity || 'النظام',
         icon: getIcon(step),
+        scenario: scenario || '',
       });
     };
 
@@ -63,12 +61,14 @@ Deno.serve(async (req) => {
       if (step.includes('حالة')) return '🔄';
       if (step.includes('إقرار')) return '📝';
       if (step.includes('سجل')) return '📋';
+      if (step.includes('تخلص') || step.includes('مدفن')) return '🏭';
+      if (step.includes('تدوير')) return '♻️';
       return '✅';
     }
 
-    addReport('بدء التجربة', `بدأ ${profile.full_name} تجربة افتراضية كاملة`, profile.full_name || 'المستخدم');
+    addReport('بدء التجربة', `بدأ ${profile.full_name} تجربة افتراضية كاملة (سيناريوهين)`, profile.full_name || 'المستخدم');
 
-    // ─── 1. Create Demo Organizations ───
+    // ─── 1. Ensure Demo Organizations ───
     const orgTypes = ['generator', 'transporter', 'recycler', 'disposal'];
     const orgNames: Record<string, { ar: string; en: string }> = {
       generator: { ar: 'شركة المولد التجريبية', en: 'Demo Generator Co' },
@@ -78,15 +78,12 @@ Deno.serve(async (req) => {
     };
 
     const demoOrgs: Record<string, string> = {};
-    
-    // Use existing org for its type, create others
     demoOrgs[currentOrg.organization_type] = currentOrg.id;
     addReport('تعيين الجهة الحالية', `تم تعيين "${currentOrg.name}" كـ ${getTypeLabel(currentOrg.organization_type)}`, currentOrg.name);
 
     for (const type of orgTypes) {
       if (type === currentOrg.organization_type) continue;
 
-      // Check if demo org already exists
       const { data: existing } = await supabase
         .from('organizations')
         .select('id, name')
@@ -128,18 +125,16 @@ Deno.serve(async (req) => {
       demoOrgs[type] = newOrg!.id;
       addReport('إنشاء منظمة جديدة', `تم إنشاء "${newOrg!.name}" (${getTypeLabel(type)})`, newOrg!.name);
 
-      // Seed org structure
       const { error: seedErr } = await supabase.rpc('seed_org_structure', {
         p_org_id: newOrg!.id,
         p_org_type: type,
       });
-
       if (!seedErr) {
-        addReport('إنشاء هيكل تنظيمي', `تم بذر الهيكل التنظيمي الافتراضي لـ "${newOrg!.name}"`, newOrg!.name);
+        addReport('إنشاء هيكل تنظيمي', `تم بذر الهيكل التنظيمي لـ "${newOrg!.name}"`, newOrg!.name);
       }
     }
 
-    // ─── 2. Seed current org structure if empty ───
+    // Seed current org structure if empty
     const { data: existingDepts } = await supabase
       .from('organization_departments')
       .select('id')
@@ -156,10 +151,8 @@ Deno.serve(async (req) => {
       addReport('هيكل تنظيمي موجود', `الهيكل التنظيمي لـ "${currentOrg.name}" موجود مسبقاً`, currentOrg.name);
     }
 
-    // ─── 3. Create Demo Driver ───
+    // ─── 2. Ensure Demo Driver ───
     let driverIdToUse: string | null = null;
-
-    // Check existing drivers
     const { data: existingDrivers } = await supabase
       .from('drivers')
       .select('id')
@@ -170,7 +163,6 @@ Deno.serve(async (req) => {
       driverIdToUse = existingDrivers[0].id;
       addReport('سائق موجود', 'تم العثور على سائق مسجل لشركة النقل', 'السائق');
     } else {
-      // Create a demo driver profile via auth
       const demoDriverEmail = `demo-driver-${Date.now()}@demo.test`;
       const { data: driverAuth, error: driverAuthErr } = await supabase.auth.admin.createUser({
         email: demoDriverEmail,
@@ -180,30 +172,21 @@ Deno.serve(async (req) => {
       });
 
       if (!driverAuthErr && driverAuth?.user) {
-        // Update profile
-        await supabase
-          .from('profiles')
-          .update({
-            full_name: 'سائق تجريبي - أحمد محمد',
-            organization_id: demoOrgs.transporter,
-            phone: '01099999999',
-          })
-          .eq('id', driverAuth.user.id);
+        await supabase.from('profiles').update({
+          full_name: 'سائق تجريبي - أحمد محمد',
+          organization_id: demoOrgs.transporter,
+          phone: '01099999999',
+        }).eq('user_id', driverAuth.user.id);
 
-        // Create driver record
-        const { data: driverRec } = await supabase
-          .from('drivers')
-          .insert({
-            profile_id: driverAuth.user.id,
-            organization_id: demoOrgs.transporter,
-            license_number: `DL-DEMO-${Date.now()}`,
-            license_expiry: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            vehicle_type: 'شاحنة نقل مخلفات',
-            vehicle_plate: 'ط ج ر 1234',
-            is_available: true,
-          })
-          .select('id')
-          .single();
+        const { data: driverRec } = await supabase.from('drivers').insert({
+          profile_id: driverAuth.user.id,
+          organization_id: demoOrgs.transporter,
+          license_number: `DL-DEMO-${Date.now()}`,
+          license_expiry: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          vehicle_type: 'شاحنة نقل مخلفات',
+          vehicle_plate: 'ط ج ر 1234',
+          is_available: true,
+        }).select('id').single();
 
         if (driverRec) {
           driverIdToUse = driverRec.id;
@@ -212,124 +195,233 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ─── 4. Create Demo Shipment ───
-    const shipmentNumber = `DEMO-${Date.now().toString(36).toUpperCase()}`;
-    const baseTime = new Date(now.getTime() - 4 * 60 * 60 * 1000); // 4 hours ago
+    // ─── Get a disposal facility ───
+    const { data: disposalFacility } = await supabase
+      .from('disposal_facilities')
+      .select('id, name')
+      .limit(1)
+      .maybeSingle();
 
-    const { data: shipment, error: shipErr } = await supabase
-      .from('shipments')
-      .insert({
-        shipment_number: shipmentNumber,
-        generator_id: demoOrgs.generator,
-        transporter_id: demoOrgs.transporter,
-        recycler_id: demoOrgs.recycler,
-        disposal_facility_id: null,
-        driver_id: driverIdToUse,
-        created_by: user.id,
-        waste_type: 'metal',
-        waste_description: 'مخلفات معدنية صناعية - تجربة افتراضية كاملة',
-        quantity: 15.5,
-        unit: 'ton',
-        status: 'confirmed',
-        pickup_address: 'المنطقة الصناعية - 6 أكتوبر',
-        delivery_address: 'مركز إعادة التدوير - العاشر من رمضان',
-        pickup_city: 'السادس من أكتوبر',
-        delivery_city: 'العاشر من رمضان',
-        pickup_latitude: 29.9773,
-        pickup_longitude: 31.1346,
-        delivery_latitude: 30.2957,
-        delivery_longitude: 31.7564,
-        pickup_date: baseTime.toISOString(),
-        expected_delivery_date: new Date(baseTime.getTime() + 6 * 60 * 60 * 1000).toISOString(),
-        packaging_method: 'حاويات مغلقة',
-        hazard_level: 'low',
-        waste_state: 'solid',
-        shipment_type: 'transport_and_recycle',
-        weight_at_source: 15500,
-        weight_at_destination: 15480,
-        actual_weight: 15480,
-        price_per_unit: 250,
-        total_value: 3875,
-        payment_status: 'paid',
-        approved_at: new Date(baseTime.getTime() + 15 * 60 * 1000).toISOString(),
-        in_transit_at: new Date(baseTime.getTime() + 30 * 60 * 1000).toISOString(),
-        delivered_at: new Date(baseTime.getTime() + 3 * 60 * 60 * 1000).toISOString(),
-        confirmed_at: new Date(baseTime.getTime() + 3.5 * 60 * 60 * 1000).toISOString(),
-        compliance_verified: true,
-        gps_active_throughout: true,
-        custody_chain_complete: true,
-        generator_approval_status: 'approved',
-        generator_approval_at: new Date(baseTime.getTime() + 10 * 60 * 1000).toISOString(),
-        recycler_approval_status: 'approved',
-        recycler_approval_at: new Date(baseTime.getTime() + 20 * 60 * 1000).toISOString(),
-      })
-      .select('id, shipment_number')
-      .single();
+    // ═══════════════════════════════════════════════════
+    // ─── SCENARIO 1: شحنة إلى المدوّر (Recycler) ───
+    // ═══════════════════════════════════════════════════
+    addReport('═══ السيناريو الأول ═══', 'شحنة نقل وتدوير: من المولد → الناقل → المدوّر', 'النظام', 'recycler');
 
-    if (shipErr) {
-      addReport('خطأ إنشاء الشحنة', shipErr.message);
-      return new Response(JSON.stringify({ success: false, report, error: shipErr.message }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const shipNum1 = `DEMO-R-${Date.now().toString(36).toUpperCase()}`;
+    const base1 = new Date(now.getTime() - 5 * 60 * 60 * 1000);
+
+    const { data: ship1, error: shipErr1 } = await supabase.from('shipments').insert({
+      shipment_number: shipNum1,
+      generator_id: demoOrgs.generator,
+      transporter_id: demoOrgs.transporter,
+      recycler_id: demoOrgs.recycler,
+      disposal_facility_id: null,
+      driver_id: driverIdToUse,
+      created_by: user.id,
+      waste_type: 'plastic',
+      waste_description: 'مخلفات بلاستيكية قابلة للتدوير - بولي إيثيلين عالي الكثافة',
+      quantity: 12.8,
+      unit: 'ton',
+      status: 'confirmed',
+      pickup_address: 'مصنع البلاستيك - المنطقة الصناعية الثالثة، 6 أكتوبر',
+      delivery_address: 'مركز إعادة تدوير البلاستيك - العاشر من رمضان',
+      pickup_city: 'السادس من أكتوبر',
+      delivery_city: 'العاشر من رمضان',
+      pickup_latitude: 29.9773,
+      pickup_longitude: 31.1346,
+      delivery_latitude: 30.2957,
+      delivery_longitude: 31.7564,
+      pickup_date: base1.toISOString(),
+      expected_delivery_date: new Date(base1.getTime() + 5 * 60 * 60 * 1000).toISOString(),
+      packaging_method: 'بالات مضغوطة',
+      hazard_level: 'none',
+      waste_state: 'solid',
+      shipment_type: 'transport_and_recycle',
+      weight_at_source: 12800,
+      weight_at_destination: 12790,
+      actual_weight: 12790,
+      price_per_unit: 180,
+      total_value: 2304,
+      payment_status: 'paid',
+      approved_at: new Date(base1.getTime() + 10 * 60 * 1000).toISOString(),
+      in_transit_at: new Date(base1.getTime() + 25 * 60 * 1000).toISOString(),
+      delivered_at: new Date(base1.getTime() + 3 * 60 * 60 * 1000).toISOString(),
+      confirmed_at: new Date(base1.getTime() + 3.5 * 60 * 60 * 1000).toISOString(),
+      compliance_verified: true,
+      gps_active_throughout: true,
+      custody_chain_complete: true,
+      generator_approval_status: 'approved',
+      generator_approval_at: new Date(base1.getTime() + 5 * 60 * 1000).toISOString(),
+      recycler_approval_status: 'approved',
+      recycler_approval_at: new Date(base1.getTime() + 15 * 60 * 1000).toISOString(),
+    }).select('id, shipment_number').single();
+
+    if (shipErr1) {
+      addReport('خطأ إنشاء شحنة التدوير', shipErr1.message, 'النظام', 'recycler');
+    } else {
+      addReport('إنشاء شحنة التدوير', `شحنة رقم ${shipNum1} — 12.8 طن بلاستيك HDPE`, 'الشحنة', 'recycler');
+
+      // Lifecycle logs for recycler scenario
+      const logs1 = [
+        { status: 'new', notes: 'إنشاء طلب شحنة بلاستيك من مصنع البولي إيثيلين', offset: 0, actor: 'المولد' },
+        { status: 'approved', notes: 'موافقة المولد (5 دقائق) + المدوّر (15 دقيقة) - تطابق خطاب الترسية', offset: 15, actor: 'النظام' },
+        { status: 'collecting', notes: 'وصول السائق أحمد محمد لموقع المولد - بدء التحميل والوزن', offset: 25, actor: 'السائق' },
+        { status: 'in_transit', notes: 'تحميل 12.8 طن في بالات مضغوطة - صورة ميزان المصدر ✅ - بدء النقل', offset: 40, actor: 'السائق' },
+        { status: 'delivered', notes: 'وصول لمركز التدوير - وزن الاستلام 12,790 كجم - فارق 0.08% مقبول', offset: 180, actor: 'السائق' },
+        { status: 'confirmed', notes: 'تأكيد المدوّر للاستلام - فحص الجودة مطابق - إصدار شهادة تدوير', offset: 210, actor: 'المدوّر' },
+      ];
+      for (const log of logs1) {
+        await supabase.from('shipment_logs').insert({
+          shipment_id: ship1!.id, status: log.status as any, notes: log.notes,
+          changed_by: user.id,
+          created_at: new Date(base1.getTime() + log.offset * 60 * 1000).toISOString(),
+        });
+        addReport(`سجل حالة: ${getStatusLabel(log.status)}`, log.notes, log.actor, 'recycler');
+      }
+
+      // Delivery declaration
+      await supabase.from('delivery_declarations').insert({
+        shipment_id: ship1!.id,
+        declared_by: user.id,
+        declaration_text: `أقر أنا السائق بتسليم شحنة البلاستيك رقم ${shipNum1} كاملة إلى مركز التدوير وأن البضاعة مطابقة للمواصفات.`,
+        agreed_at: new Date(base1.getTime() + 180 * 60 * 1000).toISOString(),
+        ip_address: '192.168.1.10',
+        device_info: 'Demo - سيناريو التدوير',
+        digital_signature: `DEMO-R-SIG-${ship1!.id.substring(0, 8)}`,
       });
+      addReport('إقرار تسليم التدوير', 'توقيع إقرار التسليم رقمياً - سلسلة الحيازة مكتملة', 'السائق', 'recycler');
     }
 
-    addReport('إنشاء شحنة تجريبية', `تم إنشاء الشحنة رقم ${shipmentNumber} (15.5 طن مخلفات صناعية)`, 'الشحنة');
+    // ═══════════════════════════════════════════════════════
+    // ─── SCENARIO 2: شحنة إلى التخلص النهائي (Disposal) ───
+    // ═══════════════════════════════════════════════════════
+    addReport('═══ السيناريو الثاني ═══', 'شحنة نقل وتخلص نهائي: من المولد → الناقل → مرفق التخلص', 'النظام', 'disposal');
 
-    // ─── 5. Create Shipment Lifecycle Logs ───
-    const lifecycleLogs = [
-      { status: 'new', notes: 'تم إنشاء الشحنة من قبل المولد', offset: 0 },
-      { status: 'approved', notes: 'تمت الموافقة على الشحنة من جميع الأطراف', offset: 15 },
-      { status: 'collecting', notes: 'بدأ السائق في جمع الشحنة من موقع المولد', offset: 30 },
-      { status: 'in_transit', notes: 'الشحنة في الطريق - تم التحميل بنجاح وبدأ النقل', offset: 45 },
-      { status: 'delivered', notes: 'تم تسليم الشحنة في مركز التدوير - وزن الاستلام 15,480 كجم', offset: 180 },
-      { status: 'confirmed', notes: 'تم تأكيد استلام الشحنة ومطابقة الأوزان - فارق 0.13% مقبول', offset: 210 },
-    ];
+    const shipNum2 = `DEMO-D-${Date.now().toString(36).toUpperCase()}`;
+    const base2 = new Date(now.getTime() - 3 * 60 * 60 * 1000);
 
-    for (const log of lifecycleLogs) {
-      await supabase.from('shipment_logs').insert({
-        shipment_id: shipment!.id,
-        status: log.status as any,
-        notes: log.notes,
-        changed_by: user.id,
-        created_at: new Date(baseTime.getTime() + log.offset * 60 * 1000).toISOString(),
+    const { data: ship2, error: shipErr2 } = await supabase.from('shipments').insert({
+      shipment_number: shipNum2,
+      generator_id: demoOrgs.generator,
+      transporter_id: demoOrgs.transporter,
+      recycler_id: null,
+      disposal_facility_id: disposalFacility?.id || null,
+      driver_id: driverIdToUse,
+      created_by: user.id,
+      waste_type: 'chemical',
+      waste_description: 'مخلفات كيميائية خطرة - مذيبات عضوية منتهية الصلاحية',
+      quantity: 5.2,
+      unit: 'ton',
+      status: 'confirmed',
+      pickup_address: 'مصنع الدهانات والكيماويات - المنطقة الصناعية، برج العرب',
+      delivery_address: disposalFacility ? `${disposalFacility.name}` : 'مدفن أبو زعبل الصحي',
+      pickup_city: 'برج العرب',
+      delivery_city: 'أبو زعبل',
+      pickup_latitude: 31.0088,
+      pickup_longitude: 29.7533,
+      delivery_latitude: 30.2781,
+      delivery_longitude: 31.3727,
+      pickup_date: base2.toISOString(),
+      expected_delivery_date: new Date(base2.getTime() + 4 * 60 * 60 * 1000).toISOString(),
+      packaging_method: 'براميل محكمة الغلق 200 لتر',
+      hazard_level: 'high',
+      waste_state: 'liquid',
+      shipment_type: 'transport_and_dispose',
+      disposal_type: 'incineration',
+      weight_at_source: 5200,
+      weight_at_destination: 5200,
+      actual_weight: 5200,
+      price_per_unit: 450,
+      total_value: 2340,
+      payment_status: 'paid',
+      approved_at: new Date(base2.getTime() + 8 * 60 * 1000).toISOString(),
+      in_transit_at: new Date(base2.getTime() + 20 * 60 * 1000).toISOString(),
+      delivered_at: new Date(base2.getTime() + 2.5 * 60 * 60 * 1000).toISOString(),
+      confirmed_at: new Date(base2.getTime() + 2.8 * 60 * 60 * 1000).toISOString(),
+      compliance_verified: true,
+      gps_active_throughout: true,
+      custody_chain_complete: true,
+      generator_approval_status: 'approved',
+      generator_approval_at: new Date(base2.getTime() + 5 * 60 * 1000).toISOString(),
+    }).select('id, shipment_number').single();
+
+    if (shipErr2) {
+      addReport('خطأ إنشاء شحنة التخلص', shipErr2.message, 'النظام', 'disposal');
+    } else {
+      addReport('إنشاء شحنة التخلص النهائي', `شحنة رقم ${shipNum2} — 5.2 طن مخلفات كيميائية خطرة`, 'الشحنة', 'disposal');
+
+      const logs2 = [
+        { status: 'new', notes: 'إنشاء طلب تخلص من مذيبات عضوية خطرة - تصنيف: خطر عالي 🔴', offset: 0, actor: 'المولد' },
+        { status: 'approved', notes: 'موافقة المولد - التحقق من ترخيص النقل الخطر ✅ ورخصة السائق للمواد الخطرة ✅', offset: 8, actor: 'النظام' },
+        { status: 'collecting', notes: 'وصول السائق - ارتداء معدات الحماية PPE - فحص البراميل (26 برميل × 200 لتر)', offset: 20, actor: 'السائق' },
+        { status: 'in_transit', notes: 'تحميل 5.2 طن في حاوية مخلفات خطرة - تتبع GPS مستمر - سرعة محدودة 60 كم/س', offset: 35, actor: 'السائق' },
+        { status: 'delivered', notes: `وصول لـ ${disposalFacility?.name || 'مدفن أبو زعبل'} - وزن مطابق 5,200 كجم - فحص إشعاعي سلبي`, offset: 150, actor: 'السائق' },
+        { status: 'confirmed', notes: 'تأكيد الاستلام - بدء إجراءات الحرق الآمن - إصدار شهادة تخلص نهائي', offset: 168, actor: 'جهة التخلص' },
+      ];
+      for (const log of logs2) {
+        await supabase.from('shipment_logs').insert({
+          shipment_id: ship2!.id, status: log.status as any, notes: log.notes,
+          changed_by: user.id,
+          created_at: new Date(base2.getTime() + log.offset * 60 * 1000).toISOString(),
+        });
+        addReport(`سجل حالة: ${getStatusLabel(log.status)}`, log.notes, log.actor, 'disposal');
+      }
+
+      // Delivery declaration for disposal
+      await supabase.from('delivery_declarations').insert({
+        shipment_id: ship2!.id,
+        declared_by: user.id,
+        declaration_text: `أقر أنا السائق بتسليم شحنة المخلفات الكيميائية الخطرة رقم ${shipNum2} (26 برميل مذيبات عضوية) كاملة إلى مرفق التخلص النهائي وفقاً لاشتراطات قانون إدارة المخلفات رقم 202 لسنة 2020 ولائحته التنفيذية.`,
+        agreed_at: new Date(base2.getTime() + 150 * 60 * 1000).toISOString(),
+        ip_address: '192.168.1.20',
+        device_info: 'Demo - سيناريو التخلص النهائي',
+        digital_signature: `DEMO-D-SIG-${ship2!.id.substring(0, 8)}`,
       });
-      addReport(`سجل حالة: ${getStatusLabel(log.status)}`, log.notes, getStatusActor(log.status));
+      addReport('إقرار تسليم التخلص', 'توقيع إقرار تسليم المواد الخطرة - Chain of Custody مكتملة', 'السائق', 'disposal');
     }
 
-    // ─── 6. Create Delivery Declaration ───
-    const declarationText = `أقر أنا سائق شركة النقل بأنني قد قمت بتسليم شحنة المخلفات رقم ${shipmentNumber} بالكامل إلى الجهة المستلمة، وأن الشحنة كانت في حالة سليمة ومطابقة للمواصفات المتفق عليها.`;
-
-    await supabase.from('delivery_declarations').insert({
-      shipment_id: shipment!.id,
-      declared_by: user.id,
-      declaration_text: declarationText,
-      agreed_at: new Date(baseTime.getTime() + 180 * 60 * 1000).toISOString(),
-      ip_address: '192.168.1.1',
-      device_info: 'Demo Scenario - تجربة افتراضية',
-      digital_signature: `DEMO-SIG-${shipment!.id.substring(0, 8)}`,
-    });
-    addReport('إقرار التسليم', 'تم توقيع إقرار التسليم رقمياً من السائق', 'السائق');
-
-    // ─── 7. Summary Stats ───
+    // ─── Summary ───
     const summary = {
-      shipmentId: shipment!.id,
-      shipmentNumber: shipment!.shipment_number,
+      scenarios: [
+        {
+          name: 'سيناريو التدوير ♻️',
+          shipmentId: ship1?.id,
+          shipmentNumber: ship1?.shipment_number || shipNum1,
+          destination: 'المدوّر',
+          wasteType: 'بلاستيك HDPE',
+          quantity: '12.8 طن',
+          hazardLevel: 'غير خطر',
+          totalValue: '2,304 ج.م',
+          duration: '3.5 ساعات',
+          weightDiscrepancy: '0.08%',
+          status: shipErr1 ? 'فشل ❌' : 'مكتمل ✅',
+        },
+        {
+          name: 'سيناريو التخلص النهائي 🏭',
+          shipmentId: ship2?.id,
+          shipmentNumber: ship2?.shipment_number || shipNum2,
+          destination: disposalFacility?.name || 'مدفن أبو زعبل',
+          wasteType: 'مذيبات كيميائية خطرة',
+          quantity: '5.2 طن',
+          hazardLevel: 'خطر عالي 🔴',
+          totalValue: '2,340 ج.م',
+          duration: '2.8 ساعات',
+          weightDiscrepancy: '0%',
+          status: shipErr2 ? 'فشل ❌' : 'مكتمل ✅',
+        },
+      ],
       organizations: {
         generator: { id: demoOrgs.generator, name: orgNames.generator?.ar || currentOrg.name, type: 'المولد' },
         transporter: { id: demoOrgs.transporter, name: orgNames.transporter?.ar || currentOrg.name, type: 'الناقل' },
         recycler: { id: demoOrgs.recycler, name: orgNames.recycler?.ar || currentOrg.name, type: 'المدوّر' },
         disposal: { id: demoOrgs.disposal, name: orgNames.disposal?.ar || currentOrg.name, type: 'التخلص النهائي' },
+        disposalFacility: disposalFacility ? { id: disposalFacility.id, name: disposalFacility.name, type: 'مرفق التخلص' } : null,
       },
       driver: driverIdToUse ? 'أحمد محمد' : 'لم يتم التعيين',
-      wasteType: 'مخلفات صناعية',
-      quantity: '15.5 طن',
-      totalValue: '3,875 ج.م',
-      duration: '3.5 ساعات',
-      weightDiscrepancy: '0.13%',
       complianceStatus: 'مكتمل ✅',
     };
 
-    addReport('اكتمال التجربة', `تمت التجربة الافتراضية بنجاح - ${report.length} خطوة تم تنفيذها`, 'النظام');
+    addReport('اكتمال التجربة', `تمت التجربة بنجاح - سيناريوهين، ${report.length} خطوة`, 'النظام');
 
     return new Response(JSON.stringify({ success: true, report, summary }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -343,35 +435,11 @@ Deno.serve(async (req) => {
 });
 
 function getTypeLabel(type: string) {
-  const labels: Record<string, string> = {
-    generator: 'المولد',
-    transporter: 'الناقل',
-    recycler: 'المدوّر',
-    disposal: 'التخلص النهائي',
-  };
+  const labels: Record<string, string> = { generator: 'المولد', transporter: 'الناقل', recycler: 'المدوّر', disposal: 'التخلص النهائي' };
   return labels[type] || type;
 }
 
 function getStatusLabel(status: string) {
-  const labels: Record<string, string> = {
-    new: 'جديدة',
-    approved: 'تمت الموافقة',
-    collecting: 'جاري الجمع',
-    in_transit: 'في الطريق',
-    delivered: 'تم التسليم',
-    confirmed: 'مؤكدة',
-  };
+  const labels: Record<string, string> = { new: 'جديدة', approved: 'تمت الموافقة', collecting: 'جاري الجمع', in_transit: 'في الطريق', delivered: 'تم التسليم', confirmed: 'مؤكدة' };
   return labels[status] || status;
-}
-
-function getStatusActor(status: string) {
-  const actors: Record<string, string> = {
-    new: 'المولد',
-    approved: 'النظام',
-    collecting: 'السائق',
-    in_transit: 'السائق',
-    delivered: 'السائق',
-    confirmed: 'المدوّر',
-  };
-  return actors[status] || 'النظام';
 }
