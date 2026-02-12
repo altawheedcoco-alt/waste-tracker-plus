@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
+import DeliveryDeclarationDialog from './DeliveryDeclarationDialog';
 import {
   Dialog,
   DialogContent,
@@ -65,6 +66,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   const [deliveryPhotoMeta, setDeliveryPhotoMeta] = useState<any>(null);
   const [receivingPhotoUrl, setReceivingPhotoUrl] = useState<string | null>(null);
   const [receivingPhotoMeta, setReceivingPhotoMeta] = useState<any>(null);
+  const [showDeclaration, setShowDeclaration] = useState(false);
   const [recyclerWeight, setRecyclerWeight] = useState('');
   const [geofenceCheck, setGeofenceCheck] = useState<{
     checking: boolean;
@@ -182,6 +184,19 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
       toast.error('يجب رفع صورة إيصال الميزان للمتابعة');
       return;
     }
+
+    // Show delivery declaration for transporter when delivering
+    const dbStatusCheck = mapToDbStatus(selectedStatus as ShipmentStatus);
+    if (organizationType === 'transporter' && ['delivered', 'confirmed'].includes(dbStatusCheck)) {
+      setShowDeclaration(true);
+      return;
+    }
+
+    await executeStatusChange();
+  };
+
+  const executeStatusChange = async () => {
+    if (!selectedStatus) return;
 
     setLoading(true);
     try {
@@ -302,7 +317,13 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     setReceivingPhotoUrl(null);
     setReceivingPhotoMeta(null);
     setRecyclerWeight('');
+    setShowDeclaration(false);
     onClose();
+  };
+
+  const handleDeclarationConfirmed = () => {
+    setShowDeclaration(false);
+    executeStatusChange();
   };
 
   const getPhaseLabel = (phase: 'transporter' | 'recycler' | 'disposal') => {
@@ -360,6 +381,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   };
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto" dir="rtl">
         <DialogHeader className="text-right">
@@ -584,6 +606,19 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         </div>
       </DialogContent>
     </Dialog>
+
+    <DeliveryDeclarationDialog
+      open={showDeclaration}
+      onOpenChange={setShowDeclaration}
+      shipment={{
+        id: shipment.id,
+        shipment_number: shipment.shipment_number,
+        waste_type: '',
+        quantity: shipment.quantity || 0,
+      }}
+      onConfirmed={handleDeclarationConfirmed}
+    />
+  </>
   );
 };
 

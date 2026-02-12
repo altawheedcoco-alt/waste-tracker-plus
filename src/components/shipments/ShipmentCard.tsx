@@ -61,6 +61,8 @@ import QuickCertificateButton from '@/components/reports/QuickCertificateButton'
 import ShipmentApprovalBadge from './ShipmentApprovalBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useDeliveryDeclaration } from '@/hooks/useDeliveryDeclaration';
+import DeliveryDeclarationViewDialog from './DeliveryDeclarationViewDialog';
 
 // Lazy load the live tracking map dialog and inline map
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -120,10 +122,12 @@ const ShipmentCard = ({
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [isLiveTrackingOpen, setIsLiveTrackingOpen] = useState(false);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
+  const [isDeclarationViewOpen, setIsDeclarationViewOpen] = useState(false);
   const [showInlineMap, setShowInlineMap] = useState(false);
 
   // استخدام hook صلاحيات الرؤية
   const visibility = useShipmentVisibility(shipment.id);
+  const { data: declarationData } = useDeliveryDeclaration(shipment.id);
 
   // Map legacy status to new status
   const mappedStatus = mapLegacyStatus(shipment.status);
@@ -731,6 +735,19 @@ const ShipmentCard = ({
                       </Badge>
                     ) : null}
 
+                    {/* Declaration View Button */}
+                    {declarationData && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                        onClick={(e) => { e.stopPropagation(); setIsDeclarationViewOpen(true); }}
+                      >
+                        <FileText className="w-4 h-4" />
+                        إقرار التسليم
+                      </Button>
+                    )}
+
                     {/* Cancel Shipment Button - Full View */}
                     <CancelShipmentDialog
                       shipmentId={shipment.id}
@@ -907,6 +924,15 @@ const ShipmentCard = ({
             shipmentStatus={shipment.status}
           />
         </Suspense>
+      )}
+
+      {/* Delivery Declaration View Dialog */}
+      {declarationData && (
+        <DeliveryDeclarationViewDialog
+          open={isDeclarationViewOpen}
+          onOpenChange={setIsDeclarationViewOpen}
+          declaration={declarationData as any}
+        />
       )}
     </>
   );
