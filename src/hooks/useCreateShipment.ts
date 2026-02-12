@@ -126,7 +126,6 @@ export const useCreateShipment = () => {
   const [suggestingWasteState, setSuggestingWasteState] = useState(false);
   const [driverCurrentLocation, setDriverCurrentLocation] = useState<DriverLocation | null>(null);
   const [loadingDriverLocation, setLoadingDriverLocation] = useState(false);
-  const [createdShipment, setCreatedShipment] = useState<any>(null);
 
   const isDriver = roles.includes('driver');
   const isAdmin = roles.includes('admin');
@@ -644,20 +643,6 @@ export const useCreateShipment = () => {
 
       if (error) throw error;
 
-      // Store created shipment for generator handover dialog
-      if (shipmentData) {
-        const transporterName = manualTransporterName || transporters.find(t => t.id === transporterId)?.name || organization?.name || '';
-        const recyclerName = manualRecyclerName || recyclers.find(r => r.id === recyclerId)?.name || '';
-        const disposalName = manualDisposalName || disposalFacilities.find(d => d.id === disposalFacilityId)?.name || '';
-        
-        setCreatedShipment({
-          ...shipmentData,
-          transporter_name: transporterName,
-          recycler_name: recyclerName,
-          disposal_name: disposalName,
-        });
-      }
-
       if (shipmentData && generatorId && transporterId && recyclerId) {
         await createShipmentChatRoom({
           shipmentId: shipmentData.id,
@@ -670,14 +655,10 @@ export const useCreateShipment = () => {
 
       toast.success('تم إنشاء الشحنة بنجاح');
       
-      // If generator, don't navigate yet - let the form show the handover dialog
-      const isGeneratorOrg = organization?.organization_type === 'generator';
-      if (!isGeneratorOrg) {
-        if (onSuccess) {
-          onSuccess();
-        } else {
-          navigate('/dashboard/shipments');
-        }
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate('/dashboard/shipments');
       }
     } catch (error: any) {
       console.error('Error creating shipment:', error);
@@ -785,9 +766,5 @@ export const useCreateShipment = () => {
     // Navigation
     navigate,
     organization,
-    
-    // Created shipment (for generator handover)
-    createdShipment,
-    setCreatedShipment,
   };
 };
