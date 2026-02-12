@@ -5,13 +5,77 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// --- Input Validation ---
+const VALID_TYPES = ['chat', 'generate_text', 'classify_waste', 'extract_weight', 'optimize_route', 'generate_report', 'waste_state'] as const;
+
+function validateRequest(body: any): string | null {
+  if (!body || typeof body !== 'object') return 'Invalid request body';
+  if (!VALID_TYPES.includes(body.type)) return 'Invalid request type';
+  
+  if ((body.type === 'chat' || body.type === 'generate_text') && (!Array.isArray(body.messages) || body.messages.length === 0)) {
+    return 'Messages array is required';
+  }
+  if ((body.type === 'classify_waste' || body.type === 'extract_weight') && typeof body.imageBase64 !== 'string') {
+    return 'Image data is required';
+  }
+  if ((body.type === 'optimize_route' || body.type === 'generate_report') && typeof body.prompt !== 'string') {
+    return 'Prompt is required';
+  }
+  
+  // Validate messages format
+  if (body.messages && Array.isArray(body.messages)) {
+    for (const msg of body.messages) {
+      if (!msg || typeof msg !== 'object') return 'Invalid message format';
+      if (!['user', 'assistant', 'system'].includes(msg.role)) return 'Invalid message role';
+      if (msg.content === undefined || msg.content === null) return 'Message content is required';
+    }
+    // Limit messages count
+    if (body.messages.length > 50) return 'Too many messages (max 50)';
+  }
+  
+  // Limit prompt length
+  if (body.prompt && typeof body.prompt === 'string' && body.prompt.length > 50000) {
+    return 'Prompt too long (max 50000 characters)';
+  }
+  
+  // Limit image size (base64 ~1.33x of original, allow ~10MB images)
+  if (body.imageBase64 && typeof body.imageBase64 === 'string' && body.imageBase64.length > 15_000_000) {
+    return 'Image too large';
+  }
+  
+  return null;
+}
+
+function sanitizeString(s: string, maxLen = 5000): string {
+  return s.slice(0, maxLen).trim();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { type, messages, imageBase64, prompt, wasteDescription, wasteType } = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate input
+    const validationError = validateRequest(body);
+    if (validationError) {
+      return new Response(JSON.stringify({ error: validationError }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { type, messages, imageBase64, prompt, wasteDescription, wasteType } = body;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -76,14 +140,10 @@ serve(async (req) => {
 
     switch (type) {
       case "chat":
-        // مساعد ذكي متخصص للمنصة - مع streaming
         requestBody = {
           model: "google/gemini-3-flash-preview",
           messages: [
-            {
-              role: "system",
-              content: platformSystemPrompt
-            },
+            { role: "system", content: platformSystemPrompt },
             ...messages
           ],
           stream: true,
@@ -91,14 +151,10 @@ serve(async (req) => {
         break;
 
       case "generate_text":
-        // توليد نص بدون streaming - للاستخدام مع invoke العادي
         requestBody = {
           model: "google/gemini-3-flash-preview",
           messages: [
-            {
-              role: "system",
-              content: platformSystemPrompt
-            },
+            { role: "system", content: platformSystemPrompt },
             ...messages
           ],
           stream: false,
@@ -106,7 +162,6 @@ serve(async (req) => {
         break;
 
       case "classify_waste":
-        // تصنيف النفايات من الصورة
         requestBody = {
           model: "google/gemini-2.5-flash",
           messages: [
@@ -133,7 +188,6 @@ serve(async (req) => {
         break;
 
       case "extract_weight":
-        // استخراج بيانات الميزان من الصورة - شامل لجميع الحقول
         requestBody = {
           model: "google/gemini-2.5-pro",
           messages: [
@@ -145,14 +199,14 @@ serve(async (req) => {
                   text: `أنت خبير في قراءة واستخراج البيانات من إيصالات الموازين العربية. حلل هذه الصورة واستخرج جميع البيانات المرئية بدقة.
 
 الحقول المطلوب استخراجها:
-1. اسم الشركة/المنشأة (company_name) - اسم الشركة صاحبة الميزان
+1. اسم الشركة/المنشأة (company_name)
 2. رقم التذكرة/الإيصال (ticket_number)
-3. نوع العملية (operation_type) - صادر/وارد/خارجي
-4. اسم الصنف/المادة (material_type) - نوع المادة المنقولة
+3. نوع العملية (operation_type)
+4. اسم الصنف/المادة (material_type)
 5. اسم العميل/المورد (customer_name)
 6. اسم السائق (driver_name)
 7. رقم السيارة/المركبة (vehicle_number)
-8. رقم المقطورة (trailer_number) - إن وجد
+8. رقم المقطورة (trailer_number)
 9. المحافظة/المنطقة (governorate)
 10. الوزن الأول/الإجمالي (first_weight) - بالكيلوجرام
 11. الوزن الثاني/الفارغ (second_weight) - بالكيلوجرام
@@ -163,7 +217,7 @@ serve(async (req) => {
 16. تاريخ الوزن الثاني (second_date)
 17. وقت الوزن الثاني (second_time)
 18. اسم القائم بالوزن (weigher_name)
-19. ملاحظات (notes) - أي ملاحظات إضافية
+19. ملاحظات (notes)
 
 أجب بصيغة JSON فقط مع كل الحقول المتوفرة. إذا لم تجد قيمة لحقل معين، اتركه فارغاً "":
 {
@@ -203,7 +257,6 @@ serve(async (req) => {
         break;
 
       case "optimize_route":
-        // تحسين المسارات
         requestBody = {
           model: "google/gemini-3-flash-preview",
           messages: [
@@ -215,14 +268,13 @@ serve(async (req) => {
             },
             {
               role: "user",
-              content: prompt
+              content: sanitizeString(prompt, 10000)
             }
           ]
         };
         break;
 
       case "generate_report":
-        // تقارير ذكية
         requestBody = {
           model: "google/gemini-3-flash-preview",
           messages: [
@@ -238,14 +290,13 @@ serve(async (req) => {
             },
             {
               role: "user",
-              content: prompt
+              content: sanitizeString(prompt, 20000)
             }
           ]
         };
         break;
 
       case "waste_state":
-        // تحديد حالة المخلف (صلبة/سائلة/شبه صلبة/غازية) بناءً على نوع النفاية
         requestBody = {
           model: "google/gemini-3-flash-preview",
           messages: [
@@ -254,27 +305,18 @@ serve(async (req) => {
               content: `أنت خبير في تصنيف حالات المخلفات والنفايات. مهمتك تحديد الحالة الفيزيائية للمخلف.
 
 الحالات المتاحة:
-- solid: مخلفات صلبة (بلاستيك، معادن، ورق، زجاج، إلكترونيات، مخلفات بناء، إلخ)
-- liquid: مخلفات سائلة (زيوت، مذيبات، أحماض، محاليل كيميائية، سوائل طبية، إلخ)
-- semi_solid: مخلفات شبه صلبة (حمأة، طين ملوث، شحوم، معاجين، إلخ)
-- gas: مخلفات غازية (غازات صناعية، أبخرة كيميائية، إلخ)
-
-أمثلة:
-- البلاستيك PET → solid
-- الزيوت المستعملة → liquid
-- حمأة الصرف → semi_solid
-- الأحماض السائلة → liquid
-- الخردة المعدنية → solid
-- الشحوم الصناعية → semi_solid
-- الغازات المضغوطة → gas
+- solid: مخلفات صلبة
+- liquid: مخلفات سائلة
+- semi_solid: مخلفات شبه صلبة
+- gas: مخلفات غازية
 
 أجب بحالة واحدة فقط من (solid, liquid, semi_solid, gas) دون أي شرح إضافي.`
             },
             {
               role: "user",
               content: `حدد حالة هذا المخلف:
-نوع المخلف: ${wasteType || 'غير محدد'}
-وصف المخلف: ${wasteDescription || 'غير محدد'}
+نوع المخلف: ${sanitizeString(wasteType || 'غير محدد', 200)}
+وصف المخلف: ${sanitizeString(wasteDescription || 'غير محدد', 500)}
 
 أجب بكلمة واحدة فقط: solid أو liquid أو semi_solid أو gas`
             }
@@ -283,7 +325,10 @@ serve(async (req) => {
         break;
 
       default:
-        throw new Error("Invalid request type");
+        return new Response(JSON.stringify({ error: "Invalid request type" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -308,8 +353,7 @@ serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
+      console.error("AI gateway error:", response.status);
       return new Response(JSON.stringify({ error: "خطأ في خدمة الذكاء الاصطناعي" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -327,7 +371,7 @@ serve(async (req) => {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
 
-    // Special handling for waste_state to extract just the state value
+    // Special handling for waste_state
     if (type === "waste_state") {
       const stateMatch = content?.toLowerCase().trim();
       const validStates = ['solid', 'liquid', 'semi_solid', 'gas'];
@@ -344,7 +388,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("AI assistant error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "حدث خطأ غير متوقع" }),
+      JSON.stringify({ error: "حدث خطأ غير متوقع" }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
