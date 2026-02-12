@@ -125,6 +125,20 @@ export const ShipmentsRepository = {
         changed_by: userId,
         notes: `تم تغيير الحالة إلى ${status}`,
       });
+
+      // Auto-create declarations based on status
+      try {
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        
+        if (status === 'in_transit' && shipment.generator_id) {
+          await autoCreateGeneratorDeclaration(id, shipment.generator_id, userId);
+        }
+        if ((status === 'delivered' || status === 'confirmed') && shipment.recycler_id) {
+          await autoCreateRecyclerDeclaration(id, shipment.recycler_id, userId);
+        }
+      } catch (e) {
+        console.error('Auto declaration error (non-blocking):', e);
+      }
     }
 
     return shipment;

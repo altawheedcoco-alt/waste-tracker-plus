@@ -373,6 +373,28 @@ const ShipmentManagement = () => {
 
       if (error) throw error;
 
+      // Auto-create declarations based on status change
+      // Auto-create declarations based on status change
+      const shipment = shipments.find(s => s.id === id);
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (shipment && currentUser) {
+        try {
+          const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+          
+          // When shipment goes in_transit → auto generator declaration
+          if (newStatus === 'in_transit' && shipment.generator?.id) {
+            await autoCreateGeneratorDeclaration(id, shipment.generator.id, currentUser.id);
+          }
+          
+          // When shipment is delivered → auto recycler declaration
+          if ((newStatus === 'delivered' || newStatus === 'confirmed') && shipment.recycler?.id) {
+            await autoCreateRecyclerDeclaration(id, shipment.recycler.id, currentUser.id);
+          }
+        } catch (declError) {
+          console.error('Auto declaration error (non-blocking):', declError);
+        }
+      }
+
       toast({
         title: 'تم التحديث',
         description: 'تم تحديث حالة الشحنة',
