@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, organization_id, full_name')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single();
 
     if (!profile?.organization_id) throw new Error('No organization');
