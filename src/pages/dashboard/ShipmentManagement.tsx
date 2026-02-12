@@ -381,8 +381,8 @@ const ShipmentManagement = () => {
         try {
           const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
           
-          // When shipment goes in_transit → auto generator declaration
-          if (newStatus === 'in_transit' && shipment.generator?.id) {
+          // When shipment is registered (approved) → auto generator declaration
+          if ((newStatus === 'approved' || newStatus === 'registered') && shipment.generator?.id) {
             await autoCreateGeneratorDeclaration(id, shipment.generator.id, currentUser.id);
           }
           
