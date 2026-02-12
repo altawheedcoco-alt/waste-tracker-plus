@@ -2668,6 +2668,94 @@ export type Database = {
           },
         ]
       }
+      delivery_declarations: {
+        Row: {
+          created_at: string
+          declaration_text: string
+          declared_at: string
+          declared_by_organization_id: string
+          declared_by_user_id: string
+          disposal_name: string | null
+          driver_name: string | null
+          driver_national_id: string | null
+          generator_name: string | null
+          id: string
+          ip_address: string | null
+          quantity: number | null
+          recycler_name: string | null
+          shipment_id: string
+          shipment_number: string | null
+          transporter_name: string | null
+          unit: string | null
+          user_agent: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          declaration_text: string
+          declared_at?: string
+          declared_by_organization_id: string
+          declared_by_user_id: string
+          disposal_name?: string | null
+          driver_name?: string | null
+          driver_national_id?: string | null
+          generator_name?: string | null
+          id?: string
+          ip_address?: string | null
+          quantity?: number | null
+          recycler_name?: string | null
+          shipment_id: string
+          shipment_number?: string | null
+          transporter_name?: string | null
+          unit?: string | null
+          user_agent?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          declaration_text?: string
+          declared_at?: string
+          declared_by_organization_id?: string
+          declared_by_user_id?: string
+          disposal_name?: string | null
+          driver_name?: string | null
+          driver_national_id?: string | null
+          generator_name?: string | null
+          id?: string
+          ip_address?: string | null
+          quantity?: number | null
+          recycler_name?: string | null
+          shipment_id?: string
+          shipment_number?: string | null
+          transporter_name?: string | null
+          unit?: string | null
+          user_agent?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_declarations_declared_by_organization_id_fkey"
+            columns: ["declared_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "delivery_declarations_declared_by_organization_id_fkey"
+            columns: ["declared_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "delivery_declarations_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deposits: {
         Row: {
           account_number: string | null
