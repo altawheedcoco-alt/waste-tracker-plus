@@ -7327,6 +7327,86 @@ export type Database = {
           },
         ]
       }
+      organization_departments: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          head_user_id: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_ar: string
+          organization_id: string
+          parent_department_id: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          head_user_id?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_ar: string
+          organization_id: string
+          parent_department_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          head_user_id?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_ar?: string
+          organization_id?: string
+          parent_department_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_departments_head_user_id_fkey"
+            columns: ["head_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_departments_parent_department_id_fkey"
+            columns: ["parent_department_id"]
+            isOneToOne: false
+            referencedRelation: "organization_departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_deposit_links: {
         Row: {
           allow_amount_edit: boolean | null
@@ -7613,6 +7693,99 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_positions: {
+        Row: {
+          assigned_user_id: string | null
+          created_at: string
+          department_id: string
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_active: boolean | null
+          level: number | null
+          max_holders: number | null
+          organization_id: string
+          permissions: Json | null
+          reports_to_position_id: string | null
+          sort_order: number | null
+          title: string
+          title_ar: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          created_at?: string
+          department_id: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean | null
+          level?: number | null
+          max_holders?: number | null
+          organization_id: string
+          permissions?: Json | null
+          reports_to_position_id?: string | null
+          sort_order?: number | null
+          title: string
+          title_ar: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          created_at?: string
+          department_id?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean | null
+          level?: number | null
+          max_holders?: number | null
+          organization_id?: string
+          permissions?: Json | null
+          reports_to_position_id?: string | null
+          sort_order?: number | null
+          title?: string
+          title_ar?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_positions_assigned_user_id_fkey"
+            columns: ["assigned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_positions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "organization_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_positions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_positions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_positions_reports_to_position_id_fkey"
+            columns: ["reports_to_position_id"]
+            isOneToOne: false
+            referencedRelation: "organization_positions"
             referencedColumns: ["id"]
           },
         ]
@@ -13619,6 +13792,10 @@ export type Database = {
       }
       run_full_archive: { Args: never; Returns: Json }
       run_security_audit: { Args: never; Returns: Json }
+      seed_org_structure: {
+        Args: { p_org_id: string; p_org_type: string }
+        Returns: undefined
+      }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
         Returns: boolean
