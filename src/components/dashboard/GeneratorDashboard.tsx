@@ -6,7 +6,7 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote, Printer } from 'lucide-react';
+import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote, Printer, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid from './QuickActionsGrid';
@@ -24,9 +24,12 @@ import LegalArchiveWidget from './generator/LegalArchiveWidget';
 import LegalComplianceWidget from './generator/LegalComplianceWidget';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
-// ChatWidget is now global in App.tsx
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
+import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
+import PartnerRatingsWidget from '@/components/partners/PartnerRatingsWidget';
+import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 
 interface ShipmentStats {
   total: number;
@@ -85,6 +88,8 @@ const GeneratorDashboard = () => {
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);
+  const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
+  const [showDepositDialog, setShowDepositDialog] = useState(false);
 
   // Responsive styles
   const titleClass = getResponsiveClass({
@@ -122,35 +127,12 @@ const GeneratorDashboard = () => {
       const { data: shipmentsRaw, error } = await supabase
         .from('shipments')
         .select(`
-          id,
-          shipment_number,
-          waste_type,
-          quantity,
-          unit,
-          status,
-          created_at,
-          pickup_address,
-          delivery_address,
-          pickup_date,
-          expected_delivery_date,
-          notes,
-          generator_notes,
-          recycler_notes,
-          waste_description,
-          hazard_level,
-          packaging_method,
-          disposal_method,
-          approved_at,
-          collection_started_at,
-          in_transit_at,
-          delivered_at,
-          confirmed_at,
-          manual_driver_name,
-          manual_vehicle_plate,
-          driver_id,
-          generator_id,
-          transporter_id,
-          recycler_id
+          id, shipment_number, waste_type, quantity, unit, status, created_at,
+          pickup_address, delivery_address, pickup_date, expected_delivery_date,
+          notes, generator_notes, recycler_notes, waste_description, hazard_level,
+          packaging_method, disposal_method, approved_at, collection_started_at,
+          in_transit_at, delivered_at, confirmed_at, manual_driver_name, manual_vehicle_plate,
+          driver_id, generator_id, transporter_id, recycler_id
         `)
         .eq('generator_id', organization?.id)
         .order('created_at', { ascending: false })
@@ -159,7 +141,6 @@ const GeneratorDashboard = () => {
       if (error) throw error;
 
       if (shipmentsRaw) {
-        // Fetch organizations for enrichment
         const orgIds = [...new Set([
           ...shipmentsRaw.map(s => s.transporter_id).filter(Boolean),
           ...shipmentsRaw.map(s => s.recycler_id).filter(Boolean),
@@ -172,7 +153,6 @@ const GeneratorDashboard = () => {
           orgsData?.forEach(o => { orgsMap[o.id] = o; });
         }
 
-        // Fetch drivers
         const driverIds = [...new Set(shipmentsRaw.map(s => s.driver_id).filter(Boolean))] as string[];
         const driversMap: Record<string, any> = {};
         if (driverIds.length > 0) {
@@ -188,7 +168,6 @@ const GeneratorDashboard = () => {
           driver: s.driver_id ? driversMap[s.driver_id] || null : null,
         }));
 
-        // Fetch recycling reports to check which shipments have reports
         const shipmentIds = shipments.map(s => s.id);
         const { data: reportsData } = await supabase
           .from('recycling_reports')
@@ -197,7 +176,6 @@ const GeneratorDashboard = () => {
 
         const reportedShipmentIds = new Set(reportsData?.map(r => r.shipment_id) || []);
 
-        // Fetch receipts to check which shipments have receipts
         const { data: receiptsData } = await supabase
           .from('shipment_receipts')
           .select('shipment_id')
@@ -213,13 +191,12 @@ const GeneratorDashboard = () => {
 
         setRecentShipments(shipmentsWithStatus as unknown as RecentShipment[]);
 
-        const newStats: ShipmentStats = {
+        setStats({
           total: shipments.length,
           new: shipments.filter((s) => s.status === 'new' || s.status === 'approved').length,
           inTransit: shipments.filter((s) => s.status === 'in_transit').length,
           completed: shipments.filter((s) => s.status === 'delivered' || s.status === 'confirmed').length,
-        };
-        setStats(newStats);
+        });
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -234,54 +211,35 @@ const GeneratorDashboard = () => {
   };
 
   const statCards = [
-    {
-      title: 'إجمالي الشحنات',
-      value: stats.total,
-      icon: Package,
-      color: 'from-blue-500 to-blue-600',
-    },
-    {
-      title: 'شحنات جديدة',
-      value: stats.new,
-      icon: Clock,
-      color: 'from-amber-500 to-amber-600',
-    },
-    {
-      title: 'قيد النقل',
-      value: stats.inTransit,
-      icon: Truck,
-      color: 'from-purple-500 to-purple-600',
-    },
-    {
-      title: 'مكتملة',
-      value: stats.completed,
-      icon: CheckCircle2,
-      color: 'from-emerald-500 to-emerald-600',
-    },
+    { title: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'from-blue-500 to-blue-600' },
+    { title: 'شحنات جديدة', value: stats.new, icon: Clock, color: 'from-amber-500 to-amber-600' },
+    { title: 'قيد النقل', value: stats.inTransit, icon: Truck, color: 'from-purple-500 to-purple-600' },
+    { title: 'مكتملة', value: stats.completed, icon: CheckCircle2, color: 'from-emerald-500 to-emerald-600' },
   ];
 
-  // State for deposit dialog
-  const [showDepositDialog, setShowDepositDialog] = useState(false);
-
-  // Use centralized quick actions
   const quickActions = useQuickActions({
     type: 'generator',
     handlers: {
       openDepositDialog: () => setShowDepositDialog(true),
+      openSmartWeightUpload: () => setShowSmartWeightUpload(true),
     },
   });
 
   return (
     <div className="space-y-6">
-      {/* Stories */}
       <StoryCircles />
-      {/* Welcome section - Responsive */}
+
+      {/* Welcome section */}
       <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'}`}>
-        <div className={`flex items-center gap-2 ${isMobile ? 'order-2' : ''}`}>
+        <div className={`flex items-center gap-2 flex-wrap ${isMobile ? 'order-2' : ''}`}>
           <SmartRequestDialog buttonText={isMobile ? 'طلب' : 'طلب تقارير'} buttonVariant="default" />
           <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
             <FileCheck className="w-4 h-4" />
             {!isMobile && 'التحقق من الوثائق'}
+          </Button>
+          <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
+            <Sparkles className="w-4 h-4" />
+            {!isMobile && 'رفع الوزنة الذكي'}
           </Button>
         </div>
         <div className={`text-right ${isMobile ? 'order-1' : ''}`}>
@@ -292,7 +250,7 @@ const GeneratorDashboard = () => {
         </div>
       </div>
 
-      {/* Stats grid - Responsive */}
+      {/* Stats grid */}
       <ResponsiveGrid cols={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
         {statCards.map((stat, index) => (
           <motion.div
@@ -308,9 +266,7 @@ const GeneratorDashboard = () => {
                     <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground truncate`}>{stat.title}</p>
                     <p className={`${statValueClass} font-bold mt-1`}>{stat.value}</p>
                   </div>
-                  <div
-                    className={`${iconContainerClass} rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shrink-0`}
-                  >
+                  <div className={`${iconContainerClass} rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shrink-0`}>
                     <stat.icon className={iconClass} />
                   </div>
                 </div>
@@ -319,6 +275,9 @@ const GeneratorDashboard = () => {
           </motion.div>
         ))}
       </ResponsiveGrid>
+
+      {/* Automation Settings */}
+      <AutomationSettingsDialog organizationType="generator" />
 
       {/* Daily Operations Summary */}
       <DailyOperationsSummary />
@@ -338,7 +297,10 @@ const GeneratorDashboard = () => {
       {/* ESG Sustainability Report */}
       <ESGReportWidget />
 
-      {/* Pending Approvals Widget - For Generator */}
+      {/* Partner Ratings */}
+      <PartnerRatingsWidget />
+
+      {/* Pending Approvals Widget */}
       <PendingApprovalsWidget />
 
       {/* Quick Actions */}
@@ -357,17 +319,38 @@ const GeneratorDashboard = () => {
       {/* Recent shipments */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="w-5 h-5" />
-            أحدث الشحنات
-          </CardTitle>
-          <CardDescription>آخر 10 شحنات تم إنشاؤها</CardDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 flex-wrap">
+              <BulkCertificateButton
+                shipments={recentShipments.map(s => ({
+                  id: s.id, shipment_number: s.shipment_number, status: s.status,
+                  created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
+                  unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
+                  has_report: s.has_report,
+                  generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
+                  transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
+                  recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
+                }))}
+                type="certificate"
+                onSuccess={fetchDashboardData}
+              />
+              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
+                <Eye className="ml-2 h-4 w-4" />
+                عرض الكل
+              </Button>
+            </div>
+            <div className="text-right">
+              <CardTitle className="flex items-center gap-2 justify-end">
+                <Package className="w-5 h-5" />
+                أحدث الشحنات
+              </CardTitle>
+              <CardDescription>آخر 10 شحنات تم إنشاؤها</CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">
-              جاري التحميل...
-            </div>
+            <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
           ) : recentShipments.length === 0 ? (
             <div className="text-center py-8">
               <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
@@ -377,14 +360,10 @@ const GeneratorDashboard = () => {
             <div className="space-y-3">
               {recentShipments.map((shipment) => (
                 <div key={shipment.id} className="group relative rounded-lg border border-border/50 hover:border-primary/30 transition-all duration-200 hover:shadow-md overflow-hidden">
-                  <ShipmentCard
-                    shipment={shipment}
-                    onStatusChange={fetchDashboardData}
-                  />
+                  <ShipmentCard shipment={shipment} onStatusChange={fetchDashboardData} />
                   <div className="flex items-center gap-1.5 px-3 py-1.5 bg-muted/40 border-t border-border/30">
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant="outline" size="sm"
                       className="text-xs h-7 gap-1.5 rounded-full px-3 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
                       onClick={(e) => { e.stopPropagation(); handlePrintShipment(shipment); }}
                     >
@@ -392,8 +371,7 @@ const GeneratorDashboard = () => {
                       طباعة
                     </Button>
                     <Button
-                      variant="outline"
-                      size="sm"
+                      variant="outline" size="sm"
                       className="text-xs h-7 gap-1.5 rounded-full px-3 hover:bg-secondary hover:text-secondary-foreground mr-auto transition-colors"
                       onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
                     >
@@ -408,26 +386,11 @@ const GeneratorDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Print Dialog */}
-      <EnhancedShipmentPrintView
-        isOpen={showPrintDialog}
-        onClose={() => setShowPrintDialog(false)}
-        shipment={selectedShipment as any}
-      />
-
-      {/* Document Verification Dialog */}
-      <DocumentVerificationWidget
-        open={showDocumentVerification}
-        onOpenChange={setShowDocumentVerification}
-      />
-
-      {/* Deposit Dialog */}
-      <AddDepositDialog
-        open={showDepositDialog}
-        onOpenChange={setShowDepositDialog}
-      />
-
-      {/* Chat Widget - Now global in App.tsx */}
+      {/* Dialogs */}
+      <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
+      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
+      <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
     </div>
   );
 };
