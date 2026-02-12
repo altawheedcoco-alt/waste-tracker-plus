@@ -18,6 +18,7 @@ interface DeclarationData {
   waste_type: string | null;
   quantity: number | null;
   unit: string | null;
+  declaration_type?: string | null;
   declaration_text: string;
   declared_at: string;
   driver_name: string | null;
@@ -114,7 +115,9 @@ const DeliveryDeclarationViewDialog = ({
           <div ref={printRef} dir="rtl" style={{ padding: '40px', fontFamily: "'Segoe UI', Tahoma, sans-serif" }}>
             {/* Header */}
             <div style={{ textAlign: 'center', borderBottom: '3px solid #16a34a', paddingBottom: '20px', marginBottom: '20px' }}>
-              <h1 style={{ color: '#16a34a', fontSize: '24px', margin: '0 0 8px' }}>إقرار تسليم شحنة نفايات</h1>
+              <h1 style={{ color: '#16a34a', fontSize: '24px', margin: '0 0 8px' }}>
+                {declaration.declaration_type === 'generator_handover' ? 'إقرار تسليم مخلفات من المولّد' : 'إقرار تسليم شحنة نفايات'}
+              </h1>
               <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>وثيقة رسمية مسجلة إلكترونياً</p>
             </div>
 

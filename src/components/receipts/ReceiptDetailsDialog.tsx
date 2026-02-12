@@ -8,7 +8,7 @@ import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from '@/components/print/PrintThemeSelector';
 import { type PrintThemeId } from '@/lib/printThemes';
 import { useAuth } from '@/contexts/AuthContext';
-import { useDeliveryDeclaration } from '@/hooks/useDeliveryDeclaration';
+import { useShipmentDeclarations } from '@/hooks/useDeliveryDeclaration';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Dialog,
@@ -68,9 +68,12 @@ const ReceiptDetailsDialog = ({
     orientation: 'portrait',
   });
 
-  // Fetch linked delivery declaration
+  // Fetch linked delivery declarations (both generator handover + transporter delivery)
   const shipmentId = receipt?.shipment?.id;
-  const { data: declarationData } = useDeliveryDeclaration(shipmentId);
+  const { data: declarations = [] } = useShipmentDeclarations(shipmentId);
+  const generatorDeclaration = declarations.find((d: any) => d.declaration_type === 'generator_handover');
+  const transporterDeclaration = declarations.find((d: any) => d.declaration_type === 'transporter_delivery' || !d.declaration_type);
+  const declarationData = transporterDeclaration || generatorDeclaration;
 
   if (!receipt) return null;
 
@@ -329,39 +332,56 @@ const ReceiptDetailsDialog = ({
                 </Button>
               )}
 
-              {/* Link to Delivery Declaration */}
-              {declarationData && (
+              {/* Generator Handover Declaration */}
+              {generatorDeclaration && (
+                <div className="p-3 rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileSignature className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+                      إقرار تسليم المولّد للناقل
+                    </span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 mr-auto" />
+                  </div>
+                  <p className="text-xs text-blue-700 dark:text-blue-400">
+                    موقّع بواسطة: {(generatorDeclaration as any).driver_name || (generatorDeclaration as any).generator_name || 'مُوقّع'}
+                    {(generatorDeclaration as any).declared_at && (
+                      <> — {format(new Date((generatorDeclaration as any).declared_at), 'dd/MM/yyyy HH:mm')}</>
+                    )}
+                  </p>
+                  <p className="text-[10px] text-blue-600 dark:text-blue-500 mt-1">
+                    المولد: {(generatorDeclaration as any).generator_name || 'غير محدد'} | النفايات: {(generatorDeclaration as any).waste_type} ({(generatorDeclaration as any).quantity} {(generatorDeclaration as any).unit || 'طن'})
+                  </p>
+                </div>
+              )}
+
+              {/* Transporter Delivery Declaration */}
+              {transporterDeclaration && (
                 <div className="p-3 rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
                   <div className="flex items-center gap-2 mb-1">
                     <FileSignature className="w-4 h-4 text-green-600" />
                     <span className="text-sm font-semibold text-green-800 dark:text-green-300">
-                      إقرار التسليم القانوني
+                      إقرار تسليم الناقل للمدوّر
                     </span>
                     <CheckCircle2 className="w-3.5 h-3.5 text-green-600 mr-auto" />
                   </div>
                   <p className="text-xs text-green-700 dark:text-green-400">
-                    موقّع بواسطة: {(declarationData as any).driver_name || 'مُوقّع'} 
-                    {(declarationData as any).declared_at && (
-                      <> — {format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy HH:mm')}</>
+                    موقّع بواسطة: {(transporterDeclaration as any).driver_name || 'مُوقّع'} 
+                    {(transporterDeclaration as any).declared_at && (
+                      <> — {format(new Date((transporterDeclaration as any).declared_at), 'dd/MM/yyyy HH:mm')}</>
                     )}
                   </p>
                   <p className="text-[10px] text-green-600 dark:text-green-500 mt-1">
-                    الناقل: {(declarationData as any).transporter_name || 'غير محدد'} | هوية السائق: {(declarationData as any).driver_national_id || 'غير محدد'}
+                    الناقل: {(transporterDeclaration as any).transporter_name || 'غير محدد'} | هوية السائق: {(transporterDeclaration as any).driver_national_id || 'غير محدد'}
                   </p>
-                  {(declarationData as any).generator_name && (
-                    <p className="text-[10px] text-green-600 dark:text-green-500">
-                      المولد: {(declarationData as any).generator_name} | النفايات: {(declarationData as any).waste_type} ({(declarationData as any).quantity} {(declarationData as any).unit || 'طن'})
-                    </p>
-                  )}
                 </div>
               )}
 
-              {!declarationData && receipt.shipment?.id && (
+              {!generatorDeclaration && !transporterDeclaration && receipt.shipment?.id && (
                 <div className="p-3 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-amber-600" />
                     <span className="text-xs text-amber-700 dark:text-amber-400">
-                      لم يتم توقيع إقرار التسليم بعد
+                      لم يتم توقيع أي إقرار تسليم بعد
                     </span>
                   </div>
                 </div>

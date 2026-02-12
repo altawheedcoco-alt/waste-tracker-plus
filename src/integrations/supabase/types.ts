@@ -2672,6 +2672,7 @@ export type Database = {
         Row: {
           created_at: string
           declaration_text: string
+          declaration_type: string
           declared_at: string
           declared_by_organization_id: string
           declared_by_user_id: string
@@ -2693,6 +2694,7 @@ export type Database = {
         Insert: {
           created_at?: string
           declaration_text: string
+          declaration_type?: string
           declared_at?: string
           declared_by_organization_id: string
           declared_by_user_id: string
@@ -2714,6 +2716,7 @@ export type Database = {
         Update: {
           created_at?: string
           declaration_text?: string
+          declaration_type?: string
           declared_at?: string
           declared_by_organization_id?: string
           declared_by_user_id?: string
