@@ -4135,6 +4135,72 @@ export type Database = {
           },
         ]
       }
+      document_print_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          document_id: string | null
+          document_number: string | null
+          document_type: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          print_tracking_code: string
+          printed_by_employee_code: string | null
+          printed_by_name: string | null
+          template_id: string
+          theme_id: string
+          user_id: string
+        }
+        Insert: {
+          action_type?: string
+          created_at?: string
+          document_id?: string | null
+          document_number?: string | null
+          document_type: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          print_tracking_code: string
+          printed_by_employee_code?: string | null
+          printed_by_name?: string | null
+          template_id?: string
+          theme_id?: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          document_id?: string | null
+          document_number?: string | null
+          document_type?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          print_tracking_code?: string
+          printed_by_employee_code?: string | null
+          printed_by_name?: string | null
+          template_id?: string
+          theme_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_print_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "document_print_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_signatures: {
         Row: {
           biometric_type: string | null
@@ -5217,6 +5283,78 @@ export type Database = {
             columns: ["uploaded_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_print_preferences: {
+        Row: {
+          auto_print_tracking: boolean | null
+          created_at: string
+          default_font: string
+          default_template_id: string
+          default_theme_id: string
+          employee_code_prefix: string | null
+          header_layout: string | null
+          id: string
+          organization_id: string
+          show_barcode: boolean | null
+          show_qr_code: boolean | null
+          show_watermark: boolean | null
+          table_style: string | null
+          updated_at: string
+          user_id: string | null
+          watermark_text: string | null
+        }
+        Insert: {
+          auto_print_tracking?: boolean | null
+          created_at?: string
+          default_font?: string
+          default_template_id?: string
+          default_theme_id?: string
+          employee_code_prefix?: string | null
+          header_layout?: string | null
+          id?: string
+          organization_id: string
+          show_barcode?: boolean | null
+          show_qr_code?: boolean | null
+          show_watermark?: boolean | null
+          table_style?: string | null
+          updated_at?: string
+          user_id?: string | null
+          watermark_text?: string | null
+        }
+        Update: {
+          auto_print_tracking?: boolean | null
+          created_at?: string
+          default_font?: string
+          default_template_id?: string
+          default_theme_id?: string
+          employee_code_prefix?: string | null
+          header_layout?: string | null
+          id?: string
+          organization_id?: string
+          show_barcode?: boolean | null
+          show_qr_code?: boolean | null
+          show_watermark?: boolean | null
+          table_style?: string | null
+          updated_at?: string
+          user_id?: string | null
+          watermark_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_print_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "entity_print_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
