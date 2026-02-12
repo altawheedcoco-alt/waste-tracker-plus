@@ -68,6 +68,7 @@ const AddOrganization = lazy(() => import("./pages/dashboard/AddOrganization"));
 const ShipmentReports = lazy(() => import("./pages/dashboard/ShipmentReports"));
 const AdminDriversMap = lazy(() => import("./pages/dashboard/AdminDriversMap"));
 const VideoGenerator = lazy(() => import("./pages/dashboard/VideoGenerator"));
+const OrgStructure = lazy(() => import("./pages/dashboard/OrgStructure"));
 const MyLocation = lazy(() => import("./pages/dashboard/MyLocation"));
 const RecyclingCertificates = lazy(() => import("./pages/dashboard/RecyclingCertificates"));
 const IssueRecyclingCertificates = lazy(() => import("./pages/dashboard/IssueRecyclingCertificates"));
@@ -296,6 +297,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/disposal/mission-control" element={<DisposalMissionControl />} />
         <Route path="/dashboard/gamification" element={<Gamification />} />
         <Route path="/dashboard/stories" element={<Stories />} />
+        <Route path="/dashboard/org-structure" element={<OrgStructure />} />
         <Route path="/dashboard/iot-settings" element={<IoTSettings />} />
         <Route path="/dashboard/e-invoice" element={<EInvoice />} />
         <Route path="/dashboard/customer-portal" element={<CustomerPortal />} />
