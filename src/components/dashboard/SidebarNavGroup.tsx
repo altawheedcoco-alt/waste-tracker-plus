@@ -98,7 +98,18 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
           : 'hover:bg-muted/80 text-foreground/80 hover:text-foreground'
       }`}
     >
-      <Icon className="w-5 h-5 shrink-0" />
+      <div className="relative">
+        <Icon className="w-5 h-5 shrink-0" />
+        {item.badge && item.badge > 0 && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute -top-1.5 -left-1.5 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center"
+          >
+            {item.badge > 9 ? '9+' : item.badge}
+          </motion.span>
+        )}
+      </div>
       <AnimatePresence>
         {!isCollapsed && (
           <motion.span
