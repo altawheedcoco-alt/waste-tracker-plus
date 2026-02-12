@@ -26,6 +26,7 @@ import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
+import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import PartnerRatingsWidget from '@/components/partners/PartnerRatingsWidget';
@@ -284,6 +285,9 @@ const GeneratorDashboard = () => {
 
       {/* Operational Alerts */}
       <OperationalAlertsWidget />
+
+      {/* Unified Document Search */}
+      <UnifiedDocumentSearch />
 
       {/* Driver Code Lookup */}
       <DriverCodeLookup />

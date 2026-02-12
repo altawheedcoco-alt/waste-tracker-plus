@@ -29,6 +29,7 @@ import {
 import AdminEntityList from './admin/AdminEntityList';
 import AdminCredentialControl from './admin/AdminCredentialControl';
 import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
+import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Switch } from '@/components/ui/switch';
 import { toast as sonnerToast } from 'sonner';
@@ -303,6 +304,11 @@ const AdminDashboard = () => {
       {/* Operational Alerts - All Orgs */}
       <motion.div variants={itemVariants}>
         <AdminOperationalAlerts />
+      </motion.div>
+
+      {/* Unified Document Search */}
+      <motion.div variants={itemVariants}>
+        <UnifiedDocumentSearch />
       </motion.div>
 
       {/* Shipment Search & Print */}
