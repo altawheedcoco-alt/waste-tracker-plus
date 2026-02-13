@@ -64,6 +64,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import RecyclingCertificatePrint from '@/components/reports/RecyclingCertificatePrint';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { QRCodeSVG } from 'qrcode.react';
@@ -772,6 +773,12 @@ const RecyclingCertificates = () => {
                 شهادة إعادة التدوير - {selectedReport?.report_number}
               </span>
               <div className="flex items-center gap-2">
+                <ShareDocumentButton
+                  referenceId={selectedReport?.id || ''}
+                  referenceType="certificate"
+                  documentTitle={`شهادة إعادة التدوير - ${selectedReport?.report_number}`}
+                  size="sm"
+                />
                 <SignDocumentButton
                   documentType="certificate"
                   documentId={selectedReport?.id || ''}
