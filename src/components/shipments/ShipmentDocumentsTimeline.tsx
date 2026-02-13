@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { usePDFExport } from '@/hooks/usePDFExport';
 import {
   FileSignature,
   FileCheck,
@@ -22,6 +23,9 @@ import {
   Bot,
   AlertTriangle,
   RefreshCw,
+  Printer,
+  Download,
+  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -39,6 +43,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface ShipmentDocumentsTimelineProps {
   shipment: {
@@ -83,6 +93,13 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejecting, setRejecting] = useState(false);
   const [generatingDocs, setGeneratingDocs] = useState(false);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
+  
+  const printRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, printContent, isExporting } = usePDFExport({
+    filename: `document-chain-${shipment.shipment_number}`,
+    orientation: 'portrait',
+  });
 
   // Fetch all declarations for this shipment
   const { data: declarations = [], refetch: refetchDeclarations } = useQuery({
@@ -149,7 +166,6 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
     }
   };
 
-  // Auto-generate all missing documents for this shipment
   const handleGenerateMissingDocs = useCallback(async () => {
     if (!profile?.id) {
       toast.error('يجب تسجيل الدخول أولاً');
@@ -159,37 +175,20 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
     let created = 0;
     try {
       const status = shipment.status;
-      
-      // Generator declaration - should exist for approved/registered/in_transit/delivered/confirmed
       if (['approved', 'registered', 'in_transit', 'delivered', 'confirmed'].includes(status) && shipment.generator_id) {
-        try {
-          await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile.id);
-          created++;
-        } catch (e) { console.error('Generator declaration:', e); }
+        try { await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile.id); created++; } catch (e) { console.error('Generator declaration:', e); }
       }
-
-      // Recycler declaration - should exist for delivered/confirmed
       if (['delivered', 'confirmed'].includes(status) && shipment.recycler_id) {
-        try {
-          await autoCreateRecyclerDeclaration(shipment.id, shipment.recycler_id, profile.id);
-          created++;
-        } catch (e) { console.error('Recycler declaration:', e); }
+        try { await autoCreateRecyclerDeclaration(shipment.id, shipment.recycler_id, profile.id); created++; } catch (e) { console.error('Recycler declaration:', e); }
       }
-
-      // Receipt - should exist for in_transit/delivered/confirmed
       if (['in_transit', 'delivered', 'confirmed'].includes(status) && shipment.transporter_id) {
-        try {
-          await autoCreateReceipt(shipment.id, shipment.transporter_id, profile.id);
-          created++;
-        } catch (e) { console.error('Receipt:', e); }
+        try { await autoCreateReceipt(shipment.id, shipment.transporter_id, profile.id); created++; } catch (e) { console.error('Receipt:', e); }
       }
-
       if (created > 0) {
         toast.success(`تم إنشاء ${created} مستند(ات) مفقودة بنجاح`);
       } else {
         toast.info('جميع المستندات المتاحة موجودة بالفعل');
       }
-      
       refetchDeclarations();
       onRefresh?.();
     } catch (error) {
@@ -280,27 +279,243 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
     return 'border-muted bg-muted/10';
   };
 
+  const declarationTypeLabels: Record<string, string> = {
+    'generator_handover': 'إقرار تسليم المولّد',
+    'transporter_delivery': 'إقرار تسليم الناقل',
+    'recycler_receipt': 'إقرار استلام المدوّر',
+  };
+
+  // Printable document chain content
+  const PrintableContent = () => (
+    <div ref={printRef} dir="rtl" style={{ fontFamily: 'Cairo, sans-serif', padding: '20px', backgroundColor: '#fff', color: '#000' }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: '24px', borderBottom: '3px solid #1a56db', paddingBottom: '16px' }}>
+        <h1 style={{ fontSize: '22px', fontWeight: 'bold', margin: '0 0 4px 0', color: '#1a56db' }}>
+          سلسلة مستندات الشحنة
+        </h1>
+        <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
+          تقرير شامل لسلسلة الحيازة والمستندات القانونية
+        </p>
+      </div>
+
+      {/* Shipment Info */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '12px', color: '#666' }}>رقم الشحنة</div>
+          <div style={{ fontSize: '16px', fontWeight: 'bold' }}>{shipment.shipment_number}</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', color: '#666' }}>نوع المخلفات</div>
+          <div style={{ fontSize: '14px', fontWeight: '600' }}>{shipment.waste_type}</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', color: '#666' }}>الكمية</div>
+          <div style={{ fontSize: '14px', fontWeight: '600' }}>{shipment.quantity} {shipment.unit || 'طن'}</div>
+        </div>
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontSize: '12px', color: '#666' }}>الحالة</div>
+          <div style={{ fontSize: '14px', fontWeight: '600' }}>{shipment.status}</div>
+        </div>
+      </div>
+
+      {/* Parties */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+        {shipment.generator?.name && (
+          <div style={{ flex: 1, padding: '10px', border: '1px solid #bfdbfe', borderRadius: '8px', backgroundColor: '#eff6ff' }}>
+            <div style={{ fontSize: '10px', color: '#3b82f6', fontWeight: 'bold' }}>🏭 المولّد</div>
+            <div style={{ fontSize: '13px', fontWeight: '600' }}>{shipment.generator.name}</div>
+          </div>
+        )}
+        {shipment.transporter?.name && (
+          <div style={{ flex: 1, padding: '10px', border: '1px solid #e9d5ff', borderRadius: '8px', backgroundColor: '#faf5ff' }}>
+            <div style={{ fontSize: '10px', color: '#9333ea', fontWeight: 'bold' }}>🚚 الناقل</div>
+            <div style={{ fontSize: '13px', fontWeight: '600' }}>{shipment.transporter.name}</div>
+          </div>
+        )}
+        {(shipment.recycler?.name || shipment.manual_disposal_name) && (
+          <div style={{ flex: 1, padding: '10px', border: '1px solid #a7f3d0', borderRadius: '8px', backgroundColor: '#ecfdf5' }}>
+            <div style={{ fontSize: '10px', color: '#059669', fontWeight: 'bold' }}>♻️ المدوّر/جهة التخلص</div>
+            <div style={{ fontSize: '13px', fontWeight: '600' }}>{shipment.recycler?.name || shipment.manual_disposal_name}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Completion Summary */}
+      <div style={{ marginBottom: '16px', padding: '10px 16px', backgroundColor: completedCount === totalSteps ? '#ecfdf5' : '#fffbeb', borderRadius: '8px', border: `1px solid ${completedCount === totalSteps ? '#a7f3d0' : '#fde68a'}`, textAlign: 'center' }}>
+        <span style={{ fontSize: '14px', fontWeight: 'bold', color: completedCount === totalSteps ? '#059669' : '#d97706' }}>
+          {completedCount === totalSteps ? '✅ سلسلة المستندات مكتملة' : `⏳ ${completedCount} من ${totalSteps} مستندات مكتملة`}
+        </span>
+      </div>
+
+      {/* Document Steps */}
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#f1f5f9' }}>
+            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #cbd5e1', fontSize: '12px' }}>المستند</th>
+            <th style={{ padding: '10px', textAlign: 'center', borderBottom: '2px solid #cbd5e1', fontSize: '12px' }}>الحالة</th>
+            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '2px solid #cbd5e1', fontSize: '12px' }}>بواسطة</th>
+            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '2px solid #cbd5e1', fontSize: '12px' }}>التاريخ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {steps.map((step) => (
+            <tr key={step.key} style={{ borderBottom: '1px solid #e2e8f0' }}>
+              <td style={{ padding: '10px', fontSize: '13px', fontWeight: '600' }}>
+                {step.label}
+                {step.autoGenerated && <span style={{ fontSize: '10px', color: '#9333ea', marginRight: '6px' }}>(🤖 تلقائي)</span>}
+              </td>
+              <td style={{ padding: '10px', textAlign: 'center' }}>
+                <span style={{
+                  padding: '3px 10px',
+                  borderRadius: '12px',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  backgroundColor: step.status === 'completed' ? '#dcfce7' : step.status === 'rejected' ? '#fee2e2' : '#f3f4f6',
+                  color: step.status === 'completed' ? '#166534' : step.status === 'rejected' ? '#991b1b' : '#6b7280',
+                }}>
+                  {step.status === 'completed' ? '✓ مكتمل' : step.status === 'rejected' ? '✗ مرفوض' : '⏳ معلق'}
+                </span>
+              </td>
+              <td style={{ padding: '10px', fontSize: '12px' }}>{step.signedBy || '—'}</td>
+              <td style={{ padding: '10px', fontSize: '12px', textAlign: 'left' }}>
+                {step.signedAt ? format(new Date(step.signedAt), 'dd/MM/yyyy HH:mm', { locale: ar }) : '—'}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* Declarations Detail */}
+      {declarations.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '2px solid #e2e8f0', paddingBottom: '6px' }}>
+            📄 تفاصيل الإقرارات
+          </h3>
+          {declarations.map((decl: any) => (
+            <div key={decl.id} style={{ marginBottom: '12px', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#fafafa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '13px', fontWeight: 'bold' }}>
+                  {declarationTypeLabels[decl.declaration_type] || decl.declaration_type}
+                </span>
+                <span style={{
+                  padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 'bold',
+                  backgroundColor: decl.status === 'active' ? '#dcfce7' : decl.status === 'rejected' ? '#fee2e2' : '#f3f4f6',
+                  color: decl.status === 'active' ? '#166534' : decl.status === 'rejected' ? '#991b1b' : '#6b7280',
+                }}>
+                  {decl.status === 'active' ? 'فعال' : decl.status === 'rejected' ? 'مرفوض' : 'معلق'}
+                </span>
+              </div>
+              <div style={{ fontSize: '11px', color: '#666', lineHeight: '1.8' }}>
+                {decl.driver_name && <div>🚛 السائق: {decl.driver_name} {decl.driver_national_id ? `(${decl.driver_national_id})` : ''}</div>}
+                {decl.generator_name && <div>🏭 المولّد: {decl.generator_name}</div>}
+                {decl.transporter_name && <div>🚚 الناقل: {decl.transporter_name}</div>}
+                {decl.recycler_name && <div>♻️ المدوّر: {decl.recycler_name}</div>}
+                <div>📅 التاريخ: {format(new Date(decl.declared_at), 'dd/MM/yyyy HH:mm:ss', { locale: ar })}</div>
+                {decl.auto_generated && <div>🤖 تم الإنشاء تلقائياً بواسطة النظام</div>}
+              </div>
+              {decl.declaration_text && (
+                <div style={{ marginTop: '8px', padding: '8px', backgroundColor: '#f0f9ff', borderRadius: '6px', fontSize: '10px', lineHeight: '1.6', color: '#334155', borderRight: '3px solid #3b82f6' }}>
+                  {decl.declaration_text.substring(0, 300)}{decl.declaration_text.length > 300 ? '...' : ''}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Receipts Detail */}
+      {receipts.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '2px solid #e2e8f0', paddingBottom: '6px' }}>
+            🧾 شهادات الاستلام
+          </h3>
+          {receipts.map((rcp: any) => (
+            <div key={rcp.id} style={{ marginBottom: '10px', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#fafafa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '13px', fontWeight: 'bold' }}>رقم الشهادة: {rcp.receipt_number}</span>
+                <span style={{
+                  padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 'bold',
+                  backgroundColor: rcp.status === 'confirmed' ? '#dcfce7' : '#fef3c7',
+                  color: rcp.status === 'confirmed' ? '#166534' : '#92400e',
+                }}>
+                  {rcp.status === 'confirmed' ? 'مؤكد' : 'معلق'}
+                </span>
+              </div>
+              {rcp.notes && <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>{rcp.notes}</div>}
+              <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                📅 {format(new Date(rcp.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#94a3b8' }}>
+        <div>تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })}</div>
+        <div>منصة إدارة النفايات — سلسلة الحيازة الرقمية</div>
+        <div>الشحنة: {shipment.shipment_number}</div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <Card>
         <CardHeader className="text-right pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="outline" className="text-xs">
                 {completedCount}/{totalSteps} مكتمل
               </Badge>
               {completedCount < totalSteps && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs gap-1"
-                  onClick={handleGenerateMissingDocs}
-                  disabled={generatingDocs}
-                >
+                <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleGenerateMissingDocs} disabled={generatingDocs}>
                   <RefreshCw className={`w-3 h-3 ${generatingDocs ? 'animate-spin' : ''}`} />
                   {generatingDocs ? 'جارٍ الإنشاء...' : 'إنشاء المفقودة'}
                 </Button>
               )}
+              {/* Print / PDF / Preview Actions */}
+              <div className="flex items-center gap-1 no-print">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => setShowPrintPreview(true)}
+                >
+                  <Eye className="w-3 h-3" />
+                  عرض
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={() => {
+                    // Brief delay for render
+                    setShowPrintPreview(true);
+                    setTimeout(() => {
+                      printContent(printRef.current);
+                    }, 500);
+                  }}
+                >
+                  <Printer className="w-3 h-3" />
+                  طباعة
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  disabled={isExporting}
+                  onClick={() => {
+                    setShowPrintPreview(true);
+                    setTimeout(() => {
+                      exportToPDF(printRef.current);
+                    }, 500);
+                  }}
+                >
+                  <Download className="w-3 h-3" />
+                  PDF
+                </Button>
+              </div>
             </div>
             <CardTitle className="flex items-center gap-2 text-lg">
               <FileText className="w-5 h-5 text-primary" />
@@ -315,7 +530,6 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
               const isRejected = step.status === 'rejected';
               return (
                 <div key={step.key} className="flex gap-3" dir="rtl">
-                  {/* Timeline Line */}
                   <div className="flex flex-col items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${getStepBorderClass(step.status)}`}>
                       {getStatusIcon(step.status)}
@@ -327,7 +541,6 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
                     )}
                   </div>
 
-                  {/* Content */}
                   <div className="flex-1 pb-4">
                     <div className={`p-3 rounded-lg border ${getContentBorderClass(step.status)}`}>
                       <div className="flex items-center justify-between gap-2 mb-1">
@@ -375,23 +588,13 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
                           </div>
                           <div className="flex items-center gap-1">
                             {step.data && step.key !== 'receipt' && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-[10px] px-2"
-                                onClick={() => setShowDeclarationView(step.data)}
-                              >
+                              <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => setShowDeclarationView(step.data)}>
                                 <FileSignature className="w-3 h-3 ml-1" />
                                 عرض
                               </Button>
                             )}
                             {step.canReject && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-[10px] px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => setRejectingDeclaration(step.data)}
-                              >
+                              <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setRejectingDeclaration(step.data)}>
                                 <XCircle className="w-3 h-3 ml-1" />
                                 إلغاء الإقرار
                               </Button>
@@ -423,6 +626,40 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
           </div>
         </CardContent>
       </Card>
+
+      {/* Print Preview Dialog */}
+      <Dialog open={showPrintPreview} onOpenChange={setShowPrintPreview}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-primary" />
+              معاينة سلسلة المستندات
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center gap-2 pb-3 border-b no-print">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1"
+              onClick={() => printContent(printRef.current)}
+            >
+              <Printer className="w-4 h-4" />
+              طباعة
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="gap-1"
+              disabled={isExporting}
+              onClick={() => exportToPDF(printRef.current)}
+            >
+              <Download className="w-4 h-4" />
+              {isExporting ? 'جارٍ التصدير...' : 'حفظ PDF'}
+            </Button>
+          </div>
+          <PrintableContent />
+        </DialogContent>
+      </Dialog>
 
       {/* Rejection Dialog */}
       <AlertDialog open={!!rejectingDeclaration} onOpenChange={(open) => { if (!open) { setRejectingDeclaration(null); setRejectionReason(''); } }}>
