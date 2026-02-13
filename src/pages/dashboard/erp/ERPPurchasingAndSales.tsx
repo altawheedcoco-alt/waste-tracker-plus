@@ -134,8 +134,8 @@ const ERPPurchasingAndSales = () => {
           {[
             { label: 'أوامر الشراء', value: purchaseOrders.length, icon: ShoppingCart, color: 'text-blue-600' },
             { label: 'أوامر البيع', value: salesOrders.length, icon: TrendingUp, color: 'text-green-600' },
-            { label: 'إجمالي المشتريات', value: `${totalPurchases.toLocaleString()} ر.س`, icon: Receipt, color: 'text-red-600' },
-            { label: 'إجمالي المبيعات', value: `${totalSales.toLocaleString()} ر.س`, icon: FileText, color: 'text-primary' },
+            { label: 'إجمالي المشتريات', value: `${totalPurchases.toLocaleString()} ج.م`, icon: Receipt, color: 'text-red-600' },
+            { label: 'إجمالي المبيعات', value: `${totalSales.toLocaleString()} ج.م`, icon: FileText, color: 'text-primary' },
           ].map(s => (
             <Card key={s.label}>
               <CardContent className="p-4 text-right">
@@ -194,8 +194,8 @@ const ERPPurchasingAndSales = () => {
                       <TableRow key={po.id}>
                         <TableCell className="font-mono">{po.po_number}</TableCell>
                         <TableCell>{po.supplier_name}</TableCell>
-                        <TableCell>{new Date(po.order_date).toLocaleDateString('ar-SA')}</TableCell>
-                        <TableCell>{(po.total_amount || 0).toLocaleString()} ر.س</TableCell>
+                        <TableCell>{new Date(po.order_date).toLocaleDateString('ar-EG')}</TableCell>
+                        <TableCell>{(po.total_amount || 0).toLocaleString()} ج.م</TableCell>
                         <TableCell><Badge variant="outline">{poStatusLabels[po.status || ''] || po.status}</Badge></TableCell>
                       </TableRow>
                     ))}
@@ -239,8 +239,8 @@ const ERPPurchasingAndSales = () => {
                       <TableRow key={so.id}>
                         <TableCell className="font-mono">{so.so_number}</TableCell>
                         <TableCell>{so.customer_name}</TableCell>
-                        <TableCell>{new Date(so.order_date).toLocaleDateString('ar-SA')}</TableCell>
-                        <TableCell>{(so.total_amount || 0).toLocaleString()} ر.س</TableCell>
+                        <TableCell>{new Date(so.order_date).toLocaleDateString('ar-EG')}</TableCell>
+                        <TableCell>{(so.total_amount || 0).toLocaleString()} ج.م</TableCell>
                         <TableCell><Badge variant="outline">{soStatusLabels[so.status || ''] || so.status}</Badge></TableCell>
                       </TableRow>
                     ))}
@@ -286,9 +286,9 @@ const ERPPurchasingAndSales = () => {
                       <TableRow key={q.id}>
                         <TableCell className="font-mono">{q.quotation_number}</TableCell>
                         <TableCell>{q.customer_name}</TableCell>
-                        <TableCell>{new Date(q.quote_date).toLocaleDateString('ar-SA')}</TableCell>
-                        <TableCell>{q.valid_until ? new Date(q.valid_until).toLocaleDateString('ar-SA') : '-'}</TableCell>
-                        <TableCell>{(q.total_amount || 0).toLocaleString()} ر.س</TableCell>
+                        <TableCell>{new Date(q.quote_date).toLocaleDateString('ar-EG')}</TableCell>
+                        <TableCell>{q.valid_until ? new Date(q.valid_until).toLocaleDateString('ar-EG') : '-'}</TableCell>
+                        <TableCell>{(q.total_amount || 0).toLocaleString()} ج.م</TableCell>
                         <TableCell><Badge variant="outline">{quotStatusLabels[q.status || ''] || q.status}</Badge></TableCell>
                       </TableRow>
                     ))}

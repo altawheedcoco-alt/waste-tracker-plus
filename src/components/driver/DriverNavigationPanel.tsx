@@ -100,7 +100,7 @@ const DriverNavigationPanel = ({
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'ar-SA';
+    utterance.lang = 'ar-EG';
     utterance.rate = 0.9;
     utterance.pitch = 1;
     

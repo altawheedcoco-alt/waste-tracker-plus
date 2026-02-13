@@ -263,7 +263,7 @@ const ERPFinancialDashboard = () => {
     exportToExcel(data, [
       { header: 'التصنيف', key: 'type', width: 15 },
       { header: 'البند', key: 'name', width: 30 },
-      { header: 'المبلغ (ر.س)', key: 'amount', width: 20 },
+      { header: 'المبلغ (ج.م)', key: 'amount', width: 20 },
     ], 'قائمة-الدخل');
   };
 
@@ -278,7 +278,7 @@ const ERPFinancialDashboard = () => {
     exportToExcel(data, [
       { header: 'القسم', key: 'section', width: 25 },
       { header: 'البند', key: 'name', width: 30 },
-      { header: 'المبلغ (ر.س)', key: 'amount', width: 20 },
+      { header: 'المبلغ (ج.م)', key: 'amount', width: 20 },
     ], 'المركز-المالي');
   };
 
@@ -302,7 +302,7 @@ const ERPFinancialDashboard = () => {
     <TableRow className={isTotal ? 'bg-muted/50 font-bold border-t-2' : ''}>
       <TableCell className={`text-right ${bold ? 'font-bold' : ''}`}>{label}</TableCell>
       <TableCell className={`text-left ${bold ? 'font-bold' : ''} ${amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-        {formatCurrency(amount)} ر.س
+        {formatCurrency(amount)} ج.م
       </TableCell>
     </TableRow>
   );
@@ -451,7 +451,7 @@ const ERPFinancialDashboard = () => {
                     <TableRow className="bg-primary/10 border-t-2 border-primary">
                       <TableCell className="text-right font-bold text-lg">صافي الربح / الخسارة</TableCell>
                       <TableCell className={`text-left font-bold text-lg ${reportData.income_statement.net_income >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(reportData.income_statement.net_income)} ر.س
+                        {formatCurrency(reportData.income_statement.net_income)} ج.م
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -598,7 +598,7 @@ const ERPFinancialDashboard = () => {
                     <TableRow className="bg-primary/10 border-t-2 border-primary">
                       <TableCell className="text-right font-bold text-lg">صافي التغير في النقد</TableCell>
                       <TableCell className={`text-left font-bold text-lg ${reportData.cash_flow.net_cash_change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatCurrency(reportData.cash_flow.net_cash_change)} ر.س
+                        {formatCurrency(reportData.cash_flow.net_cash_change)} ج.م
                       </TableCell>
                     </TableRow>
                   </TableBody>

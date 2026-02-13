@@ -45,7 +45,7 @@ const OfficialReportPrint: React.FC<OfficialReportPrintProps> = ({
     weekday: 'long',
   });
 
-  const hijriDate = new Date().toLocaleDateString('ar-SA-u-ca-islamic', {
+  const hijriDate = new Date().toLocaleDateString('ar-EG-u-ca-islamic', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

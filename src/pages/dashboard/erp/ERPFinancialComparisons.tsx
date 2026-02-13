@@ -290,8 +290,8 @@ const ERPFinancialComparisons = () => {
         ) : rows.map((r, i) => (
           <TableRow key={i}>
             <TableCell className="text-right font-medium">{r.label}</TableCell>
-            <TableCell className="text-center font-mono">{fmt(r.current)} ر.س</TableCell>
-            <TableCell className="text-center font-mono text-muted-foreground">{fmt(r.previous)} ر.س</TableCell>
+            <TableCell className="text-center font-mono">{fmt(r.current)} ج.م</TableCell>
+            <TableCell className="text-center font-mono text-muted-foreground">{fmt(r.previous)} ج.م</TableCell>
             <TableCell className="text-center">
               <Badge variant={r.status === 'improved' ? 'default' : 'destructive'} className="gap-1">
                 {r.status === 'improved' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
@@ -313,7 +313,7 @@ const ERPFinancialComparisons = () => {
       <div className="bg-background border rounded-lg p-3 shadow-lg text-right text-sm">
         <p className="font-semibold mb-1">{label}</p>
         {payload.map((p: any, i: number) => (
-          <p key={i} style={{ color: p.color }}>{p.name}: {fmt(p.value)} ر.س</p>
+          <p key={i} style={{ color: p.color }}>{p.name}: {fmt(p.value)} ج.م</p>
         ))}
       </div>
     );
@@ -601,9 +601,9 @@ const ERPFinancialComparisons = () => {
                   <Card>
                     <CardContent className="p-4 text-right">
                       <p className="text-xs text-muted-foreground">إجمالي المبيعات (الشهر الحالي)</p>
-                      <p className="text-xl font-bold text-green-600">{fmt(current?.revenue || 0)} ر.س</p>
+                      <p className="text-xl font-bold text-green-600">{fmt(current?.revenue || 0)} ج.م</p>
                       <p className="text-xs text-muted-foreground mt-2">إجمالي المصاريف التشغيلية</p>
-                      <p className="text-xl font-bold text-red-600">{fmt(opexAnalytics.totalOpex)} ر.س</p>
+                      <p className="text-xl font-bold text-red-600">{fmt(opexAnalytics.totalOpex)} ج.م</p>
                     </CardContent>
                   </Card>
                   <Card>
@@ -612,9 +612,9 @@ const ERPFinancialComparisons = () => {
                       <p className="text-lg font-bold">{opexAnalytics.prevOpexRatio.toFixed(1)}%</p>
                       <p className="text-xs text-muted-foreground mt-2">التفسير</p>
                       <p className="text-sm">
-                        كل <span className="font-bold">1 ر.س</span> مبيعات يُستهلك منه{' '}
+                        كل <span className="font-bold">1 ج.م</span> مبيعات يُستهلك منه{' '}
                         <span className={`font-bold ${opexAnalytics.opexRatio > 70 ? 'text-red-600' : 'text-green-600'}`}>
-                          {(opexAnalytics.opexRatio / 100).toFixed(2)} ر.س
+                          {(opexAnalytics.opexRatio / 100).toFixed(2)} ج.م
                         </span>{' '}
                         مصاريف تشغيلية
                       </p>
@@ -652,7 +652,7 @@ const ERPFinancialComparisons = () => {
                                 <p className="font-semibold mb-1">{label}</p>
                                 {payload.map((p: any, i: number) => (
                                   <p key={i} style={{ color: p.color }}>
-                                    {p.name}: {p.name === 'نسبة الكفاءة' ? `${p.value}%` : `${fmt(p.value)} ر.س`}
+                                    {p.name}: {p.name === 'نسبة الكفاءة' ? `${p.value}%` : `${fmt(p.value)} ج.م`}
                                   </p>
                                 ))}
                               </div>
@@ -678,7 +678,7 @@ const ERPFinancialComparisons = () => {
                       <TableHeader>
                         <TableRow>
                           <TableHead className="text-right">البند</TableHead>
-                          <TableHead className="text-center">القيمة (ر.س)</TableHead>
+                          <TableHead className="text-center">القيمة (ج.م)</TableHead>
                           <TableHead className="text-center">النسبة من المبيعات</TableHead>
                           <TableHead className="text-center">الشهر السابق</TableHead>
                           <TableHead className="text-center">التغير عن الشهر السابق</TableHead>
@@ -752,7 +752,7 @@ const ERPFinancialComparisons = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2 text-right">
-                    <Label>الإيرادات المستهدفة (ر.س)</Label>
+                    <Label>الإيرادات المستهدفة (ج.م)</Label>
                     <Input
                       type="number"
                       value={budgetRevenue || ''}
@@ -762,7 +762,7 @@ const ERPFinancialComparisons = () => {
                     />
                   </div>
                   <div className="space-y-2 text-right">
-                    <Label>المصروفات المخصصة (ر.س)</Label>
+                    <Label>المصروفات المخصصة (ج.م)</Label>
                     <Input
                       type="number"
                       value={budgetExpenses || ''}
@@ -797,10 +797,10 @@ const ERPFinancialComparisons = () => {
                         {budgetComparison.map((r, i) => (
                           <TableRow key={i}>
                             <TableCell className="text-right font-medium">{r.label}</TableCell>
-                            <TableCell className="text-center font-mono">{fmt(r.budget)} ر.س</TableCell>
-                            <TableCell className="text-center font-mono">{fmt(r.actual)} ر.س</TableCell>
+                            <TableCell className="text-center font-mono">{fmt(r.budget)} ج.م</TableCell>
+                            <TableCell className="text-center font-mono">{fmt(r.actual)} ج.م</TableCell>
                             <TableCell className={`text-center font-mono font-bold ${r.positive ? 'text-green-600' : 'text-red-600'}`}>
-                              {r.variance >= 0 ? '+' : ''}{fmt(r.variance)} ر.س
+                              {r.variance >= 0 ? '+' : ''}{fmt(r.variance)} ج.م
                             </TableCell>
                             <TableCell className="text-center">
                               <Badge variant={r.positive ? 'default' : 'destructive'}>
@@ -829,7 +829,7 @@ const ERPFinancialComparisons = () => {
                           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                           <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                           <YAxis type="category" dataKey="label" width={100} tick={{ fontSize: 12 }} />
-                          <Tooltip formatter={(v: number) => `${fmt(v)} ر.س`} />
+                          <Tooltip formatter={(v: number) => `${fmt(v)} ج.م`} />
                           <Legend />
                           <Bar dataKey="budget" name="المخصص" fill="#94a3b8" radius={[0, 4, 4, 0]} barSize={16} />
                           <Bar dataKey="actual" name="الفعلي" radius={[0, 4, 4, 0]} barSize={16}>

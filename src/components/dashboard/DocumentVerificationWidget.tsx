@@ -243,7 +243,7 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
                 <div className="text-right">
                   <span className="text-muted-foreground">التاريخ:</span>
                   <p className="font-medium">
-                    {new Date(result.shipment.created_at).toLocaleDateString('ar-SA')}
+                    {new Date(result.shipment.created_at).toLocaleDateString('ar-EG')}
                   </p>
                 </div>
                 <div className="col-span-2 text-right">

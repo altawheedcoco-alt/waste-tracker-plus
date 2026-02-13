@@ -277,7 +277,7 @@ const ERPRevenueExpensesAnalysis = () => {
       <div className="bg-background border rounded-lg p-3 shadow-lg text-right text-sm">
         <p className="font-semibold mb-1">{label}</p>
         {payload.map((p: any, i: number) => (
-          <p key={i} style={{ color: p.color }}>{p.name}: {fmt(p.value)} ر.س</p>
+          <p key={i} style={{ color: p.color }}>{p.name}: {fmt(p.value)} ج.م</p>
         ))}
       </div>
     );
@@ -334,7 +334,7 @@ const ERPRevenueExpensesAnalysis = () => {
                   <div>
                     <p className="font-bold text-destructive">⚠️ تنبيه: تجاوز الميزانية!</p>
                     <p className="text-sm text-muted-foreground">
-                      المصروفات ({fmt(analytics.totalExpenses)} ر.س) تجاوزت {(budgetThreshold * 100).toFixed(0)}% من الإيرادات ({fmt(analytics.totalRevenue)} ر.س)
+                      المصروفات ({fmt(analytics.totalExpenses)} ج.م) تجاوزت {(budgetThreshold * 100).toFixed(0)}% من الإيرادات ({fmt(analytics.totalRevenue)} ج.م)
                     </p>
                   </div>
                 </CardContent>
@@ -348,7 +348,7 @@ const ERPRevenueExpensesAnalysis = () => {
           {[
             {
               label: 'إجمالي الإيرادات',
-              value: `${fmt(analytics.totalRevenue)} ر.س`,
+              value: `${fmt(analytics.totalRevenue)} ج.م`,
               change: fmtPct(analytics.revenueMoM),
               positive: analytics.revenueMoM >= 0,
               icon: TrendingUp,
@@ -357,7 +357,7 @@ const ERPRevenueExpensesAnalysis = () => {
             },
             {
               label: 'إجمالي المصروفات',
-              value: `${fmt(analytics.totalExpenses)} ر.س`,
+              value: `${fmt(analytics.totalExpenses)} ج.م`,
               change: fmtPct(analytics.expenseMoM),
               positive: analytics.expenseMoM <= 0,
               icon: TrendingDown,
@@ -366,7 +366,7 @@ const ERPRevenueExpensesAnalysis = () => {
             },
             {
               label: 'صافي الربح',
-              value: `${fmt(analytics.netIncome)} ر.س`,
+              value: `${fmt(analytics.netIncome)} ج.م`,
               positive: analytics.netIncome >= 0,
               icon: DollarSign,
               iconBg: 'bg-blue-100 dark:bg-blue-900/30',
@@ -382,14 +382,14 @@ const ERPRevenueExpensesAnalysis = () => {
             },
             {
               label: 'متوسط الإيراد/عميل',
-              value: `${fmt(analytics.arpu)} ر.س`,
+              value: `${fmt(analytics.arpu)} ج.م`,
               icon: Users,
               iconBg: 'bg-cyan-100 dark:bg-cyan-900/30',
               iconColor: 'text-cyan-600',
             },
             {
               label: 'معدل الحرق الشهري',
-              value: `${fmt(analytics.burnRate)} ر.س`,
+              value: `${fmt(analytics.burnRate)} ج.م`,
               icon: Flame,
               iconBg: 'bg-orange-100 dark:bg-orange-900/30',
               iconColor: 'text-orange-600',
@@ -428,7 +428,7 @@ const ERPRevenueExpensesAnalysis = () => {
             </div>
             <Progress value={Math.min(analytics.expenseToRevenueRatio, 100)} className="h-3" />
             <p className="text-xs text-muted-foreground text-right mt-1">
-              كل 1 ر.س إيراد يُستهلك منه {(analytics.expenseToRevenueRatio / 100).toFixed(2)} ر.س مصروفات
+              كل 1 ج.م إيراد يُستهلك منه {(analytics.expenseToRevenueRatio / 100).toFixed(2)} ج.م مصروفات
             </p>
           </CardContent>
         </Card>
@@ -478,7 +478,7 @@ const ERPRevenueExpensesAnalysis = () => {
                         <Pie data={analytics.revenuePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} innerRadius={50} paddingAngle={2}>
                           {analytics.revenuePieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                         </Pie>
-                        <Tooltip formatter={(v: number) => `${fmt(v)} ر.س`} />
+                        <Tooltip formatter={(v: number) => `${fmt(v)} ج.م`} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -516,7 +516,7 @@ const ERPRevenueExpensesAnalysis = () => {
                         <Pie data={analytics.expensePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} innerRadius={50} paddingAngle={2}>
                           {analytics.expensePieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                         </Pie>
-                        <Tooltip formatter={(v: number) => `${fmt(v)} ر.س`} />
+                        <Tooltip formatter={(v: number) => `${fmt(v)} ج.م`} />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -554,7 +554,7 @@ const ERPRevenueExpensesAnalysis = () => {
                     <span className="text-sm font-medium">{item.label}</span>
                   </div>
                   <Progress value={item.pct} className="h-2" />
-                  <p className="text-lg font-bold">{fmt(item.value)} ر.س</p>
+                  <p className="text-lg font-bold">{fmt(item.value)} ج.م</p>
                 </div>
               ))}
             </div>
@@ -568,7 +568,7 @@ const ERPRevenueExpensesAnalysis = () => {
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                   <YAxis type="category" dataKey="name" width={60} />
-                  <Tooltip formatter={(v: number) => `${fmt(v)} ر.س`} />
+                  <Tooltip formatter={(v: number) => `${fmt(v)} ج.م`} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
                     <Cell fill="#3b82f6" />
                     <Cell fill="#f59e0b" />
@@ -603,7 +603,7 @@ const ERPRevenueExpensesAnalysis = () => {
                   ) : analytics.revenues.map((r, i) => (
                     <TableRow key={i}>
                       <TableCell className="text-right font-medium">{r.name}</TableCell>
-                      <TableCell className="text-left text-green-600">{fmt(r.amount)} ر.س</TableCell>
+                      <TableCell className="text-left text-green-600">{fmt(r.amount)} ج.م</TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline" className="text-[10px]">
                           {analytics.totalRevenue > 0 ? (r.amount / analytics.totalRevenue * 100).toFixed(1) : 0}%
@@ -618,7 +618,7 @@ const ERPRevenueExpensesAnalysis = () => {
                   ))}
                   <TableRow className="bg-muted/50 font-bold border-t-2">
                     <TableCell className="text-right">الإجمالي</TableCell>
-                    <TableCell className="text-left text-green-700">{fmt(analytics.totalRevenue)} ر.س</TableCell>
+                    <TableCell className="text-left text-green-700">{fmt(analytics.totalRevenue)} ج.م</TableCell>
                     <TableCell className="text-center"><Badge>100%</Badge></TableCell>
                     <TableCell />
                   </TableRow>
@@ -648,7 +648,7 @@ const ERPRevenueExpensesAnalysis = () => {
                   ) : analytics.expenses.map((e, i) => (
                     <TableRow key={i}>
                       <TableCell className="text-right font-medium">{e.name}</TableCell>
-                      <TableCell className="text-left text-red-600">{fmt(e.amount)} ر.س</TableCell>
+                      <TableCell className="text-left text-red-600">{fmt(e.amount)} ج.م</TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline" className="text-[10px]">
                           {analytics.totalExpenses > 0 ? (e.amount / analytics.totalExpenses * 100).toFixed(1) : 0}%
@@ -663,7 +663,7 @@ const ERPRevenueExpensesAnalysis = () => {
                   ))}
                   <TableRow className="bg-muted/50 font-bold border-t-2">
                     <TableCell className="text-right">الإجمالي</TableCell>
-                    <TableCell className="text-left text-red-700">{fmt(analytics.totalExpenses)} ر.س</TableCell>
+                    <TableCell className="text-left text-red-700">{fmt(analytics.totalExpenses)} ج.م</TableCell>
                     <TableCell className="text-center"><Badge>100%</Badge></TableCell>
                     <TableCell />
                   </TableRow>
@@ -704,7 +704,7 @@ const ERPRevenueExpensesAnalysis = () => {
                     <TableCell>{line.entry?.date ? new Date(line.entry.date).toLocaleDateString('ar-EG') : '-'}</TableCell>
                     <TableCell>{line.entry?.desc || line.description || '-'}</TableCell>
                     <TableCell className="text-left">{Number(line.debit) > 0 ? `${fmt(line.debit)} ج.م` : '-'}</TableCell>
-                    <TableCell className="text-left">{Number(line.credit) > 0 ? `${fmt(line.credit)} ر.س` : '-'}</TableCell>
+                    <TableCell className="text-left">{Number(line.credit) > 0 ? `${fmt(line.credit)} ج.م` : '-'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
