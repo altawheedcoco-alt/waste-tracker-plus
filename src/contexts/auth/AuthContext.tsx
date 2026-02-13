@@ -257,6 +257,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
           });
         }
+      } else {
+        // No profile found - check if this is an OAuth user that needs setup
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        const isOAuthUser = currentUser?.app_metadata?.provider === 'google' || 
+                           currentUser?.identities?.some(i => i.provider === 'google');
+        
+        if (isOAuthUser && !window.location.pathname.includes('/auth/google-setup')) {
+          // Redirect to Google setup page
+          window.location.href = '/auth/google-setup';
+        }
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
