@@ -993,20 +993,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating Actions - Unified Stack for Web & Mobile */}
-          <FloatingActionsStack 
-            actions={[
-              {
-                id: 'create-shipment',
-                icon: <Plus size={isMobile ? 20 : 24} />,
-                onClick: () => startTransition(() => navigate('/dashboard/shipments/new')),
-                label: t('commandPalette.newShipment'),
-                variant: 'primary',
-                visible: isTransporter || isDriver,
-              },
-            ]}
-            position="bottom-left"
-          />
+
+
         </div>
       </div>
     </TooltipProvider>

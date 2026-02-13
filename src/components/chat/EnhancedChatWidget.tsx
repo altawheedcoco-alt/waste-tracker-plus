@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { cn } from '@/lib/utils';
+import { onWidgetToggle } from '@/lib/widgetBus';
 
 import ChatSidebar, { ChatPartner } from './ChatSidebar';
 import ChatHeader from './ChatHeader';
@@ -37,6 +38,16 @@ const EnhancedChatWidget = () => {
   const [loadingPartners, setLoadingPartners] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<ChatPartner | null>(null);
   const [unreadTotal, setUnreadTotal] = useState(0);
+
+  // Listen for unified menu toggle
+  useEffect(() => {
+    return onWidgetToggle((id) => {
+      if (id === 'team-chat') {
+        setIsOpen(true);
+        setView('sidebar');
+      }
+    });
+  }, []);
 
   // Fetch partners when widget opens
   const fetchPartners = useCallback(async () => {
@@ -152,30 +163,6 @@ const EnhancedChatWidget = () => {
 
   return (
     <>
-      {/* Floating Button - Hidden on mobile to reduce clutter (ChatWidget is primary) */}
-      <AnimatePresence>
-        {!isOpen && !isMobile && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleOpen}
-            className={cn(
-              "fixed z-40 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center",
-              "bottom-6 left-6 w-14 h-14"
-            )}
-          >
-            <MessageCircle className="w-6 h-6" />
-            {unreadTotal > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
-                {unreadTotal > 9 ? '9+' : unreadTotal}
-              </span>
-            )}
-          </motion.button>
-        )}
-      </AnimatePresence>
 
       {/* Chat Widget */}
       <AnimatePresence>

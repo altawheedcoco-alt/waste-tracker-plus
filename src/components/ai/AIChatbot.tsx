@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import ReactMarkdown from 'react-markdown';
 import { registerAIChatHandler, unregisterAIChatHandler } from '@/lib/aiChatBus';
+import { onWidgetToggle } from '@/lib/widgetBus';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,6 +22,13 @@ const AIChatbot = () => {
   const [input, setInput] = useState('');
   const { isLoading, streamChat } = useAIAssistant();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Listen for unified menu toggle
+  useEffect(() => {
+    return onWidgetToggle((id) => {
+      if (id === 'ai-chat') setIsOpen(true);
+    });
+  }, []);
 
   // Listen for external "طور" trigger
   useEffect(() => {
@@ -114,22 +122,6 @@ const AIChatbot = () => {
 
   return (
     <>
-      {/* Floating Button - Hidden as ChatWidget handles this */}
-      {/* This component uses the same position as ChatWidget, consider using FloatingActionsStack */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        className="fixed bottom-52 left-4 z-40"
-      >
-        <Button
-          onClick={() => setIsOpen(!isOpen)}
-          size="lg"
-          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg bg-accent text-accent-foreground touch-manipulation"
-        >
-          {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Bot className="w-5 h-5 sm:w-6 sm:h-6" />}
-        </Button>
-      </motion.div>
-
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
