@@ -33,6 +33,9 @@ import AutomationSettingsDialog from '@/components/automation/AutomationSettings
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import PartnerRatingsWidget from '@/components/partners/PartnerRatingsWidget';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
+import WeeklyShipmentChart from './generator/WeeklyShipmentChart';
+import FinancialSummaryWidget from './generator/FinancialSummaryWidget';
+import ComplianceGauge from './generator/ComplianceGauge';
 
 interface ShipmentStats {
   total: number;
@@ -258,7 +261,7 @@ const GeneratorDashboard = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <StoryCircles />
 
       {/* Welcome section */}
@@ -300,6 +303,13 @@ const GeneratorDashboard = () => {
           />
         ))}
       </ResponsiveGrid>
+
+      {/* New: Chart + Compliance + Financial row */}
+      <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'}`}>
+        <WeeklyShipmentChart />
+        <ComplianceGauge />
+        <FinancialSummaryWidget />
+      </div>
 
       {/* Automation Settings */}
       <AutomationSettingsDialog organizationType="generator" />
