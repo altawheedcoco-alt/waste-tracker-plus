@@ -40,6 +40,7 @@ import TransporterReceiptCertificatePrint from './TransporterReceiptCertificateP
 import RecyclingTemplatesLibrary from './RecyclingTemplatesLibrary';
 import type { RecyclingReportTemplate } from '@/lib/recyclingReportTemplates';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 
 interface Shipment {
   id: string;
@@ -517,6 +518,11 @@ const TransporterReceiptCertificateDialog = ({
                 العودة للتعديل
               </Button>
               <div className="flex gap-2 flex-wrap">
+                <ShareDocumentButton
+                  referenceId={shipment.id}
+                  referenceType="receipt"
+                  documentTitle={`شهادة استلام ونقل - ${shipment.shipment_number}`}
+                />
                 <SignDocumentButton
                   documentType="receipt"
                   documentId={shipment.id}

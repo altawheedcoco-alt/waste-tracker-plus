@@ -17,6 +17,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DisposalCertificatePrint from '@/components/disposal/DisposalCertificatePrint';
 import DisposalAccountStatementPrint from '@/components/disposal/DisposalAccountStatementPrint';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 
 interface CompletionFinanceTabProps {
   facilityId?: string | null;
@@ -381,6 +382,12 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
                 <Button size="sm" className="gap-2" onClick={() => handlePrintCert()}>
                   <Printer className="w-4 h-4" /> طباعة الشهادة
                 </Button>
+                <ShareDocumentButton
+                  referenceId={previewCertData?.certificate_number || ''}
+                  referenceType="certificate"
+                  documentTitle="شهادة التخلص الآمن"
+                  size="sm"
+                />
                 <SignDocumentButton
                   documentType="certificate"
                   documentId={previewCertData?.certificate_number || ''}
