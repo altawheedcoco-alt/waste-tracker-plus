@@ -133,16 +133,35 @@ const DocumentArchive = () => {
 
   const isLoading = loadingIssued || loadingReceived || loadingSent;
 
-  // Combine all docs
+  // Combine all docs with deduplication
   const allDocs = useMemo(() => {
     const combined = [...issuedDocs, ...receivedDocs, ...sentDocs];
+    
+    // Deduplicate: use a composite key of (documentId/referenceId + type + source)
+    // Priority: issued > received > sent (keep the most relevant version)
+    const seen = new Map<string, typeof combined[0]>();
+    const sourcePriority: Record<string, number> = { issued: 3, received: 2, sent: 1 };
+    
+    for (const doc of combined) {
+      // Build dedup key from document identifiers
+      const docRef = (doc as any).documentId || (doc as any).referenceId || '';
+      const dedupKey = docRef ? `${doc.type}-${docRef}` : `unique-${doc.id}-${doc.source}`;
+      
+      const existing = seen.get(dedupKey);
+      if (!existing || (sourcePriority[doc.source] || 0) > (sourcePriority[existing.source] || 0)) {
+        seen.set(dedupKey, doc);
+      }
+    }
+    
+    const deduped = Array.from(seen.values());
+    
     // Sort
-    combined.sort((a, b) => {
+    deduped.sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       return sortDesc ? dateB - dateA : dateA - dateB;
     });
-    return combined;
+    return deduped;
   }, [issuedDocs, receivedDocs, sentDocs, sortDesc]);
 
   // Filter by tab and search
