@@ -36,6 +36,7 @@ import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import WeeklyShipmentChart from './generator/WeeklyShipmentChart';
 import FinancialSummaryWidget from './generator/FinancialSummaryWidget';
 import ComplianceGauge from './generator/ComplianceGauge';
+import DashboardBrief from './generator/DashboardBrief';
 
 interface ShipmentStats {
   total: number;
@@ -261,11 +262,11 @@ const GeneratorDashboard = () => {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <StoryCircles />
 
       {/* Welcome section */}
-      <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'}`}>
+      <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
         <div className={`flex items-center gap-2 flex-wrap ${isMobile ? 'order-2' : ''}`}>
           <SmartRequestDialog buttonText={isMobile ? 'طلب' : 'طلب تقارير'} buttonVariant="default" />
           <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
@@ -285,73 +286,45 @@ const GeneratorDashboard = () => {
         </div>
       </div>
 
-      {/* Stats grid */}
-      <ResponsiveGrid cols={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-        {statCards.map((stat, index) => (
-          <InteractiveStatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-            gradient={stat.gradient}
-            color={stat.color}
-            bgColor={stat.bgColor}
-            delay={index * 0.05}
-            detailSections={stat.detailSections}
-            detailTitle={stat.title}
-            detailDescription="اضغط على العناصر لمزيد من التفاصيل"
-          />
-        ))}
-      </ResponsiveGrid>
+      {/* ★ Comprehensive Daily Brief */}
+      <DashboardBrief />
 
-      {/* New: Chart + Compliance + Financial row */}
-      <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2 lg:grid-cols-3'}`}>
+      {/* Chart + Compliance row */}
+      <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
         <WeeklyShipmentChart />
         <ComplianceGauge />
-        <FinancialSummaryWidget />
       </div>
 
-      {/* Automation Settings */}
-      <AutomationSettingsDialog organizationType="generator" />
-
-      {/* Daily Operations Summary */}
-      <DailyOperationsSummary />
-
-      {/* Operational Alerts */}
-      <OperationalAlertsWidget />
-
-      {/* Unified Document Search */}
-      <UnifiedDocumentSearch />
-
-      {/* Driver Code Lookup */}
-      <DriverCodeLookup />
-
-      {/* Active Shipment Tracking */}
-      <GeneratorTrackingWidget />
-
-      {/* Disposal Status Radar */}
-      <DisposalRadarWidget />
-
-      {/* ESG Sustainability Report */}
-      <ESGReportWidget />
-
-      {/* Partner Ratings */}
-      <PartnerRatingsWidget />
-
-      {/* Pending Approvals Widget */}
-      <PendingApprovalsWidget />
-
-      {/* Quick Actions */}
+      {/* Quick Actions - moved up for easy access */}
       <QuickActionsGrid
         actions={quickActions}
         title="الإجراءات السريعة"
         subtitle="الوظائف المستخدمة بكثرة"
       />
 
-      {/* Legal Compliance Engine */}
-      <LegalComplianceWidget />
+      {/* Search & Verification */}
+      <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+        <UnifiedDocumentSearch />
+        <DriverCodeLookup />
+      </div>
 
-      {/* Legal Archive */}
+      {/* Operational Widgets */}
+      <DailyOperationsSummary />
+      <OperationalAlertsWidget />
+
+      {/* Tracking & Monitoring */}
+      <GeneratorTrackingWidget />
+      <DisposalRadarWidget />
+
+      {/* Reports & Compliance */}
+      <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+        <ESGReportWidget />
+        <PartnerRatingsWidget />
+      </div>
+
+      <PendingApprovalsWidget />
+      <AutomationSettingsDialog organizationType="generator" />
+      <LegalComplianceWidget />
       <LegalArchiveWidget />
 
       {/* Recent shipments */}
