@@ -15,43 +15,48 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const formData = await req.formData();
-    const imageFile = formData.get("image") as File;
+    const userDescription = formData.get("description") as string || "";
+    
+    // Collect all images
+    const imageContents: { type: string; image_url: { url: string } }[] = [];
+    
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith("image") && value instanceof File) {
+        const arrayBuffer = await value.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        let binary = "";
+        for (let i = 0; i < uint8Array.length; i++) {
+          binary += String.fromCharCode(uint8Array[i]);
+        }
+        const base64Image = btoa(binary);
+        const mimeType = value.type || "image/jpeg";
+        imageContents.push({
+          type: "image_url",
+          image_url: { url: `data:${mimeType};base64,${base64Image}` },
+        });
+      }
+    }
 
-    if (!imageFile) {
-      return new Response(JSON.stringify({ error: "No image provided" }), {
+    if (imageContents.length === 0) {
+      return new Response(JSON.stringify({ error: "No images provided" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const arrayBuffer = await imageFile.arrayBuffer();
-    const uint8Array = new Uint8Array(arrayBuffer);
-    let binary = "";
-    for (let i = 0; i < uint8Array.length; i++) {
-      binary += String.fromCharCode(uint8Array[i]);
-    }
-    const base64Image = btoa(binary);
-    const mimeType = imageFile.type || "image/jpeg";
+    const descriptionContext = userDescription
+      ? `\n\nوصف المستخدم للمحتوى: "${userDescription}" - استخدم هذا الوصف كمرجع إضافي لتحسين دقة التحليل والتسعير.`
+      : "";
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `أنت خبير متخصص في تحليل وتصنيف المخلفات والنفايات. حلل هذه الصورة بدقة متناهية واستخرج تقريراً تفصيلياً شاملاً.
+    const imageCountNote = imageContents.length > 1
+      ? `\n\nملاحظة: تم رفع ${imageContents.length} صور. قم بتحليل جميع الصور معاً كشحنة واحدة واحسب إجمالي المكونات من كل الصور.`
+      : "";
+
+    const prompt = `أنت خبير متخصص في تحليل وتصنيف المخلفات والنفايات وتسعيرها في السوق المصري. حلل هذه الصور بدقة متناهية واستخرج تقريراً تفصيلياً شاملاً.${descriptionContext}${imageCountNote}
 
 أجب بصيغة JSON فقط بالشكل التالي:
 {
-  "overall_description": "وصف شامل لمحتوى الصورة بالعربية (3-5 جمل)",
+  "overall_description": "وصف شامل لمحتوى الصور بالعربية (3-5 جمل)",
   "estimated_total_weight_kg": رقم تقديري للوزن الكلي بالكيلوجرام,
   "weight_confidence": "high/medium/low",
   "overall_condition": "جيدة/متوسطة/رديئة/مختلطة",
@@ -102,7 +107,7 @@ serve(async (req) => {
         "name": "اسم المكون بالعربية",
         "waste_type": "نوع المخلف",
         "estimated_weight_kg": وزن المكون بالكيلو,
-        "price_per_ton_egp": سعر الطن الواحد من هذا الصنف بالجنيه المصري (بناءً على أسعار السوق المصري الحالية),
+        "price_per_ton_egp": سعر الطن الواحد من هذا الصنف بالجنيه المصري (بناءً على أسعار السوق المصري الحالية التقريبية),
         "total_value_egp": القيمة الإجمالية لهذا المكون بالجنيه المصري (الوزن/1000 × سعر الطن),
         "price_source": "مصدر التسعير (سوق محلي/بورصة/تقدير)"
       }
@@ -116,21 +121,25 @@ serve(async (req) => {
 }
 
 تعليمات مهمة:
-- حلل كل مكون مرئي في الصورة بشكل منفصل
+- حلل كل مكون مرئي في الصور بشكل منفصل
 - قدر الأوزان بناءً على الحجم المرئي والكثافة المعروفة لكل مادة
 - احسب النسب بدقة بحيث يكون مجموعها 100%
+- قدم أسعاراً واقعية بناءً على السوق المصري الحالي لعام 2025-2026
+- إذا قدم المستخدم وصفاً، استخدمه لتحسين دقة التعرف والتسعير
 - إذا لم تستطع تحديد شيء، استخدم null
-- أجب بـ JSON صالح فقط بدون أي نص إضافي أو markdown`,
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64Image}`,
-                },
-              },
-            ],
-          },
-        ],
+- أجب بـ JSON صالح فقط بدون أي نص إضافي أو markdown`;
+
+    const messageContent: any[] = [{ type: "text", text: prompt }, ...imageContents];
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [{ role: "user", content: messageContent }],
         temperature: 0.2,
       }),
     });
