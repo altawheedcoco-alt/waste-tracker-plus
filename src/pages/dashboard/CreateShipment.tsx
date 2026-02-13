@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ArrowRight } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CreateShipmentForm from '@/components/shipments/CreateShipmentForm';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface CreateShipmentProps {
   isModal?: boolean;
@@ -14,14 +15,15 @@ interface CreateShipmentProps {
 
 const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentProps) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   if (isModal) {
     return (
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>إنشاء شحنة جديدة</DialogTitle>
-            <DialogDescription>إدخال بيانات الشحنة الجديدة</DialogDescription>
+            <DialogTitle>{t('shipments.createNewShipment')}</DialogTitle>
+            <DialogDescription>{t('shipments.createNewShipmentDesc')}</DialogDescription>
           </DialogHeader>
           <CreateShipmentForm onSuccess={onSuccess} onClose={onClose} />
         </DialogContent>
@@ -37,8 +39,8 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
             <ArrowRight className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">إنشاء شحنة جديدة</h1>
-            <p className="text-muted-foreground">إدخال بيانات الشحنة الجديدة</p>
+            <h1 className="text-2xl font-bold">{t('shipments.createNewShipment')}</h1>
+            <p className="text-muted-foreground">{t('shipments.createNewShipmentDesc')}</p>
           </div>
         </div>
 
