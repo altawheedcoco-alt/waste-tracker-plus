@@ -15,12 +15,14 @@ import { toast } from 'sonner';
 import { useExcelExport } from '@/hooks/useExcelExport';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, ReferenceLine, ComposedChart, Area, Cell
+  Tooltip, Legend, ResponsiveContainer, ReferenceLine, ComposedChart, Area, Cell,
+  AreaChart, PieChart, Pie
 } from 'recharts';
 import {
   TrendingUp, TrendingDown, Download, Calendar, ArrowUpRight,
-  ArrowDownRight, Scale, GitCompareArrows, Target, BarChart3
+  ArrowDownRight, Scale, GitCompareArrows, Target, BarChart3, Percent, Activity
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 
 const COLORS_POSITIVE = '#10b981';
@@ -184,6 +186,58 @@ const ERPFinancialComparisons = () => {
     return idx >= 0 ? costVsRevenueTrend[idx].month : null;
   }, [costVsRevenueTrend]);
 
+  // Opex Ratio analytics
+  const opexAnalytics = useMemo(() => {
+    if (!current || !previous || !monthlyData) return null;
+
+    // Current month opex items (expenses only, excluding COGS which starts with 5)
+    const opexItems = current.items
+      .filter(i => i.type === 'expense')
+      .map(i => ({
+        name: i.name,
+        amount: i.amount,
+        ratioToSales: current.revenue > 0 ? (i.amount / current.revenue * 100) : 0,
+      }))
+      .sort((a, b) => b.amount - a.amount);
+
+    // Previous month opex items for comparison
+    const prevItemMap = new Map<string, { name: string; type: string; amount: number }>(previous.items.filter(i => i.type === 'expense').map(i => [i.name, i]));
+
+    const opexItemsWithChange = opexItems.map(item => {
+      const prevItem = prevItemMap.get(item.name);
+      const prevRatio = prevItem && previous.revenue > 0 ? (prevItem.amount / previous.revenue * 100) : 0;
+      return {
+        ...item,
+        prevAmount: prevItem?.amount || 0,
+        prevRatio,
+        ratioChange: item.ratioToSales - prevRatio,
+        status: item.ratioToSales <= prevRatio ? 'improved' as const : item.ratioToSales === prevRatio ? 'stable' as const : 'declined' as const,
+      };
+    });
+
+    const totalOpex = current.expenses;
+    const opexRatio = current.revenue > 0 ? (totalOpex / current.revenue * 100) : 0;
+    const prevOpexRatio = previous.revenue > 0 ? (previous.expenses / previous.revenue * 100) : 0;
+    const opexRatioChange = opexRatio - prevOpexRatio;
+
+    // Trend data for area chart
+    const opexTrend = monthlyData.slice(1).map(m => ({
+      month: m.shortLabel,
+      مبيعات: m.revenue,
+      'مصاريف تشغيلية': m.expenses,
+      'نسبة الكفاءة': m.revenue > 0 ? +(m.expenses / m.revenue * 100).toFixed(1) : 0,
+    }));
+
+    return {
+      totalOpex,
+      opexRatio,
+      prevOpexRatio,
+      opexRatioChange,
+      opexItemsWithChange,
+      opexTrend,
+    };
+  }, [current, previous, monthlyData]);
+
   // Budget vs Actual
   const budgetComparison = useMemo(() => {
     if (!current) return [];
@@ -325,10 +379,11 @@ const ERPFinancialComparisons = () => {
 
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} dir="rtl">
-          <TabsList className="grid grid-cols-4 w-full">
+          <TabsList className="grid grid-cols-5 w-full">
             <TabsTrigger value="mom">شهرية (MoM)</TabsTrigger>
             <TabsTrigger value="yoy">سنوية (YoY)</TabsTrigger>
             <TabsTrigger value="cost-revenue">تكلفة vs إيراد</TabsTrigger>
+            <TabsTrigger value="opex">الكفاءة التشغيلية</TabsTrigger>
             <TabsTrigger value="budget">ميزانية vs فعلي</TabsTrigger>
           </TabsList>
 
@@ -517,6 +572,175 @@ const ERPFinancialComparisons = () => {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Opex Ratio Tab */}
+          <TabsContent value="opex" className="space-y-4">
+            {opexAnalytics && (
+              <>
+                {/* Opex KPI Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-4 text-right">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                          <Percent className="h-5 w-5 text-orange-600" />
+                        </div>
+                        <Badge variant={opexAnalytics.opexRatioChange <= 0 ? 'default' : 'destructive'} className="gap-1">
+                          {opexAnalytics.opexRatioChange <= 0 ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
+                          {fmtPct(opexAnalytics.opexRatioChange)}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">نسبة المصاريف التشغيلية للمبيعات</p>
+                      <p className={`text-2xl font-bold ${opexAnalytics.opexRatio > 70 ? 'text-red-600' : opexAnalytics.opexRatio > 50 ? 'text-orange-600' : 'text-green-600'}`}>
+                        {opexAnalytics.opexRatio.toFixed(1)}%
+                      </p>
+                      <Progress value={Math.min(opexAnalytics.opexRatio, 100)} className="h-2 mt-2" />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-right">
+                      <p className="text-xs text-muted-foreground">إجمالي المبيعات (الشهر الحالي)</p>
+                      <p className="text-xl font-bold text-green-600">{fmt(current?.revenue || 0)} ر.س</p>
+                      <p className="text-xs text-muted-foreground mt-2">إجمالي المصاريف التشغيلية</p>
+                      <p className="text-xl font-bold text-red-600">{fmt(opexAnalytics.totalOpex)} ر.س</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-right">
+                      <p className="text-xs text-muted-foreground">الشهر السابق</p>
+                      <p className="text-lg font-bold">{opexAnalytics.prevOpexRatio.toFixed(1)}%</p>
+                      <p className="text-xs text-muted-foreground mt-2">التفسير</p>
+                      <p className="text-sm">
+                        كل <span className="font-bold">1 ر.س</span> مبيعات يُستهلك منه{' '}
+                        <span className={`font-bold ${opexAnalytics.opexRatio > 70 ? 'text-red-600' : 'text-green-600'}`}>
+                          {(opexAnalytics.opexRatio / 100).toFixed(2)} ر.س
+                        </span>{' '}
+                        مصاريف تشغيلية
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Alert */}
+                {opexAnalytics.opexRatioChange > 2 && (
+                  <Card className="border-destructive bg-destructive/5">
+                    <CardContent className="p-4 text-right">
+                      <p className="font-bold text-destructive">⚠️ نسبة المصاريف التشغيلية ارتفعت بـ {opexAnalytics.opexRatioChange.toFixed(1)} نقطة مئوية مقارنة بالشهر السابق</p>
+                      <p className="text-sm text-muted-foreground">يُنصح بمراجعة بنود المصاريف أدناه لتحديد مصدر الزيادة</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Area Chart: Sales vs Opex trend */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-right text-base">اتجاه المبيعات مقابل المصاريف التشغيلية (12 شهر)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-[350px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <ComposedChart data={opexAnalytics.opexTrend}>
+                          <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                          <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                          <YAxis yAxisId="amount" tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
+                          <YAxis yAxisId="pct" orientation="left" tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                          <Tooltip content={({ active, payload, label }: any) => {
+                            if (!active || !payload?.length) return null;
+                            return (
+                              <div className="bg-background border rounded-lg p-3 shadow-lg text-right text-sm">
+                                <p className="font-semibold mb-1">{label}</p>
+                                {payload.map((p: any, i: number) => (
+                                  <p key={i} style={{ color: p.color }}>
+                                    {p.name}: {p.name === 'نسبة الكفاءة' ? `${p.value}%` : `${fmt(p.value)} ر.س`}
+                                  </p>
+                                ))}
+                              </div>
+                            );
+                          }} />
+                          <Legend />
+                          <Area yAxisId="amount" type="monotone" dataKey="مبيعات" fill={COLORS_REVENUE + '20'} stroke={COLORS_REVENUE} strokeWidth={2} />
+                          <Area yAxisId="amount" type="monotone" dataKey="مصاريف تشغيلية" fill={COLORS_NEGATIVE + '20'} stroke={COLORS_NEGATIVE} strokeWidth={2} />
+                          <Line yAxisId="pct" type="monotone" dataKey="نسبة الكفاءة" stroke={COLORS_COST} strokeWidth={2} dot={{ r: 4 }} strokeDasharray="5 5" />
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Opex Breakdown Table */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-right text-base">تفصيل نسبة كل بند تشغيلي من المبيعات</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-right">البند</TableHead>
+                          <TableHead className="text-center">القيمة (ر.س)</TableHead>
+                          <TableHead className="text-center">النسبة من المبيعات</TableHead>
+                          <TableHead className="text-center">الشهر السابق</TableHead>
+                          <TableHead className="text-center">التغير عن الشهر السابق</TableHead>
+                          <TableHead className="text-center">الحالة</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {opexAnalytics.opexItemsWithChange.length === 0 ? (
+                          <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">لا توجد بيانات</TableCell></TableRow>
+                        ) : (
+                          <>
+                            {opexAnalytics.opexItemsWithChange.map((item, i) => (
+                              <TableRow key={i}>
+                                <TableCell className="text-right font-medium">{item.name}</TableCell>
+                                <TableCell className="text-center font-mono">{fmt(item.amount)}</TableCell>
+                                <TableCell className="text-center">
+                                  <Badge variant="outline">{item.ratioToSales.toFixed(1)}%</Badge>
+                                </TableCell>
+                                <TableCell className="text-center font-mono text-muted-foreground">{item.prevRatio.toFixed(1)}%</TableCell>
+                                <TableCell className="text-center">
+                                  <Badge variant={item.status === 'improved' ? 'default' : item.status === 'stable' ? 'secondary' : 'destructive'} className="gap-1">
+                                    {item.status === 'improved' ? <ArrowDownRight className="h-3 w-3" /> : item.status === 'stable' ? null : <ArrowUpRight className="h-3 w-3" />}
+                                    {item.ratioChange === 0 ? 'ثابت' : fmtPct(item.ratioChange)}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-center text-sm">
+                                  {item.status === 'improved' ? '🟢 متحسن' : item.status === 'stable' ? '⚪ ثابت' : '🔴 تحتاج مراجعة'}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                            {/* Total Row */}
+                            <TableRow className="bg-muted/50 font-bold border-t-2">
+                              <TableCell className="text-right">الإجمالي</TableCell>
+                              <TableCell className="text-center font-mono">{fmt(opexAnalytics.totalOpex)}</TableCell>
+                              <TableCell className="text-center">
+                                <Badge className={opexAnalytics.opexRatio > 70 ? 'bg-red-600' : ''}>{opexAnalytics.opexRatio.toFixed(1)}%</Badge>
+                              </TableCell>
+                              <TableCell className="text-center">{opexAnalytics.prevOpexRatio.toFixed(1)}%</TableCell>
+                              <TableCell className="text-center">
+                                <Badge variant={opexAnalytics.opexRatioChange <= 0 ? 'default' : 'destructive'}>
+                                  {fmtPct(opexAnalytics.opexRatioChange)}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                {opexAnalytics.opexRatioChange <= 0 ? '🟢' : '🔴'}
+                              </TableCell>
+                            </TableRow>
+                          </>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+            {!opexAnalytics && (
+              <Card>
+                <CardContent className="p-8 text-center text-muted-foreground">
+                  لا توجد بيانات كافية لتحليل الكفاءة التشغيلية
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Budget vs Actual Tab */}
