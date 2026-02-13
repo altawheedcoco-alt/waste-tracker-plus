@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Menu, X, LogIn, UserPlus } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
 
   const handleLogin = () => navigate('/auth?mode=login');
   const handleEmployeeLogin = () => navigate('/auth?mode=employee');
@@ -48,6 +48,16 @@ const Header = () => {
           </nav>
 
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full border border-border/60 bg-background/80 backdrop-blur-sm text-sm font-medium text-muted-foreground hover:text-primary hover:border-primary/40 transition-all duration-200"
+              aria-label="Switch language"
+            >
+              <Globe className="w-4 h-4" />
+              <span className="font-semibold text-xs">{language === 'ar' ? 'EN' : 'عربي'}</span>
+            </motion.button>
             <GuideButton />
             <Button variant="outline" size="default" onClick={handleEmployeeLogin} className="gap-2 text-sm lg:text-base">
               <UserPlus className="w-4 h-4" />
@@ -84,6 +94,13 @@ const Header = () => {
                 <NavLink href="#stats" mobile>{t('nav.stats')}</NavLink>
                 <NavLink href="#contact" mobile>{t('nav.contact')}</NavLink>
                 <div className="flex flex-col gap-3 pt-4">
+                  <button
+                    onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+                    className="flex items-center justify-center gap-2 w-full h-11 rounded-lg border border-border/60 bg-background/80 text-sm font-medium text-muted-foreground hover:text-primary transition-colors touch-manipulation"
+                  >
+                    <Globe className="w-4 h-4" />
+                    {language === 'ar' ? 'English' : 'عربي'}
+                  </button>
                   <GuideButton />
                   <Button variant="outline" className="w-full gap-2 h-11 touch-manipulation" onClick={handleEmployeeLogin}>
                     <UserPlus className="w-4 h-4" />
