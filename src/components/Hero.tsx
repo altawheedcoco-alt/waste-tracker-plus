@@ -1,8 +1,16 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Globe, Leaf, Truck } from "lucide-react";
+import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
+
+const quickAccessItems = [
+  { icon: Truck, label: 'ناقل مخلفات', desc: 'شركات نقل المخلفات', mode: 'register', type: 'transporter', color: 'from-primary to-emerald-600' },
+  { icon: Factory, label: 'مولد مخلفات', desc: 'مصانع ومنشآت', mode: 'register', type: 'generator', color: 'from-amber-500 to-orange-600' },
+  { icon: Recycle, label: 'معيد تدوير', desc: 'مرافق إعادة التدوير', mode: 'register', type: 'recycler', color: 'from-cyan-500 to-blue-600' },
+  { icon: Building2, label: 'مرفق تخلص', desc: 'مدافن ومحارق', mode: 'register', type: 'disposal', color: 'from-purple-500 to-violet-600' },
+  { icon: UserCog, label: 'دخول موظف', desc: 'موظفي الشركات', mode: 'employee', type: null, color: 'from-slate-500 to-slate-700' },
+];
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -120,11 +128,43 @@ const Hero = () => {
             </Button>
           </motion.div>
 
+          {/* Quick Access Icons */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="mt-12"
+          >
+            <p className="text-sm text-muted-foreground mb-4">دخول سريع حسب نوع الحساب</p>
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+              {quickAccessItems.map((item, i) => (
+                <motion.button
+                  key={item.label}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 + i * 0.08 }}
+                  whileHover={{ scale: 1.1, y: -4 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate(item.type ? `/auth?mode=${item.mode}&type=${item.type}` : `/auth?mode=${item.mode}`)}
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                >
+                  <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow`}>
+                    <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                  </div>
+                  <span className="text-xs sm:text-sm font-medium text-foreground/80 group-hover:text-primary transition-colors">
+                    {item.label}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground hidden sm:block">{item.desc}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-8 text-sm text-muted-foreground"
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="mt-6 text-sm text-muted-foreground"
           >
             انضم إلينا الآن وابدأ في إدارة مخلفاتك بشكل ذكي ومستدام
           </motion.p>
