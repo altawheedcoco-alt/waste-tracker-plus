@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Check, ChevronsUpDown, Search, Star, AlertTriangle, Leaf, PenLine, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { getStoredCustomWasteTypes, useCustomWasteTypes, CustomWasteType } from '@/hooks/useCustomWasteTypes';
+import { useCustomWasteTypes, CustomWasteType } from '@/hooks/useCustomWasteTypes';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -332,18 +332,9 @@ interface WasteTypeComboboxProps {
 const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [customWasteTypes, setCustomWasteTypes] = useState<CustomWasteType[]>([]);
   const [isManualEntry, setIsManualEntry] = useState(false);
   const [manualInput, setManualInput] = useState('');
-  const { addCustomWasteType } = useCustomWasteTypes();
-
-  useEffect(() => {
-    setCustomWasteTypes(getStoredCustomWasteTypes());
-    const interval = setInterval(() => {
-      setCustomWasteTypes(getStoredCustomWasteTypes());
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
+  const { customWasteTypes, addCustomWasteType } = useCustomWasteTypes();
 
   const handleManualEntry = () => {
     setIsManualEntry(true);
@@ -360,15 +351,12 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
     const customName = manualInput.trim();
 
     // Save to custom waste types for reuse
-    const newType = addCustomWasteType({
+    addCustomWasteType({
       name: customName,
       code: customCode,
       category: 'non-hazardous',
-      parentCategory: 'other',
+      parent_category: 'other',
     });
-
-    // Update local state
-    setCustomWasteTypes(prev => [...prev, newType]);
 
     // Select the new type
     const wasteLabel = `${customCode} - مخلف ${customName}`;
@@ -395,10 +383,10 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
     // Add custom waste types first
     customWasteTypes.forEach(custom => {
       items.push({
-        value: `${custom.parentCategory}:${custom.code}`,
+        value: `${custom.parent_category}:${custom.code}`,
         label: custom.name.startsWith('مخلف') ? custom.name : `مخلف ${custom.name}`,
         code: custom.code,
-        category: custom.parentCategory,
+        category: custom.parent_category,
         categoryLabel: 'أنواع مخصصة',
         isHazardous: custom.category === 'hazardous',
         isCustom: true,

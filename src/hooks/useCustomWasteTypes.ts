@@ -1,63 +1,95 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export interface CustomWasteType {
   id: string;
   name: string;
   code: string;
   category: 'hazardous' | 'non-hazardous';
-  parentCategory: string;
-  hazardLevel?: 'low' | 'medium' | 'high' | 'critical';
+  parent_category: string;
+  hazard_level?: 'low' | 'medium' | 'high' | 'critical' | null;
   recyclable?: boolean;
-  createdAt: string;
+  organization_id: string;
+  created_at: string;
 }
 
-const STORAGE_KEY = 'custom_waste_types';
-
 export const useCustomWasteTypes = () => {
-  const [customWasteTypes, setCustomWasteTypes] = useState<CustomWasteType[]>([]);
+  const { organization } = useAuth();
+  const queryClient = useQueryClient();
+  const orgId = organization?.id;
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        setCustomWasteTypes(JSON.parse(stored));
-      } catch {
-        console.error('Error parsing custom waste types');
+  const { data: customWasteTypes = [], isLoading } = useQuery({
+    queryKey: ['custom-waste-types', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data, error } = await supabase
+        .from('custom_waste_types')
+        .select('*')
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as unknown as CustomWasteType[];
+    },
+    enabled: !!orgId,
+  });
+
+  const addMutation = useMutation({
+    mutationFn: async (wasteType: { name: string; code: string; category: 'hazardous' | 'non-hazardous'; parent_category: string; hazard_level?: string; recyclable?: boolean }) => {
+      if (!orgId) throw new Error('No organization');
+      const { data, error } = await supabase
+        .from('custom_waste_types')
+        .insert({ ...wasteType, organization_id: orgId } as any)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-waste-types', orgId] });
+      toast.success('تم إضافة الصنف بنجاح');
+    },
+    onError: (err: any) => {
+      if (err?.code === '23505') {
+        toast.error('هذا الكود مستخدم بالفعل');
+      } else {
+        toast.error('فشل في إضافة الصنف');
       }
-    }
-  }, []);
+    },
+  });
 
-  // Save to localStorage whenever customWasteTypes changes
-  const saveToStorage = (types: CustomWasteType[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(types));
-    setCustomWasteTypes(types);
-  };
+  const removeMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('custom_waste_types')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-waste-types', orgId] });
+      toast.success('تم حذف الصنف');
+    },
+  });
 
-  const addCustomWasteType = (wasteType: Omit<CustomWasteType, 'id' | 'createdAt'>) => {
-    const newType: CustomWasteType = {
-      ...wasteType,
-      id: `custom-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [...customWasteTypes, newType];
-    saveToStorage(updated);
-    return newType;
+  const addCustomWasteType = (wasteType: { name: string; code: string; category: 'hazardous' | 'non-hazardous'; parent_category: string; hazard_level?: string; recyclable?: boolean }) => {
+    addMutation.mutate(wasteType);
   };
 
   const removeCustomWasteType = (id: string) => {
-    const updated = customWasteTypes.filter(type => type.id !== id);
-    saveToStorage(updated);
+    removeMutation.mutate(id);
   };
 
-  const getCustomHazardousTypes = () => 
+  const getCustomHazardousTypes = () =>
     customWasteTypes.filter(type => type.category === 'hazardous');
 
-  const getCustomNonHazardousTypes = () => 
+  const getCustomNonHazardousTypes = () =>
     customWasteTypes.filter(type => type.category === 'non-hazardous');
 
   return {
     customWasteTypes,
+    isLoading,
     addCustomWasteType,
     removeCustomWasteType,
     getCustomHazardousTypes,
@@ -65,15 +97,11 @@ export const useCustomWasteTypes = () => {
   };
 };
 
-// Static function to get custom waste types (for components that don't use the hook)
-export const getStoredCustomWasteTypes = (): CustomWasteType[] => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch {
-      return [];
-    }
-  }
-  return [];
+// Static function for components that don't use the hook
+export const getStoredCustomWasteTypes = async (organizationId: string): Promise<CustomWasteType[]> => {
+  const { data } = await supabase
+    .from('custom_waste_types')
+    .select('*')
+    .eq('organization_id', organizationId);
+  return (data || []) as unknown as CustomWasteType[];
 };

@@ -177,7 +177,7 @@ export default function PartnerWasteTypes({ partnerId, isExternal = false }: Par
           name: wasteTypeName,
           code: wasteCode,
           category: 'non-hazardous',
-          parentCategory: 'custom',
+          parent_category: 'custom',
         });
       }
 
