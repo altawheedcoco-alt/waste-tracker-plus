@@ -757,6 +757,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
           <div class="footer-content">
             <div class="footer-left">
               <p>تاريخ الطباعة: ${printDate}</p>
+              <p style="margin-top: 4px; font-size: 7pt; color: #6b7280;">📅 تاريخ وصول الشحنة (أول تسجيل على المنظومة): ${receipt.confirmed_at ? new Date(receipt.confirmed_at).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : receipt.created_at ? new Date(receipt.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-'}</p>
             </div>
             <div class="footer-right">
               <span class="verification-code">🔐 ${verificationCode}</span>

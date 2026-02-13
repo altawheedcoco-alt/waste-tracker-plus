@@ -902,6 +902,9 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                   <div style={{ textAlign: 'center', fontSize: '6pt', color: '#9ca3af', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
                     <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
                     <div style={{ marginTop: '2px' }}>رقم التتبع: {shipment.shipment_number} | رقم الوثيقة: {documentSerial}</div>
+                    <div style={{ marginTop: '3px', fontSize: '6pt', color: '#6b7280' }}>
+                      📅 تاريخ وصول الشحنة (أول تسجيل على المنظومة): {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.created_at ? format(new Date(shipment.created_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : '-'}
+                    </div>
                     <div style={{ marginTop: '3px', fontSize: '5pt', fontStyle: 'italic', color: '#a1a1aa' }}>
                       إخلاء مسؤولية: هذا المستند تم إنشاؤه آلياً بناءً على البيانات المدخلة، والمنصة غير مسؤولة عن صحة المعلومات الواردة فيه.
                     </div>

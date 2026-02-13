@@ -261,7 +261,7 @@ const RecyclingCertificatePrint = ({
 
       {/* Main Certificate Content */}
       <div 
-        className="print-container bg-white text-black print:p-0" 
+        className="print-container bg-white text-black print:p-0 print-break-after" 
         dir="rtl" 
         style={{ 
           height: '297mm', 
@@ -271,7 +271,8 @@ const RecyclingCertificatePrint = ({
           fontFamily: 'Cairo, sans-serif',
           fontSize: '9pt',
           overflow: 'hidden',
-          boxSizing: 'border-box'
+          boxSizing: 'border-box',
+          pageBreakAfter: 'always',
         }}
       >
       {/* Header with QR and Barcode */}
@@ -555,6 +556,9 @@ const RecyclingCertificatePrint = ({
         <p style={{ margin: 0 }}>تم إصدار هذه الشهادة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير | تاريخ الإصدار: {currentDate} | رقم المرجع: {shipment.shipment_number}</p>
         <p style={{ margin: '2px 0 0 0', fontSize: '6pt' }}>
           هذه الوثيقة صالحة بدون توقيع خطي في حالة التحقق الإلكتروني عبر رمز QR
+        </p>
+        <p style={{ margin: '4px 0 0 0', fontSize: '7pt', color: '#6b7280' }}>
+          📅 تاريخ وصول الشحنة (أول تسجيل على المنظومة): {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : deliveryDate}
         </p>
       </footer>
     </div>
