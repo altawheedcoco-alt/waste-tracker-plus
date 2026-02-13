@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import CompanyRegistrationForm, { CompanyFormData } from '@/components/auth/CompanyRegistrationForm';
 import { supabase } from '@/integrations/supabase/client';
+import { lovable } from '@/integrations/lovable/index';
 
 // Validation schemas
 const loginSchema = z.object({
@@ -588,11 +589,20 @@ const Auth = () => {
                       type="button"
                       variant="outline"
                       className="w-full gap-2"
-                      onClick={() => {
-                        toast({
-                          title: 'قريباً',
-                          description: 'تسجيل الدخول عبر Google سيكون متاحاً قريباً',
+                      disabled={loading}
+                      onClick={async () => {
+                        setLoading(true);
+                        const { error } = await lovable.auth.signInWithOAuth('google', {
+                          redirect_uri: window.location.origin,
                         });
+                        if (error) {
+                          toast({
+                            title: 'خطأ',
+                            description: 'فشل تسجيل الدخول عبر Google',
+                            variant: 'destructive',
+                          });
+                          setLoading(false);
+                        }
                       }}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24">
