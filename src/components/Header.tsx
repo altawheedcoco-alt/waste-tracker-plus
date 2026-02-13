@@ -1,23 +1,19 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Menu, X, LogIn, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
 import logo from "@/assets/logo.png";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
-  const handleLogin = () => {
-    navigate('/auth?mode=login');
-  };
-
-  const handleEmployeeLogin = () => {
-    navigate('/auth?mode=employee');
-  };
-
+  const handleLogin = () => navigate('/auth?mode=login');
+  const handleEmployeeLogin = () => navigate('/auth?mode=employee');
 
   return (
     <motion.header
@@ -28,68 +24,52 @@ const Header = () => {
     >
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo */}
           <motion.div
             whileHover={{ scale: 1.05 }}
             className="flex items-center gap-2 sm:gap-3 cursor-pointer"
             onClick={() => navigate('/')}
           >
-            <img src={logo} alt="آي ريسايكل" className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
+            <img src={logo} alt={t('landing.systemNameAr')} className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
             <div className="flex flex-col">
               <span className="text-sm sm:text-base lg:text-lg font-bold text-primary tracking-wide">
-                iRecycle Waste Management System
+                {t('landing.systemName')}
               </span>
               <span className="text-xs sm:text-sm lg:text-base font-semibold text-foreground/80">
-                نظام آي ريسايكل لإدارة المخلفات
+                {t('landing.systemNameAr')}
               </span>
             </div>
           </motion.div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-            <NavLink href="#features">المميزات</NavLink>
-            <NavLink href="#services">الخدمات</NavLink>
-            <NavLink href="#stats">الإحصائيات</NavLink>
-            <NavLink href="#contact">تواصل معنا</NavLink>
+            <NavLink href="#features">{t('nav.features')}</NavLink>
+            <NavLink href="#services">{t('nav.services')}</NavLink>
+            <NavLink href="#stats">{t('nav.stats')}</NavLink>
+            <NavLink href="#contact">{t('nav.contact')}</NavLink>
           </nav>
 
-          {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
             <GuideButton />
-
-            <Button
-              variant="outline" 
-              size="default"
-              onClick={handleEmployeeLogin}
-              className="gap-2 text-sm lg:text-base"
-            >
+            <Button variant="outline" size="default" onClick={handleEmployeeLogin} className="gap-2 text-sm lg:text-base">
               <UserPlus className="w-4 h-4" />
-              <span className="hidden lg:inline">دخول كموظف</span>
-              <span className="lg:hidden">موظف</span>
+              <span className="hidden lg:inline">{t('nav.employeeLogin')}</span>
+              <span className="lg:hidden">{t('nav.employee')}</span>
             </Button>
-            <Button 
-              variant="eco" 
-              size="default"
-              onClick={handleLogin}
-              className="gap-2 text-sm lg:text-base"
-            >
+            <Button variant="eco" size="default" onClick={handleLogin} className="gap-2 text-sm lg:text-base">
               <LogIn className="w-4 h-4" />
-              <span className="hidden lg:inline">تسجيل الدخول</span>
-              <span className="lg:hidden">دخول</span>
+              <span className="hidden lg:inline">{t('nav.login')}</span>
+              <span className="lg:hidden">{t('nav.login')}</span>
             </Button>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 text-foreground touch-manipulation"
-            aria-label="فتح القائمة"
+            aria-label={t('nav.features')}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -99,27 +79,19 @@ const Header = () => {
               className="md:hidden py-4 border-t border-border"
             >
               <nav className="flex flex-col gap-3">
-                <NavLink href="#features" mobile>المميزات</NavLink>
-                <NavLink href="#services" mobile>الخدمات</NavLink>
-                <NavLink href="#stats" mobile>الإحصائيات</NavLink>
-                <NavLink href="#contact" mobile>تواصل معنا</NavLink>
+                <NavLink href="#features" mobile>{t('nav.features')}</NavLink>
+                <NavLink href="#services" mobile>{t('nav.services')}</NavLink>
+                <NavLink href="#stats" mobile>{t('nav.stats')}</NavLink>
+                <NavLink href="#contact" mobile>{t('nav.contact')}</NavLink>
                 <div className="flex flex-col gap-3 pt-4">
                   <GuideButton />
-                  <Button 
-                    variant="outline" 
-                    className="w-full gap-2 h-11 touch-manipulation" 
-                    onClick={handleEmployeeLogin}
-                  >
+                  <Button variant="outline" className="w-full gap-2 h-11 touch-manipulation" onClick={handleEmployeeLogin}>
                     <UserPlus className="w-4 h-4" />
-                    دخول كموظف
+                    {t('nav.employeeLogin')}
                   </Button>
-                  <Button 
-                    variant="eco" 
-                    className="w-full gap-2 h-11 touch-manipulation" 
-                    onClick={handleLogin}
-                  >
+                  <Button variant="eco" className="w-full gap-2 h-11 touch-manipulation" onClick={handleLogin}>
                     <LogIn className="w-4 h-4" />
-                    تسجيل الدخول
+                    {t('nav.login')}
                   </Button>
                 </div>
               </nav>
@@ -130,6 +102,8 @@ const Header = () => {
     </motion.header>
   );
 };
+
+import { AnimatePresence } from "framer-motion";
 
 const NavLink = ({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) => (
   <motion.a
