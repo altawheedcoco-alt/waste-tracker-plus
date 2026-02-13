@@ -29,6 +29,16 @@ const fontOptions: { value: FontFamily; label: string; preview: string }[] = [
   { value: 'almarai', label: 'Almarai', preview: 'خط المراعي' },
   { value: 'ibm-plex', label: 'IBM Plex', preview: 'خط آي بي إم' },
   { value: 'noto-kufi', label: 'Noto Kufi', preview: 'خط نوتو كوفي' },
+  { value: 'amiri', label: 'Amiri', preview: 'خط أميري' },
+  { value: 'reem-kufi', label: 'Reem Kufi', preview: 'خط ريم كوفي' },
+  { value: 'readex-pro', label: 'Readex Pro', preview: 'خط ريدكس برو' },
+  { value: 'el-messiri', label: 'El Messiri', preview: 'خط المسيري' },
+  { value: 'changa', label: 'Changa', preview: 'خط شانجا' },
+  { value: 'inter', label: 'Inter', preview: 'Modern Font' },
+  { value: 'poppins', label: 'Poppins', preview: 'Geometric Font' },
+  { value: 'montserrat', label: 'Montserrat', preview: 'Elegant Font' },
+  { value: 'space-grotesk', label: 'Space Grotesk', preview: 'Tech Font' },
+  { value: 'plus-jakarta', label: 'Jakarta Sans', preview: 'Sharp Font' },
 ];
 
 const displayModeOptions: { value: DisplayMode; label: string; icon: typeof Monitor }[] = [

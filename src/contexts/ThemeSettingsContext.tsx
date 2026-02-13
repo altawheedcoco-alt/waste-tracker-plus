@@ -1,7 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 
 export type ThemeColor = 'green' | 'blue' | 'purple' | 'orange' | 'red' | 'teal';
-export type FontFamily = 'cairo' | 'tajawal' | 'almarai' | 'ibm-plex' | 'noto-kufi';
+export type FontFamily = 
+  // Arabic fonts
+  | 'cairo' | 'tajawal' | 'almarai' | 'ibm-plex' | 'noto-kufi' 
+  | 'amiri' | 'harmattan' | 'scheherazade' | 'reem-kufi' | 'aref-ruqaa'
+  | 'lemonada' | 'marhey' | 'readex-pro' | 'baloo-bhaijaan' | 'changa'
+  | 'el-messiri' | 'lalezar' | 'rakkas' | 'mirza' | 'katibeh'
+  // English fonts
+  | 'inter' | 'roboto' | 'open-sans' | 'montserrat' | 'poppins'
+  | 'nunito' | 'raleway' | 'source-sans' | 'work-sans' | 'dm-sans'
+  | 'space-grotesk' | 'outfit' | 'plus-jakarta' | 'manrope' | 'sora'
+  | 'lexend' | 'red-hat' | 'be-vietnam' | 'cabinet-grotesk' | 'general-sans';
 export type DisplayMode = 'auto' | 'desktop' | 'tablet' | 'mobile';
 
 interface ThemeSettings {
@@ -53,19 +63,93 @@ const colorPalettes: Record<ThemeColor, { primary: string; accent: string; ring:
 };
 
 const fontImports: Record<FontFamily, string> = {
+  // Arabic fonts
   'cairo': 'Cairo:wght@300;400;500;600;700;800',
   'tajawal': 'Tajawal:wght@300;400;500;700;800',
   'almarai': 'Almarai:wght@300;400;700;800',
   'ibm-plex': 'IBM+Plex+Sans+Arabic:wght@300;400;500;600;700',
   'noto-kufi': 'Noto+Kufi+Arabic:wght@300;400;500;600;700',
+  'amiri': 'Amiri:wght@400;700',
+  'harmattan': 'Harmattan:wght@400;500;600;700',
+  'scheherazade': 'Scheherazade+New:wght@400;500;600;700',
+  'reem-kufi': 'Reem+Kufi:wght@400;500;600;700',
+  'aref-ruqaa': 'Aref+Ruqaa:wght@400;700',
+  'lemonada': 'Lemonada:wght@300;400;500;600;700',
+  'marhey': 'Marhey:wght@300;400;500;600;700',
+  'readex-pro': 'Readex+Pro:wght@200;300;400;500;600;700',
+  'baloo-bhaijaan': 'Baloo+Bhaijaan+2:wght@400;500;600;700;800',
+  'changa': 'Changa:wght@200;300;400;500;600;700;800',
+  'el-messiri': 'El+Messiri:wght@400;500;600;700',
+  'lalezar': 'Lalezar:wght@400',
+  'rakkas': 'Rakkas:wght@400',
+  'mirza': 'Mirza:wght@400;500;600;700',
+  'katibeh': 'Katibeh:wght@400',
+  // English fonts
+  'inter': 'Inter:wght@300;400;500;600;700;800',
+  'roboto': 'Roboto:wght@300;400;500;700;900',
+  'open-sans': 'Open+Sans:wght@300;400;500;600;700;800',
+  'montserrat': 'Montserrat:wght@300;400;500;600;700;800',
+  'poppins': 'Poppins:wght@300;400;500;600;700;800',
+  'nunito': 'Nunito:wght@300;400;500;600;700;800',
+  'raleway': 'Raleway:wght@300;400;500;600;700;800',
+  'source-sans': 'Source+Sans+3:wght@300;400;500;600;700;800',
+  'work-sans': 'Work+Sans:wght@300;400;500;600;700;800',
+  'dm-sans': 'DM+Sans:wght@300;400;500;600;700',
+  'space-grotesk': 'Space+Grotesk:wght@300;400;500;600;700',
+  'outfit': 'Outfit:wght@300;400;500;600;700;800',
+  'plus-jakarta': 'Plus+Jakarta+Sans:wght@300;400;500;600;700;800',
+  'manrope': 'Manrope:wght@300;400;500;600;700;800',
+  'sora': 'Sora:wght@300;400;500;600;700;800',
+  'lexend': 'Lexend:wght@300;400;500;600;700;800',
+  'red-hat': 'Red+Hat+Display:wght@300;400;500;600;700;800',
+  'be-vietnam': 'Be+Vietnam+Pro:wght@300;400;500;600;700;800',
+  'cabinet-grotesk': 'Josefin+Sans:wght@300;400;500;600;700',
+  'general-sans': 'Figtree:wght@300;400;500;600;700;800',
 };
 
 const fontFamilyCSS: Record<FontFamily, string> = {
+  // Arabic fonts
   'cairo': "'Cairo', sans-serif",
   'tajawal': "'Tajawal', sans-serif",
   'almarai': "'Almarai', sans-serif",
   'ibm-plex': "'IBM Plex Sans Arabic', sans-serif",
   'noto-kufi': "'Noto Kufi Arabic', sans-serif",
+  'amiri': "'Amiri', serif",
+  'harmattan': "'Harmattan', sans-serif",
+  'scheherazade': "'Scheherazade New', serif",
+  'reem-kufi': "'Reem Kufi', sans-serif",
+  'aref-ruqaa': "'Aref Ruqaa', serif",
+  'lemonada': "'Lemonada', cursive",
+  'marhey': "'Marhey', cursive",
+  'readex-pro': "'Readex Pro', sans-serif",
+  'baloo-bhaijaan': "'Baloo Bhaijaan 2', cursive",
+  'changa': "'Changa', sans-serif",
+  'el-messiri': "'El Messiri', sans-serif",
+  'lalezar': "'Lalezar', cursive",
+  'rakkas': "'Rakkas', cursive",
+  'mirza': "'Mirza', cursive",
+  'katibeh': "'Katibeh', cursive",
+  // English fonts
+  'inter': "'Inter', sans-serif",
+  'roboto': "'Roboto', sans-serif",
+  'open-sans': "'Open Sans', sans-serif",
+  'montserrat': "'Montserrat', sans-serif",
+  'poppins': "'Poppins', sans-serif",
+  'nunito': "'Nunito', sans-serif",
+  'raleway': "'Raleway', sans-serif",
+  'source-sans': "'Source Sans 3', sans-serif",
+  'work-sans': "'Work Sans', sans-serif",
+  'dm-sans': "'DM Sans', sans-serif",
+  'space-grotesk': "'Space Grotesk', sans-serif",
+  'outfit': "'Outfit', sans-serif",
+  'plus-jakarta': "'Plus Jakarta Sans', sans-serif",
+  'manrope': "'Manrope', sans-serif",
+  'sora': "'Sora', sans-serif",
+  'lexend': "'Lexend', sans-serif",
+  'red-hat': "'Red Hat Display', sans-serif",
+  'be-vietnam': "'Be Vietnam Pro', sans-serif",
+  'cabinet-grotesk': "'Josefin Sans', sans-serif",
+  'general-sans': "'Figtree', sans-serif",
 };
 
 const getActualScreenMode = (): 'desktop' | 'tablet' | 'mobile' => {
