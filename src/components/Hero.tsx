@@ -1,15 +1,16 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog } from "lucide-react";
+import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog, Car, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 
 const quickAccessItems = [
-  { icon: Truck, label: 'ناقل مخلفات', desc: 'شركات نقل المخلفات', mode: 'register', type: 'transporter', color: 'from-primary to-emerald-600' },
   { icon: Factory, label: 'مولد مخلفات', desc: 'مصانع ومنشآت', mode: 'register', type: 'generator', color: 'from-amber-500 to-orange-600' },
   { icon: Recycle, label: 'معيد تدوير', desc: 'مرافق إعادة التدوير', mode: 'register', type: 'recycler', color: 'from-cyan-500 to-blue-600' },
-  { icon: Building2, label: 'مرفق تخلص', desc: 'مدافن ومحارق', mode: 'register', type: 'disposal', color: 'from-purple-500 to-violet-600' },
-  { icon: UserCog, label: 'دخول موظف', desc: 'موظفي الشركات', mode: 'employee', type: null, color: 'from-slate-500 to-slate-700' },
+  { icon: Truck, label: 'ناقل مخلفات', desc: 'شركات نقل المخلفات', mode: 'register', type: 'transporter', color: 'from-primary to-emerald-600' },
+  { icon: ShieldCheck, label: 'جهة تخلص آمن', desc: 'مدافن ومحارق', mode: 'register', type: 'disposal', color: 'from-purple-500 to-violet-600' },
+  { icon: Car, label: 'سائق', desc: 'سائقي المركبات', mode: 'login', type: 'driver', color: 'from-rose-500 to-red-600' },
+  { icon: UserCog, label: 'موظف', desc: 'موظفي الشركات', mode: 'employee', type: null, color: 'from-slate-500 to-slate-700' },
 ];
 
 const Hero = () => {
