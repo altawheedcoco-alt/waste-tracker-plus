@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 import StampSignatureSettings, { StampSignatureConfig, defaultConfig } from './StampSignatureSettings';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
+import SignDocumentButton from '@/components/signature/SignDocumentButton';
 
 interface OrganizationData {
   name: string;
@@ -1031,6 +1032,12 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
             إغلاق
           </Button>
           <div className="flex items-center gap-2">
+            <SignDocumentButton
+              documentType="shipment"
+              documentId={shipment.id}
+              documentTitle={`وثيقة شحنة ${shipment.shipment_number}`}
+              variant="outline"
+            />
             <ShareDocumentButton
               referenceId={shipment.shipment_number}
               referenceType="shipment"
