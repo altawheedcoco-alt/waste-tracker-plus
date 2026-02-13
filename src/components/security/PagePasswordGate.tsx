@@ -177,7 +177,7 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
     );
   }
 
-  if (isUnlocked) {
+  if (!pagePassword || isUnlocked) {
     return <>{children}</>;
   }
 
