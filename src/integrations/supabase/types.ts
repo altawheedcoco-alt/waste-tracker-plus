@@ -2343,6 +2343,63 @@ export type Database = {
           },
         ]
       }
+      custom_waste_types: {
+        Row: {
+          category: string
+          code: string
+          created_at: string
+          created_by: string | null
+          hazard_level: string | null
+          id: string
+          name: string
+          organization_id: string
+          parent_category: string
+          recyclable: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          code: string
+          created_at?: string
+          created_by?: string | null
+          hazard_level?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          parent_category?: string
+          recyclable?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          hazard_level?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          parent_category?: string
+          recyclable?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_waste_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "custom_waste_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_conversation_messages: {
         Row: {
           actions: Json | null

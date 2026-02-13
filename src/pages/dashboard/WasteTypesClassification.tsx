@@ -647,8 +647,8 @@ const WasteTypesClassification = () => {
       name: newWasteType.name.trim(),
       code: generatedCode,
       category: newWasteType.category,
-      parentCategory: newWasteType.parentCategory,
-      hazardLevel: newWasteType.category === 'hazardous' ? newWasteType.hazardLevel : undefined,
+      parent_category: newWasteType.parentCategory,
+      hazard_level: newWasteType.category === 'hazardous' ? newWasteType.hazardLevel : undefined,
       recyclable: newWasteType.category === 'non-hazardous' ? newWasteType.recyclable : undefined,
     });
 
@@ -913,7 +913,7 @@ const WasteTypesClassification = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {customWasteTypes.map((wasteType) => {
-                  const hazardConfig = wasteType.hazardLevel ? hazardLevelConfig[wasteType.hazardLevel] : null;
+                  const hazardConfig = wasteType.hazard_level ? hazardLevelConfig[wasteType.hazard_level] : null;
                   return (
                     <div
                       key={wasteType.id}
@@ -1035,7 +1035,7 @@ const WasteTypesClassification = () => {
               {/* Categories */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {hazardousWasteCategories.map((category) => {
-                  const categoryCustomTypes = customHazardous.filter(c => c.parentCategory === category.id);
+                  const categoryCustomTypes = customHazardous.filter(c => c.parent_category === category.id);
                   return (
                     <Card key={category.id} className="border-destructive/20">
                       <CardHeader>
@@ -1079,7 +1079,7 @@ const WasteTypesClassification = () => {
                             })}
                             {/* Custom types for this category */}
                             {categoryCustomTypes.map((customType) => {
-                              const hazardConfig = customType.hazardLevel ? hazardLevelConfig[customType.hazardLevel] : hazardLevelConfig.medium;
+                              const hazardConfig = customType.hazard_level ? hazardLevelConfig[customType.hazard_level] : hazardLevelConfig.medium;
                               return (
                                 <div
                                   key={customType.id}
@@ -1148,7 +1148,7 @@ const WasteTypesClassification = () => {
               {/* Categories */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {nonHazardousWasteCategories.map((category) => {
-                  const categoryCustomTypes = customNonHazardous.filter(c => c.parentCategory === category.id);
+                  const categoryCustomTypes = customNonHazardous.filter(c => c.parent_category === category.id);
                   return (
                     <Card key={category.id}>
                       <CardHeader>
