@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { formatNumber, formatCurrency } from '@/lib/numberFormat';
+import BackButton from '@/components/ui/back-button';
 
 interface WasteComponent {
   name: string;
@@ -141,6 +142,7 @@ const DetailedWasteAnalysis = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto" dir="rtl">
+      <BackButton />
       <div className="text-center space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold">تحليل المخلفات بالذكاء الاصطناعي</h1>
         <p className="text-muted-foreground">ارفع صورة للمخلفات واحصل على تحليل تفصيلي شامل لكل مكون</p>
