@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
 import ShareDocumentDialog from './ShareDocumentDialog';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ShareDocumentButtonProps {
   referenceId?: string;
@@ -22,9 +23,11 @@ const ShareDocumentButton = ({
   variant = 'outline',
   size = 'sm',
   className = '',
-  label = 'مشاركة',
+  label,
 }: ShareDocumentButtonProps) => {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
+  const displayLabel = label ?? t('shareDoc.share');
 
   return (
     <>
@@ -35,7 +38,7 @@ const ShareDocumentButton = ({
         onClick={() => setOpen(true)}
       >
         <Share2 className="w-4 h-4" />
-        {size !== 'icon' && label}
+        {size !== 'icon' && displayLabel}
       </Button>
 
       <ShareDocumentDialog
