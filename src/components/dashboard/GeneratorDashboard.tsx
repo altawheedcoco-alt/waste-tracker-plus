@@ -6,12 +6,14 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote, Printer, Sparkles } from 'lucide-react';
+import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote, Printer, Sparkles, ListFilter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import ResponsiveGrid from './ResponsiveGrid';
+import InteractiveStatCard from './shared/InteractiveStatCard';
+import { DetailSection } from './shared/InteractiveDetailDrawer';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
@@ -211,11 +213,40 @@ const GeneratorDashboard = () => {
     setShowPrintDialog(true);
   };
 
+  const buildStatDetails = (type: string): DetailSection[] => {
+    const sections: DetailSection[] = [
+      {
+        id: 'status-breakdown',
+        title: 'توزيع حسب الحالة',
+        icon: ListFilter,
+        defaultOpen: true,
+        content: (
+          <div className="space-y-2 text-right">
+            <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <Badge variant="secondary">{stats.new}</Badge>
+              <span className="text-sm">جديدة / معتمدة</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <Badge variant="secondary">{stats.inTransit}</Badge>
+              <span className="text-sm">قيد النقل</span>
+            </div>
+            <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+              <Badge variant="secondary">{stats.completed}</Badge>
+              <span className="text-sm">مكتملة</span>
+            </div>
+          </div>
+        ),
+        link: '/dashboard/shipments',
+      },
+    ];
+    return sections;
+  };
+
   const statCards = [
-    { title: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'from-blue-500 to-blue-600' },
-    { title: 'شحنات جديدة', value: stats.new, icon: Clock, color: 'from-amber-500 to-amber-600' },
-    { title: 'قيد النقل', value: stats.inTransit, icon: Truck, color: 'from-purple-500 to-purple-600' },
-    { title: 'مكتملة', value: stats.completed, icon: CheckCircle2, color: 'from-emerald-500 to-emerald-600' },
+    { title: 'إجمالي الشحنات', value: stats.total, icon: Package, gradient: 'from-blue-500 to-blue-600', color: 'text-blue-500', bgColor: 'bg-blue-500/10', detailSections: buildStatDetails('total') },
+    { title: 'شحنات جديدة', value: stats.new, icon: Clock, gradient: 'from-amber-500 to-amber-600', color: 'text-amber-500', bgColor: 'bg-amber-500/10', detailSections: buildStatDetails('new') },
+    { title: 'قيد النقل', value: stats.inTransit, icon: Truck, gradient: 'from-purple-500 to-purple-600', color: 'text-purple-500', bgColor: 'bg-purple-500/10', detailSections: buildStatDetails('transit') },
+    { title: 'مكتملة', value: stats.completed, icon: CheckCircle2, gradient: 'from-emerald-500 to-emerald-600', color: 'text-emerald-500', bgColor: 'bg-emerald-500/10', detailSections: buildStatDetails('completed') },
   ];
 
   const quickActions = useQuickActions({
@@ -254,26 +285,19 @@ const GeneratorDashboard = () => {
       {/* Stats grid */}
       <ResponsiveGrid cols={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
         {statCards.map((stat, index) => (
-          <motion.div
+          <InteractiveStatCard
             key={stat.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-          >
-            <Card className="relative overflow-hidden">
-              <CardContent className={isMobile ? 'p-3' : 'p-5'}>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className={`${isMobile ? 'text-xs' : 'text-sm'} text-muted-foreground truncate`}>{stat.title}</p>
-                    <p className={`${statValueClass} font-bold mt-1`}>{stat.value}</p>
-                  </div>
-                  <div className={`${iconContainerClass} rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center text-white shrink-0`}>
-                    <stat.icon className={iconClass} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+            title={stat.title}
+            value={stat.value}
+            icon={stat.icon}
+            gradient={stat.gradient}
+            color={stat.color}
+            bgColor={stat.bgColor}
+            delay={index * 0.05}
+            detailSections={stat.detailSections}
+            detailTitle={stat.title}
+            detailDescription="اضغط على العناصر لمزيد من التفاصيل"
+          />
         ))}
       </ResponsiveGrid>
 
