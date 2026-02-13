@@ -151,12 +151,30 @@ Deno.serve(async (req) => {
       const existingUser = existingUsers?.users?.find(u => u.email === account.email);
 
       if (existingUser) {
+        // Ensure user_organizations entry exists for existing users too
+        let orgId: string | null = null;
+        if (account.orgName) {
+          orgId = orgIds[account.orgType] || null;
+        } else if (account.orgType === 'driver' || account.orgType === 'employee') {
+          orgId = orgIds['transporter'] || null;
+        } else if (account.orgType === 'admin') {
+          orgId = orgIds['transporter'] || null;
+        }
+        if (orgId) {
+          await supabase.from('user_organizations').upsert({
+            user_id: existingUser.id,
+            organization_id: orgId,
+            role_in_organization: account.role,
+            is_primary: true,
+            is_active: true,
+          }, { onConflict: 'user_id,organization_id' });
+        }
         results.push({
           email: account.email,
           label: account.fullName,
           icon: account.icon,
           orgType: account.orgType,
-          status: 'exists',
+          status: 'exists_fixed',
         });
         continue;
       }
@@ -199,6 +217,17 @@ Deno.serve(async (req) => {
         user_id: userId,
         role: roleToAssign,
       });
+
+      // Create user_organizations entry (critical for dashboard routing)
+      if (orgId) {
+        await supabase.from('user_organizations').upsert({
+          user_id: userId,
+          organization_id: orgId,
+          role_in_organization: account.role,
+          is_primary: true,
+          is_active: true,
+        }, { onConflict: 'user_id,organization_id' });
+      }
 
       // Create driver record if needed
       if (account.orgType === 'driver' && orgId) {
