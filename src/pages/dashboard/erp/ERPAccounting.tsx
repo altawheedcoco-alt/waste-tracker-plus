@@ -304,7 +304,7 @@ const ERPAccounting = () => {
                     ) : entries.map(entry => (
                       <TableRow key={entry.id}>
                         <TableCell className="font-mono">{entry.entry_number}</TableCell>
-                        <TableCell>{new Date(entry.entry_date).toLocaleDateString('ar-SA')}</TableCell>
+                        <TableCell>{new Date(entry.entry_date).toLocaleDateString('ar-EG')}</TableCell>
                         <TableCell>{entry.description || '-'}</TableCell>
                         <TableCell>{(entry.total_debit || 0).toLocaleString()}</TableCell>
                         <TableCell>{(entry.total_credit || 0).toLocaleString()}</TableCell>

@@ -110,7 +110,7 @@ const FinancialSummaryWidget = () => {
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground truncate">{item.label}</p>
                 <p className="font-bold text-sm">
-                  {item.value.toLocaleString('ar-SA')} <span className="text-[10px] text-muted-foreground">ج.م</span>
+                  {item.value.toLocaleString('ar-EG')} <span className="text-[10px] text-muted-foreground">ج.م</span>
                 </p>
               </div>
             </div>

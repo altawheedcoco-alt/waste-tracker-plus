@@ -88,7 +88,7 @@ const getPeriodDates = (period: string) => {
   return {
     start: start.toISOString().split('T')[0],
     end: end.toISOString().split('T')[0],
-    label: `${start.toLocaleDateString('ar-SA')} - ${end.toLocaleDateString('ar-SA')}`,
+    label: `${start.toLocaleDateString('ar-EG')} - ${end.toLocaleDateString('ar-EG')}`,
   };
 };
 
@@ -292,11 +292,11 @@ const ERPFinancialDashboard = () => {
     exportToExcel(data, [
       { header: 'النشاط', key: 'activity', width: 20 },
       { header: 'الوصف', key: 'desc', width: 30 },
-      { header: 'المبلغ (ر.س)', key: 'amount', width: 20 },
+      { header: 'المبلغ (ج.م)', key: 'amount', width: 20 },
     ], 'التدفقات-النقدية');
   };
 
-  const formatCurrency = (val: number) => val.toLocaleString('ar-SA', { minimumFractionDigits: 2 });
+  const formatCurrency = (val: number) => val.toLocaleString('ar-EG', { minimumFractionDigits: 2 });
 
   const SectionRow = ({ label, amount, bold = false, isTotal = false }: { label: string; amount: number; bold?: boolean; isTotal?: boolean }) => (
     <TableRow className={isTotal ? 'bg-muted/50 font-bold border-t-2' : ''}>
@@ -632,10 +632,10 @@ const ERPFinancialDashboard = () => {
                         <FileText className="h-5 w-5 text-primary" />
                       </div>
                       <p className="text-sm text-muted-foreground mt-2">
-                        {new Date(report.period_start).toLocaleDateString('ar-SA')} - {new Date(report.period_end).toLocaleDateString('ar-SA')}
+                        {new Date(report.period_start).toLocaleDateString('ar-EG')} - {new Date(report.period_end).toLocaleDateString('ar-EG')}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        تم الحفظ: {new Date(report.created_at).toLocaleDateString('ar-SA')}
+                        تم الحفظ: {new Date(report.created_at).toLocaleDateString('ar-EG')}
                       </p>
                     </CardContent>
                   </Card>

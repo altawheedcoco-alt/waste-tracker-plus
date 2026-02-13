@@ -99,7 +99,7 @@ export const formatDurationArabic = (seconds: number): string => {
 export const calculateETA = (durationSeconds: number): string => {
   const now = new Date();
   const eta = new Date(now.getTime() + durationSeconds * 1000);
-  return eta.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+  return eta.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 };
 
 /**

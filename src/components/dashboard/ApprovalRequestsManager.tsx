@@ -304,7 +304,7 @@ const ApprovalRequestsManager = () => {
             .update({
               status: 'in_progress',
               reviewed_by: user?.id,
-              admin_notes: (request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-SA') + '] بدء إعداد السجل',
+              admin_notes: (request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-EG') + '] بدء إعداد السجل',
             })
             .eq('id', request.id);
           
@@ -337,7 +337,7 @@ const ApprovalRequestsManager = () => {
             .update({
               status: 'in_progress',
               reviewed_by: user?.id,
-              admin_notes: (request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-SA') + '] بدء معالجة طلب الدعم الفني',
+              admin_notes: (request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-EG') + '] بدء معالجة طلب الدعم الفني',
             })
             .eq('id', request.id);
           
@@ -354,7 +354,7 @@ const ApprovalRequestsManager = () => {
               status: 'completed',
               reviewed_by: user?.id,
               reviewed_at: new Date().toISOString(),
-              admin_notes: (request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-SA') + '] تم تطبيق التغييرات',
+              admin_notes: (request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-EG') + '] تم تطبيق التغييرات',
             })
             .eq('id', request.id);
           
@@ -389,7 +389,7 @@ const ApprovalRequestsManager = () => {
           status: 'completed',
           reviewed_by: user?.id,
           reviewed_at: new Date().toISOString(),
-          admin_notes: (adminNotes || request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-SA') + '] تم إكمال الطلب',
+          admin_notes: (adminNotes || request.admin_notes || '') + '\n[' + new Date().toLocaleString('ar-EG') + '] تم إكمال الطلب',
         })
         .eq('id', request.id);
 

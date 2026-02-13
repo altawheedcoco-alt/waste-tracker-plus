@@ -148,7 +148,7 @@ const UnifiedDocumentSearch = () => {
                   صفحة التحقق
                 </Button>
                 <p className="text-[10px] text-muted-foreground">
-                  تم التحقق: {new Date(result.verifiedAt).toLocaleString('ar-SA')}
+                  تم التحقق: {new Date(result.verifiedAt).toLocaleString('ar-EG')}
                 </p>
               </div>
             )}

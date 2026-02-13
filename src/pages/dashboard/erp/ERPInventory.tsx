@@ -240,7 +240,7 @@ const ERPInventory = () => {
                       <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground">لا توجد حركات</TableCell></TableRow>
                     ) : movements.map((m: any) => (
                       <TableRow key={m.id}>
-                        <TableCell>{new Date(m.created_at).toLocaleDateString('ar-SA')}</TableCell>
+                        <TableCell>{new Date(m.created_at).toLocaleDateString('ar-EG')}</TableCell>
                         <TableCell>{m.item?.item_name || '-'}</TableCell>
                         <TableCell>
                           <Badge variant={m.movement_type === 'in' ? 'default' : m.movement_type === 'out' ? 'destructive' : 'secondary'}>

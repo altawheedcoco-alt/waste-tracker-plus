@@ -117,8 +117,8 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilte
       'لوحة المركبة': s.driver?.vehicle_plate || s.manual_vehicle_plate || '-',
       'عنوان الاستلام': s.pickup_address || '-',
       'عنوان التسليم': s.delivery_address || '-',
-      'تاريخ الإنشاء': s.created_at ? new Date(s.created_at).toLocaleDateString('ar-SA') : '-',
-      'تاريخ التسليم': s.delivered_at ? new Date(s.delivered_at).toLocaleDateString('ar-SA') : '-',
+      'تاريخ الإنشاء': s.created_at ? new Date(s.created_at).toLocaleDateString('ar-EG') : '-',
+      'تاريخ التسليم': s.delivered_at ? new Date(s.delivered_at).toLocaleDateString('ar-EG') : '-',
     }));
 
     const ws = XLSX.utils.json_to_sheet(exportData);

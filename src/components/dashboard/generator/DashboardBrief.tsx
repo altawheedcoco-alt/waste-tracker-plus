@@ -156,11 +156,11 @@ const DashboardBrief = () => {
                   <Banknote className="w-4 h-4 text-amber-500" />
                 </div>
               </div>
-              <p className="text-2xl font-bold">{d.unpaid.toLocaleString('ar-SA')}</p>
+              <p className="text-2xl font-bold">{d.unpaid.toLocaleString('ar-EG')}</p>
               <p className="text-xs text-muted-foreground">مستحقات غير مدفوعة (ج.م)</p>
               <div className="flex items-center gap-2 mt-1.5">
                 <Badge variant="secondary" className="text-[9px] h-5 gap-0.5">
-                  <Receipt className="w-2.5 h-2.5" /> {d.totalRevenue.toLocaleString('ar-SA')} مدفوع
+                  <Receipt className="w-2.5 h-2.5" /> {d.totalRevenue.toLocaleString('ar-EG')} مدفوع
                 </Badge>
               </div>
             </button>

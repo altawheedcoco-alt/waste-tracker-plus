@@ -151,7 +151,7 @@ const TransporterPartnerSummary = () => {
               <div className="flex items-center gap-2">
                 <div className="text-left">
                   <p className={`text-sm font-bold ${p.balance >= 0 ? 'text-emerald-600' : 'text-destructive'}`}>
-                    {p.balance.toLocaleString('ar-SA')} SAR
+                    {p.balance.toLocaleString('ar-EG')} ج.م
                   </p>
                 </div>
                 <Badge variant="secondary" className="text-[10px]">
@@ -162,7 +162,7 @@ const TransporterPartnerSummary = () => {
                 <div>
                   <p className="font-medium text-sm">{p.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {p.type === 'generator' ? 'مولد' : 'مدوّر'} • {p.totalQuantity.toLocaleString('ar-SA')} طن
+                    {p.type === 'generator' ? 'مولد' : 'مدوّر'} • {p.totalQuantity.toLocaleString('ar-EG')} طن
                   </p>
                 </div>
                 <ArrowLeftRight className="w-4 h-4 text-muted-foreground" />
