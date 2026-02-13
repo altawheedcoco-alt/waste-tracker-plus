@@ -1,50 +1,23 @@
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
-
-const systemCapabilities = [
-  {
-    title: "تتبع GPS مباشر للسائقين",
-    description: "رقابة كاملة على مخلفاتك عبر تتبع ذكي يضمن لك التخلص النهائي الصحيح",
-  },
-  {
-    title: "إدارة متكاملة للشحنات",
-    description: "نظام شامل يسهل تتبع الشحنة من المصدر حتى التخلص النهائي",
-  },
-  {
-    title: "تقارير بيئية شاملة",
-    description: "تحليلات بيئية دقيقة تدعم اتخاذ القرار وتوفير الوقت",
-  },
-  {
-    title: "نظام موافقات إلكتروني",
-    description: "وداعاً للورق، اعتمد طلباتك بضغطة زر وبأمان عالٍ",
-  },
-  {
-    title: "تنبيهات فورية بالبريد والهاتف",
-    description: "ابقَ على اطلاع دائم بكل شحنة من خلال نظام الإشعارات الذكي",
-  },
-  {
-    title: "تحليل البيانات",
-    description: "توقعات دقيقة للكميات المستقبلية لتحسين إدارة الموارد",
-  },
-  {
-    title: "توثيق بالصور والباركود",
-    description: "ضمان جودة الاستلام والتسليم عبر مسح الرموز والتوثيق البصري",
-  },
-  {
-    title: "دعم فني على مدار الساعة",
-    description: "فريق متخصص لمساعدتك في حل المشاكل التقنية واللوجستية فوراً",
-  },
-  {
-    title: "لوحة تحكم للمدراء",
-    description: "راقب جميع العمليات من شاشة واحدة بكل سهولة",
-  },
-  {
-    title: "ابدأ رحلة التحول الرقمي في إدارة المخلفات الآن",
-    description: "",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FeaturesList = () => {
+  const { t } = useLanguage();
+
+  const systemCapabilities = [
+    { title: t('featuresList.f1'), description: t('featuresList.f1d') },
+    { title: t('featuresList.f2'), description: t('featuresList.f2d') },
+    { title: t('featuresList.f3'), description: t('featuresList.f3d') },
+    { title: t('featuresList.f4'), description: t('featuresList.f4d') },
+    { title: t('featuresList.f5'), description: t('featuresList.f5d') },
+    { title: t('featuresList.f6'), description: t('featuresList.f6d') },
+    { title: t('featuresList.f7'), description: t('featuresList.f7d') },
+    { title: t('featuresList.f8'), description: t('featuresList.f8d') },
+    { title: t('featuresList.f9'), description: t('featuresList.f9d') },
+    { title: t('featuresList.f10'), description: '' },
+  ];
+
   return (
     <section className="py-16 bg-background">
       <div className="container px-4">
@@ -58,17 +31,11 @@ const FeaturesList = () => {
               transition={{ duration: 0.4, delay: index * 0.08 }}
               className="flex items-start gap-4 p-4 rounded-xl hover:bg-muted/50 transition-colors border-b border-border/30"
             >
-              <div className="flex-shrink-0 mt-1">
-                <CheckCircle2 className="w-6 h-6 text-primary" />
-              </div>
+              <div className="flex-shrink-0 mt-1"><CheckCircle2 className="w-6 h-6 text-primary" /></div>
               <div className="text-right flex-1">
                 <h3 className="font-bold text-foreground leading-relaxed">
                   {capability.title}
-                  {capability.description && (
-                    <span className="font-normal text-muted-foreground">
-                      : "{capability.description}"
-                    </span>
-                  )}
+                  {capability.description && <span className="font-normal text-muted-foreground">: "{capability.description}"</span>}
                 </h3>
               </div>
             </motion.div>
