@@ -292,12 +292,44 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         console.error('Error logging status change:', logError);
       }
 
-      if (['delivered', 'in_transit'].includes(dbStatus) && organization?.organization_type === 'transporter') {
-        try {
-          await autoCreateReceipt(shipment.id, organization.id, profile?.id);
-        } catch (receiptError) {
-          console.error('Auto receipt creation failed:', receiptError);
+      // Auto-create declarations and receipts based on status
+      try {
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        
+        // Generator declaration when shipment is approved/registered
+        if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) {
+          await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile?.id || '');
+          console.log('Auto generator declaration created');
         }
+        
+        // Recycler declaration when shipment is delivered/confirmed
+        if (['delivered', 'confirmed'].includes(dbStatus)) {
+          // Fetch recycler_id from shipment
+          const { data: fullShipment } = await supabase
+            .from('shipments')
+            .select('recycler_id, transporter_id')
+            .eq('id', shipment.id)
+            .single();
+          
+          if (fullShipment?.recycler_id) {
+            await autoCreateRecyclerDeclaration(shipment.id, fullShipment.recycler_id, profile?.id || '');
+            console.log('Auto recycler declaration created');
+          }
+          
+          // Auto-create receipt for transporter
+          if (organization?.organization_type === 'transporter') {
+            await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+            console.log('Auto receipt created');
+          }
+        }
+        
+        // Also create receipt when in_transit (transporter picking up)
+        if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') {
+          await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+          console.log('Auto receipt created on in_transit');
+        }
+      } catch (autoError) {
+        console.error('Auto document creation failed (non-blocking):', autoError);
       }
 
       toast.success(`تم تحديث الحالة إلى "${statusConfig?.labelAr || selectedStatus}"`);

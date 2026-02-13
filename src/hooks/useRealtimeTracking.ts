@@ -118,6 +118,42 @@ export const useRealtimeTracking = ({
       });
 
       console.log(`[RealtimeTracking] Auto status change: ${newStatus} - ${notes}`);
+
+      // Auto-create declarations and receipts based on status
+      try {
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
+
+        // Fetch shipment details for org IDs
+        const { data: shipmentData } = await supabase
+          .from('shipments')
+          .select('generator_id, transporter_id, recycler_id')
+          .eq('id', shipmentId)
+          .single();
+
+        if (shipmentData) {
+          // Generator declaration on approved/registered/in_transit
+          if (['approved', 'registered', 'in_transit'].includes(newStatus) && shipmentData.generator_id) {
+            await autoCreateGeneratorDeclaration(shipmentId, shipmentData.generator_id, user.id);
+            console.log('[RealtimeTracking] Auto generator declaration created');
+          }
+
+          // Recycler declaration on delivered/confirmed
+          if (['delivered', 'confirmed'].includes(newStatus) && shipmentData.recycler_id) {
+            await autoCreateRecyclerDeclaration(shipmentId, shipmentData.recycler_id, user.id);
+            console.log('[RealtimeTracking] Auto recycler declaration created');
+          }
+
+          // Receipt on in_transit/delivered
+          if (['in_transit', 'delivered'].includes(newStatus) && shipmentData.transporter_id) {
+            await autoCreateReceipt(shipmentId, shipmentData.transporter_id, user.id);
+            console.log('[RealtimeTracking] Auto receipt created');
+          }
+        }
+      } catch (autoErr) {
+        console.error('[RealtimeTracking] Auto document creation failed (non-blocking):', autoErr);
+      }
+
       return true;
     } catch (error) {
       console.error('[RealtimeTracking] Error updating status:', error);
