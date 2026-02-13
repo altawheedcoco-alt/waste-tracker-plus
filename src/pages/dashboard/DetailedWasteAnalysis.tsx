@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star, DollarSign, TrendingUp, Coins, X, Plus, FileText, ImageIcon } from 'lucide-react';
+import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star, DollarSign, TrendingUp, Coins, X, Plus, FileText, ImageIcon, ShieldX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { formatNumber, formatCurrency } from '@/lib/numberFormat';
 import BackButton from '@/components/ui/back-button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface ImageItem {
   file: File;
@@ -104,12 +106,40 @@ const gradeColors: Record<string, string> = {
 };
 
 const DetailedWasteAnalysis = () => {
+  const { organization, roles } = useAuth();
+  const navigate = useNavigate();
   const [images, setImages] = useState<ImageItem[]>([]);
   const [description, setDescription] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  const isAdmin = roles.includes('admin');
+  const orgType = organization?.organization_type;
+  const hasAccess = isAdmin || orgType === 'transporter' || orgType === 'recycler';
+
+  if (!hasAccess) {
+    return (
+      <div className="p-4 md:p-6 max-w-5xl mx-auto" dir="rtl">
+        <BackButton />
+        <Card className="mt-6">
+          <CardContent className="flex flex-col items-center justify-center py-16 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+              <ShieldX className="w-8 h-8 text-destructive" />
+            </div>
+            <h2 className="text-xl font-bold">غير مصرح بالوصول</h2>
+            <p className="text-muted-foreground text-center max-w-md">
+              هذه الصفحة متاحة فقط لجهات النقل وجهات التدوير ومدير النظام
+            </p>
+            <Button onClick={() => navigate('/dashboard')} variant="outline">
+              العودة للوحة التحكم
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const addFiles = (files: FileList | null) => {
     if (!files) return;
