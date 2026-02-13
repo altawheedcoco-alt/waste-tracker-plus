@@ -15194,6 +15194,290 @@ export type Database = {
           },
         ]
       }
+      work_order_activity: {
+        Row: {
+          action: string
+          actor_organization_id: string | null
+          actor_user_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          work_order_id: string
+        }
+        Insert: {
+          action: string
+          actor_organization_id?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          work_order_id: string
+        }
+        Update: {
+          action?: string
+          actor_organization_id?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_activity_actor_organization_id_fkey"
+            columns: ["actor_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "work_order_activity_actor_organization_id_fkey"
+            columns: ["actor_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_activity_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_hazardous: boolean | null
+          notes: string | null
+          packaging_type: string | null
+          quantity: number
+          unit: string
+          waste_description: string | null
+          waste_type: string
+          work_order_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_hazardous?: boolean | null
+          notes?: string | null
+          packaging_type?: string | null
+          quantity?: number
+          unit?: string
+          waste_description?: string | null
+          waste_type: string
+          work_order_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_hazardous?: boolean | null
+          notes?: string | null
+          packaging_type?: string | null
+          quantity?: number
+          unit?: string
+          waste_description?: string | null
+          waste_type?: string
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_items_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_order_recipients: {
+        Row: {
+          counter_date: string | null
+          counter_price: number | null
+          counter_quantity: number | null
+          created_at: string
+          id: string
+          recipient_external_partner_id: string | null
+          recipient_organization_id: string | null
+          recipient_type: string
+          responded_at: string | null
+          responded_by: string | null
+          response_notes: string | null
+          status: string
+          updated_at: string
+          viewed_at: string | null
+          work_order_id: string
+        }
+        Insert: {
+          counter_date?: string | null
+          counter_price?: number | null
+          counter_quantity?: number | null
+          created_at?: string
+          id?: string
+          recipient_external_partner_id?: string | null
+          recipient_organization_id?: string | null
+          recipient_type: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          status?: string
+          updated_at?: string
+          viewed_at?: string | null
+          work_order_id: string
+        }
+        Update: {
+          counter_date?: string | null
+          counter_price?: number | null
+          counter_quantity?: number | null
+          created_at?: string
+          id?: string
+          recipient_external_partner_id?: string | null
+          recipient_organization_id?: string | null
+          recipient_type?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          status?: string
+          updated_at?: string
+          viewed_at?: string | null
+          work_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_order_recipients_recipient_external_partner_id_fkey"
+            columns: ["recipient_external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_recipients_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "work_order_recipients_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_recipients_work_order_id_fkey"
+            columns: ["work_order_id"]
+            isOneToOne: false
+            referencedRelation: "work_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_orders: {
+        Row: {
+          attachments: string[] | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          equipment_details: string | null
+          estimated_quantity: number
+          id: string
+          is_hazardous: boolean | null
+          order_number: string
+          organization_id: string
+          pickup_latitude: number | null
+          pickup_location: string | null
+          pickup_longitude: number | null
+          preferred_date: string | null
+          preferred_time_slot: string | null
+          requires_special_equipment: boolean | null
+          sent_at: string | null
+          special_instructions: string | null
+          status: string
+          unit: string
+          updated_at: string
+          urgency: string
+          waste_description: string | null
+          waste_type: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          equipment_details?: string | null
+          estimated_quantity?: number
+          id?: string
+          is_hazardous?: boolean | null
+          order_number: string
+          organization_id: string
+          pickup_latitude?: number | null
+          pickup_location?: string | null
+          pickup_longitude?: number | null
+          preferred_date?: string | null
+          preferred_time_slot?: string | null
+          requires_special_equipment?: boolean | null
+          sent_at?: string | null
+          special_instructions?: string | null
+          status?: string
+          unit?: string
+          updated_at?: string
+          urgency?: string
+          waste_description?: string | null
+          waste_type: string
+        }
+        Update: {
+          attachments?: string[] | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          equipment_details?: string | null
+          estimated_quantity?: number
+          id?: string
+          is_hazardous?: boolean | null
+          order_number?: string
+          organization_id?: string
+          pickup_latitude?: number | null
+          pickup_location?: string | null
+          pickup_longitude?: number | null
+          preferred_date?: string | null
+          preferred_time_slot?: string | null
+          requires_special_equipment?: boolean | null
+          sent_at?: string | null
+          special_instructions?: string | null
+          status?: string
+          unit?: string
+          updated_at?: string
+          urgency?: string
+          waste_description?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "work_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       mv_admin_dashboard: {

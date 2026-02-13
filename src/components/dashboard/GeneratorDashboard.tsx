@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote, Printer, Sparkles, ListFilter } from 'lucide-react';
+import { Package, TrendingUp, Clock, CheckCircle2, Truck, AlertCircle, Bot, Eye, Users, Leaf, FileCheck, Send, FolderCheck, FileSignature, Banknote, Printer, Sparkles, ListFilter, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid from './QuickActionsGrid';
@@ -37,6 +38,8 @@ import WeeklyShipmentChart from './generator/WeeklyShipmentChart';
 import FinancialSummaryWidget from './generator/FinancialSummaryWidget';
 import ComplianceGauge from './generator/ComplianceGauge';
 import DashboardBrief from './generator/DashboardBrief';
+import CreateWorkOrderDialog from '@/components/work-orders/CreateWorkOrderDialog';
+import WorkOrderInbox from '@/components/work-orders/WorkOrderInbox';
 
 interface ShipmentStats {
   total: number;
@@ -83,6 +86,7 @@ interface RecentShipment {
 const GeneratorDashboard = () => {
   const { profile, organization } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
   const [stats, setStats] = useState<ShipmentStats>({
     total: 0,
@@ -97,6 +101,7 @@ const GeneratorDashboard = () => {
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
+  const [showWorkOrder, setShowWorkOrder] = useState(false);
 
   // Responsive styles
   const titleClass = getResponsiveClass({
@@ -268,14 +273,17 @@ const GeneratorDashboard = () => {
       {/* Welcome section */}
       <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
         <div className={`flex items-center gap-2 flex-wrap ${isMobile ? 'order-2' : ''}`}>
-          <SmartRequestDialog buttonText={isMobile ? 'طلب' : 'طلب تقارير'} buttonVariant="default" />
+          <Button onClick={() => setShowWorkOrder(true)} variant="default" size={isMobile ? 'sm' : 'default'} className="gap-2">
+            <ClipboardList className="w-4 h-4" />
+            {!isMobile && t('workOrder.createNew')}
+          </Button>
+          <SmartRequestDialog buttonText={isMobile ? t('common.search') : t('common.search')} buttonVariant="outline" />
           <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
             <FileCheck className="w-4 h-4" />
-            {!isMobile && 'التحقق من الوثائق'}
+            {!isMobile && t('docVerify.sectionBadge')}
           </Button>
           <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
             <Sparkles className="w-4 h-4" />
-            {!isMobile && 'رفع الوزنة الذكي'}
           </Button>
         </div>
         <div className={`text-right ${isMobile ? 'order-1' : ''}`}>
@@ -301,6 +309,9 @@ const GeneratorDashboard = () => {
         title="الإجراءات السريعة"
         subtitle="الوظائف المستخدمة بكثرة"
       />
+
+      {/* Work Orders */}
+      <WorkOrderInbox />
 
       {/* Search & Verification */}
       <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
@@ -402,6 +413,7 @@ const GeneratorDashboard = () => {
       <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
+      <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
     </div>
   );
 };
