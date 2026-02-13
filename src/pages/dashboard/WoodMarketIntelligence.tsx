@@ -19,6 +19,7 @@ import {
   PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
+import BackButton from '@/components/ui/back-button';
 
 interface AnalysisResult {
   scrapWood: {
@@ -158,6 +159,7 @@ const WoodMarketIntelligence = () => {
 
   return (
     <div className="space-y-6 p-4 md:p-6" dir={isAr ? 'rtl' : 'ltr'}>
+      <BackButton />
       {/* Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
