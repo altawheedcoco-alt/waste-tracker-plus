@@ -4,13 +4,17 @@ import { Shield, User, Clock, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar, enUS } from 'date-fns/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AuditLogTabProps {
   organizationId?: string | null;
 }
 
 const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'ar' ? ar : enUS;
+
   const { data: logs = [], isLoading } = useQuery({
     queryKey: ['mc-audit-logs', organizationId],
     queryFn: async () => {
@@ -28,7 +32,6 @@ const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
     enabled: !!organizationId,
   });
 
-  // Also fetch disposal operations with audit trail
   const { data: recentOps = [] } = useQuery({
     queryKey: ['mc-audit-ops', organizationId],
     queryFn: async () => {
@@ -54,10 +57,10 @@ const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'pending': return 'قيد الانتظار';
-      case 'processing': return 'قيد المعالجة';
-      case 'completed': return 'مكتمل';
-      case 'rejected': return 'مرفوض';
+      case 'pending': return t('missionControl.statusPending');
+      case 'processing': return t('missionControl.statusProcessing');
+      case 'completed': return t('missionControl.statusCompleted');
+      case 'rejected': return t('missionControl.statusRejected');
       default: return status;
     }
   };
@@ -68,15 +71,15 @@ const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Shield className="w-5 h-5 text-slate-600" />
-            سجل التدقيق — لا يُمحى
+            {t('missionControl.auditLogTitle')}
           </CardTitle>
-          <CardDescription>كل إجراء مسجل: من الموظف، متى، وما هي القراءات. ضمان قانوني للجهة.</CardDescription>
+          <CardDescription>{t('missionControl.auditLogDesc')}</CardDescription>
         </CardHeader>
         <CardContent>
           {recentOps.length === 0 && logs.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Shield className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              <p>لا توجد سجلات حتى الآن</p>
+              <p>{t('missionControl.noLogsYet')}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -93,24 +96,23 @@ const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
                     <p className="text-xs text-muted-foreground mt-1">{op.waste_description}</p>
                     <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
                       {op.receiving_officer && (
-                        <span className="flex items-center gap-1"><User className="w-3 h-3" /> مسؤول الاستلام: {op.receiving_officer}</span>
+                        <span className="flex items-center gap-1"><User className="w-3 h-3" /> {t('missionControl.receivingOfficer')}: {op.receiving_officer}</span>
                       )}
                       {op.verified_by && (
-                        <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> تحقق بواسطة: {op.verified_by}</span>
+                        <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> {t('missionControl.verifiedBy')}: {op.verified_by}</span>
                       )}
                       {op.processing_started_at && (
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> بدأ المعالجة: {format(new Date(op.processing_started_at), 'dd/MM HH:mm', { locale: ar })}</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.processingStarted')}: {format(new Date(op.processing_started_at), 'dd/MM HH:mm', { locale: dateLocale })}</span>
                       )}
                       {op.processing_completed_at && (
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> انتهى: {format(new Date(op.processing_completed_at), 'dd/MM HH:mm', { locale: ar })}</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.processingEnded')}: {format(new Date(op.processing_completed_at), 'dd/MM HH:mm', { locale: dateLocale })}</span>
                       )}
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> آخر تحديث: {format(new Date(op.updated_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.lastUpdate')}: {format(new Date(op.updated_at), 'dd/MM/yyyy HH:mm', { locale: dateLocale })}</span>
                     </div>
                   </div>
                 </div>
               ))}
 
-              {/* Activity logs */}
               {logs.map((log: any) => (
                 <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30">
                   <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 mt-0.5">
@@ -122,7 +124,7 @@ const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
                       <span className="text-sm">{log.action}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {log.resource_type} • {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss', { locale: ar })}
+                      {log.resource_type} • {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss', { locale: dateLocale })}
                     </p>
                   </div>
                 </div>
