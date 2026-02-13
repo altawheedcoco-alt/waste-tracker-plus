@@ -10,13 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useQRVerification } from '@/hooks/useQRVerification';
 import { DOCUMENT_TYPE_LABELS, DocumentQRType } from '@/lib/documentQR';
 import { toast } from 'sonner';
-
-const statusLabels: Record<string, string> = {
-  new: 'جديدة', approved: 'معتمدة', collecting: 'قيد التجميع',
-  in_transit: 'قيد النقل', delivered: 'تم التسليم', confirmed: 'مؤكدة',
-  cancelled: 'ملغية', active: 'نشط', expired: 'منتهي', draft: 'مسودة',
-  paid: 'مدفوعة', unpaid: 'غير مدفوعة', partial: 'مدفوعة جزئياً',
-};
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const docTypeIcons: Record<string, React.ReactNode> = {
   shipment: <Package className="w-4 h-4" />,
@@ -35,10 +29,18 @@ const DocumentVerification = () => {
   const navigate = useNavigate();
   const [documentNumber, setDocumentNumber] = useState('');
   const { loading, result, verify, reset } = useQRVerification();
+  const { t, language } = useLanguage();
+
+  const statusLabels: Record<string, string> = {
+    new: t('docVerify.statusNew'), approved: t('docVerify.statusApproved'), collecting: t('docVerify.statusCollecting'),
+    in_transit: t('docVerify.statusInTransit'), delivered: t('docVerify.statusDelivered'), confirmed: t('docVerify.statusConfirmed'),
+    cancelled: t('docVerify.statusCancelled'), active: t('docVerify.statusActive'), expired: t('docVerify.statusExpired'), draft: t('docVerify.statusDraft'),
+    paid: t('docVerify.statusPaid'), unpaid: t('docVerify.statusUnpaid'), partial: t('docVerify.statusPartial'),
+  };
 
   const handleVerify = async () => {
     if (!documentNumber.trim()) {
-      toast.error('يرجى إدخال رقم أو كود الوثيقة');
+      toast.error(t('docVerify.enterNumber'));
       return;
     }
     reset();
@@ -49,8 +51,9 @@ const DocumentVerification = () => {
     if (e.key === 'Enter') handleVerify();
   };
 
+  const langKey = language === 'ar' ? 'ar' : 'en';
   const typeLabel = result?.type
-    ? DOCUMENT_TYPE_LABELS[result.type as DocumentQRType]?.ar || result.type
+    ? DOCUMENT_TYPE_LABELS[result.type as DocumentQRType]?.[langKey] || result.type
     : '';
 
   return (
@@ -64,11 +67,11 @@ const DocumentVerification = () => {
         >
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
             <Shield className="w-5 h-5" />
-            <span className="font-medium">التحقق من صحة الوثائق</span>
+            <span className="font-medium">{t('docVerify.sectionBadge')}</span>
           </div>
-          <h2 className="text-3xl font-bold mb-4">تحقق من صحة أي وثيقة</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('docVerify.title')}</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            أدخل رقم أي مستند — شحنة، شهادة تدوير، إيصال، فاتورة، عقد، خطاب ترسية — أو امسح رمز QR للتحقق الفوري
+            {t('docVerify.subtitle')}
           </p>
         </motion.div>
 
@@ -83,10 +86,10 @@ const DocumentVerification = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileCheck className="w-6 h-6 text-primary" />
-                التحقق الشامل من الوثائق
+                {t('docVerify.cardTitle')}
               </CardTitle>
               <CardDescription>
-                أدخل رقم الوثيقة (مثل SHP-xxx، INV-xxx، CNT-xxx، AWL-xxx...) أو أي كود تحقق
+                {t('docVerify.cardDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -94,11 +97,11 @@ const DocumentVerification = () => {
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="number" className="flex items-center gap-2">
                     <Search className="w-4 h-4" />
-                    رقم الوثيقة
+                    {t('docVerify.tabNumber')}
                   </TabsTrigger>
                   <TabsTrigger value="qr" className="flex items-center gap-2">
                     <QrCode className="w-4 h-4" />
-                    مسح QR
+                    {t('docVerify.tabQR')}
                   </TabsTrigger>
                 </TabsList>
 
@@ -106,11 +109,11 @@ const DocumentVerification = () => {
                   <div className="flex gap-3 items-center">
                     <Button onClick={handleVerify} disabled={loading} size="lg" className="h-12 px-6">
                       {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                        <><Search className="w-5 h-5 ml-2" />تحقق</>
+                        <><Search className="w-5 h-5 ml-2" />{t('docVerify.verifyBtn')}</>
                       )}
                     </Button>
                     <Input
-                      placeholder="أدخل رقم الوثيقة أو كود التحقق..."
+                      placeholder={t('docVerify.placeholder')}
                       value={documentNumber}
                       onChange={(e) => setDocumentNumber(e.target.value)}
                       onKeyDown={handleKeyPress}
@@ -118,12 +121,11 @@ const DocumentVerification = () => {
                       dir="ltr"
                     />
                   </div>
-                  {/* Supported types hints */}
                   <div className="flex flex-wrap gap-2 justify-center">
-                    {['shipment', 'certificate', 'receipt', 'contract', 'invoice', 'disposal', 'award_letter'].map(t => (
-                      <Badge key={t} variant="outline" className="text-[10px] gap-1">
-                        {docTypeIcons[t]}
-                        {DOCUMENT_TYPE_LABELS[t as DocumentQRType]?.ar}
+                    {['shipment', 'certificate', 'receipt', 'contract', 'invoice', 'disposal', 'award_letter'].map(docType => (
+                      <Badge key={docType} variant="outline" className="text-[10px] gap-1">
+                        {docTypeIcons[docType]}
+                        {DOCUMENT_TYPE_LABELS[docType as DocumentQRType]?.[langKey]}
                       </Badge>
                     ))}
                   </div>
@@ -133,20 +135,19 @@ const DocumentVerification = () => {
                   <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/50">
                     <QrCode className="w-16 h-16 mx-auto text-primary mb-4" />
                     <p className="text-muted-foreground mb-4">
-                      امسح رمز QR الموجود على أي مستند للتحقق من صحته
+                      {t('docVerify.qrPrompt')}
                     </p>
                     <Button size="lg" onClick={() => navigate('/scan')} className="gap-2">
                       <Camera className="w-5 h-5" />
-                      فتح الماسح الضوئي
+                      {t('docVerify.openScanner')}
                     </Button>
                     <p className="text-xs text-muted-foreground mt-4">
-                      يدعم جميع أنواع المستندات: شحنات، شهادات، إيصالات، عقود، فواتير، خطابات ترسية
+                      {t('docVerify.qrSupported')}
                     </p>
                   </div>
                 </TabsContent>
               </Tabs>
 
-              {/* Verification Result */}
               {result && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -161,7 +162,7 @@ const DocumentVerification = () => {
                         </div>
                         <div>
                           <h3 className="font-bold text-green-700 dark:text-green-300">
-                            وثيقة صحيحة ✓
+                            {t('docVerify.validDoc')}
                           </h3>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="gap-1 text-green-600 border-green-300">
@@ -177,7 +178,7 @@ const DocumentVerification = () => {
 
                       {result.status && (
                         <div className="mb-3">
-                          <span className="text-muted-foreground text-sm">الحالة: </span>
+                          <span className="text-muted-foreground text-sm">{t('docVerify.statusLabel')}: </span>
                           <Badge variant="secondary">{statusLabels[result.status] || result.status}</Badge>
                         </div>
                       )}
@@ -199,7 +200,7 @@ const DocumentVerification = () => {
 
                       {result.verifiedAt && (
                         <p className="text-xs text-green-500 mt-3">
-                          تم التحقق في: {new Date(result.verifiedAt).toLocaleString('ar-EG')}
+                          {t('docVerify.verifiedAt')}: {new Date(result.verifiedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
                         </p>
                       )}
                     </div>
@@ -210,9 +211,9 @@ const DocumentVerification = () => {
                           <FileX className="w-6 h-6 text-red-600 dark:text-red-400" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-red-700 dark:text-red-300">وثيقة غير موجودة ✗</h3>
+                          <h3 className="font-bold text-red-700 dark:text-red-300">{t('docVerify.invalidDoc')}</h3>
                           <p className="text-sm text-red-600 dark:text-red-400">
-                            {result.message || 'لم يتم العثور على وثيقة بهذا الرقم في النظام'}
+                            {result.message || t('docVerify.invalidMsg')}
                           </p>
                         </div>
                       </div>

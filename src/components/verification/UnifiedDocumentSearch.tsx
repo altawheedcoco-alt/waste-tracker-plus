@@ -7,13 +7,7 @@ import { Search, Loader2, FileCheck, FileX, Package, FileText, Receipt, Shield, 
 import { useQRVerification } from '@/hooks/useQRVerification';
 import { DOCUMENT_TYPE_LABELS, DocumentQRType } from '@/lib/documentQR';
 import { useNavigate } from 'react-router-dom';
-
-const statusLabels: Record<string, string> = {
-  new: 'جديدة', approved: 'معتمدة', in_transit: 'قيد النقل',
-  delivered: 'تم التسليم', confirmed: 'مؤكدة', cancelled: 'ملغية',
-  active: 'نشط', expired: 'منتهي', draft: 'مسودة',
-  paid: 'مدفوعة', unpaid: 'غير مدفوعة',
-};
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const docTypeIcons: Record<string, React.ReactNode> = {
   shipment: <Package className="w-4 h-4" />,
@@ -32,6 +26,16 @@ const UnifiedDocumentSearch = () => {
   const [query, setQuery] = useState('');
   const { loading, result, verify, reset } = useQRVerification();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+
+  const langKey = language === 'ar' ? 'ar' : 'en';
+
+  const statusLabels: Record<string, string> = {
+    new: t('docVerify.statusNew'), approved: t('docVerify.statusApproved'), in_transit: t('docVerify.statusInTransit'),
+    delivered: t('docVerify.statusDelivered'), confirmed: t('docVerify.statusConfirmed'), cancelled: t('docVerify.statusCancelled'),
+    active: t('docVerify.statusActive'), expired: t('docVerify.statusExpired'), draft: t('docVerify.statusDraft'),
+    paid: t('docVerify.statusPaid'), unpaid: t('docVerify.statusUnpaid'),
+  };
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -40,7 +44,7 @@ const UnifiedDocumentSearch = () => {
   };
 
   const typeLabel = result?.type
-    ? DOCUMENT_TYPE_LABELS[result.type as DocumentQRType]?.ar || result.type
+    ? DOCUMENT_TYPE_LABELS[result.type as DocumentQRType]?.[langKey] || result.type
     : '';
 
   return (
@@ -48,20 +52,20 @@ const UnifiedDocumentSearch = () => {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base justify-end">
           <QrCode className="w-5 h-5 text-primary" />
-          بحث وتحقق شامل من المستندات
+          {t('docVerify.searchTitle')}
         </CardTitle>
         <CardDescription className="text-right">
-          ابحث بأي رقم مستند: شحنة، شهادة، إيصال، فاتورة، عقد، خطاب ترسية، كود تحقق...
+          {t('docVerify.searchDesc')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
           <Button onClick={handleSearch} disabled={loading || !query.trim()}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-            <span className="mr-1">تحقق</span>
+            <span className="mr-1">{t('docVerify.verifyBtn')}</span>
           </Button>
           <Input
-            placeholder="أدخل رقم المستند أو كود التحقق..."
+            placeholder={t('docVerify.searchPlaceholder')}
             value={query}
             onChange={(e) => { setQuery(e.target.value); if (result) reset(); }}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -70,17 +74,15 @@ const UnifiedDocumentSearch = () => {
           />
         </div>
 
-        {/* Supported types badges */}
         <div className="flex flex-wrap gap-1.5 justify-center">
           {Object.entries(DOCUMENT_TYPE_LABELS).map(([key, label]) => (
             <Badge key={key} variant="outline" className="text-[9px] gap-0.5 py-0.5">
               {docTypeIcons[key] || <FileText className="w-3 h-3" />}
-              {label.ar}
+              {label[langKey]}
             </Badge>
           ))}
         </div>
 
-        {/* Result */}
         {result && (
           <div className={`p-4 rounded-lg border ${
             result.isValid
@@ -92,12 +94,12 @@ const UnifiedDocumentSearch = () => {
                 {result.isValid ? (
                   <Badge className="bg-green-600 gap-1">
                     <FileCheck className="w-3 h-3" />
-                    صحيح ✓
+                    {t('docVerify.valid')}
                   </Badge>
                 ) : (
                   <Badge variant="destructive" className="gap-1">
                     <FileX className="w-3 h-3" />
-                    غير موجود ✗
+                    {t('docVerify.notFound')}
                   </Badge>
                 )}
                 {result.status && (
@@ -145,10 +147,10 @@ const UnifiedDocumentSearch = () => {
                   onClick={() => navigate(`/qr-verify?type=${result.type}&code=${encodeURIComponent(result.reference)}`)}
                 >
                   <ExternalLink className="w-3 h-3" />
-                  صفحة التحقق
+                  {t('docVerify.verifyPage')}
                 </Button>
                 <p className="text-[10px] text-muted-foreground">
-                  تم التحقق: {new Date(result.verifiedAt).toLocaleString('ar-EG')}
+                  {t('docVerify.verifiedOn')}: {new Date(result.verifiedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
                 </p>
               </div>
             )}
