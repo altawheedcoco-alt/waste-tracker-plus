@@ -5588,6 +5588,1255 @@ export type Database = {
           },
         ]
       }
+      erp_attendance: {
+        Row: {
+          attendance_date: string
+          check_in: string | null
+          check_out: string | null
+          created_at: string | null
+          employee_id: string
+          id: string
+          notes: string | null
+          organization_id: string
+          overtime_hours: number | null
+          status: string | null
+        }
+        Insert: {
+          attendance_date: string
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          overtime_hours?: number | null
+          status?: string | null
+        }
+        Update: {
+          attendance_date?: string
+          check_in?: string | null
+          check_out?: string | null
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          overtime_hours?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_attendance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "erp_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_attendance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_attendance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_chart_of_accounts: {
+        Row: {
+          account_code: string
+          account_name: string
+          account_name_en: string | null
+          account_type: string
+          balance: number | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          organization_id: string
+          parent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_code: string
+          account_name: string
+          account_name_en?: string | null
+          account_type: string
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_code?: string
+          account_name?: string
+          account_name_en?: string | null
+          account_type?: string
+          balance?: number | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id?: string
+          parent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_chart_of_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_chart_of_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_employees: {
+        Row: {
+          bank_name: string | null
+          base_salary: number | null
+          contract_type: string | null
+          created_at: string | null
+          department: string | null
+          email: string | null
+          employee_number: string | null
+          full_name: string
+          hire_date: string | null
+          housing_allowance: number | null
+          iban: string | null
+          id: string
+          is_active: boolean | null
+          job_title: string | null
+          national_id: string | null
+          notes: string | null
+          organization_id: string
+          other_allowances: number | null
+          phone: string | null
+          profile_id: string | null
+          termination_date: string | null
+          transport_allowance: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          bank_name?: string | null
+          base_salary?: number | null
+          contract_type?: string | null
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          employee_number?: string | null
+          full_name: string
+          hire_date?: string | null
+          housing_allowance?: number | null
+          iban?: string | null
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          national_id?: string | null
+          notes?: string | null
+          organization_id: string
+          other_allowances?: number | null
+          phone?: string | null
+          profile_id?: string | null
+          termination_date?: string | null
+          transport_allowance?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          bank_name?: string | null
+          base_salary?: number | null
+          contract_type?: string | null
+          created_at?: string | null
+          department?: string | null
+          email?: string | null
+          employee_number?: string | null
+          full_name?: string
+          hire_date?: string | null
+          housing_allowance?: number | null
+          iban?: string | null
+          id?: string
+          is_active?: boolean | null
+          job_title?: string | null
+          national_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          other_allowances?: number | null
+          phone?: string | null
+          profile_id?: string | null
+          termination_date?: string | null
+          transport_allowance?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_financial_reports: {
+        Row: {
+          created_at: string | null
+          generated_by: string | null
+          id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          report_data: Json | null
+          report_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          generated_by?: string | null
+          id?: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          report_data?: Json | null
+          report_type: string
+        }
+        Update: {
+          created_at?: string | null
+          generated_by?: string | null
+          id?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          report_data?: Json | null
+          report_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_financial_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_financial_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_inventory_items: {
+        Row: {
+          barcode: string | null
+          category: string | null
+          created_at: string | null
+          current_stock: number | null
+          id: string
+          is_active: boolean | null
+          item_code: string
+          item_name: string
+          maximum_stock: number | null
+          minimum_stock: number | null
+          notes: string | null
+          organization_id: string
+          selling_price: number | null
+          unit: string | null
+          unit_cost: number | null
+          updated_at: string | null
+          warehouse_id: string | null
+        }
+        Insert: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string | null
+          current_stock?: number | null
+          id?: string
+          is_active?: boolean | null
+          item_code: string
+          item_name: string
+          maximum_stock?: number | null
+          minimum_stock?: number | null
+          notes?: string | null
+          organization_id: string
+          selling_price?: number | null
+          unit?: string | null
+          unit_cost?: number | null
+          updated_at?: string | null
+          warehouse_id?: string | null
+        }
+        Update: {
+          barcode?: string | null
+          category?: string | null
+          created_at?: string | null
+          current_stock?: number | null
+          id?: string
+          is_active?: boolean | null
+          item_code?: string
+          item_name?: string
+          maximum_stock?: number | null
+          minimum_stock?: number | null
+          notes?: string | null
+          organization_id?: string
+          selling_price?: number | null
+          unit?: string | null
+          unit_cost?: number | null
+          updated_at?: string | null
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_inventory_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_inventory_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_inventory_items_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "erp_warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_journal_entries: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          entry_date: string
+          entry_number: string
+          id: string
+          organization_id: string
+          posted_at: string | null
+          posted_by: string | null
+          reference_id: string | null
+          reference_type: string | null
+          status: string | null
+          total_credit: number | null
+          total_debit: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_number: string
+          id?: string
+          organization_id: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          total_credit?: number | null
+          total_debit?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_number?: string
+          id?: string
+          organization_id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string | null
+          total_credit?: number | null
+          total_debit?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_journal_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_journal_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_journal_lines: {
+        Row: {
+          account_id: string
+          created_at: string | null
+          credit: number | null
+          debit: number | null
+          description: string | null
+          id: string
+          journal_entry_id: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string | null
+          credit?: number | null
+          debit?: number | null
+          description?: string | null
+          id?: string
+          journal_entry_id: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string | null
+          credit?: number | null
+          debit?: number | null
+          description?: string | null
+          id?: string
+          journal_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_journal_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "erp_chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_journal_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "erp_journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_leave_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          days_count: number | null
+          employee_id: string
+          end_date: string
+          id: string
+          leave_type: string
+          notes: string | null
+          organization_id: string
+          reason: string | null
+          start_date: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          days_count?: number | null
+          employee_id: string
+          end_date: string
+          id?: string
+          leave_type: string
+          notes?: string | null
+          organization_id: string
+          reason?: string | null
+          start_date: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          days_count?: number | null
+          employee_id?: string
+          end_date?: string
+          id?: string
+          leave_type?: string
+          notes?: string | null
+          organization_id?: string
+          reason?: string | null
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "erp_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_leave_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_leave_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_payroll: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          paid_at: string | null
+          period_month: number
+          period_year: number
+          status: string | null
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          paid_at?: string | null
+          period_month: number
+          period_year: number
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          paid_at?: string | null
+          period_month?: number
+          period_year?: number
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_payroll_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_payroll_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_payroll_items: {
+        Row: {
+          allowances: number | null
+          base_salary: number | null
+          created_at: string | null
+          deductions: number | null
+          employee_id: string
+          id: string
+          net_salary: number | null
+          notes: string | null
+          overtime_pay: number | null
+          payroll_id: string
+        }
+        Insert: {
+          allowances?: number | null
+          base_salary?: number | null
+          created_at?: string | null
+          deductions?: number | null
+          employee_id: string
+          id?: string
+          net_salary?: number | null
+          notes?: string | null
+          overtime_pay?: number | null
+          payroll_id: string
+        }
+        Update: {
+          allowances?: number | null
+          base_salary?: number | null
+          created_at?: string | null
+          deductions?: number | null
+          employee_id?: string
+          id?: string
+          net_salary?: number | null
+          notes?: string | null
+          overtime_pay?: number | null
+          payroll_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_payroll_items_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "erp_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_payroll_items_payroll_id_fkey"
+            columns: ["payroll_id"]
+            isOneToOne: false
+            referencedRelation: "erp_payroll"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_purchase_order_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          item_id: string | null
+          purchase_order_id: string
+          quantity: number
+          received_quantity: number | null
+          total_price: number | null
+          unit_price: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          purchase_order_id: string
+          quantity?: number
+          received_quantity?: number | null
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          purchase_order_id?: string
+          quantity?: number
+          received_quantity?: number | null
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_purchase_order_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "erp_inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_purchase_order_items_purchase_order_id_fkey"
+            columns: ["purchase_order_id"]
+            isOneToOne: false
+            referencedRelation: "erp_purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_purchase_orders: {
+        Row: {
+          approved_by: string | null
+          created_at: string | null
+          created_by: string | null
+          expected_delivery: string | null
+          id: string
+          notes: string | null
+          order_date: string | null
+          organization_id: string
+          po_number: string
+          status: string | null
+          subtotal: number | null
+          supplier_contact: string | null
+          supplier_name: string
+          tax_amount: number | null
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expected_delivery?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string | null
+          organization_id: string
+          po_number: string
+          status?: string | null
+          subtotal?: number | null
+          supplier_contact?: string | null
+          supplier_name: string
+          tax_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          expected_delivery?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string | null
+          organization_id?: string
+          po_number?: string
+          status?: string | null
+          subtotal?: number | null
+          supplier_contact?: string | null
+          supplier_name?: string
+          tax_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_purchase_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_purchase_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_quotation_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          item_id: string | null
+          quantity: number
+          quotation_id: string
+          total_price: number | null
+          unit_price: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          quantity?: number
+          quotation_id: string
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          quantity?: number
+          quotation_id?: string
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_quotation_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "erp_inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_quotation_items_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "erp_quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_quotations: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          customer_contact: string | null
+          customer_name: string
+          id: string
+          notes: string | null
+          organization_id: string
+          quotation_number: string
+          quote_date: string | null
+          status: string | null
+          subtotal: number | null
+          tax_amount: number | null
+          total_amount: number | null
+          updated_at: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_contact?: string | null
+          customer_name: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          quotation_number: string
+          quote_date?: string | null
+          status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_contact?: string | null
+          customer_name?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          quotation_number?: string
+          quote_date?: string | null
+          status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_quotations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_quotations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_sales_order_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          item_id: string | null
+          quantity: number
+          sales_order_id: string
+          total_price: number | null
+          unit_price: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          quantity?: number
+          sales_order_id: string
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          item_id?: string | null
+          quantity?: number
+          sales_order_id?: string
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_sales_order_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "erp_inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_sales_order_items_sales_order_id_fkey"
+            columns: ["sales_order_id"]
+            isOneToOne: false
+            referencedRelation: "erp_sales_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_sales_orders: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          customer_contact: string | null
+          customer_name: string
+          delivery_date: string | null
+          id: string
+          notes: string | null
+          order_date: string | null
+          organization_id: string
+          so_number: string
+          status: string | null
+          subtotal: number | null
+          tax_amount: number | null
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_contact?: string | null
+          customer_name: string
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string | null
+          organization_id: string
+          so_number: string
+          status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          customer_contact?: string | null
+          customer_name?: string
+          delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string | null
+          organization_id?: string
+          so_number?: string
+          status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_sales_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_sales_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_stock_count_items: {
+        Row: {
+          actual_quantity: number | null
+          created_at: string | null
+          difference: number | null
+          id: string
+          item_id: string
+          notes: string | null
+          stock_count_id: string
+          system_quantity: number | null
+        }
+        Insert: {
+          actual_quantity?: number | null
+          created_at?: string | null
+          difference?: number | null
+          id?: string
+          item_id: string
+          notes?: string | null
+          stock_count_id: string
+          system_quantity?: number | null
+        }
+        Update: {
+          actual_quantity?: number | null
+          created_at?: string | null
+          difference?: number | null
+          id?: string
+          item_id?: string
+          notes?: string | null
+          stock_count_id?: string
+          system_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_stock_count_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "erp_inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_stock_count_items_stock_count_id_fkey"
+            columns: ["stock_count_id"]
+            isOneToOne: false
+            referencedRelation: "erp_stock_counts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_stock_counts: {
+        Row: {
+          approved_by: string | null
+          count_date: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          status: string | null
+          updated_at: string | null
+          warehouse_id: string | null
+        }
+        Insert: {
+          approved_by?: string | null
+          count_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          status?: string | null
+          updated_at?: string | null
+          warehouse_id?: string | null
+        }
+        Update: {
+          approved_by?: string | null
+          count_date?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          status?: string | null
+          updated_at?: string | null
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_stock_counts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_stock_counts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_stock_counts_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "erp_warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_stock_movements: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          item_id: string
+          movement_type: string
+          notes: string | null
+          organization_id: string
+          quantity: number
+          reference_id: string | null
+          reference_type: string | null
+          unit_cost: number | null
+          warehouse_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          item_id: string
+          movement_type: string
+          notes?: string | null
+          organization_id: string
+          quantity: number
+          reference_id?: string | null
+          reference_type?: string | null
+          unit_cost?: number | null
+          warehouse_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          item_id?: string
+          movement_type?: string
+          notes?: string | null
+          organization_id?: string
+          quantity?: number
+          reference_id?: string | null
+          reference_type?: string | null
+          unit_cost?: number | null
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_stock_movements_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "erp_inventory_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_stock_movements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_stock_movements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_stock_movements_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "erp_warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      erp_warehouses: {
+        Row: {
+          code: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          location: string | null
+          manager_id: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          manager_id?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          location?: string | null
+          manager_id?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_warehouses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_warehouses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
