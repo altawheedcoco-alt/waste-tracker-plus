@@ -12,6 +12,24 @@ serve(async (req) => {
   }
 
   try {
+    // Block execution in production environment
+    const environment = Deno.env.get('ENVIRONMENT') || Deno.env.get('APP_ENV') || '';
+    if (environment === 'production') {
+      return new Response(
+        JSON.stringify({ error: 'Demo seeding is disabled in production' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Require a secret confirmation header to prevent accidental execution
+    const confirmHeader = req.headers.get('x-confirm-seed');
+    if (confirmHeader !== 'yes-seed-demo-data') {
+      return new Response(
+        JSON.stringify({ error: 'Missing confirmation header. This action creates demo accounts with known passwords.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
