@@ -47,14 +47,17 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
 import ProfileCustomization from '@/components/settings/ProfileCustomization';
 
-const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
-  { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
-  { value: 'blue', label: 'أزرق سماوي', color: 'bg-blue-500', gradient: 'from-blue-400 to-indigo-600' },
-  { value: 'purple', label: 'بنفسجي ملكي', color: 'bg-purple-500', gradient: 'from-purple-400 to-violet-600' },
-  { value: 'orange', label: 'برتقالي دافئ', color: 'bg-orange-500', gradient: 'from-orange-400 to-amber-600' },
-  { value: 'red', label: 'أحمر جريء', color: 'bg-red-500', gradient: 'from-red-400 to-rose-600' },
-  { value: 'teal', label: 'فيروزي هادئ', color: 'bg-teal-500', gradient: 'from-teal-400 to-cyan-600' },
-];
+const Settings = () => {
+  const { t } = useLanguage();
+
+  const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
+    { value: 'green', label: t('settings.greenNatural'), color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
+    { value: 'blue', label: t('settings.blueSky'), color: 'bg-blue-500', gradient: 'from-blue-400 to-indigo-600' },
+    { value: 'purple', label: t('settings.purpleRoyal'), color: 'bg-purple-500', gradient: 'from-purple-400 to-violet-600' },
+    { value: 'orange', label: t('settings.orangeWarm'), color: 'bg-orange-500', gradient: 'from-orange-400 to-amber-600' },
+    { value: 'red', label: t('settings.redBold'), color: 'bg-red-500', gradient: 'from-red-400 to-rose-600' },
+    { value: 'teal', label: t('settings.tealCalm'), color: 'bg-teal-500', gradient: 'from-teal-400 to-cyan-600' },
+  ];
 
 const arabicFontOptions: { value: FontFamily; label: string; preview: string; description: string }[] = [
   { value: 'cairo', label: 'Cairo', preview: 'خط القاهرة', description: 'خط عصري ومريح للقراءة' },
@@ -104,60 +107,22 @@ const englishFontOptions: { value: FontFamily; label: string; preview: string; d
 
 const fontOptions = [...arabicFontOptions, ...englishFontOptions];
 
-const displayModeOptions: { value: DisplayMode; label: string; icon: typeof Monitor; description: string }[] = [
-  { value: 'auto', label: 'تلقائي', icon: MonitorSmartphone, description: 'يتكيف مع حجم الشاشة' },
-  { value: 'desktop', label: 'سطح المكتب', icon: Monitor, description: 'عرض كامل للشاشات الكبيرة' },
-  { value: 'tablet', label: 'تابلت', icon: Tablet, description: 'عرض متوسط للأجهزة اللوحية' },
-  { value: 'mobile', label: 'هاتف', icon: Smartphone, description: 'عرض مضغوط للهواتف' },
-];
+  const displayModeOptions: { value: DisplayMode; label: string; icon: typeof Monitor; description: string }[] = [
+    { value: 'auto', label: t('settings.auto'), icon: MonitorSmartphone, description: t('settings.autoDesc') },
+    { value: 'desktop', label: t('settings.desktop'), icon: Monitor, description: t('settings.desktopDesc') },
+    { value: 'tablet', label: t('settings.tablet'), icon: Tablet, description: t('settings.tabletDesc') },
+    { value: 'mobile', label: t('settings.mobile'), icon: Smartphone, description: t('settings.mobileDesc') },
+  ];
 
-// Predefined theme presets
-const themePresets = [
-  { 
-    name: 'كلاسيكي أخضر', 
-    color: 'green' as ThemeColor, 
-    font: 'cairo' as FontFamily, 
-    dark: false,
-    icon: '🌿'
-  },
-  { 
-    name: 'ليلي أنيق', 
-    color: 'blue' as ThemeColor, 
-    font: 'tajawal' as FontFamily, 
-    dark: true,
-    icon: '🌙'
-  },
-  { 
-    name: 'مهني حديث', 
-    color: 'teal' as ThemeColor, 
-    font: 'ibm-plex' as FontFamily, 
-    dark: false,
-    icon: '💼'
-  },
-  { 
-    name: 'إبداعي', 
-    color: 'purple' as ThemeColor, 
-    font: 'noto-kufi' as FontFamily, 
-    dark: true,
-    icon: '🎨'
-  },
-  { 
-    name: 'دافئ ومريح', 
-    color: 'orange' as ThemeColor, 
-    font: 'almarai' as FontFamily, 
-    dark: false,
-    icon: '☀️'
-  },
-  { 
-    name: 'قوي وجريء', 
-    color: 'red' as ThemeColor, 
-    font: 'cairo' as FontFamily, 
-    dark: true,
-    icon: '🔥'
-  },
-];
+  const themePresets = [
+    { name: t('settings.classicGreen'), color: 'green' as ThemeColor, font: 'cairo' as FontFamily, dark: false, icon: '🌿' },
+    { name: t('settings.elegantNight'), color: 'blue' as ThemeColor, font: 'tajawal' as FontFamily, dark: true, icon: '🌙' },
+    { name: t('settings.modernPro'), color: 'teal' as ThemeColor, font: 'ibm-plex' as FontFamily, dark: false, icon: '💼' },
+    { name: t('settings.creative'), color: 'purple' as ThemeColor, font: 'noto-kufi' as FontFamily, dark: true, icon: '🎨' },
+    { name: t('settings.warmComfy'), color: 'orange' as ThemeColor, font: 'almarai' as FontFamily, dark: false, icon: '☀️' },
+    { name: t('settings.boldStrong'), color: 'red' as ThemeColor, font: 'cairo' as FontFamily, dark: true, icon: '🔥' },
+  ];
 
-const Settings = () => {
   const {
     settings,
     setThemeColor,
@@ -170,7 +135,6 @@ const Settings = () => {
   } = useThemeSettings();
 
   const { organization } = useAuth();
-  const { t } = useLanguage();
   const isTransporter = organization?.organization_type === 'transporter';
 
   // Read tab from URL params
@@ -216,7 +180,7 @@ const Settings = () => {
           <TabsList className="inline-flex w-max gap-1 h-auto p-1.5 bg-muted/50 rounded-xl">
             <TabsTrigger value="profile" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <UserCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">الملف الشخصي</span>
+              <span className="hidden sm:inline">{t('nav.profile')}</span>
             </TabsTrigger>
             <TabsTrigger value="language" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Globe className="h-4 w-4" />
@@ -272,7 +236,7 @@ const Settings = () => {
             </TabsTrigger>
             <TabsTrigger value="document-templates" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">قوالب المستندات</span>
+              <span className="hidden sm:inline">{t('sidebar.docArchive')}</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -293,10 +257,10 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
-                ثيمات جاهزة
+                {t('settings.themePresets')}
               </CardTitle>
               <CardDescription>
-                اختر من مجموعة ثيمات مصممة مسبقاً لتطبيقها بنقرة واحدة
+                {t('settings.themePresetsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent>
