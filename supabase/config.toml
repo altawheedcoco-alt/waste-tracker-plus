@@ -125,3 +125,6 @@ verify_jwt = false
 
 [functions.esg-report-generator]
 verify_jwt = false
+
+[functions.detailed-waste-analysis]
+verify_jwt = false
