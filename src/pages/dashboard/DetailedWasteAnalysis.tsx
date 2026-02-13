@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star } from 'lucide-react';
+import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star, DollarSign, TrendingUp, Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { formatNumber, formatCurrency } from '@/lib/numberFormat';
 
 interface WasteComponent {
   name: string;
@@ -21,6 +22,25 @@ interface WasteComponent {
   market_value: string;
   color: string;
   notes: string;
+}
+
+interface ComponentPricing {
+  name: string;
+  waste_type: string;
+  estimated_weight_kg: number;
+  price_per_ton_egp: number;
+  total_value_egp: number;
+  price_source: string;
+}
+
+interface FinancialAnalysis {
+  currency: string;
+  components_pricing: ComponentPricing[];
+  total_estimated_value_egp: number;
+  mixed_ton_price_egp: number;
+  price_per_kg_egp: number;
+  sorted_vs_mixed_premium: string;
+  market_notes: string;
 }
 
 interface AnalysisResult {
@@ -54,6 +74,7 @@ interface AnalysisResult {
     best_recycling_method: string;
     disposal_method: string;
   };
+  financial_analysis?: FinancialAnalysis;
 }
 
 const wasteTypeColors: Record<string, string> = {
@@ -270,6 +291,81 @@ const DetailedWasteAnalysis = () => {
                 </Card>
               )}
             </div>
+
+            {/* Financial Analysis */}
+            {result.financial_analysis && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-primary" />
+                    التحليل المالي والتسعير
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="p-3 rounded-lg border bg-card text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs"><Coins className="w-4 h-4" />إجمالي القيمة</div>
+                      <p className="font-bold text-lg text-primary">{formatCurrency(result.financial_analysis.total_estimated_value_egp)}</p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-card text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs"><TrendingUp className="w-4 h-4" />سعر الطن المختلط</div>
+                      <p className="font-bold text-lg">{formatCurrency(result.financial_analysis.mixed_ton_price_egp)}</p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-card text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs"><Scale className="w-4 h-4" />سعر الكيلو</div>
+                      <p className="font-bold text-lg">{formatNumber(result.financial_analysis.price_per_kg_egp, 2)} ج.م</p>
+                    </div>
+                    <div className="p-3 rounded-lg border bg-card text-center space-y-1">
+                      <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs"><Recycle className="w-4 h-4" />فائدة الفرز</div>
+                      <p className="font-bold text-sm">{result.financial_analysis.sorted_vs_mixed_premium}</p>
+                    </div>
+                  </div>
+
+                  {result.financial_analysis.components_pricing?.length > 0 && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b text-muted-foreground">
+                            <th className="text-right py-2 px-2">الصنف</th>
+                            <th className="text-center py-2 px-2">الوزن (كجم)</th>
+                            <th className="text-center py-2 px-2">سعر الطن</th>
+                            <th className="text-center py-2 px-2">الإجمالي</th>
+                            <th className="text-center py-2 px-2">المصدر</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {result.financial_analysis.components_pricing.map((cp, i) => (
+                            <tr key={i} className="border-b last:border-0">
+                              <td className="py-2 px-2 font-medium">
+                                <div className="flex items-center gap-1">
+                                  <span className={`w-2 h-2 rounded-full ${wasteTypeColors[cp.waste_type] || 'bg-muted'}`} />
+                                  {cp.name}
+                                </div>
+                              </td>
+                              <td className="text-center py-2 px-2">{formatNumber(cp.estimated_weight_kg, 1)}</td>
+                              <td className="text-center py-2 px-2">{formatCurrency(cp.price_per_ton_egp)}</td>
+                              <td className="text-center py-2 px-2 font-semibold text-primary">{formatCurrency(cp.total_value_egp)}</td>
+                              <td className="text-center py-2 px-2 text-xs text-muted-foreground">{cp.price_source}</td>
+                            </tr>
+                          ))}
+                          <tr className="font-bold border-t-2">
+                            <td className="py-2 px-2">الإجمالي</td>
+                            <td className="text-center py-2 px-2">{formatNumber(result.estimated_total_weight_kg, 1)}</td>
+                            <td className="text-center py-2 px-2">—</td>
+                            <td className="text-center py-2 px-2 text-primary">{formatCurrency(result.financial_analysis.total_estimated_value_egp)}</td>
+                            <td />
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {result.financial_analysis.market_notes && (
+                    <p className="text-xs text-muted-foreground border-t pt-2">{result.financial_analysis.market_notes}</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Recommendations */}
             {result.quality_assessment?.recommendations?.length > 0 && (
