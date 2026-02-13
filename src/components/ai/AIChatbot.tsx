@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import ReactMarkdown from 'react-markdown';
+import { registerAIChatHandler, unregisterAIChatHandler } from '@/lib/aiChatBus';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -20,6 +21,47 @@ const AIChatbot = () => {
   const [input, setInput] = useState('');
   const { isLoading, streamChat } = useAIAssistant();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Listen for external "طور" trigger
+  useEffect(() => {
+    registerAIChatHandler((message: string) => {
+      setIsOpen(true);
+      // Auto-send the development request
+      setTimeout(() => {
+        setInput(message);
+        // Trigger send programmatically
+        const userMessage: Message = { role: 'user', content: message };
+        setMessages(prev => [...prev, userMessage]);
+        
+        let assistantContent = '';
+        const updateAssistant = (chunk: string) => {
+          assistantContent += chunk;
+          setMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last?.role === 'assistant' && prev.length > 1) {
+              return prev.map((m, i) => 
+                i === prev.length - 1 ? { ...m, content: assistantContent } : m
+              );
+            }
+            return [...prev, { role: 'assistant', content: assistantContent }];
+          });
+        };
+
+        streamChat({
+          messages: [...messages, userMessage],
+          onDelta: updateAssistant,
+          onDone: () => {},
+        }).catch(() => {
+          setMessages(prev => [
+            ...prev,
+            { role: 'assistant', content: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.' }
+          ]);
+        });
+        setInput('');
+      }, 300);
+    });
+    return () => unregisterAIChatHandler();
+  }, [messages, streamChat]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -77,14 +119,14 @@ const AIChatbot = () => {
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="fixed bottom-52 left-4 z-40 hidden" // Hidden - use ChatWidget instead
+        className="fixed bottom-52 left-4 z-40"
       >
         <Button
           onClick={() => setIsOpen(!isOpen)}
           size="lg"
           className="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg bg-accent text-accent-foreground touch-manipulation"
         >
-          {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
+          {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Bot className="w-5 h-5 sm:w-6 sm:h-6" />}
         </Button>
       </motion.div>
 
