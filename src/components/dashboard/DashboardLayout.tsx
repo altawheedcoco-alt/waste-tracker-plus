@@ -88,6 +88,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 import DepositButton from '@/components/deposits/DepositButton';
+import { getAvatarEmoji, getColorTheme } from '@/components/settings/ProfileCustomization';
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
 import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
@@ -792,12 +793,23 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center gap-1 sm:gap-2 hover:bg-muted/80 px-2 sm:px-3">
-                    <Avatar className="h-7 w-7 sm:h-8 sm:w-8 ring-2 ring-primary/20">
-                      <AvatarImage src={profile?.avatar_url || ''} />
-                      <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                        {profile?.full_name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
+                    {(profile as any)?.avatar_preset && (profile as any).avatar_preset !== 'default' ? (
+                      <div 
+                        className="h-7 w-7 sm:h-8 sm:w-8 rounded-full flex items-center justify-center text-lg ring-2 ring-primary/20"
+                        style={{ 
+                          background: `linear-gradient(135deg, ${getColorTheme((profile as any)?.profile_color_theme || 'teal-blue')[0]}40, ${getColorTheme((profile as any)?.profile_color_theme || 'teal-blue')[1]}40)` 
+                        }}
+                      >
+                        {getAvatarEmoji((profile as any).avatar_preset)}
+                      </div>
+                    ) : (
+                      <Avatar className="h-7 w-7 sm:h-8 sm:w-8 ring-2 ring-primary/20">
+                        <AvatarImage src={profile?.avatar_url || ''} />
+                        <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
+                          {profile?.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
                     <span className="hidden md:inline-block font-medium text-sm lg:text-base max-w-[120px] truncate">{profile?.full_name}</span>
                     <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground hidden sm:block" />
                   </Button>
@@ -852,7 +864,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     <Building2 className="ml-2 h-4 w-4" />
                     ملف الجهة
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => startTransition(() => navigate('/dashboard/settings'))} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => startTransition(() => navigate('/dashboard/settings?tab=profile'))} className="cursor-pointer">
                     <User className="ml-2 h-4 w-4" />
                     الملف الشخصي
                   </DropdownMenuItem>

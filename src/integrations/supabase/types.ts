@@ -11633,6 +11633,7 @@ export type Database = {
           access_all_partners: boolean | null
           access_all_waste_types: boolean | null
           active_organization_id: string | null
+          avatar_preset: string | null
           avatar_url: string | null
           can_sign_documents: boolean | null
           created_at: string | null
@@ -11650,6 +11651,7 @@ export type Database = {
           organization_id: string | null
           phone: string | null
           position: string | null
+          profile_color_theme: string | null
           signature_authority_level: string | null
           updated_at: string | null
           user_id: string
@@ -11658,6 +11660,7 @@ export type Database = {
           access_all_partners?: boolean | null
           access_all_waste_types?: boolean | null
           active_organization_id?: string | null
+          avatar_preset?: string | null
           avatar_url?: string | null
           can_sign_documents?: boolean | null
           created_at?: string | null
@@ -11675,6 +11678,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           position?: string | null
+          profile_color_theme?: string | null
           signature_authority_level?: string | null
           updated_at?: string | null
           user_id: string
@@ -11683,6 +11687,7 @@ export type Database = {
           access_all_partners?: boolean | null
           access_all_waste_types?: boolean | null
           active_organization_id?: string | null
+          avatar_preset?: string | null
           avatar_url?: string | null
           can_sign_documents?: boolean | null
           created_at?: string | null
@@ -11700,6 +11705,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           position?: string | null
+          profile_color_theme?: string | null
           signature_authority_level?: string | null
           updated_at?: string | null
           user_id?: string
