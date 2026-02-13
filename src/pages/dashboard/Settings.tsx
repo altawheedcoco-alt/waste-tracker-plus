@@ -20,7 +20,8 @@ import {
   Brush,
   MessageSquare,
   Globe,
-  UserCircle
+  UserCircle,
+  Settings2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -184,88 +185,97 @@ const Settings = () => {
     }
   };
 
-  return (
+   return (
     <div className="space-y-6 pb-10">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BackButton />
-          <div>
-            <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
-            <p className="text-muted-foreground">{t('settings.subtitle')}</p>
+      {/* Header */}
+      <div className="relative overflow-hidden rounded-xl border bg-gradient-to-l from-primary/5 via-background to-primary/10 p-5">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-4">
+            <BackButton />
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Settings2 className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold">{t('settings.title')}</h1>
+                <p className="text-muted-foreground text-sm">{t('settings.subtitle')}</p>
+              </div>
+            </div>
           </div>
+          <Button variant="outline" size="sm" onClick={resetToDefaults} className="gap-2">
+            <RotateCcw className="h-4 w-4" />
+            {t('settings.resetDefault')}
+          </Button>
         </div>
-        <Button variant="outline" onClick={resetToDefaults}>
-          <RotateCcw className="h-4 w-4 ml-2" />
-          {t('settings.resetDefault')}
-        </Button>
+        <div className="absolute top-0 left-0 w-32 h-32 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-24 h-24 bg-primary/5 rounded-full translate-x-1/3 translate-y-1/3" />
       </div>
 
       <Tabs defaultValue={defaultTab} className="space-y-6">
-        <TabsList className={cn(
-          "grid w-full lg:w-auto lg:inline-grid overflow-x-auto",
-          isTransporter ? "grid-cols-14" : "grid-cols-13"
-        )}>
-          <TabsTrigger value="profile" className="gap-2">
-            <UserCircle className="h-4 w-4" />
-            <span className="hidden sm:inline">الملف الشخصي</span>
-          </TabsTrigger>
-          <TabsTrigger value="language" className="gap-2">
-            <Globe className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.language')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="themes" className="gap-2">
-            <Sparkles className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.themes')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="colors" className="gap-2">
-            <Palette className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.colors')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="typography" className="gap-2">
-            <Type className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.typography')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="display" className="gap-2">
-            <Eye className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.display')}</span>
-          </TabsTrigger>
-          {isTransporter && (
-            <TabsTrigger value="advanced-appearance" className="gap-2">
-              <Brush className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('settings.advancedAppearance')}</span>
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pb-1">
+          <TabsList className="inline-flex w-max gap-1 h-auto p-1.5 bg-muted/50 rounded-xl">
+            <TabsTrigger value="profile" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <UserCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">الملف الشخصي</span>
             </TabsTrigger>
-          )}
-          <TabsTrigger value="sounds" className="gap-2">
-            <Volume2 className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.sounds')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="automation" className="gap-2">
-            <Zap className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.automation')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="security" className="gap-2">
-            <Lock className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.security')}</span>
-          </TabsTrigger>
-          {isTransporter && (
-            <TabsTrigger value="visibility" className="gap-2">
-              <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('settings.visibility')}</span>
+            <TabsTrigger value="language" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Globe className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.language')}</span>
             </TabsTrigger>
-          )}
-          <TabsTrigger value="notifications-channels" className="gap-2">
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.notificationChannels')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="terms" className="gap-2">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('settings.terms')}</span>
-          </TabsTrigger>
-          <TabsTrigger value="document-templates" className="gap-2">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">قوالب المستندات</span>
-          </TabsTrigger>
-        </TabsList>
+            <TabsTrigger value="themes" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.themes')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="colors" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Palette className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.colors')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="typography" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Type className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.typography')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="display" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Eye className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.display')}</span>
+            </TabsTrigger>
+            {isTransporter && (
+              <TabsTrigger value="advanced-appearance" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <Brush className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('settings.advancedAppearance')}</span>
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="sounds" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Volume2 className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.sounds')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Zap className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.automation')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <Lock className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.security')}</span>
+            </TabsTrigger>
+            {isTransporter && (
+              <TabsTrigger value="visibility" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <Shield className="h-4 w-4" />
+                <span className="hidden sm:inline">{t('settings.visibility')}</span>
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="notifications-channels" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.notificationChannels')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="terms" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('settings.terms')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="document-templates" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">قوالب المستندات</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Profile Customization Tab */}
         <TabsContent value="profile" className="space-y-6">
