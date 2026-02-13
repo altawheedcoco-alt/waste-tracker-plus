@@ -1,15 +1,21 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star, DollarSign, TrendingUp, Coins } from 'lucide-react';
+import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star, DollarSign, TrendingUp, Coins, X, Plus, FileText, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { formatNumber, formatCurrency } from '@/lib/numberFormat';
 import BackButton from '@/components/ui/back-button';
+
+interface ImageItem {
+  file: File;
+  preview: string;
+}
 
 interface WasteComponent {
   name: string;
@@ -98,25 +104,56 @@ const gradeColors: Record<string, string> = {
 };
 
 const DetailedWasteAnalysis = () => {
-  const [image, setImage] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
+  const [description, setDescription] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const addFiles = (files: FileList | null) => {
+    if (!files) return;
+    const newImages: ImageItem[] = [];
+    const maxTotal = 10;
+    const allowed = maxTotal - images.length;
+    
+    Array.from(files).slice(0, allowed).forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+      const preview = URL.createObjectURL(file);
+      newImages.push({ file, preview });
+    });
+    
+    if (newImages.length === 0) return;
+    setImages(prev => [...prev, ...newImages]);
+    if (files.length > allowed) {
+      toast.info(`تم إضافة ${allowed} صور فقط (الحد الأقصى ${maxTotal})`);
+    }
+  };
 
-    const reader = new FileReader();
-    reader.onload = (event) => setImage(event.target?.result as string);
-    reader.readAsDataURL(file);
+  const removeImage = (index: number) => {
+    setImages(prev => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleAnalyze = async () => {
+    if (images.length === 0) {
+      toast.error('يرجى رفع صورة واحدة على الأقل');
+      return;
+    }
 
     setIsAnalyzing(true);
     setResult(null);
 
     try {
       const formData = new FormData();
-      formData.append('image', file);
+      images.forEach((img, i) => {
+        formData.append(`image_${i}`, img.file);
+      });
+      if (description.trim()) {
+        formData.append('description', description.trim());
+      }
 
       const { data, error } = await supabase.functions.invoke('detailed-waste-analysis', {
         body: formData,
@@ -126,7 +163,7 @@ const DetailedWasteAnalysis = () => {
       if (!data.success) throw new Error(data.error || 'فشل التحليل');
 
       setResult(data.analysis);
-      toast.success('تم تحليل الصورة بنجاح');
+      toast.success('تم تحليل الصور بنجاح');
     } catch (err: any) {
       toast.error(err.message || 'حدث خطأ أثناء التحليل');
     } finally {
@@ -135,9 +172,12 @@ const DetailedWasteAnalysis = () => {
   };
 
   const reset = () => {
-    setImage(null);
+    images.forEach(img => URL.revokeObjectURL(img.preview));
+    setImages([]);
+    setDescription('');
     setResult(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
 
   return (
@@ -145,39 +185,152 @@ const DetailedWasteAnalysis = () => {
       <BackButton />
       <div className="text-center space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold">تحليل المخلفات بالذكاء الاصطناعي</h1>
-        <p className="text-muted-foreground">ارفع صورة للمخلفات واحصل على تحليل تفصيلي شامل لكل مكون</p>
+        <p className="text-muted-foreground">ارفع صور المخلفات وأضف وصفاً للحصول على تحليل تفصيلي شامل مع التسعير</p>
       </div>
 
       {/* Upload Area */}
       <Card>
-        <CardContent className="p-6">
-          <div
-            onClick={() => !isAnalyzing && fileInputRef.current?.click()}
-            className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors"
-          >
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-            {image ? (
-              <div className="space-y-4">
-                <img src={image} alt="Waste" className="max-h-64 mx-auto rounded-lg object-contain" />
-                {isAnalyzing && (
-                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>جاري تحليل الصورة بدقة...</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-                  <Camera className="w-8 h-8 text-primary" />
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ImageIcon className="w-5 h-5 text-primary" />
+            الصور ({images.length}/10)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Image Grid */}
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {images.map((img, i) => (
+                <motion.div
+                  key={img.preview}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="relative group aspect-square rounded-lg overflow-hidden border bg-muted"
+                >
+                  <img src={img.preview} alt={`صورة ${i + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => removeImage(i)}
+                    className="absolute top-1 left-1 w-6 h-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="absolute bottom-1 right-1 text-xs bg-background/80 text-foreground rounded px-1.5 py-0.5">
+                    {i + 1}
+                  </span>
+                </motion.div>
+              ))}
+
+              {/* Add More Button */}
+              {images.length < 10 && (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="aspect-square rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
+                >
+                  <Plus className="w-6 h-6 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground mt-1">إضافة</span>
                 </div>
-                <p className="font-medium">اضغط لرفع صورة المخلفات</p>
-                <p className="text-sm text-muted-foreground">PNG, JPG أو JPEG - حجم أقصى 20MB</p>
+              )}
+            </div>
+          )}
+
+          {/* Empty State Upload Buttons */}
+          {images.length === 0 && (
+            <div className="border-2 border-dashed border-border rounded-xl p-8 text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                <Camera className="w-8 h-8 text-primary" />
               </div>
-            )}
-          </div>
+              <div>
+                <p className="font-medium">ارفع صور المخلفات للتحليل</p>
+                <p className="text-sm text-muted-foreground mt-1">يمكنك رفع حتى 10 صور - PNG, JPG أو JPEG</p>
+              </div>
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                <Button onClick={() => fileInputRef.current?.click()} variant="outline" className="gap-2">
+                  <Upload className="w-4 h-4" />
+                  رفع صور
+                </Button>
+                <Button onClick={() => cameraInputRef.current?.click()} variant="outline" className="gap-2">
+                  <Camera className="w-4 h-4" />
+                  التقاط من الكاميرا
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Hidden Inputs */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }}
+            className="hidden"
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }}
+            className="hidden"
+          />
+
+          {/* Action Buttons when images exist */}
+          {images.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button onClick={() => cameraInputRef.current?.click()} variant="outline" size="sm" className="gap-1.5">
+                <Camera className="w-4 h-4" />
+                كاميرا
+              </Button>
+              <Button onClick={() => fileInputRef.current?.click()} variant="outline" size="sm" className="gap-1.5">
+                <Upload className="w-4 h-4" />
+                رفع المزيد
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Description Input */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileText className="w-5 h-5 text-primary" />
+            وصف المحتوى (اختياري)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="أضف وصفاً لمساعدة الذكاء الاصطناعي في التحليل الدقيق... مثلاً: حمولة كرتون مستعمل من مصنع مواد غذائية، أو خردة حديد من ورشة ميكانيكية..."
+            className="min-h-[80px] resize-none text-right"
+            dir="rtl"
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            الوصف يساعد في تحديد نوع المخلفات وتسعيرها بدقة أعلى
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Analyze Button */}
+      <Button
+        onClick={handleAnalyze}
+        disabled={isAnalyzing || images.length === 0}
+        className="w-full"
+        size="lg"
+      >
+        {isAnalyzing ? (
+          <>
+            <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+            جاري تحليل {images.length > 1 ? `${images.length} صور` : 'الصورة'} بدقة...
+          </>
+        ) : (
+          <>
+            <BarChart3 className="w-5 h-5 ml-2" />
+            تحليل {images.length > 1 ? `${images.length} صور` : images.length === 1 ? 'الصورة' : 'المخلفات'}
+          </>
+        )}
+      </Button>
 
       {/* Results */}
       <AnimatePresence>
@@ -388,7 +541,7 @@ const DetailedWasteAnalysis = () => {
 
             <Button onClick={reset} variant="outline" className="w-full">
               <Camera className="w-4 h-4 ml-2" />
-              تحليل صورة جديدة
+              تحليل جديد
             </Button>
           </motion.div>
         )}
