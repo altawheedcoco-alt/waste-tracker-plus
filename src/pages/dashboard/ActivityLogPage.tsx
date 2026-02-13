@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,7 +40,8 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar as arLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 interface ActivityLog {
   id: string;
@@ -59,53 +61,11 @@ interface ActivityLog {
   } | null;
 }
 
-const actionTypeLabels: Record<string, { label: string; icon: typeof Activity; color: string }> = {
-  shipment_create: { label: 'إنشاء شحنة', icon: Package, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
-  shipment_update: { label: 'تحديث شحنة', icon: Package, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
-  shipment_status_change: { label: 'تغيير حالة', icon: Package, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' },
-  shipment_delete: { label: 'حذف شحنة', icon: Package, color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
-  shipment_view: { label: 'عرض شحنة', icon: Eye, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
-  shipment_print: { label: 'طباعة شحنة', icon: FileText, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
-  invoice_create: { label: 'إنشاء فاتورة', icon: FileText, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
-  invoice_update: { label: 'تحديث فاتورة', icon: FileText, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
-  deposit_create: { label: 'إنشاء إيداع', icon: FileText, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
-  driver_assign: { label: 'إسناد سائق', icon: Truck, color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400' },
-  driver_create: { label: 'إضافة سائق', icon: Truck, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
-  settings_change: { label: 'تغيير إعدادات', icon: Settings, color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' },
-  user_role_change: { label: 'تغيير صلاحية', icon: Shield, color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
-  auth_login: { label: 'تسجيل دخول', icon: User, color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  auth_logout: { label: 'تسجيل خروج', icon: User, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
-  file_upload: { label: 'رفع ملف', icon: Download, color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400' },
-  qr_scan: { label: 'مسح QR', icon: Eye, color: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400' },
-};
-
-const resourceTypeLabels: Record<string, string> = {
-  shipment: 'شحنة',
-  shipments: 'شحنات',
-  invoice: 'فاتورة',
-  invoices: 'فواتير',
-  deposit: 'إيداع',
-  deposits: 'إيداعات',
-  contract: 'عقد',
-  contracts: 'عقود',
-  driver: 'سائق',
-  drivers: 'سائقين',
-  user: 'مستخدم',
-  organization: 'مؤسسة',
-  settings: 'إعدادات',
-  file: 'ملف',
-  recycling_reports: 'تقارير إعادة التدوير',
-  shipment_receipts: 'إيصالات الشحنات',
-  award_letters: 'خطابات الترسية',
-  external_partners: 'شركاء خارجيين',
-  accounting_ledger: 'قيود محاسبية',
-  api_keys: 'مفاتيح API',
-};
-
 const PAGE_SIZE = 50;
 
 const ActivityLogPage = () => {
   const { roles } = useAuth();
+  const { t, language } = useLanguage();
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,6 +75,27 @@ const ActivityLogPage = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   const isAdmin = roles.includes('admin');
+  const dateLocale = language === 'ar' ? arLocale : enUS;
+
+  const actionTypeLabels: Record<string, { label: string; icon: typeof Activity; color: string }> = {
+    shipment_create: { label: t('activityLog.shipmentCreate'), icon: Package, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+    shipment_update: { label: t('activityLog.shipmentUpdate'), icon: Package, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
+    shipment_status_change: { label: t('activityLog.shipmentStatusChange'), icon: Package, color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' },
+    shipment_delete: { label: t('activityLog.shipmentDelete'), icon: Package, color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
+    shipment_view: { label: t('activityLog.shipmentView'), icon: Eye, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
+    shipment_print: { label: t('activityLog.shipmentPrint'), icon: FileText, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+    invoice_create: { label: t('activityLog.invoiceCreate'), icon: FileText, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+    invoice_update: { label: t('activityLog.invoiceUpdate'), icon: FileText, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
+    deposit_create: { label: t('activityLog.depositCreate'), icon: FileText, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+    driver_assign: { label: t('activityLog.driverAssign'), icon: Truck, color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400' },
+    driver_create: { label: t('activityLog.driverCreate'), icon: Truck, color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+    settings_change: { label: t('activityLog.settingsChange'), icon: Settings, color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' },
+    user_role_change: { label: t('activityLog.userRoleChange'), icon: Shield, color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
+    auth_login: { label: t('activityLog.authLogin'), icon: User, color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' },
+    auth_logout: { label: t('activityLog.authLogout'), icon: User, color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
+    file_upload: { label: t('activityLog.fileUpload'), icon: Download, color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400' },
+    qr_scan: { label: t('activityLog.qrScan'), icon: Eye, color: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-400' },
+  };
 
   useEffect(() => {
     fetchLogs();
@@ -149,7 +130,6 @@ const ActivityLogPage = () => {
 
       if (error) throw error;
 
-      // Normalize profile data (may be array due to removed FK)
       const normalizedLogs = (data || []).map(log => ({
         ...log,
         profile: Array.isArray(log.profile) ? log.profile[0] : log.profile,
@@ -193,15 +173,15 @@ const ActivityLogPage = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Activity className="h-6 w-6 text-primary" />
-              سجل الأنشطة والتصرفات
+              {t('activityLog.title')}
             </h1>
             <p className="text-muted-foreground mt-1">
-              {isAdmin ? 'جميع الأنشطة في المنصة' : 'سجل أنشطتك ومؤسستك'}
+              {isAdmin ? t('activityLog.adminSubtitle') : t('activityLog.userSubtitle')}
             </p>
           </div>
           <Button onClick={fetchLogs} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 ml-2" />
-            تحديث
+            {t('activityLog.refresh')}
           </Button>
         </motion.div>
 
@@ -212,7 +192,7 @@ const ActivityLogPage = () => {
               <div className="relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="بحث في الأنشطة..."
+                  placeholder={t('activityLog.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -222,41 +202,41 @@ const ActivityLogPage = () => {
 
               <Select value={actionTypeFilter} onValueChange={(v) => { setActionTypeFilter(v); setPage(1); }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="نوع التصرف" />
+                  <SelectValue placeholder={t('activityLog.actionType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الأنواع</SelectItem>
-                  <SelectItem value="shipment_create">إنشاء شحنة</SelectItem>
-                  <SelectItem value="shipment_status_change">تغيير حالة</SelectItem>
-                  <SelectItem value="shipment_update">تحديث شحنة</SelectItem>
-                  <SelectItem value="invoice_create">إنشاء فاتورة</SelectItem>
-                  <SelectItem value="deposit_create">إنشاء إيداع</SelectItem>
-                  <SelectItem value="driver_assign">إسناد سائق</SelectItem>
-                  <SelectItem value="user_role_change">تغيير صلاحية</SelectItem>
-                  <SelectItem value="settings_change">تغيير إعدادات</SelectItem>
-                  <SelectItem value="auth_login">تسجيل دخول</SelectItem>
-                  <SelectItem value="auth_logout">تسجيل خروج</SelectItem>
+                  <SelectItem value="all">{t('activityLog.allTypes')}</SelectItem>
+                  <SelectItem value="shipment_create">{t('activityLog.shipmentCreate')}</SelectItem>
+                  <SelectItem value="shipment_status_change">{t('activityLog.shipmentStatusChange')}</SelectItem>
+                  <SelectItem value="shipment_update">{t('activityLog.shipmentUpdate')}</SelectItem>
+                  <SelectItem value="invoice_create">{t('activityLog.invoiceCreate')}</SelectItem>
+                  <SelectItem value="deposit_create">{t('activityLog.depositCreate')}</SelectItem>
+                  <SelectItem value="driver_assign">{t('activityLog.driverAssign')}</SelectItem>
+                  <SelectItem value="user_role_change">{t('activityLog.userRoleChange')}</SelectItem>
+                  <SelectItem value="settings_change">{t('activityLog.settingsChange')}</SelectItem>
+                  <SelectItem value="auth_login">{t('activityLog.authLogin')}</SelectItem>
+                  <SelectItem value="auth_logout">{t('activityLog.authLogout')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={resourceTypeFilter} onValueChange={(v) => { setResourceTypeFilter(v); setPage(1); }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="نوع المورد" />
+                  <SelectValue placeholder={t('activityLog.resourceType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الموارد</SelectItem>
-                  <SelectItem value="shipments">الشحنات</SelectItem>
-                  <SelectItem value="invoices">الفواتير</SelectItem>
-                  <SelectItem value="deposits">الإيداعات</SelectItem>
-                  <SelectItem value="contracts">العقود</SelectItem>
-                  <SelectItem value="drivers">السائقين</SelectItem>
-                  <SelectItem value="user">المستخدمين</SelectItem>
+                  <SelectItem value="all">{t('activityLog.allResources')}</SelectItem>
+                  <SelectItem value="shipments">{t('nav.shipments')}</SelectItem>
+                  <SelectItem value="invoices">{t('nav.invoices')}</SelectItem>
+                  <SelectItem value="deposits">{t('nav.accounting')}</SelectItem>
+                  <SelectItem value="contracts">{t('nav.contracts')}</SelectItem>
+                  <SelectItem value="drivers">{t('nav.drivers')}</SelectItem>
+                  <SelectItem value="user">{t('nav.users')}</SelectItem>
                 </SelectContent>
               </Select>
 
               <Button onClick={handleSearch} className="w-full">
                 <Filter className="h-4 w-4 ml-2" />
-                تطبيق الفلتر
+                {t('activityLog.applyFilter')}
               </Button>
             </div>
           </CardContent>
@@ -266,8 +246,8 @@ const ActivityLogPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-4 pb-4">
-              <div className="text-2xl font-bold text-primary">{totalCount.toLocaleString('ar-EG')}</div>
-              <div className="text-sm text-muted-foreground">إجمالي الأنشطة</div>
+              <div className="text-2xl font-bold text-primary">{totalCount.toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}</div>
+              <div className="text-sm text-muted-foreground">{t('activityLog.totalActivities')}</div>
             </CardContent>
           </Card>
           <Card>
@@ -275,7 +255,7 @@ const ActivityLogPage = () => {
               <div className="text-2xl font-bold text-green-600">
                 {logs.filter(l => l.action_type?.includes('create')).length}
               </div>
-              <div className="text-sm text-muted-foreground">عمليات إنشاء</div>
+              <div className="text-sm text-muted-foreground">{t('activityLog.createOps')}</div>
             </CardContent>
           </Card>
           <Card>
@@ -283,7 +263,7 @@ const ActivityLogPage = () => {
               <div className="text-2xl font-bold text-blue-600">
                 {logs.filter(l => l.action_type?.includes('update') || l.action_type?.includes('change')).length}
               </div>
-              <div className="text-sm text-muted-foreground">عمليات تحديث</div>
+              <div className="text-sm text-muted-foreground">{t('activityLog.updateOps')}</div>
             </CardContent>
           </Card>
           <Card>
@@ -291,7 +271,7 @@ const ActivityLogPage = () => {
               <div className="text-2xl font-bold text-red-600">
                 {logs.filter(l => l.action_type?.includes('delete')).length}
               </div>
-              <div className="text-sm text-muted-foreground">عمليات حذف</div>
+              <div className="text-sm text-muted-foreground">{t('activityLog.deleteOps')}</div>
             </CardContent>
           </Card>
         </div>
@@ -299,9 +279,9 @@ const ActivityLogPage = () => {
         {/* Logs Table */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">سجل التصرفات</CardTitle>
+            <CardTitle className="text-lg">{t('activityLog.actionsLog')}</CardTitle>
             <CardDescription>
-              عرض {((page - 1) * PAGE_SIZE) + 1} - {Math.min(page * PAGE_SIZE, totalCount)} من {totalCount} سجل
+              {t('activityLog.showing')} {((page - 1) * PAGE_SIZE) + 1} - {Math.min(page * PAGE_SIZE, totalCount)} {t('activityLog.of')} {totalCount} {t('activityLog.records')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -312,7 +292,7 @@ const ActivityLogPage = () => {
             ) : logs.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Activity className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>لا توجد أنشطة مسجلة</p>
+                <p>{t('activityLog.noActivities')}</p>
               </div>
             ) : (
               <>
@@ -320,12 +300,12 @@ const ActivityLogPage = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-right">التاريخ والوقت</TableHead>
-                        <TableHead className="text-right">المستخدم</TableHead>
-                        <TableHead className="text-right">نوع التصرف</TableHead>
-                        <TableHead className="text-right">الوصف</TableHead>
-                        <TableHead className="text-right">المورد</TableHead>
-                        <TableHead className="text-right">المصدر</TableHead>
+                        <TableHead className="text-right">{t('activityLog.dateTime')}</TableHead>
+                        <TableHead className="text-right">{t('activityLog.user')}</TableHead>
+                        <TableHead className="text-right">{t('activityLog.actionTypeCol')}</TableHead>
+                        <TableHead className="text-right">{t('activityLog.description')}</TableHead>
+                        <TableHead className="text-right">{t('activityLog.resource')}</TableHead>
+                        <TableHead className="text-right">{t('activityLog.source')}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -338,14 +318,14 @@ const ActivityLogPage = () => {
                             <TableCell className="font-mono text-sm whitespace-nowrap">
                               <div className="flex items-center gap-2">
                                 <Clock className="h-3 w-3 text-muted-foreground" />
-                                {format(new Date(log.created_at), 'yyyy/MM/dd HH:mm:ss', { locale: ar })}
+                                {format(new Date(log.created_at), 'yyyy/MM/dd HH:mm:ss', { locale: dateLocale })}
                               </div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <User className="h-4 w-4 text-muted-foreground" />
                                 <span className="text-sm">
-                                  {log.profile?.full_name || log.profile?.email || 'غير معروف'}
+                                  {log.profile?.full_name || log.profile?.email || t('activityLog.unknown')}
                                 </span>
                               </div>
                             </TableCell>
@@ -361,17 +341,17 @@ const ActivityLogPage = () => {
                             <TableCell>
                               {log.resource_type && (
                                 <Badge variant="outline">
-                                  {resourceTypeLabels[log.resource_type] || log.resource_type}
+                                  {log.resource_type}
                                 </Badge>
                               )}
                             </TableCell>
                             <TableCell className="text-xs text-muted-foreground">
                               {log.user_agent === 'database_trigger' ? (
                                 <Badge variant="secondary" className="text-xs">
-                                  تلقائي
+                                  {t('activityLog.automatic')}
                                 </Badge>
                               ) : (
-                                'واجهة المستخدم'
+                                t('activityLog.userInterface')
                               )}
                             </TableCell>
                           </TableRow>
@@ -384,7 +364,7 @@ const ActivityLogPage = () => {
                 {/* Pagination */}
                 <div className="flex items-center justify-between mt-4 pt-4 border-t">
                   <div className="text-sm text-muted-foreground">
-                    صفحة {page} من {totalPages}
+                    {t('activityLog.page')} {page} {t('activityLog.ofPages')} {totalPages}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -394,7 +374,7 @@ const ActivityLogPage = () => {
                       disabled={page === 1}
                     >
                       <ChevronRight className="h-4 w-4" />
-                      السابق
+                      {t('activityLog.previous')}
                     </Button>
                     <Button
                       variant="outline"
@@ -402,7 +382,7 @@ const ActivityLogPage = () => {
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page >= totalPages}
                     >
-                      التالي
+                      {t('activityLog.next')}
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                   </div>

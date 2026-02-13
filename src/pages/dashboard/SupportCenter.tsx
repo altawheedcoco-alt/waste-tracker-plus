@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useSupportTickets, useSupportStats, TicketStatus, TicketPriority, TicketCategory } from '@/hooks/useSupportTickets';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar as arLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import {
   Headphones,
   Plus,
@@ -39,36 +41,10 @@ import CreateTicketDialog from '@/components/support/CreateTicketDialog';
 import AdminSupportCenter from '@/components/support/AdminSupportCenter';
 import BackButton from '@/components/ui/back-button';
 
-const statusConfig: Record<TicketStatus, { label: string; color: string; icon: React.ElementType }> = {
-  open: { label: 'مفتوحة', color: 'bg-blue-500', icon: AlertCircle },
-  in_progress: { label: 'قيد المعالجة', color: 'bg-yellow-500', icon: Clock },
-  waiting_response: { label: 'في انتظار الرد', color: 'bg-orange-500', icon: Timer },
-  resolved: { label: 'تم الحل', color: 'bg-green-500', icon: CheckCircle2 },
-  closed: { label: 'مغلقة', color: 'bg-gray-500', icon: CheckCircle2 },
-};
-
-const priorityConfig: Record<TicketPriority, { label: string; color: string }> = {
-  low: { label: 'منخفضة', color: 'bg-gray-500' },
-  medium: { label: 'متوسطة', color: 'bg-blue-500' },
-  high: { label: 'عالية', color: 'bg-orange-500' },
-  urgent: { label: 'عاجلة', color: 'bg-red-500' },
-};
-
-const categoryConfig: Record<TicketCategory, { label: string; icon: React.ElementType }> = {
-  bug: { label: 'خطأ تقني', icon: Bug },
-  feature_request: { label: 'طلب ميزة', icon: Lightbulb },
-  technical_issue: { label: 'مشكلة تقنية', icon: AlertTriangle },
-  billing: { label: 'فواتير ومدفوعات', icon: Banknote },
-  general: { label: 'استفسار عام', icon: HelpCircle },
-  complaint: { label: 'شكوى', icon: MessageSquare },
-  suggestion: { label: 'اقتراح', icon: Star },
-};
-
 const SupportCenter = () => {
   const { roles } = useAuth();
   const isAdmin = roles.includes('admin');
 
-  // Show enhanced admin support center for admins
   if (isAdmin) {
     return (
       <motion.div
@@ -82,12 +58,11 @@ const SupportCenter = () => {
     );
   }
 
-  // Regular user support page
   return <UserSupportPage />;
 };
 
-// Separate component for non-admin users
 const UserSupportPage = () => {
+  const { t, language } = useLanguage();
   const { tickets, isLoading, refetch } = useSupportTickets();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,7 +71,33 @@ const UserSupportPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  // Filter tickets
+  const dateLocale = language === 'ar' ? arLocale : enUS;
+
+  const statusConfig: Record<TicketStatus, { label: string; color: string; icon: React.ElementType }> = {
+    open: { label: t('support.statusOpen'), color: 'bg-blue-500', icon: AlertCircle },
+    in_progress: { label: t('support.statusInProgress'), color: 'bg-yellow-500', icon: Clock },
+    waiting_response: { label: t('support.statusWaiting'), color: 'bg-orange-500', icon: Timer },
+    resolved: { label: t('support.statusResolved'), color: 'bg-green-500', icon: CheckCircle2 },
+    closed: { label: t('support.statusClosed'), color: 'bg-gray-500', icon: CheckCircle2 },
+  };
+
+  const priorityConfig: Record<TicketPriority, { label: string; color: string }> = {
+    low: { label: t('support.priorityLow'), color: 'bg-gray-500' },
+    medium: { label: t('support.priorityMedium'), color: 'bg-blue-500' },
+    high: { label: t('support.priorityHigh'), color: 'bg-orange-500' },
+    urgent: { label: t('support.priorityUrgent'), color: 'bg-red-500' },
+  };
+
+  const categoryConfig: Record<TicketCategory, { label: string; icon: React.ElementType }> = {
+    bug: { label: t('support.categoryBug'), icon: Bug },
+    feature_request: { label: t('support.categoryFeature'), icon: Lightbulb },
+    technical_issue: { label: t('support.categoryTechnical'), icon: AlertTriangle },
+    billing: { label: t('support.categoryBilling'), icon: Banknote },
+    general: { label: t('support.categoryGeneral'), icon: HelpCircle },
+    complaint: { label: t('support.categoryComplaint'), icon: MessageSquare },
+    suggestion: { label: t('support.categorySuggestion'), icon: Star },
+  };
+
   const filteredTickets = tickets.filter(ticket => {
     const matchesSearch = 
       ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -127,13 +128,13 @@ const UserSupportPage = () => {
               <Headphones className="w-8 h-8" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">الدعم الفني</h1>
-              <p className="text-muted-foreground">تواصل مع إدارة النظام لحل مشكلاتك</p>
+              <h1 className="text-2xl font-bold">{t('support.title')}</h1>
+              <p className="text-muted-foreground">{t('support.subtitle')}</p>
             </div>
           </div>
           <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
             <Plus className="w-4 h-4" />
-            تذكرة جديدة
+            {t('support.newTicket')}
           </Button>
         </div>
       </div>
@@ -144,7 +145,7 @@ const UserSupportPage = () => {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5 text-blue-500" />
-              <span className="text-muted-foreground">تذاكري المفتوحة</span>
+              <span className="text-muted-foreground">{t('support.myOpenTickets')}</span>
             </div>
             <p className="text-3xl font-bold mt-2 text-blue-700">{openTickets}</p>
           </CardContent>
@@ -153,7 +154,7 @@ const UserSupportPage = () => {
           <CardContent className="pt-4">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-500" />
-              <span className="text-muted-foreground">العاجلة</span>
+              <span className="text-muted-foreground">{t('support.urgent')}</span>
             </div>
             <p className="text-3xl font-bold mt-2 text-red-700">{urgentTickets}</p>
           </CardContent>
@@ -167,7 +168,7 @@ const UserSupportPage = () => {
             <div className="flex-1 relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="البحث في التذاكر..."
+                placeholder={t('support.searchTickets')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pr-10"
@@ -175,27 +176,27 @@ const UserSupportPage = () => {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t('support.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="open">مفتوحة</SelectItem>
-                <SelectItem value="in_progress">قيد المعالجة</SelectItem>
-                <SelectItem value="waiting_response">في انتظار الرد</SelectItem>
-                <SelectItem value="resolved">تم الحل</SelectItem>
-                <SelectItem value="closed">مغلقة</SelectItem>
+                <SelectItem value="all">{t('support.allStatuses')}</SelectItem>
+                <SelectItem value="open">{t('support.statusOpen')}</SelectItem>
+                <SelectItem value="in_progress">{t('support.statusInProgress')}</SelectItem>
+                <SelectItem value="waiting_response">{t('support.statusWaiting')}</SelectItem>
+                <SelectItem value="resolved">{t('support.statusResolved')}</SelectItem>
+                <SelectItem value="closed">{t('support.statusClosed')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الأولوية" />
+                <SelectValue placeholder={t('support.priority')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الأولويات</SelectItem>
-                <SelectItem value="urgent">عاجلة</SelectItem>
-                <SelectItem value="high">عالية</SelectItem>
-                <SelectItem value="medium">متوسطة</SelectItem>
-                <SelectItem value="low">منخفضة</SelectItem>
+                <SelectItem value="all">{t('support.allPriorities')}</SelectItem>
+                <SelectItem value="urgent">{t('support.priorityUrgent')}</SelectItem>
+                <SelectItem value="high">{t('support.priorityHigh')}</SelectItem>
+                <SelectItem value="medium">{t('support.priorityMedium')}</SelectItem>
+                <SelectItem value="low">{t('support.priorityLow')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -207,10 +208,10 @@ const UserSupportPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
-            التذاكر ({filteredTickets.length})
+            {t('support.tickets')} ({filteredTickets.length})
           </CardTitle>
           <CardDescription>
-            جميع التذاكر ترسل مباشرة إلى مدير النظام
+            {t('support.ticketsSentToAdmin')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -221,13 +222,13 @@ const UserSupportPage = () => {
           ) : filteredTickets.length === 0 ? (
             <div className="text-center py-12">
               <MessageCircle className="w-12 h-12 mx-auto text-muted-foreground/50" />
-              <p className="mt-4 text-muted-foreground">لا توجد تذاكر</p>
+              <p className="mt-4 text-muted-foreground">{t('support.noTickets')}</p>
               <Button 
                 variant="outline" 
                 className="mt-4"
                 onClick={() => setCreateDialogOpen(true)}
               >
-                إنشاء تذكرة جديدة
+                {t('support.createNewTicket')}
               </Button>
             </div>
           ) : (
@@ -268,7 +269,7 @@ const UserSupportPage = () => {
                             {statusConfig[ticket.status].label}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
-                            {format(new Date(ticket.created_at), 'dd MMM yyyy', { locale: ar })}
+                            {format(new Date(ticket.created_at), 'dd MMM yyyy', { locale: dateLocale })}
                           </span>
                           {ticket.satisfaction_rating && (
                             <div className="flex items-center gap-1">
@@ -295,7 +296,6 @@ const UserSupportPage = () => {
         </CardContent>
       </Card>
 
-      {/* Create Ticket Dialog */}
       <CreateTicketDialog 
         open={createDialogOpen} 
         onOpenChange={setCreateDialogOpen}
@@ -305,7 +305,6 @@ const UserSupportPage = () => {
         }}
       />
 
-      {/* Ticket Detail Dialog */}
       {selectedTicket && (
         <TicketDetailDialog
           ticketId={selectedTicket}
