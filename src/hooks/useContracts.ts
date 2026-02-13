@@ -3,6 +3,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format, isPast, isToday, differenceInDays } from 'date-fns';
+import { type ContractorType } from '@/lib/contract-logic/contractEntityResolver';
+import { type SigningMethod } from '@/lib/contract-logic/contractSigningTypes';
 
 export interface Contract {
   id: string;
@@ -24,6 +26,18 @@ export interface Contract {
   created_at: string;
   updated_at: string;
   partner_organization?: { name: string } | null;
+  contractor_type?: string;
+  external_legal_name?: string;
+  external_tax_id?: string;
+  external_commercial_register?: string;
+  external_address?: string;
+  external_representative?: string;
+  external_phone?: string;
+  external_email?: string;
+  signing_method?: string;
+  party_one_signature_url?: string;
+  party_two_signature_url?: string;
+  share_token?: string;
 }
 
 export interface ContractFormData {
@@ -37,6 +51,16 @@ export interface ContractFormData {
   value: string;
   terms: string;
   notes: string;
+  contractor_type: ContractorType;
+  partner_organization_id: string;
+  external_legal_name: string;
+  external_tax_id: string;
+  external_commercial_register: string;
+  external_address: string;
+  external_representative: string;
+  external_phone: string;
+  external_email: string;
+  signing_method: SigningMethod;
 }
 
 const initialFormData: ContractFormData = {
@@ -50,6 +74,16 @@ const initialFormData: ContractFormData = {
   value: '',
   terms: '',
   notes: '',
+  contractor_type: 'internal',
+  partner_organization_id: '',
+  external_legal_name: '',
+  external_tax_id: '',
+  external_commercial_register: '',
+  external_address: '',
+  external_representative: '',
+  external_phone: '',
+  external_email: '',
+  signing_method: 'none',
 };
 
 export const useContracts = () => {
@@ -102,7 +136,7 @@ export const useContracts = () => {
       const contractData: any = {
         title: formData.title,
         description: formData.description || null,
-        partner_name: formData.partner_name || null,
+        partner_name: formData.contractor_type === 'internal' ? formData.partner_name : formData.external_legal_name || null,
         contract_type: formData.contract_type,
         status: formData.status,
         start_date: formData.start_date ? format(formData.start_date, 'yyyy-MM-dd') : null,
@@ -111,7 +145,21 @@ export const useContracts = () => {
         terms: formData.terms || null,
         notes: formData.notes || null,
         organization_id: organization?.id,
+        contractor_type: formData.contractor_type,
+        partner_organization_id: formData.contractor_type === 'internal' && formData.partner_organization_id ? formData.partner_organization_id : null,
+        signing_method: formData.signing_method,
       };
+
+      // Add external entity fields
+      if (formData.contractor_type === 'external') {
+        contractData.external_legal_name = formData.external_legal_name || null;
+        contractData.external_tax_id = formData.external_tax_id || null;
+        contractData.external_commercial_register = formData.external_commercial_register || null;
+        contractData.external_address = formData.external_address || null;
+        contractData.external_representative = formData.external_representative || null;
+        contractData.external_phone = formData.external_phone || null;
+        contractData.external_email = formData.external_email || null;
+      }
 
       if (isEditing && selectedContract) {
         const { error } = await supabase
@@ -172,6 +220,16 @@ export const useContracts = () => {
       value: contract.value?.toString() || '',
       terms: contract.terms || '',
       notes: contract.notes || '',
+      contractor_type: (contract.contractor_type as ContractorType) || 'internal',
+      partner_organization_id: contract.partner_organization_id || '',
+      external_legal_name: contract.external_legal_name || '',
+      external_tax_id: contract.external_tax_id || '',
+      external_commercial_register: contract.external_commercial_register || '',
+      external_address: contract.external_address || '',
+      external_representative: contract.external_representative || '',
+      external_phone: contract.external_phone || '',
+      external_email: contract.external_email || '',
+      signing_method: (contract.signing_method as SigningMethod) || 'none',
     });
     setIsEditing(true);
     setShowAddDialog(true);

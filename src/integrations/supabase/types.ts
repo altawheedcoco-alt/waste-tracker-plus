@@ -2141,11 +2141,19 @@ export type Database = {
           clause_count: number | null
           contract_number: string
           contract_type: string
+          contractor_type: string | null
           created_at: string
           created_by: string | null
           currency: string | null
           description: string | null
           end_date: string | null
+          external_address: string | null
+          external_commercial_register: string | null
+          external_email: string | null
+          external_legal_name: string | null
+          external_phone: string | null
+          external_representative: string | null
+          external_tax_id: string | null
           id: string
           is_verified: boolean | null
           legal_references: Json | null
@@ -2153,6 +2161,14 @@ export type Database = {
           organization_id: string | null
           partner_name: string | null
           partner_organization_id: string | null
+          party_one_signature_url: string | null
+          party_one_signed_at: string | null
+          party_two_signature_url: string | null
+          party_two_signed_at: string | null
+          share_token: string | null
+          shared_at: string | null
+          shared_via: string | null
+          signing_method: string | null
           start_date: string | null
           status: string
           terms: string | null
@@ -2171,11 +2187,19 @@ export type Database = {
           clause_count?: number | null
           contract_number: string
           contract_type?: string
+          contractor_type?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
           description?: string | null
           end_date?: string | null
+          external_address?: string | null
+          external_commercial_register?: string | null
+          external_email?: string | null
+          external_legal_name?: string | null
+          external_phone?: string | null
+          external_representative?: string | null
+          external_tax_id?: string | null
           id?: string
           is_verified?: boolean | null
           legal_references?: Json | null
@@ -2183,6 +2207,14 @@ export type Database = {
           organization_id?: string | null
           partner_name?: string | null
           partner_organization_id?: string | null
+          party_one_signature_url?: string | null
+          party_one_signed_at?: string | null
+          party_two_signature_url?: string | null
+          party_two_signed_at?: string | null
+          share_token?: string | null
+          shared_at?: string | null
+          shared_via?: string | null
+          signing_method?: string | null
           start_date?: string | null
           status?: string
           terms?: string | null
@@ -2201,11 +2233,19 @@ export type Database = {
           clause_count?: number | null
           contract_number?: string
           contract_type?: string
+          contractor_type?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
           description?: string | null
           end_date?: string | null
+          external_address?: string | null
+          external_commercial_register?: string | null
+          external_email?: string | null
+          external_legal_name?: string | null
+          external_phone?: string | null
+          external_representative?: string | null
+          external_tax_id?: string | null
           id?: string
           is_verified?: boolean | null
           legal_references?: Json | null
@@ -2213,6 +2253,14 @@ export type Database = {
           organization_id?: string | null
           partner_name?: string | null
           partner_organization_id?: string | null
+          party_one_signature_url?: string | null
+          party_one_signed_at?: string | null
+          party_two_signature_url?: string | null
+          party_two_signed_at?: string | null
+          share_token?: string | null
+          shared_at?: string | null
+          shared_via?: string | null
+          signing_method?: string | null
           start_date?: string | null
           status?: string
           terms?: string | null
