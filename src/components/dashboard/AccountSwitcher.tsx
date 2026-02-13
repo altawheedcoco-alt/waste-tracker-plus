@@ -155,67 +155,69 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        <AnimatePresence>
-          {userOrganizations.map((org, index) => {
-            const Icon = getOrganizationIcon(org.organization_type);
-            const isActive = org.organization_id === organization.id;
-            
-            return (
-              <motion.div
-                key={org.organization_id}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <DropdownMenuItem
-                  className={cn(
-                    "flex items-center gap-3 p-3 cursor-pointer",
-                    isActive && "bg-primary/5"
-                  )}
-                  onClick={() => {
-                    if (!isActive) {
-                      switchOrganization(org.organization_id);
-                      setOpen(false);
-                    }
-                  }}
-                  disabled={switchingOrganization}
+        {!isAdmin && (
+          <AnimatePresence>
+            {userOrganizations.map((org, index) => {
+              const Icon = getOrganizationIcon(org.organization_type);
+              const isActive = org.organization_id === organization.id;
+              
+              return (
+                <motion.div
+                  key={org.organization_id}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  <div className={cn(
-                    "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                    getOrganizationColor(org.organization_type)
-                  )}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm truncate">{org.organization_name}</p>
-                      {org.is_primary && (
-                        <Badge variant="outline" className="text-[10px] h-4 px-1">
-                          الرئيسية
-                        </Badge>
-                      )}
+                  <DropdownMenuItem
+                    className={cn(
+                      "flex items-center gap-3 p-3 cursor-pointer",
+                      isActive && "bg-primary/5"
+                    )}
+                    onClick={() => {
+                      if (!isActive) {
+                        switchOrganization(org.organization_id);
+                        setOpen(false);
+                      }
+                    }}
+                    disabled={switchingOrganization}
+                  >
+                    <div className={cn(
+                      "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                      getOrganizationColor(org.organization_type)
+                    )}>
+                      <Icon className="w-5 h-5" />
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-xs text-muted-foreground">
-                        {getOrganizationLabel(org.organization_type)}
-                      </p>
-                      {!org.is_verified && (
-                        <Badge variant="secondary" className="text-[10px] h-4 px-1">
-                          قيد المراجعة
-                        </Badge>
-                      )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-sm truncate">{org.organization_name}</p>
+                        {org.is_primary && (
+                          <Badge variant="outline" className="text-[10px] h-4 px-1">
+                            الرئيسية
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-xs text-muted-foreground">
+                          {getOrganizationLabel(org.organization_type)}
+                        </p>
+                        {!org.is_verified && (
+                          <Badge variant="secondary" className="text-[10px] h-4 px-1">
+                            قيد المراجعة
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  {isActive && (
-                    <Check className="w-4 h-4 text-primary shrink-0" />
-                  )}
-                </DropdownMenuItem>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                    
+                    {isActive && (
+                      <Check className="w-4 h-4 text-primary shrink-0" />
+                    )}
+                  </DropdownMenuItem>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
         
         {isAdmin && (
           <>
