@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { ar } from '@/i18n/ar';
 import { en } from '@/i18n/en';
+import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ar' | 'en';
 
@@ -39,9 +40,39 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return 'ar';
   });
 
-  const setLanguage = useCallback((lang: Language) => {
+  // Load language preference from database on mount
+  useEffect(() => {
+    const loadPreference = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('preferred_language')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profile?.preferred_language && (profile.preferred_language === 'ar' || profile.preferred_language === 'en')) {
+        setLanguageState(profile.preferred_language as Language);
+        localStorage.setItem(STORAGE_KEY, profile.preferred_language);
+      }
+    };
+
+    loadPreference();
+  }, []);
+
+  const setLanguage = useCallback(async (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEY, lang);
+
+    // Save to database for persistence across devices
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ preferred_language: lang } as any)
+        .eq('user_id', user.id);
+    }
   }, []);
 
   useEffect(() => {

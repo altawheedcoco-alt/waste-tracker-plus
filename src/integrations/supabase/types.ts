@@ -11699,6 +11699,7 @@ export type Database = {
           organization_id: string | null
           phone: string | null
           position: string | null
+          preferred_language: string | null
           profile_color_theme: string | null
           signature_authority_level: string | null
           updated_at: string | null
@@ -11726,6 +11727,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           position?: string | null
+          preferred_language?: string | null
           profile_color_theme?: string | null
           signature_authority_level?: string | null
           updated_at?: string | null
@@ -11753,6 +11755,7 @@ export type Database = {
           organization_id?: string | null
           phone?: string | null
           position?: string | null
+          preferred_language?: string | null
           profile_color_theme?: string | null
           signature_authority_level?: string | null
           updated_at?: string | null
