@@ -63,6 +63,7 @@ import {
   GitCompareArrows,
   FolderOpen,
   Inbox,
+  TreePine,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -365,6 +366,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Truck, label: t('sidebar.driversMap'), path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
             { icon: FolderCheck, label: t('sidebar.recyclingCerts'), path: '/dashboard/recycling-certificates', badge: sectionBadges['admin-certs'], key: 'admin-certs' },
             { icon: Video, label: t('sidebar.videoGen'), path: '/dashboard/video-generator', key: 'video-gen' },
+            { icon: TreePine, label: t('sidebar.woodMarket'), path: '/dashboard/wood-market', key: 'wood-market' },
           ]
         } as SidebarMenuItem]
       : []),
