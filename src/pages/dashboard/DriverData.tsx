@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -30,7 +31,8 @@ import {
 import ResponsivePageContainer from '@/components/dashboard/ResponsivePageContainer';
 import { motion } from 'framer-motion';
 import { format, differenceInDays, isPast } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar as arLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 
 interface DriverInfo {
   id: string;
@@ -57,21 +59,9 @@ interface DriverStats {
   lastLocationUpdate: string | null;
 }
 
-const vehicleTypes = [
-  { value: 'pickup', label: 'بيك أب' },
-  { value: 'truck_small', label: 'شاحنة صغيرة' },
-  { value: 'truck_medium', label: 'شاحنة متوسطة' },
-  { value: 'truck_large', label: 'شاحنة كبيرة' },
-  { value: 'tanker', label: 'صهريج' },
-  { value: 'container', label: 'حاوية' },
-  { value: 'refrigerated', label: 'مبردة' },
-  { value: 'flatbed', label: 'مسطحة' },
-  { value: 'van', label: 'فان' },
-  { value: 'other', label: 'أخرى' },
-];
-
 const DriverData = () => {
   const { profile } = useAuth();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,6 +80,21 @@ const DriverData = () => {
     is_available: true,
   });
 
+  const dateLocale = language === 'ar' ? arLocale : enUS;
+
+  const vehicleTypes = [
+    { value: 'pickup', label: t('driverData.pickup') },
+    { value: 'truck_small', label: t('driverData.truckSmall') },
+    { value: 'truck_medium', label: t('driverData.truckMedium') },
+    { value: 'truck_large', label: t('driverData.truckLarge') },
+    { value: 'tanker', label: t('driverData.tanker') },
+    { value: 'container', label: t('driverData.container') },
+    { value: 'refrigerated', label: t('driverData.refrigerated') },
+    { value: 'flatbed', label: t('driverData.flatbed') },
+    { value: 'van', label: t('driverData.van') },
+    { value: 'other', label: t('driverData.otherVehicle') },
+  ];
+
   useEffect(() => {
     if (profile?.id) {
       fetchDriverData();
@@ -98,7 +103,6 @@ const DriverData = () => {
 
   const fetchDriverData = async () => {
     try {
-      // Fetch driver info
       const { data: driver, error: driverError } = await supabase
         .from('drivers')
         .select(`
@@ -127,7 +131,6 @@ const DriverData = () => {
           is_available: driver.is_available ?? true,
         });
 
-        // Fetch shipment stats
         const { data: shipments } = await supabase
           .from('shipments')
           .select('id, status')
@@ -136,7 +139,6 @@ const DriverData = () => {
         const activeStatuses = ['new', 'approved', 'collecting', 'in_transit'];
         const completedStatuses = ['delivered', 'confirmed'];
 
-        // Fetch last location update
         const { data: lastLocation } = await supabase
           .from('driver_location_logs')
           .select('recorded_at')
@@ -183,16 +185,16 @@ const DriverData = () => {
       if (error) throw error;
 
       toast({
-        title: 'تم الحفظ بنجاح',
-        description: 'تم تحديث بيانات السائق',
+        title: t('driverData.saved'),
+        description: t('driverData.savedDesc'),
       });
 
       fetchDriverData();
     } catch (error: any) {
       console.error('Error saving driver data:', error);
       toast({
-        title: 'خطأ في الحفظ',
-        description: error.message || 'فشل في حفظ البيانات',
+        title: t('driverData.saveError'),
+        description: error.message || t('driverData.saveFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -201,17 +203,17 @@ const DriverData = () => {
   };
 
   const getLicenseStatus = () => {
-    if (!formData.license_expiry) return { status: 'unknown', label: 'غير محدد', color: 'secondary' };
+    if (!formData.license_expiry) return { status: 'unknown', label: t('driverData.licenseUnknown'), color: 'secondary' };
     
     const expiryDate = new Date(formData.license_expiry);
     const daysUntilExpiry = differenceInDays(expiryDate, new Date());
 
     if (isPast(expiryDate)) {
-      return { status: 'expired', label: 'منتهية', color: 'destructive' };
+      return { status: 'expired', label: t('driverData.licenseExpired'), color: 'destructive' };
     } else if (daysUntilExpiry <= 30) {
-      return { status: 'expiring', label: `تنتهي خلال ${daysUntilExpiry} يوم`, color: 'warning' };
+      return { status: 'expiring', label: `${t('driverData.licenseExpiring')} ${daysUntilExpiry} ${t('driverData.licenseDays')}`, color: 'warning' };
     } else {
-      return { status: 'valid', label: 'سارية', color: 'success' };
+      return { status: 'valid', label: t('driverData.licenseValid'), color: 'success' };
     }
   };
 
@@ -238,8 +240,8 @@ const DriverData = () => {
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">بيانات السائق</h1>
-              <p className="text-muted-foreground">معلومات الرخصة والمركبة والإحصائيات</p>
+              <h1 className="text-2xl font-bold">{t('driverData.title')}</h1>
+              <p className="text-muted-foreground">{t('driverData.subtitle')}</p>
             </div>
             <div className="flex items-center gap-2">
               <Badge 
@@ -251,7 +253,7 @@ const DriverData = () => {
                 ) : (
                   <Clock className="h-3 w-3" />
                 )}
-                {formData.is_available ? 'متاح للعمل' : 'غير متاح'}
+                {formData.is_available ? t('driverData.availableForWork') : t('driverData.unavailable')}
               </Badge>
             </div>
           </div>
@@ -266,7 +268,7 @@ const DriverData = () => {
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{stats.totalShipments}</p>
-                    <p className="text-sm text-muted-foreground">إجمالي الشحنات</p>
+                    <p className="text-sm text-muted-foreground">{t('driverData.totalShipments')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -280,7 +282,7 @@ const DriverData = () => {
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{stats.activeShipments}</p>
-                    <p className="text-sm text-muted-foreground">شحنات نشطة</p>
+                    <p className="text-sm text-muted-foreground">{t('driverData.activeShipments')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -294,7 +296,7 @@ const DriverData = () => {
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{stats.completedShipments}</p>
-                    <p className="text-sm text-muted-foreground">شحنات مكتملة</p>
+                    <p className="text-sm text-muted-foreground">{t('driverData.completedShipments')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -307,11 +309,11 @@ const DriverData = () => {
                     <MapPin className="h-5 w-5 text-amber-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">آخر تحديث للموقع</p>
+                    <p className="text-sm font-medium">{t('driverData.lastLocationUpdate')}</p>
                     <p className="text-xs text-muted-foreground">
                       {stats.lastLocationUpdate 
-                        ? format(new Date(stats.lastLocationUpdate), 'dd MMM yyyy - HH:mm', { locale: ar })
-                        : 'لا يوجد'}
+                        ? format(new Date(stats.lastLocationUpdate), 'dd MMM yyyy - HH:mm', { locale: dateLocale })
+                        : t('driverData.noLocation')}
                     </p>
                   </div>
                 </div>
@@ -324,35 +326,33 @@ const DriverData = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-primary" />
-                بيانات رخصة القيادة
+                {t('driverData.licenseInfo')}
               </CardTitle>
               <CardDescription>
-                معلومات رخصة القيادة وحالتها
+                {t('driverData.licenseInfoDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
-                {/* License Number */}
                 <div className="space-y-2">
                   <Label htmlFor="license_number" className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-muted-foreground" />
-                    رقم الرخصة
+                    {t('driverData.licenseNumber')}
                   </Label>
                   <Input
                     id="license_number"
                     value={formData.license_number}
                     onChange={(e) => handleInputChange('license_number', e.target.value)}
-                    placeholder="أدخل رقم رخصة القيادة"
+                    placeholder={t('driverData.licenseNumberPlaceholder')}
                     dir="ltr"
                     className="text-left"
                   />
                 </div>
 
-                {/* License Expiry */}
                 <div className="space-y-2">
                   <Label htmlFor="license_expiry" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    تاريخ انتهاء الرخصة
+                    {t('driverData.licenseExpiry')}
                   </Label>
                   <div className="flex gap-2">
                     <Input
@@ -384,26 +384,25 @@ const DriverData = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Car className="h-5 w-5 text-primary" />
-                بيانات المركبة
+                {t('driverData.vehicleInfo')}
               </CardTitle>
               <CardDescription>
-                معلومات المركبة المستخدمة في النقل
+                {t('driverData.vehicleInfoDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Vehicle Type */}
                 <div className="space-y-2">
                   <Label htmlFor="vehicle_type" className="flex items-center gap-2">
                     <Truck className="h-4 w-4 text-muted-foreground" />
-                    نوع المركبة
+                    {t('driverData.vehicleType')}
                   </Label>
                   <Select 
                     value={formData.vehicle_type} 
                     onValueChange={(value) => handleInputChange('vehicle_type', value)}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="اختر نوع المركبة" />
+                      <SelectValue placeholder={t('driverData.vehicleTypePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       {vehicleTypes.map((type) => (
@@ -415,17 +414,16 @@ const DriverData = () => {
                   </Select>
                 </div>
 
-                {/* Vehicle Plate */}
                 <div className="space-y-2">
                   <Label htmlFor="vehicle_plate" className="flex items-center gap-2">
                     <FileCheck className="h-4 w-4 text-muted-foreground" />
-                    رقم لوحة المركبة
+                    {t('driverData.vehiclePlate')}
                   </Label>
                   <Input
                     id="vehicle_plate"
                     value={formData.vehicle_plate}
                     onChange={(e) => handleInputChange('vehicle_plate', e.target.value)}
-                    placeholder="مثال: أ ب ج 1234"
+                    placeholder={t('driverData.vehiclePlatePlaceholder')}
                     dir="ltr"
                     className="text-left"
                   />
@@ -434,14 +432,13 @@ const DriverData = () => {
 
               <Separator />
 
-              {/* Availability Toggle */}
               <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
                 <div className="space-y-1">
                   <Label htmlFor="is_available" className="text-base font-medium">
-                    حالة التوفر للعمل
+                    {t('driverData.availabilityToggle')}
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    عند تفعيل هذا الخيار، ستظهر كسائق متاح لاستلام شحنات جديدة
+                    {t('driverData.availabilityDesc')}
                   </p>
                 </div>
                 <Switch
@@ -459,10 +456,10 @@ const DriverData = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-primary" />
-                  الجهة المنتسب إليها
+                  {t('driverData.organization')}
                 </CardTitle>
                 <CardDescription>
-                  معلومات شركة النقل التي تعمل معها
+                  {t('driverData.organizationDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -470,23 +467,31 @@ const DriverData = () => {
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                     <Building2 className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">اسم الجهة</p>
+                      <p className="text-sm font-medium">{t('driverData.orgName')}</p>
                       <p className="text-sm text-muted-foreground">{driverInfo.organization.name}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <Activity className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium">{t('driverData.orgPhone')}</p>
+                      <p className="text-sm text-muted-foreground" dir="ltr">{driverInfo.organization.phone}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                     <MapPin className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm font-medium">المدينة</p>
+                      <p className="text-sm font-medium">{t('driverData.orgCity')}</p>
                       <p className="text-sm text-muted-foreground">{driverInfo.organization.city}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 md:col-span-2">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
                     <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium">العنوان</p>
+                      <p className="text-sm font-medium">{t('driverData.orgAddress')}</p>
                       <p className="text-sm text-muted-foreground">{driverInfo.organization.address}</p>
                     </div>
                   </div>
@@ -500,7 +505,7 @@ const DriverData = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-primary" />
-                معلومات التسجيل
+                {language === 'ar' ? 'معلومات التسجيل' : 'Registration Info'}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -508,10 +513,10 @@ const DriverData = () => {
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">تاريخ التسجيل</p>
+                    <p className="text-sm font-medium">{language === 'ar' ? 'تاريخ التسجيل' : 'Registration Date'}</p>
                     <p className="text-sm text-muted-foreground">
                       {driverInfo?.created_at 
-                        ? format(new Date(driverInfo.created_at), 'dd MMMM yyyy', { locale: ar })
+                        ? format(new Date(driverInfo.created_at), 'dd MMMM yyyy', { locale: dateLocale })
                         : '-'}
                     </p>
                   </div>
@@ -520,10 +525,10 @@ const DriverData = () => {
                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium">آخر تحديث للبيانات</p>
+                    <p className="text-sm font-medium">{language === 'ar' ? 'آخر تحديث للبيانات' : 'Last Data Update'}</p>
                     <p className="text-sm text-muted-foreground">
                       {driverInfo?.updated_at 
-                        ? format(new Date(driverInfo.updated_at), 'dd MMMM yyyy - HH:mm', { locale: ar })
+                        ? format(new Date(driverInfo.updated_at), 'dd MMMM yyyy - HH:mm', { locale: dateLocale })
                         : '-'}
                     </p>
                   </div>
@@ -540,7 +545,7 @@ const DriverData = () => {
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              حفظ جميع التغييرات
+              {t('driverData.saveChanges')}
             </Button>
           </div>
         </motion.div>

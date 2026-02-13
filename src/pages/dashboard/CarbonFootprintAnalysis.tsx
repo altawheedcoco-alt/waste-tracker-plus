@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -114,19 +115,6 @@ const buildFactorsFromDB = (dbFactors: any[]): typeof CARBON_FACTORS_FALLBACK =>
   return factors;
 };
 
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'بناء',
-  other: 'أخرى',
-};
-
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316'];
 
 interface Organization {
@@ -149,6 +137,7 @@ interface CarbonData {
 }
 
 const CarbonFootprintAnalysis = () => {
+  const { t, language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -162,10 +151,22 @@ const CarbonFootprintAnalysis = () => {
   const { toast } = useToast();
   const reportRef = useRef<HTMLDivElement>(null);
 
+  const wasteTypeLabels: Record<string, string> = {
+    plastic: language === 'ar' ? 'بلاستيك' : 'Plastic',
+    paper: language === 'ar' ? 'ورق' : 'Paper',
+    metal: language === 'ar' ? 'معادن' : 'Metals',
+    glass: language === 'ar' ? 'زجاج' : 'Glass',
+    electronic: language === 'ar' ? 'إلكترونيات' : 'Electronics',
+    organic: language === 'ar' ? 'عضوية' : 'Organic',
+    chemical: language === 'ar' ? 'كيميائية' : 'Chemical',
+    medical: language === 'ar' ? 'طبية' : 'Medical',
+    construction: language === 'ar' ? 'بناء' : 'Construction',
+    other: language === 'ar' ? 'أخرى' : 'Other',
+  };
+
   useEffect(() => {
     fetchOrganizations();
     fetchEmissionFactors();
-    // Set default date range (last 12 months)
     const now = new Date();
     const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
     setDateFrom(yearAgo.toISOString().split('T')[0]);
@@ -240,14 +241,12 @@ const CarbonFootprintAnalysis = () => {
       const { data: shipments, error } = await query;
       if (error) throw error;
 
-      // Fetch organizations for names
       const { data: orgs } = await supabase
         .from('organizations')
         .select('id, name, organization_type');
 
       const orgMap = new Map(orgs?.map(o => [o.id, o]) || []);
 
-      // Filter shipments based on selected organizations and types
       let filteredShipments = shipments || [];
       
       if (selectedOrgs.length > 0) {
@@ -275,7 +274,6 @@ const CarbonFootprintAnalysis = () => {
         });
       }
 
-      // Calculate emissions using DB factors
       let totalEmissions = 0;
       let totalSavings = 0;
       let transportEmissions = 0;
@@ -288,12 +286,10 @@ const CarbonFootprintAnalysis = () => {
         const quantity = Number(shipment.quantity) || 0;
         const wasteType = shipment.waste_type as string || 'other';
         
-        // Calculate processing emissions using DB-loaded IPCC factors
         const processingFactor = (dbFactors.waste_processing as Record<string, number>)[wasteType] || 1.0;
         const shipmentProcessingEmissions = quantity * processingFactor;
         processingEmissions += shipmentProcessingEmissions;
 
-        // Transport emissions: calculate distance from coordinates or use 50km fallback
         let distanceKm = 50;
         if (shipment.pickup_latitude && shipment.delivery_latitude) {
           const R = 6371;
@@ -303,7 +299,7 @@ const CarbonFootprintAnalysis = () => {
             Math.cos((shipment.pickup_latitude * Math.PI) / 180) *
             Math.cos((shipment.delivery_latitude * Math.PI) / 180) *
             Math.sin(dLon / 2) ** 2;
-          distanceKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.3; // 1.3 road factor
+          distanceKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 1.3;
         }
         const shipmentTransportEmissions = quantity * dbFactors.transport_per_km_ton * distanceKm / 1000;
         transportEmissions += shipmentTransportEmissions;
@@ -311,20 +307,17 @@ const CarbonFootprintAnalysis = () => {
         const shipmentEmissions = shipmentProcessingEmissions + shipmentTransportEmissions;
         totalEmissions += shipmentEmissions;
 
-        // Calculate IPCC-based recycling savings
         const isRecycled = shipment.disposal_method === 'recycling' || shipment.status === 'confirmed';
         const savingsFactor = (dbFactors.recycling_savings as Record<string, number>)[wasteType] || 0.5;
         const shipmentSavings = isRecycled ? quantity * savingsFactor : 0;
         totalSavings += shipmentSavings;
 
-        // Aggregate by waste type
         if (!emissionsByWasteType[wasteType]) {
           emissionsByWasteType[wasteType] = { emissions: 0, savings: 0 };
         }
         emissionsByWasteType[wasteType].emissions += shipmentEmissions;
         emissionsByWasteType[wasteType].savings += shipmentSavings;
 
-        // Aggregate by organization (generator)
         const generatorOrg = orgMap.get(shipment.generator_id || '');
         if (generatorOrg) {
           if (!emissionsByOrg[generatorOrg.id]) {
@@ -333,7 +326,6 @@ const CarbonFootprintAnalysis = () => {
           emissionsByOrg[generatorOrg.id].emissions += shipmentEmissions;
         }
 
-        // Monthly trend
         const month = new Date(shipment.created_at || '').toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
         if (!monthlyData[month]) {
           monthlyData[month] = { emissions: 0, savings: 0 };
@@ -342,7 +334,6 @@ const CarbonFootprintAnalysis = () => {
         monthlyData[month].savings += shipmentSavings;
       });
 
-      // Format data for charts
       const emissionsByWasteTypeArr = Object.entries(emissionsByWasteType).map(([type, data]) => ({
         name: wasteTypeLabels[type] || type,
         emissions: Math.round(data.emissions * 100) / 100,
@@ -351,7 +342,7 @@ const CarbonFootprintAnalysis = () => {
 
       const emissionsByOrgArr = Object.entries(emissionsByOrg)
         .map(([id, data]) => ({
-          name: orgMap.get(id)?.name || 'غير معروف',
+          name: orgMap.get(id)?.name || (language === 'ar' ? 'غير معروف' : 'Unknown'),
           emissions: Math.round(data.emissions * 100) / 100,
           type: data.type,
         }))
@@ -366,10 +357,9 @@ const CarbonFootprintAnalysis = () => {
         }))
         .slice(-12);
 
-      // Calculate equivalents
       const netCarbon = totalEmissions - totalSavings;
-      const treesEquivalent = Math.round(netCarbon / 21); // One tree absorbs ~21 kg CO2/year
-      const carsEquivalent = Math.round(netCarbon / 4600); // Average car emits ~4600 kg CO2/year
+      const treesEquivalent = Math.round(netCarbon / 21);
+      const carsEquivalent = Math.round(netCarbon / 4600);
 
       setCarbonData({
         totalEmissions: Math.round(totalEmissions * 100) / 100,
@@ -386,8 +376,8 @@ const CarbonFootprintAnalysis = () => {
     } catch (error) {
       console.error('Error calculating carbon footprint:', error);
       toast({
-        title: 'خطأ',
-        description: 'فشل في حساب البصمة الكربونية',
+        title: t('common.error'),
+        description: t('carbon.errorCalc'),
         variant: 'destructive',
       });
     } finally {
@@ -415,11 +405,10 @@ const CarbonFootprintAnalysis = () => {
     if (!carbonData) return;
     setGenerating(true);
     try {
-      // Generate detailed report combining PDF + data summary
       exportToPdf();
       toast({
-        title: 'تم إنشاء التقرير المفصل',
-        description: 'يتم تحميل تقرير البصمة الكربونية المفصل بصيغة PDF',
+        title: t('carbon.reportCreated'),
+        description: t('carbon.reportCreatedDesc'),
       });
     } finally {
       setGenerating(false);
@@ -433,21 +422,19 @@ const CarbonFootprintAnalysis = () => {
     
     try {
       toast({
-        title: 'جاري إنشاء PDF',
-        description: 'يرجى الانتظار بينما يتم إنشاء التقرير...',
+        title: t('carbon.creatingPdf'),
+        description: t('carbon.creatingPdfDesc'),
       });
 
-      // Create PDF
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 15;
       let yPosition = margin;
 
-      // Add title
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(20);
-      pdf.setTextColor(16, 185, 129); // Emerald color
+      pdf.setTextColor(16, 185, 129);
       pdf.text('Carbon Footprint Report', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 10;
       
@@ -456,7 +443,6 @@ const CarbonFootprintAnalysis = () => {
       pdf.text(`Period: ${dateFrom} to ${dateTo}`, pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 15;
 
-      // Summary section
       pdf.setFontSize(14);
       pdf.setTextColor(0);
       pdf.setFont('helvetica', 'bold');
@@ -482,7 +468,6 @@ const CarbonFootprintAnalysis = () => {
 
       yPosition += 10;
 
-      // Environmental equivalents
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.text('Environmental Equivalents', margin, yPosition);
@@ -495,7 +480,6 @@ const CarbonFootprintAnalysis = () => {
       pdf.text(`Equivalent car emissions: ${carbonData.carsEquivalent.toLocaleString()} cars/year`, margin, yPosition);
       yPosition += 15;
 
-      // Emissions by waste type
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(14);
       pdf.text('Emissions by Waste Type', margin, yPosition);
@@ -511,7 +495,6 @@ const CarbonFootprintAnalysis = () => {
 
       yPosition += 10;
 
-      // Capture charts as images
       const chartsContainer = reportRef.current;
       if (chartsContainer) {
         const canvas = await html2canvas(chartsContainer, {
@@ -525,7 +508,6 @@ const CarbonFootprintAnalysis = () => {
         const imgWidth = pageWidth - (margin * 2);
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        // Check if we need a new page
         if (yPosition + imgHeight > pageHeight - margin) {
           pdf.addPage();
           yPosition = margin;
@@ -539,7 +521,6 @@ const CarbonFootprintAnalysis = () => {
         pdf.addImage(imgData, 'PNG', margin, yPosition, imgWidth, Math.min(imgHeight, pageHeight - yPosition - margin));
       }
 
-      // Add footer to all pages
       const pageCount = pdf.internal.pages.length - 1;
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
@@ -553,18 +534,17 @@ const CarbonFootprintAnalysis = () => {
         );
       }
 
-      // Save PDF
       pdf.save(`carbon-footprint-report-${new Date().toISOString().split('T')[0]}.pdf`);
 
       toast({
-        title: 'تم تصدير PDF',
-        description: 'تم تحميل تقرير البصمة الكربونية بصيغة PDF بنجاح',
+        title: t('carbonExtra.pdfExported'),
+        description: t('carbonExtra.pdfExportedDesc'),
       });
     } catch (error) {
       console.error('Error exporting PDF:', error);
       toast({
-        title: 'خطأ',
-        description: 'فشل في تصدير التقرير بصيغة PDF',
+        title: t('common.error'),
+        description: t('carbonExtra.pdfError'),
         variant: 'destructive',
       });
     } finally {
@@ -576,27 +556,22 @@ const CarbonFootprintAnalysis = () => {
     if (!carbonData) return;
 
     const reportContent = `
-تقرير البصمة الكربونية
+${t('carbonExtra.title')}
 =====================
 
-الفترة: من ${dateFrom} إلى ${dateTo}
+${t('carbonExtra.fromDate')}: ${dateFrom} - ${t('carbonExtra.toDate')}: ${dateTo}
 
-ملخص الانبعاثات:
-- إجمالي الانبعاثات: ${carbonData.totalEmissions} كجم CO₂
-- انبعاثات النقل: ${carbonData.transportEmissions} كجم CO₂
-- انبعاثات المعالجة: ${carbonData.processingEmissions} كجم CO₂
+${t('carbonExtra.totalEmissions')}: ${carbonData.totalEmissions} ${t('carbonExtra.kgCo2')}
+${t('carbonExtra.transportEmissions')}: ${carbonData.transportEmissions} ${t('carbonExtra.kgCo2')}
+${t('carbonExtra.processingEmissions')}: ${carbonData.processingEmissions} ${t('carbonExtra.kgCo2')}
+${t('carbonExtra.recyclingSavings')}: ${carbonData.totalSavings} ${t('carbonExtra.kgCo2')}
+${t('carbonExtra.netFootprint')}: ${carbonData.netCarbon} ${t('carbonExtra.kgCo2')}
 
-الوفورات من إعادة التدوير:
-- إجمالي الوفورات: ${carbonData.totalSavings} كجم CO₂
+${carbonData.treesEquivalent} ${t('carbonExtra.treesNeeded')}
+${carbonData.carsEquivalent} ${t('carbonExtra.carsEquiv')}
 
-صافي البصمة الكربونية: ${carbonData.netCarbon} كجم CO₂
-
-المكافئات:
-- يعادل ${carbonData.treesEquivalent} شجرة لامتصاص هذه الكمية سنوياً
-- يعادل انبعاثات ${carbonData.carsEquivalent} سيارة سنوياً
-
-الانبعاثات حسب نوع النفايات:
-${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم CO₂`).join('\n')}
+${t('carbonExtra.emissionsByWaste')}:
+${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} ${t('carbonExtra.kgCo2')}`).join('\n')}
     `.trim();
 
     const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
@@ -610,8 +585,8 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
     URL.revokeObjectURL(url);
 
     toast({
-      title: 'تم تصدير التقرير',
-      description: 'تم تحميل تقرير البصمة الكربونية',
+      title: t('carbonExtra.txtExported'),
+      description: t('carbonExtra.txtExportedDesc'),
     });
   };
 
@@ -626,7 +601,6 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
         animate={{ opacity: 1, y: 0 }}
         className="space-y-6"
       >
-        {/* Back Button */}
         <BackButton />
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3 flex-wrap">
@@ -636,11 +610,11 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
               ) : (
                 <FileDown className="w-4 h-4" />
               )}
-              تصدير PDF
+              {t('carbon.exportPdf')}
             </Button>
             <Button onClick={exportReport} variant="outline" className="gap-2" disabled={!carbonData}>
               <Download className="w-4 h-4" />
-              تصدير TXT
+              {t('carbonExtra.exportTxt')}
             </Button>
             <Button onClick={generateReport} variant="outline" className="gap-2" disabled={generating}>
               {generating ? (
@@ -648,19 +622,19 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
               ) : (
                 <FileText className="w-4 h-4" />
               )}
-              إنشاء تقرير مفصل
+              {t('carbonExtra.detailedReport')}
             </Button>
           </div>
           <div className="text-right">
             <h1 className="text-3xl font-bold flex items-center gap-3 justify-end">
               <Leaf className="w-8 h-8 text-primary" />
-              تحليل البصمة الكربونية
+              {t('carbonExtra.title')}
             </h1>
             <div className="flex items-center gap-2 justify-end mt-1">
               <Badge variant="outline" className="text-xs">IPCC 2006</Badge>
               <Badge variant="outline" className="text-xs">GHG Protocol</Badge>
               <Badge variant="outline" className="text-xs">IEA 2023</Badge>
-              <p className="text-muted-foreground text-sm">تحليل شامل بمعاملات انبعاثات رسمية معتمدة دولياً</p>
+              <p className="text-muted-foreground text-sm">{t('carbonExtra.officialDesc')}</p>
             </div>
           </div>
         </div>
@@ -670,14 +644,13 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
           <CardHeader className="text-right pb-4">
             <CardTitle className="flex items-center gap-2 justify-end text-lg">
               <Filter className="w-5 h-5" />
-              معايير التحليل
+              {t('carbonExtra.analysisCriteria')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Date Range */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 text-right">
-                <Label>إلى تاريخ</Label>
+                <Label>{t('carbonExtra.toDate')}</Label>
                 <Input
                   type="date"
                   value={dateTo}
@@ -686,7 +659,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                 />
               </div>
               <div className="space-y-2 text-right">
-                <Label>من تاريخ</Label>
+                <Label>{t('carbonExtra.fromDate')}</Label>
                 <Input
                   type="date"
                   value={dateFrom}
@@ -698,12 +671,11 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
 
             <Separator />
 
-            {/* Organization Types */}
             <div className="space-y-3 text-right">
-              <Label>نوع الجهات</Label>
+              <Label>{t('carbonExtra.orgTypes')}</Label>
               <div className="flex flex-wrap gap-4 justify-end">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="type-generator" className="cursor-pointer">جهات مولدة</Label>
+                  <Label htmlFor="type-generator" className="cursor-pointer">{t('carbonExtra.generatorOrgs')}</Label>
                   <Checkbox
                     id="type-generator"
                     checked={selectedTypes.includes('generator')}
@@ -711,7 +683,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="type-transporter" className="cursor-pointer">ناقلون</Label>
+                  <Label htmlFor="type-transporter" className="cursor-pointer">{t('carbonExtra.transporterOrgs')}</Label>
                   <Checkbox
                     id="type-transporter"
                     checked={selectedTypes.includes('transporter')}
@@ -719,7 +691,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="type-recycler" className="cursor-pointer">معيدو تدوير</Label>
+                  <Label htmlFor="type-recycler" className="cursor-pointer">{t('carbonExtra.recyclerOrgs')}</Label>
                   <Checkbox
                     id="type-recycler"
                     checked={selectedTypes.includes('recycler')}
@@ -727,7 +699,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="type-disposal" className="cursor-pointer">تخلص نهائي</Label>
+                  <Label htmlFor="type-disposal" className="cursor-pointer">{t('carbonExtra.disposalOrgs')}</Label>
                   <Checkbox
                     id="type-disposal"
                     checked={selectedTypes.includes('disposal')}
@@ -739,7 +711,6 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
 
             <Separator />
 
-            {/* Specific Organizations */}
             <div className="space-y-3 text-right">
               <div className="flex items-center justify-between">
                 <Button
@@ -748,9 +719,9 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                   onClick={() => setSelectedOrgs([])}
                   className="text-xs"
                 >
-                  إعادة تعيين
+                  {t('carbonExtra.resetSelection')}
                 </Button>
-                <Label>جهات محددة (اختياري)</Label>
+                <Label>{t('carbonExtra.specificOrgs')}</Label>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
                 {filteredOrganizations.map(org => (
@@ -768,7 +739,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
               </div>
               {selectedOrgs.length > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  تم اختيار {selectedOrgs.length} جهة
+                  {t('carbonExtra.selectedCount')} {selectedOrgs.length} {t('carbonExtra.org')}
                 </p>
               )}
             </div>
@@ -781,7 +752,6 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
           </div>
         ) : carbonData && (
           <>
-            {/* Charts Container for PDF Export */}
             <div ref={reportRef} className="space-y-6 bg-background">
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -792,11 +762,11 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <Factory className="w-6 h-6 text-red-500" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">إجمالي الانبعاثات</p>
+                      <p className="text-sm text-muted-foreground">{t('carbonExtra.totalEmissions')}</p>
                       <p className="text-2xl font-bold text-red-600">
                         {carbonData.totalEmissions.toLocaleString()}
                       </p>
-                      <p className="text-xs text-muted-foreground">كجم CO₂</p>
+                      <p className="text-xs text-muted-foreground">{t('carbonExtra.kgCo2')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -809,11 +779,11 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <Recycle className="w-6 h-6 text-emerald-500" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">وفورات التدوير</p>
+                      <p className="text-sm text-muted-foreground">{t('carbonExtra.recyclingSavings')}</p>
                       <p className="text-2xl font-bold text-emerald-600">
                         {carbonData.totalSavings.toLocaleString()}
                       </p>
-                      <p className="text-xs text-muted-foreground">كجم CO₂</p>
+                      <p className="text-xs text-muted-foreground">{t('carbonExtra.kgCo2')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -826,11 +796,11 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <Leaf className={`w-6 h-6 ${carbonData.netCarbon > 0 ? 'text-amber-500' : 'text-emerald-500'}`} />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">صافي البصمة</p>
+                      <p className="text-sm text-muted-foreground">{t('carbonExtra.netFootprint')}</p>
                       <p className={`text-2xl font-bold ${carbonData.netCarbon > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
                         {carbonData.netCarbon > 0 ? '+' : ''}{carbonData.netCarbon.toLocaleString()}
                       </p>
-                      <p className="text-xs text-muted-foreground">كجم CO₂</p>
+                      <p className="text-xs text-muted-foreground">{t('carbonExtra.kgCo2')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -843,11 +813,11 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <TreePine className="w-6 h-6 text-blue-500" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">معادل الأشجار</p>
+                      <p className="text-sm text-muted-foreground">{t('carbonExtra.treeEquivalent')}</p>
                       <p className="text-2xl font-bold text-blue-600">
                         {carbonData.treesEquivalent.toLocaleString()}
                       </p>
-                      <p className="text-xs text-muted-foreground">شجرة / سنة</p>
+                      <p className="text-xs text-muted-foreground">{t('carbonExtra.treePerYear')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -863,9 +833,9 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <Truck className="w-6 h-6 text-amber-500" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">انبعاثات النقل</p>
+                      <p className="text-sm text-muted-foreground">{t('carbonExtra.transportEmissions')}</p>
                       <p className="text-2xl font-bold">
-                        {carbonData.transportEmissions.toLocaleString()} كجم
+                        {carbonData.transportEmissions.toLocaleString()} {language === 'ar' ? 'كجم' : 'kg'}
                       </p>
                     </div>
                   </div>
@@ -879,9 +849,9 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <Zap className="w-6 h-6 text-purple-500" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">انبعاثات المعالجة</p>
+                      <p className="text-sm text-muted-foreground">{t('carbonExtra.processingEmissions')}</p>
                       <p className="text-2xl font-bold">
-                        {carbonData.processingEmissions.toLocaleString()} كجم
+                        {carbonData.processingEmissions.toLocaleString()} {language === 'ar' ? 'كجم' : 'kg'}
                       </p>
                     </div>
                   </div>
@@ -891,14 +861,13 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
 
             {/* Charts Row 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Monthly Trend */}
               <Card>
                 <CardHeader className="text-right">
                   <CardTitle className="flex items-center gap-2 justify-end">
                     <TrendingDown className="w-5 h-5" />
-                    اتجاه الانبعاثات والوفورات
+                    {t('carbonExtra.emissionsTrend')}
                   </CardTitle>
-                  <CardDescription>التغير الشهري في البصمة الكربونية</CardDescription>
+                  <CardDescription>{t('carbonExtra.monthlyChange')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -911,7 +880,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <Area
                         type="monotone"
                         dataKey="emissions"
-                        name="الانبعاثات"
+                        name={t('carbonExtra.emissions')}
                         stackId="1"
                         stroke="#EF4444"
                         fill="#FEE2E2"
@@ -919,7 +888,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <Area
                         type="monotone"
                         dataKey="savings"
-                        name="الوفورات"
+                        name={t('carbonExtra.savingsLabel')}
                         stackId="2"
                         stroke="#10B981"
                         fill="#D1FAE5"
@@ -929,14 +898,13 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                 </CardContent>
               </Card>
 
-              {/* Emissions by Waste Type */}
               <Card>
                 <CardHeader className="text-right">
                   <CardTitle className="flex items-center gap-2 justify-end">
                     <Calculator className="w-5 h-5" />
-                    الانبعاثات حسب نوع النفايات
+                    {t('carbonExtra.emissionsByWaste')}
                   </CardTitle>
-                  <CardDescription>توزيع البصمة الكربونية على أنواع النفايات</CardDescription>
+                  <CardDescription>{t('carbonExtra.wasteDistribution')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -946,8 +914,8 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                       <YAxis dataKey="name" type="category" width={80} />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="emissions" name="الانبعاثات" fill="#EF4444" radius={[0, 4, 4, 0]} />
-                      <Bar dataKey="savings" name="الوفورات" fill="#10B981" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="emissions" name={t('carbonExtra.emissions')} fill="#EF4444" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="savings" name={t('carbonExtra.savingsLabel')} fill="#10B981" radius={[0, 4, 4, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -956,23 +924,22 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
 
             {/* Charts Row 2 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Top Emitting Organizations */}
               <Card>
                 <CardHeader className="text-right">
                   <CardTitle className="flex items-center gap-2 justify-end">
                     <Building2 className="w-5 h-5" />
-                    أعلى الجهات انبعاثاً
+                    {t('carbonExtra.topEmitters')}
                   </CardTitle>
-                  <CardDescription>الجهات الأكثر مساهمة في البصمة الكربونية</CardDescription>
+                  <CardDescription>{t('carbonExtra.topEmittersDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {carbonData.emissionsByOrg.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-8">لا توجد بيانات</p>
+                    <p className="text-center text-muted-foreground py-8">{t('carbonExtra.noData')}</p>
                   ) : (
                     <div className="space-y-3">
                       {carbonData.emissionsByOrg.map((org, index) => (
                         <div key={index} className="flex items-center justify-between">
-                          <Badge variant="destructive">{org.emissions} كجم CO₂</Badge>
+                          <Badge variant="destructive">{org.emissions} {t('carbonExtra.kgCo2')}</Badge>
                           <div className="flex items-center gap-3">
                             <span className="font-medium text-sm truncate max-w-[200px]">{org.name}</span>
                             <span className="w-6 h-6 rounded-full bg-red-500/10 flex items-center justify-center text-xs font-bold text-red-600">
@@ -986,14 +953,13 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                 </CardContent>
               </Card>
 
-              {/* Environmental Impact */}
               <Card>
                 <CardHeader className="text-right">
                   <CardTitle className="flex items-center gap-2 justify-end">
                     <Wind className="w-5 h-5" />
-                    الأثر البيئي
+                    {t('carbonExtra.envImpact')}
                   </CardTitle>
-                  <CardDescription>معادلات بيئية للبصمة الكربونية</CardDescription>
+                  <CardDescription>{t('carbonExtra.envImpactDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
@@ -1002,7 +968,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                         <TreePine className="w-10 h-10 text-emerald-500" />
                         <div className="text-right">
                           <p className="text-2xl font-bold">{carbonData.treesEquivalent}</p>
-                          <p className="text-sm text-muted-foreground">شجرة مطلوبة للامتصاص سنوياً</p>
+                          <p className="text-sm text-muted-foreground">{t('carbonExtra.treesNeeded')}</p>
                         </div>
                       </div>
                     </div>
@@ -1012,7 +978,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                         <Truck className="w-10 h-10 text-amber-500" />
                         <div className="text-right">
                           <p className="text-2xl font-bold">{carbonData.carsEquivalent}</p>
-                          <p className="text-sm text-muted-foreground">سيارة معادلة للانبعاثات سنوياً</p>
+                          <p className="text-sm text-muted-foreground">{t('carbonExtra.carsEquiv')}</p>
                         </div>
                       </div>
                     </div>
@@ -1024,7 +990,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} كجم C
                           <p className="text-lg font-bold text-emerald-600">
                             {Math.round(carbonData.totalSavings / carbonData.totalEmissions * 100) || 0}%
                           </p>
-                          <p className="text-sm text-muted-foreground">نسبة الوفورات من إجمالي الانبعاثات</p>
+                          <p className="text-sm text-muted-foreground">{t('carbonExtra.savingsPercent')}</p>
                         </div>
                       </div>
                     </div>
