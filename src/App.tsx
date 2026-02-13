@@ -98,6 +98,7 @@ const MapExplorer = lazy(() => import("./pages/dashboard/MapExplorer"));
 const SystemStatus = lazy(() => import("./pages/dashboard/SystemStatus"));
 const SupportCenter = lazy(() => import("./pages/dashboard/SupportCenter"));
 const ApiManagement = lazy(() => import("./pages/dashboard/ApiManagement"));
+const SecurityPenetrationTesting = lazy(() => import("./pages/dashboard/SecurityPenetrationTesting"));
 const AdvancedAnalytics = lazy(() => import("./pages/dashboard/AdvancedAnalytics"));
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const SavedLocationsPage = lazy(() => import("./pages/SavedLocationsPage"));
@@ -287,6 +288,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/system-status" element={<SystemStatus />} />
         <Route path="/dashboard/support" element={<SupportCenter />} />
         <Route path="/dashboard/api" element={<ApiManagement />} />
+        <Route path="/dashboard/security-testing" element={<SecurityPenetrationTesting />} />
         <Route path="/dashboard/advanced-analytics" element={<AdvancedAnalytics />} />
         <Route path="/dashboard/saved-locations" element={<SavedLocationsPage />} />
         <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
