@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { generateReceiptPrintHTML } from './ReceiptPrintTemplate';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
+import SignDocumentButton from '@/components/signature/SignDocumentButton';
 
 interface ReceiptDetailsDialogProps {
   open: boolean;
@@ -421,6 +422,13 @@ const ReceiptDetailsDialog = ({
               documentTitle={`شهادة استلام ${receipt.receipt_number}`}
               size="sm"
               className="flex-1 min-w-[100px]"
+            />
+            <SignDocumentButton
+              documentType="receipt"
+              documentId={receipt.id || receipt.receipt_number}
+              documentTitle={`شهادة استلام ${receipt.receipt_number}`}
+              variant="outline"
+              size="sm"
             />
             {isGenerator && receipt.status === 'pending' && (
               <Button onClick={handleConfirm} size="sm" className="flex-1 min-w-[100px]" disabled={confirming}>

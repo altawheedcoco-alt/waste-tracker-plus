@@ -16,6 +16,7 @@ import { useReactToPrint } from 'react-to-print';
 import { useAuth } from '@/contexts/AuthContext';
 import DisposalCertificatePrint from '@/components/disposal/DisposalCertificatePrint';
 import DisposalAccountStatementPrint from '@/components/disposal/DisposalAccountStatementPrint';
+import SignDocumentButton from '@/components/signature/SignDocumentButton';
 
 interface CompletionFinanceTabProps {
   facilityId?: string | null;
@@ -376,9 +377,18 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
         <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto p-0" dir="rtl">
           <DialogHeader className="p-4 pb-0">
             <div className="flex items-center justify-between">
-              <Button size="sm" className="gap-2" onClick={() => handlePrintCert()}>
-                <Printer className="w-4 h-4" /> طباعة الشهادة
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button size="sm" className="gap-2" onClick={() => handlePrintCert()}>
+                  <Printer className="w-4 h-4" /> طباعة الشهادة
+                </Button>
+                <SignDocumentButton
+                  documentType="certificate"
+                  documentId={previewCertData?.certificate_number || ''}
+                  documentTitle="شهادة التخلص الآمن"
+                  variant="outline"
+                  size="sm"
+                />
+              </div>
               <DialogTitle>معاينة شهادة التخلص الآمن</DialogTitle>
             </div>
           </DialogHeader>
