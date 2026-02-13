@@ -1,8 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DollarSign, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { DollarSign, Clock, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRight, FileText, Truck } from 'lucide-react';
 import { TransporterFinancials, TransporterKPIs } from '@/hooks/useTransporterExtended';
+import InteractiveStatCard from '../shared/InteractiveStatCard';
+import { DetailSection } from '../shared/InteractiveDetailDrawer';
 
 interface TransporterKPICardsProps {
   financials: TransporterFinancials | undefined;
@@ -14,15 +16,107 @@ interface TransporterKPICardsProps {
 const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading }: TransporterKPICardsProps) => {
   const isLoading = financialsLoading || kpisLoading;
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i}><CardContent className="p-3 sm:p-6"><Skeleton className="h-20" /></CardContent></Card>
-        ))}
-      </div>
-    );
-  }
+  const revenueDetails: DetailSection[] = [
+    {
+      id: 'revenue-breakdown',
+      title: 'تفاصيل الإيرادات',
+      icon: DollarSign,
+      defaultOpen: true,
+      content: (
+        <div className="space-y-3 text-right">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <span className="font-bold text-emerald-600">
+              {(financials?.totalRevenue || 0).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}
+            </span>
+            <span className="text-sm">إجمالي الإيرادات</span>
+          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <span className="font-bold text-amber-600">
+              {(financials?.pendingPayments || 0).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}
+            </span>
+            <span className="text-sm">مدفوعات معلقة</span>
+          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-primary/5">
+            <span className="font-bold text-primary">
+              {((financials?.totalRevenue || 0) - (financials?.pendingPayments || 0)).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}
+            </span>
+            <span className="text-sm font-medium">صافي المحصّل</span>
+          </div>
+        </div>
+      ),
+      link: '/dashboard/accounting',
+    },
+  ];
+
+  const pendingDetails: DetailSection[] = [
+    {
+      id: 'pending-info',
+      title: 'المدفوعات المعلقة',
+      icon: Clock,
+      defaultOpen: true,
+      content: (
+        <div className="space-y-2 text-right text-sm text-muted-foreground">
+          <p>المبلغ المعلق: <span className="font-bold text-foreground">{(financials?.pendingPayments || 0).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}</span></p>
+          <p>هذه المدفوعات تحتاج متابعة وتحصيل من الشركاء.</p>
+        </div>
+      ),
+      link: '/dashboard/accounting',
+    },
+  ];
+
+  const onTimeDetails: DetailSection[] = [
+    {
+      id: 'performance-breakdown',
+      title: 'تفاصيل الأداء',
+      icon: TrendingUp,
+      defaultOpen: true,
+      content: (
+        <div className="space-y-3 text-right">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <Badge variant={((kpis?.onTimeRate || 0) >= 80) ? 'default' : 'destructive'}>
+              {kpis?.onTimeRate || 0}%
+            </Badge>
+            <span className="text-sm">الالتزام بالمواعيد</span>
+          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <Badge variant="secondary">{kpis?.completionRate || 0}%</Badge>
+            <span className="text-sm">معدل الإنجاز</span>
+          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <Badge variant="outline">{kpis?.avgDeliveryDays || 0} يوم</Badge>
+            <span className="text-sm">متوسط وقت التسليم</span>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const overdueDetails: DetailSection[] = [
+    {
+      id: 'overdue-info',
+      title: 'الشحنات المتأخرة',
+      icon: AlertTriangle,
+      defaultOpen: true,
+      content: (
+        <div className="space-y-3 text-right">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <Badge variant={(kpis?.overdueShipments || 0) > 0 ? 'destructive' : 'default'}>
+              {kpis?.overdueShipments || 0}
+            </Badge>
+            <span className="text-sm">شحنات متأخرة</span>
+          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <Badge variant="outline">{kpis?.avgDeliveryDays || 0} يوم</Badge>
+            <span className="text-sm">متوسط التسليم</span>
+          </div>
+          {(kpis?.overdueShipments || 0) > 0 && (
+            <p className="text-sm text-destructive">⚠️ يوجد شحنات تحتاج اهتمام فوري</p>
+          )}
+        </div>
+      ),
+      link: '/dashboard/shipments',
+    },
+  ];
 
   const cards = [
     {
@@ -32,6 +126,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
       icon: DollarSign,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-500/10',
+      detailSections: revenueDetails,
     },
     {
       title: 'مدفوعات معلقة',
@@ -41,6 +136,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
       color: 'text-amber-600',
       bgColor: 'bg-amber-500/10',
       badge: financials?.pendingPayments && financials.pendingPayments > 0 ? 'تحتاج متابعة' : undefined,
+      detailSections: pendingDetails,
     },
     {
       title: 'نسبة الالتزام بالمواعيد',
@@ -49,6 +145,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
       icon: TrendingUp,
       color: (kpis?.onTimeRate || 0) >= 80 ? 'text-emerald-600' : 'text-red-600',
       bgColor: (kpis?.onTimeRate || 0) >= 80 ? 'bg-emerald-500/10' : 'bg-red-500/10',
+      detailSections: onTimeDetails,
     },
     {
       title: 'شحنات متأخرة',
@@ -58,38 +155,30 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
       color: (kpis?.overdueShipments || 0) > 0 ? 'text-red-600' : 'text-emerald-600',
       bgColor: (kpis?.overdueShipments || 0) > 0 ? 'bg-red-500/10' : 'bg-emerald-500/10',
       badge: (kpis?.overdueShipments || 0) > 0 ? 'تحتاج اهتمام' : undefined,
+      detailSections: overdueDetails,
     },
   ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-      {cards.map((card) => (
-        <Card key={card.title}>
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg ${card.bgColor} flex items-center justify-center`}>
-                  <card.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${card.color}`} />
-                </div>
-                {card.badge && (
-                  <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5">
-                    {card.badge}
-                  </Badge>
-                )}
-              </div>
-              <div className="text-right">
-                <p className="text-xs sm:text-sm text-muted-foreground">{card.title}</p>
-                <div className="flex items-baseline gap-1 justify-end">
-                  <p className="text-lg sm:text-2xl font-bold">{card.value}</p>
-                  {card.suffix && <span className="text-xs text-muted-foreground">{card.suffix}</span>}
-                </div>
-                {card.subtitle && (
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">{card.subtitle}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {cards.map((card, index) => (
+        <InteractiveStatCard
+          key={card.title}
+          title={card.title}
+          value={card.value}
+          icon={card.icon}
+          color={card.color}
+          bgColor={card.bgColor}
+          subtitle={card.subtitle}
+          suffix={card.suffix}
+          badge={card.badge}
+          badgeVariant="destructive"
+          delay={index * 0.1}
+          detailSections={card.detailSections}
+          detailTitle={card.title}
+          detailDescription={`تفاصيل ${card.title}`}
+          isLoading={isLoading}
+        />
       ))}
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import FacilityDashboardHeader from './shared/FacilityDashboardHeader';
 import FacilityCapacityCard from './shared/FacilityCapacityCard';
 import StatsCardsGrid, { StatCardItem } from './shared/StatsCardsGrid';
+import { DetailSection } from './shared/InteractiveDetailDrawer';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import CreateShipmentButton from './CreateShipmentButton';
@@ -158,11 +159,37 @@ const RecyclerDashboard = () => {
   const recentShipments = shipmentData?.shipments || [];
   const stats = shipmentData?.stats || { total: 0, incoming: 0, processing: 0, completed: 0 };
 
+  const buildRecyclerDetails = (): DetailSection[] => [
+    {
+      id: 'status-breakdown',
+      title: 'توزيع الشحنات حسب الحالة',
+      icon: ListFilter,
+      defaultOpen: true,
+      content: (
+        <div className="space-y-2 text-right">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <span className="font-bold">{stats.incoming}</span>
+            <span className="text-sm">واردة</span>
+          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <span className="font-bold">{stats.processing}</span>
+            <span className="text-sm">قيد المعالجة</span>
+          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+            <span className="font-bold">{stats.completed}</span>
+            <span className="text-sm">مؤكدة</span>
+          </div>
+        </div>
+      ),
+      link: '/dashboard/shipments',
+    },
+  ];
+
   const statCards: StatCardItem[] = [
-    { title: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-    { title: 'شحنات واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
-    { title: 'قيد المعالجة', value: stats.processing, icon: Clock, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-    { title: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10' },
+    { title: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10', detailSections: buildRecyclerDetails(), detailTitle: 'تفاصيل الشحنات' },
+    { title: 'شحنات واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', bgColor: 'bg-amber-500/10', detailSections: buildRecyclerDetails() },
+    { title: 'قيد المعالجة', value: stats.processing, icon: Clock, color: 'text-purple-500', bgColor: 'bg-purple-500/10', detailSections: buildRecyclerDetails() },
+    { title: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10', detailSections: buildRecyclerDetails() },
   ];
 
   const handleRefresh = () => {
