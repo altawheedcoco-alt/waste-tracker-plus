@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Book, Truck, Recycle, Factory, User, ChevronDown, Shield } from "lucide-react";
+import { Book, Truck, Recycle, Factory, User, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -36,14 +36,6 @@ const roles = [
     icon: User,
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
-  },
-  {
-    id: "admin",
-    title: "دليل مدير النظام",
-    description: "إدارة المنصة والتحكم الكامل",
-    icon: Shield,
-    color: "text-red-500",
-    bgColor: "bg-red-500/10",
   },
 ];
 
