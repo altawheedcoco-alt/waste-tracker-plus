@@ -9918,6 +9918,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          activation_blocked_reason: string | null
           activity_type: string | null
           address: string | null
           agent_email: string | null
@@ -9935,6 +9936,7 @@ export type Database = {
           delegate_national_id: string | null
           delegate_phone: string | null
           description: string | null
+          documents_submitted: boolean | null
           email: string
           environmental_approval_number: string | null
           environmental_license: string | null
@@ -9944,6 +9946,7 @@ export type Database = {
           headquarters: string | null
           id: string
           ida_license: string | null
+          identity_verified: boolean | null
           industrial_registry: string | null
           is_active: boolean | null
           is_suspended: boolean | null
@@ -9955,6 +9958,8 @@ export type Database = {
           logo_url: string | null
           name: string
           name_en: string | null
+          onboarding_completed: boolean | null
+          onboarding_completed_at: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
           partner_code: string
           phone: string
@@ -9973,11 +9978,13 @@ export type Database = {
           suspended_at: string | null
           suspension_reason: string | null
           tax_card: string | null
+          terms_accepted: boolean | null
           updated_at: string | null
           vision: string | null
           wmra_license: string | null
         }
         Insert: {
+          activation_blocked_reason?: string | null
           activity_type?: string | null
           address?: string | null
           agent_email?: string | null
@@ -9995,6 +10002,7 @@ export type Database = {
           delegate_national_id?: string | null
           delegate_phone?: string | null
           description?: string | null
+          documents_submitted?: boolean | null
           email: string
           environmental_approval_number?: string | null
           environmental_license?: string | null
@@ -10004,6 +10012,7 @@ export type Database = {
           headquarters?: string | null
           id?: string
           ida_license?: string | null
+          identity_verified?: boolean | null
           industrial_registry?: string | null
           is_active?: boolean | null
           is_suspended?: boolean | null
@@ -10015,6 +10024,8 @@ export type Database = {
           logo_url?: string | null
           name: string
           name_en?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
           partner_code?: string
           phone: string
@@ -10033,11 +10044,13 @@ export type Database = {
           suspended_at?: string | null
           suspension_reason?: string | null
           tax_card?: string | null
+          terms_accepted?: boolean | null
           updated_at?: string | null
           vision?: string | null
           wmra_license?: string | null
         }
         Update: {
+          activation_blocked_reason?: string | null
           activity_type?: string | null
           address?: string | null
           agent_email?: string | null
@@ -10055,6 +10068,7 @@ export type Database = {
           delegate_national_id?: string | null
           delegate_phone?: string | null
           description?: string | null
+          documents_submitted?: boolean | null
           email?: string
           environmental_approval_number?: string | null
           environmental_license?: string | null
@@ -10064,6 +10078,7 @@ export type Database = {
           headquarters?: string | null
           id?: string
           ida_license?: string | null
+          identity_verified?: boolean | null
           industrial_registry?: string | null
           is_active?: boolean | null
           is_suspended?: boolean | null
@@ -10075,6 +10090,8 @@ export type Database = {
           logo_url?: string | null
           name?: string
           name_en?: string | null
+          onboarding_completed?: boolean | null
+          onboarding_completed_at?: string | null
           organization_type?: Database["public"]["Enums"]["organization_type"]
           partner_code?: string
           phone?: string
@@ -10093,6 +10110,7 @@ export type Database = {
           suspended_at?: string | null
           suspension_reason?: string | null
           tax_card?: string | null
+          terms_accepted?: boolean | null
           updated_at?: string | null
           vision?: string | null
           wmra_license?: string | null

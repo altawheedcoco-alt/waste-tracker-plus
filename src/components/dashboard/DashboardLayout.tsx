@@ -95,6 +95,7 @@ import GlobalRefreshButton from './GlobalRefreshButton';
 import LiveEventToast from '@/components/notifications/LiveEventToast';
 import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomizer';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
+import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -961,7 +962,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto pb-24 sm:pb-6`}>
             <DashboardBreadcrumb />
             <div className="w-full max-w-full">
-              {children}
+              <OnboardingGuard>
+                {children}
+              </OnboardingGuard>
             </div>
           </main>
 
