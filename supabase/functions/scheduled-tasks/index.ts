@@ -372,6 +372,113 @@ Deno.serve(async (req) => {
         )
       }
 
+      case 'generate-financial-reports': {
+        // توليد التقارير المالية الشهرية تلقائياً لكل جهة
+        console.log('[Scheduled Tasks] Generating monthly financial reports...')
+        
+        const { data: orgs } = await supabase
+          .from('organizations')
+          .select('id, name')
+
+        let reportsGenerated = 0
+        const now = new Date()
+        const periodEnd = new Date(now.getFullYear(), now.getMonth(), 0) // last day of prev month
+        const periodStart = new Date(periodEnd.getFullYear(), periodEnd.getMonth(), 1) // first day of prev month
+
+        for (const org of orgs || []) {
+          // Get posted journal entries for the period
+          const { data: entries } = await supabase
+            .from('erp_journal_entries')
+            .select('id')
+            .eq('organization_id', org.id)
+            .eq('status', 'posted')
+            .gte('entry_date', periodStart.toISOString().split('T')[0])
+            .lte('entry_date', periodEnd.toISOString().split('T')[0])
+
+          if (!entries?.length) continue
+
+          const entryIds = entries.map(e => e.id)
+          const { data: lines } = await supabase
+            .from('erp_journal_lines')
+            .select('*, erp_chart_of_accounts!inner(account_code, account_name, account_type)')
+            .in('journal_entry_id', entryIds)
+
+          if (!lines?.length) continue
+
+          // Build report data
+          const accountMap = new Map()
+          lines.forEach((line: any) => {
+            const acc = line.erp_chart_of_accounts
+            const key = line.account_id
+            const existing = accountMap.get(key) || { name: acc.account_name, type: acc.account_type, debit: 0, credit: 0 }
+            existing.debit += Number(line.debit) || 0
+            existing.credit += Number(line.credit) || 0
+            accountMap.set(key, existing)
+          })
+
+          const revenues: any[] = []
+          const expenses: any[] = []
+          accountMap.forEach((v: any) => {
+            if (v.type === 'revenue') revenues.push({ account_name: v.name, amount: v.credit - v.debit })
+            if (v.type === 'expense') expenses.push({ account_name: v.name, amount: v.debit - v.credit })
+          })
+
+          const reportData = {
+            income_statement: {
+              revenues,
+              expenses,
+              total_revenue: revenues.reduce((s: number, r: any) => s + r.amount, 0),
+              total_expenses: expenses.reduce((s: number, e: any) => s + e.amount, 0),
+              net_income: revenues.reduce((s: number, r: any) => s + r.amount, 0) - expenses.reduce((s: number, e: any) => s + e.amount, 0),
+            },
+            generated_automatically: true,
+            generated_at: new Date().toISOString(),
+          }
+
+          // Save each report type
+          for (const reportType of ['income_statement', 'balance_sheet', 'cash_flow']) {
+            await supabase.from('erp_financial_reports').insert({
+              organization_id: org.id,
+              report_type: reportType,
+              period_start: periodStart.toISOString().split('T')[0],
+              period_end: periodEnd.toISOString().split('T')[0],
+              report_data: reportData,
+            })
+          }
+          reportsGenerated++
+
+          // Notify org members
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('organization_id', org.id)
+            .eq('is_active', true)
+
+          const notifications = (profiles || []).map((p: any) => ({
+            user_id: p.user_id,
+            title: '📊 تقارير مالية شهرية جاهزة',
+            message: `تم توليد التقارير المالية للفترة ${periodStart.toISOString().split('T')[0]} إلى ${periodEnd.toISOString().split('T')[0]}`,
+            type: 'financial_report',
+            is_read: false
+          }))
+
+          if (notifications.length > 0) {
+            await supabase.from('notifications').insert(notifications)
+          }
+        }
+
+        console.log(`[Scheduled Tasks] Generated reports for ${reportsGenerated} organizations`)
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            task: 'generate-financial-reports',
+            organizations_processed: reportsGenerated
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       default:
         return new Response(
           JSON.stringify({ 
@@ -385,7 +492,8 @@ Deno.serve(async (req) => {
               'update-partner-stats',
               'archive-old-data',
               'refresh-materialized-views',
-              'security-audit'
+              'security-audit',
+              'generate-financial-reports'
             ]
           }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
