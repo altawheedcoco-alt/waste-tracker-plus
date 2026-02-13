@@ -26,37 +26,16 @@ export async function verifyPin(pin: string, hash: string): Promise<boolean> {
 const PIN_VERIFIED_KEY = 'pin_verified_session';
 const MAX_ATTEMPTS = 6;
 
-const DEMO_EMAILS = [
-  'demo-generator@irecycle.test',
-  'demo-recycler@irecycle.test',
-  'demo-transporter@irecycle.test',
-  'demo-disposal@irecycle.test',
-  'demo-driver@irecycle.test',
-  'demo-employee@irecycle.test',
-  'demo-admin@irecycle.test',
-];
-
 export function useUserPin() {
   const { toast } = useToast();
   const [pinData, setPinData] = useState<UserPin | null>(null);
   const [loading, setLoading] = useState(true);
   const [pinVerified, setPinVerified] = useState(() => sessionStorage.getItem(PIN_VERIFIED_KEY) === 'true');
 
-  const [isDemoAccount, setIsDemoAccount] = useState(false);
-
   const fetchPin = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setLoading(false); return; }
-
-      // Skip PIN for demo accounts
-      if (DEMO_EMAILS.includes(user.email || '')) {
-        setIsDemoAccount(true);
-        setPinVerified(true);
-        sessionStorage.setItem(PIN_VERIFIED_KEY, 'true');
-        setLoading(false);
-        return;
-      }
 
       const { data, error } = await supabase
         .from('user_pin_codes')
