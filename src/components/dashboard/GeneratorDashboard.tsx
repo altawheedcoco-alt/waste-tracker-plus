@@ -40,6 +40,7 @@ import ComplianceGauge from './generator/ComplianceGauge';
 import DashboardBrief from './generator/DashboardBrief';
 import CreateWorkOrderDialog from '@/components/work-orders/CreateWorkOrderDialog';
 import WorkOrderInbox from '@/components/work-orders/WorkOrderInbox';
+import GeneratorCommandCenter from './generator/GeneratorCommandCenter';
 
 interface ShipmentStats {
   total: number;
@@ -293,6 +294,9 @@ const GeneratorDashboard = () => {
           </p>
         </div>
       </div>
+
+      {/* ★ مركز القيادة */}
+      <GeneratorCommandCenter />
 
       {/* ★ Comprehensive Daily Brief */}
       <DashboardBrief />
