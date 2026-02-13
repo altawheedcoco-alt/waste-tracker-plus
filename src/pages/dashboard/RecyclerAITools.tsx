@@ -6,8 +6,11 @@ import BackButton from '@/components/ui/back-button';
 import RecyclerWasteAnalytics from '@/components/ai/recycler/RecyclerWasteAnalytics';
 import RecyclerDetailedAnalytics from '@/components/ai/recycler/RecyclerDetailedAnalytics';
 import RecyclerPerformanceAdvisor from '@/components/ai/recycler/RecyclerPerformanceAdvisor';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const RecyclerAITools = () => {
+  const { t } = useLanguage();
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 md:p-6">
@@ -22,8 +25,8 @@ const RecyclerAITools = () => {
               <Recycle className="w-6 h-6 text-white" />
             </div>
             <div className="text-right">
-              <h1 className="text-xl md:text-2xl font-bold">أدوات تحليل التدوير</h1>
-              <p className="text-muted-foreground text-sm">تحليلات متقدمة لأداء منشأة التدوير</p>
+              <h1 className="text-xl md:text-2xl font-bold">{t('recyclerAI.title')}</h1>
+              <p className="text-muted-foreground text-sm">{t('recyclerAI.subtitle')}</p>
             </div>
           </div>
         </motion.div>
@@ -32,15 +35,15 @@ const RecyclerAITools = () => {
           <TabsList className="grid grid-cols-3 w-full max-w-2xl">
             <TabsTrigger value="analytics" className="flex items-center gap-2 text-xs md:text-sm">
               <BarChart3 className="w-4 h-4" />
-              <span>إحصائيات المعالجة</span>
+              <span>{t('recyclerAI.processingStats')}</span>
             </TabsTrigger>
             <TabsTrigger value="detailed" className="flex items-center gap-2 text-xs md:text-sm">
               <CalendarDays className="w-4 h-4" />
-              <span>تحليل تفصيلي</span>
+              <span>{t('recyclerAI.detailedAnalysis')}</span>
             </TabsTrigger>
             <TabsTrigger value="advisor" className="flex items-center gap-2 text-xs md:text-sm">
               <Lightbulb className="w-4 h-4" />
-              <span>توصيات الأداء</span>
+              <span>{t('recyclerAI.performanceRecs')}</span>
             </TabsTrigger>
           </TabsList>
 
