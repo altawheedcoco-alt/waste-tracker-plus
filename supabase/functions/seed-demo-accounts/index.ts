@@ -87,6 +87,32 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    // Check if reset mode
+    let body: any = {};
+    try { body = await req.json(); } catch { /* no body */ }
+    
+    if (body?.reset) {
+      // Delete existing demo users (cascades to profiles, user_orgs, roles)
+      const { data: existingUsers } = await supabase.auth.admin.listUsers();
+      const demoEmails = DEMO_ACCOUNTS.map(a => a.email);
+      const demoUsers = existingUsers?.users?.filter(u => demoEmails.includes(u.email || '')) || [];
+      
+      for (const u of demoUsers) {
+        await supabase.auth.admin.deleteUser(u.id);
+      }
+      
+      // Delete demo organizations
+      const demoOrgEmails = DEMO_ACCOUNTS.filter(a => a.orgName).map(a => `${a.orgType}@demo.test`);
+      for (const email of demoOrgEmails) {
+        await supabase.from('organizations').delete().eq('email', email);
+      }
+      
+      return new Response(
+        JSON.stringify({ success: true, deleted: demoUsers.length, message: 'تم حذف الحسابات التجريبية' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const results: any[] = [];
     const orgIds: Record<string, string> = {};
 
