@@ -209,22 +209,18 @@ const TemplateCard = ({
                     </DropdownMenuItem>
                   )}
                   
-                  {template.template_type === 'custom' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => onEdit(template)} className="gap-2">
-                        <Edit className="w-4 h-4" />
-                        تعديل
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => onDelete(template.id)} 
-                        className="gap-2 text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        حذف
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onEdit(template)} className="gap-2">
+                    <Edit className="w-4 h-4" />
+                    تعديل
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => onDelete(template.id)} 
+                    className="gap-2 text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    حذف
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
