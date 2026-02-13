@@ -129,6 +129,10 @@ const CustomerPortal = lazy(() => import("./pages/dashboard/CustomerPortal"));
 const OnboardingReview = lazy(() => import("./pages/dashboard/OnboardingReview"));
 const Stories = lazy(() => import("./pages/dashboard/Stories"));
 const DeliveryDeclarations = lazy(() => import("./pages/dashboard/DeliveryDeclarations"));
+const ERPAccounting = lazy(() => import("./pages/dashboard/erp/ERPAccounting"));
+const ERPInventory = lazy(() => import("./pages/dashboard/erp/ERPInventory"));
+const ERPHR = lazy(() => import("./pages/dashboard/erp/ERPHR"));
+const ERPPurchasingAndSales = lazy(() => import("./pages/dashboard/erp/ERPPurchasingAndSales"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -306,6 +310,10 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/e-invoice" element={<EInvoice />} />
         <Route path="/dashboard/customer-portal" element={<CustomerPortal />} />
         <Route path="/dashboard/onboarding-review" element={<OnboardingReview />} />
+        <Route path="/dashboard/erp/accounting" element={<ERPAccounting />} />
+        <Route path="/dashboard/erp/inventory" element={<ERPInventory />} />
+        <Route path="/dashboard/erp/hr" element={<ERPHR />} />
+        <Route path="/dashboard/erp/purchasing-sales" element={<ERPPurchasingAndSales />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />

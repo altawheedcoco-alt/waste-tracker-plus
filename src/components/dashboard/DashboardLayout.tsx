@@ -55,6 +55,10 @@ import {
   Factory,
   WifiOff,
   FileCheck,
+  Calculator,
+  Wallet,
+  ShoppingCart,
+  Boxes,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -392,6 +396,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Scale, label: 'سجل جهاز التنظيم', path: '/dashboard/regulatory-updates', key: 'regulatory' },
       { icon: ClipboardList, label: 'الخطط التشغيلية', path: '/dashboard/operational-plans', key: 'operational-plans' },
       { icon: Users, label: 'حسابات الشركاء', path: '/dashboard/partner-accounts', badge: sectionBadges['partner-accounts'], key: 'partner-accounts' },
+    ]},
+    // ERP System group
+    { icon: Boxes, label: 'نظام ERP', path: '#', key: 'erp-group', children: [
+      { icon: Calculator, label: 'المحاسبة والمالية', path: '/dashboard/erp/accounting', key: 'erp-accounting' },
+      { icon: Package, label: 'إدارة المخزون', path: '/dashboard/erp/inventory', key: 'erp-inventory' },
+      { icon: Users, label: 'الموارد البشرية', path: '/dashboard/erp/hr', key: 'erp-hr' },
+      { icon: ShoppingCart, label: 'المشتريات والمبيعات', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales' },
     ]},
     // System & Support group
     { icon: Settings, label: 'النظام والدعم', path: '#', key: 'system-support-group', badge: notificationCount, children: [
