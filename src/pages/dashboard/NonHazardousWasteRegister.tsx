@@ -13,11 +13,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, differenceInHours, differenceInDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import BackButton from '@/components/ui/back-button';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import * as XLSX from 'xlsx';
 import {
   Search,
   CalendarIcon,
@@ -37,6 +40,12 @@ import {
   Building2,
   Recycle,
   User,
+  FileSpreadsheet,
+  ShieldCheck,
+  Bell,
+  BarChart3,
+  Timer,
+  AlertTriangle,
 } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 
@@ -184,6 +193,108 @@ const NonHazardousWasteRegister = () => {
     };
   }, [filteredShipments]);
 
+  // Compliance score
+  const complianceData = useMemo(() => {
+    if (!filteredShipments || filteredShipments.length === 0) return { score: 100, issues: [] as string[] };
+    const issues: string[] = [];
+    let compliant = 0;
+    filteredShipments.forEach((s: any) => {
+      let isCompliant = true;
+      if (!s.packaging_method) isCompliant = false;
+      if (!s.driver_id && !s.manual_driver_name) isCompliant = false;
+      if (!s.recycler_id) isCompliant = false;
+      if (isCompliant) compliant++;
+    });
+    const score = Math.round((compliant / filteredShipments.length) * 100);
+    if (score < 100) {
+      const noPack = filteredShipments.filter((s: any) => !s.packaging_method).length;
+      const noDriver = filteredShipments.filter((s: any) => !s.driver_id && !s.manual_driver_name).length;
+      const noRecycler = filteredShipments.filter((s: any) => !s.recycler_id).length;
+      if (noPack > 0) issues.push(`${noPack} شحنة بدون تحديد طريقة التعبئة`);
+      if (noDriver > 0) issues.push(`${noDriver} شحنة بدون سائق معيّن`);
+      if (noRecycler > 0) issues.push(`${noRecycler} شحنة بدون جهة تدوير`);
+    }
+    return { score, issues };
+  }, [filteredShipments]);
+
+  // Overdue shipments
+  const overdueShipments = useMemo(() => {
+    if (!filteredShipments) return [];
+    const now = new Date();
+    return filteredShipments.filter((s: any) => {
+      if (s.status === 'confirmed' || s.status === 'delivered') return false;
+      const created = new Date(s.created_at);
+      return differenceInHours(now, created) > 48;
+    });
+  }, [filteredShipments]);
+
+  // Chart data
+  const wasteTypeChartData = useMemo(() => {
+    if (!filteredShipments) return [];
+    const counts: Record<string, number> = {};
+    filteredShipments.forEach((s: any) => {
+      const type = wasteTypeLabels[s.waste_type] || s.waste_type;
+      counts[type] = (counts[type] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [filteredShipments]);
+
+  const monthlyChartData = useMemo(() => {
+    if (!filteredShipments) return [];
+    const months: Record<string, { name: string; count: number; weight: number }> = {};
+    filteredShipments.forEach((s: any) => {
+      const monthKey = format(new Date(s.created_at), 'yyyy-MM');
+      const monthLabel = format(new Date(s.created_at), 'MMM yyyy', { locale: ar });
+      if (!months[monthKey]) months[monthKey] = { name: monthLabel, count: 0, weight: 0 };
+      months[monthKey].count++;
+      months[monthKey].weight += Number(s.quantity) || 0;
+    });
+    return Object.values(months).sort((a, b) => a.name.localeCompare(b.name));
+  }, [filteredShipments]);
+
+  const statusChartData = useMemo(() => {
+    if (!filteredShipments) return [];
+    const counts: Record<string, number> = {};
+    filteredShipments.forEach((s: any) => {
+      const status = statusLabels[s.status || 'new'] || s.status || 'جديدة';
+      counts[status] = (counts[status] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, value]) => ({ name, value }));
+  }, [filteredShipments]);
+
+  const CHART_COLORS = ['#3b82f6', '#22c55e', '#f97316', '#8b5cf6', '#eab308', '#ef4444', '#06b6d4'];
+
+  // Excel export
+  const handleExportExcel = () => {
+    if (!filteredShipments || filteredShipments.length === 0) {
+      toast.error('لا توجد بيانات للتصدير');
+      return;
+    }
+    const rows = filteredShipments.map((s: any, i: number) => ({
+      '#': i + 1,
+      'رقم الشحنة': s.shipment_number,
+      'التاريخ': format(new Date(s.created_at), 'dd/MM/yyyy HH:mm'),
+      'نوع المخلف': wasteTypeLabels[s.waste_type] || s.waste_type,
+      'الكمية': s.quantity,
+      'الوحدة': s.unit || 'كجم',
+      'التعبئة': packagingLabels[s.packaging_method] || s.packaging_method || '-',
+      'الجهة المولدة': s.generator?.name || '-',
+      'كود المولد': s.generator?.client_code || '-',
+      'الجهة الناقلة': s.transporter?.name || '-',
+      'الجهة المدورة': s.recycler?.name || '-',
+      'السائق': s.driver?.profiles?.full_name || s.manual_driver_name || '-',
+      'لوحة المركبة': s.driver?.vehicle_plate || s.manual_vehicle_plate || '-',
+      'الحالة': statusLabels[s.status || 'new'],
+      'عنوان الاستلام': s.pickup_address || '-',
+      'عنوان التسليم': s.delivery_address || '-',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'سجل المخلفات غير الخطرة');
+    XLSX.writeFile(wb, `سجل-المخلفات-غير-الخطرة-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    toast.success('تم تصدير الملف بنجاح');
+  };
+
   // Request register preparation - now saves to database
   const handleRequestRegister = async () => {
     const result = await createRequest({
@@ -286,6 +397,10 @@ const NonHazardousWasteRegister = () => {
             <Button onClick={handleExportPDF} disabled={isExportingPDF} className="gap-2">
               {isExportingPDF ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               تحميل PDF
+            </Button>
+            <Button onClick={handleExportExcel} variant="outline" className="gap-2">
+              <FileSpreadsheet className="w-4 h-4" />
+              تصدير Excel
             </Button>
           </div>
         </div>
@@ -417,7 +532,171 @@ const NonHazardousWasteRegister = () => {
           </Card>
         </div>
 
-        {/* Filters */}
+        {/* Compliance Indicator */}
+        <Card className="print:hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-primary" />
+              مؤشر الامتثال
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-6">
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">نسبة الامتثال</span>
+                  <span className={cn(
+                    "text-2xl font-bold",
+                    complianceData.score >= 80 ? "text-green-600" :
+                    complianceData.score >= 50 ? "text-amber-600" : "text-destructive"
+                  )}>
+                    {complianceData.score}%
+                  </span>
+                </div>
+                <Progress 
+                  value={complianceData.score} 
+                  className={cn(
+                    "h-3",
+                    complianceData.score >= 80 ? "[&>div]:bg-green-500" :
+                    complianceData.score >= 50 ? "[&>div]:bg-amber-500" : "[&>div]:bg-destructive"
+                  )}
+                />
+                {complianceData.issues.length > 0 && (
+                  <div className="mt-3 space-y-1">
+                    {complianceData.issues.map((issue, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />
+                        {issue}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Overdue Alerts */}
+        {overdueShipments.length > 0 && (
+          <Card className="border-amber-200 dark:border-amber-800 print:hidden">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-amber-600">
+                <Bell className="w-5 h-5" />
+                تنبيهات الشحنات المتأخرة ({overdueShipments.length})
+              </CardTitle>
+              <CardDescription>شحنات تجاوزت 48 ساعة بدون إكمال</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {overdueShipments.slice(0, 10).map((s: any) => {
+                  const days = differenceInDays(new Date(), new Date(s.created_at));
+                  return (
+                    <div key={s.id} className="flex items-center justify-between p-2 rounded-lg bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-800/30">
+                      <div className="flex items-center gap-3">
+                        <Timer className="w-4 h-4 text-amber-600" />
+                        <div>
+                          <span className="font-mono text-sm font-medium">{s.shipment_number}</span>
+                          <span className="text-xs text-muted-foreground mr-2">{s.generator?.name}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-amber-600 border-amber-300">
+                          متأخرة {days} يوم
+                        </Badge>
+                        <Badge className={cn("text-xs", statusColors[s.status || 'new'])}>
+                          {statusLabels[s.status || 'new']}
+                        </Badge>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Charts Section */}
+        {filteredShipments.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 print:hidden">
+            {/* Waste Type Distribution */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  توزيع أنواع المخلفات
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={wasteTypeChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      dataKey="value"
+                      label={({ name, value }) => `${name}: ${value}`}
+                    >
+                      {wasteTypeChartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Status Distribution */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  توزيع الحالات
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={statusChartData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis type="category" dataKey="name" width={70} tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Bar dataKey="value" name="عدد الشحنات" radius={[0, 4, 4, 0]}>
+                      {statusChartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Monthly Trend */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  الاتجاه الشهري
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={monthlyChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" name="عدد الشحنات" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         <Card className="print:hidden">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
