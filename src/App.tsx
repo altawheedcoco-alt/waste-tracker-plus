@@ -138,6 +138,7 @@ const ERPFinancialDashboard = lazy(() => import("./pages/dashboard/erp/ERPFinanc
 const ERPRevenueExpensesAnalysis = lazy(() => import("./pages/dashboard/erp/ERPRevenueExpensesAnalysis"));
 const ERPCogs = lazy(() => import("./pages/dashboard/erp/ERPCogs"));
 const ERPFinancialComparisons = lazy(() => import("./pages/dashboard/erp/ERPFinancialComparisons"));
+const DocumentArchive = lazy(() => import("./pages/dashboard/DocumentArchive"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -324,6 +325,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/erp/revenue-expenses" element={<ERPRevenueExpensesAnalysis />} />
         <Route path="/dashboard/erp/cogs" element={<ERPCogs />} />
         <Route path="/dashboard/erp/financial-comparisons" element={<ERPFinancialComparisons />} />
+        <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />

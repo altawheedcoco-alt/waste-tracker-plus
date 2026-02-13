@@ -60,6 +60,8 @@ import {
   ShoppingCart,
   Boxes,
   GitCompareArrows,
+  FolderOpen,
+  Inbox,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -370,6 +372,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: FileText, label: 'تقارير الشحنات', path: '/dashboard/shipment-reports', key: 'shipment-reports' },
       { icon: ClipboardList, label: 'التقرير المجمع', path: '/dashboard/aggregate-report', key: 'aggregate-report' },
       { icon: BookOpen, label: 'دليل التقارير', path: '/dashboard/reports-guide', key: 'reports-guide' },
+    ]},
+    // Document Archive
+    { icon: FolderOpen, label: 'أرشيف المستندات', path: '#', key: 'doc-archive-group', children: [
+      { icon: FolderOpen, label: 'جميع المستندات', path: '/dashboard/document-archive', key: 'doc-archive-all' },
+      { icon: Inbox, label: 'المستندات الواردة', path: '/dashboard/document-archive?tab=received', key: 'doc-archive-received' },
+      { icon: Send, label: 'المستندات المُرسلة', path: '/dashboard/document-archive?tab=sent', key: 'doc-archive-sent' },
+      { icon: FileText, label: 'المستندات الصادرة', path: '/dashboard/document-archive?tab=issued', key: 'doc-archive-issued' },
     ]},
     // Waste registers group
     { icon: FileSpreadsheet, label: 'سجلات المخلفات', path: '#', key: 'waste-group', children: [
