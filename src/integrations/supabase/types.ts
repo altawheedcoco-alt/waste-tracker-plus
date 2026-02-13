@@ -5716,6 +5716,90 @@ export type Database = {
           },
         ]
       }
+      erp_cogs_records: {
+        Row: {
+          closing_inventory: number
+          cogs: number
+          created_at: string
+          created_by: string | null
+          direct_labor: number
+          generated_automatically: boolean | null
+          gross_profit: number
+          gross_profit_margin: number
+          id: string
+          notes: string | null
+          opening_inventory: number
+          organization_id: string
+          period_end: string
+          period_start: string
+          purchase_freight: number
+          purchases: number
+          revenue: number
+          updated_at: string
+          valuation_method: string
+          wastage: number
+        }
+        Insert: {
+          closing_inventory?: number
+          cogs?: number
+          created_at?: string
+          created_by?: string | null
+          direct_labor?: number
+          generated_automatically?: boolean | null
+          gross_profit?: number
+          gross_profit_margin?: number
+          id?: string
+          notes?: string | null
+          opening_inventory?: number
+          organization_id: string
+          period_end: string
+          period_start: string
+          purchase_freight?: number
+          purchases?: number
+          revenue?: number
+          updated_at?: string
+          valuation_method?: string
+          wastage?: number
+        }
+        Update: {
+          closing_inventory?: number
+          cogs?: number
+          created_at?: string
+          created_by?: string | null
+          direct_labor?: number
+          generated_automatically?: boolean | null
+          gross_profit?: number
+          gross_profit_margin?: number
+          id?: string
+          notes?: string | null
+          opening_inventory?: number
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          purchase_freight?: number
+          purchases?: number
+          revenue?: number
+          updated_at?: string
+          valuation_method?: string
+          wastage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "erp_cogs_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "erp_cogs_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       erp_employees: {
         Row: {
           bank_name: string | null
@@ -5863,6 +5947,7 @@ export type Database = {
           category: string | null
           created_at: string | null
           current_stock: number | null
+          freight_cost: number | null
           id: string
           is_active: boolean | null
           item_code: string
@@ -5872,9 +5957,11 @@ export type Database = {
           notes: string | null
           organization_id: string
           selling_price: number | null
+          total_cost: number | null
           unit: string | null
           unit_cost: number | null
           updated_at: string | null
+          valuation_method: string | null
           warehouse_id: string | null
         }
         Insert: {
@@ -5882,6 +5969,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           current_stock?: number | null
+          freight_cost?: number | null
           id?: string
           is_active?: boolean | null
           item_code: string
@@ -5891,9 +5979,11 @@ export type Database = {
           notes?: string | null
           organization_id: string
           selling_price?: number | null
+          total_cost?: number | null
           unit?: string | null
           unit_cost?: number | null
           updated_at?: string | null
+          valuation_method?: string | null
           warehouse_id?: string | null
         }
         Update: {
@@ -5901,6 +5991,7 @@ export type Database = {
           category?: string | null
           created_at?: string | null
           current_stock?: number | null
+          freight_cost?: number | null
           id?: string
           is_active?: boolean | null
           item_code?: string
@@ -5910,9 +6001,11 @@ export type Database = {
           notes?: string | null
           organization_id?: string
           selling_price?: number | null
+          total_cost?: number | null
           unit?: string | null
           unit_cost?: number | null
           updated_at?: string | null
+          valuation_method?: string | null
           warehouse_id?: string | null
         }
         Relationships: [
@@ -6713,6 +6806,7 @@ export type Database = {
         Row: {
           created_at: string | null
           created_by: string | null
+          freight_cost: number | null
           id: string
           item_id: string
           movement_type: string
@@ -6721,12 +6815,14 @@ export type Database = {
           quantity: number
           reference_id: string | null
           reference_type: string | null
+          total_cost: number | null
           unit_cost: number | null
           warehouse_id: string | null
         }
         Insert: {
           created_at?: string | null
           created_by?: string | null
+          freight_cost?: number | null
           id?: string
           item_id: string
           movement_type: string
@@ -6735,12 +6831,14 @@ export type Database = {
           quantity: number
           reference_id?: string | null
           reference_type?: string | null
+          total_cost?: number | null
           unit_cost?: number | null
           warehouse_id?: string | null
         }
         Update: {
           created_at?: string | null
           created_by?: string | null
+          freight_cost?: number | null
           id?: string
           item_id?: string
           movement_type?: string
@@ -6749,6 +6847,7 @@ export type Database = {
           quantity?: number
           reference_id?: string | null
           reference_type?: string | null
+          total_cost?: number | null
           unit_cost?: number | null
           warehouse_id?: string | null
         }

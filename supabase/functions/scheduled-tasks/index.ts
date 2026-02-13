@@ -479,6 +479,109 @@ Deno.serve(async (req) => {
         )
       }
 
+      case 'calculate-monthly-cogs': {
+        // حساب تكلفة البضاعة المباعة شهرياً لكل جهة
+        console.log('[Scheduled Tasks] Calculating monthly COGS...')
+        
+        const { data: orgs } = await supabase
+          .from('organizations')
+          .select('id')
+
+        let processed = 0
+        const now = new Date()
+        const periodEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+        const periodStart = new Date(periodEnd.getFullYear(), periodEnd.getMonth(), 1)
+
+        for (const org of orgs || []) {
+          // Get stock movements for the period
+          const { data: movements } = await supabase
+            .from('erp_stock_movements')
+            .select('movement_type, quantity, unit_cost')
+            .eq('organization_id', org.id)
+            .gte('created_at', periodStart.toISOString())
+            .lte('created_at', periodEnd.toISOString() + 'T23:59:59')
+
+          if (!movements?.length) continue
+
+          const inbound = movements.filter(m => m.movement_type === 'in' || m.movement_type === 'purchase')
+          const outbound = movements.filter(m => m.movement_type === 'out' || m.movement_type === 'sale')
+
+          const purchases = inbound.reduce((s, m) => s + (Number(m.quantity) || 0) * (Number(m.unit_cost) || 0), 0)
+          const totalInQty = inbound.reduce((s, m) => s + (Number(m.quantity) || 0), 0)
+          const avgCost = totalInQty > 0 ? purchases / totalInQty : 0
+          const soldQty = outbound.reduce((s, m) => s + (Number(m.quantity) || 0), 0)
+          const cogs = soldQty * avgCost
+
+          // Get revenue
+          const { data: entries } = await supabase
+            .from('erp_journal_entries')
+            .select('id')
+            .eq('organization_id', org.id)
+            .eq('status', 'posted')
+            .gte('entry_date', periodStart.toISOString().split('T')[0])
+            .lte('entry_date', periodEnd.toISOString().split('T')[0])
+
+          let revenue = 0
+          if (entries?.length) {
+            const { data: lines } = await supabase
+              .from('erp_journal_lines')
+              .select('debit, credit, erp_chart_of_accounts!inner(account_type)')
+              .in('journal_entry_id', entries.map(e => e.id))
+            revenue = (lines || []).reduce((s: number, l: any) => {
+              if (l.erp_chart_of_accounts.account_type === 'revenue')
+                return s + ((Number(l.credit) || 0) - (Number(l.debit) || 0))
+              return s
+            }, 0)
+          }
+
+          const grossProfit = revenue - cogs
+          const margin = revenue > 0 ? (grossProfit / revenue * 100) : 0
+
+          await supabase.from('erp_cogs_records').insert({
+            organization_id: org.id,
+            period_start: periodStart.toISOString().split('T')[0],
+            period_end: periodEnd.toISOString().split('T')[0],
+            opening_inventory: 0,
+            purchases,
+            closing_inventory: 0,
+            cogs,
+            revenue,
+            gross_profit: grossProfit,
+            gross_profit_margin: margin,
+            valuation_method: 'weighted_average',
+            generated_automatically: true,
+          })
+          processed++
+
+          // Alert if low margin
+          if (margin < 15 && margin > 0) {
+            const { data: profiles } = await supabase
+              .from('profiles')
+              .select('user_id')
+              .eq('organization_id', org.id)
+              .eq('is_active', true)
+
+            const notifications = (profiles || []).map((p: any) => ({
+              user_id: p.user_id,
+              title: '⚠️ تنبيه: هامش ربح منخفض',
+              message: `هامش الربح الإجمالي للشهر الماضي ${margin.toFixed(1)}% وهو أقل من 15%. يرجى مراجعة الأسعار.`,
+              type: 'low_margin_alert',
+              is_read: false
+            }))
+            if (notifications.length > 0) {
+              await supabase.from('notifications').insert(notifications)
+            }
+          }
+        }
+
+        console.log(`[Scheduled Tasks] COGS calculated for ${processed} organizations`)
+
+        return new Response(
+          JSON.stringify({ success: true, task: 'calculate-monthly-cogs', processed }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
       default:
         return new Response(
           JSON.stringify({ 
@@ -493,7 +596,8 @@ Deno.serve(async (req) => {
               'archive-old-data',
               'refresh-materialized-views',
               'security-audit',
-              'generate-financial-reports'
+              'generate-financial-reports',
+              'calculate-monthly-cogs'
             ]
           }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

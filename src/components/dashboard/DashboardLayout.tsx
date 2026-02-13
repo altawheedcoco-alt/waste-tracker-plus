@@ -405,6 +405,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: ShoppingCart, label: 'المشتريات والمبيعات', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales' },
       { icon: BarChart3, label: 'التقارير المالية', path: '/dashboard/erp/financial-dashboard', key: 'erp-financial-dashboard' },
       { icon: Activity, label: 'تحليل الإيرادات والمصروفات', path: '/dashboard/erp/revenue-expenses', key: 'erp-revenue-expenses' },
+      { icon: Banknote, label: 'تكلفة البضاعة المباعة (COGS)', path: '/dashboard/erp/cogs', key: 'erp-cogs' },
     ]},
     // System & Support group
     { icon: Settings, label: 'النظام والدعم', path: '#', key: 'system-support-group', badge: notificationCount, children: [
