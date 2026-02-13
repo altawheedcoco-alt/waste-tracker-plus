@@ -14,7 +14,11 @@ export const useAutoRefresh = ({ intervalMs = 15000, enabled = true }: UseAutoRe
 
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries();
+    try {
+      await queryClient.refetchQueries({ type: 'active' });
+    } catch (e) {
+      console.error('Refresh error:', e);
+    }
     setLastRefresh(new Date());
     setTimeout(() => setIsRefreshing(false), 800);
   }, [queryClient]);
@@ -23,8 +27,10 @@ export const useAutoRefresh = ({ intervalMs = 15000, enabled = true }: UseAutoRe
   useEffect(() => {
     if (!enabled) return;
 
-    intervalRef.current = setInterval(() => {
-      queryClient.invalidateQueries();
+    intervalRef.current = setInterval(async () => {
+      try {
+        await queryClient.refetchQueries({ type: 'active' });
+      } catch (e) { /* silent */ }
       setLastRefresh(new Date());
     }, intervalMs);
 
