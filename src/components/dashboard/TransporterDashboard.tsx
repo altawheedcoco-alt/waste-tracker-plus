@@ -38,6 +38,7 @@ import TransporterPerformanceCharts from './transporter/TransporterPerformanceCh
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
+import TransporterCommandCenter from './transporter/TransporterCommandCenter';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load heavy tab content
@@ -110,6 +111,8 @@ const TransporterDashboard = () => {
     <div className="space-y-4 sm:space-y-6">
       <StoryCircles />
       <TransporterHeader organizationName={organization?.name || ''} />
+
+      <TransporterCommandCenter />
 
       <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
         <DailyOperationsSummary />

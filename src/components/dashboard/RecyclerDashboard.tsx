@@ -33,6 +33,7 @@ import VehicleComplianceManager from '@/components/compliance/VehicleComplianceM
 import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import RecyclerCommandCenter from './recycler/RecyclerCommandCenter';
 
 interface RecentShipment {
   id: string;
@@ -216,6 +217,8 @@ const RecyclerDashboard = () => {
 
       {/* Facility Capacity - from disposal */}
       {facility && <FacilityCapacityCard facility={facility} />}
+
+      <RecyclerCommandCenter />
 
       <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
 
