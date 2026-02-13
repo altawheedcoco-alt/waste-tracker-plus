@@ -26,19 +26,19 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
         <div className="space-y-3 text-right">
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
             <span className="font-bold text-emerald-600">
-              {(financials?.totalRevenue || 0).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}
+              {(financials?.totalRevenue || 0).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}
             </span>
             <span className="text-sm">إجمالي الإيرادات</span>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
             <span className="font-bold text-amber-600">
-              {(financials?.pendingPayments || 0).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}
+              {(financials?.pendingPayments || 0).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}
             </span>
             <span className="text-sm">مدفوعات معلقة</span>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-primary/5">
             <span className="font-bold text-primary">
-              {((financials?.totalRevenue || 0) - (financials?.pendingPayments || 0)).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}
+              {((financials?.totalRevenue || 0) - (financials?.pendingPayments || 0)).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}
             </span>
             <span className="text-sm font-medium">صافي المحصّل</span>
           </div>
@@ -56,7 +56,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
       defaultOpen: true,
       content: (
         <div className="space-y-2 text-right text-sm text-muted-foreground">
-          <p>المبلغ المعلق: <span className="font-bold text-foreground">{(financials?.pendingPayments || 0).toLocaleString('ar-SA')} {financials?.currency || 'SAR'}</span></p>
+          <p>المبلغ المعلق: <span className="font-bold text-foreground">{(financials?.pendingPayments || 0).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}</span></p>
           <p>هذه المدفوعات تحتاج متابعة وتحصيل من الشركاء.</p>
         </div>
       ),
@@ -121,8 +121,8 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
   const cards = [
     {
       title: 'الإيرادات',
-      value: `${(financials?.totalRevenue || 0).toLocaleString('ar-SA')}`,
-      suffix: financials?.currency || 'SAR',
+      value: `${(financials?.totalRevenue || 0).toLocaleString('ar-EG')}`,
+      suffix: financials?.currency || 'ج.م',
       icon: DollarSign,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-500/10',
@@ -130,8 +130,8 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
     },
     {
       title: 'مدفوعات معلقة',
-      value: `${(financials?.pendingPayments || 0).toLocaleString('ar-SA')}`,
-      suffix: financials?.currency || 'SAR',
+      value: `${(financials?.pendingPayments || 0).toLocaleString('ar-EG')}`,
+      suffix: financials?.currency || 'ج.م',
       icon: Clock,
       color: 'text-amber-600',
       bgColor: 'bg-amber-500/10',

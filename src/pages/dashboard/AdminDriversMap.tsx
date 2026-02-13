@@ -535,7 +535,7 @@ const AdminDriversMap = () => {
                         </div>
                         <div className="flex items-center gap-2 justify-end">
                           <span className="text-sm">
-                            {selectedDriver.last_update && new Date(selectedDriver.last_update).toLocaleTimeString('ar-SA')}
+                            {selectedDriver.last_update && new Date(selectedDriver.last_update).toLocaleTimeString('ar-EG')}
                           </span>
                           <Clock className="w-4 h-4 text-muted-foreground" />
                         </div>

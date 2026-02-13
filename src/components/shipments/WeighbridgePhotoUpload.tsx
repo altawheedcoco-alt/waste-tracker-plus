@@ -134,7 +134,7 @@ const WeighbridgePhotoUpload = ({
           <div className="absolute bottom-0 left-0 right-0 bg-background/80 text-foreground p-2 text-xs">
             <div className="flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>تم الرفع: {metadata?.timestamp ? new Date(metadata.timestamp).toLocaleString('ar-SA') : ''}</span>
+              <span>تم الرفع: {metadata?.timestamp ? new Date(metadata.timestamp).toLocaleString('ar-EG') : ''}</span>
             </div>
             {metadata?.latitude && (
               <span>📍 {metadata.latitude.toFixed(5)}, {metadata.longitude?.toFixed(5)}</span>

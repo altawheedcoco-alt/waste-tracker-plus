@@ -363,7 +363,7 @@ const AdvancedAppearanceSettings = () => {
                       <td className="p-3 text-sm">SHP-2026-001</td>
                       <td className="p-3"><Badge className="bg-primary text-primary-foreground">مكتمل</Badge></td>
                       <td className="p-3 text-muted-foreground text-sm">2026/02/08</td>
-                      <td className="p-3 font-bold text-primary">5,000 ر.س</td>
+                      <td className="p-3 font-bold text-primary">5,000 ج.م</td>
                     </tr>
                     <tr className="border-t bg-muted/30 hover:bg-muted/50 transition-colors">
                       <td className="p-3 text-sm">SHP-2026-002</td>

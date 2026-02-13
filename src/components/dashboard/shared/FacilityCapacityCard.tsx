@@ -44,7 +44,7 @@ const FacilityCapacityCard = ({ facility }: FacilityCapacityCardProps) => {
   const metrics = [
     { label: 'السعة الكلية', value: facility.total_capacity_tons, unit: 'طن', icon: '📦' },
     { label: 'السعة اليومية', value: facility.daily_capacity_tons, unit: 'طن/يوم', icon: '📊' },
-    { label: 'سعر الطن', value: facility.price_per_ton, unit: facility.currency || 'ر.س', icon: '💰' },
+    { label: 'سعر الطن', value: facility.price_per_ton, unit: facility.currency || 'ج.م', icon: '💰' },
     { label: 'التقييم', value: facility.eeaa_rating, unit: '', icon: '⭐' },
   ];
 

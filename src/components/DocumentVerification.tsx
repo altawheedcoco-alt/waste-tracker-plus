@@ -199,7 +199,7 @@ const DocumentVerification = () => {
 
                       {result.verifiedAt && (
                         <p className="text-xs text-green-500 mt-3">
-                          تم التحقق في: {new Date(result.verifiedAt).toLocaleString('ar-SA')}
+                          تم التحقق في: {new Date(result.verifiedAt).toLocaleString('ar-EG')}
                         </p>
                       )}
                     </div>

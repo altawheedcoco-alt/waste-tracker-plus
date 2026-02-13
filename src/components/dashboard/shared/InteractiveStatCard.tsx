@@ -162,7 +162,7 @@ const InteractiveStatCard = ({
           icon={Icon}
           iconColor={color}
           iconBgColor={bgColor}
-          summaryValue={typeof value === 'number' ? value.toLocaleString('ar-SA') : value}
+          summaryValue={typeof value === 'number' ? value.toLocaleString('ar-EG') : value}
           summaryLabel={title}
           sections={detailSections!}
         />

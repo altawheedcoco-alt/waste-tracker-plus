@@ -55,7 +55,7 @@ async function fetchFinancials(organizationId: string): Promise<TransporterFinan
     totalRevenue,
     pendingPayments,
     totalDeposits,
-    currency: 'SAR',
+    currency: 'ج.م',
   };
 }
 

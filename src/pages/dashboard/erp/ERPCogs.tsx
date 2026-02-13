@@ -230,12 +230,12 @@ const ERPCogs = () => {
     onError: (e: any) => toast.error(e.message),
   });
 
-  const fmt = (v: number) => v.toLocaleString('ar-SA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const fmt = (v: number) => v.toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   // Historical trend data
   const trendData = useMemo(() =>
     [...cogsRecords].reverse().map(r => ({
-      period: new Date(r.period_end).toLocaleDateString('ar-SA', { month: 'short', year: '2-digit' }),
+      period: new Date(r.period_end).toLocaleDateString('ar-EG', { month: 'short', year: '2-digit' }),
       'تكلفة البضاعة': r.cogs,
       'الإيرادات': r.revenue,
       'مجمل الربح': r.gross_profit,
@@ -312,18 +312,18 @@ const ERPCogs = () => {
                     <CardContent className="p-4 space-y-2 text-sm text-right">
                       <h4 className="font-bold mb-2">نتيجة الحساب التلقائي:</h4>
                       <div className="space-y-1">
-                        <div className="flex justify-between"><span>المشتريات:</span><span className="font-mono">{fmt(calculatedCogs.purchases)} ر.س</span></div>
-                        <div className="flex justify-between"><span>+ الشحن والجمارك:</span><span className="font-mono">{fmt(calcForm.purchase_freight)} ر.س</span></div>
-                        <div className="flex justify-between"><span>+ العمالة المباشرة:</span><span className="font-mono">{fmt(calcForm.direct_labor)} ر.س</span></div>
-                        <div className="flex justify-between"><span>+ الفاقد:</span><span className="font-mono">{fmt(calcForm.wastage)} ر.س</span></div>
+                        <div className="flex justify-between"><span>المشتريات:</span><span className="font-mono">{fmt(calculatedCogs.purchases)} ج.م</span></div>
+                        <div className="flex justify-between"><span>+ الشحن والجمارك:</span><span className="font-mono">{fmt(calcForm.purchase_freight)} ج.م</span></div>
+                        <div className="flex justify-between"><span>+ العمالة المباشرة:</span><span className="font-mono">{fmt(calcForm.direct_labor)} ج.م</span></div>
+                        <div className="flex justify-between"><span>+ الفاقد:</span><span className="font-mono">{fmt(calcForm.wastage)} ج.م</span></div>
                         <hr className="my-2" />
-                        <div className="flex justify-between font-bold text-base"><span>= تكلفة البضاعة المباعة (COGS):</span><span className="font-mono text-destructive">{fmt(calculatedCogs.cogs)} ر.س</span></div>
+                        <div className="flex justify-between font-bold text-base"><span>= تكلفة البضاعة المباعة (COGS):</span><span className="font-mono text-destructive">{fmt(calculatedCogs.cogs)} ج.م</span></div>
                         <hr className="my-2" />
-                        <div className="flex justify-between"><span>إيرادات الفترة:</span><span className="font-mono text-green-600">{fmt(periodRevenue)} ر.س</span></div>
+                        <div className="flex justify-between"><span>إيرادات الفترة:</span><span className="font-mono text-green-600">{fmt(periodRevenue)} ج.م</span></div>
                         <div className="flex justify-between font-bold">
                           <span>مجمل الربح:</span>
                           <span className={`font-mono ${calculatedCogs.grossProfit >= 0 ? 'text-green-600' : 'text-destructive'}`}>
-                            {fmt(calculatedCogs.grossProfit)} ر.س ({calculatedCogs.grossProfitMargin.toFixed(1)}%)
+                            {fmt(calculatedCogs.grossProfit)} ج.م ({calculatedCogs.grossProfitMargin.toFixed(1)}%)
                           </span>
                         </div>
                       </div>
@@ -368,9 +368,9 @@ const ERPCogs = () => {
         {/* KPI Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'قيمة المخزون الحالي', value: `${fmt(inventoryItems.reduce((s, i) => s + (i.current_stock || 0) * (i.unit_cost || 0), 0))} ر.س`, icon: Boxes, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600' },
-            { label: 'COGS (آخر فترة)', value: cogsRecords[0] ? `${fmt(cogsRecords[0].cogs)} ر.س` : '-', icon: Calculator, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600' },
-            { label: 'مجمل الربح', value: cogsRecords[0] ? `${fmt(cogsRecords[0].gross_profit)} ر.س` : '-', icon: TrendingUp, bg: 'bg-green-100 dark:bg-green-900/30', color: 'text-green-600' },
+            { label: 'قيمة المخزون الحالي', value: `${fmt(inventoryItems.reduce((s, i) => s + (i.current_stock || 0) * (i.unit_cost || 0), 0))} ج.م`, icon: Boxes, bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600' },
+            { label: 'COGS (آخر فترة)', value: cogsRecords[0] ? `${fmt(cogsRecords[0].cogs)} ج.م` : '-', icon: Calculator, bg: 'bg-red-100 dark:bg-red-900/30', color: 'text-red-600' },
+            { label: 'مجمل الربح', value: cogsRecords[0] ? `${fmt(cogsRecords[0].gross_profit)} ج.م` : '-', icon: TrendingUp, bg: 'bg-green-100 dark:bg-green-900/30', color: 'text-green-600' },
             { label: 'هامش الربح الإجمالي', value: cogsRecords[0] ? `${Number(cogsRecords[0].gross_profit_margin).toFixed(1)}%` : '-', icon: Target, bg: 'bg-purple-100 dark:bg-purple-900/30', color: 'text-purple-600' },
           ].map(kpi => (
             <Card key={kpi.label}>
@@ -442,7 +442,7 @@ const ERPCogs = () => {
                           <Pie data={calculatedCogs.breakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} innerRadius={55} paddingAngle={3}>
                             {calculatedCogs.breakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                           </Pie>
-                          <Tooltip formatter={(v: number) => `${fmt(v)} ر.س`} />
+                          <Tooltip formatter={(v: number) => `${fmt(v)} ج.م`} />
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
@@ -456,17 +456,17 @@ const ERPCogs = () => {
                 <CardContent className="space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="font-mono font-bold text-green-600">{fmt(periodRevenue)} ر.س</span>
+                      <span className="font-mono font-bold text-green-600">{fmt(periodRevenue)} ج.م</span>
                       <span>الإيرادات</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
-                      <span className="font-mono font-bold text-destructive">- {fmt(calculatedCogs.cogs)} ر.س</span>
+                      <span className="font-mono font-bold text-destructive">- {fmt(calculatedCogs.cogs)} ج.م</span>
                       <span>تكلفة البضاعة المباعة</span>
                     </div>
                     <hr />
                     <div className="flex justify-between items-center text-base font-bold">
                       <span className={`font-mono ${calculatedCogs.grossProfit >= 0 ? 'text-green-600' : 'text-destructive'}`}>
-                        = {fmt(calculatedCogs.grossProfit)} ر.س
+                        = {fmt(calculatedCogs.grossProfit)} ج.م
                       </span>
                       <span>مجمل الربح (Gross Profit)</span>
                     </div>
@@ -515,8 +515,8 @@ const ERPCogs = () => {
                       <TableRow key={i} className={item.lowMargin ? 'bg-destructive/5' : ''}>
                         <TableCell className="text-right font-medium">{item.name}</TableCell>
                         <TableCell className="text-right font-mono text-xs">{item.code}</TableCell>
-                        <TableCell className="text-left">{fmt(item.cost)} ر.س</TableCell>
-                        <TableCell className="text-left">{fmt(item.price)} ر.س</TableCell>
+                        <TableCell className="text-left">{fmt(item.cost)} ج.م</TableCell>
+                        <TableCell className="text-left">{fmt(item.price)} ج.م</TableCell>
                         <TableCell className="text-center">
                           <Badge variant={item.margin >= 30 ? 'default' : item.margin >= marginThreshold ? 'secondary' : 'destructive'}>
                             {item.margin.toFixed(1)}%
@@ -583,7 +583,7 @@ const ERPCogs = () => {
                     ) : cogsRecords.map((r: any) => (
                       <TableRow key={r.id}>
                         <TableCell className="text-right text-xs">
-                          {new Date(r.period_start).toLocaleDateString('ar-SA')} - {new Date(r.period_end).toLocaleDateString('ar-SA')}
+                          {new Date(r.period_start).toLocaleDateString('ar-EG')} - {new Date(r.period_end).toLocaleDateString('ar-EG')}
                         </TableCell>
                         <TableCell className="text-left">{fmt(r.purchases)}</TableCell>
                         <TableCell className="text-left text-destructive font-medium">{fmt(r.cogs)}</TableCell>

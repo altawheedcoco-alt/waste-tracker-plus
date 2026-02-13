@@ -132,7 +132,7 @@ const PartnerProfitabilityPanel = () => {
         <div className="flex items-center justify-between">
           <div className="text-left">
             <span className={cn('text-lg font-bold', totalProfit >= 0 ? 'text-emerald-600' : 'text-red-600')}>
-              {totalProfit.toLocaleString('ar-SA')} ر.س
+              {totalProfit.toLocaleString('ar-EG')} ج.م
             </span>
             <p className="text-xs text-muted-foreground">إجمالي الربح</p>
           </div>

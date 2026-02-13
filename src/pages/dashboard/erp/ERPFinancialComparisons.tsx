@@ -37,8 +37,8 @@ const getMonthRange = (year: number, month: number) => {
   return {
     start: start.toISOString().split('T')[0],
     end: end.toISOString().split('T')[0],
-    label: start.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' }),
-    shortLabel: start.toLocaleDateString('ar-SA', { month: 'short' }),
+    label: start.toLocaleDateString('ar-EG', { month: 'long', year: 'numeric' }),
+    shortLabel: start.toLocaleDateString('ar-EG', { month: 'short' }),
   };
 };
 
@@ -131,7 +131,7 @@ const ERPFinancialComparisons = () => {
 
   const calcChange = (curr: number, prev: number) => prev === 0 ? 0 : ((curr - prev) / Math.abs(prev)) * 100;
 
-  const fmt = (v: number) => v.toLocaleString('ar-SA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const fmt = (v: number) => v.toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const fmtPct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`;
 
   // MoM comparison table data
@@ -448,8 +448,8 @@ const ERPFinancialComparisons = () => {
               <CardContent>
                 <ComparisonTable
                   rows={yoyRows}
-                  currentLabel={`${new Date().toLocaleDateString('ar-SA', { month: 'long' })} ${currentYear}`}
-                  previousLabel={`${new Date().toLocaleDateString('ar-SA', { month: 'long' })} ${currentYear - 1}`}
+                  currentLabel={`${new Date().toLocaleDateString('ar-EG', { month: 'long' })} ${currentYear}`}
+                  previousLabel={`${new Date().toLocaleDateString('ar-EG', { month: 'long' })} ${currentYear - 1}`}
                 />
               </CardContent>
             </Card>

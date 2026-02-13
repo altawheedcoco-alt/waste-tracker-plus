@@ -37,7 +37,7 @@ const getPeriodDates = (period: string) => {
     case 'current-year': start = new Date(now.getFullYear(), 0, 1); break;
     default: start = new Date(now.getFullYear(), now.getMonth(), 1);
   }
-  return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0], label: `${start.toLocaleDateString('ar-SA')} - ${end.toLocaleDateString('ar-SA')}` };
+  return { start: start.toISOString().split('T')[0], end: end.toISOString().split('T')[0], label: `${start.toLocaleDateString('ar-EG')} - ${end.toLocaleDateString('ar-EG')}` };
 };
 
 const getMonthlyPeriods = (count: number) => {
@@ -49,7 +49,7 @@ const getMonthlyPeriods = (count: number) => {
     periods.push({
       start: start.toISOString().split('T')[0],
       end: end.toISOString().split('T')[0],
-      label: start.toLocaleDateString('ar-SA', { month: 'short', year: 'numeric' }),
+      label: start.toLocaleDateString('ar-EG', { month: 'short', year: 'numeric' }),
       monthKey: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`,
     });
   }
@@ -268,7 +268,7 @@ const ERPRevenueExpensesAnalysis = () => {
     };
   }, [journalData, prevJournalData, customersCount, dates, monthlyPeriods, budgetThreshold]);
 
-  const fmt = (v: number) => v.toLocaleString('ar-SA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const fmt = (v: number) => v.toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const fmtPct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -701,9 +701,9 @@ const ERPRevenueExpensesAnalysis = () => {
                 ) : drilldownLines.map((line: any, i: number) => (
                   <TableRow key={i}>
                     <TableCell className="font-mono text-xs">{line.entry?.number || '-'}</TableCell>
-                    <TableCell>{line.entry?.date ? new Date(line.entry.date).toLocaleDateString('ar-SA') : '-'}</TableCell>
+                    <TableCell>{line.entry?.date ? new Date(line.entry.date).toLocaleDateString('ar-EG') : '-'}</TableCell>
                     <TableCell>{line.entry?.desc || line.description || '-'}</TableCell>
-                    <TableCell className="text-left">{Number(line.debit) > 0 ? `${fmt(line.debit)} ر.س` : '-'}</TableCell>
+                    <TableCell className="text-left">{Number(line.debit) > 0 ? `${fmt(line.debit)} ج.م` : '-'}</TableCell>
                     <TableCell className="text-left">{Number(line.credit) > 0 ? `${fmt(line.credit)} ر.س` : '-'}</TableCell>
                   </TableRow>
                 ))}
