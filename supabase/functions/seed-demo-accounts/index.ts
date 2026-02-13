@@ -230,12 +230,16 @@ Deno.serve(async (req) => {
         orgId = orgIds['transporter'] || null; // admin needs an org too
       }
 
-      // Update profile
-      await supabase.from('profiles').update({
+      // Create profile (upsert since there's no auto-create trigger)
+      await supabase.from('profiles').upsert({
+        id: userId,
+        user_id: userId,
         full_name: account.fullName,
+        email: account.email,
         organization_id: orgId,
         phone: account.phone,
-      }).eq('user_id', userId);
+        is_active: true,
+      }, { onConflict: 'id' });
 
       // Assign role
       const roleToAssign = account.role as any;
