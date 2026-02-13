@@ -73,7 +73,7 @@ const DashboardBrief = () => {
     staleTime: 1000 * 60 * 3,
   });
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return (
       <Card className="animate-pulse">
         <CardContent className="p-6 h-48" />
@@ -81,7 +81,7 @@ const DashboardBrief = () => {
     );
   }
 
-  const d = data!;
+  const d = data;
   const complianceColor = d.complianceRate >= 80 ? 'text-emerald-600' : d.complianceRate >= 50 ? 'text-amber-500' : 'text-red-500';
 
   return (
