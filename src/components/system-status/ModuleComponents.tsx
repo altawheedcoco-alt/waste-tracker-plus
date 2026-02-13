@@ -1,14 +1,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import {
   CheckCircle2,
   Clock,
   Target,
   XCircle,
   ThumbsUp,
+  Wrench,
 } from 'lucide-react';
 import { SystemModule, FeatureStatus } from './types';
+import { triggerAIChat } from '@/lib/aiChatBus';
+import { toast } from 'sonner';
 
 interface ModuleOverviewCardProps {
   module: SystemModule;
@@ -42,7 +46,15 @@ export const getPriorityVariant = (priority: string) => {
 
 export const ModuleOverviewCard = ({ module }: ModuleOverviewCardProps) => {
   const ModuleIcon = module.icon;
+  const nonCompleted = module.features.filter(f => f.status !== 'completed');
   
+  const handleDevelop = () => {
+    const features = nonCompleted.map(f => f.name).join('، ');
+    const message = `طور الميزات التالية في وحدة "${module.name}": ${features}. حسّنها لتكون جاهزة للاستخدام الفعلي.`;
+    triggerAIChat(message);
+    toast.success(`🚀 جارٍ تطوير: ${module.name}`);
+  };
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
@@ -62,13 +74,19 @@ export const ModuleOverviewCard = ({ module }: ModuleOverviewCardProps) => {
           <span className="font-semibold text-primary">{module.overallProgress}%</span>
         </div>
         <Progress value={module.overallProgress} className="h-2" />
-        <div className="flex gap-2 mt-3 text-xs">
+        <div className="flex gap-2 mt-3 text-xs items-center">
           <Badge variant="outline" className="bg-green-500/10 text-green-700">
             {module.features.filter(f => f.status === 'completed').length} مكتمل
           </Badge>
           <Badge variant="outline" className="bg-yellow-500/10 text-yellow-700">
             {module.features.filter(f => f.status === 'in_progress').length} قيد العمل
           </Badge>
+          {nonCompleted.length > 0 && (
+            <Button size="sm" variant="outline" className="gap-1 text-[10px] h-6 ms-auto border-primary/30 text-primary" onClick={handleDevelop}>
+              <Wrench className="w-3 h-3" />
+              طوّر
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

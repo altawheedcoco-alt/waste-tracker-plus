@@ -38,6 +38,7 @@ import {
   Brain,
   Radio,
   Building2,
+  Wrench,
 } from 'lucide-react';
 import EngineerVisionSection from '@/components/system-status/EngineerVisionSection';
 import BackButton from '@/components/ui/back-button';
@@ -49,6 +50,8 @@ import { ModuleOverviewCard, StrengthsList, getStatusInfo, getPriorityVariant } 
 import { LiveStatsGrid, OverallProgressCard } from '@/components/system-status/StatsComponents';
 import { IntegrationCard, IntegrationDetailView, IntegrationStatsGrid } from '@/components/system-status/IntegrationsComponents';
 import { OrganizationsHealthTab } from '@/components/system-status/OrganizationsHealthTab';
+import { triggerAIChat } from '@/lib/aiChatBus';
+import { toast } from 'sonner';
 
 // Calculate overall system progress
 const calculateOverallProgress = () => {
@@ -66,6 +69,12 @@ const SystemStatus = () => {
   const inProgressFeatures = systemModulesData.flatMap(m => m.features.filter(f => f.status === 'in_progress'));
   const plannedFeatures = systemModulesData.flatMap(m => m.features.filter(f => f.status === 'planned'));
   const issueFeatures = systemModulesData.flatMap(m => m.features.filter(f => f.issues && f.issues.length > 0));
+
+  const handleDevelop = (featureName: string, featureDescription: string, moduleName: string) => {
+    const message = `طور الميزة التالية في نظام "${moduleName}": "${featureName}" - ${featureDescription}. قم بتحسينها وإضافة التفاصيل اللازمة لتكون جاهزة للاستخدام الفعلي في الناقل والمولد والمدور.`;
+    triggerAIChat(message);
+    toast.success(`🚀 جارٍ تطوير: ${featureName}`);
+  };
 
   return (
     <motion.div
@@ -295,6 +304,15 @@ const SystemStatus = () => {
                         <div className="flex items-center gap-2">
                           <Progress value={feature.progress} className="w-20 h-2" />
                           <span className="text-sm font-medium min-w-[40px]">{feature.progress}%</span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1 text-xs border-yellow-400 text-yellow-700 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
+                            onClick={() => handleDevelop(feature.name, feature.description, module?.name || '')}
+                          >
+                            <Wrench className="w-3 h-3" />
+                            طوّر
+                          </Button>
                         </div>
                       </div>
                     );
@@ -385,9 +403,19 @@ const SystemStatus = () => {
                             <p className="text-xs text-muted-foreground">{feature.description}</p>
                           </div>
                         </div>
-                        <Badge variant={getPriorityVariant(feature.priority) as any}>
-                          {feature.priority === 'high' ? 'أولوية عالية' : feature.priority === 'medium' ? 'متوسطة' : 'منخفضة'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={getPriorityVariant(feature.priority) as any}>
+                            {feature.priority === 'high' ? 'أولوية عالية' : feature.priority === 'medium' ? 'متوسطة' : 'منخفضة'}
+                          </Badge>
+                          <Button
+                            size="sm"
+                            className="gap-1 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => handleDevelop(feature.name, feature.description, module?.name || '')}
+                          >
+                            <Rocket className="w-3 h-3" />
+                            طوّر
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
