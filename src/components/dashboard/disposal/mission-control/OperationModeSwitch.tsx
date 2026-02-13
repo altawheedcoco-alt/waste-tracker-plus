@@ -1,54 +1,54 @@
-import { useState } from 'react';
 import { Brain, Zap, Hand, Settings2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OperationModeSwitchProps {
   facilityId?: string | null;
   currentMode: string;
 }
 
-const modes = [
-  {
-    value: 'ai',
-    label: 'ذكي',
-    icon: Brain,
-    color: 'bg-purple-500 text-white',
-    inactiveColor: 'text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-950/30',
-    description: 'النظام يقرر ويُنفذ تلقائياً (AI Auto-Pilot)',
-  },
-  {
-    value: 'hybrid',
-    label: 'مدمج',
-    icon: Settings2,
-    color: 'bg-blue-500 text-white',
-    inactiveColor: 'text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-950/30',
-    description: 'النظام يقترح والموظف يعتمد (Hybrid)',
-  },
-  {
-    value: 'auto',
-    label: 'تلقائي',
-    icon: Zap,
-    color: 'bg-emerald-500 text-white',
-    inactiveColor: 'text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-950/30',
-    description: 'تدفق آلي كامل بدون ذكاء اصطناعي (Automated)',
-  },
-  {
-    value: 'manual',
-    label: 'يدوي',
-    icon: Hand,
-    color: 'bg-gray-500 text-white',
-    inactiveColor: 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-950/30',
-    description: 'تحكم بشري كامل (Manual Backup)',
-  },
-];
-
 const OperationModeSwitch = ({ facilityId, currentMode }: OperationModeSwitchProps) => {
   const queryClient = useQueryClient();
+  const { t } = useLanguage();
+
+  const modes = [
+    {
+      value: 'ai',
+      label: t('missionControl.modeAI'),
+      icon: Brain,
+      color: 'bg-purple-500 text-white',
+      inactiveColor: 'text-purple-600 hover:bg-purple-100 dark:hover:bg-purple-950/30',
+      description: t('missionControl.modeAIDesc'),
+    },
+    {
+      value: 'hybrid',
+      label: t('missionControl.modeHybrid'),
+      icon: Settings2,
+      color: 'bg-blue-500 text-white',
+      inactiveColor: 'text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-950/30',
+      description: t('missionControl.modeHybridDesc'),
+    },
+    {
+      value: 'auto',
+      label: t('missionControl.modeAuto'),
+      icon: Zap,
+      color: 'bg-emerald-500 text-white',
+      inactiveColor: 'text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-950/30',
+      description: t('missionControl.modeAutoDesc'),
+    },
+    {
+      value: 'manual',
+      label: t('missionControl.modeManual'),
+      icon: Hand,
+      color: 'bg-gray-500 text-white',
+      inactiveColor: 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-950/30',
+      description: t('missionControl.modeManualDesc'),
+    },
+  ];
 
   const updateModeMutation = useMutation({
     mutationFn: async (newMode: string) => {
@@ -61,12 +61,10 @@ const OperationModeSwitch = ({ facilityId, currentMode }: OperationModeSwitchPro
     },
     onSuccess: (_, newMode) => {
       const modeInfo = modes.find(m => m.value === newMode);
-      toast.success(`تم التبديل إلى الوضع: ${modeInfo?.label || newMode}`);
+      toast.success(`${t('missionControl.switchedToMode')}: ${modeInfo?.label || newMode}`);
       queryClient.invalidateQueries({ queryKey: ['disposal-facility'] });
     },
   });
-
-  const activeMode = modes.find(m => m.value === currentMode) || modes[1];
 
   return (
     <TooltipProvider>
