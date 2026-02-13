@@ -19,7 +19,8 @@ import {
   Zap,
   Brush,
   MessageSquare,
-  Globe
+  Globe,
+  UserCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -43,6 +44,7 @@ import NotificationChannelsSettings from '@/components/settings/NotificationChan
 import LanguageSettings from '@/components/settings/LanguageSettings';
 import { useLanguage } from '@/contexts/LanguageContext';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
+import ProfileCustomization from '@/components/settings/ProfileCustomization';
 
 const colorOptions: { value: ThemeColor; label: string; color: string; gradient: string }[] = [
   { value: 'green', label: 'أخضر طبيعي', color: 'bg-green-500', gradient: 'from-green-400 to-emerald-600' },
@@ -130,6 +132,10 @@ const Settings = () => {
   const { t } = useLanguage();
   const isTransporter = organization?.organization_type === 'transporter';
 
+  // Read tab from URL params
+  const searchParams = new URLSearchParams(window.location.search);
+  const defaultTab = searchParams.get('tab') || 'themes';
+
   const applyPreset = (preset: typeof themePresets[0]) => {
     setThemeColor(preset.color);
     setFontFamily(preset.font);
@@ -154,11 +160,15 @@ const Settings = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="themes" className="space-y-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className={cn(
           "grid w-full lg:w-auto lg:inline-grid overflow-x-auto",
-          isTransporter ? "grid-cols-13" : "grid-cols-12"
+          isTransporter ? "grid-cols-14" : "grid-cols-13"
         )}>
+          <TabsTrigger value="profile" className="gap-2">
+            <UserCircle className="h-4 w-4" />
+            <span className="hidden sm:inline">الملف الشخصي</span>
+          </TabsTrigger>
           <TabsTrigger value="language" className="gap-2">
             <Globe className="h-4 w-4" />
             <span className="hidden sm:inline">{t('settings.language')}</span>
@@ -216,6 +226,11 @@ const Settings = () => {
             <span className="hidden sm:inline">قوالب المستندات</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* Profile Customization Tab */}
+        <TabsContent value="profile" className="space-y-6">
+          <ProfileCustomization />
+        </TabsContent>
 
         {/* Language Tab */}
         <TabsContent value="language" className="space-y-6">
