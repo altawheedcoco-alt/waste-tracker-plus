@@ -55,13 +55,53 @@ const colorOptions: { value: ThemeColor; label: string; color: string; gradient:
   { value: 'teal', label: 'فيروزي هادئ', color: 'bg-teal-500', gradient: 'from-teal-400 to-cyan-600' },
 ];
 
-const fontOptions: { value: FontFamily; label: string; preview: string; description: string }[] = [
+const arabicFontOptions: { value: FontFamily; label: string; preview: string; description: string }[] = [
   { value: 'cairo', label: 'Cairo', preview: 'خط القاهرة', description: 'خط عصري ومريح للقراءة' },
   { value: 'tajawal', label: 'Tajawal', preview: 'خط تجوال', description: 'خط أنيق وواضح' },
   { value: 'almarai', label: 'Almarai', preview: 'خط المراعي', description: 'خط احترافي وبسيط' },
-  { value: 'ibm-plex', label: 'IBM Plex', preview: 'خط آي بي إم', description: 'خط تقني متطور' },
+  { value: 'ibm-plex', label: 'IBM Plex Arabic', preview: 'خط آي بي إم', description: 'خط تقني متطور' },
   { value: 'noto-kufi', label: 'Noto Kufi', preview: 'خط نوتو كوفي', description: 'خط كوفي عربي أصيل' },
+  { value: 'amiri', label: 'Amiri', preview: 'خط أميري', description: 'خط نسخي تقليدي فاخر' },
+  { value: 'harmattan', label: 'Harmattan', preview: 'خط هرمتان', description: 'خط واضح للقراءة الطويلة' },
+  { value: 'scheherazade', label: 'Scheherazade', preview: 'خط شهرزاد', description: 'خط نسخي كلاسيكي رائع' },
+  { value: 'reem-kufi', label: 'Reem Kufi', preview: 'خط ريم كوفي', description: 'خط كوفي عصري ومتوازن' },
+  { value: 'aref-ruqaa', label: 'Aref Ruqaa', preview: 'خط عارف رقعة', description: 'خط رقعة تقليدي جميل' },
+  { value: 'lemonada', label: 'Lemonada', preview: 'خط ليموناضة', description: 'خط مرح ومبتكر' },
+  { value: 'marhey', label: 'Marhey', preview: 'خط مرحي', description: 'خط ديكوري ملفت' },
+  { value: 'readex-pro', label: 'Readex Pro', preview: 'خط ريدكس برو', description: 'خط حديث عالي الوضوح' },
+  { value: 'baloo-bhaijaan', label: 'Baloo Bhaijaan', preview: 'خط بالو بيجان', description: 'خط مستدير ودافئ' },
+  { value: 'changa', label: 'Changa', preview: 'خط شانجا', description: 'خط هندسي أنيق' },
+  { value: 'el-messiri', label: 'El Messiri', preview: 'خط المسيري', description: 'خط عربي عصري مميز' },
+  { value: 'lalezar', label: 'Lalezar', preview: 'خط لاله‌زار', description: 'خط عناوين قوي وعريض' },
+  { value: 'rakkas', label: 'Rakkas', preview: 'خط رقّاص', description: 'خط ديواني فني رائع' },
+  { value: 'mirza', label: 'Mirza', preview: 'خط ميرزا', description: 'خط نستعليق أنيق' },
+  { value: 'katibeh', label: 'Katibeh', preview: 'خط كاتبة', description: 'خط عناوين ملفت ومميز' },
 ];
+
+const englishFontOptions: { value: FontFamily; label: string; preview: string; description: string }[] = [
+  { value: 'inter', label: 'Inter', preview: 'The quick brown fox', description: 'Modern & highly readable' },
+  { value: 'roboto', label: 'Roboto', preview: 'The quick brown fox', description: 'Google\'s signature font' },
+  { value: 'open-sans', label: 'Open Sans', preview: 'The quick brown fox', description: 'Clean & versatile' },
+  { value: 'montserrat', label: 'Montserrat', preview: 'The quick brown fox', description: 'Elegant geometric' },
+  { value: 'poppins', label: 'Poppins', preview: 'The quick brown fox', description: 'Geometric sans-serif' },
+  { value: 'nunito', label: 'Nunito', preview: 'The quick brown fox', description: 'Rounded & friendly' },
+  { value: 'raleway', label: 'Raleway', preview: 'The quick brown fox', description: 'Thin elegant display' },
+  { value: 'source-sans', label: 'Source Sans 3', preview: 'The quick brown fox', description: 'Adobe\'s open source' },
+  { value: 'work-sans', label: 'Work Sans', preview: 'The quick brown fox', description: 'Optimized for screens' },
+  { value: 'dm-sans', label: 'DM Sans', preview: 'The quick brown fox', description: 'Low-contrast geometric' },
+  { value: 'space-grotesk', label: 'Space Grotesk', preview: 'The quick brown fox', description: 'Tech & futuristic' },
+  { value: 'outfit', label: 'Outfit', preview: 'The quick brown fox', description: 'Geometric & modern' },
+  { value: 'plus-jakarta', label: 'Plus Jakarta Sans', preview: 'The quick brown fox', description: 'Contemporary & sharp' },
+  { value: 'manrope', label: 'Manrope', preview: 'The quick brown fox', description: 'Semi-rounded modern' },
+  { value: 'sora', label: 'Sora', preview: 'The quick brown fox', description: 'Bold & expressive' },
+  { value: 'lexend', label: 'Lexend', preview: 'The quick brown fox', description: 'Designed for readability' },
+  { value: 'red-hat', label: 'Red Hat Display', preview: 'The quick brown fox', description: 'Professional & clean' },
+  { value: 'be-vietnam', label: 'Be Vietnam Pro', preview: 'The quick brown fox', description: 'Vietnamese-inspired' },
+  { value: 'cabinet-grotesk', label: 'Josefin Sans', preview: 'The quick brown fox', description: 'Elegant vintage feel' },
+  { value: 'general-sans', label: 'General Sans', preview: 'The quick brown fox', description: 'Versatile & neutral' },
+];
+
+const fontOptions = [...arabicFontOptions, ...englishFontOptions];
 
 const displayModeOptions: { value: DisplayMode; label: string; icon: typeof Monitor; description: string }[] = [
   { value: 'auto', label: 'تلقائي', icon: MonitorSmartphone, description: 'يتكيف مع حجم الشاشة' },
@@ -405,38 +445,38 @@ const Settings = () => {
 
         {/* Typography Tab */}
         <TabsContent value="typography" className="space-y-6">
-          {/* Font Family */}
+          {/* Arabic Fonts */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Type className="h-5 w-5 text-primary" />
-                نوع الخط
+                الخطوط العربية
               </CardTitle>
               <CardDescription>
-                اختر الخط المناسب لك من مجموعة الخطوط العربية
+                مجموعة شاملة من الخطوط العربية المجانية المميزة
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {fontOptions.map((option, index) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {arabicFontOptions.map((option, index) => (
                   <motion.button
                     key={option.value}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ x: -4 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setFontFamily(option.value)}
                     className={cn(
-                      'relative flex flex-col items-start p-4 rounded-xl border-2 transition-all text-right',
+                      'relative flex flex-col items-start p-3 rounded-xl border-2 transition-all text-right',
                       settings.fontFamily === option.value
                         ? 'border-primary bg-primary/10 shadow-lg'
                         : 'border-border hover:border-primary/50'
                     )}
                     style={{ fontFamily: `'${option.label}', sans-serif` }}
                   >
-                    <div className="flex items-center justify-between w-full mb-2">
-                      <span className="font-bold text-lg">{option.label}</span>
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <span className="font-bold text-sm">{option.label}</span>
                       {settings.fontFamily === option.value && (
                         <motion.div
                           initial={{ scale: 0 }}
@@ -447,8 +487,58 @@ const Settings = () => {
                         </motion.div>
                       )}
                     </div>
-                    <span className="text-xl mb-1">{option.preview}</span>
-                    <span className="text-xs text-muted-foreground">{option.description}</span>
+                    <span className="text-lg mb-0.5">{option.preview}</span>
+                    <span className="text-[10px] text-muted-foreground">{option.description}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* English Fonts */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Type className="h-5 w-5 text-primary" />
+                English Fonts
+              </CardTitle>
+              <CardDescription>
+                Premium free English fonts for a professional look
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {englishFontOptions.map((option, index) => (
+                  <motion.button
+                    key={option.value}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setFontFamily(option.value)}
+                    className={cn(
+                      'relative flex flex-col items-start p-3 rounded-xl border-2 transition-all text-left',
+                      settings.fontFamily === option.value
+                        ? 'border-primary bg-primary/10 shadow-lg'
+                        : 'border-border hover:border-primary/50'
+                    )}
+                    style={{ fontFamily: `'${option.label}', sans-serif` }}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <span className="font-bold text-sm">{option.label}</span>
+                      {settings.fontFamily === option.value && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="w-5 h-5 bg-primary rounded-full flex items-center justify-center"
+                        >
+                          <Check className="h-3 w-3 text-primary-foreground" />
+                        </motion.div>
+                      )}
+                    </div>
+                    <span className="text-lg mb-0.5">{option.preview}</span>
+                    <span className="text-[10px] text-muted-foreground">{option.description}</span>
                   </motion.button>
                 ))}
               </div>
