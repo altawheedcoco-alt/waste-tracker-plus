@@ -175,11 +175,16 @@ const SystemStatus = () => {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            initial="hidden"
+            animate="visible"
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.07 } } }}
+          >
             {systemModulesData.map((module) => (
               <ModuleOverviewCard key={module.id} module={module} />
             ))}
-          </div>
+          </motion.div>
         </TabsContent>
 
         {/* Integrations Tab */}
@@ -290,10 +295,16 @@ const SystemStatus = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {inProgressFeatures.map((feature, idx) => {
+              {inProgressFeatures.map((feature, idx) => {
                     const module = systemModulesData.find(m => m.features.includes(feature));
                     return (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05, duration: 0.35 }}
+                        className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg"
+                      >
                         <div className="flex items-center gap-3">
                           {module && <module.icon className="w-4 h-4 text-yellow-600" />}
                           <div>
@@ -314,7 +325,7 @@ const SystemStatus = () => {
                             طوّر
                           </Button>
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>

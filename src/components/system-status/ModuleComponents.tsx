@@ -13,6 +13,7 @@ import {
 import { SystemModule, FeatureStatus } from './types';
 import { triggerAIChat } from '@/lib/aiChatBus';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 interface ModuleOverviewCardProps {
   module: SystemModule;
@@ -56,7 +57,13 @@ export const ModuleOverviewCard = ({ module }: ModuleOverviewCardProps) => {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <motion.div
+      initial={{ opacity: 0, y: 24, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ y: -4, boxShadow: '0 8px 30px -12px hsl(var(--primary) / 0.15)' }}
+    >
+    <Card className="hover:shadow-md transition-shadow overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
@@ -90,6 +97,7 @@ export const ModuleOverviewCard = ({ module }: ModuleOverviewCardProps) => {
         </div>
       </CardContent>
     </Card>
+    </motion.div>
   );
 };
 
