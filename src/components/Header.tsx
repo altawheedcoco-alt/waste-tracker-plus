@@ -1,14 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, LogIn, UserPlus, Factory, Recycle, Truck, Building2 } from "lucide-react";
+import { Menu, X, LogIn, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import GuideButton from "@/components/guide/GuideButton";
 import logo from "@/assets/logo.png";
 
@@ -24,9 +18,6 @@ const Header = () => {
     navigate('/auth?mode=employee');
   };
 
-  const handleQuickLogin = (type: string) => {
-    navigate(`/auth?mode=login&type=${type}`);
-  };
 
   return (
     <motion.header
@@ -65,36 +56,8 @@ const Header = () => {
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
             <GuideButton />
-            
-            {/* Quick Login Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="default" className="gap-2 text-sm">
-                  <Factory className="w-4 h-4" />
-                  دخول سريع
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => handleQuickLogin('generator')} className="gap-2 cursor-pointer">
-                  <Building2 className="w-4 h-4 text-primary" />
-                  جهة مولدة
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleQuickLogin('transporter')} className="gap-2 cursor-pointer">
-                  <Truck className="w-4 h-4 text-primary" />
-                  جهة ناقلة
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleQuickLogin('recycler')} className="gap-2 cursor-pointer">
-                  <Recycle className="w-4 h-4 text-primary" />
-                  جهة تدوير
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleQuickLogin('disposal')} className="gap-2 cursor-pointer">
-                  <Factory className="w-4 h-4 text-destructive" />
-                  جهة تخلص نهائي
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
-            <Button 
+            <Button
               variant="outline" 
               size="default"
               onClick={handleEmployeeLogin}
