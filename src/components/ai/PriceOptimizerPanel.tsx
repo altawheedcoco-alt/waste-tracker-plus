@@ -217,12 +217,12 @@ const PriceOptimizerPanel = () => {
                         <div className="text-left">
                           <div className="flex items-center gap-2">
                             <span className="text-muted-foreground line-through text-sm">
-                              {price.currentPrice} ر.س
+                              {price.currentPrice} ج.م
                             </span>
                             {getChangeIcon(price.changePercent)}
                           </div>
                           <div className="text-xl font-bold text-primary">
-                            {price.suggestedPrice} ر.س
+                            {price.suggestedPrice} ج.م
                           </div>
                         </div>
                       </div>

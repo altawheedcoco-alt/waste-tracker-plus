@@ -369,19 +369,19 @@ const AdvancedAppearanceSettings = () => {
                       <td className="p-3 text-sm">SHP-2026-002</td>
                       <td className="p-3"><Badge variant="secondary">قيد التنفيذ</Badge></td>
                       <td className="p-3 text-muted-foreground text-sm">2026/02/07</td>
-                      <td className="p-3 font-bold text-primary">3,200 ر.س</td>
+                      <td className="p-3 font-bold text-primary">3,200 ج.م</td>
                     </tr>
                     <tr className="border-t hover:bg-muted/50 transition-colors">
                       <td className="p-3 text-sm">SHP-2026-003</td>
                       <td className="p-3"><Badge variant="destructive">ملغي</Badge></td>
                       <td className="p-3 text-muted-foreground text-sm">2026/02/06</td>
-                      <td className="p-3 font-bold text-muted-foreground">0 ر.س</td>
+                      <td className="p-3 font-bold text-muted-foreground">0 ج.م</td>
                     </tr>
                     <tr className="border-t bg-muted/30 hover:bg-muted/50 transition-colors">
                       <td className="p-3 text-sm">SHP-2026-004</td>
                       <td className="p-3"><Badge variant="outline">معلق</Badge></td>
                       <td className="p-3 text-muted-foreground text-sm">2026/02/05</td>
-                      <td className="p-3 font-bold text-primary">7,800 ر.س</td>
+                      <td className="p-3 font-bold text-primary">7,800 ج.م</td>
                     </tr>
                   </tbody>
                 </table>

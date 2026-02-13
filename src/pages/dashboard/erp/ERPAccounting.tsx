@@ -168,7 +168,7 @@ const ERPAccounting = () => {
                   <stat.icon className={`h-5 w-5 ${stat.color}`} />
                   <div>
                     <p className="text-xs text-muted-foreground">{stat.label}</p>
-                    <p className="text-lg font-bold">{stat.value.toLocaleString()} ر.س</p>
+                    <p className="text-lg font-bold">{stat.value.toLocaleString()} ج.م</p>
                   </div>
                 </div>
               </CardContent>
@@ -235,7 +235,7 @@ const ERPAccounting = () => {
                         <TableCell className="font-mono">{acc.account_code}</TableCell>
                         <TableCell>{acc.account_name}</TableCell>
                         <TableCell><Badge variant="outline">{accountTypeLabels[acc.account_type] || acc.account_type}</Badge></TableCell>
-                        <TableCell>{(acc.balance || 0).toLocaleString()} ر.س</TableCell>
+                        <TableCell>{(acc.balance || 0).toLocaleString()} ج.م</TableCell>
                         <TableCell><Badge variant={acc.is_active ? 'default' : 'secondary'}>{acc.is_active ? 'نشط' : 'معطل'}</Badge></TableCell>
                       </TableRow>
                     ))}

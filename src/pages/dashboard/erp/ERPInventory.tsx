@@ -103,7 +103,7 @@ const ERPInventory = () => {
           {[
             { label: 'إجمالي الأصناف', value: items.length, icon: Package, color: 'text-blue-600' },
             { label: 'المستودعات', value: warehouses.length, icon: Warehouse, color: 'text-green-600' },
-            { label: 'قيمة المخزون', value: `${totalValue.toLocaleString()} ر.س`, icon: ArrowUpDown, color: 'text-primary' },
+            { label: 'قيمة المخزون', value: `${totalValue.toLocaleString()} ج.م`, icon: ArrowUpDown, color: 'text-primary' },
             { label: 'أصناف منخفضة', value: lowStockItems.length, icon: AlertTriangle, color: 'text-red-600' },
           ].map(s => (
             <Card key={s.label}>

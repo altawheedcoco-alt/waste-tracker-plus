@@ -548,7 +548,7 @@ const ERPCogs = () => {
                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                         <XAxis dataKey="period" tick={{ fontSize: 11 }} />
                         <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-                        <Tooltip formatter={(v: number) => `${fmt(v)} ر.س`} />
+                        <Tooltip formatter={(v: number) => `${fmt(v)} ج.م`} />
                         <Legend />
                         <Bar dataKey="الإيرادات" fill="#10b981" radius={[4, 4, 0, 0]} barSize={18} />
                         <Bar dataKey="تكلفة البضاعة" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={18} />

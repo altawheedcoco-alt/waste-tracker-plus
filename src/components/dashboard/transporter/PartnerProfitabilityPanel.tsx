@@ -156,7 +156,7 @@ const PartnerProfitabilityPanel = () => {
                   partner.profit >= 0 ? 'text-emerald-600' : 'text-red-600'
                 )}>
                   {partner.profit >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                  {partner.profit.toLocaleString('ar-SA')}
+                  {partner.profit.toLocaleString('ar-EG')}
                 </div>
                 {partner.profitMargin !== 0 && (
                   <Badge variant="outline" className={cn(
@@ -176,7 +176,7 @@ const PartnerProfitabilityPanel = () => {
                   <span className="font-medium text-sm">{partner.partnerName}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {partner.shipmentCount} شحنة • إيراد: {partner.totalRevenue.toLocaleString('ar-SA')} • تكلفة: {partner.totalCost.toLocaleString('ar-SA')}
+                  {partner.shipmentCount} شحنة • إيراد: {partner.totalRevenue.toLocaleString('ar-EG')} • تكلفة: {partner.totalCost.toLocaleString('ar-EG')}
                 </p>
               </div>
             </div>

@@ -114,7 +114,7 @@ const ERPHR = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: 'الموظفين النشطين', value: activeEmployees.length, icon: Users, color: 'text-blue-600' },
-            { label: 'إجمالي الرواتب', value: `${totalSalaries.toLocaleString()} ر.س`, icon: Wallet, color: 'text-green-600' },
+            { label: 'إجمالي الرواتب', value: `${totalSalaries.toLocaleString()} ج.م`, icon: Wallet, color: 'text-green-600' },
             { label: 'إجازات معلقة', value: pendingLeaves, icon: Calendar, color: 'text-orange-600' },
             { label: 'مسيرات الرواتب', value: payrolls.length, icon: Clock, color: 'text-primary' },
           ].map(s => (
@@ -203,7 +203,7 @@ const ERPHR = () => {
                         <TableCell>{emp.department || '-'}</TableCell>
                         <TableCell>{emp.job_title || '-'}</TableCell>
                         <TableCell><Badge variant="outline">{contractLabels[emp.contract_type || ''] || '-'}</Badge></TableCell>
-                        <TableCell>{((emp.base_salary || 0) + (emp.housing_allowance || 0) + (emp.transport_allowance || 0)).toLocaleString()} ر.س</TableCell>
+                        <TableCell>{((emp.base_salary || 0) + (emp.housing_allowance || 0) + (emp.transport_allowance || 0)).toLocaleString()} ج.م</TableCell>
                         <TableCell><Badge variant={emp.is_active ? 'default' : 'secondary'}>{emp.is_active ? 'نشط' : 'منتهي'}</Badge></TableCell>
                       </TableRow>
                     ))}
@@ -263,8 +263,8 @@ const ERPHR = () => {
                       <TableRow key={l.id}>
                         <TableCell>{l.employee?.full_name || '-'}</TableCell>
                         <TableCell><Badge variant="outline">{leaveLabels[l.leave_type] || l.leave_type}</Badge></TableCell>
-                        <TableCell>{new Date(l.start_date).toLocaleDateString('ar-SA')}</TableCell>
-                        <TableCell>{new Date(l.end_date).toLocaleDateString('ar-SA')}</TableCell>
+                        <TableCell>{new Date(l.start_date).toLocaleDateString('ar-EG')}</TableCell>
+                        <TableCell>{new Date(l.end_date).toLocaleDateString('ar-EG')}</TableCell>
                         <TableCell>{l.reason || '-'}</TableCell>
                         <TableCell>
                           <Badge variant={l.status === 'approved' ? 'default' : l.status === 'rejected' ? 'destructive' : 'secondary'}>
@@ -301,7 +301,7 @@ const ERPHR = () => {
                             {p.status === 'paid' ? 'مدفوع' : p.status === 'approved' ? 'معتمد' : p.status === 'calculated' ? 'محسوب' : 'مسودة'}
                           </Badge>
                         </TableCell>
-                        <TableCell>{(p.total_amount || 0).toLocaleString()} ر.س</TableCell>
+                        <TableCell>{(p.total_amount || 0).toLocaleString()} ج.م</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
