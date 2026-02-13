@@ -25,6 +25,7 @@ const TrackingModeController = lazy(() => import('@/components/tracking/Tracking
 const ShipmentGPSTrackingPanel = lazy(() => import('@/components/tracking/ShipmentGPSTrackingPanel'));
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -58,7 +59,8 @@ import {
   Lock,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar as arLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { getCityById } from '@/lib/egyptianCities';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -97,6 +99,8 @@ const ShipmentDetailsPage = () => {
   const { shipmentId } = useParams();
   const navigate = useNavigate();
   const { roles, organization } = useAuth();
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'ar' ? arLocale : enUS;
   const [shipment, setShipment] = useState<ShipmentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +124,7 @@ const ShipmentDetailsPage = () => {
   const fetchShipmentDetails = async () => {
     try {
       if (!shipmentId) {
-        setError('معرف الشحنة غير صالح');
+        setError(t('shipmentDetails.invalidId'));
         return;
       }
 
@@ -128,7 +132,7 @@ const ShipmentDetailsPage = () => {
       const shipmentData = await fetchShipmentByIdOrNumber(shipmentId);
 
       if (!shipmentData) {
-        setError('الشحنة غير موجودة');
+        setError(t('shipmentDetails.notFoundDesc'));
         return;
       }
 
@@ -167,11 +171,11 @@ const ShipmentDetailsPage = () => {
     } catch (error: any) {
       console.error('Error fetching shipment details:', error);
       if (error?.code === 'PGRST116') {
-        setError('لا توجد صلاحية للوصول لهذه الشحنة');
+        setError(t('shipmentDetails.noPermission'));
       } else if (error?.message?.includes('JWT')) {
-        setError('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+        setError(t('shipmentDetails.sessionExpired'));
       } else {
-        setError('حدث خطأ أثناء جلب بيانات الشحنة');
+        setError(t('shipmentDetails.fetchError'));
       }
     } finally {
       setLoading(false);
@@ -198,19 +202,19 @@ const ShipmentDetailsPage = () => {
       <DashboardLayout>
         <div className="flex flex-col items-center justify-center min-h-[60vh]">
           <Package className="w-16 h-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">الشحنة غير موجودة</h2>
+          <h2 className="text-xl font-semibold mb-2">{t('shipmentDetails.notFound')}</h2>
           <p className="text-muted-foreground mb-4">
-            {error || 'لم يتم العثور على الشحنة المطلوبة'}
+            {error || t('shipmentDetails.notFoundDesc')}
           </p>
           {error?.includes('صلاحية') && (
             <p className="text-sm text-muted-foreground mb-4">
-              رقم الشحنة: {shipmentId}
+              {t('shipmentDetails.shipmentNumber')}: {shipmentId}
             </p>
           )}
           <div className="flex gap-2">
-            <Button onClick={() => navigate(-1)}>العودة</Button>
+            <Button onClick={() => navigate(-1)}>{t('shipmentDetails.goBack')}</Button>
             <Button variant="outline" onClick={() => window.location.reload()}>
-              إعادة المحاولة
+              {t('shipmentDetails.retry')}
             </Button>
           </div>
         </div>
@@ -234,7 +238,7 @@ const ShipmentDetailsPage = () => {
               <h1 className="text-2xl font-bold font-mono">{shipment.shipment_number}</h1>
             </div>
             <p className="text-muted-foreground">
-              تم الإنشاء في {format(new Date(shipment.created_at), 'PPP', { locale: ar })}
+              {t('shipmentDetails.createdAt')} {format(new Date(shipment.created_at), 'PPP', { locale: dateLocale })}
             </p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -245,7 +249,7 @@ const ShipmentDetailsPage = () => {
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Navigation className="ml-2 h-4 w-4" />
-                التتبع المباشر
+                {t('shipmentDetails.liveTracking')}
               </Button>
             )}
             {/* Quick Receipt Button - only for transporter */}
@@ -271,11 +275,11 @@ const ShipmentDetailsPage = () => {
             )}
             <Button variant="outline" onClick={() => setShowStatusDialog(true)}>
               <Edit className="ml-2 h-4 w-4" />
-              تغيير الحالة
+              {t('shipmentDetails.changeStatus')}
             </Button>
             <Button variant="eco" onClick={() => setShowPrintDialog(true)}>
               <Printer className="ml-2 h-4 w-4" />
-              طباعة / تحميل PDF
+              {t('shipmentDetails.printPdf')}
             </Button>
             {/* Cancel Shipment Button */}
             <CancelShipmentDialog
@@ -321,7 +325,7 @@ const ShipmentDetailsPage = () => {
           <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
             <Lock className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-800 dark:text-amber-200">
-              التتبع المباشر غير متاح. الناقل لم يفعّل هذه الميزة لحسابكم.
+              {t('shipmentDetails.trackingUnavailable')}
             </AlertDescription>
           </Alert>
         )}
@@ -335,7 +339,7 @@ const ShipmentDetailsPage = () => {
                   <div className="p-2 rounded-full bg-primary/10">
                     <Navigation className="h-5 w-5 text-primary" />
                   </div>
-                  التتبع المباشر للشحنة
+                  {t('shipmentDetails.liveTrackingTitle')}
                 </CardTitle>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -344,12 +348,12 @@ const ShipmentDetailsPage = () => {
                     onClick={() => setShowLiveTracking(true)}
                   >
                     <Eye className="ml-2 h-4 w-4" />
-                    تتبع كامل
+                    {t('shipmentDetails.fullTracking')}
                   </Button>
                 </div>
               </div>
               <CardDescription className="mt-2">
-                تتبع مسار السائق والمسافة المتبقية في الوقت الحقيقي
+                {t('shipmentDetails.liveTrackingDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -423,17 +427,17 @@ const ShipmentDetailsPage = () => {
             <CardHeader className="text-right">
               <CardTitle className="flex items-center gap-2 justify-end">
                 <Package className="w-5 h-5 text-primary" />
-                تفاصيل المخلفات
+                {t('shipmentDetails.wasteDetails')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">نوع المخلفات</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentDetails.wasteType')}</p>
                   <p className="font-medium">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">الكمية</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentDetails.quantity')}</p>
                   <p className="font-medium flex items-center gap-1 justify-end">
                     <Scale className="w-4 h-4 text-muted-foreground" />
                     {shipment.quantity} {shipment.unit || 'كجم'}
@@ -443,7 +447,7 @@ const ShipmentDetailsPage = () => {
               
               {shipment.hazard_level && (
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground mb-1">مستوى الخطورة</p>
+                  <p className="text-sm text-muted-foreground mb-1">{t('shipmentDetails.hazardLevel')}</p>
                   <Badge className={hazardConfig?.className}>
                     <AlertTriangle className="w-3 h-3 ml-1" />
                     {hazardConfig?.label}
@@ -453,14 +457,14 @@ const ShipmentDetailsPage = () => {
 
               {shipment.waste_description && (
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">وصف المخلفات</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentDetails.wasteDescription')}</p>
                   <p className="text-sm">{shipment.waste_description}</p>
                 </div>
               )}
 
               {shipment.packaging_method && (
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">طريقة التعبئة</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentDetails.packagingMethod')}</p>
                   <p className="font-medium flex items-center gap-1 justify-end">
                     <Box className="w-4 h-4 text-muted-foreground" />
                     {shipment.packaging_method}
@@ -470,7 +474,7 @@ const ShipmentDetailsPage = () => {
 
               {shipment.disposal_method && (
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">طريقة التخلص</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentDetails.disposalMethod')}</p>
                   <p className="font-medium">{shipment.disposal_method}</p>
                 </div>
               )}
@@ -482,28 +486,28 @@ const ShipmentDetailsPage = () => {
             <CardHeader className="text-right">
               <CardTitle className="flex items-center gap-2 justify-end">
                 <MapPin className="w-5 h-5 text-primary" />
-                مواقع الشحنة
+                {t('shipmentDetails.locations')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-right p-3 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground mb-1">موقع الاستلام</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('shipmentDetails.pickupLocation')}</p>
                 <p className="font-medium">{shipment.pickup_address}</p>
                 {shipment.pickup_date && (
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 justify-end">
                     <Calendar className="w-3 h-3" />
-                    {format(new Date(shipment.pickup_date), 'PPP', { locale: ar })}
+                    {format(new Date(shipment.pickup_date), 'PPP', { locale: dateLocale })}
                   </p>
                 )}
               </div>
 
               <div className="text-right p-3 rounded-lg bg-muted/50">
-                <p className="text-sm text-muted-foreground mb-1">موقع التسليم</p>
+                <p className="text-sm text-muted-foreground mb-1">{t('shipmentDetails.deliveryLocation')}</p>
                 <p className="font-medium">{shipment.delivery_address}</p>
                 {shipment.expected_delivery_date && (
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1 justify-end">
                     <Calendar className="w-3 h-3" />
-                    {format(new Date(shipment.expected_delivery_date), 'PPP', { locale: ar })}
+                    {format(new Date(shipment.expected_delivery_date), 'PPP', { locale: dateLocale })}
                   </p>
                 )}
               </div>
@@ -514,9 +518,9 @@ const ShipmentDetailsPage = () => {
           {shipment.generator && (
             <Card>
               <CardHeader className="text-right">
-                <CardTitle className="flex items-center gap-2 justify-end">
+              <CardTitle className="flex items-center gap-2 justify-end">
                   <Building2 className="w-5 h-5 text-blue-500" />
-                  الجهة المولدة
+                  {t('shipmentDetails.generator')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -549,7 +553,7 @@ const ShipmentDetailsPage = () => {
                   <>
                     <Separator />
                     <div className="text-right">
-                      <p className="text-sm text-muted-foreground">ملاحظات المولد</p>
+                      <p className="text-sm text-muted-foreground">{t('shipmentDetails.generatorNotes')}</p>
                       <p className="text-sm">{shipment.generator_notes}</p>
                     </div>
                   </>
@@ -562,9 +566,9 @@ const ShipmentDetailsPage = () => {
           {shipment.transporter && (
             <Card>
               <CardHeader className="text-right">
-                <CardTitle className="flex items-center gap-2 justify-end">
+              <CardTitle className="flex items-center gap-2 justify-end">
                   <Truck className="w-5 h-5 text-purple-500" />
-                  الجهة الناقلة
+                  {t('shipmentDetails.transporter')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -593,7 +597,7 @@ const ShipmentDetailsPage = () => {
                   <>
                     <Separator />
                     <div className="text-right p-3 rounded-lg bg-muted/50">
-                      <p className="text-sm font-medium mb-2">بيانات السائق</p>
+                      <p className="text-sm font-medium mb-2">{t('shipmentDetails.driverInfo')}</p>
                       <div className="space-y-1 text-sm">
                         <p className="flex items-center gap-2 justify-end">
                           <span>{shipment.driver?.profile?.full_name || shipment.manual_driver_name}</span>
@@ -621,7 +625,7 @@ const ShipmentDetailsPage = () => {
                 {(shipment.driver || shipment.manual_driver_name) && !visibility.canViewDriverInfo && !visibility.isOwner && (
                   <div className="text-right p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200">
                     <div className="flex items-center gap-2 justify-end text-sm text-amber-800 dark:text-amber-200">
-                      <span>بيانات السائق محجوبة</span>
+                      <span>{t('shipmentDetails.driverInfoHidden')}</span>
                       <Lock className="w-4 h-4" />
                     </div>
                   </div>
@@ -634,9 +638,9 @@ const ShipmentDetailsPage = () => {
           {shipment.recycler && visibility.canViewRecyclerInfo && (
             <Card>
               <CardHeader className="text-right">
-                <CardTitle className="flex items-center gap-2 justify-end">
+              <CardTitle className="flex items-center gap-2 justify-end">
                   <Recycle className="w-5 h-5 text-green-500" />
-                  الجهة المُعيدة للتدوير
+                  {t('shipmentDetails.recycler')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -669,7 +673,7 @@ const ShipmentDetailsPage = () => {
                   <>
                     <Separator />
                     <div className="text-right">
-                      <p className="text-sm text-muted-foreground">ملاحظات المُعيد</p>
+                      <p className="text-sm text-muted-foreground">{t('shipmentDetails.recyclerNotes')}</p>
                       <p className="text-sm">{shipment.recycler_notes}</p>
                     </div>
                   </>
@@ -682,9 +686,9 @@ const ShipmentDetailsPage = () => {
           {shipment.notes && (
             <Card className="lg:col-span-2">
               <CardHeader className="text-right">
-                <CardTitle className="flex items-center gap-2 justify-end">
+              <CardTitle className="flex items-center gap-2 justify-end">
                   <FileText className="w-5 h-5 text-primary" />
-                  ملاحظات عامة
+                  {t('shipmentDetails.generalNotes')}
                 </CardTitle>
               </CardHeader>
               <CardContent>

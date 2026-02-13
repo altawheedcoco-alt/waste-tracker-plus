@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
@@ -56,28 +57,6 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import EmployeePostsViewer from '@/components/profile/EmployeePostsViewer';
 
-const DEPARTMENTS = [
-  { value: 'operations', label: 'العمليات' },
-  { value: 'logistics', label: 'اللوجستيات' },
-  { value: 'sales', label: 'المبيعات' },
-  { value: 'finance', label: 'المالية' },
-  { value: 'hr', label: 'الموارد البشرية' },
-  { value: 'it', label: 'تقنية المعلومات' },
-  { value: 'quality', label: 'الجودة' },
-  { value: 'safety', label: 'السلامة' },
-];
-
-const PERMISSIONS = [
-  { value: 'view_shipments', label: 'عرض الشحنات' },
-  { value: 'create_shipments', label: 'إنشاء الشحنات' },
-  { value: 'manage_shipments', label: 'إدارة الشحنات' },
-  { value: 'view_reports', label: 'عرض التقارير' },
-  { value: 'manage_drivers', label: 'إدارة السائقين' },
-  { value: 'chat', label: 'الدردشة مع الشركات' },
-  { value: 'view_documents', label: 'عرض المستندات' },
-  { value: 'manage_documents', label: 'إدارة المستندات' },
-];
-
 interface Employee {
   id: string;
   user_id: string;
@@ -93,6 +72,30 @@ interface Employee {
 }
 
 const EmployeeManagement = () => {
+  const { t } = useLanguage();
+
+  const DEPARTMENTS = [
+    { value: 'operations', label: t('employees.deptOperations') },
+    { value: 'logistics', label: t('employees.deptLogistics') },
+    { value: 'sales', label: t('employees.deptSales') },
+    { value: 'finance', label: t('employees.deptFinance') },
+    { value: 'hr', label: t('employees.deptHR') },
+    { value: 'it', label: t('employees.deptIT') },
+    { value: 'quality', label: t('employees.deptQuality') },
+    { value: 'safety', label: t('employees.deptSafety') },
+  ];
+
+  const PERMISSIONS = [
+    { value: 'view_shipments', label: t('employees.permViewShipments') },
+    { value: 'create_shipments', label: t('employees.permCreateShipments') },
+    { value: 'manage_shipments', label: t('employees.permManageShipments') },
+    { value: 'view_reports', label: t('employees.permViewReports') },
+    { value: 'manage_drivers', label: t('employees.permManageDrivers') },
+    { value: 'chat', label: t('employees.permChat') },
+    { value: 'view_documents', label: t('employees.permViewDocuments') },
+    { value: 'manage_documents', label: t('employees.permManageDocuments') },
+  ];
+
   const { user, organization, roles } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -168,8 +171,8 @@ const EmployeeManagement = () => {
     },
     onSuccess: () => {
       toast({
-        title: 'تم إضافة الموظف',
-        description: 'تم تسجيل الموظف بنجاح',
+        title: t('employees.employeeAdded'),
+        description: t('employees.employeeAddedDesc'),
       });
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setIsAddDialogOpen(false);
@@ -197,8 +200,8 @@ const EmployeeManagement = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       toast({
-        title: 'تم التحديث',
-        description: 'تم تحديث حالة الموظف',
+        title: t('employees.statusUpdated'),
+        description: t('employees.statusUpdatedDesc'),
       });
     },
   });
@@ -219,8 +222,8 @@ const EmployeeManagement = () => {
     e.preventDefault();
     if (!newEmployee.full_name || !newEmployee.email || !newEmployee.password) {
       toast({
-        title: 'خطأ',
-        description: 'يرجى ملء جميع الحقول المطلوبة',
+        title: t('common.error'),
+        description: t('employees.fillRequired'),
         variant: 'destructive',
       });
       return;
@@ -263,10 +266,10 @@ const EmployeeManagement = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Users className="h-7 w-7 text-primary" />
-              إدارة الموظفين
+              {t('employees.title')}
             </h1>
             <p className="text-muted-foreground mt-1">
-              إدارة موظفي المنشأة وتحديد صلاحياتهم
+              {t('employees.subtitle')}
             </p>
           </div>
 
@@ -275,14 +278,14 @@ const EmployeeManagement = () => {
               <DialogTrigger asChild>
                 <Button className="gap-2">
                   <UserPlus className="h-4 w-4" />
-                  إضافة موظف
+                  {t('employees.addEmployee')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>إضافة موظف جديد</DialogTitle>
+                  <DialogTitle>{t('employees.addNewEmployee')}</DialogTitle>
                   <DialogDescription>
-                    أدخل بيانات الموظف الجديد وحدد صلاحياته
+                    {t('employees.addNewEmployeeDesc')}
                   </DialogDescription>
                 </DialogHeader>
 
@@ -290,37 +293,37 @@ const EmployeeManagement = () => {
                   {/* Basic Info */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="full_name">الاسم الكامل *</Label>
+                      <Label htmlFor="full_name">{t('employees.fullName')}</Label>
                       <Input
                         id="full_name"
                         value={newEmployee.full_name}
                         onChange={(e) => setNewEmployee(prev => ({ ...prev, full_name: e.target.value }))}
-                        placeholder="أدخل الاسم الكامل"
+                        placeholder={t('employees.fullNamePlaceholder')}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">البريد الإلكتروني *</Label>
+                      <Label htmlFor="email">{t('employees.emailRequired')}</Label>
                       <Input
                         id="email"
                         type="email"
                         value={newEmployee.email}
                         onChange={(e) => setNewEmployee(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder="example@company.com"
+                        placeholder={t('employees.emailPlaceholder')}
                         required
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password">كلمة المرور *</Label>
+                      <Label htmlFor="password">{t('employees.passwordRequired')}</Label>
                       <div className="relative">
                         <Input
                           id="password"
                           type={showPassword ? 'text' : 'password'}
                           value={newEmployee.password}
                           onChange={(e) => setNewEmployee(prev => ({ ...prev, password: e.target.value }))}
-                          placeholder="أدخل كلمة المرور"
+                          placeholder={t('employees.passwordPlaceholder')}
                           required
                           minLength={6}
                         />
@@ -337,33 +340,33 @@ const EmployeeManagement = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phone">رقم الهاتف</Label>
+                      <Label htmlFor="phone">{t('employees.phoneNumber')}</Label>
                       <Input
                         id="phone"
                         value={newEmployee.phone}
                         onChange={(e) => setNewEmployee(prev => ({ ...prev, phone: e.target.value }))}
-                        placeholder="05xxxxxxxx"
+                        placeholder={t('employees.phonePlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="position">المسمى الوظيفي</Label>
+                      <Label htmlFor="position">{t('employees.jobTitle')}</Label>
                       <Input
                         id="position"
                         value={newEmployee.position}
                         onChange={(e) => setNewEmployee(prev => ({ ...prev, position: e.target.value }))}
-                        placeholder="مثال: مدير العمليات"
+                        placeholder={t('employees.positionPlaceholder')}
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="department">القسم</Label>
+                      <Label htmlFor="department">{t('employees.department')}</Label>
                       <Select
                         value={newEmployee.department}
                         onValueChange={(value) => setNewEmployee(prev => ({ ...prev, department: value }))}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="اختر القسم" />
+                          <SelectValue placeholder={t('employees.selectDepartment')} />
                         </SelectTrigger>
                         <SelectContent>
                           {DEPARTMENTS.map((dept) => (
@@ -380,7 +383,7 @@ const EmployeeManagement = () => {
                   <div className="space-y-3">
                     <Label className="flex items-center gap-2">
                       <Shield className="h-4 w-4" />
-                      الصلاحيات
+                      {t('employees.permissions')}
                     </Label>
                     <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/50">
                       {PERMISSIONS.map((perm) => (
@@ -400,10 +403,10 @@ const EmployeeManagement = () => {
 
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                      إلغاء
+                      {t('common.cancel')}
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'جاري الإضافة...' : 'إضافة الموظف'}
+                      {isSubmitting ? t('employees.adding') : t('employees.addEmployeeBtn')}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -422,7 +425,7 @@ const EmployeeManagement = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{employees.length}</p>
-                  <p className="text-sm text-muted-foreground">إجمالي الموظفين</p>
+                  <p className="text-sm text-muted-foreground">{t('employees.totalEmployees')}</p>
                 </div>
               </div>
             </CardContent>
@@ -436,7 +439,7 @@ const EmployeeManagement = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{employees.filter(e => e.is_active).length}</p>
-                  <p className="text-sm text-muted-foreground">نشط</p>
+                  <p className="text-sm text-muted-foreground">{t('employees.active')}</p>
                 </div>
               </div>
             </CardContent>
@@ -450,7 +453,7 @@ const EmployeeManagement = () => {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">{employees.filter(e => !e.is_active).length}</p>
-                  <p className="text-sm text-muted-foreground">غير نشط</p>
+                  <p className="text-sm text-muted-foreground">{t('employees.inactive')}</p>
                 </div>
               </div>
             </CardContent>
@@ -466,7 +469,7 @@ const EmployeeManagement = () => {
                   <p className="text-2xl font-bold">
                     {new Set(employees.map(e => e.department).filter(Boolean)).size}
                   </p>
-                  <p className="text-sm text-muted-foreground">أقسام</p>
+                  <p className="text-sm text-muted-foreground">{t('employees.departments')}</p>
                 </div>
               </div>
             </CardContent>
@@ -477,7 +480,7 @@ const EmployeeManagement = () => {
         <div className="relative max-w-md">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="البحث بالاسم أو البريد أو المسمى..."
+            placeholder={t('employees.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-10"
@@ -493,9 +496,9 @@ const EmployeeManagement = () => {
           <Card>
             <CardContent className="py-12 text-center">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium">لا يوجد موظفين</h3>
+              <h3 className="text-lg font-medium">{t('employees.noEmployees')}</h3>
               <p className="text-muted-foreground">
-                {searchQuery ? 'لا توجد نتائج للبحث' : 'ابدأ بإضافة موظفين جدد'}
+                {searchQuery ? t('employees.noSearchResults') : t('employees.startAdding')}
               </p>
             </CardContent>
           </Card>
@@ -525,7 +528,7 @@ const EmployeeManagement = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold truncate">{employee.full_name}</h3>
                           <Badge variant={employee.is_active ? 'default' : 'secondary'}>
-                            {employee.is_active ? 'نشط' : 'غير نشط'}
+                            {employee.is_active ? t('employees.active') : t('employees.inactive')}
                           </Badge>
                         </div>
 
@@ -587,12 +590,12 @@ const EmployeeManagement = () => {
                               {employee.is_active ? (
                                 <>
                                   <X className="h-4 w-4 ml-2" />
-                                  تعطيل الحساب
+                                  {t('employees.deactivate')}
                                 </>
                               ) : (
                                 <>
                                   <Check className="h-4 w-4 ml-2" />
-                                  تفعيل الحساب
+                                  {t('employees.activate')}
                                 </>
                               )}
                             </DropdownMenuItem>
@@ -600,7 +603,7 @@ const EmployeeManagement = () => {
                               onClick={() => setSelectedEmployeeForPosts(employee)}
                             >
                               <MessageSquare className="h-4 w-4 ml-2" />
-                              عرض المنشورات
+                              {t('employees.viewPosts')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

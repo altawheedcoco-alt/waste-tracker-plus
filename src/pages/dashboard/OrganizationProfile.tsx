@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,6 +52,7 @@ interface OrganizationDocument {
 
 const OrganizationProfile = () => {
   const { user, organization, profile, roles, refreshProfile } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -97,7 +99,7 @@ const OrganizationProfile = () => {
       }
     } catch (error) {
       console.error('Error fetching organization data:', error);
-      toast.error('حدث خطأ في تحميل البيانات');
+      toast.error(t('orgProfile.dataLoadError'));
     } finally {
       setLoading(false);
     }
@@ -151,11 +153,11 @@ const OrganizationProfile = () => {
 
       if (error) throw error;
       
-      toast.success('تم حفظ البيانات بنجاح');
+      toast.success(t('orgProfile.dataSaved'));
       await refreshProfile();
     } catch (error) {
       console.error('Error saving organization data:', error);
-      toast.error('حدث خطأ في حفظ البيانات');
+      toast.error(t('orgProfile.dataSaveError'));
     } finally {
       setSaving(false);
     }
@@ -168,13 +170,13 @@ const OrganizationProfile = () => {
     // Validate file type
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      toast.error('نوع الملف غير مدعوم. يرجى رفع PDF أو صورة.');
+      toast.error(t('orgProfile.unsupportedFileType'));
       return;
     }
 
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت.');
+      toast.error(t('orgProfile.fileTooLarge'));
       return;
     }
 
@@ -205,11 +207,11 @@ const OrganizationProfile = () => {
 
       if (dbError) throw dbError;
 
-      toast.success('تم رفع الملف بنجاح');
+      toast.success(t('orgProfile.fileUploaded'));
       fetchOrganizationData();
     } catch (error) {
       console.error('Error uploading file:', error);
-      toast.error('حدث خطأ في رفع الملف');
+      toast.error(t('orgProfile.fileUploadError'));
     } finally {
       setUploading(false);
     }
@@ -232,11 +234,11 @@ const OrganizationProfile = () => {
 
       if (error) throw error;
 
-      toast.success('تم حذف الملف');
+      toast.success(t('orgProfile.fileDeleted'));
       setDocuments(documents.filter(d => d.id !== doc.id));
     } catch (error) {
       console.error('Error deleting document:', error);
-      toast.error('حدث خطأ في حذف الملف');
+      toast.error(t('orgProfile.fileDeleteError'));
     }
   };
 
@@ -256,15 +258,15 @@ const OrganizationProfile = () => {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading document:', error);
-      toast.error('حدث خطأ في تحميل الملف');
+      toast.error(t('orgProfile.fileDownloadError'));
     }
   };
 
   const getOrganizationTypeLabel = (type: string) => {
     switch (type) {
-      case 'generator': return 'الجهة المولدة';
-      case 'transporter': return 'الجهة الناقلة';
-      case 'recycler': return 'الجهة المدورة';
+      case 'generator': return t('orgProfile.generatorType');
+      case 'transporter': return t('orgProfile.transporterType');
+      case 'recycler': return t('orgProfile.recyclerType');
       default: return type;
     }
   };
@@ -296,8 +298,8 @@ const OrganizationProfile = () => {
         <Card>
           <CardContent className="py-12 text-center">
             <Building2 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">لا توجد جهة مرتبطة</h3>
-            <p className="text-muted-foreground">لم يتم ربط حسابك بأي جهة بعد</p>
+            <h3 className="text-lg font-semibold mb-2">{t('orgProfile.noOrgLinked')}</h3>
+            <p className="text-muted-foreground">{t('orgProfile.noOrgLinkedDesc')}</p>
           </CardContent>
         </Card>
       </DashboardLayout>
@@ -339,31 +341,31 @@ const OrganizationProfile = () => {
           <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="portfolio">
               <Target className="w-4 h-4 ml-2" />
-              البورتفوليو
+              {t('orgProfile.portfolio')}
             </TabsTrigger>
             <TabsTrigger value="posts">
               <PenSquare className="w-4 h-4 ml-2" />
-              المنشورات
+              {t('orgProfile.posts')}
             </TabsTrigger>
             <TabsTrigger value="basic">
               <Building2 className="w-4 h-4 ml-2" />
-              البيانات الأساسية
+              {t('orgProfile.basicData')}
             </TabsTrigger>
             <TabsTrigger value="representatives">
               <Users className="w-4 h-4 ml-2" />
-              الممثلين
+              {t('orgProfile.representatives')}
             </TabsTrigger>
             <TabsTrigger value="stamps">
               <Stamp className="w-4 h-4 ml-2" />
-              الختم والتوقيع
+              {t('orgProfile.stampSignature')}
             </TabsTrigger>
             <TabsTrigger value="documents">
               <FileText className="w-4 h-4 ml-2" />
-              الوثائق
+              {t('orgProfile.documents')}
             </TabsTrigger>
             <TabsTrigger value="contact">
               <Phone className="w-4 h-4 ml-2" />
-              التواصل
+              {t('orgProfile.contactTab')}
             </TabsTrigger>
           </TabsList>
 
@@ -405,14 +407,14 @@ const OrganizationProfile = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="w-5 h-5" />
-                  البيانات الأساسية للجهة
+                  {t('orgProfile.basicDataTitle')}
                 </CardTitle>
-                <CardDescription>المعلومات الأساسية والتسجيلية للجهة</CardDescription>
+                <CardDescription>{t('orgProfile.basicDataDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>اسم الجهة (عربي)</Label>
+                    <Label>{t('orgProfile.orgNameAr')}</Label>
                     <Input
                       value={orgData?.name || ''}
                       onChange={(e) => setOrgData({ ...orgData, name: e.target.value })}
@@ -420,7 +422,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>اسم الجهة (إنجليزي)</Label>
+                    <Label>{t('orgProfile.orgNameEn')}</Label>
                     <Input
                       value={orgData?.name_en || ''}
                       onChange={(e) => setOrgData({ ...orgData, name_en: e.target.value })}
@@ -429,7 +431,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>رقم السجل التجاري</Label>
+                    <Label>{t('orgProfile.commercialRegister')}</Label>
                     <Input
                       value={orgData?.commercial_register || ''}
                       onChange={(e) => setOrgData({ ...orgData, commercial_register: e.target.value })}
@@ -437,7 +439,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>البطاقة الضريبية</Label>
+                    <Label>{t('orgProfile.taxCard')}</Label>
                     <Input
                       value={orgData?.tax_card || ''}
                       onChange={(e) => setOrgData({ ...orgData, tax_card: e.target.value })}
@@ -445,7 +447,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>رقم الموافقة البيئية</Label>
+                    <Label>{t('orgProfile.envApprovalNumber')}</Label>
                     <Input
                       value={orgData?.environmental_approval_number || ''}
                       onChange={(e) => setOrgData({ ...orgData, environmental_approval_number: e.target.value })}
@@ -453,7 +455,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>رقم الترخيص البيئي</Label>
+                    <Label>{t('orgProfile.envLicense')}</Label>
                     <Input
                       value={orgData?.environmental_license || ''}
                       onChange={(e) => setOrgData({ ...orgData, environmental_license: e.target.value })}
@@ -461,7 +463,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>رخصة جهاز تنظيم إدارة المخلفات</Label>
+                    <Label>{t('orgProfile.wmraLicense')}</Label>
                     <Input
                       value={orgData?.wmra_license || ''}
                       onChange={(e) => setOrgData({ ...orgData, wmra_license: e.target.value })}
@@ -469,7 +471,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>رقم تسجيل المنشأة</Label>
+                    <Label>{t('orgProfile.establishmentReg')}</Label>
                     <Input
                       value={orgData?.establishment_registration || ''}
                       onChange={(e) => setOrgData({ ...orgData, establishment_registration: e.target.value })}
@@ -477,7 +479,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>النشاط المسجل</Label>
+                    <Label>{t('orgProfile.registeredActivity')}</Label>
                     <Input
                       value={orgData?.registered_activity || ''}
                       onChange={(e) => setOrgData({ ...orgData, registered_activity: e.target.value })}
@@ -485,7 +487,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>نوع النشاط</Label>
+                    <Label>{t('orgProfile.activityType')}</Label>
                     <Input
                       value={orgData?.activity_type || ''}
                       onChange={(e) => setOrgData({ ...orgData, activity_type: e.target.value })}
@@ -493,7 +495,7 @@ const OrganizationProfile = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>الطاقة الإنتاجية</Label>
+                    <Label>{t('orgProfile.productionCapacity')}</Label>
                     <Input
                       value={orgData?.production_capacity || ''}
                       onChange={(e) => setOrgData({ ...orgData, production_capacity: e.target.value })}
@@ -507,10 +509,10 @@ const OrganizationProfile = () => {
                   <>
                     <Separator />
                     <div className="space-y-4">
-                      <h4 className="font-medium text-primary">بيانات خاصة بالجهة الناقلة</h4>
+                      <h4 className="font-medium text-primary">{t('orgProfile.transporterFields')}</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>رقم موافقة رخصة جهاز تنظيم النقل البري</Label>
+                          <Label>{t('orgProfile.landTransportLicense')}</Label>
                           <Input
                             value={orgData?.land_transport_license || ''}
                             onChange={(e) => setOrgData({ ...orgData, land_transport_license: e.target.value })}
@@ -527,10 +529,10 @@ const OrganizationProfile = () => {
                   <>
                     <Separator />
                     <div className="space-y-4">
-                      <h4 className="font-medium text-primary">بيانات خاصة بجهة التدوير</h4>
+                      <h4 className="font-medium text-primary">{t('orgProfile.recyclerFields')}</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>رقم الرخصة الهيئة العامة للتنمية الصناعية</Label>
+                          <Label>{t('orgProfile.idaLicense')}</Label>
                           <Input
                             value={orgData?.ida_license || ''}
                             onChange={(e) => setOrgData({ ...orgData, ida_license: e.target.value })}
@@ -538,7 +540,7 @@ const OrganizationProfile = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>رقم السجل الصناعي للهيئة العامة للتنمية الصناعية</Label>
+                          <Label>{t('orgProfile.industrialRegistry')}</Label>
                           <Input
                             value={orgData?.industrial_registry || ''}
                             onChange={(e) => setOrgData({ ...orgData, industrial_registry: e.target.value })}
@@ -546,7 +548,7 @@ const OrganizationProfile = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label>رقم الترخيص</Label>
+                          <Label>{t('orgProfile.licenseNumber')}</Label>
                           <Input
                             value={orgData?.license_number || ''}
                             onChange={(e) => setOrgData({ ...orgData, license_number: e.target.value })}
@@ -563,11 +565,11 @@ const OrganizationProfile = () => {
                 <div className="space-y-4">
                   <h4 className="font-medium flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
-                    العنوان
+                    {t('orgProfile.address')}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label>المدينة</Label>
+                      <Label>{t('orgProfile.city')}</Label>
                       <Input
                         value={orgData?.city || ''}
                         onChange={(e) => setOrgData({ ...orgData, city: e.target.value })}
@@ -575,7 +577,7 @@ const OrganizationProfile = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>المنطقة</Label>
+                      <Label>{t('orgProfile.region')}</Label>
                       <Input
                         value={orgData?.region || ''}
                         onChange={(e) => setOrgData({ ...orgData, region: e.target.value })}
@@ -583,7 +585,7 @@ const OrganizationProfile = () => {
                       />
                     </div>
                     <div className="space-y-2 md:col-span-3">
-                      <Label>العنوان التفصيلي</Label>
+                      <Label>{t('orgProfile.detailedAddress')}</Label>
                       <Input
                         value={orgData?.address || ''}
                         onChange={(e) => setOrgData({ ...orgData, address: e.target.value })}
@@ -597,7 +599,7 @@ const OrganizationProfile = () => {
                   <div className="flex justify-end">
                     <Button onClick={handleSave} disabled={saving}>
                       {saving ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Save className="w-4 h-4 ml-2" />}
-                      حفظ التغييرات
+                      {t('orgProfile.saveChanges')}
                     </Button>
                   </div>
                 )}

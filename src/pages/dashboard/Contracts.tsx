@@ -9,8 +9,10 @@ import ContractsList from '@/components/contracts/ContractsList';
 import ContractFormDialog from '@/components/contracts/ContractFormDialog';
 import ContractViewDialog from '@/components/contracts/ContractViewDialog';
 import { useContracts } from '@/hooks/useContracts';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Contracts = () => {
+  const { t } = useLanguage();
   const {
     loading,
     searchQuery,
@@ -45,16 +47,16 @@ const Contracts = () => {
           <div className="flex items-center gap-3">
             <BackButton fallbackPath="/dashboard" />
             <div className="text-right">
-              <h1 className="text-2xl font-bold flex items-center gap-2">
+                <h1 className="text-2xl font-bold flex items-center gap-2">
                 <FileCheck className="w-6 h-6" />
-                إدارة العقود
+                {t('contracts.title')}
               </h1>
-              <p className="text-muted-foreground">إدارة العقود والاتفاقيات مع الشركاء</p>
+              <p className="text-muted-foreground">{t('contracts.subtitle')}</p>
             </div>
           </div>
           <Button onClick={() => { resetForm(); setShowAddDialog(true); }} className="gap-2">
             <Plus className="w-4 h-4" />
-            إضافة عقد
+            {t('contracts.addContract')}
           </Button>
         </div>
 
@@ -64,7 +66,7 @@ const Contracts = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">عقود سارية</p>
+                  <p className="text-sm text-muted-foreground">{t('contracts.activeContracts')}</p>
                   <p className="text-2xl font-bold text-primary">{activeContracts.length}</p>
                 </div>
                 <CheckCircle2 className="w-8 h-8 text-primary" />
@@ -75,7 +77,7 @@ const Contracts = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">قيد العمل</p>
+                  <p className="text-sm text-muted-foreground">{t('contracts.pendingContracts')}</p>
                   <p className="text-2xl font-bold text-secondary-foreground">{pendingContracts.length}</p>
                 </div>
                 <Clock className="w-8 h-8 text-secondary-foreground" />
@@ -86,7 +88,7 @@ const Contracts = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">منتهية</p>
+                  <p className="text-sm text-muted-foreground">{t('contracts.expiredContracts')}</p>
                   <p className="text-2xl font-bold text-destructive">{expiredContracts.length}</p>
                 </div>
                 <XCircle className="w-8 h-8 text-destructive" />
@@ -99,7 +101,7 @@ const Contracts = () => {
         <div className="relative max-w-md">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="بحث في العقود..."
+            placeholder={t('contracts.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-10"
@@ -111,15 +113,15 @@ const Contracts = () => {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="active" className="gap-1">
               <CheckCircle2 className="w-4 h-4" />
-              عقود سارية ({activeContracts.length})
+              {t('contracts.activeContracts')} ({activeContracts.length})
             </TabsTrigger>
             <TabsTrigger value="pending" className="gap-1">
               <Clock className="w-4 h-4" />
-              قيد العمل ({pendingContracts.length})
+              {t('contracts.pendingContracts')} ({pendingContracts.length})
             </TabsTrigger>
             <TabsTrigger value="expired" className="gap-1">
               <XCircle className="w-4 h-4" />
-              منتهية ({expiredContracts.length})
+              {t('contracts.expiredContracts')} ({expiredContracts.length})
             </TabsTrigger>
           </TabsList>
 
@@ -131,7 +133,7 @@ const Contracts = () => {
             ) : (
               <ContractsList 
                 contracts={activeContracts} 
-                emptyMessage="لا توجد عقود سارية حالياً"
+                emptyMessage={t('contracts.noActiveContracts')}
                 filterContracts={filterContracts}
                 onView={(c) => { setSelectedContract(c); setShowViewDialog(true); }}
                 onEdit={handleEdit}
@@ -150,7 +152,7 @@ const Contracts = () => {
             ) : (
               <ContractsList 
                 contracts={pendingContracts} 
-                emptyMessage="لا توجد عقود قيد العمل"
+                emptyMessage={t('contracts.noPendingContracts')}
                 filterContracts={filterContracts}
                 onView={(c) => { setSelectedContract(c); setShowViewDialog(true); }}
                 onEdit={handleEdit}
@@ -169,7 +171,7 @@ const Contracts = () => {
             ) : (
               <ContractsList 
                 contracts={expiredContracts} 
-                emptyMessage="لا توجد عقود منتهية"
+                emptyMessage={t('contracts.noExpiredContracts')}
                 filterContracts={filterContracts}
                 onView={(c) => { setSelectedContract(c); setShowViewDialog(true); }}
                 onEdit={handleEdit}
