@@ -15,6 +15,7 @@ import {
   Search, FileText, FileCheck, Receipt, Truck, Recycle, Factory,
   Download, Eye, Clock, Building2, ArrowUpDown,
   FolderOpen, Inbox, Send as SendIcon, FileArchive, Scale, Briefcase, Bell,
+  Weight, Banknote, Image,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -32,7 +33,9 @@ const DOC_TYPES: Record<string, { label: string; icon: typeof FileText; color: s
   declaration: { label: 'الإقرارات', icon: FileText, color: 'text-orange-600' },
   award_letter: { label: 'خطابات الترسية', icon: Briefcase, color: 'text-teal-600' },
   recycling_report: { label: 'تقارير التدوير', icon: Recycle, color: 'text-green-600' },
-  weight_record: { label: 'سجلات الوزن', icon: Scale, color: 'text-cyan-600' },
+  weight_record: { label: 'سجلات الوزن الخارجية', icon: Weight, color: 'text-cyan-600' },
+  weighbridge_photo: { label: 'صور الوزنات', icon: Image, color: 'text-sky-600' },
+  deposit: { label: 'الإيداعات', icon: Banknote, color: 'text-lime-600' },
   entity_document: { label: 'مستندات مرفوعة', icon: FileArchive, color: 'text-rose-600' },
   other: { label: 'مستندات أخرى', icon: FileText, color: 'text-muted-foreground' },
 };
@@ -294,13 +297,109 @@ const DocumentArchive = () => {
     enabled: !!orgId,
   });
 
-  const isLoading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8;
+  // ─── 9. Deposits (إيداعات) ───
+  const { data: depositDocs = [], isLoading: l9 } = useQuery({
+    queryKey: ['doc-archive-deposits', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data, error } = await supabase
+        .from('deposits')
+        .select('id, reference_number, depositor_name, amount, currency, deposit_date, receipt_url, transfer_method, bank_name, created_at, partner_organization_id')
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      return (data || []).map((d: any): ArchiveDoc => ({
+        id: d.id,
+        title: `إيداع ${d.reference_number || ''} - ${d.depositor_name || ''}`.trim(),
+        type: 'deposit',
+        date: d.created_at,
+        source: 'system',
+        amount: d.amount,
+        fileUrl: d.receipt_url,
+        dedupKey: `deposit-${d.id}`,
+      }));
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── 10. External Weight Records (وزنات خارجية) ───
+  const { data: weightDocs = [], isLoading: l10 } = useQuery({
+    queryKey: ['doc-archive-weights', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data, error } = await supabase
+        .from('external_weight_records')
+        .select('id, company_name, quantity, unit, waste_type, record_date, notes, created_at')
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      return (data || []).map((d: any): ArchiveDoc => ({
+        id: d.id,
+        title: `وزنة ${d.company_name || ''} - ${d.quantity} ${d.unit} ${d.waste_type || ''}`.trim(),
+        type: 'weight_record',
+        date: d.created_at,
+        source: 'system',
+        dedupKey: `weight-${d.id}`,
+      }));
+    },
+    enabled: !!orgId,
+  });
+
+  // ─── 11. Weighbridge Photos (صور الوزنات من الشحنات) ───
+  const { data: weighbridgeDocs = [], isLoading: l11 } = useQuery({
+    queryKey: ['doc-archive-weighbridge', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data, error } = await supabase
+        .from('shipments')
+        .select('id, shipment_number, pickup_weighbridge_photo_url, delivery_weighbridge_photo_url, created_at, generator_id, recycler_id, transporter_id')
+        .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`)
+        .not('pickup_weighbridge_photo_url', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(300);
+      if (error) throw error;
+      const docs: ArchiveDoc[] = [];
+      (data || []).forEach((d: any) => {
+        if (d.pickup_weighbridge_photo_url) {
+          docs.push({
+            id: `${d.id}-pickup`,
+            title: `صورة وزنة استلام - شحنة ${d.shipment_number || ''}`.trim(),
+            type: 'weighbridge_photo',
+            date: d.created_at,
+            source: 'system',
+            fileUrl: d.pickup_weighbridge_photo_url,
+            referenceId: d.id,
+            dedupKey: `wb-pickup-${d.id}`,
+          });
+        }
+        if (d.delivery_weighbridge_photo_url) {
+          docs.push({
+            id: `${d.id}-delivery`,
+            title: `صورة وزنة تسليم - شحنة ${d.shipment_number || ''}`.trim(),
+            type: 'weighbridge_photo',
+            date: d.created_at,
+            source: 'system',
+            fileUrl: d.delivery_weighbridge_photo_url,
+            referenceId: d.id,
+            dedupKey: `wb-delivery-${d.id}`,
+          });
+        }
+      });
+      return docs;
+    },
+    enabled: !!orgId,
+  });
+
+  const isLoading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9 || l10 || l11;
 
   // ─── Combine + Deduplicate ───
   const allDocs = useMemo(() => {
     const combined: ArchiveDoc[] = [
       ...issuedDocs, ...receivedDocs, ...sentDocs,
       ...invoiceDocs, ...certDocs, ...awardDocs, ...contractDocs, ...entityDocs,
+      ...depositDocs, ...weightDocs, ...weighbridgeDocs,
     ];
 
     // Dedup by dedupKey
@@ -320,7 +419,7 @@ const DocumentArchive = () => {
       return sortDesc ? dateB - dateA : dateA - dateB;
     });
     return deduped;
-  }, [issuedDocs, receivedDocs, sentDocs, invoiceDocs, certDocs, awardDocs, contractDocs, entityDocs, sortDesc]);
+  }, [issuedDocs, receivedDocs, sentDocs, invoiceDocs, certDocs, awardDocs, contractDocs, entityDocs, depositDocs, weightDocs, weighbridgeDocs, sortDesc]);
 
   // ─── Filter ───
   const filteredDocs = useMemo(() => {
@@ -432,7 +531,7 @@ const DocumentArchive = () => {
           <div>
             <h1 className="text-xl font-bold">أرشيف المستندات</h1>
             <p className="text-sm text-muted-foreground">
-              جميع المستندات من كل المصادر تلقائياً — فواتير، شهادات، عقود، ترسيات، مرفقات
+              جميع المستندات تلقائياً — فواتير، شهادات، عقود، ترسيات، إيداعات، وزنات، صور وزنات، مرفقات
             </p>
           </div>
         </div>
