@@ -40,6 +40,7 @@ import {
   Phone,
   MapPin,
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Organization {
   id: string;
@@ -55,6 +56,7 @@ interface Organization {
 }
 
 const CompanyManagement = () => {
+  const { t } = useLanguage();
   const { toast } = useToast();
   const [companies, setCompanies] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,8 +82,8 @@ const CompanyManagement = () => {
     } catch (error: any) {
       console.error('Error fetching companies:', error);
       toast({
-        title: 'خطأ',
-        description: 'فشل في جلب بيانات الشركات',
+        title: t('companies.error'),
+        description: t('companies.fetchError'),
         variant: 'destructive',
       });
     } finally {
@@ -122,11 +124,11 @@ const CompanyManagement = () => {
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'generator':
-        return 'الجهة المولدة';
+        return t('companies.generatorEntity');
       case 'transporter':
-        return 'الجهة الناقلة';
+        return t('companies.transporterEntity');
       case 'recycler':
-        return 'الجهة المدورة';
+        return t('companies.recyclerEntity');
       default:
         return type;
     }
@@ -170,15 +172,15 @@ const CompanyManagement = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Building2 className="h-7 w-7 text-primary" />
-              إدارة الشركات
+              {t('companies.title')}
             </h1>
             <p className="text-muted-foreground mt-1">
-              إضافة وإدارة الشركات المسجلة في النظام
+              {t('companies.subtitle')}
             </p>
           </div>
           <Button onClick={() => setAddDialogOpen(true)} className="gap-2">
             <Plus className="h-4 w-4" />
-            إضافة شركة جديدة
+            {t('companies.addNew')}
           </Button>
         </div>
 
@@ -187,37 +189,37 @@ const CompanyManagement = () => {
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-primary">{stats.total}</p>
-              <p className="text-sm text-muted-foreground">إجمالي الشركات</p>
+              <p className="text-sm text-muted-foreground">{t('companies.totalCompanies')}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-amber-500/10 to-amber-500/5">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-amber-600">{stats.generators}</p>
-              <p className="text-sm text-muted-foreground">جهات مولدة</p>
+              <p className="text-sm text-muted-foreground">{t('companies.generatorEntities')}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-blue-600">{stats.transporters}</p>
-              <p className="text-sm text-muted-foreground">شركات نقل</p>
+              <p className="text-sm text-muted-foreground">{t('companies.transportCompanies')}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-green-600">{stats.recyclers}</p>
-              <p className="text-sm text-muted-foreground">جهات تدوير</p>
+              <p className="text-sm text-muted-foreground">{t('companies.recyclerEntities')}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-purple-600">{stats.verified}</p>
-              <p className="text-sm text-muted-foreground">موثقة</p>
+              <p className="text-sm text-muted-foreground">{t('companies.verifiedLabel')}</p>
             </CardContent>
           </Card>
           <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5">
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-emerald-600">{stats.active}</p>
-              <p className="text-sm text-muted-foreground">نشطة</p>
+              <p className="text-sm text-muted-foreground">{t('companies.activeLabel')}</p>
             </CardContent>
           </Card>
         </div>
@@ -229,7 +231,7 @@ const CompanyManagement = () => {
               <div className="flex-1 relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="البحث بالاسم أو البريد أو المدينة..."
+                  placeholder={t('companies.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10"
@@ -237,30 +239,30 @@ const CompanyManagement = () => {
               </div>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="نوع الشركة" />
+                  <SelectValue placeholder={t('companies.companyType')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الأنواع</SelectItem>
-                  <SelectItem value="generator">جهات مولدة</SelectItem>
-                  <SelectItem value="transporter">شركات نقل</SelectItem>
-                  <SelectItem value="recycler">جهات تدوير</SelectItem>
+                  <SelectItem value="all">{t('companies.allTypes')}</SelectItem>
+                  <SelectItem value="generator">{t('companies.generatorEntities')}</SelectItem>
+                  <SelectItem value="transporter">{t('companies.transportCompanies')}</SelectItem>
+                  <SelectItem value="recycler">{t('companies.recyclerEntities')}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="الحالة" />
+                  <SelectValue placeholder={t('companies.status')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الحالات</SelectItem>
-                  <SelectItem value="active">نشطة</SelectItem>
-                  <SelectItem value="inactive">غير نشطة</SelectItem>
-                  <SelectItem value="verified">موثقة</SelectItem>
-                  <SelectItem value="unverified">غير موثقة</SelectItem>
+                  <SelectItem value="all">{t('companies.allStatuses')}</SelectItem>
+                  <SelectItem value="active">{t('companies.active')}</SelectItem>
+                  <SelectItem value="inactive">{t('companies.inactive')}</SelectItem>
+                  <SelectItem value="verified">{t('companies.verified')}</SelectItem>
+                  <SelectItem value="unverified">{t('companies.unverified')}</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={fetchCompanies} className="gap-2">
                 <RefreshCcw className="h-4 w-4" />
-                تحديث
+                {t('companies.refresh')}
               </Button>
             </div>
           </CardContent>
@@ -270,7 +272,7 @@ const CompanyManagement = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
-              الشركات ({filteredCompanies.length})
+              {t('companies.companiesCount')} ({filteredCompanies.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -281,19 +283,19 @@ const CompanyManagement = () => {
             ) : filteredCompanies.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>لا توجد شركات مطابقة</p>
+                <p>{t('companies.noMatchingCompanies')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-right">الشركة</TableHead>
-                      <TableHead className="text-right">النوع</TableHead>
-                      <TableHead className="text-right">التواصل</TableHead>
-                      <TableHead className="text-right">المدينة</TableHead>
-                      <TableHead className="text-right">الحالة</TableHead>
-                      <TableHead className="text-right">الإجراءات</TableHead>
+                      <TableHead className="text-right">{t('companies.company')}</TableHead>
+                      <TableHead className="text-right">{t('companies.type')}</TableHead>
+                      <TableHead className="text-right">{t('companies.contact')}</TableHead>
+                      <TableHead className="text-right">{t('companies.city')}</TableHead>
+                      <TableHead className="text-right">{t('companies.statusCol')}</TableHead>
+                      <TableHead className="text-right">{t('companies.actionsCol')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -340,21 +342,21 @@ const CompanyManagement = () => {
                             {company.is_verified ? (
                               <Badge variant="default" className="gap-1 bg-green-600 w-fit">
                                 <CheckCircle className="h-3 w-3" />
-                                موثقة
+                                {t('companies.verified')}
                               </Badge>
                             ) : (
                               <Badge variant="secondary" className="gap-1 w-fit">
                                 <XCircle className="h-3 w-3" />
-                                غير موثقة
+                                {t('companies.unverified')}
                               </Badge>
                             )}
                             {company.is_active ? (
                               <Badge variant="outline" className="gap-1 border-green-500 text-green-600 w-fit">
-                                نشطة
+                                {t('companies.active')}
                               </Badge>
                             ) : (
                               <Badge variant="outline" className="gap-1 border-red-500 text-red-600 w-fit">
-                                غير نشطة
+                                {t('companies.inactive')}
                               </Badge>
                             )}
                           </div>
@@ -362,7 +364,7 @@ const CompanyManagement = () => {
                         <TableCell>
                           <Button variant="ghost" size="sm" className="gap-2">
                             <Eye className="h-4 w-4" />
-                            عرض
+                            {t('companies.view')}
                           </Button>
                         </TableCell>
                       </TableRow>

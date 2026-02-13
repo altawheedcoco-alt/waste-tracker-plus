@@ -29,8 +29,8 @@ import {
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-// Import refactored components
 import {
   DocumentsTable,
   VerificationStatsGrid,
@@ -45,6 +45,7 @@ import {
 } from '@/components/verification';
 
 const DocumentVerification = () => {
+  const { t } = useLanguage();
   const {
     documents,
     loading,
@@ -83,15 +84,15 @@ const DocumentVerification = () => {
       if (url) {
         setPreviewUrl(url);
       } else {
-        setPreviewError('فشل في تحميل المستند');
+        setPreviewError(t('verification.loadFailed'));
       }
     } catch (error) {
       console.error('Error loading preview:', error);
-      setPreviewError('فشل في تحميل المستند');
+      setPreviewError(t('verification.loadFailed'));
     } finally {
       setPreviewLoading(false);
     }
-  }, [getDocumentUrl]);
+  }, [getDocumentUrl, t]);
 
   const runAIAnalysis = async (doc: OrganizationDocument) => {
     setAnalyzing(true);
@@ -129,14 +130,14 @@ const DocumentVerification = () => {
           previous_status: doc.verification_status || 'pending',
           new_status: doc.verification_status || 'pending',
           verified_by: user?.id,
-          notes: 'تحليل قانوني بالذكاء الاصطناعي: ' + analysis.summary,
+          notes: t('verification.aiAnalysisNote') + ': ' + analysis.summary,
           ai_analysis: analysis as any,
         }]);
 
-      toast.success('تم تحليل المستند قانونياً');
+      toast.success(t('verification.analysisSuccess'));
     } catch (error) {
       console.error('AI Analysis error:', error);
-      toast.error('فشل في تحليل المستند');
+      toast.error(t('verification.analysisFailed'));
     } finally {
       setAnalyzing(false);
     }
@@ -176,7 +177,7 @@ const DocumentVerification = () => {
     if (url) {
       window.open(url, '_blank');
     } else {
-      toast.error('فشل في فتح المستند');
+      toast.error(t('verification.openFailed'));
     }
   };
 
@@ -218,19 +219,19 @@ const DocumentVerification = () => {
               ) : (
                 <Gavel className="w-4 h-4" />
               )}
-              تحقق قانوني تلقائي
+              {t('verification.autoVerify')}
             </Button>
             <Button variant="outline" onClick={fetchDocuments} className="gap-2">
               <RotateCw className="w-4 h-4" />
-              تحديث
+              {t('verification.refresh')}
             </Button>
           </div>
           <div className="text-right">
             <h1 className="text-3xl font-bold flex items-center gap-3 justify-end">
               <Scale className="w-8 h-8 text-primary" />
-              نظام التحقق القانوني من المستندات
+              {t('verification.title')}
             </h1>
-            <p className="text-muted-foreground">مراجعة وتوثيق المستندات القانونية للجهات تلقائياً</p>
+            <p className="text-muted-foreground">{t('verification.subtitle')}</p>
           </div>
         </div>
 
@@ -243,9 +244,9 @@ const DocumentVerification = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-muted-foreground">
-                  {Math.round((stats.verified / stats.total) * 100)}% مكتمل
+                  {Math.round((stats.verified / stats.total) * 100)}% {t('verification.complete')}
                 </span>
-                <span className="text-sm font-medium">نسبة التحقق</span>
+                <span className="text-sm font-medium">{t('verification.verificationProgress')}</span>
               </div>
               <Progress value={(stats.verified / stats.total) * 100} className="h-2" />
             </CardContent>
@@ -257,17 +258,16 @@ const DocumentVerification = () => {
           <CardHeader className="text-right">
             <CardTitle className="flex items-center gap-2 justify-end">
               <FileText className="w-5 h-5" />
-              قائمة المستندات
+              {t('verification.documentList')}
             </CardTitle>
-            <CardDescription>جميع المستندات المقدمة من الجهات مع التحقق القانوني التلقائي</CardDescription>
+            <CardDescription>{t('verification.documentListDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Search & Tabs */}
             <div className="space-y-4 mb-6">
               <div className="relative">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="بحث بالاسم أو نوع المستند أو اسم الجهة..."
+                  placeholder={t('verification.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 text-right"
@@ -275,11 +275,11 @@ const DocumentVerification = () => {
               </div>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="all">الكل ({stats.total})</TabsTrigger>
-                  <TabsTrigger value="pending">معلق ({stats.pending})</TabsTrigger>
-                  <TabsTrigger value="verified">موثق ({stats.verified})</TabsTrigger>
-                  <TabsTrigger value="rejected">مرفوض ({stats.rejected})</TabsTrigger>
-                  <TabsTrigger value="review">مراجعة ({stats.requiresReview})</TabsTrigger>
+                  <TabsTrigger value="all">{t('verification.all')} ({stats.total})</TabsTrigger>
+                  <TabsTrigger value="pending">{t('verification.pending')} ({stats.pending})</TabsTrigger>
+                  <TabsTrigger value="verified">{t('verification.verified')} ({stats.verified})</TabsTrigger>
+                  <TabsTrigger value="rejected">{t('verification.rejected')} ({stats.rejected})</TabsTrigger>
+                  <TabsTrigger value="review">{t('verification.review')} ({stats.requiresReview})</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
@@ -300,17 +300,16 @@ const DocumentVerification = () => {
             <DialogHeader className="text-right">
               <DialogTitle className="flex items-center gap-2 justify-end">
                 <Scale className="w-5 h-5" />
-                مراجعة المستند القانونية
+                {t('verification.reviewDialog')}
               </DialogTitle>
               <DialogDescription>
-                مراجعة تفصيلية للمستند مع التحليل القانوني بالذكاء الاصطناعي
+                {t('verification.reviewDialogDesc')}
               </DialogDescription>
             </DialogHeader>
 
             {selectedDoc && (
               <ScrollArea className="max-h-[60vh] pr-4">
                 <div className="space-y-6">
-                  {/* Document Preview */}
                   <DocumentPreviewPanel
                     document={selectedDoc}
                     previewUrl={previewUrl}
@@ -321,23 +320,15 @@ const DocumentVerification = () => {
                     onAnalyze={runAIAnalysis}
                     onPreviewError={setPreviewError}
                   />
-
-                  {/* Document Info */}
                   <DocumentInfoGrid document={selectedDoc} />
-
-                  {/* AI Legal Analysis Results */}
                   {currentAnalysis && (
                     <AILegalAnalysisPanel analysis={currentAnalysis} />
                   )}
-
-                  {/* Verification History */}
                   <VerificationHistoryPanel
                     history={verificationHistory}
                     isOpen={historyOpen}
                     onOpenChange={setHistoryOpen}
                   />
-
-                  {/* Verification Actions */}
                   {(selectedDoc.verification_status === 'pending' || 
                     !selectedDoc.verification_status ||
                     selectedDoc.verification_status === 'requires_review') && (
@@ -354,7 +345,7 @@ const DocumentVerification = () => {
 
             <DialogFooter className="gap-2 flex-row-reverse sm:flex-row-reverse">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                إغلاق
+                {t('verification.close')}
               </Button>
               {selectedDoc && (selectedDoc.verification_status === 'pending' || 
                 !selectedDoc.verification_status ||
@@ -368,7 +359,7 @@ const DocumentVerification = () => {
                   >
                     {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                     <AlertTriangle className="w-4 h-4" />
-                    تحويل للمراجعة
+                    {t('verification.sendToReview')}
                   </Button>
                   <Button
                     variant="destructive"
@@ -378,7 +369,7 @@ const DocumentVerification = () => {
                   >
                     {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                     <X className="w-4 h-4" />
-                    رفض
+                    {t('verification.reject')}
                   </Button>
                   <Button
                     onClick={() => onVerify(selectedDoc.id, 'verified')}
@@ -387,7 +378,7 @@ const DocumentVerification = () => {
                   >
                     {actionLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                     <Check className="w-4 h-4" />
-                    توثيق
+                    {t('verification.verify')}
                   </Button>
                 </>
               )}
