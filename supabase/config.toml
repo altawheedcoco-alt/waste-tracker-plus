@@ -116,3 +116,12 @@ verify_jwt = false
 
 [functions.seed-demo-scenario]
 verify_jwt = false
+
+[functions.commodity-market-analysis]
+verify_jwt = false
+
+[functions.waste-flow-analysis]
+verify_jwt = false
+
+[functions.esg-report-generator]
+verify_jwt = false

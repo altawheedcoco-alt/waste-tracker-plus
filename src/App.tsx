@@ -142,6 +142,9 @@ const ERPRevenueExpensesAnalysis = lazy(() => import("./pages/dashboard/erp/ERPR
 const ERPCogs = lazy(() => import("./pages/dashboard/erp/ERPCogs"));
 const ERPFinancialComparisons = lazy(() => import("./pages/dashboard/erp/ERPFinancialComparisons"));
 const DocumentArchive = lazy(() => import("./pages/dashboard/DocumentArchive"));
+const GlobalCommodityExchange = lazy(() => import("./pages/dashboard/GlobalCommodityExchange"));
+const WasteFlowHeatmap = lazy(() => import("./pages/dashboard/WasteFlowHeatmap"));
+const ESGReports = lazy(() => import("./pages/dashboard/ESGReports"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -332,6 +335,9 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/erp/cogs" element={<ERPCogs />} />
         <Route path="/dashboard/erp/financial-comparisons" element={<ERPFinancialComparisons />} />
         <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
+        <Route path="/dashboard/commodity-exchange" element={<GlobalCommodityExchange />} />
+        <Route path="/dashboard/waste-flow-heatmap" element={<WasteFlowHeatmap />} />
+        <Route path="/dashboard/esg-reports" element={<ESGReports />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
