@@ -31,8 +31,9 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLanguage } from '@/contexts/LanguageContext';
 
-interface CommandItem {
+interface CommandItemType {
   icon: React.ElementType;
   label: string;
   path: string;
@@ -44,38 +45,37 @@ const CommandPalette = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { organization, roles } = useAuth();
+  const { t } = useLanguage();
 
   const isAdmin = roles.includes('admin');
   const isTransporter = organization?.organization_type === 'transporter';
 
-  const navigationItems: CommandItem[] = [
-    { icon: LayoutDashboard, label: 'لوحة التحكم', path: '/dashboard', keywords: ['home', 'main'], category: 'navigation' },
-    { icon: Building2, label: 'ملف الجهة', path: '/dashboard/organization-profile', keywords: ['organization', 'company'], category: 'navigation' },
-    { icon: Package, label: 'الشحنات', path: isTransporter ? '/dashboard/transporter-shipments' : '/dashboard/shipments', keywords: ['shipment', 'delivery'], category: 'navigation' },
-    { icon: BarChart3, label: 'التقارير', path: '/dashboard/reports', keywords: ['reports', 'analytics'], category: 'navigation' },
-    { icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', keywords: ['notifications', 'alerts'], category: 'navigation' },
-    { icon: Settings, label: 'الإعدادات', path: '/dashboard/settings', keywords: ['settings', 'preferences'], category: 'navigation' },
-    { icon: Leaf, label: 'الاستدامة البيئية', path: '/dashboard/environmental-sustainability', keywords: ['environment', 'green'], category: 'navigation' },
-    { icon: Bot, label: 'أدوات الذكاء الاصطناعي', path: '/dashboard/ai-tools', keywords: ['ai', 'tools'], category: 'navigation' },
+  const navigationItems: CommandItemType[] = [
+    { icon: LayoutDashboard, label: t('commandPalette.dashboard'), path: '/dashboard', keywords: ['home', 'main'], category: 'navigation' },
+    { icon: Building2, label: t('commandPalette.orgProfile'), path: '/dashboard/organization-profile', keywords: ['organization', 'company'], category: 'navigation' },
+    { icon: Package, label: t('commandPalette.shipments'), path: isTransporter ? '/dashboard/transporter-shipments' : '/dashboard/shipments', keywords: ['shipment', 'delivery'], category: 'navigation' },
+    { icon: BarChart3, label: t('commandPalette.reports'), path: '/dashboard/reports', keywords: ['reports', 'analytics'], category: 'navigation' },
+    { icon: Bell, label: t('commandPalette.notifications'), path: '/dashboard/notifications', keywords: ['notifications', 'alerts'], category: 'navigation' },
+    { icon: Settings, label: t('commandPalette.settings'), path: '/dashboard/settings', keywords: ['settings', 'preferences'], category: 'navigation' },
+    { icon: Leaf, label: t('commandPalette.envSustainability'), path: '/dashboard/environmental-sustainability', keywords: ['environment', 'green'], category: 'navigation' },
+    { icon: Bot, label: t('commandPalette.aiTools'), path: '/dashboard/ai-tools', keywords: ['ai', 'tools'], category: 'navigation' },
   ];
 
-  const transporterItems: CommandItem[] = isTransporter ? [
-    { icon: Users, label: 'السائقين', path: '/dashboard/transporter-drivers', keywords: ['drivers'], category: 'navigation' },
-    { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', keywords: ['tracking', 'location'], category: 'navigation' },
+  const transporterItems: CommandItemType[] = isTransporter ? [
+    { icon: Users, label: t('commandPalette.drivers'), path: '/dashboard/transporter-drivers', keywords: ['drivers'], category: 'navigation' },
+    { icon: MapPin, label: t('commandPalette.driverTracking'), path: '/dashboard/driver-tracking', keywords: ['tracking', 'location'], category: 'navigation' },
   ] : [];
 
-  const adminItems: CommandItem[] = isAdmin ? [
-    { icon: CheckSquare, label: 'موافقات الشركات', path: '/dashboard/company-approvals', keywords: ['approvals'], category: 'admin' },
-    { icon: UserPlus, label: 'موافقات السائقين', path: '/dashboard/driver-approvals', keywords: ['driver approvals'], category: 'admin' },
-    { icon: FileText, label: 'وثائق الجهات', path: '/dashboard/organization-documents', keywords: ['documents'], category: 'admin' },
-    { icon: MapPin, label: 'تتبع السائقين', path: '/dashboard/driver-tracking', keywords: ['tracking'], category: 'admin' },
+  const adminItems: CommandItemType[] = isAdmin ? [
+    { icon: CheckSquare, label: t('commandPalette.companyApprovals'), path: '/dashboard/company-approvals', keywords: ['approvals'], category: 'admin' },
+    { icon: UserPlus, label: t('commandPalette.driverApprovals'), path: '/dashboard/driver-approvals', keywords: ['driver approvals'], category: 'admin' },
+    { icon: FileText, label: t('commandPalette.orgDocuments'), path: '/dashboard/organization-documents', keywords: ['documents'], category: 'admin' },
+    { icon: MapPin, label: t('commandPalette.driverTracking'), path: '/dashboard/driver-tracking', keywords: ['tracking'], category: 'admin' },
   ] : [];
 
-  const actionItems: CommandItem[] = [
-    { icon: Plus, label: 'إنشاء شحنة جديدة', path: '/dashboard/shipments/new', keywords: ['create', 'new shipment'], category: 'actions' },
+  const actionItems: CommandItemType[] = [
+    { icon: Plus, label: t('commandPalette.newShipment'), path: '/dashboard/shipments/new', keywords: ['create', 'new shipment'], category: 'actions' },
   ];
-
-  const allItems = [...navigationItems, ...transporterItems, ...adminItems, ...actionItems];
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -105,24 +105,24 @@ const CommandPalette = () => {
               onClick={() => setOpen(true)}
             >
               <Search className="h-4 w-4 xl:ml-2" />
-              <span className="hidden xl:inline-flex">بحث سريع...</span>
+              <span className="hidden xl:inline-flex">{t('commandPalette.quickSearch')}</span>
               <kbd className="pointer-events-none absolute left-1.5 top-1.5 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
                 <span className="text-xs">⌘</span>K
               </kbd>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            <p>بحث سريع (⌘K)</p>
+            <p>{t('commandPalette.quickSearchTooltip')}</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="ابحث عن صفحة أو إجراء..." className="text-right" />
+        <CommandInput placeholder={t('commandPalette.searchPlaceholder')} className="text-right" />
         <CommandList>
-          <CommandEmpty>لا توجد نتائج.</CommandEmpty>
+          <CommandEmpty>{t('commandPalette.noResults')}</CommandEmpty>
           
-          <CommandGroup heading="التنقل">
+          <CommandGroup heading={t('commandPalette.navigation')}>
             {navigationItems.map((item) => (
               <CommandItem
                 key={item.path}
@@ -150,7 +150,7 @@ const CommandPalette = () => {
           {isAdmin && (
             <>
               <CommandSeparator />
-              <CommandGroup heading="الإدارة">
+              <CommandGroup heading={t('commandPalette.administration')}>
                 {adminItems.map((item) => (
                   <CommandItem
                     key={item.path}
@@ -167,7 +167,7 @@ const CommandPalette = () => {
           )}
 
           <CommandSeparator />
-          <CommandGroup heading="إجراءات سريعة">
+          <CommandGroup heading={t('commandPalette.quickActions')}>
             {actionItems.map((item) => (
               <CommandItem
                 key={item.path}

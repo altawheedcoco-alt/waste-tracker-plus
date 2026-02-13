@@ -30,6 +30,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ChatHeaderProps {
   partnerName: string;
@@ -56,6 +57,7 @@ const ChatHeader = ({
   onToggleSound,
   isMobile = false
 }: ChatHeaderProps) => {
+  const { t } = useLanguage();
   
   const getOrgTypeIcon = () => {
     switch (partnerType) {
@@ -68,10 +70,10 @@ const ChatHeader = ({
 
   const getOrgTypeName = () => {
     switch (partnerType) {
-      case 'generator': return 'مُنتج نفايات';
-      case 'transporter': return 'ناقل نفايات';
-      case 'recycler': return 'مُعالج نفايات';
-      default: return 'شريك';
+      case 'generator': return t('chat.wasteGenerator');
+      case 'transporter': return t('chat.wasteTransporter');
+      case 'recycler': return t('chat.wasteRecycler');
+      default: return t('chat.partner');
     }
   };
 
@@ -85,21 +87,14 @@ const ChatHeader = ({
       {/* Right Side - Partner Info */}
       <div className="flex items-center gap-3">
         {onBack && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onBack}
-            className="h-9 w-9 shrink-0"
-          >
+          <Button variant="ghost" size="icon" onClick={onBack} className="h-9 w-9 shrink-0">
             <ArrowRight className="w-5 h-5" />
           </Button>
         )}
 
         <div className="relative">
           <Avatar className={cn(isMobile ? "h-10 w-10" : "h-11 w-11")}>
-            {partnerLogo ? (
-              <AvatarImage src={partnerLogo} />
-            ) : null}
+            {partnerLogo ? <AvatarImage src={partnerLogo} /> : null}
             <AvatarFallback className="bg-primary/10">
               <Icon className="w-5 h-5 text-primary" />
             </AvatarFallback>
@@ -118,10 +113,10 @@ const ChatHeader = ({
               {getOrgTypeName()}
             </Badge>
             {isOnline ? (
-              <span className="text-[11px] text-emerald-600 font-medium">متصل الآن</span>
+              <span className="text-[11px] text-emerald-600 font-medium">{t('chat.onlineNow')}</span>
             ) : lastSeen && (
               <span className="text-[11px] text-muted-foreground">
-                آخر ظهور {lastSeen}
+                {t('chat.lastSeen')} {lastSeen}
               </span>
             )}
           </div>
@@ -138,7 +133,7 @@ const ChatHeader = ({
                   <Phone className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>مكالمة صوتية</TooltipContent>
+              <TooltipContent>{t('chat.voiceCall')}</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -147,23 +142,18 @@ const ChatHeader = ({
                   <Video className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>مكالمة فيديو</TooltipContent>
+              <TooltipContent>{t('chat.videoCall')}</TooltipContent>
             </Tooltip>
           </>
         )}
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-9 w-9"
-              onClick={onSearch}
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9" onClick={onSearch}>
               <Search className="w-4 h-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>بحث في المحادثة</TooltipContent>
+          <TooltipContent>{t('chat.searchChat')}</TooltipContent>
         </Tooltip>
 
         <DropdownMenu>
@@ -175,33 +165,33 @@ const ChatHeader = ({
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem>
               <Info className="w-4 h-4 ml-2" />
-              معلومات الجهة
+              {t('chat.orgInfo')}
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Star className="w-4 h-4 ml-2" />
-              إضافة للمفضلة
+              {t('chat.addFavorite')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onToggleSound}>
               {soundEnabled ? (
                 <>
                   <VolumeX className="w-4 h-4 ml-2" />
-                  كتم الإشعارات
+                  {t('chat.muteNotifications')}
                 </>
               ) : (
                 <>
                   <Volume2 className="w-4 h-4 ml-2" />
-                  تفعيل الإشعارات
+                  {t('chat.enableNotifications')}
                 </>
               )}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">
               <Trash2 className="w-4 h-4 ml-2" />
-              حذف المحادثة
+              {t('chat.deleteChat')}
             </DropdownMenuItem>
             <DropdownMenuItem className="text-destructive">
               <Ban className="w-4 h-4 ml-2" />
-              حظر الجهة
+              {t('chat.blockOrg')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
