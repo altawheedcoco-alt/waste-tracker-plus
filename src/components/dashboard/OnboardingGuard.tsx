@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +22,7 @@ const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
   const { organization, roles } = useAuth();
   const navigate = useNavigate();
   const isAdmin = roles.includes('admin');
+  const [skipped, setSkipped] = useState(false);
 
   const { data: status, isLoading } = useQuery({
     queryKey: ['onboarding-status', organization?.id],
@@ -38,7 +40,7 @@ const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
   });
 
   // Admins bypass all checks
-  if (isAdmin) return <>{children}</>;
+  if (isAdmin || skipped) return <>{children}</>;
 
   // Loading state
   if (isLoading || !status) return <>{children}</>;
@@ -146,6 +148,10 @@ const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
               ⏳ تم إرسال طلبك وهو قيد المراجعة من مدير النظام
             </p>
           )}
+
+          <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setSkipped(true)}>
+            تخطي الآن والمتابعة لاحقاً
+          </Button>
         </CardContent>
       </Card>
     </div>
