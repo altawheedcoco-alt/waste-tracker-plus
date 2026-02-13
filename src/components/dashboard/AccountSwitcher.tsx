@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Building2, 
@@ -9,7 +10,8 @@ import {
   Factory, 
   Recycle,
   Plus,
-  Loader2
+  Loader2,
+  Shield
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -73,10 +75,13 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
     organization, 
     userOrganizations, 
     switchOrganization, 
-    switchingOrganization 
+    switchingOrganization,
+    roles
   } = useAuth();
+  const navigate = useNavigate();
   
   const [open, setOpen] = useState(false);
+  const isAdmin = roles.includes('admin');
 
   if (!organization) return null;
 
@@ -215,13 +220,40 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
           })}
         </AnimatePresence>
         
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="flex items-center gap-3 p-3 cursor-pointer"
+              onClick={() => {
+                navigate('/dashboard/system-overview');
+                setOpen(false);
+              }}
+            >
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-red-500/10 text-red-600 border-red-200 shrink-0">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-sm">مدير النظام</p>
+                  <Badge variant="outline" className="text-[10px] h-4 px-1 border-red-200 text-red-600">
+                    Admin
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة الشاملة</p>
+              </div>
+            </DropdownMenuItem>
+          </>
+        )}
+        
         {canAddMore && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
               className="flex items-center gap-3 p-3 text-primary cursor-pointer"
               onClick={() => {
-                window.location.href = '/dashboard/add-organization';
+                navigate('/dashboard/add-organization');
+                setOpen(false);
               }}
             >
               <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 shrink-0">
