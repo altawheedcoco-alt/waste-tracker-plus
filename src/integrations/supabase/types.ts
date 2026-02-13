@@ -16304,6 +16304,10 @@ export type Database = {
           waste_type: string
         }[]
       }
+      global_search: {
+        Args: { p_limit?: number; p_org_id: string; p_query: string }
+        Returns: Json
+      }
       has_employee_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
