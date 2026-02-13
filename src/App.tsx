@@ -26,6 +26,7 @@ PageLoader.displayName = 'PageLoader';
 // Eagerly loaded pages (critical path only)
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import GoogleSetup from "./pages/GoogleSetup";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
@@ -212,6 +213,7 @@ const AppRoutes = memo(() => (
     <Route path="/qr-verify" element={<QRVerify />} />
     <Route path="/scan" element={<QRVerify />} />
     <Route path="/auth" element={<Auth />} />
+    <Route path="/auth/google-setup" element={<GoogleSetup />} />
     {/* Guide Routes */}
     <Route path="/guide/generator" element={<GeneratorGuide />} />
     <Route path="/guide/transporter" element={<TransporterGuide />} />
