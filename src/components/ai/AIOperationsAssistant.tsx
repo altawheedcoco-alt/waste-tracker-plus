@@ -13,6 +13,7 @@ import {
   Download, Copy, Upload, ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { onWidgetToggle } from '@/lib/widgetBus';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -50,6 +51,13 @@ const AIOperationsAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Listen for unified menu toggle
+  useEffect(() => {
+    return onWidgetToggle((id) => {
+      if (id === 'operations') setIsOpen(true);
+    });
+  }, []);
   const [activeTask, setActiveTask] = useState<TaskType>('general');
   const [showPresets, setShowPresets] = useState(true);
   const [tableStyle, setTableStyle] = useState<TableStyle>('classic');
@@ -222,22 +230,6 @@ const AIOperationsAssistant = () => {
 
   return (
     <>
-      {/* Floating Button */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center touch-manipulation"
-        style={{
-          background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)))',
-          color: 'hsl(var(--primary-foreground))',
-        }}
-        title="النظام الشخصي السريع"
-      >
-        <Sparkles className="w-6 h-6" />
-      </motion.button>
 
       {/* Full Panel */}
       <AnimatePresence>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCustomerAssistant } from '@/hooks/useCustomerAssistant';
 import { useSupportTickets } from '@/hooks/useSupportTickets';
@@ -13,6 +13,7 @@ import ConversationRatingDialog from './ConversationRatingDialog';
 import CreateTicketDialog from '@/components/support/CreateTicketDialog';
 import TicketDetailDialog from '@/components/support/TicketDetailDialog';
 import { format } from 'date-fns';
+import { onWidgetToggle } from '@/lib/widgetBus';
 import { ar } from 'date-fns/locale';
 import {
   MessageCircle,
@@ -53,6 +54,13 @@ const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'chat' | 'tickets'>('chat');
   const [input, setInput] = useState('');
+
+  // Listen for unified menu toggle
+  useEffect(() => {
+    return onWidgetToggle((id) => {
+      if (id === 'support') setIsOpen(true);
+    });
+  }, []);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -136,41 +144,6 @@ const UnifiedSupportWidget = ({ context }: UnifiedSupportWidgetProps) => {
 
   return (
     <>
-      {/* Floating Button - Responsive positioning */}
-      <motion.button
-        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] sm:bottom-6 right-3 sm:right-6 z-50 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-gradient-to-r from-primary to-emerald-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center touch-manipulation"
-        onClick={() => setIsOpen(!isOpen)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div
-              key="close"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-            >
-              <X className="h-5 w-5 sm:h-6 sm:w-6" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="open"
-              initial={{ rotate: 90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: -90, opacity: 0 }}
-              className="relative"
-            >
-              <Headphones className="h-5 w-5 sm:h-6 sm:w-6" />
-              {hasNotifications && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center">
-                  {activeTickets.length + (messages.length > 0 ? 1 : 0)}
-                </span>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
 
       {/* Widget Panel - Full width on mobile */}
       <AnimatePresence>

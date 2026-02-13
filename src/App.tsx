@@ -168,7 +168,7 @@ const EnhancedChatWidget = lazy(() => lazyRetry(() => import("./components/chat/
 const UnifiedSupportWidget = lazy(() => lazyRetry(() => import("./components/ai/UnifiedSupportWidget")));
 const BetaBanner = lazy(() => lazyRetry(() => import("./components/BetaBanner")));
 const AccessibilityPanel = lazy(() => lazyRetry(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel }))));
-
+const UnifiedFloatingMenu = lazy(() => lazyRetry(() => import("./components/layout/UnifiedFloatingMenu")));
 // Smart QueryClient with adaptive caching per data category
 import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
@@ -192,6 +192,7 @@ const Providers = memo(() => (
                     <AIChatbot />
                     <EnhancedChatWidget />
                     <UnifiedSupportWidget />
+                    <UnifiedFloatingMenu />
                     <BetaBanner />
                     <AccessibilityPanel />
                     <OfflineBanner />
