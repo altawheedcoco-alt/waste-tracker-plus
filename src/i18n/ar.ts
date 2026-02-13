@@ -550,6 +550,7 @@ export const ar = {
     orgDocuments: 'وثائق الجهات',
     driversMap: 'خريطة السائقين',
     videoGen: 'أنشئ منشورك بضغطة زر',
+    woodMarket: 'ذكاء سوق الخشب',
     reportsGroup: 'التقارير',
     shipmentReports: 'تقارير الشحنات',
     aggregateReport: 'التقرير المجمع',

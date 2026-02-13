@@ -69,6 +69,7 @@ const AddOrganization = lazy(() => import("./pages/dashboard/AddOrganization"));
 const ShipmentReports = lazy(() => import("./pages/dashboard/ShipmentReports"));
 const AdminDriversMap = lazy(() => import("./pages/dashboard/AdminDriversMap"));
 const VideoGenerator = lazy(() => import("./pages/dashboard/VideoGenerator"));
+const WoodMarketIntelligence = lazy(() => import("./pages/dashboard/WoodMarketIntelligence"));
 const OrgStructure = lazy(() => import("./pages/dashboard/OrgStructure"));
 const MyLocation = lazy(() => import("./pages/dashboard/MyLocation"));
 const RecyclingCertificates = lazy(() => import("./pages/dashboard/RecyclingCertificates"));
@@ -297,6 +298,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/guilloche-patterns" element={<GuillochePatterns />} />
         <Route path="/dashboard/delivery-declarations" element={<DeliveryDeclarations />} />
         <Route path="/dashboard/smart-insights" element={<SmartInsights />} />
+        <Route path="/dashboard/wood-market" element={<WoodMarketIntelligence />} />
         <Route path="/dashboard/award-letters" element={<AwardLetters />} />
         <Route path="/dashboard/operations" element={<OperationsDashboard />} />
         <Route path="/dashboard/activity-log" element={<ActivityLogPage />} />

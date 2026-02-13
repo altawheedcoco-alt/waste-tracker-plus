@@ -549,6 +549,7 @@ export const en = {
     orgDocuments: 'Organization Documents',
     driversMap: 'Drivers Map',
     videoGen: 'Create Post with One Click',
+    woodMarket: 'Wood Market Intelligence',
     reportsGroup: 'Reports',
     shipmentReports: 'Shipment Reports',
     aggregateReport: 'Aggregate Report',
