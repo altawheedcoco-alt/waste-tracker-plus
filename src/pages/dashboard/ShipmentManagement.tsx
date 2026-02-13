@@ -40,6 +40,7 @@ import BackButton from '@/components/ui/back-button';
 import ShipmentRouteMap from '@/components/shipments/ShipmentRouteMap';
 import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 
 interface Shipment {
@@ -114,42 +115,44 @@ interface Organization {
   organization_type: string;
 }
 
-const wasteTypes = [
-  { value: 'plastic', label: 'بلاستيك' },
-  { value: 'paper', label: 'ورق' },
-  { value: 'metal', label: 'معادن' },
-  { value: 'glass', label: 'زجاج' },
-  { value: 'electronic', label: 'إلكترونيات' },
-  { value: 'organic', label: 'عضوية' },
-  { value: 'chemical', label: 'كيميائية' },
-  { value: 'medical', label: 'طبية' },
-  { value: 'construction', label: 'بناء' },
-  { value: 'other', label: 'أخرى' },
-];
-
-const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  new: { label: 'جديدة', color: 'bg-blue-100 text-blue-800', icon: AlertCircle },
-  approved: { label: 'معتمدة', color: 'bg-purple-100 text-purple-800', icon: CheckCircle },
-  in_transit: { label: 'في الطريق', color: 'bg-orange-100 text-orange-800', icon: MapPin },
-  delivered: { label: 'تم التسليم', color: 'bg-green-100 text-green-800', icon: Package },
-  confirmed: { label: 'مكتمل', color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle },
-};
-
-const disposalMethodsLabels: Record<string, string> = {
-  recycling: 'إعادة تدوير',
-  remanufacturing: 'إعادة تصنيع',
-  recycling_remanufacturing: 'إعادة تدوير / إعادة تصنيع',
-  landfill: 'دفن صحي',
-  incineration: 'حرق',
-  treatment: 'معالجة',
-  reuse: 'إعادة استخدام',
-};
-
-const getDisposalMethodLabel = (method: string): string => {
-  return disposalMethodsLabels[method] || method;
-};
-
 const ShipmentManagement = () => {
+  const { t } = useLanguage();
+
+  const wasteTypes = [
+    { value: 'plastic', label: t('shipmentMgmt.plastic') },
+    { value: 'paper', label: t('shipmentMgmt.paper') },
+    { value: 'metal', label: t('shipmentMgmt.metal') },
+    { value: 'glass', label: t('shipmentMgmt.glass') },
+    { value: 'electronic', label: t('shipmentMgmt.electronic') },
+    { value: 'organic', label: t('shipmentMgmt.organic') },
+    { value: 'chemical', label: t('shipmentMgmt.chemical') },
+    { value: 'medical', label: t('shipmentMgmt.medical') },
+    { value: 'construction', label: t('shipmentMgmt.construction') },
+    { value: 'other', label: t('shipmentMgmt.other') },
+  ];
+
+  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+    new: { label: t('shipmentMgmt.statusNew'), color: 'bg-blue-100 text-blue-800', icon: AlertCircle },
+    approved: { label: t('shipmentMgmt.statusApproved'), color: 'bg-purple-100 text-purple-800', icon: CheckCircle },
+    in_transit: { label: t('shipmentMgmt.statusInTransit'), color: 'bg-orange-100 text-orange-800', icon: MapPin },
+    delivered: { label: t('shipmentMgmt.statusDelivered'), color: 'bg-green-100 text-green-800', icon: Package },
+    confirmed: { label: t('shipmentMgmt.statusConfirmed'), color: 'bg-emerald-100 text-emerald-800', icon: CheckCircle },
+  };
+
+  const disposalMethodsLabels: Record<string, string> = {
+    recycling: t('shipmentMgmt.recycling'),
+    remanufacturing: t('shipmentMgmt.remanufacturing'),
+    recycling_remanufacturing: t('shipmentMgmt.recyclingRemanufacturing'),
+    landfill: t('shipmentMgmt.landfill'),
+    incineration: t('shipmentMgmt.incineration'),
+    treatment: t('shipmentMgmt.treatment'),
+    reuse: t('shipmentMgmt.reuse'),
+  };
+
+  const getDisposalMethodLabel = (method: string): string => {
+    return disposalMethodsLabels[method] || method;
+  };
+
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
@@ -260,8 +263,8 @@ const ShipmentManagement = () => {
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
-        title: 'خطأ في تحميل البيانات',
-        description: error?.message || 'حدث خطأ غير متوقع',
+        title: t('shipmentMgmt.errorLoading'),
+        description: error?.message || t('shipmentMgmt.unexpectedError'),
         variant: 'destructive',
       });
     } finally {
@@ -289,8 +292,8 @@ const ShipmentManagement = () => {
   const handleCreateShipment = async () => {
     if (!newShipment.generator_id || !newShipment.transporter_id || !newShipment.recycler_id) {
       toast({
-        title: 'خطأ',
-        description: 'يرجى تحديد جميع الأطراف',
+        title: t('common.error'),
+        description: t('shipmentMgmt.errorMissingParties'),
         variant: 'destructive',
       });
       return;
@@ -328,8 +331,8 @@ const ShipmentManagement = () => {
       if (error) throw error;
 
       toast({
-        title: 'تم الإنشاء',
-        description: 'تم إنشاء الشحنة بنجاح',
+        title: t('shipmentMgmt.created'),
+        description: t('shipmentMgmt.createdDesc'),
       });
 
       setDialogOpen(false);
@@ -346,8 +349,8 @@ const ShipmentManagement = () => {
     } catch (error) {
       console.error('Error creating shipment:', error);
       toast({
-        title: 'خطأ',
-        description: 'فشل في إنشاء الشحنة',
+        title: t('common.error'),
+        description: t('shipmentMgmt.createFailed'),
         variant: 'destructive',
       });
     } finally {
@@ -396,14 +399,14 @@ const ShipmentManagement = () => {
       }
 
       toast({
-        title: 'تم التحديث',
-        description: 'تم تحديث حالة الشحنة',
+        title: t('shipmentMgmt.updated'),
+        description: t('shipmentMgmt.updatedDesc'),
       });
     } catch (error) {
       console.error('Error updating status:', error);
       toast({
-        title: 'خطأ',
-        description: 'فشل في تحديث الحالة',
+        title: t('common.error'),
+        description: t('shipmentMgmt.updateFailed'),
         variant: 'destructive',
       });
     }
@@ -451,22 +454,22 @@ const ShipmentManagement = () => {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent className="max-w-2xl" dir="rtl">
               <DialogHeader className="text-right">
-                <DialogTitle>إنشاء شحنة جديدة</DialogTitle>
+                <DialogTitle>{t('shipmentMgmt.createNew')}</DialogTitle>
                 <DialogDescription>
-                  أدخل تفاصيل الشحنة الجديدة
+                  {t('shipmentMgmt.enterDetails')}
                 </DialogDescription>
               </DialogHeader>
 
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label>الجهة المولدة</Label>
+                    <Label>{t('shipmentMgmt.generator')}</Label>
                     <Select
                       value={newShipment.generator_id}
                       onValueChange={(v) => setNewShipment(prev => ({ ...prev, generator_id: v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر..." />
+                        <SelectValue placeholder={t('shipmentMgmt.choose')} />
                       </SelectTrigger>
                       <SelectContent>
                         {generators.map(g => (
@@ -476,13 +479,13 @@ const ShipmentManagement = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>شركة النقل</Label>
+                    <Label>{t('shipmentMgmt.transporter')}</Label>
                     <Select
                       value={newShipment.transporter_id}
                       onValueChange={(v) => setNewShipment(prev => ({ ...prev, transporter_id: v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر..." />
+                        <SelectValue placeholder={t('shipmentMgmt.choose')} />
                       </SelectTrigger>
                       <SelectContent>
                         {transporters.map(t => (
@@ -492,13 +495,13 @@ const ShipmentManagement = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>جهة التدوير</Label>
+                    <Label>{t('shipmentMgmt.recycler')}</Label>
                     <Select
                       value={newShipment.recycler_id}
                       onValueChange={(v) => setNewShipment(prev => ({ ...prev, recycler_id: v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر..." />
+                        <SelectValue placeholder={t('shipmentMgmt.choose')} />
                       </SelectTrigger>
                       <SelectContent>
                         {recyclers.map(r => (
@@ -511,13 +514,13 @@ const ShipmentManagement = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>نوع النفايات</Label>
+                    <Label>{t('shipmentMgmt.wasteType')}</Label>
                     <Select
                       value={newShipment.waste_type}
                       onValueChange={(v) => setNewShipment(prev => ({ ...prev, waste_type: v }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر..." />
+                        <SelectValue placeholder={t('shipmentMgmt.choose')} />
                       </SelectTrigger>
                       <SelectContent>
                         {wasteTypes.map(w => (
@@ -527,7 +530,7 @@ const ShipmentManagement = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>الكمية (كجم)</Label>
+                    <Label>{t('shipmentMgmt.quantity')}</Label>
                     <Input
                       type="number"
                       placeholder="100"
@@ -538,27 +541,27 @@ const ShipmentManagement = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>عنوان الاستلام</Label>
+                  <Label>{t('shipmentMgmt.pickupAddress')}</Label>
                   <Input
-                    placeholder="المنطقة الصناعية، المبنى رقم 5"
+                    placeholder={t('shipmentMgmt.pickupPlaceholder')}
                     value={newShipment.pickup_address}
                     onChange={(e) => setNewShipment(prev => ({ ...prev, pickup_address: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>عنوان التسليم</Label>
+                  <Label>{t('shipmentMgmt.deliveryAddress')}</Label>
                   <Input
-                    placeholder="مصنع التدوير، المنطقة الصناعية الثانية"
+                    placeholder={t('shipmentMgmt.deliveryPlaceholder')}
                     value={newShipment.delivery_address}
                     onChange={(e) => setNewShipment(prev => ({ ...prev, delivery_address: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>ملاحظات</Label>
+                  <Label>{t('shipmentMgmt.notes')}</Label>
                   <Textarea
-                    placeholder="أي ملاحظات إضافية..."
+                    placeholder={t('shipmentMgmt.notesPlaceholder')}
                     value={newShipment.notes}
                     onChange={(e) => setNewShipment(prev => ({ ...prev, notes: e.target.value }))}
                   />
@@ -567,11 +570,11 @@ const ShipmentManagement = () => {
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                  إلغاء
+                  {t('common.cancel')}
                 </Button>
                 <Button onClick={handleCreateShipment} disabled={createLoading}>
                   {createLoading && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
-                  إنشاء الشحنة
+                  {t('shipmentMgmt.create')}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -582,15 +585,15 @@ const ShipmentManagement = () => {
               size="icon"
               onClick={() => fetchData()}
               disabled={loading}
-              title="تحديث الصفحة"
+              title={t('shipmentMgmt.refreshPage')}
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
 
           <div className="text-right">
-            <h1 className="text-3xl font-bold">إدارة الشحنات</h1>
-            <p className="text-muted-foreground">إنشاء وتتبع الشحنات في الوقت الفعلي</p>
+            <h1 className="text-3xl font-bold">{t('shipmentMgmt.title')}</h1>
+            <p className="text-muted-foreground">{t('shipmentMgmt.subtitle')}</p>
           </div>
         </div>
 
@@ -603,7 +606,7 @@ const ShipmentManagement = () => {
                   <Package className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">إجمالي الشحنات</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentMgmt.totalShipments')}</p>
                   <p className="text-3xl font-bold">{statsData.total}</p>
                 </div>
               </div>
@@ -616,7 +619,7 @@ const ShipmentManagement = () => {
                   <Truck className="w-6 h-6 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">شحنات نشطة</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentMgmt.activeShipments')}</p>
                   <p className="text-3xl font-bold text-amber-600">{statsData.active}</p>
                 </div>
               </div>
@@ -629,7 +632,7 @@ const ShipmentManagement = () => {
                   <CheckCircle className="w-6 h-6 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">شحنات مكتملة</p>
+                  <p className="text-sm text-muted-foreground">{t('shipmentMgmt.completedShipments')}</p>
                   <p className="text-3xl font-bold text-green-600">{statsData.completed}</p>
                 </div>
               </div>
@@ -640,17 +643,17 @@ const ShipmentManagement = () => {
         {/* Filters */}
         <Card>
           <CardHeader className="text-right">
-            <CardTitle>قائمة الشحنات</CardTitle>
-            <CardDescription>جميع الشحنات المسجلة مع التحديث الفوري</CardDescription>
+            <CardTitle>{t('shipmentMgmt.shipmentList')}</CardTitle>
+            <CardDescription>{t('shipmentMgmt.shipmentListDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4 mb-6">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-48">
-                  <SelectValue placeholder="فلترة بالحالة" />
+                  <SelectValue placeholder={t('shipmentMgmt.filterByStatus')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الحالات</SelectItem>
+                  <SelectItem value="all">{t('shipmentMgmt.allStatuses')}</SelectItem>
                   {Object.entries(statusConfig).map(([key, config]) => (
                     <SelectItem key={key} value={key}>{config.label}</SelectItem>
                   ))}
@@ -659,7 +662,7 @@ const ShipmentManagement = () => {
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="بحث برقم الشحنة أو اسم الشركة..."
+                  placeholder={t('shipmentMgmt.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10 text-right"
@@ -674,7 +677,7 @@ const ShipmentManagement = () => {
             ) : filteredShipments.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>لا توجد شحنات</p>
+                <p>{t('shipmentMgmt.noShipments')}</p>
               </div>
             ) : (
               <div className="space-y-4">
