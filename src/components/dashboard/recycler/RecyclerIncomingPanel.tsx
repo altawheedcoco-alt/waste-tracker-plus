@@ -11,6 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import ShipmentTimeline from '@/components/shipments/ShipmentTimeline';
+import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
 
 const RecyclerIncomingPanel = () => {
   const { organization } = useAuth();
@@ -131,10 +132,18 @@ const RecyclerIncomingPanel = () => {
           <CardContent className="space-y-2">
             {awaitingConfirmation.map((s) => (
               <div key={s.id} className="flex items-center justify-between p-2.5 rounded-lg border bg-card">
-                <Button size="sm" className="text-xs h-7" onClick={() => handleConfirm(s.id)}>
-                  <CheckCircle2 className="ml-1 h-3 w-3" />
-                  تأكيد الاستلام
-                </Button>
+                <div className="flex items-center gap-1">
+                  <QuickCertificateButton
+                    shipment={{ id: s.id, shipment_number: s.shipment_number, waste_type: s.waste_type, quantity: s.quantity, unit: s.unit }}
+                    variant="ghost"
+                    size="sm"
+                    showLabel={false}
+                  />
+                  <Button size="sm" className="text-xs h-7" onClick={() => handleConfirm(s.id)}>
+                    <CheckCircle2 className="ml-1 h-3 w-3" />
+                    تأكيد الاستلام
+                  </Button>
+                </div>
                 <div className="text-right flex-1">
                   <div className="flex items-center gap-2 justify-end">
                     <Badge variant="outline" className="text-[10px]">{s.waste_type}</Badge>

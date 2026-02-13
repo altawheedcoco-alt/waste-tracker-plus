@@ -37,6 +37,7 @@ import {
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
+import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
 
 interface LinkedPartner {
   id: string;
@@ -473,6 +474,16 @@ const TransporterShipments = () => {
                                 </TooltipTrigger>
                                 <TooltipContent>إنشاء شهادة استلام</TooltipContent>
                               </Tooltip>
+                            )}
+                            {/* Quick Certificate Button */}
+                            {['delivered', 'confirmed'].includes(shipment.status) && (
+                              <QuickCertificateButton 
+                                shipment={shipment} 
+                                onSuccess={fetchShipments}
+                                variant="ghost"
+                                size="sm"
+                                showLabel={false}
+                              />
                             )}
                           </div>
                         </TooltipProvider>
