@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   MessageCircle, 
   Search, 
@@ -40,6 +41,7 @@ interface Partner {
 
 const Chat = () => {
   const { user, organization } = useAuth();
+  const { t } = useLanguage();
   const { isMobile, isTablet } = useDisplayMode();
   const {
     messages,
@@ -185,9 +187,9 @@ const Chat = () => {
 
   const getOrgTypeLabel = (type: string) => {
     switch (type) {
-      case 'generator': return 'جهة مولدة';
-      case 'transporter': return 'جهة ناقلة';
-      case 'recycler': return 'جهة مدورة';
+      case 'generator': return t('chat.generatorEntity');
+      case 'transporter': return t('chat.transporterEntity');
+      case 'recycler': return t('chat.recyclerEntity');
       default: return type;
     }
   };
@@ -247,7 +249,7 @@ const Chat = () => {
               )}>
                 <div className="flex items-center gap-2 mb-3">
                   <MessageCircle className="w-5 h-5 text-primary" />
-                  <h2 className={cn("font-bold", isMobile ? "text-base" : "text-lg")}>المحادثات</h2>
+                  <h2 className={cn("font-bold", isMobile ? "text-base" : "text-lg")}>{t('chat.conversations')}</h2>
                   {totalUnread > 0 && (
                     <Badge variant="destructive" className="text-xs px-1.5 py-0.5">
                       {totalUnread}
@@ -261,7 +263,7 @@ const Chat = () => {
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="بحث في الشركاء..."
+                    placeholder={t('chat.searchPartners')}
                     className="pr-9 h-9 text-sm"
                   />
                 </div>
@@ -279,13 +281,13 @@ const Chat = () => {
                       {searchQuery ? (
                         <>
                           <Search className="mx-auto mb-2 opacity-30" size={32} />
-                          <p className="text-sm">لا توجد نتائج للبحث</p>
+                          <p className="text-sm">{t('chat.noSearchResults')}</p>
                         </>
                       ) : (
                         <>
                           <MessageCircle className="mx-auto mb-2 opacity-30" size={32} />
-                          <p className="text-sm">لا يوجد شركاء للتواصل</p>
-                          <p className="text-xs mt-1">الشركاء يظهرون عند إنشاء شحنات مشتركة</p>
+                          <p className="text-sm">{t('chat.noPartners')}</p>
+                          <p className="text-xs mt-1">{t('chat.partnersAppear')}</p>
                         </>
                       )}
                     </div>
@@ -433,9 +435,9 @@ const Chat = () => {
                     <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <MessageCircle className="w-10 h-10 text-primary" />
                     </div>
-                    <h3 className="text-lg font-semibold mb-2">مرحباً بك في المحادثات</h3>
+                    <h3 className="text-lg font-semibold mb-2">{t('chat.selectConversation')}</h3>
                     <p className="text-muted-foreground text-sm">
-                      اختر شريك من القائمة لبدء المحادثة
+                      {t('chat.selectConversationDesc')}
                     </p>
                   </div>
                 </div>

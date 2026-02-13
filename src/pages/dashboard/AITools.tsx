@@ -12,13 +12,15 @@ import AdvancedAIDashboard from '@/components/ai/AdvancedAIDashboard';
 import SentimentAnalysisPanel from '@/components/ai/SentimentAnalysisPanel';
 import SmartPredictionsPanel from '@/components/ai/SmartPredictionsPanel';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from 'sonner';
 
 const AITools = () => {
   const { isMobile } = useDisplayMode();
+  const { t } = useLanguage();
 
   const handleDocumentClassified = (result: any, file: File) => {
-    toast.success(`تم تصنيف المستند: ${result.document_type}`);
+    toast.success(`${t('aiTools.docClassified')}: ${result.document_type}`);
   };
 
   return (
@@ -35,8 +37,8 @@ const AITools = () => {
               <Bot className="w-6 h-6 text-primary-foreground" />
             </div>
             <div className="text-right">
-              <h1 className="text-xl md:text-2xl font-bold">أدوات الذكاء الاصطناعي</h1>
-              <p className="text-muted-foreground text-sm">أدوات ذكية لتحليل وإدارة مخلفات منشأتك</p>
+              <h1 className="text-xl md:text-2xl font-bold">{t('aiTools.title')}</h1>
+              <p className="text-muted-foreground text-sm">{t('aiTools.subtitle')}</p>
             </div>
           </div>
         </motion.div>
@@ -45,35 +47,35 @@ const AITools = () => {
           <TabsList className={`grid grid-cols-8 w-full max-w-5xl`}>
             <TabsTrigger value="advanced" className="flex items-center gap-2 text-xs md:text-sm">
               <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">تحليلات متقدمة</span>
+              <span className="hidden sm:inline">{t('aiTools.advanced')}</span>
             </TabsTrigger>
             <TabsTrigger value="sentiment" className="flex items-center gap-2 text-xs md:text-sm">
               <Heart className="w-4 h-4" />
-              <span className="hidden sm:inline">تحليل المشاعر</span>
+              <span className="hidden sm:inline">{t('aiTools.sentiment')}</span>
             </TabsTrigger>
             <TabsTrigger value="predictions" className="flex items-center gap-2 text-xs md:text-sm">
               <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">توقعات ذكية</span>
+              <span className="hidden sm:inline">{t('aiTools.predictions')}</span>
             </TabsTrigger>
             <TabsTrigger value="insights" className="flex items-center gap-2 text-xs md:text-sm">
               <Brain className="w-4 h-4" />
-              <span className="hidden sm:inline">رؤى ذكية</span>
+              <span className="hidden sm:inline">{t('aiTools.insights')}</span>
             </TabsTrigger>
             <TabsTrigger value="documents" className="flex items-center gap-2 text-xs md:text-sm">
               <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">تصنيف المستندات</span>
+              <span className="hidden sm:inline">{t('aiTools.documents')}</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2 text-xs md:text-sm">
               <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">الإحصائيات</span>
+              <span className="hidden sm:inline">{t('aiTools.analytics')}</span>
             </TabsTrigger>
             <TabsTrigger value="detailed" className="flex items-center gap-2 text-xs md:text-sm">
               <CalendarDays className="w-4 h-4" />
-              <span className="hidden sm:inline">تحليل تفصيلي</span>
+              <span className="hidden sm:inline">{t('aiTools.detailed')}</span>
             </TabsTrigger>
             <TabsTrigger value="reduction" className="flex items-center gap-2 text-xs md:text-sm">
               <Lightbulb className="w-4 h-4" />
-              <span className="hidden sm:inline">توصيات</span>
+              <span className="hidden sm:inline">{t('aiTools.reduction')}</span>
             </TabsTrigger>
           </TabsList>
 

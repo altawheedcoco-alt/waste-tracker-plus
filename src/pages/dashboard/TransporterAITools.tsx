@@ -6,8 +6,11 @@ import BackButton from '@/components/ui/back-button';
 import TransporterAnalytics from '@/components/ai/transporter/TransporterAnalytics';
 import TransporterDetailedAnalytics from '@/components/ai/transporter/TransporterDetailedAnalytics';
 import TransporterPerformanceAdvisor from '@/components/ai/transporter/TransporterPerformanceAdvisor';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const TransporterAITools = () => {
+  const { t } = useLanguage();
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 md:p-6">
@@ -22,8 +25,8 @@ const TransporterAITools = () => {
               <Truck className="w-6 h-6 text-white" />
             </div>
             <div className="text-right">
-              <h1 className="text-xl md:text-2xl font-bold">أدوات تحليل النقل</h1>
-              <p className="text-muted-foreground text-sm">تحليلات متقدمة لأداء شركة النقل</p>
+              <h1 className="text-xl md:text-2xl font-bold">{t('transporterAI.title')}</h1>
+              <p className="text-muted-foreground text-sm">{t('transporterAI.subtitle')}</p>
             </div>
           </div>
         </motion.div>
@@ -32,15 +35,15 @@ const TransporterAITools = () => {
           <TabsList className="grid grid-cols-3 w-full max-w-2xl">
             <TabsTrigger value="analytics" className="flex items-center gap-2 text-xs md:text-sm">
               <BarChart3 className="w-4 h-4" />
-              <span>إحصائيات النقل</span>
+              <span>{t('transporterAI.transportStats')}</span>
             </TabsTrigger>
             <TabsTrigger value="detailed" className="flex items-center gap-2 text-xs md:text-sm">
               <CalendarDays className="w-4 h-4" />
-              <span>تحليل تفصيلي</span>
+              <span>{t('transporterAI.detailedAnalysis')}</span>
             </TabsTrigger>
             <TabsTrigger value="advisor" className="flex items-center gap-2 text-xs md:text-sm">
               <Lightbulb className="w-4 h-4" />
-              <span>توصيات الأداء</span>
+              <span>{t('transporterAI.performanceRecs')}</span>
             </TabsTrigger>
           </TabsList>
 
