@@ -9,7 +9,6 @@ import {
   Truck, 
   Factory, 
   Recycle,
-  Plus,
   Loader2,
   Shield
 } from 'lucide-react';
@@ -85,9 +84,7 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
 
   if (!organization) return null;
 
-  // Max 3 organizations (generator/transporter/recycler/disposal), unlimited drivers/employees
-  const MAX_ORGANIZATIONS = 3;
-  const canAddMore = userOrganizations.length < MAX_ORGANIZATIONS;
+  // Add organization feature removed
 
   // Collapsed view - just show icon
   if (collapsed) {
@@ -246,28 +243,6 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
           </>
         )}
         
-        {canAddMore && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="flex items-center gap-3 p-3 text-primary cursor-pointer"
-              onClick={() => {
-                navigate('/dashboard/add-organization');
-                setOpen(false);
-              }}
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 shrink-0">
-                <Plus className="w-5 h-5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">إضافة منظمة جديدة</span>
-                <span className="text-[10px] text-muted-foreground">
-                  {userOrganizations.length} من {MAX_ORGANIZATIONS}
-                </span>
-              </div>
-            </DropdownMenuItem>
-          </>
-        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
