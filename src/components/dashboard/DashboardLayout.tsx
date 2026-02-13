@@ -59,6 +59,7 @@ import {
   Wallet,
   ShoppingCart,
   Boxes,
+  GitCompareArrows,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -406,6 +407,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: BarChart3, label: 'التقارير المالية', path: '/dashboard/erp/financial-dashboard', key: 'erp-financial-dashboard' },
       { icon: Activity, label: 'تحليل الإيرادات والمصروفات', path: '/dashboard/erp/revenue-expenses', key: 'erp-revenue-expenses' },
       { icon: Banknote, label: 'تكلفة البضاعة المباعة (COGS)', path: '/dashboard/erp/cogs', key: 'erp-cogs' },
+      { icon: GitCompareArrows, label: 'المقارنات المالية', path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons' },
     ]},
     // System & Support group
     { icon: Settings, label: 'النظام والدعم', path: '#', key: 'system-support-group', badge: notificationCount, children: [
