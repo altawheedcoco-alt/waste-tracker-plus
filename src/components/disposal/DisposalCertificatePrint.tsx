@@ -49,7 +49,7 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
 
   return (
     <div
-      className="bg-white mx-auto print:p-0 print:shadow-none"
+      className="bg-white mx-auto print:p-0 print:shadow-none print-break-after"
       style={{
         maxWidth: '210mm',
         fontFamily: 'Cairo, sans-serif',
@@ -57,6 +57,7 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
         fontSize: '9pt',
         lineHeight: '1.5',
         padding: '20mm 15mm',
+        pageBreakAfter: 'always',
       }}
     >
       {/* Top decorative border */}
@@ -201,6 +202,11 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
         {/* Footer */}
         <div className="mt-4 pt-2 text-center" style={{ borderTop: '1px dashed #d1d5db', fontSize: '7pt', color: '#9ca3af' }}>
           <p>هذه الشهادة صادرة إلكترونياً — يمكن التحقق من صحتها بمسح رمز QR</p>
+          {data.processing_completed_at && (
+            <p style={{ margin: '4px 0 0 0', fontSize: '7pt', color: '#6b7280' }}>
+              📅 تاريخ وصول الشحنة (أول تسجيل على المنظومة): {format(new Date(data.processing_completed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar })}
+            </p>
+          )}
         </div>
       </div>
     </div>
