@@ -10,8 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar as arLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Select,
   SelectContent,
@@ -75,28 +77,9 @@ interface ReportData {
 
 const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
-const statusLabels: Record<string, string> = {
-  new: 'جديدة',
-  approved: 'معتمدة',
-  in_transit: 'في الطريق',
-  delivered: 'تم التسليم',
-  confirmed: 'مكتمل',
-};
-
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'بناء',
-  other: 'أخرى',
-};
-
 const Reports = () => {
+  const { t, language } = useLanguage();
+  const dateLocale = language === 'ar' ? arLocale : enUS;
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('month');
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
@@ -114,6 +97,33 @@ const Reports = () => {
     topTransporters: [],
   });
   const { toast } = useToast();
+
+  const statusLabels: Record<string, string> = {
+    new: t('reportsPage.newStatus'),
+    approved: t('reportsPage.approvedStatus'),
+    in_transit: t('reportsPage.inTransitStatus'),
+    delivered: t('reportsPage.deliveredStatus'),
+    confirmed: t('reportsPage.confirmedStatus'),
+  };
+
+  const wasteTypeLabels: Record<string, string> = {
+    plastic: t('shipments.plastic'),
+    paper: t('shipments.paper'),
+    metal: t('shipments.metal'),
+    glass: t('shipments.glass'),
+    electronic: t('shipments.electronic'),
+    organic: t('shipments.organic'),
+    chemical: t('shipments.chemical'),
+    medical: t('shipments.medical'),
+    construction: t('shipments.construction'),
+    other: t('shipments.other'),
+  };
+
+  const orgTypeLabels: Record<string, string> = {
+    generator: t('reports.generators'),
+    transporter: t('reports.transporters'),
+    recycler: t('reports.recyclers'),
+  };
 
   useEffect(() => {
     fetchReportData();
@@ -182,11 +192,6 @@ const Reports = () => {
       organizations.forEach(o => {
         orgTypeCounts[o.organization_type] = (orgTypeCounts[o.organization_type] || 0) + 1;
       });
-      const orgTypeLabels: Record<string, string> = {
-        generator: 'جهات مولدة',
-        transporter: 'ناقلون',
-        recycler: 'معيدو تدوير',
-      };
       const organizationsByType = Object.entries(orgTypeCounts).map(([key, value], index) => ({
         name: orgTypeLabels[key] || key,
         value,
@@ -218,7 +223,7 @@ const Reports = () => {
       });
       const topGenerators = Object.entries(generatorCounts)
         .map(([id, count]) => ({
-          name: organizations.find(o => o.id === id)?.name || 'غير معروف',
+          name: organizations.find(o => o.id === id)?.name || t('reportsPage.unknown'),
           shipments: count,
         }))
         .sort((a, b) => b.shipments - a.shipments)
@@ -233,7 +238,7 @@ const Reports = () => {
       });
       const topTransporters = Object.entries(transporterCounts)
         .map(([id, count]) => ({
-          name: organizations.find(o => o.id === id)?.name || 'غير معروف',
+          name: organizations.find(o => o.id === id)?.name || t('reportsPage.unknown'),
           shipments: count,
         }))
         .sort((a, b) => b.shipments - a.shipments)
@@ -250,8 +255,8 @@ const Reports = () => {
     } catch (error) {
       console.error('Error fetching report data:', error);
       toast({
-        title: 'خطأ',
-        description: 'فشل في تحميل بيانات التقارير',
+        title: t('reports.error'),
+        description: t('reports.loadError'),
         variant: 'destructive',
       });
     } finally {
@@ -261,8 +266,8 @@ const Reports = () => {
 
   const exportReport = () => {
     toast({
-      title: 'جاري التحضير',
-      description: 'استخدم أداة التصدير التنظيمي أدناه',
+      title: t('reports.preparing'),
+      description: t('reports.useExportTool'),
     });
   };
 
@@ -292,12 +297,12 @@ const Reports = () => {
               <DialogTrigger asChild>
                 <Button className="gap-2">
                   <FileText className="w-4 h-4" />
-                  التقرير الرسمي (طراز 1919)
+                  {t('reports.officialReport')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-right">التقرير الإحصائي الرسمي</DialogTitle>
+                  <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
                 </DialogHeader>
                 <OfficialReportPrint 
                   data={data} 
@@ -309,8 +314,8 @@ const Reports = () => {
             </Dialog>
           </div>
           <div className="text-right">
-            <h1 className="text-3xl font-bold">التقارير والإحصائيات</h1>
-            <p className="text-muted-foreground">تحليل شامل لأداء النظام</p>
+            <h1 className="text-3xl font-bold">{t('reports.title')}</h1>
+            <p className="text-muted-foreground">{t('reports.subtitle')}</p>
           </div>
         </div>
 
@@ -319,16 +324,16 @@ const Reports = () => {
           <CardHeader className="text-right pb-4">
             <CardTitle className="flex items-center gap-2 justify-end text-lg">
               <Filter className="w-5 h-5" />
-              معايير التصفية
+              {t('reports.filterCriteria')}
             </CardTitle>
-            <CardDescription>حدد معايير التصفية لإنشاء التقرير المجمع للشحنات أو الشركات</CardDescription>
+            <CardDescription>{t('reports.filterCriteriaDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Date Range and Status/Type Filters */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* From Date */}
               <div className="space-y-2 text-right">
-                <Label>من تاريخ</Label>
+                <Label>{t('reports.fromDate')}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -339,7 +344,7 @@ const Reports = () => {
                       )}
                     >
                       <CalendarIcon className="ml-2 h-4 w-4" />
-                      {fromDate ? format(fromDate, "PPP", { locale: ar }) : "اختر التاريخ"}
+                      {fromDate ? format(fromDate, "PPP", { locale: dateLocale }) : t('reports.selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -356,7 +361,7 @@ const Reports = () => {
 
               {/* To Date */}
               <div className="space-y-2 text-right">
-                <Label>إلى تاريخ</Label>
+                <Label>{t('reports.toDate')}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -367,7 +372,7 @@ const Reports = () => {
                       )}
                     >
                       <CalendarIcon className="ml-2 h-4 w-4" />
-                      {toDate ? format(toDate, "PPP", { locale: ar }) : "اختر التاريخ"}
+                      {toDate ? format(toDate, "PPP", { locale: dateLocale }) : t('reports.selectDate')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -384,41 +389,41 @@ const Reports = () => {
 
               {/* Status Filter */}
               <div className="space-y-2 text-right">
-                <Label>حالة الشحنة</Label>
+                <Label>{t('reports.shipmentStatus')}</Label>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="جميع الحالات" />
+                    <SelectValue placeholder={t('reports.allStatuses')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع الحالات</SelectItem>
-                    <SelectItem value="new">جديدة</SelectItem>
-                    <SelectItem value="approved">معتمدة</SelectItem>
-                    <SelectItem value="in_transit">في الطريق</SelectItem>
-                    <SelectItem value="delivered">تم التسليم</SelectItem>
-                    <SelectItem value="confirmed">مكتمل</SelectItem>
+                    <SelectItem value="all">{t('reports.allStatuses')}</SelectItem>
+                    <SelectItem value="new">{t('reportsPage.newStatus')}</SelectItem>
+                    <SelectItem value="approved">{t('reportsPage.approvedStatus')}</SelectItem>
+                    <SelectItem value="in_transit">{t('reportsPage.inTransitStatus')}</SelectItem>
+                    <SelectItem value="delivered">{t('reportsPage.deliveredStatus')}</SelectItem>
+                    <SelectItem value="confirmed">{t('reportsPage.confirmedStatus')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Waste Type Filter */}
               <div className="space-y-2 text-right">
-                <Label>نوع المخلفات</Label>
+                <Label>{t('reports.wasteType')}</Label>
                 <Select value={wasteTypeFilter} onValueChange={setWasteTypeFilter}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="جميع الأنواع" />
+                    <SelectValue placeholder={t('reports.allTypes')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع الأنواع</SelectItem>
-                    <SelectItem value="plastic">بلاستيك</SelectItem>
-                    <SelectItem value="paper">ورق</SelectItem>
-                    <SelectItem value="metal">معادن</SelectItem>
-                    <SelectItem value="glass">زجاج</SelectItem>
-                    <SelectItem value="electronic">إلكترونيات</SelectItem>
-                    <SelectItem value="organic">عضوية</SelectItem>
-                    <SelectItem value="chemical">كيميائية</SelectItem>
-                    <SelectItem value="medical">طبية</SelectItem>
-                    <SelectItem value="construction">بناء</SelectItem>
-                    <SelectItem value="other">أخرى</SelectItem>
+                    <SelectItem value="all">{t('reports.allTypes')}</SelectItem>
+                    <SelectItem value="plastic">{t('shipments.plastic')}</SelectItem>
+                    <SelectItem value="paper">{t('shipments.paper')}</SelectItem>
+                    <SelectItem value="metal">{t('shipments.metal')}</SelectItem>
+                    <SelectItem value="glass">{t('shipments.glass')}</SelectItem>
+                    <SelectItem value="electronic">{t('shipments.electronic')}</SelectItem>
+                    <SelectItem value="organic">{t('shipments.organic')}</SelectItem>
+                    <SelectItem value="chemical">{t('shipments.chemical')}</SelectItem>
+                    <SelectItem value="medical">{t('shipments.medical')}</SelectItem>
+                    <SelectItem value="construction">{t('shipments.construction')}</SelectItem>
+                    <SelectItem value="other">{t('shipments.other')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -428,7 +433,7 @@ const Reports = () => {
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-4 border-t">
               {/* Print Options */}
               <div className="flex flex-wrap items-center gap-6">
-                <span className="text-sm font-medium text-muted-foreground">خيارات الطباعة:</span>
+                <span className="text-sm font-medium text-muted-foreground">{t('reports.printOptions')}:</span>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="includeStamps"
@@ -437,7 +442,7 @@ const Reports = () => {
                   />
                   <Label htmlFor="includeStamps" className="flex items-center gap-1 cursor-pointer">
                     <Stamp className="w-4 h-4" />
-                    تضمين الأختام
+                    {t('reports.includeStamps')}
                   </Label>
                 </div>
                 <div className="flex items-center gap-2">
@@ -448,7 +453,7 @@ const Reports = () => {
                   />
                   <Label htmlFor="includeSignatures" className="flex items-center gap-1 cursor-pointer">
                     <PenLine className="w-4 h-4" />
-                    تضمين التوقيعات
+                    {t('reports.includeSignatures')}
                   </Label>
                 </div>
               </div>
@@ -457,18 +462,18 @@ const Reports = () => {
               <div className="flex items-center gap-3">
                 <Button onClick={fetchReportData} variant="outline" className="gap-2">
                   <RefreshCw className="w-4 h-4" />
-                  تحديث البيانات
+                  {t('reports.refreshData')}
                 </Button>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button className="gap-2">
                       <Printer className="w-4 h-4" />
-                      طباعة التقرير
+                      {t('reports.printReport')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle className="text-right">التقرير الإحصائي الرسمي</DialogTitle>
+                    <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
                     </DialogHeader>
                     <OfficialReportPrint 
                       data={data} 
@@ -496,7 +501,7 @@ const Reports = () => {
                   <Package className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">إجمالي الشحنات</p>
+                  <p className="text-sm text-muted-foreground">{t('reportsPage.totalShipments')}</p>
                   <p className="text-3xl font-bold">
                     {data.shipmentsByStatus.reduce((a, b) => a + b.value, 0)}
                   </p>
@@ -511,9 +516,9 @@ const Reports = () => {
                   <Building2 className="w-6 h-6 text-blue-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">جهات مولدة</p>
+                  <p className="text-sm text-muted-foreground">{t('reportsPage.generatorOrgs')}</p>
                   <p className="text-3xl font-bold">
-                    {data.organizationsByType.find(o => o.name === 'جهات مولدة')?.value || 0}
+                    {data.organizationsByType.find(o => o.name === t('reports.generators'))?.value || 0}
                   </p>
                 </div>
               </div>
@@ -526,9 +531,9 @@ const Reports = () => {
                   <Truck className="w-6 h-6 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">شركات نقل</p>
+                  <p className="text-sm text-muted-foreground">{t('reportsPage.transportCompanies')}</p>
                   <p className="text-3xl font-bold">
-                    {data.organizationsByType.find(o => o.name === 'ناقلون')?.value || 0}
+                    {data.organizationsByType.find(o => o.name === t('reports.transporters'))?.value || 0}
                   </p>
                 </div>
               </div>
@@ -541,9 +546,9 @@ const Reports = () => {
                   <Recycle className="w-6 h-6 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">جهات تدوير</p>
+                  <p className="text-sm text-muted-foreground">{t('reportsPage.recyclerOrgs')}</p>
                   <p className="text-3xl font-bold">
-                    {data.organizationsByType.find(o => o.name === 'معيدو تدوير')?.value || 0}
+                    {data.organizationsByType.find(o => o.name === t('reports.recyclers'))?.value || 0}
                   </p>
                 </div>
               </div>
@@ -558,9 +563,9 @@ const Reports = () => {
             <CardHeader className="text-right">
               <CardTitle className="flex items-center gap-2 justify-end">
                 <TrendingUp className="w-5 h-5" />
-                اتجاه الشحنات
+                {t('reportsPage.shipmentsTrendTitle')}
               </CardTitle>
-              <CardDescription>عدد الشحنات خلال الأسبوع الماضي</CardDescription>
+              <CardDescription>{t('reportsPage.shipmentsTrendDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -586,9 +591,9 @@ const Reports = () => {
             <CardHeader className="text-right">
               <CardTitle className="flex items-center gap-2 justify-end">
                 <ChartBar className="w-5 h-5" />
-                الشحنات حسب الحالة
+                {t('reportsPage.shipmentsByStatusTitle')}
               </CardTitle>
-              <CardDescription>توزيع الشحنات على الحالات المختلفة</CardDescription>
+              <CardDescription>{t('reportsPage.shipmentsByStatusDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -619,8 +624,8 @@ const Reports = () => {
           {/* Waste Types */}
           <Card>
             <CardHeader className="text-right">
-              <CardTitle>الشحنات حسب نوع النفايات</CardTitle>
-              <CardDescription>توزيع أنواع النفايات المنقولة</CardDescription>
+              <CardTitle>{t('reportsPage.shipmentsByWasteTitle')}</CardTitle>
+              <CardDescription>{t('reportsPage.shipmentsByWasteDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -638,8 +643,8 @@ const Reports = () => {
           {/* Organization Types */}
           <Card>
             <CardHeader className="text-right">
-              <CardTitle>توزيع المنظمات</CardTitle>
-              <CardDescription>عدد المنظمات حسب النوع</CardDescription>
+              <CardTitle>{t('reportsPage.orgDistribution')}</CardTitle>
+              <CardDescription>{t('reportsPage.orgDistributionDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -668,17 +673,17 @@ const Reports = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader className="text-right">
-              <CardTitle>أعلى الجهات المولدة نشاطاً</CardTitle>
-              <CardDescription>حسب عدد الشحنات</CardDescription>
+              <CardTitle>{t('reportsPage.topGenerators')}</CardTitle>
+              <CardDescription>{t('reportsPage.byShipmentCount')}</CardDescription>
             </CardHeader>
             <CardContent>
               {data.topGenerators.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">لا توجد بيانات</p>
+                <p className="text-center text-muted-foreground py-8">{t('reportsPage.noDataAvailable')}</p>
               ) : (
                 <div className="space-y-4">
                   {data.topGenerators.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
-                      <Badge variant="secondary">{item.shipments} شحنة</Badge>
+                      <Badge variant="secondary">{item.shipments} {t('notificationDetails.shipment')}</Badge>
                       <div className="flex items-center gap-3">
                         <span className="font-medium">{item.name}</span>
                         <span className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
@@ -694,17 +699,17 @@ const Reports = () => {
 
           <Card>
             <CardHeader className="text-right">
-              <CardTitle>أعلى شركات النقل نشاطاً</CardTitle>
-              <CardDescription>حسب عدد الشحنات</CardDescription>
+              <CardTitle>{t('reportsPage.topTransporters')}</CardTitle>
+              <CardDescription>{t('reportsPage.byShipmentCount')}</CardDescription>
             </CardHeader>
             <CardContent>
               {data.topTransporters.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">لا توجد بيانات</p>
+                <p className="text-center text-muted-foreground py-8">{t('reportsPage.noDataAvailable')}</p>
               ) : (
                 <div className="space-y-4">
                   {data.topTransporters.map((item, index) => (
                     <div key={index} className="flex items-center justify-between">
-                      <Badge variant="secondary">{item.shipments} شحنة</Badge>
+                      <Badge variant="secondary">{item.shipments} {t('notificationDetails.shipment')}</Badge>
                       <div className="flex items-center gap-3">
                         <span className="font-medium">{item.name}</span>
                         <span className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-sm font-bold text-amber-600">

@@ -2,12 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow, format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar as arLocale } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import ResponsivePageContainer from '@/components/dashboard/ResponsivePageContainer';
-import ResponsiveGrid from '@/components/dashboard/ResponsiveGrid';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,42 +91,42 @@ const getNotificationColor = (type: string | null) => {
   }
 };
 
-const getNotificationBadge = (type: string | null) => {
+const getNotificationBadge = (type: string | null, t: (key: string) => string) => {
   switch (type) {
     case 'shipment_created':
-      return { label: 'شحنة جديدة', variant: 'default' as const };
+      return { label: t('notifications.shipmentCreated'), variant: 'default' as const };
     case 'shipment_status':
-      return { label: 'تحديث الحالة', variant: 'secondary' as const };
+      return { label: t('notifications.statusUpdate'), variant: 'secondary' as const };
     case 'shipment_approved':
-      return { label: 'موافقة', variant: 'default' as const };
+      return { label: t('notifications.approval'), variant: 'default' as const };
     case 'shipment_delivered':
-      return { label: 'تم التسليم', variant: 'default' as const };
+      return { label: t('notifications.shipmentDelivered'), variant: 'default' as const };
     case 'shipment_assigned':
-      return { label: 'إسناد شحنة', variant: 'secondary' as const };
+      return { label: t('notifications.shipmentAssigned'), variant: 'secondary' as const };
     case 'recycling_report':
-      return { label: 'تقرير تدوير', variant: 'default' as const };
+      return { label: t('notifications.recyclingReport'), variant: 'default' as const };
     case 'document_uploaded':
-      return { label: 'وثيقة جديدة', variant: 'secondary' as const };
+      return { label: t('notifications.newDocument'), variant: 'secondary' as const };
     case 'warning':
-      return { label: 'تحذير', variant: 'destructive' as const };
+      return { label: t('notifications.warning'), variant: 'destructive' as const };
     case 'approval_request':
-      return { label: 'طلب موافقة', variant: 'secondary' as const };
+      return { label: t('notifications.approvalRequest'), variant: 'secondary' as const };
     default:
-      return { label: 'إشعار', variant: 'outline' as const };
+      return { label: t('notifications.notification'), variant: 'outline' as const };
   }
 };
 
-const getStatusLabel = (status: string | null) => {
+const getStatusLabel = (status: string | null, t: (key: string) => string) => {
   const statusMap: Record<string, { label: string; color: string }> = {
-    pending: { label: 'قيد الانتظار', color: 'bg-amber-100 text-amber-700' },
-    approved: { label: 'موافق عليها', color: 'bg-blue-100 text-blue-700' },
-    in_transit: { label: 'قيد النقل', color: 'bg-purple-100 text-purple-700' },
-    picked_up: { label: 'تم الاستلام', color: 'bg-indigo-100 text-indigo-700' },
-    delivered: { label: 'تم التسليم', color: 'bg-green-100 text-green-700' },
-    confirmed: { label: 'مؤكدة', color: 'bg-emerald-100 text-emerald-700' },
-    cancelled: { label: 'ملغاة', color: 'bg-red-100 text-red-700' },
+    pending: { label: t('notificationDetails.pending'), color: 'bg-amber-100 text-amber-700' },
+    approved: { label: t('notificationDetails.approved'), color: 'bg-blue-100 text-blue-700' },
+    in_transit: { label: t('notificationDetails.in_transit'), color: 'bg-purple-100 text-purple-700' },
+    picked_up: { label: t('notificationDetails.picked_up'), color: 'bg-indigo-100 text-indigo-700' },
+    delivered: { label: t('notificationDetails.delivered'), color: 'bg-green-100 text-green-700' },
+    confirmed: { label: t('notificationDetails.confirmed'), color: 'bg-emerald-100 text-emerald-700' },
+    cancelled: { label: t('notificationDetails.cancelled'), color: 'bg-red-100 text-red-700' },
   };
-  return statusMap[status || ''] || { label: status || 'غير محدد', color: 'bg-muted text-muted-foreground' };
+  return statusMap[status || ''] || { label: status || t('notificationDetails.notAssigned'), color: 'bg-muted text-muted-foreground' };
 };
 
 // Categorize notifications
@@ -190,25 +191,25 @@ interface CategoryConfig {
   bgColor: string;
 }
 
-const categories: CategoryConfig[] = [
-  { id: 'all', label: 'الكل', icon: Bell, color: 'text-primary', bgColor: 'bg-primary/10' },
-  { id: 'new_shipments', label: 'شحنات جديدة', icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-  { id: 'received_requests', label: 'طلبات مستلمة', icon: Inbox, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
-  { id: 'sent_requests', label: 'طلبات مرسلة', icon: Send, color: 'text-green-500', bgColor: 'bg-green-500/10' },
-  { id: 'delivered_shipments', label: 'شحنات مستلمة', icon: PackageCheck, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-  { id: 'messages', label: 'المحادثات', icon: MessageSquare, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10' },
+const getCategories = (t: (key: string) => string): CategoryConfig[] => [
+  { id: 'all', label: t('notifications.all'), icon: Bell, color: 'text-primary', bgColor: 'bg-primary/10' },
+  { id: 'new_shipments', label: t('notifications.newShipments'), icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+  { id: 'received_requests', label: t('notifications.receivedRequests'), icon: Inbox, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
+  { id: 'sent_requests', label: t('notifications.sentRequests'), icon: Send, color: 'text-green-500', bgColor: 'bg-green-500/10' },
+  { id: 'delivered_shipments', label: t('notifications.deliveredShipments'), icon: PackageCheck, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+  { id: 'messages', label: t('notifications.messages'), icon: MessageSquare, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10' },
 ];
 
 const Notifications = () => {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const categories = getCategories(t);
+  const dateLocale = language === 'ar' ? arLocale : enUS;
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [soundEnabled, setSoundEnabled] = useState(true);
-  
-  // Use display mode for responsive layout
-  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
   // Get unique shipment IDs from notifications
   const shipmentIds = useMemo(() => {
@@ -333,8 +334,10 @@ const Notifications = () => {
     );
   }
 
+  // Use display mode for responsive layout
+  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
+
   // Get responsive grid columns for categories
-  const categoryGridCols = isMobile ? 2 : isTablet ? 3 : 6;
   const iconSize = getResponsiveClass({
     mobile: 'w-8 h-8',
     tablet: 'w-10 h-10',
@@ -350,8 +353,8 @@ const Notifications = () => {
     <DashboardLayout>
       <div className="w-full max-w-full overflow-x-hidden px-1">
         <ResponsivePageContainer
-          title="الإشعارات"
-          subtitle="جميع الإشعارات والتنبيهات الخاصة بك"
+          title={t('notifications.title')}
+          subtitle={t('notifications.subtitle')}
           actions={
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <Button
@@ -362,7 +365,7 @@ const Notifications = () => {
                 disabled={!soundEnabled}
               >
                 <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                {!isMobile && 'اختبار الصوت'}
+                {!isMobile && t('notifications.testSound')}
               </Button>
               {unreadCount > 0 && (
                 <Button 
@@ -372,7 +375,7 @@ const Notifications = () => {
                   className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
                 >
                   <CheckCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  {isMobile ? `(${unreadCount})` : `تحديد الكل كمقروء (${unreadCount})`}
+                  {isMobile ? `(${unreadCount})` : `${t('notifications.markAllRead')} (${unreadCount})`}
                 </Button>
               )}
             </div>
@@ -460,11 +463,11 @@ const Notifications = () => {
                   return (
                     <>
                       <EmptyIcon className={`w-16 h-16 mx-auto mb-4 ${activeCat?.color || 'text-muted-foreground/30'} opacity-30`} />
-                      <h3 className="text-lg font-medium mb-2">لا توجد إشعارات</h3>
+                      <h3 className="text-lg font-medium mb-2">{t('notifications.noNotifications')}</h3>
                       <p className="text-muted-foreground">
                         {activeCategory === 'all' 
-                          ? 'ستظهر هنا الإشعارات الخاصة بك'
-                          : `لا توجد إشعارات في فئة "${activeCat?.label}"`
+                          ? t('notifications.willAppearHere')
+                          : t('notifications.noNotificationsInCategory')
                         }
                       </p>
                     </>
@@ -476,7 +479,7 @@ const Notifications = () => {
                 {filteredNotifications.map((notification, index) => {
                   const Icon = getNotificationIcon(notification.type);
                   const iconColorClass = getNotificationColor(notification.type);
-                  const badge = getNotificationBadge(notification.type);
+                  const badge = getNotificationBadge(notification.type, t);
                   const isRecyclingReport = notification.type === 'recycling_report' && notification.pdf_url;
                   const shipmentDetails = notification.shipment_id ? shipmentDetailsMap[notification.shipment_id] : null;
                   const driverProfile = shipmentDetails?.driver?.profiles 
@@ -554,8 +557,8 @@ const Notifications = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               {shipmentDetails?.status && (
-                                <Badge className={`${getStatusLabel(shipmentDetails.status).color} text-[10px]`}>
-                                  {getStatusLabel(shipmentDetails.status).label}
+                                <Badge className={`${getStatusLabel(shipmentDetails.status, t).color} text-[10px]`}>
+                                  {getStatusLabel(shipmentDetails.status, t).label}
                                 </Badge>
                               )}
                               <Badge variant={badge.variant} className={`shrink-0 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-xs'}`}>
@@ -591,7 +594,7 @@ const Notifications = () => {
                                 {shipmentDetails.quantity && (
                                   <Badge variant="outline" className="gap-1 text-[10px]">
                                     <Scale className="w-3 h-3" />
-                                    {shipmentDetails.quantity} {shipmentDetails.unit || 'كجم'}
+                                    {shipmentDetails.quantity} {shipmentDetails.unit || t('notificationDetails.kg')}
                                   </Badge>
                                 )}
                               </div>
@@ -601,21 +604,21 @@ const Notifications = () => {
                                 {shipmentDetails.generator?.name && (
                                   <div className="flex items-center gap-1.5 text-muted-foreground">
                                     <Building2 className="w-3.5 h-3.5 text-blue-500" />
-                                    <span className="text-[10px] text-muted-foreground/70">المولد:</span>
+                                    <span className="text-[10px] text-muted-foreground/70">{t('notificationDetails.generator')}:</span>
                                     <span className="font-medium truncate">{shipmentDetails.generator.name}</span>
                                   </div>
                                 )}
                                 {shipmentDetails.transporter?.name && (
                                   <div className="flex items-center gap-1.5 text-muted-foreground">
                                     <Truck className="w-3.5 h-3.5 text-purple-500" />
-                                    <span className="text-[10px] text-muted-foreground/70">الناقل:</span>
+                                    <span className="text-[10px] text-muted-foreground/70">{t('notificationDetails.transporter')}:</span>
                                     <span className="font-medium truncate">{shipmentDetails.transporter.name}</span>
                                   </div>
                                 )}
                                 {shipmentDetails.recycler?.name && (
                                   <div className="flex items-center gap-1.5 text-muted-foreground">
                                     <Recycle className="w-3.5 h-3.5 text-green-500" />
-                                    <span className="text-[10px] text-muted-foreground/70">المدور:</span>
+                                    <span className="text-[10px] text-muted-foreground/70">{t('notificationDetails.recyclerLabel')}:</span>
                                     <span className="font-medium truncate">{shipmentDetails.recycler.name}</span>
                                   </div>
                                 )}
@@ -626,8 +629,8 @@ const Notifications = () => {
                                 <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-border/50 mt-1">
                                   <div className="flex items-center gap-1.5 text-xs">
                                     <User className="w-3.5 h-3.5 text-amber-500" />
-                                    <span className="text-muted-foreground/70">السائق:</span>
-                                    <span className="font-medium">{driverProfile?.full_name || 'غير محدد'}</span>
+                                    <span className="text-muted-foreground/70">{t('notificationDetails.driverLabel')}:</span>
+                                    <span className="font-medium">{driverProfile?.full_name || t('notificationDetails.notAssigned')}</span>
                                   </div>
                                   {driverProfile?.phone && (
                                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -655,14 +658,14 @@ const Notifications = () => {
                                   {shipmentDetails.pickup_address && (
                                     <div className="flex items-start gap-1.5 text-xs">
                                       <MapPin className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
-                                      <span className="text-muted-foreground/70">من:</span>
+                                      <span className="text-muted-foreground/70">{t('notificationDetails.from')}:</span>
                                       <span className="text-muted-foreground line-clamp-1">{shipmentDetails.pickup_address}</span>
                                     </div>
                                   )}
                                   {shipmentDetails.delivery_address && (
                                     <div className="flex items-start gap-1.5 text-xs">
                                       <MapPin className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
-                                      <span className="text-muted-foreground/70">إلى:</span>
+                                      <span className="text-muted-foreground/70">{t('notificationDetails.to')}:</span>
                                       <span className="text-muted-foreground line-clamp-1">{shipmentDetails.delivery_address}</span>
                                     </div>
                                   )}
@@ -682,9 +685,9 @@ const Notifications = () => {
                               )}
                               {notification.request_id && (
                                 <Badge variant="outline" className="gap-1 text-[10px] font-mono">
-                                  <FileText className="w-3 h-3" />
-                                  طلب: {notification.request_id.slice(0, 6)}
-                                </Badge>
+                                   <FileText className="w-3 h-3" />
+                                   {t('notificationDetails.request')}: {notification.request_id.slice(0, 6)}
+                                 </Badge>
                               )}
                             </div>
                           )}
@@ -694,7 +697,7 @@ const Notifications = () => {
                             <Clock className="w-3 h-3" />
                             {formatDistanceToNow(new Date(notification.created_at), {
                               addSuffix: true,
-                              locale: ar,
+                              locale: dateLocale,
                             })}
                           </div>
                           
@@ -703,7 +706,7 @@ const Notifications = () => {
                             <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-border/50">
                               <div className="flex items-center gap-2 text-primary text-xs mb-1 w-full">
                                 <FileText className="w-4 h-4" />
-                                <span className="font-medium">شهادة إعادة التدوير مرفقة</span>
+                                <span className="font-medium">{t('notificationDetails.recyclingCertAttached')}</span>
                               </div>
                               <Button
                                 variant="outline"
@@ -712,7 +715,7 @@ const Notifications = () => {
                                 onClick={handlePdfView}
                               >
                                 <Eye className="w-3.5 h-3.5" />
-                                عرض
+                                {t('notificationDetails.view')}
                               </Button>
                               <Button
                                 variant="outline"
@@ -721,7 +724,7 @@ const Notifications = () => {
                                 onClick={handlePdfDownload}
                               >
                                 <Download className="w-3.5 h-3.5" />
-                                تنزيل
+                                {t('notificationDetails.download')}
                               </Button>
                               <Button
                                 variant="outline"
@@ -730,7 +733,7 @@ const Notifications = () => {
                                 onClick={handlePdfPrint}
                               >
                                 <Printer className="w-3.5 h-3.5" />
-                                طباعة
+                                {t('notificationDetails.print')}
                               </Button>
                             </div>
                           )}

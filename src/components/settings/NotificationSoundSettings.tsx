@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { 
   Volume2, 
   VolumeX, 
@@ -106,6 +107,7 @@ const soundConfigs: SoundConfig[] = [
 ];
 
 const NotificationSoundSettings = () => {
+  const { t } = useLanguage();
   const [masterEnabled, setMasterEnabled] = useState(true);
   const [soundSettings, setSoundSettings] = useState<Record<NotificationSoundType, boolean>>({} as any);
   const [playingSound, setPlayingSound] = useState<NotificationSoundType | null>(null);
@@ -150,10 +152,10 @@ const NotificationSoundSettings = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Volume2 className="h-5 w-5 text-primary" />
-          نغمات الإشعارات
+          {t('soundSettings.title')}
         </CardTitle>
         <CardDescription>
-          تخصيص نغمات مميزة لكل نوع من الإشعارات
+          {t('soundSettings.subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -166,9 +168,9 @@ const NotificationSoundSettings = () => {
               <VolumeX className="h-6 w-6 text-muted-foreground" />
             )}
             <div>
-              <p className="font-medium">تفعيل الأصوات</p>
+              <p className="font-medium">{t('soundSettings.enableSounds')}</p>
               <p className="text-sm text-muted-foreground">
-                {masterEnabled ? 'الأصوات مفعّلة لجميع الإشعارات' : 'الأصوات متوقفة'}
+                {masterEnabled ? t('soundSettings.soundsEnabled') : t('soundSettings.soundsDisabled')}
               </p>
             </div>
           </div>
@@ -184,9 +186,9 @@ const NotificationSoundSettings = () => {
           !masterEnabled && 'opacity-50 pointer-events-none'
         )}>
           <div className="flex items-center justify-between">
-            <h4 className="font-medium text-sm text-muted-foreground">نغمات حسب نوع الإشعار</h4>
+            <h4 className="font-medium text-sm text-muted-foreground">{t('soundSettings.soundsByType')}</h4>
             <Button variant="ghost" size="sm" onClick={handleReset} className="text-xs">
-              إعادة تعيين
+              {t('soundSettings.resetSettings')}
             </Button>
           </div>
           
