@@ -78,30 +78,50 @@ const SystemStatus = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
       className="space-y-6"
     >
       {/* Header */}
-      <div className="flex flex-col gap-4">
+      <motion.div
+        className="flex flex-col gap-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BackButton />
-            <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-white">
+            <motion.div
+              className="p-3 rounded-xl bg-gradient-to-br from-primary to-primary/60 text-white"
+              initial={{ scale: 0, rotate: -90 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+            >
               <Activity className="w-8 h-8" />
-            </div>
-            <div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+            >
               <h1 className="text-2xl font-bold">حالة النظام</h1>
               <p className="text-muted-foreground">تقرير شامل ومباشر عن حالة المنصة</p>
-            </div>
+            </motion.div>
           </div>
-          <div className="flex gap-2">
+          <motion.div
+            className="flex gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
             <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/support')}>
               <Sparkles className="w-4 h-4 ml-2" />
               الدعم الفني
               <ExternalLink className="w-3 h-3 mr-2" />
             </Button>
-          </div>
+          </motion.div>
         </div>
 
         {/* Live Stats from Database */}
@@ -115,7 +135,7 @@ const SystemStatus = () => {
           plannedCount={plannedFeatures.length}
           issuesCount={issueFeatures.length}
         />
-      </div>
+      </motion.div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
@@ -371,26 +391,38 @@ const SystemStatus = () => {
         <TabsContent value="future" className="mt-6">
           <div className="grid gap-6">
             {/* Vision Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <motion.div
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              initial="hidden"
+              animate="visible"
+              variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06 } } }}
+            >
               {systemModulesData.map((module, idx) => (
-                <Card key={idx} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary/60 text-white">
-                        <module.icon className="w-5 h-5" />
+                <motion.div
+                  key={idx}
+                  variants={{ hidden: { opacity: 0, y: 20, scale: 0.96 }, visible: { opacity: 1, y: 0, scale: 1 } }}
+                  transition={{ duration: 0.4 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                >
+                  <Card className="hover:shadow-md transition-shadow h-full">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-primary to-primary/60 text-white">
+                          <module.icon className="w-5 h-5" />
+                        </div>
+                        <CardTitle className="text-base">{module.name}</CardTitle>
                       </div>
-                      <CardTitle className="text-base">{module.name}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Rocket className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                      <p>{module.futureVision}</p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Rocket className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <p>{module.futureVision}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Planned Features */}
             <Card>
@@ -406,7 +438,13 @@ const SystemStatus = () => {
                   {plannedFeatures.map((feature, idx) => {
                     const module = systemModulesData.find(m => m.features.includes(feature));
                     return (
-                      <div key={idx} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: 15 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05, duration: 0.35 }}
+                        className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg"
+                      >
                         <div className="flex items-center gap-3">
                           {module && <module.icon className="w-4 h-4 text-blue-600" />}
                           <div>
@@ -427,7 +465,7 @@ const SystemStatus = () => {
                             طوّر
                           </Button>
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
