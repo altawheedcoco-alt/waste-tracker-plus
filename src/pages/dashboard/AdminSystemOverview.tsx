@@ -157,7 +157,7 @@ const AdminSystemOverview = () => {
         .from('organizations')
         .select(`
           *,
-          profiles(id, full_name, email, phone, user_id, is_active),
+          profiles!profiles_organization_id_fkey(id, full_name, email, phone, user_id, is_active),
           documents:organization_documents(id, document_type, file_name)
         `)
         .order('created_at', { ascending: false });
