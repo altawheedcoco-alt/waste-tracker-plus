@@ -1880,6 +1880,69 @@ export type Database = {
           },
         ]
       }
+      commodity_market_prices: {
+        Row: {
+          commodity_name: string
+          commodity_name_ar: string
+          commodity_subtype: string
+          commodity_type: string
+          created_at: string
+          currency: string
+          id: string
+          notes: string | null
+          previous_price: number | null
+          price_change_percent: number | null
+          price_date: string
+          price_per_ton: number
+          price_source: string
+          region: string | null
+          source_url: string | null
+          trend: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          commodity_name: string
+          commodity_name_ar: string
+          commodity_subtype: string
+          commodity_type: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          previous_price?: number | null
+          price_change_percent?: number | null
+          price_date?: string
+          price_per_ton: number
+          price_source: string
+          region?: string | null
+          source_url?: string | null
+          trend?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          commodity_name?: string
+          commodity_name_ar?: string
+          commodity_subtype?: string
+          commodity_type?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          notes?: string | null
+          previous_price?: number | null
+          price_change_percent?: number | null
+          price_date?: string
+          price_per_ton?: number
+          price_source?: string
+          region?: string | null
+          source_url?: string | null
+          trend?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contract_custom_versions: {
         Row: {
           created_at: string
@@ -7041,6 +7104,114 @@ export type Database = {
           },
         ]
       }
+      esg_reports: {
+        Row: {
+          carbon_credit_value_usd: number | null
+          carbon_credits_earned: number | null
+          carbon_emissions_saved_tons: number | null
+          created_at: string
+          diversion_rate: number | null
+          environmental_score: number | null
+          generated_by: string | null
+          governance_score: number | null
+          id: string
+          organization_id: string | null
+          overall_esg_score: number | null
+          period_end: string
+          period_start: string
+          published_at: string | null
+          renewable_energy_generated_kwh: number | null
+          report_data: Json | null
+          report_title: string
+          report_type: string
+          report_url: string | null
+          reviewed_by: string | null
+          sdg_contributions: Json | null
+          social_score: number | null
+          status: string | null
+          total_waste_diverted_tons: number | null
+          total_waste_landfilled_tons: number | null
+          trees_equivalent_saved: number | null
+          updated_at: string
+          water_saved_liters: number | null
+        }
+        Insert: {
+          carbon_credit_value_usd?: number | null
+          carbon_credits_earned?: number | null
+          carbon_emissions_saved_tons?: number | null
+          created_at?: string
+          diversion_rate?: number | null
+          environmental_score?: number | null
+          generated_by?: string | null
+          governance_score?: number | null
+          id?: string
+          organization_id?: string | null
+          overall_esg_score?: number | null
+          period_end: string
+          period_start: string
+          published_at?: string | null
+          renewable_energy_generated_kwh?: number | null
+          report_data?: Json | null
+          report_title: string
+          report_type?: string
+          report_url?: string | null
+          reviewed_by?: string | null
+          sdg_contributions?: Json | null
+          social_score?: number | null
+          status?: string | null
+          total_waste_diverted_tons?: number | null
+          total_waste_landfilled_tons?: number | null
+          trees_equivalent_saved?: number | null
+          updated_at?: string
+          water_saved_liters?: number | null
+        }
+        Update: {
+          carbon_credit_value_usd?: number | null
+          carbon_credits_earned?: number | null
+          carbon_emissions_saved_tons?: number | null
+          created_at?: string
+          diversion_rate?: number | null
+          environmental_score?: number | null
+          generated_by?: string | null
+          governance_score?: number | null
+          id?: string
+          organization_id?: string | null
+          overall_esg_score?: number | null
+          period_end?: string
+          period_start?: string
+          published_at?: string | null
+          renewable_energy_generated_kwh?: number | null
+          report_data?: Json | null
+          report_title?: string
+          report_type?: string
+          report_url?: string | null
+          reviewed_by?: string | null
+          sdg_contributions?: Json | null
+          social_score?: number | null
+          status?: string | null
+          total_waste_diverted_tons?: number | null
+          total_waste_landfilled_tons?: number | null
+          trees_equivalent_saved?: number | null
+          updated_at?: string
+          water_saved_liters?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esg_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "esg_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -7610,6 +7781,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      geo_concentration_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string
+          current_value: number | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          message: string
+          message_ar: string
+          region_lat: number
+          region_lng: number
+          region_name: string
+          severity: string
+          threshold_value: number | null
+          waste_type: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string
+          current_value?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          message: string
+          message_ar: string
+          region_lat: number
+          region_lng: number
+          region_name: string
+          severity?: string
+          threshold_value?: number | null
+          waste_type?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          current_value?: number | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          message?: string
+          message_ar?: string
+          region_lat?: number
+          region_lng?: number
+          region_name?: string
+          severity?: string
+          threshold_value?: number | null
+          waste_type?: string | null
+        }
+        Relationships: []
       }
       gps_device_types: {
         Row: {
@@ -15118,6 +15346,78 @@ export type Database = {
           {
             foreignKeyName: "verified_partnerships_requester_org_id_fkey"
             columns: ["requester_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waste_flow_analytics: {
+        Row: {
+          avg_price_per_ton: number | null
+          created_at: string
+          destination_lat: number | null
+          destination_lng: number | null
+          destination_region: string | null
+          flow_date: string
+          flow_direction: string | null
+          id: string
+          organization_id: string | null
+          quantity_tons: number
+          shipment_count: number | null
+          source_lat: number | null
+          source_lng: number | null
+          source_region: string
+          waste_category: string
+          waste_type: string
+        }
+        Insert: {
+          avg_price_per_ton?: number | null
+          created_at?: string
+          destination_lat?: number | null
+          destination_lng?: number | null
+          destination_region?: string | null
+          flow_date?: string
+          flow_direction?: string | null
+          id?: string
+          organization_id?: string | null
+          quantity_tons?: number
+          shipment_count?: number | null
+          source_lat?: number | null
+          source_lng?: number | null
+          source_region: string
+          waste_category: string
+          waste_type: string
+        }
+        Update: {
+          avg_price_per_ton?: number | null
+          created_at?: string
+          destination_lat?: number | null
+          destination_lng?: number | null
+          destination_region?: string | null
+          flow_date?: string
+          flow_direction?: string | null
+          id?: string
+          organization_id?: string | null
+          quantity_tons?: number
+          shipment_count?: number | null
+          source_lat?: number | null
+          source_lng?: number | null
+          source_region?: string
+          waste_category?: string
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_flow_analytics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "waste_flow_analytics_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
