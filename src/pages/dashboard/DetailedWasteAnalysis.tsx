@@ -1,0 +1,314 @@
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, Upload, Loader2, Recycle, AlertTriangle, CheckCircle, Trash2, BarChart3, Droplets, Scale, PackageOpen, Leaf, ShieldAlert, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+
+interface WasteComponent {
+  name: string;
+  name_en: string;
+  waste_type: string;
+  sub_type: string;
+  percentage: number;
+  estimated_weight_kg: number;
+  condition: string;
+  recyclable: boolean;
+  market_value: string;
+  color: string;
+  notes: string;
+}
+
+interface AnalysisResult {
+  overall_description: string;
+  estimated_total_weight_kg: number;
+  weight_confidence: string;
+  overall_condition: string;
+  is_hazardous: boolean;
+  hazard_level: string;
+  components: WasteComponent[];
+  contamination: {
+    dirt_percentage: number;
+    moisture_percentage: number;
+    contamination_level: string;
+    contamination_details: string;
+  };
+  container_info: {
+    type: string;
+    fill_level_percent: number;
+    size_estimate: string;
+  };
+  quality_assessment: {
+    overall_grade: string;
+    sorting_quality: string;
+    purity_percentage: number;
+    recommendations: string[];
+  };
+  recycling_potential: {
+    recyclable_percentage: number;
+    estimated_recovery_value: string;
+    best_recycling_method: string;
+    disposal_method: string;
+  };
+}
+
+const wasteTypeColors: Record<string, string> = {
+  plastic: 'bg-blue-500', paper: 'bg-amber-500', metal: 'bg-gray-500',
+  glass: 'bg-cyan-500', electronic: 'bg-purple-500', organic: 'bg-green-500',
+  chemical: 'bg-red-500', medical: 'bg-pink-500', construction: 'bg-orange-500',
+  other: 'bg-slate-500',
+};
+
+const wasteTypeLabels: Record<string, string> = {
+  plastic: 'بلاستيك', paper: 'ورق/كرتون', metal: 'معادن', glass: 'زجاج',
+  electronic: 'إلكتروني', organic: 'عضوي', chemical: 'كيميائي',
+  medical: 'طبي', construction: 'بناء', other: 'أخرى',
+};
+
+const gradeColors: Record<string, string> = {
+  A: 'text-green-600 bg-green-100', B: 'text-blue-600 bg-blue-100',
+  C: 'text-amber-600 bg-amber-100', D: 'text-orange-600 bg-orange-100',
+  F: 'text-red-600 bg-red-100',
+};
+
+const DetailedWasteAnalysis = () => {
+  const [image, setImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => setImage(event.target?.result as string);
+    reader.readAsDataURL(file);
+
+    setIsAnalyzing(true);
+    setResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const { data, error } = await supabase.functions.invoke('detailed-waste-analysis', {
+        body: formData,
+      });
+
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error || 'فشل التحليل');
+
+      setResult(data.analysis);
+      toast.success('تم تحليل الصورة بنجاح');
+    } catch (err: any) {
+      toast.error(err.message || 'حدث خطأ أثناء التحليل');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const reset = () => {
+    setImage(null);
+    setResult(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  return (
+    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto" dir="rtl">
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold">تحليل المخلفات بالذكاء الاصطناعي</h1>
+        <p className="text-muted-foreground">ارفع صورة للمخلفات واحصل على تحليل تفصيلي شامل لكل مكون</p>
+      </div>
+
+      {/* Upload Area */}
+      <Card>
+        <CardContent className="p-6">
+          <div
+            onClick={() => !isAnalyzing && fileInputRef.current?.click()}
+            className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors"
+          >
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            {image ? (
+              <div className="space-y-4">
+                <img src={image} alt="Waste" className="max-h-64 mx-auto rounded-lg object-contain" />
+                {isAnalyzing && (
+                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>جاري تحليل الصورة بدقة...</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                  <Camera className="w-8 h-8 text-primary" />
+                </div>
+                <p className="font-medium">اضغط لرفع صورة المخلفات</p>
+                <p className="text-sm text-muted-foreground">PNG, JPG أو JPEG - حجم أقصى 20MB</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Results */}
+      <AnimatePresence>
+        {result && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+            {/* Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                  النتيجة العامة
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground leading-relaxed">{result.overall_description}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <StatCard icon={<Scale className="w-4 h-4" />} label="الوزن التقديري" value={`${result.estimated_total_weight_kg} كجم`} sub={`ثقة: ${result.weight_confidence === 'high' ? 'عالية' : result.weight_confidence === 'medium' ? 'متوسطة' : 'منخفضة'}`} />
+                  <StatCard icon={<PackageOpen className="w-4 h-4" />} label="الحالة" value={result.overall_condition} />
+                  <StatCard icon={<ShieldAlert className="w-4 h-4" />} label="مستوى الخطورة" value={result.hazard_level === 'none' ? 'آمن' : result.hazard_level === 'low' ? 'منخفض' : result.hazard_level === 'medium' ? 'متوسط' : result.hazard_level === 'high' ? 'عالي' : 'حرج'} color={result.is_hazardous ? 'text-red-600' : 'text-green-600'} />
+                  <StatCard icon={<Star className="w-4 h-4" />} label="تقييم الجودة" value={result.quality_assessment?.overall_grade || 'N/A'} badge badgeClass={gradeColors[result.quality_assessment?.overall_grade] || ''} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Components Breakdown */}
+            {result.components?.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trash2 className="w-5 h-5 text-primary" />
+                    تفاصيل المكونات ({result.components.length} مكون)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {result.components.map((comp, i) => (
+                    <div key={i} className="p-4 rounded-lg border bg-card space-y-3">
+                      <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${wasteTypeColors[comp.waste_type] || 'bg-slate-500'} text-white`}>
+                            {wasteTypeLabels[comp.waste_type] || comp.waste_type}
+                          </Badge>
+                          <span className="font-semibold">{comp.name}</span>
+                          <span className="text-xs text-muted-foreground">({comp.name_en})</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {comp.recyclable && <Badge variant="outline" className="text-green-600 border-green-300">♻ قابل للتدوير</Badge>}
+                          <Badge variant="secondary">{comp.percentage}%</Badge>
+                        </div>
+                      </div>
+                      <Progress value={comp.percentage} className="h-2" />
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                        <div><span className="text-muted-foreground">الوزن: </span><span className="font-medium">{comp.estimated_weight_kg} كجم</span></div>
+                        <div><span className="text-muted-foreground">الحالة: </span><span className="font-medium">{comp.condition}</span></div>
+                        <div><span className="text-muted-foreground">القيمة السوقية: </span><span className="font-medium">{comp.market_value === 'high' ? 'عالية' : comp.market_value === 'medium' ? 'متوسطة' : comp.market_value === 'low' ? 'منخفضة' : 'معدومة'}</span></div>
+                        {comp.sub_type && <div><span className="text-muted-foreground">النوع الفرعي: </span><span className="font-medium">{comp.sub_type}</span></div>}
+                      </div>
+                      {comp.notes && <p className="text-xs text-muted-foreground">{comp.notes}</p>}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Contamination & Quality */}
+            <div className="grid md:grid-cols-2 gap-4">
+              {result.contamination && (
+                <Card>
+                  <CardHeader><CardTitle className="text-base flex items-center gap-2"><Droplets className="w-4 h-4 text-primary" /> التلوث والشوائب</CardTitle></CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm"><span>نسبة التراب</span><span className="font-bold">{result.contamination.dirt_percentage}%</span></div>
+                      <Progress value={result.contamination.dirt_percentage} className="h-2" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm"><span>نسبة الرطوبة</span><span className="font-bold">{result.contamination.moisture_percentage}%</span></div>
+                      <Progress value={result.contamination.moisture_percentage} className="h-2" />
+                    </div>
+                    <Separator />
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">مستوى التلوث: </span>
+                      <Badge variant={result.contamination.contamination_level === 'high' ? 'destructive' : 'secondary'}>
+                        {result.contamination.contamination_level === 'none' ? 'نظيف' : result.contamination.contamination_level === 'low' ? 'منخفض' : result.contamination.contamination_level === 'medium' ? 'متوسط' : 'عالي'}
+                      </Badge>
+                    </div>
+                    {result.contamination.contamination_details && (
+                      <p className="text-xs text-muted-foreground">{result.contamination.contamination_details}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {result.recycling_potential && (
+                <Card>
+                  <CardHeader><CardTitle className="text-base flex items-center gap-2"><Leaf className="w-4 h-4 text-primary" /> إمكانية إعادة التدوير</CardTitle></CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm"><span>نسبة القابل للتدوير</span><span className="font-bold text-green-600">{result.recycling_potential.recyclable_percentage}%</span></div>
+                      <Progress value={result.recycling_potential.recyclable_percentage} className="h-2" />
+                    </div>
+                    <Separator />
+                    <div className="space-y-2 text-sm">
+                      {result.recycling_potential.estimated_recovery_value && (
+                        <div><span className="text-muted-foreground">القيمة التقديرية: </span>{result.recycling_potential.estimated_recovery_value}</div>
+                      )}
+                      {result.recycling_potential.best_recycling_method && (
+                        <div><span className="text-muted-foreground">أفضل طريقة: </span>{result.recycling_potential.best_recycling_method}</div>
+                      )}
+                      {result.recycling_potential.disposal_method && (
+                        <div><span className="text-muted-foreground">التخلص: </span>{result.recycling_potential.disposal_method}</div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Recommendations */}
+            {result.quality_assessment?.recommendations?.length > 0 && (
+              <Card>
+                <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-amber-500" /> التوصيات</CardTitle></CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {result.quality_assessment.recommendations.map((rec, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            <Button onClick={reset} variant="outline" className="w-full">
+              <Camera className="w-4 h-4 ml-2" />
+              تحليل صورة جديدة
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const StatCard = ({ icon, label, value, sub, color, badge, badgeClass }: { icon: React.ReactNode; label: string; value: string; sub?: string; color?: string; badge?: boolean; badgeClass?: string }) => (
+  <div className="p-3 rounded-lg border bg-card text-center space-y-1">
+    <div className="flex items-center justify-center gap-1 text-muted-foreground text-xs">{icon}{label}</div>
+    {badge ? (
+      <span className={`inline-block text-xl font-bold px-3 py-1 rounded-full ${badgeClass}`}>{value}</span>
+    ) : (
+      <p className={`font-bold text-lg ${color || ''}`}>{value}</p>
+    )}
+    {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+  </div>
+);
+
+export default DetailedWasteAnalysis;
