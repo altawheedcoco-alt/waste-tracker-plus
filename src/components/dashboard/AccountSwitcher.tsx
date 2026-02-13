@@ -80,41 +80,20 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
 
   if (!organization) return null;
 
-  // Check if user already has an organization (cannot add more)
-  const hasOrganization = userOrganizations.length >= 1;
+  // Max 3 organizations (generator/transporter/recycler/disposal), unlimited drivers/employees
+  const MAX_ORGANIZATIONS = 3;
+  const canAddMore = userOrganizations.length < MAX_ORGANIZATIONS;
 
-  // For users with only one organization, show a simpler view (without add button since they already have an org)
-  if (userOrganizations.length <= 1) {
+  // Collapsed view - just show icon
+  if (collapsed) {
     const Icon = getOrganizationIcon(organization.organization_type);
-    
-    if (collapsed) {
-      return (
-        <div className={cn("p-2", className)}>
-          <div className={cn(
-            "w-10 h-10 rounded-lg flex items-center justify-center",
-            getOrganizationColor(organization.organization_type)
-          )}>
-            <Icon className="w-5 h-5" />
-          </div>
-        </div>
-      );
-    }
-    
     return (
-      <div className={cn("w-full gap-3 p-3", className)}>
-        <div className="flex items-center gap-3">
-          <div className={cn(
-            "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-            getOrganizationColor(organization.organization_type)
-          )}>
-            <Icon className="w-5 h-5" />
-          </div>
-          <div className="flex-1 min-w-0 text-right">
-            <p className="font-medium text-sm truncate">{organization.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {getOrganizationLabel(organization.organization_type)}
-            </p>
-          </div>
+      <div className={cn("p-2", className)}>
+        <div className={cn(
+          "w-10 h-10 rounded-lg flex items-center justify-center",
+          getOrganizationColor(organization.organization_type)
+        )}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
     );
@@ -236,8 +215,7 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
           })}
         </AnimatePresence>
         
-        {/* Only show add organization option for admins or if no organization exists */}
-        {!hasOrganization && (
+        {canAddMore && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem 
@@ -249,7 +227,12 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
               <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-primary/10 shrink-0">
                 <Plus className="w-5 h-5" />
               </div>
-              <span className="font-medium text-sm">إضافة منظمة جديدة</span>
+              <div className="flex flex-col">
+                <span className="font-medium text-sm">إضافة منظمة جديدة</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {userOrganizations.length} من {MAX_ORGANIZATIONS}
+                </span>
+              </div>
             </DropdownMenuItem>
           </>
         )}
