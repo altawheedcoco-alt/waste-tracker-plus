@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } from '@/utils/autoDeclarationCreator';
+import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +21,7 @@ import {
   XCircle,
   Bot,
   AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -73,12 +76,13 @@ interface DocumentStep {
 }
 
 const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTimelineProps) => {
-  const { organization } = useAuth();
+  const { profile, organization } = useAuth();
   const [showGeneratorHandover, setShowGeneratorHandover] = useState(false);
   const [showDeclarationView, setShowDeclarationView] = useState<any>(null);
   const [rejectingDeclaration, setRejectingDeclaration] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [rejecting, setRejecting] = useState(false);
+  const [generatingDocs, setGeneratingDocs] = useState(false);
 
   // Fetch all declarations for this shipment
   const { data: declarations = [], refetch: refetchDeclarations } = useQuery({
@@ -104,12 +108,15 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
     queryKey: ['shipment-receipts', shipment.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('receipts' as any)
-        .select('id, receipt_number, status, created_at, issued_by_name')
+        .from('shipment_receipts')
+        .select('id, receipt_number, status, created_at, created_by')
         .eq('shipment_id', shipment.id)
         .order('created_at', { ascending: true });
 
-      if (error) return [] as any[];
+      if (error) {
+        console.error('Error fetching receipts:', error);
+        return [] as any[];
+      }
       return (data || []) as any[];
     },
     staleTime: 1000 * 60 * 2,
@@ -141,6 +148,57 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
       setRejecting(false);
     }
   };
+
+  // Auto-generate all missing documents for this shipment
+  const handleGenerateMissingDocs = useCallback(async () => {
+    if (!profile?.id) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return;
+    }
+    setGeneratingDocs(true);
+    let created = 0;
+    try {
+      const status = shipment.status;
+      
+      // Generator declaration - should exist for approved/registered/in_transit/delivered/confirmed
+      if (['approved', 'registered', 'in_transit', 'delivered', 'confirmed'].includes(status) && shipment.generator_id) {
+        try {
+          await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile.id);
+          created++;
+        } catch (e) { console.error('Generator declaration:', e); }
+      }
+
+      // Recycler declaration - should exist for delivered/confirmed
+      if (['delivered', 'confirmed'].includes(status) && shipment.recycler_id) {
+        try {
+          await autoCreateRecyclerDeclaration(shipment.id, shipment.recycler_id, profile.id);
+          created++;
+        } catch (e) { console.error('Recycler declaration:', e); }
+      }
+
+      // Receipt - should exist for in_transit/delivered/confirmed
+      if (['in_transit', 'delivered', 'confirmed'].includes(status) && shipment.transporter_id) {
+        try {
+          await autoCreateReceipt(shipment.id, shipment.transporter_id, profile.id);
+          created++;
+        } catch (e) { console.error('Receipt:', e); }
+      }
+
+      if (created > 0) {
+        toast.success(`تم إنشاء ${created} مستند(ات) مفقودة بنجاح`);
+      } else {
+        toast.info('جميع المستندات المتاحة موجودة بالفعل');
+      }
+      
+      refetchDeclarations();
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error generating missing docs:', error);
+      toast.error('حدث خطأ أثناء إنشاء المستندات');
+    } finally {
+      setGeneratingDocs(false);
+    }
+  }, [shipment, profile?.id, refetchDeclarations, onRefresh]);
 
   // Build the document steps
   const steps: DocumentStep[] = [
@@ -227,9 +285,23 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
       <Card>
         <CardHeader className="text-right pb-3">
           <div className="flex items-center justify-between">
-            <Badge variant="outline" className="text-xs">
-              {completedCount}/{totalSteps} مكتمل
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs">
+                {completedCount}/{totalSteps} مكتمل
+              </Badge>
+              {completedCount < totalSteps && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs gap-1"
+                  onClick={handleGenerateMissingDocs}
+                  disabled={generatingDocs}
+                >
+                  <RefreshCw className={`w-3 h-3 ${generatingDocs ? 'animate-spin' : ''}`} />
+                  {generatingDocs ? 'جارٍ الإنشاء...' : 'إنشاء المفقودة'}
+                </Button>
+              )}
+            </div>
             <CardTitle className="flex items-center gap-2 text-lg">
               <FileText className="w-5 h-5 text-primary" />
               سلسلة المستندات
