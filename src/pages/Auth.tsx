@@ -16,6 +16,7 @@ import CompanyRegistrationForm, { CompanyFormData } from '@/components/auth/Comp
 import DemoQuickLogin from '@/components/auth/DemoQuickLogin';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Validation schemas
 const loginSchema = z.object({
@@ -65,6 +66,7 @@ const Auth = () => {
   const { user, signIn, signUp, signUpDriver } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Company form state
   const [companyData, setCompanyData] = useState({
@@ -134,20 +136,20 @@ const Auth = () => {
 
     if (stepNumber === 1) {
       if (!companyData.organizationType) {
-        newErrors.organizationType = 'يرجى اختيار نوع المنشأة';
+        newErrors.organizationType = t('auth.selectOrgType');
       }
     } else if (stepNumber === 2) {
-      if (!companyData.organizationName) newErrors.organizationName = 'اسم المنشأة مطلوب';
-      if (!companyData.organizationEmail) newErrors.organizationEmail = 'بريد المنشأة مطلوب';
-      if (!companyData.organizationPhone) newErrors.organizationPhone = 'هاتف المنشأة مطلوب';
-      if (!companyData.address) newErrors.address = 'العنوان مطلوب';
-      if (!companyData.city) newErrors.city = 'المدينة مطلوبة';
+      if (!companyData.organizationName) newErrors.organizationName = t('auth.orgNameRequired');
+      if (!companyData.organizationEmail) newErrors.organizationEmail = t('auth.orgEmailRequired');
+      if (!companyData.organizationPhone) newErrors.organizationPhone = t('auth.orgPhoneRequired');
+      if (!companyData.address) newErrors.address = t('auth.addressRequired');
+      if (!companyData.city) newErrors.city = t('auth.cityRequired');
     } else if (stepNumber === 3) {
-      if (!companyData.fullName) newErrors.fullName = 'الاسم مطلوب';
-      if (!companyData.email) newErrors.email = 'البريد الإلكتروني مطلوب';
-      if (!companyData.phone) newErrors.phone = 'رقم الهاتف مطلوب';
+      if (!companyData.fullName) newErrors.fullName = t('auth.nameRequired');
+      if (!companyData.email) newErrors.email = t('auth.emailRequired');
+      if (!companyData.phone) newErrors.phone = t('auth.phoneRequired');
       if (!companyData.password || companyData.password.length < 6) {
-        newErrors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+        newErrors.password = t('auth.passwordMinLength');
       }
     }
 
@@ -159,16 +161,16 @@ const Auth = () => {
     const newErrors: Record<string, string> = {};
 
     if (stepNumber === 1) {
-      if (!driverData.fullName) newErrors.fullName = 'الاسم مطلوب';
-      if (!driverData.email) newErrors.email = 'البريد الإلكتروني مطلوب';
-      if (!driverData.phone) newErrors.phone = 'رقم الهاتف مطلوب';
+      if (!driverData.fullName) newErrors.fullName = t('auth.nameRequired');
+      if (!driverData.email) newErrors.email = t('auth.emailRequired');
+      if (!driverData.phone) newErrors.phone = t('auth.phoneRequired');
       if (!driverData.password || driverData.password.length < 6) {
-        newErrors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+        newErrors.password = t('auth.passwordMinLength');
       }
     } else if (stepNumber === 2) {
-      if (!driverData.licenseNumber) newErrors.licenseNumber = 'رقم الرخصة مطلوب';
-      if (!driverData.vehicleType) newErrors.vehicleType = 'نوع المركبة مطلوب';
-      if (!driverData.vehiclePlate) newErrors.vehiclePlate = 'لوحة المركبة مطلوبة';
+      if (!driverData.licenseNumber) newErrors.licenseNumber = t('auth.licenseRequired');
+      if (!driverData.vehicleType) newErrors.vehicleType = t('auth.vehicleTypeRequired');
+      if (!driverData.vehiclePlate) newErrors.vehiclePlate = t('auth.vehiclePlateRequired');
     }
 
     setErrors(newErrors);
@@ -188,21 +190,21 @@ const Auth = () => {
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           toast({
-            title: 'خطأ في تسجيل الدخول',
-            description: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+            title: t('auth.loginError'),
+            description: t('auth.invalidCredentials'),
             variant: 'destructive',
           });
         } else {
           toast({
-            title: 'خطأ',
+            title: t('common.error'),
             description: error.message,
             variant: 'destructive',
           });
         }
       } else {
         toast({
-          title: 'تم تسجيل الدخول بنجاح',
-          description: 'مرحباً بك في آي ريسايكل',
+          title: t('auth.loginSuccess'),
+          description: t('auth.welcomeBack'),
         });
         navigate('/dashboard');
       }
@@ -284,8 +286,8 @@ const Auth = () => {
     } catch (error: any) {
       console.error('Company registration error:', error);
       toast({
-        title: 'خطأ في التسجيل',
-        description: error?.message || 'حدث خطأ أثناء التسجيل',
+        title: t('auth.registerError'),
+        description: error?.message || t('common.error'),
         variant: 'destructive',
       });
       return { error };
@@ -332,14 +334,14 @@ const Auth = () => {
       if (signInError) {
         // Registration succeeded but login failed - still show success
         toast({
-          title: 'تم التسجيل بنجاح',
-          description: 'سيتم مراجعة طلبك من قبل الإدارة. يمكنك تسجيل الدخول الآن.',
+          title: t('auth.registerSuccess'),
+          description: t('auth.reviewPending'),
         });
         setAuthMode('login');
       } else {
         toast({
-          title: 'تم التسجيل بنجاح',
-          description: 'سيتم مراجعة طلبك من قبل الإدارة',
+          title: t('auth.registerSuccess'),
+          description: t('auth.reviewPending'),
         });
         navigate('/dashboard');
       }
@@ -355,8 +357,8 @@ const Auth = () => {
         setErrors(newErrors);
       } else {
         toast({
-          title: 'خطأ في التسجيل',
-          description: error?.message || 'حدث خطأ أثناء التسجيل',
+          title: t('auth.registerError'),
+          description: error?.message || t('common.error'),
           variant: 'destructive',
         });
       }
@@ -398,29 +400,29 @@ const Auth = () => {
   const organizationTypes = [
     {
       value: 'generator',
-      label: 'الجهة المولدة',
-      description: 'مصانع، شركات، مستشفيات',
+      label: t('auth.generatorOrg'),
+      description: t('auth.generatorOrgDesc'),
       icon: Building2,
       color: 'from-blue-500 to-blue-600',
     },
     {
       value: 'transporter',
-      label: 'الجهة الناقلة',
-      description: 'جمع ونقل المخلفات',
+      label: t('auth.transporterOrg'),
+      description: t('auth.transporterOrgDesc'),
       icon: Truck,
       color: 'from-amber-500 to-amber-600',
     },
     {
       value: 'recycler',
-      label: 'الجهة المدورة',
-      description: 'مصانع إعادة التدوير',
+      label: t('auth.recyclerOrg'),
+      description: t('auth.recyclerOrgDesc'),
       icon: Recycle,
       color: 'from-emerald-500 to-emerald-600',
     },
     {
       value: 'disposal',
-      label: 'جهة التخلص النهائي',
-      description: 'المدافن الصحية والمحارق والمعالجة',
+      label: t('auth.disposalOrg'),
+      description: t('auth.disposalOrgDesc'),
       icon: Factory,
       color: 'from-rose-500 to-red-600',
     },
@@ -429,15 +431,15 @@ const Auth = () => {
   const registrationTypes = [
     {
       value: 'company',
-      label: 'تسجيل شركة / منشأة',
-      description: 'مولدة، ناقلة، أو مدورة للمخلفات',
+      label: t('auth.companyRegistration'),
+      description: t('auth.companyRegistrationDesc'),
       icon: Building2,
       color: 'from-primary to-primary/80',
     },
     {
       value: 'driver',
-      label: 'تسجيل سائق',
-      description: 'سائق لنقل المخلفات',
+      label: t('auth.driverRegistration'),
+      description: t('auth.driverRegistrationDesc'),
       icon: User,
       color: 'from-amber-500 to-amber-600',
     },
@@ -470,8 +472,8 @@ const Auth = () => {
           >
             <img src={logo} alt="آي ريسايكل" className="h-16 w-16 object-contain" />
             <div className="text-right">
-              <h1 className="text-2xl font-bold text-gradient-eco">آي ريسايكل</h1>
-              <p className="text-sm text-muted-foreground">نظام إدارة المخلفات الذكي</p>
+              <h1 className="text-2xl font-bold text-gradient-eco">{t('footer.brandName')}</h1>
+              <p className="text-sm text-muted-foreground">{t('landing.tagline')}</p>
             </div>
           </motion.div>
         </div>
@@ -481,33 +483,33 @@ const Auth = () => {
             {/* System Branding */}
             <div className="mb-4 pb-4 border-b border-border/50">
               <h2 className="text-lg sm:text-xl font-bold text-primary tracking-wide">
-                iRecycle Waste Management System
+                {t('landing.systemName')}
               </h2>
               <p className="text-sm sm:text-base font-semibold text-foreground/70">
-                نظام آي ريسايكل لإدارة المخلفات
+                {t('landing.systemNameAr')}
               </p>
             </div>
             
             <CardTitle className="text-xl">
               {authMode === 'login' 
-                ? 'تسجيل الدخول' 
+                ? t('auth.login') 
                 : registrationType === null 
-                  ? 'إنشاء حساب جديد'
+                  ? t('auth.newAccount')
                   : registrationType === 'company'
-                    ? 'تسجيل شركة جديدة'
-                    : `تسجيل سائق - الخطوة ${step} من ${getTotalSteps()}`
+                    ? t('auth.registerCompany')
+                    : t('auth.driverStep').replace('{step}', String(step)).replace('{total}', String(getTotalSteps()))
               }
             </CardTitle>
             <CardDescription>
               {authMode === 'login'
-                ? 'أدخل بيانات حسابك للمتابعة'
+                ? t('auth.enterCredentials')
                 : registrationType === null
-                  ? 'اختر نوع الحساب'
+                  ? t('auth.chooseAccountType')
                   : registrationType === 'company'
-                    ? 'أكمل البيانات القانونية للتسجيل'
+                    ? t('auth.completeLegalData')
                     : step === 1
-                      ? 'البيانات الشخصية'
-                      : 'بيانات الرخصة والمركبة'
+                      ? t('auth.personalData')
+                      : t('auth.licenseVehicleData')
               }
             </CardDescription>
           </CardHeader>
@@ -525,7 +527,7 @@ const Auth = () => {
                   className="space-y-4"
                 >
                   <div className="space-y-2">
-                    <Label htmlFor="email">البريد الإلكتروني</Label>
+                    <Label htmlFor="email">{t('auth.email')}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -541,7 +543,7 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password">كلمة المرور</Label>
+                    <Label htmlFor="password">{t('auth.password')}</Label>
                     <div className="relative">
                       <Input
                         id="password"
@@ -571,7 +573,7 @@ const Auth = () => {
                     className="w-full"
                     disabled={loading}
                   >
-                    {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+                    {loading ? t('auth.loggingIn') : t('auth.loginButton')}
                   </Button>
 
                   {/* Social Login Divider */}
@@ -580,7 +582,7 @@ const Auth = () => {
                       <Separator className="w-full" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">أو سجل الدخول عبر</span>
+                      <span className="bg-card px-2 text-muted-foreground">{t('auth.orLoginWith')}</span>
                     </div>
                   </div>
 
@@ -598,8 +600,8 @@ const Auth = () => {
                         });
                         if (error) {
                           toast({
-                            title: 'خطأ',
-                            description: 'فشل تسجيل الدخول عبر Google',
+                            title: t('common.error'),
+                            description: t('auth.googleLoginError'),
                             variant: 'destructive',
                           });
                           setLoading(false);
@@ -620,8 +622,8 @@ const Auth = () => {
                       className="w-full gap-2"
                       onClick={() => {
                         toast({
-                          title: 'قريباً',
-                          description: 'تسجيل الدخول عبر Apple سيكون متاحاً قريباً',
+                          title: t('auth.comingSoon'),
+                          description: t('auth.appleLoginSoon'),
                         });
                       }}
                     >
@@ -647,7 +649,7 @@ const Auth = () => {
                   <Alert className="bg-primary/5 border-primary/20">
                     <AlertCircle className="h-4 w-4 text-primary" />
                     <AlertDescription className="text-sm">
-                      جميع الطلبات تخضع للمراجعة والموافقة من قبل الإدارة
+                      {t('auth.allRequestsReviewed')}
                     </AlertDescription>
                   </Alert>
 
@@ -705,7 +707,7 @@ const Auth = () => {
                   {step === 1 && (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>الاسم الكامل</Label>
+                        <Label>{t('auth.fullName')}</Label>
                         <Input
                           placeholder="أحمد محمد"
                           value={driverData.fullName}
@@ -718,7 +720,7 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>البريد الإلكتروني</Label>
+                        <Label>{t('auth.email')}</Label>
                         <Input
                           type="email"
                           placeholder="ahmed@example.com"
@@ -733,7 +735,7 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>رقم الهاتف</Label>
+                        <Label>{t('auth.phone')}</Label>
                         <Input
                           placeholder="01234567890"
                           value={driverData.phone}
@@ -747,7 +749,7 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>كلمة المرور</Label>
+                        <Label>{t('auth.password')}</Label>
                         <div className="relative">
                           <Input
                             type={showPassword ? 'text' : 'password'}
@@ -775,7 +777,7 @@ const Auth = () => {
                   {step === 2 && (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>رقم رخصة القيادة</Label>
+                        <Label>{t('auth.licenseNumber')}</Label>
                         <Input
                           placeholder="DL-123456"
                           value={driverData.licenseNumber}
@@ -789,7 +791,7 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>تاريخ انتهاء الرخصة (اختياري)</Label>
+                        <Label>{t('auth.licenseExpiry')}</Label>
                         <Input
                           type="date"
                           value={driverData.licenseExpiry}
@@ -799,7 +801,7 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>نوع المركبة</Label>
+                        <Label>{t('auth.vehicleType')}</Label>
                         <Input
                           placeholder="شاحنة نقل"
                           value={driverData.vehicleType}
@@ -812,7 +814,7 @@ const Auth = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>لوحة المركبة</Label>
+                        <Label>{t('auth.vehiclePlate')}</Label>
                         <Input
                           placeholder="أ ب ج 1234"
                           value={driverData.vehiclePlate}
@@ -836,7 +838,7 @@ const Auth = () => {
                       className="flex-1"
                     >
                       <ArrowRight className="ml-2" size={18} />
-                      السابق
+                      {t('common.previous')}
                     </Button>
                     {step < 2 ? (
                       <Button
@@ -845,7 +847,7 @@ const Auth = () => {
                         onClick={nextStep}
                         className="flex-1"
                       >
-                        التالي
+                        {t('common.next')}
                         <ArrowLeft className="mr-2" size={18} />
                       </Button>
                     ) : (
@@ -856,7 +858,7 @@ const Auth = () => {
                         disabled={loading}
                         className="flex-1"
                       >
-                        {loading ? 'جاري إنشاء الحساب...' : 'إرسال الطلب'}
+                        {loading ? t('auth.creatingAccount') : t('auth.submitRequest')}
                       </Button>
                     )}
                   </div>
@@ -884,13 +886,13 @@ const Auth = () => {
               >
                 {authMode === 'login' ? (
                   <>
-                    ليس لديك حساب؟{' '}
-                    <span className="text-primary font-medium">سجل الآن</span>
+                    {t('auth.noAccount')}{' '}
+                    <span className="text-primary font-medium">{t('auth.signUpNow')}</span>
                   </>
                 ) : (
                   <>
-                    لديك حساب بالفعل؟{' '}
-                    <span className="text-primary font-medium">تسجيل الدخول</span>
+                    {t('auth.hasAccount')}{' '}
+                    <span className="text-primary font-medium">{t('auth.login')}</span>
                   </>
                 )}
               </button>
@@ -905,7 +907,7 @@ const Auth = () => {
                 className="text-muted-foreground"
               >
                 <Leaf className="ml-2" size={16} />
-                العودة للرئيسية
+                {t('auth.backToHome')}
               </Button>
             </div>
           </CardContent>
