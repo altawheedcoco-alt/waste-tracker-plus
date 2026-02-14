@@ -9977,6 +9977,115 @@ export type Database = {
           },
         ]
       }
+      organization_members: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          employee_number: string | null
+          id: string
+          invitation_accepted_at: string | null
+          invitation_email: string | null
+          invitation_token: string | null
+          invited_by: string | null
+          job_title: string | null
+          job_title_ar: string | null
+          joined_at: string | null
+          left_at: string | null
+          notes: string | null
+          organization_id: string
+          position_id: string | null
+          profile_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          employee_number?: string | null
+          id?: string
+          invitation_accepted_at?: string | null
+          invitation_email?: string | null
+          invitation_token?: string | null
+          invited_by?: string | null
+          job_title?: string | null
+          job_title_ar?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          notes?: string | null
+          organization_id: string
+          position_id?: string | null
+          profile_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          employee_number?: string | null
+          id?: string
+          invitation_accepted_at?: string | null
+          invitation_email?: string | null
+          invitation_token?: string | null
+          invited_by?: string | null
+          job_title?: string | null
+          job_title_ar?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          notes?: string | null
+          organization_id?: string
+          position_id?: string | null
+          profile_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "organization_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "organization_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_photos: {
         Row: {
           caption: string | null
@@ -12385,6 +12494,121 @@ export type Database = {
             columns: ["portal_token_id"]
             isOneToOne: false
             referencedRelation: "portal_access_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_permissions: {
+        Row: {
+          can_approve_payments: boolean | null
+          can_approve_shipments: boolean | null
+          can_assign_drivers: boolean | null
+          can_change_status: boolean | null
+          can_create_invoices: boolean | null
+          can_create_shipments: boolean | null
+          can_delete_shipments: boolean | null
+          can_edit_shipments: boolean | null
+          can_export_data: boolean | null
+          can_issue_certificates: boolean | null
+          can_manage_contracts: boolean | null
+          can_manage_deposits: boolean | null
+          can_manage_drivers: boolean | null
+          can_manage_partners: boolean | null
+          can_manage_settings: boolean | null
+          can_manage_templates: boolean | null
+          can_manage_users: boolean | null
+          can_sign_documents: boolean | null
+          can_track_vehicles: boolean | null
+          can_view_financials: boolean | null
+          can_view_partner_data: boolean | null
+          can_view_reports: boolean | null
+          created_at: string
+          custom_permissions: Json | null
+          id: string
+          organization_id: string
+          position_id: string
+          updated_at: string
+        }
+        Insert: {
+          can_approve_payments?: boolean | null
+          can_approve_shipments?: boolean | null
+          can_assign_drivers?: boolean | null
+          can_change_status?: boolean | null
+          can_create_invoices?: boolean | null
+          can_create_shipments?: boolean | null
+          can_delete_shipments?: boolean | null
+          can_edit_shipments?: boolean | null
+          can_export_data?: boolean | null
+          can_issue_certificates?: boolean | null
+          can_manage_contracts?: boolean | null
+          can_manage_deposits?: boolean | null
+          can_manage_drivers?: boolean | null
+          can_manage_partners?: boolean | null
+          can_manage_settings?: boolean | null
+          can_manage_templates?: boolean | null
+          can_manage_users?: boolean | null
+          can_sign_documents?: boolean | null
+          can_track_vehicles?: boolean | null
+          can_view_financials?: boolean | null
+          can_view_partner_data?: boolean | null
+          can_view_reports?: boolean | null
+          created_at?: string
+          custom_permissions?: Json | null
+          id?: string
+          organization_id: string
+          position_id: string
+          updated_at?: string
+        }
+        Update: {
+          can_approve_payments?: boolean | null
+          can_approve_shipments?: boolean | null
+          can_assign_drivers?: boolean | null
+          can_change_status?: boolean | null
+          can_create_invoices?: boolean | null
+          can_create_shipments?: boolean | null
+          can_delete_shipments?: boolean | null
+          can_edit_shipments?: boolean | null
+          can_export_data?: boolean | null
+          can_issue_certificates?: boolean | null
+          can_manage_contracts?: boolean | null
+          can_manage_deposits?: boolean | null
+          can_manage_drivers?: boolean | null
+          can_manage_partners?: boolean | null
+          can_manage_settings?: boolean | null
+          can_manage_templates?: boolean | null
+          can_manage_users?: boolean | null
+          can_sign_documents?: boolean | null
+          can_track_vehicles?: boolean | null
+          can_view_financials?: boolean | null
+          can_view_partner_data?: boolean | null
+          can_view_reports?: boolean | null
+          created_at?: string
+          custom_permissions?: Json | null
+          id?: string
+          organization_id?: string
+          position_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_permissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "position_permissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_permissions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: true
+            referencedRelation: "organization_positions"
             referencedColumns: ["id"]
           },
         ]
@@ -17712,6 +17936,10 @@ export type Database = {
           minutes_offline: number
           organization_id: string
         }[]
+      }
+      check_position_permission: {
+        Args: { _org_id: string; _permission: string; _user_id: string }
+        Returns: boolean
       }
       check_slot_availability: {
         Args: { p_booking_date: string; p_timeslot_id: string }
