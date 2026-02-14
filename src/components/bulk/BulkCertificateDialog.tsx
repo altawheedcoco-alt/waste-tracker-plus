@@ -62,7 +62,7 @@ interface BulkCertificateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   shipments: Shipment[];
-  type: 'receipt' | 'certificate';
+  type: 'receipt' | 'certificate' | 'delivery';
   onSuccess?: () => void;
 }
 
@@ -100,14 +100,15 @@ const BulkCertificateDialog = ({
   const [reportNumber, setReportNumber] = useState('');
 
   const isReceipt = type === 'receipt';
-  const title = isReceipt ? 'إصدار شهادات استلام مجمعة' : 'إصدار شهادات تدوير مجمعة';
+  const isDelivery = type === 'delivery';
+  const title = isDelivery ? 'إصدار شهادات تسليم مجمعة' : isReceipt ? 'إصدار شهادات استلام مجمعة' : 'إصدار شهادات تدوير مجمعة';
 
   useEffect(() => {
     if (open) {
       setSelectedIds(new Set(shipments.map(s => s.id)));
       setStep('select');
       // Generate report number
-      const prefix = isReceipt ? 'RCP-AGG' : 'CRT-AGG';
+      const prefix = isDelivery ? 'DLV-AGG' : isReceipt ? 'RCP-AGG' : 'CRT-AGG';
       const dateStr = format(new Date(), 'yyyyMMdd');
       const random = Math.random().toString(36).substring(2, 6).toUpperCase();
       setReportNumber(`${prefix}-${dateStr}-${random}`);
@@ -159,19 +160,19 @@ const BulkCertificateDialog = ({
     try {
       const shipmentIds = selectedShipments.map(s => s.id);
 
-      if (isReceipt) {
-        // Create bulk receipts - using only valid columns from shipment_receipts table
+      if (isReceipt || isDelivery) {
+        // Create bulk receipts/delivery certificates
         const receipts = selectedShipments.map(shipment => ({
           shipment_id: shipment.id,
-          receipt_number: `RCP-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+          receipt_number: `${isDelivery ? 'DLV' : 'RCP'}-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
           status: 'confirmed',
           actual_weight: shipment.quantity,
           declared_weight: shipment.quantity,
           waste_type: shipment.waste_type,
-          notes: `شهادة مجمعة - ${reportNumber}`,
+          notes: `${isDelivery ? 'شهادة تسليم مجمعة' : 'شهادة استلام مجمعة'} - ${reportNumber}`,
           pickup_date: new Date().toISOString(),
-          transporter_id: organization?.id || null,
-          generator_id: shipment.generator?.name ? null : null, // Will be fetched from shipment
+          transporter_id: isDelivery ? null : organization?.id || null,
+          generator_id: isDelivery ? organization?.id || null : null,
         }));
 
         const { error } = await supabase

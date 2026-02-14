@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   Recycle,
   Truck,
+  Send,
 } from 'lucide-react';
 import { format, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -44,7 +45,7 @@ interface Shipment {
 
 interface BulkCertificateButtonProps {
   shipments: Shipment[];
-  type: 'receipt' | 'certificate';
+  type: 'receipt' | 'certificate' | 'delivery';
   onSuccess?: () => void;
 }
 
@@ -66,8 +67,9 @@ const BulkCertificateButton = ({ shipments, type, onSuccess }: BulkCertificateBu
   const [selectedShipments, setSelectedShipments] = useState<Shipment[]>([]);
 
   const isReceipt = type === 'receipt';
-  const icon = isReceipt ? <Truck className="w-4 h-4" /> : <Recycle className="w-4 h-4" />;
-  const label = isReceipt ? 'شهادات استلام مجمعة' : 'شهادات تدوير مجمعة';
+  const isDelivery = type === 'delivery';
+  const icon = isDelivery ? <Send className="w-4 h-4" /> : isReceipt ? <Truck className="w-4 h-4" /> : <Recycle className="w-4 h-4" />;
+  const label = isDelivery ? 'شهادات تسليم مجمعة' : isReceipt ? 'شهادات استلام مجمعة' : 'شهادات تدوير مجمعة';
 
   // Get unique waste types
   const uniqueWasteTypes = [...new Set(shipments.map(s => s.waste_type))];
@@ -79,7 +81,12 @@ const BulkCertificateButton = ({ shipments, type, onSuccess }: BulkCertificateBu
 
   // Filter eligible shipments (not already certified)
   const getEligibleShipments = (targetShipments: Shipment[]) => {
-    if (isReceipt) {
+    if (isDelivery) {
+      // For delivery: generator confirms handover - approved/collecting/in_transit and not yet delivered
+      return targetShipments.filter(s => 
+        ['approved', 'collecting', 'in_transit', 'delivered'].includes(s.status) && !s.has_receipt
+      );
+    } else if (isReceipt) {
       // For receipts: must be delivered or confirmed, and not have receipt yet
       return targetShipments.filter(s => 
         ['delivered', 'confirmed', 'in_transit'].includes(s.status) && !s.has_receipt
