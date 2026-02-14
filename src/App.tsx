@@ -98,6 +98,7 @@ const DemoScenario = lazy(() => import("./pages/dashboard/DemoScenario"));
 const MapExplorer = lazy(() => import("./pages/dashboard/MapExplorer"));
 const SystemStatus = lazy(() => import("./pages/dashboard/SystemStatus"));
 const SupportCenter = lazy(() => import("./pages/dashboard/SupportCenter"));
+const SubscriptionManagement = lazy(() => import("./pages/dashboard/SubscriptionManagement"));
 const ApiManagement = lazy(() => import("./pages/dashboard/ApiManagement"));
 const SecurityPenetrationTesting = lazy(() => import("./pages/dashboard/SecurityPenetrationTesting"));
 const DatabaseQueryOptimization = lazy(() => import("./pages/dashboard/DatabaseQueryOptimization"));
@@ -343,6 +344,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/erp/revenue-expenses" element={<ERPRevenueExpensesAnalysis />} />
         <Route path="/dashboard/erp/cogs" element={<ERPCogs />} />
         <Route path="/dashboard/erp/financial-comparisons" element={<ERPFinancialComparisons />} />
+        <Route path="/dashboard/subscription" element={<SubscriptionManagement />} />
         <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
         <Route path="/dashboard/commodity-exchange" element={<GlobalCommodityExchange />} />
         <Route path="/dashboard/waste-exchange" element={<WasteExchange />} />
