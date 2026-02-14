@@ -9,7 +9,6 @@ import {
   FileCheck,
   Eye,
   Printer,
-  Download,
   CheckCircle2,
   Clock,
   AlertCircle,
@@ -20,6 +19,9 @@ import {
   Calendar,
   Scale,
   ExternalLink,
+  MapPin,
+  Recycle,
+  User,
 } from 'lucide-react';
 
 interface ReceiptCardProps {
@@ -32,22 +34,39 @@ interface ReceiptCardProps {
     declared_weight: number | null;
     unit: string;
     status: string;
+    notes?: string | null;
+    pickup_location?: string | null;
+    delivery_location?: string | null;
     shipment?: {
       id?: string;
       shipment_number: string;
+      status?: string;
+      pickup_address?: string | null;
+      delivery_address?: string | null;
+      recycler?: {
+        name: string;
+        city?: string | null;
+      } | null;
     } | null;
     generator?: {
       id?: string;
       name: string;
+      city?: string | null;
     } | null;
     transporter?: {
       name: string;
+      city?: string | null;
+    } | null;
+    recycler?: {
+      name: string;
+      city?: string | null;
     } | null;
     driver?: {
       profile?: {
         full_name: string;
       } | null;
     } | null;
+    created_at?: string;
   };
   onView: (id: string) => void;
   onPrint: (id: string) => void;
@@ -167,9 +186,9 @@ const ReceiptCard = ({
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {/* Date */}
-            <div className="space-y-1">
+          {/* Details Grid */}
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 تاريخ الاستلام
@@ -179,51 +198,83 @@ const ReceiptCard = ({
               </p>
             </div>
 
-            {/* Waste Type */}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground">نوع النفايات</p>
               <p className="text-sm font-medium">
                 {wasteTypeLabels[receipt.waste_type] || receipt.waste_type}
               </p>
             </div>
 
-            {/* Weight */}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Scale className="w-3 h-3" />
                 الوزن
               </p>
-              <p className="text-sm font-medium">
+              <p className="text-sm font-bold text-primary">
                 {receipt.actual_weight || receipt.declared_weight || '-'} {receipt.unit}
               </p>
             </div>
 
-            {/* Generator or Transporter */}
             {showGenerator && receipt.generator && (
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Building2 className="w-3 h-3" />
                   الجهة المولدة
                 </p>
                 <p className="text-sm font-medium truncate">{receipt.generator.name}</p>
+                {receipt.generator.city && <p className="text-xs text-muted-foreground">{receipt.generator.city}</p>}
               </div>
             )}
             {showTransporter && receipt.transporter && (
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Truck className="w-3 h-3" />
                   الجهة الناقلة
                 </p>
                 <p className="text-sm font-medium truncate">{receipt.transporter.name}</p>
+                {receipt.transporter.city && <p className="text-xs text-muted-foreground">{receipt.transporter.city}</p>}
+              </div>
+            )}
+            {(receipt.recycler || receipt.shipment?.recycler) && (
+              <div className="space-y-0.5">
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Recycle className="w-3 h-3" />
+                  جهة التدوير
+                </p>
+                <p className="text-sm font-medium truncate">{(receipt.recycler || receipt.shipment?.recycler)?.name}</p>
+                {(receipt.recycler || receipt.shipment?.recycler)?.city && <p className="text-xs text-muted-foreground">{(receipt.recycler || receipt.shipment?.recycler)?.city}</p>}
               </div>
             )}
           </div>
 
-          {/* Driver Info */}
-          {receipt.driver?.profile?.full_name && (
-            <div className="mt-3 pt-3 border-t flex items-center gap-2 text-sm text-muted-foreground">
-              <Truck className="w-4 h-4" />
-              السائق: {receipt.driver.profile.full_name}
+          {/* Locations & Driver */}
+          {(receipt.driver?.profile?.full_name || receipt.shipment?.pickup_address || receipt.shipment?.delivery_address) && (
+            <div className="mt-3 pt-3 border-t space-y-1.5">
+              {receipt.driver?.profile?.full_name && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <User className="w-3.5 h-3.5" />
+                  <span>السائق: <span className="font-medium text-foreground">{receipt.driver.profile.full_name}</span></span>
+                </div>
+              )}
+              {receipt.shipment?.pickup_address && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="w-3.5 h-3.5 text-green-500" />
+                  <span className="truncate">من: {receipt.shipment.pickup_address}</span>
+                </div>
+              )}
+              {receipt.shipment?.delivery_address && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="w-3.5 h-3.5 text-red-500" />
+                  <span className="truncate">إلى: {receipt.shipment.delivery_address}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Notes */}
+          {receipt.notes && (
+            <div className="mt-2 pt-2 border-t">
+              <p className="text-xs text-muted-foreground line-clamp-2">📝 {receipt.notes}</p>
             </div>
           )}
         </CardContent>
