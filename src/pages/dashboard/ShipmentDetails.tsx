@@ -17,6 +17,7 @@ import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
 import RouteProgressBar from '@/components/tracking/RouteProgressBar';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
+import GeneratorCompletionCard from '@/components/shipments/GeneratorCompletionCard';
 
 // Lazy load the live tracking components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -294,6 +295,11 @@ const ShipmentDetailsPage = () => {
         {/* Status Timeline */}
         <ShipmentStatusTimeline shipment={shipment} />
 
+        {/* Generator Completion Card - shown when shipment delivered/confirmed and user is generator */}
+        {organization?.organization_type === 'generator' && ['delivered', 'confirmed'].includes(shipment.status) && (
+          <GeneratorCompletionCard shipment={shipment} />
+        )}
+
         {/* Documents Chain Timeline */}
         <ShipmentDocumentsTimeline shipment={shipment} onRefresh={fetchShipmentDetails} />
 
@@ -303,123 +309,128 @@ const ShipmentDetailsPage = () => {
         {/* Progress Logs - Auto-recorded milestones */}
         <ShipmentProgressLogs shipmentId={shipment.id} maxHeight={350} />
 
-        {/* Tracking Mode Controller - Shows when driver is assigned AND visibility allowed */}
-        {shipment.driver_id && visibility.canViewTracking && (
-          <Suspense fallback={
-            <div className="h-[200px] flex items-center justify-center bg-muted/30 rounded-lg">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          }>
-            <TrackingModeController
-              shipmentId={shipment.id}
-              driverId={shipment.driver_id}
-              pickupCoords={generatorLocation}
-              deliveryCoords={recyclerLocation}
-              currentStatus={shipment.status}
-            />
-          </Suspense>
-        )}
-
-        {/* Visibility Restricted Notice */}
-        {shipment.driver_id && !visibility.canViewTracking && !visibility.isOwner && (
-          <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-            <Lock className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-800 dark:text-amber-200">
-              {t('shipmentDetails.trackingUnavailable')}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Live Tracking Section - Featured when driver is assigned AND visibility allowed */}
-        {shipment.driver_id && visibility.canViewTracking && visibility.canViewMaps && (
-          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <Navigation className="h-5 w-5 text-primary" />
-                  </div>
-                  {t('shipmentDetails.liveTrackingTitle')}
-                </CardTitle>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowLiveTracking(true)}
-                  >
-                    <Eye className="ml-2 h-4 w-4" />
-                    {t('shipmentDetails.fullTracking')}
-                  </Button>
+        {/* Tracking & Live Map - Hide for generators when shipment is completed */}
+        {!(organization?.organization_type === 'generator' && ['delivered', 'confirmed'].includes(shipment.status)) && (
+          <>
+            {/* Tracking Mode Controller - Shows when driver is assigned AND visibility allowed */}
+            {shipment.driver_id && visibility.canViewTracking && (
+              <Suspense fallback={
+                <div className="h-[200px] flex items-center justify-center bg-muted/30 rounded-lg">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
-              </div>
-              <CardDescription className="mt-2">
-                {t('shipmentDetails.liveTrackingDesc')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Progress Bar */}
-              <RouteProgressBar
-                status={shipment.status}
-                pickupAddress={shipment.pickup_address}
-                deliveryAddress={shipment.delivery_address}
-                pickupDate={shipment.pickup_date}
-                deliveredAt={shipment.delivered_at}
-                compact
-              />
+              }>
+                <TrackingModeController
+                  shipmentId={shipment.id}
+                  driverId={shipment.driver_id}
+                  pickupCoords={generatorLocation}
+                  deliveryCoords={recyclerLocation}
+                  currentStatus={shipment.status}
+                />
+              </Suspense>
+            )}
 
-              {/* Driver Route Visualization - only if can view driver location */}
-              {visibility.canViewDriverLocation && (
-                <Suspense fallback={
-                  <div className="h-[400px] flex items-center justify-center bg-muted/30 rounded-lg">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            {/* Visibility Restricted Notice */}
+            {shipment.driver_id && !visibility.canViewTracking && !visibility.isOwner && (
+              <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+                <Lock className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800 dark:text-amber-200">
+                  {t('shipmentDetails.trackingUnavailable')}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Live Tracking Section - Featured when driver is assigned AND visibility allowed */}
+            {shipment.driver_id && visibility.canViewTracking && visibility.canViewMaps && (
+              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <div className="p-2 rounded-full bg-primary/10">
+                        <Navigation className="h-5 w-5 text-primary" />
+                      </div>
+                      {t('shipmentDetails.liveTrackingTitle')}
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowLiveTracking(true)}
+                      >
+                        <Eye className="ml-2 h-4 w-4" />
+                        {t('shipmentDetails.fullTracking')}
+                      </Button>
+                    </div>
                   </div>
-                }>
-                  <DriverRouteVisualization
-                    shipmentId={shipment.id}
-                    driverId={shipment.driver_id}
+                  <CardDescription className="mt-2">
+                    {t('shipmentDetails.liveTrackingDesc')}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Progress Bar */}
+                  <RouteProgressBar
+                    status={shipment.status}
                     pickupAddress={shipment.pickup_address}
                     deliveryAddress={shipment.delivery_address}
-                    status={shipment.status}
-                    showStats={true}
-                    height={350}
+                    pickupDate={shipment.pickup_date}
+                    deliveredAt={shipment.delivered_at}
+                    compact
                   />
-                </Suspense>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Unified Tracker with Live Map - Show only if no driver */}
-        {!shipment.driver_id && (
-          <UnifiedShipmentTracker
-            shipment={{
-              ...shipment,
-              pickup_address: shipment.pickup_address || '',
-              delivery_address: shipment.delivery_address || '',
-              generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city || '' } : null,
-              transporter: shipment.transporter ? { name: shipment.transporter.name, phone: shipment.transporter.phone || '' } : null,
-              recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city || '' } : null,
-            }}
-            showMap={generatorLocation !== null && recyclerLocation !== null}
-            onStatusUpdate={fetchShipmentDetails}
-          />
-        )}
+                  {/* Driver Route Visualization - only if can view driver location */}
+                  {visibility.canViewDriverLocation && (
+                    <Suspense fallback={
+                      <div className="h-[400px] flex items-center justify-center bg-muted/30 rounded-lg">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      </div>
+                    }>
+                      <DriverRouteVisualization
+                        shipmentId={shipment.id}
+                        driverId={shipment.driver_id}
+                        pickupAddress={shipment.pickup_address}
+                        deliveryAddress={shipment.delivery_address}
+                        status={shipment.status}
+                        showStats={true}
+                        height={350}
+                      />
+                    </Suspense>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
-        {/* GPS Vehicle Tracking Panel - Integrated with all parties */}
-        <Suspense fallback={
-          <div className="h-[200px] flex items-center justify-center bg-muted/30 rounded-lg">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          </div>
-        }>
-          <ShipmentGPSTrackingPanel
-            shipmentId={shipment.id}
-            driverId={shipment.driver_id}
-            transporterId={shipment.transporter_id}
-            generatorId={shipment.generator_id}
-            recyclerId={shipment.recycler_id}
-            shipmentStatus={shipment.status}
-          />
-        </Suspense>
+            {/* Unified Tracker with Live Map - Show only if no driver */}
+            {!shipment.driver_id && (
+              <UnifiedShipmentTracker
+                shipment={{
+                  ...shipment,
+                  pickup_address: shipment.pickup_address || '',
+                  delivery_address: shipment.delivery_address || '',
+                  generator: shipment.generator ? { name: shipment.generator.name, city: shipment.generator.city || '' } : null,
+                  transporter: shipment.transporter ? { name: shipment.transporter.name, phone: shipment.transporter.phone || '' } : null,
+                  recycler: shipment.recycler ? { name: shipment.recycler.name, city: shipment.recycler.city || '' } : null,
+                }}
+                showMap={generatorLocation !== null && recyclerLocation !== null}
+                onStatusUpdate={fetchShipmentDetails}
+              />
+            )}
+
+            {/* GPS Vehicle Tracking Panel - Integrated with all parties */}
+            <Suspense fallback={
+              <div className="h-[200px] flex items-center justify-center bg-muted/30 rounded-lg">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            }>
+              <ShipmentGPSTrackingPanel
+                shipmentId={shipment.id}
+                driverId={shipment.driver_id}
+                transporterId={shipment.transporter_id}
+                generatorId={shipment.generator_id}
+                recyclerId={shipment.recycler_id}
+                shipmentStatus={shipment.status}
+              />
+            </Suspense>
+          </>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Waste Details */}
