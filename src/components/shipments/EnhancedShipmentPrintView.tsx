@@ -66,6 +66,7 @@ interface OrganizationData {
   signature_url?: string | null;
   logo_url?: string | null;
   client_code?: string | null;
+  organization_type?: string | null;
 }
 
 interface ShipmentData {
@@ -701,7 +702,7 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
               >
                 <div className="page">
                   {/* Header Table - Barcode left, QR right */}
-                  <table style={{ marginBottom: '6px', border: 'none', width: '100%' }}>
+                  <table style={{ marginBottom: '4px', border: 'none', width: '100%' }}>
                     <tbody>
                       <tr>
                         <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
@@ -712,8 +713,8 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                         </td>
                         <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
                           <div style={{ fontSize: '14pt', fontWeight: 'bold', color: '#16a34a', marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
-                          <div style={{ fontSize: '9pt', color: '#6b7280', marginBottom: '6px' }}>Waste Transport Tracking Form</div>
-                          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+                          <div style={{ fontSize: '9pt', color: '#6b7280', marginBottom: '4px' }}>Waste Transport Tracking Form</div>
+                          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                             <span style={{ background: '#dcfce7', color: '#166534', padding: '3px 12px', borderRadius: '4px', fontSize: '8pt', fontWeight: '600', border: '1px solid #86efac' }}>
                               {statusLabels[shipment.status] || shipment.status}
                             </span>
@@ -721,12 +722,64 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                               {shipment.shipment_number}
                             </span>
                           </div>
+                          <div style={{ fontSize: '7pt', color: '#6b7280' }}>
+                            الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#16a34a' }}>{documentSerial}</span>
+                            {' | '}
+                            كود التحقق: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#dc2626' }}>{verificationCode}</span>
+                          </div>
                         </td>
                         <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
                           <div className="qr-container bg-white p-2 border rounded-lg inline-block">
                             <QRCodeSVG value={qrData} size={60} level="M" />
                           </div>
                           <div style={{ fontSize: '6pt', color: '#6b7280' }}>امسح للتتبع</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Organization Logos & Security Bar */}
+                  <table style={{ borderCollapse: 'collapse', marginBottom: '4px', width: '100%' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #e5e7eb', background: '#f0f9ff' }}>
+                          {shipment.generator?.logo_url ? (
+                            <img src={shipment.generator.logo_url} alt="لوجو المولد" style={{ maxHeight: '30px', maxWidth: '80px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                          ) : (
+                            <div style={{ fontSize: '7pt', color: '#3b82f6', fontWeight: '600' }}>🏢 {shipment.generator?.name || 'الجهة المولدة'}</div>
+                          )}
+                          {shipment.generator?.client_code && (
+                            <div style={{ fontSize: '5pt', color: '#6b7280', fontFamily: 'monospace', marginTop: '2px' }}>
+                              <Barcode value={shipment.generator.client_code} width={0.8} height={15} fontSize={0} margin={0} displayValue={false} />
+                              <div>{shipment.generator.client_code}</div>
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #e5e7eb', background: '#fffbeb' }}>
+                          {shipment.transporter?.logo_url ? (
+                            <img src={shipment.transporter.logo_url} alt="لوجو الناقل" style={{ maxHeight: '30px', maxWidth: '80px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                          ) : (
+                            <div style={{ fontSize: '7pt', color: '#eab308', fontWeight: '600' }}>🚛 {shipment.transporter?.name || 'الجهة الناقلة'}</div>
+                          )}
+                          {shipment.transporter?.client_code && (
+                            <div style={{ fontSize: '5pt', color: '#6b7280', fontFamily: 'monospace', marginTop: '2px' }}>
+                              <Barcode value={shipment.transporter.client_code} width={0.8} height={15} fontSize={0} margin={0} displayValue={false} />
+                              <div>{shipment.transporter.client_code}</div>
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #e5e7eb', background: '#f0fdf4' }}>
+                          {shipment.recycler?.logo_url ? (
+                            <img src={shipment.recycler.logo_url} alt="لوجو المدور" style={{ maxHeight: '30px', maxWidth: '80px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                          ) : (
+                            <div style={{ fontSize: '7pt', color: '#22c55e', fontWeight: '600' }}>♻️ {shipment.recycler?.name || 'جهة التدوير'}</div>
+                          )}
+                          {shipment.recycler?.client_code && (
+                            <div style={{ fontSize: '5pt', color: '#6b7280', fontFamily: 'monospace', marginTop: '2px' }}>
+                              <Barcode value={shipment.recycler.client_code} width={0.8} height={15} fontSize={0} margin={0} displayValue={false} />
+                              <div>{shipment.recycler.client_code}</div>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     </tbody>
@@ -899,10 +952,59 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                     </tbody>
                   </table>
 
+                  {/* Declaration Section with QR */}
+                  {declarationData && (
+                    <table style={{ borderCollapse: 'collapse', marginBottom: '4px', width: '100%' }}>
+                      <tbody>
+                        <tr>
+                          <td colSpan={3} style={{ background: '#7c3aed', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #6d28d9' }}>
+                            📋 إقرار تسليم الشحنة - Declaration
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style={{ width: '70%', padding: '6px', border: '1px solid #d1d5db', fontSize: '7pt', verticalAlign: 'top' }}>
+                            <div style={{ marginBottom: '4px' }}>
+                              <span style={{ color: '#6b7280' }}>المُقِر: </span>
+                              <strong>{(declarationData as any).driver_name || 'غير محدد'}</strong>
+                              <span style={{ marginRight: '10px', color: '#6b7280' }}>رقم الهوية: </span>
+                              <strong>{(declarationData as any).driver_national_id || 'غير محدد'}</strong>
+                            </div>
+                            <div style={{ marginBottom: '4px' }}>
+                              <span style={{ color: '#6b7280' }}>تاريخ الإقرار: </span>
+                              <strong>{(declarationData as any).declared_at ? format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : '-'}</strong>
+                              <span style={{ marginRight: '10px', color: '#6b7280' }}>رقم الوثيقة: </span>
+                              <strong style={{ fontFamily: 'monospace', color: '#7c3aed' }}>DEC-{(declarationData as any).id?.slice(0, 8).toUpperCase()}</strong>
+                            </div>
+                            <div style={{ fontSize: '6pt', color: '#374151', borderTop: '1px dashed #e5e7eb', paddingTop: '3px', marginTop: '3px', maxHeight: '30px', overflow: 'hidden' }}>
+                              {(declarationData as any).declaration_text?.slice(0, 200)}...
+                            </div>
+                            <div style={{ marginTop: '3px', fontSize: '6pt', color: '#16a34a', fontWeight: '600' }}>
+                              ✅ تم التوقيع إلكترونياً - وثيقة مسجلة ومحمية رقمياً
+                            </div>
+                          </td>
+                          <td style={{ width: '30%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', verticalAlign: 'middle' }}>
+                            <QRCodeSVG 
+                              value={`${window.location.origin}/qr-verify?type=declaration&code=DEC-${(declarationData as any).id?.slice(0, 8).toUpperCase()}`} 
+                              size={50} 
+                              level="M" 
+                            />
+                            <div style={{ fontSize: '5pt', color: '#6b7280', marginTop: '2px' }}>QR الإقرار</div>
+                            <div style={{ marginTop: '3px' }}>
+                              <Barcode value={`DEC-${(declarationData as any).id?.slice(0, 8).toUpperCase()}`} width={0.8} height={18} fontSize={0} margin={0} displayValue={false} />
+                            </div>
+                            <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280' }}>DEC-{(declarationData as any).id?.slice(0, 8).toUpperCase()}</div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  )}
+
                   {/* Footer */}
                   <div style={{ textAlign: 'center', fontSize: '6pt', color: '#9ca3af', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
                     <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
-                    <div style={{ marginTop: '2px' }}>رقم التتبع: {shipment.shipment_number} | رقم الوثيقة: {documentSerial}</div>
+                    <div style={{ marginTop: '2px' }}>
+                      رقم التتبع: {shipment.shipment_number} | رقم الوثيقة: {documentSerial} | كود التحقق: {verificationCode}
+                    </div>
                     <div style={{ marginTop: '3px', fontSize: '6pt', color: '#6b7280' }}>
                       📅 تاريخ وصول الشحنة (أول تسجيل على المنظومة): {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.created_at ? format(new Date(shipment.created_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : '-'}
                     </div>
