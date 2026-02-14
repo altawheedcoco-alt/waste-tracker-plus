@@ -13397,7 +13397,13 @@ export type Database = {
           receipt_number: string
           shipment_id: string
           status: string
+          transporter_approval_deadline: string | null
+          transporter_approval_status: string | null
+          transporter_approved_at: string | null
           transporter_id: string | null
+          transporter_rejection_reason: string | null
+          transporter_signature_url: string | null
+          transporter_stamp_url: string | null
           unit: string | null
           updated_at: string
           waste_category: string | null
@@ -13423,7 +13429,13 @@ export type Database = {
           receipt_number?: string
           shipment_id: string
           status?: string
+          transporter_approval_deadline?: string | null
+          transporter_approval_status?: string | null
+          transporter_approved_at?: string | null
           transporter_id?: string | null
+          transporter_rejection_reason?: string | null
+          transporter_signature_url?: string | null
+          transporter_stamp_url?: string | null
           unit?: string | null
           updated_at?: string
           waste_category?: string | null
@@ -13449,7 +13461,13 @@ export type Database = {
           receipt_number?: string
           shipment_id?: string
           status?: string
+          transporter_approval_deadline?: string | null
+          transporter_approval_status?: string | null
+          transporter_approved_at?: string | null
           transporter_id?: string | null
+          transporter_rejection_reason?: string | null
+          transporter_signature_url?: string | null
+          transporter_stamp_url?: string | null
           unit?: string | null
           updated_at?: string
           waste_category?: string | null
@@ -17110,6 +17128,7 @@ export type Database = {
         Args: { _org_id_1: string; _org_id_2: string }
         Returns: boolean
       }
+      auto_approve_delivery_certificates: { Args: never; Returns: undefined }
       auto_approve_expired_shipments: { Args: never; Returns: undefined }
       can_access_contract: {
         Args: { _contract_id: string; _user_id: string }

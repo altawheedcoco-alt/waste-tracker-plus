@@ -163,16 +163,24 @@ const BulkCertificateDialog = ({
 
       if (isDelivery) {
         // Create bulk delivery certificates for generator handover
+        // Sets transporter approval to 'pending' with 6-hour auto-approval deadline
+        const approvalDeadline = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString();
+        const generatorStampUrl = includeStamp ? selectedStamp : null;
+        const generatorSignatureUrl = includeSignature ? selectedSignature : null;
+
         const receipts = selectedShipments.map(shipment => ({
           shipment_id: shipment.id,
           receipt_number: `DLV-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          status: 'confirmed',
+          status: 'pending_approval',
           actual_weight: shipment.quantity,
           declared_weight: shipment.quantity,
           waste_type: shipment.waste_type,
           notes: `شهادة تسليم مجمعة من المولد - ${reportNumber}`,
           pickup_date: new Date().toISOString(),
           generator_id: organization?.id || null,
+          generator_signature: generatorSignatureUrl,
+          transporter_approval_status: 'pending',
+          transporter_approval_deadline: approvalDeadline,
         }));
 
         const { error } = await supabase
@@ -215,7 +223,10 @@ const BulkCertificateDialog = ({
         if (error) throw error;
       }
 
-      toast.success(`تم إصدار ${selectedShipments.length} شهادة بنجاح`);
+      const successMsg = isDelivery 
+        ? `تم إصدار ${selectedShipments.length} شهادة تسليم - بانتظار موافقة الناقل (مهلة 6 ساعات للموافقة التلقائية)`
+        : `تم إصدار ${selectedShipments.length} شهادة بنجاح`;
+      toast.success(successMsg);
       
       // Print the aggregate certificate
       handlePrint();

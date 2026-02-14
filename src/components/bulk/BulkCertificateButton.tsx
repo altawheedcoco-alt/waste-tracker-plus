@@ -83,10 +83,8 @@ const BulkCertificateButton = ({ shipments, type, onSuccess }: BulkCertificateBu
   // Filter eligible shipments (not already certified)
   const getEligibleShipments = (targetShipments: Shipment[]) => {
     if (isDelivery) {
-      // For delivery: generator confirms handover of waste - shipments registered/approved/pending that haven't been certified yet
-      return targetShipments.filter(s => 
-        ['registered', 'pending', 'approved', 'collecting', 'in_transit'].includes(s.status) && !s.has_delivery_certificate
-      );
+      // For delivery: generator issues certificate for any shipment not yet certified
+      return targetShipments.filter(s => !s.has_delivery_certificate);
     } else if (isReceipt) {
       // For receipts: must be delivered or confirmed, and not have receipt yet
       return targetShipments.filter(s => 
