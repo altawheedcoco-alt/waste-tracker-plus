@@ -13518,6 +13518,86 @@ export type Database = {
           },
         ]
       }
+      shipment_rejection_log: {
+        Row: {
+          created_at: string
+          id: string
+          is_sidelined: boolean | null
+          notes: string | null
+          receipt_id: string | null
+          rejected_by_organization_id: string | null
+          rejected_by_user_id: string | null
+          rejection_reason: string
+          rejection_type: string
+          shipment_id: string
+          shipment_status_before: string | null
+          sidelined_at: string | null
+          sidelined_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_sidelined?: boolean | null
+          notes?: string | null
+          receipt_id?: string | null
+          rejected_by_organization_id?: string | null
+          rejected_by_user_id?: string | null
+          rejection_reason: string
+          rejection_type?: string
+          shipment_id: string
+          shipment_status_before?: string | null
+          sidelined_at?: string | null
+          sidelined_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_sidelined?: boolean | null
+          notes?: string | null
+          receipt_id?: string | null
+          rejected_by_organization_id?: string | null
+          rejected_by_user_id?: string | null
+          rejection_reason?: string
+          rejection_type?: string
+          shipment_id?: string
+          shipment_status_before?: string | null
+          sidelined_at?: string | null
+          sidelined_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_rejection_log_receipt_id_fkey"
+            columns: ["receipt_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_receipts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_rejection_log_rejected_by_organization_id_fkey"
+            columns: ["rejected_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_rejection_log_rejected_by_organization_id_fkey"
+            columns: ["rejected_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_rejection_log_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_tracking_config: {
         Row: {
           anomaly_detection_enabled: boolean | null
