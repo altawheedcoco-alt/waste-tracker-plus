@@ -27,6 +27,13 @@ const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   const isAdmin = roles.includes('admin');
 
+  // Check if this is a demo/test organization
+  const isDemoOrg = !!(
+    organization?.name?.includes('تجريبية') ||
+    organization?.name?.includes('Demo') ||
+    (organization as any)?.email?.endsWith('@demo.test')
+  );
+
   const { data: status, isLoading } = useQuery({
     queryKey: ['onboarding-status', organization?.id],
     queryFn: async () => {
@@ -40,11 +47,11 @@ const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
       return data as unknown as OnboardingStatus | null;
     },
     enabled: !!organization?.id,
-    refetchInterval: 30000, // Check every 30s for approval updates
+    refetchInterval: 30000,
   });
 
-  // Admins bypass all checks
-  if (isAdmin) return <>{children}</>;
+  // Admins and demo orgs bypass all checks
+  if (isAdmin || isDemoOrg) return <>{children}</>;
 
   // Loading state
   if (isLoading) {
