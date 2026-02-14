@@ -11377,6 +11377,94 @@ export type Database = {
           },
         ]
       }
+      payment_transactions: {
+        Row: {
+          amount: number
+          card_brand: string | null
+          card_last_four: string | null
+          created_at: string
+          currency: string | null
+          error_message: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string | null
+          payment_method: string
+          payment_provider: string | null
+          provider_order_id: string | null
+          provider_transaction_id: string | null
+          receipt_url: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+          wallet_phone: string | null
+        }
+        Insert: {
+          amount: number
+          card_brand?: string | null
+          card_last_four?: string | null
+          created_at?: string
+          currency?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          payment_method: string
+          payment_provider?: string | null
+          provider_order_id?: string | null
+          provider_transaction_id?: string | null
+          receipt_url?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+          wallet_phone?: string | null
+        }
+        Update: {
+          amount?: number
+          card_brand?: string | null
+          card_last_four?: string | null
+          created_at?: string
+          currency?: string | null
+          error_message?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          payment_method?: string
+          payment_provider?: string | null
+          provider_order_id?: string | null
+          provider_transaction_id?: string | null
+          receipt_url?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+          wallet_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_transactions_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -11484,6 +11572,60 @@ export type Database = {
             foreignKeyName: "payments_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paymob_config: {
+        Row: {
+          card_integration_id: string | null
+          created_at: string
+          hmac_secret: string | null
+          id: string
+          iframe_id: string | null
+          is_active: boolean | null
+          kiosk_integration_id: string | null
+          organization_id: string | null
+          updated_at: string
+          wallet_integration_id: string | null
+        }
+        Insert: {
+          card_integration_id?: string | null
+          created_at?: string
+          hmac_secret?: string | null
+          id?: string
+          iframe_id?: string | null
+          is_active?: boolean | null
+          kiosk_integration_id?: string | null
+          organization_id?: string | null
+          updated_at?: string
+          wallet_integration_id?: string | null
+        }
+        Update: {
+          card_integration_id?: string | null
+          created_at?: string
+          hmac_secret?: string | null
+          id?: string
+          iframe_id?: string | null
+          is_active?: boolean | null
+          kiosk_integration_id?: string | null
+          organization_id?: string | null
+          updated_at?: string
+          wallet_integration_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paymob_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "paymob_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -13947,6 +14089,48 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_days: number
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_ar: string
+          price_egp: number
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_ar: string
+          price_egp: number
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_days?: number
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_ar?: string
+          price_egp?: number
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       support_quick_replies: {
         Row: {
           category: string
@@ -15086,6 +15270,79 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          created_at: string
+          expiry_date: string | null
+          grace_period_hours: number | null
+          id: string
+          last_payment_date: string | null
+          organization_id: string | null
+          payment_method: string | null
+          paymob_subscription_id: string | null
+          plan_id: string | null
+          start_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          created_at?: string
+          expiry_date?: string | null
+          grace_period_hours?: number | null
+          id?: string
+          last_payment_date?: string | null
+          organization_id?: string | null
+          payment_method?: string | null
+          paymob_subscription_id?: string | null
+          plan_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          created_at?: string
+          expiry_date?: string | null
+          grace_period_hours?: number | null
+          id?: string
+          last_payment_date?: string | null
+          organization_id?: string | null
+          payment_method?: string | null
+          paymob_subscription_id?: string | null
+          plan_id?: string | null
+          start_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "user_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_two_factor_auth: {
         Row: {

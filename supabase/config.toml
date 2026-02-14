@@ -134,3 +134,12 @@ verify_jwt = false
 
 [functions.whatsapp-webhook]
 verify_jwt = false
+
+[functions.paymob-checkout]
+verify_jwt = false
+
+[functions.paymob-webhook]
+verify_jwt = false
+
+[functions.subscription-cron]
+verify_jwt = false
