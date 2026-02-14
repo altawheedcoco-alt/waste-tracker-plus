@@ -102,27 +102,33 @@ const GeneratorReceipts = () => {
     if (organization?.id) {
       loadReceipts();
       loadEligibleShipments();
-      
-      const channel = supabase
-        .channel(getTabChannelName('generator-receipts'))
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'shipment_receipts',
-            filter: `generator_id=eq.${organization.id}`,
-          },
-          () => {
-            loadReceipts();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
+    } else {
+      setLoading(false);
     }
+  }, [organization?.id]);
+
+  useEffect(() => {
+    if (!organization?.id) return;
+    
+    const channel = supabase
+      .channel(getTabChannelName('generator-receipts'))
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'shipment_receipts',
+          filter: `generator_id=eq.${organization.id}`,
+        },
+        () => {
+          loadReceipts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [organization?.id]);
 
   const loadReceipts = async () => {
