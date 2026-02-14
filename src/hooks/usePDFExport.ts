@@ -177,10 +177,10 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
 
     const defaultPrintStyles = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-      @page { size: A4; margin: 12mm 15mm; }
+      @page { size: A4; margin: 10mm 12mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; box-sizing: border-box; }
       body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; direction: rtl; }
-      .print-container { width: 180mm; max-width: 180mm; margin: 0 auto; padding: 3mm; box-sizing: border-box; }
+      .print-container { width: 186mm; max-width: 186mm; margin: 0 auto; padding: 2mm; box-sizing: border-box; overflow: visible !important; }
       .no-print { display: none !important; }
       img { max-width: 100%; height: auto; max-height: 60mm; object-fit: contain; }
       table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
@@ -192,20 +192,66 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       h4, h5, h6 { font-size: 11px; margin: 2px 0; }
       h1, h2, h3, h4, h5, h6 { page-break-after: avoid; }
       p { font-size: 10px; margin: 2px 0; line-height: 1.4; }
+      /* Ensure header and footer are always visible */
+      header, footer { display: block !important; visibility: visible !important; overflow: visible !important; page-break-inside: avoid; }
+      footer { page-break-before: avoid; }
+      /* Grid and flex support for print */
+      .grid { display: grid !important; }
+      .flex { display: flex !important; }
+      .grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
+      .grid-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
+      .items-start { align-items: flex-start !important; }
+      .items-center { align-items: center !important; }
+      .justify-between { justify-content: space-between !important; }
+      .justify-center { justify-content: center !important; }
+      .text-center { text-align: center !important; }
+      .gap-1 { gap: 4px !important; }
+      .gap-2 { gap: 8px !important; }
+      .gap-3 { gap: 10px !important; }
       .gap-4, .gap-6, .gap-8 { gap: 8px !important; }
       .space-y-4 > * + *, .space-y-6 > * + *, .space-y-8 > * + * { margin-top: 6px !important; }
       .p-6, .p-8 { padding: 8px !important; }
       .p-4, .p-5 { padding: 6px !important; }
+      .p-1, .p-1\\.5 { padding: 4px !important; }
+      .p-2 { padding: 6px !important; }
+      .p-3 { padding: 8px !important; }
+      .px-2 { padding-left: 6px !important; padding-right: 6px !important; }
+      .px-4 { padding-left: 12px !important; padding-right: 12px !important; }
+      .py-0\\.5 { padding-top: 2px !important; padding-bottom: 2px !important; }
+      .mb-1 { margin-bottom: 4px !important; }
+      .mb-2 { margin-bottom: 6px !important; }
+      .mb-3 { margin-bottom: 8px !important; }
       .mb-4, .mb-6, .mb-8 { margin-bottom: 6px !important; }
+      .mt-1 { margin-top: 4px !important; }
+      .mt-2 { margin-top: 6px !important; }
+      .mt-3 { margin-top: 8px !important; }
       .mt-4, .mt-6, .mt-8 { margin-top: 6px !important; }
+      .pt-2 { padding-top: 6px !important; }
+      .pb-3 { padding-bottom: 8px !important; }
       .py-4, .py-6 { padding-top: 4px !important; padding-bottom: 4px !important; }
+      .rounded, .rounded-lg { border-radius: 4px !important; }
+      .border { border-width: 1px !important; border-style: solid !important; }
+      .border-t { border-top-width: 1px !important; border-top-style: solid !important; }
+      .border-b { border-bottom-width: 1px !important; border-bottom-style: solid !important; }
+      .flex-1 { flex: 1 1 0% !important; }
+      .flex-shrink-0 { flex-shrink: 0 !important; }
+      .inline-block { display: inline-block !important; }
+      .font-mono { font-family: monospace !important; }
+      .font-bold { font-weight: 700 !important; }
+      .font-semibold { font-weight: 600 !important; }
+      .font-medium { font-weight: 500 !important; }
+      .col-span-2 { grid-column: span 2 !important; }
+      .col-span-3 { grid-column: span 3 !important; }
+      .w-full { width: 100% !important; }
       .text-3xl { font-size: 16px !important; }
       .text-4xl { font-size: 18px !important; }
       .text-6xl { font-size: 22px !important; }
       .text-2xl { font-size: 14px !important; }
       .text-xl { font-size: 12px !important; }
       .text-lg { font-size: 11px !important; }
-      @media print { body { margin: 0; padding: 0; } }
+      /* SVG icons in print */
+      svg { display: inline-block !important; vertical-align: middle !important; }
+      @media print { body { margin: 0; padding: 0; } .print-container { overflow: visible !important; } }
     `;
 
     const content = element.outerHTML;
