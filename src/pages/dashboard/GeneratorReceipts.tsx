@@ -56,14 +56,24 @@ interface Receipt {
   shipment: {
     id: string;
     shipment_number: string;
+    status?: string;
+    pickup_address?: string | null;
+    delivery_address?: string | null;
+    recycler?: {
+      id: string;
+      name: string;
+      city?: string | null;
+    } | null;
   } | null;
   generator: {
     id: string;
     name: string;
+    city?: string | null;
   } | null;
   transporter: {
     id: string;
     name: string;
+    city?: string | null;
   } | null;
   driver: {
     id: string;
@@ -167,9 +177,9 @@ const GeneratorReceipts = () => {
       const { data, error } = await supabase
         .from('shipment_receipts')
         .select(`id, receipt_number, pickup_date, waste_type, actual_weight, declared_weight, unit, status, notes, pickup_location, created_by,
-          shipment:shipments(id, shipment_number),
-          generator:organizations!shipment_receipts_generator_id_fkey(id, name),
-          transporter:organizations!shipment_receipts_transporter_id_fkey(id, name),
+          shipment:shipments(id, shipment_number, status, pickup_address, delivery_address, recycler:organizations!shipments_recycler_id_fkey(id, name, city)),
+          generator:organizations!shipment_receipts_generator_id_fkey(id, name, city),
+          transporter:organizations!shipment_receipts_transporter_id_fkey(id, name, city),
           driver:drivers(id, profile:profiles(full_name))`)
         .eq('generator_id', organization?.id)
         .order('created_at', { ascending: false });
