@@ -82,6 +82,7 @@ interface RecentShipment {
   driver: { license_number: string; vehicle_type: string | null; vehicle_plate: string | null; profile: { full_name: string; phone: string | null } } | null;
   has_report?: boolean;
   has_receipt?: boolean;
+  has_delivery_certificate?: boolean;
 }
 
 const GeneratorDashboard = () => {
@@ -196,10 +197,20 @@ const GeneratorDashboard = () => {
 
         const receiptShipmentIds = new Set(receiptsData?.map(r => r.shipment_id) || []);
 
+        // Check for delivery certificates (generator-issued)
+        const { data: deliveryCertsData } = await supabase
+          .from('shipment_receipts')
+          .select('shipment_id')
+          .in('shipment_id', shipmentIds)
+          .eq('generator_id', organization?.id || '');
+
+        const deliveryCertShipmentIds = new Set(deliveryCertsData?.map(r => r.shipment_id) || []);
+
         const shipmentsWithStatus = shipments.map(s => ({
           ...s,
           has_report: reportedShipmentIds.has(s.id),
           has_receipt: receiptShipmentIds.has(s.id),
+          has_delivery_certificate: deliveryCertShipmentIds.has(s.id),
         }));
 
         setRecentShipments(shipmentsWithStatus as unknown as RecentShipment[]);
@@ -353,6 +364,7 @@ const GeneratorDashboard = () => {
                   created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
                   unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
                   has_report: s.has_report,
+                  has_delivery_certificate: s.has_delivery_certificate,
                   generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
                   transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
                   recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
