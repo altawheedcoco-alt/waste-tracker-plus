@@ -135,7 +135,7 @@ export default function DetailedAccountLedger({
   const [notesValue, setNotesValue] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
 
-  const { exportToPDF, previewPDF } = usePDFExport({
+  const { exportToPDF, previewPDF, printContent } = usePDFExport({
     filename: `سجل-حساب-${partnerName}`,
     orientation: 'portrait',
   });
@@ -332,26 +332,7 @@ export default function DetailedAccountLedger({
       const element = container.firstChild as HTMLElement;
 
       if (action === 'print') {
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-          printWindow.document.write(`
-            <!DOCTYPE html>
-            <html dir="rtl">
-              <head>
-                <meta charset="UTF-8">
-                <title>سجل حساب - ${partnerName}</title>
-                <style>
-                  * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-                  body { direction: rtl; background: white; }
-                  @media print { @page { size: A4; margin: 10mm; } }
-                </style>
-              </head>
-              <body>${element.outerHTML}</body>
-            </html>
-          `);
-          printWindow.document.close();
-          setTimeout(() => printWindow.print(), 300);
-        }
+        printContent(element);
       } else if (action === 'pdf') {
         await exportToPDF(element, `سجل-حساب-${partnerName}`);
       } else {

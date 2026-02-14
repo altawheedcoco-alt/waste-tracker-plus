@@ -155,7 +155,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
   const [themeId, setThemeId] = useState('eco-green');
   const theme = getThemeById(themeId);
-  const { exportToPDF, isExporting } = usePDFExport({
+  const { exportToPDF, printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
     filename: `tracking-form-${shipmentId}`,
     orientation: 'portrait',
     format: 'a4',
@@ -288,50 +288,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
   };
 
   const handlePrint = () => {
-    if (!printRef.current || !shipment) return;
-
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
-      <head>
-        <meta charset="UTF-8">
-        <title>نموذج تتبع الشحنة - ${shipment.shipment_number}</title>
-        <style>
-          @page { size: A4; margin: 5mm; }
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: ${theme.font}; font-size: 6pt; direction: rtl; background: white; color: #1a1a1a; line-height: 1.2; }
-          .page { width: 100%; max-width: 210mm; margin: 0 auto; }
-          table { width: 100%; border-collapse: collapse; margin-bottom: 3px; }
-          th, td { border: 1px solid ${theme.colors.border}; padding: 2px 3px; text-align: right; font-size: 6pt; }
-          .section-header { background: ${theme.colors.headerBg}; color: ${theme.colors.headerText}; font-weight: bold; font-size: 7pt; text-align: center; padding: 2px; }
-          .label-cell { background: ${theme.colors.labelBg}; font-weight: 600; color: ${theme.colors.labelText}; }
-          .party-header-gen { background: ${theme.colors.generatorLight}; color: ${theme.colors.generatorBg}; font-weight: bold; font-size: 7pt; text-align: center; }
-          .party-header-trans { background: ${theme.colors.transporterLight}; color: ${theme.colors.transporterBg}; font-weight: bold; font-size: 7pt; text-align: center; }
-          .party-header-rec { background: ${theme.colors.recyclerLight}; color: ${theme.colors.recyclerBg}; font-weight: bold; font-size: 7pt; text-align: center; }
-          .party-name-gen { background: ${theme.colors.generatorLight}; font-weight: bold; text-align: center; }
-          .party-name-trans { background: ${theme.colors.transporterLight}; font-weight: bold; text-align: center; }
-          .party-name-rec { background: ${theme.colors.recyclerLight}; font-weight: bold; text-align: center; }
-          .signature-cell { text-align: center; vertical-align: bottom; height: 35px; }
-          .footer { text-align: center; font-size: 5pt; color: ${theme.colors.footerText}; margin-top: 3px; padding-top: 3px; border-top: 1px solid ${theme.colors.borderLight}; }
-          @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
-        </style>
-      </head>
-      <body>
-        ${printRef.current.innerHTML}
-      </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.focus();
-    
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+    if (printRef.current) {
+      printWithTheme(printRef.current, themeId as any);
+    }
   };
 
   const formatDate = (date: string | null) => {

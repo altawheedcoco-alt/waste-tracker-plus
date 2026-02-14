@@ -48,6 +48,7 @@ import { ar } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { usePDFExport } from '@/hooks/usePDFExport';
 import BackButton from '@/components/ui/back-button';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AggregateCertificatesPrint from '@/components/reports/AggregateCertificatesPrint';
@@ -126,6 +127,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 const IssueRecyclingCertificates = () => {
   const { organization } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
+  const { printContent: printContentFn } = usePDFExport({ filename: 'aggregate-recycling-certificate' });
   const [loading, setLoading] = useState(true);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -313,29 +315,9 @@ const IssueRecyclingCertificates = () => {
   };
 
   // Print aggregate certificate
-  const handlePrintAggregate = async () => {
-    setIsGeneratingPDF(true);
-    try {
-      const pdfBlob = await generatePdfBlob();
-      if (pdfBlob) {
-        const blobUrl = URL.createObjectURL(pdfBlob);
-        const printWindow = window.open(blobUrl, '_blank');
-        if (printWindow) {
-          printWindow.onload = () => {
-            printWindow.focus();
-            printWindow.print();
-          };
-        }
-      }
-    } catch (error) {
-      console.error('Error printing:', error);
-      toast({
-        title: 'خطأ',
-        description: 'حدث خطأ أثناء الطباعة',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsGeneratingPDF(false);
+  const handlePrintAggregate = () => {
+    if (printRef.current) {
+      printContentFn(printRef.current);
     }
   };
 

@@ -150,7 +150,7 @@ const RecyclingCertificateDialog = ({
 }: RecyclingCertificateDialogProps) => {
   const { organization } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, isExporting } = usePDFExport({
+  const { exportToPDF, printContent: printContentFn, isExporting } = usePDFExport({
     filename: `recycling-certificate-${shipment.shipment_number}`,
     orientation: 'portrait',
   });
@@ -227,37 +227,9 @@ const RecyclingCertificateDialog = ({
     }
   }, [wasteCategory, selectedTemplateId]);
 
-  const handlePrint = async () => {
-    if (!printRef.current) {
-      toast.error('لا يوجد محتوى للطباعة');
-      return;
-    }
-
-    try {
-      // Generate PDF blob
-      const pdfBlob = await generatePdfBlob();
-      if (!pdfBlob) {
-        toast.error('فشل في إنشاء ملف PDF');
-        return;
-      }
-
-      // Create blob URL and open in new window for printing
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const printWindow = window.open(blobUrl, '_blank');
-      
-      if (printWindow) {
-        printWindow.onload = () => {
-          printWindow.focus();
-          printWindow.print();
-        };
-      } else {
-        // Fallback if popup blocked
-        window.print();
-      }
-    } catch (error) {
-      console.error('Error preparing print:', error);
-      // Fallback to native print
-      window.print();
+  const handlePrint = () => {
+    if (printRef.current) {
+      printContentFn(printRef.current);
     }
   };
 

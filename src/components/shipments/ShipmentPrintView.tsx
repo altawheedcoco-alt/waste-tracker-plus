@@ -148,7 +148,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [signingLoading, setSigningLoading] = useState(false);
   const theme = getThemeById(themeId);
   
-  const { exportToPDF, isExporting } = usePDFExport({
+  const { exportToPDF, printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
     filename: `tracking-form-${shipment?.shipment_number || 'document'}`,
     orientation: 'portrait',
     format: 'a4',
@@ -227,48 +227,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   if (!shipment) return null;
 
   const handlePrint = () => {
-    const printContent = printRef.current;
-    if (!printContent) return;
-
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
-      <head>
-        <meta charset="UTF-8">
-        <title>نموذج تتبع الشحنة - ${shipment.shipment_number}</title>
-        <style>
-          @page { size: A4; margin: 5mm; }
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { font-family: ${theme.font}; font-size: 6pt; direction: rtl; background: white; color: #1a1a1a; line-height: 1.2; }
-          .page { width: 100%; max-width: 210mm; margin: 0 auto; }
-          table { width: 100%; border-collapse: collapse; margin-bottom: 3px; }
-          th, td { border: 1px solid ${theme.colors.border}; padding: 2px 3px; text-align: right; font-size: 6pt; }
-          .section-header { background: ${theme.colors.headerBg}; color: ${theme.colors.headerText}; font-weight: bold; font-size: 7pt; text-align: center; padding: 2px; }
-          .label-cell { background: ${theme.colors.labelBg}; font-weight: 600; color: ${theme.colors.labelText}; }
-          .party-header-gen { background: ${theme.colors.generatorBg}; color: ${theme.colors.generatorText}; font-weight: bold; font-size: 7pt; text-align: center; }
-          .party-header-trans { background: ${theme.colors.transporterBg}; color: ${theme.colors.transporterText}; font-weight: bold; font-size: 7pt; text-align: center; }
-          .party-header-rec { background: ${theme.colors.recyclerBg}; color: ${theme.colors.recyclerText}; font-weight: bold; font-size: 7pt; text-align: center; }
-          .signature-cell { text-align: center; vertical-align: bottom; height: 35px; }
-          .footer { text-align: center; font-size: 5pt; color: ${theme.colors.footerText}; margin-top: 3px; padding-top: 3px; border-top: 1px solid ${theme.colors.borderLight}; }
-          @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } }
-        </style>
-      </head>
-      <body>
-        ${printContent.innerHTML}
-      </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.focus();
-    
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 250);
+    if (printRef.current) {
+      printWithTheme(printRef.current, themeId as any);
+    }
   };
 
   const handleExportPDF = async () => {
