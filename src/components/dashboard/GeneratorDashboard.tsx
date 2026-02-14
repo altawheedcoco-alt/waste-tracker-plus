@@ -357,7 +357,7 @@ const GeneratorDashboard = () => {
                   transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
                   recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
                 }))}
-                type="certificate"
+                type="delivery"
                 onSuccess={fetchDashboardData}
               />
               <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
