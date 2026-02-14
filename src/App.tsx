@@ -134,6 +134,7 @@ const CustomerPortal = lazy(() => import("./pages/dashboard/CustomerPortal"));
 const OnboardingReview = lazy(() => import("./pages/dashboard/OnboardingReview"));
 const Stories = lazy(() => import("./pages/dashboard/Stories"));
 const DeliveryDeclarations = lazy(() => import("./pages/dashboard/DeliveryDeclarations"));
+const RejectedShipments = lazy(() => import("./pages/dashboard/RejectedShipments"));
 const ERPAccounting = lazy(() => import("./pages/dashboard/erp/ERPAccounting"));
 const ERPInventory = lazy(() => import("./pages/dashboard/erp/ERPInventory"));
 const ERPHR = lazy(() => import("./pages/dashboard/erp/ERPHR"));
@@ -310,6 +311,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/generator-receipts" element={<GeneratorReceipts />} />
         <Route path="/dashboard/guilloche-patterns" element={<GuillochePatterns />} />
         <Route path="/dashboard/delivery-declarations" element={<DeliveryDeclarations />} />
+        <Route path="/dashboard/rejected-shipments" element={<RejectedShipments />} />
         <Route path="/dashboard/smart-insights" element={<SmartInsights />} />
         <Route path="/dashboard/wood-market" element={<WoodMarketIntelligence />} />
         <Route path="/dashboard/award-letters" element={<AwardLetters />} />

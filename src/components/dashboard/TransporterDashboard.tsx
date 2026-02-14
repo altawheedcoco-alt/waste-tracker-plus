@@ -62,6 +62,7 @@ const IncidentReportManager = lazy(() => import('@/components/compliance/Inciden
 const TransporterAIInsights = lazy(() => import('@/components/ai/TransporterAIInsights'));
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertificateButton'));
+const TransporterDeliveryApproval = lazy(() => import('@/components/receipts/TransporterDeliveryApproval'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -124,6 +125,12 @@ const TransporterDashboard = () => {
         <OperationalAlertsWidget />
         <TransporterSLAAlerts shipments={shipments} />
         <TransporterIncomingRequests />
+      </ErrorBoundary>
+
+      <ErrorBoundary fallbackTitle="خطأ في موافقات التسليم">
+        <Suspense fallback={<TabFallback />}>
+          <TransporterDeliveryApproval />
+        </Suspense>
       </ErrorBoundary>
 
       <TransporterNotifications notifications={notifications} />
