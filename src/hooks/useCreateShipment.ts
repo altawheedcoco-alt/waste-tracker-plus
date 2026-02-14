@@ -653,6 +653,17 @@ export const useCreateShipment = () => {
         });
       }
 
+      // Auto-create generator declaration immediately on shipment creation
+      if (shipmentData && generatorId && profile?.id) {
+        try {
+          const { autoCreateGeneratorDeclaration } = await import('@/utils/autoDeclarationCreator');
+          await autoCreateGeneratorDeclaration(shipmentData.id, generatorId, profile.id);
+          console.log('Auto generator declaration created on shipment creation');
+        } catch (e) {
+          console.error('Auto declaration error (non-blocking):', e);
+        }
+      }
+
       toast.success('تم إنشاء الشحنة بنجاح');
       
       if (onSuccess) {
