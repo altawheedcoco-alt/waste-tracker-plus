@@ -39,6 +39,7 @@ import AutomationSettingsDialog from '@/components/automation/AutomationSettings
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import TransporterCommandCenter from './transporter/TransporterCommandCenter';
+import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield } from 'lucide-react';
@@ -127,6 +128,10 @@ const TransporterDashboard = () => {
       <TransporterHeader organizationName={organization?.name || ''} />
 
       <TransporterCommandCenter />
+
+      <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
+        <TransporterDailyPulse />
+      </ErrorBoundary>
 
       <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
         <DailyOperationsSummary />
