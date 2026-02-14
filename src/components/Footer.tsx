@@ -7,22 +7,22 @@ const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-foreground text-background pt-10 sm:pt-16 pb-6 sm:pb-8">
+    <footer className="bg-foreground text-background pt-8 sm:pt-16 pb-6 sm:pb-8">
       <div className="container px-4">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-12 mb-8 sm:mb-12">
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <img src={logo} alt={t('footer.brandName')} className="h-12 w-12 object-contain brightness-0 invert" />
-              <span className="text-xl font-bold">{t('footer.brandName')}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-12 mb-8 sm:mb-12">
+          <div className="sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+              <img src={logo} alt={t('footer.brandName')} className="h-10 w-10 sm:h-12 sm:w-12 object-contain brightness-0 invert" />
+              <span className="text-lg sm:text-xl font-bold">{t('footer.brandName')}</span>
             </div>
-            <p className="text-background/70 leading-relaxed mb-6">{t('footer.brandDesc')}</p>
-            <div className="flex gap-4">
+            <p className="text-background/70 leading-relaxed mb-4 sm:mb-6 text-sm">{t('footer.brandDesc')}</p>
+            <div className="flex gap-3 sm:gap-4">
               <SocialIcon icon={Facebook} /><SocialIcon icon={Twitter} /><SocialIcon icon={Linkedin} /><SocialIcon icon={Instagram} />
             </div>
           </div>
           <div>
-            <h4 className="text-lg font-bold mb-6">{t('footer.quickLinks')}</h4>
-            <ul className="space-y-3">
+            <h4 className="text-base sm:text-lg font-bold mb-3 sm:mb-6">{t('footer.quickLinks')}</h4>
+            <ul className="space-y-2 sm:space-y-3">
               <FooterLink href="#">{t('nav.home')}</FooterLink>
               <FooterLink href="#features">{t('nav.features')}</FooterLink>
               <FooterLink href="#services">{t('nav.services')}</FooterLink>
@@ -30,8 +30,8 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-bold mb-6">{t('footer.ourServices')}</h4>
-            <ul className="space-y-3">
+            <h4 className="text-base sm:text-lg font-bold mb-3 sm:mb-6">{t('footer.ourServices')}</h4>
+            <ul className="space-y-2 sm:space-y-3">
               <FooterLink href="#">{t('footer.shipmentMgmt')}</FooterLink>
               <FooterLink href="#">{t('footer.transportTracking')}</FooterLink>
               <FooterLink href="#">{t('footer.recyclingService')}</FooterLink>
@@ -39,11 +39,11 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h4 className="text-lg font-bold mb-6">{t('footer.contactUs')}</h4>
-            <ul className="space-y-4">
-              <li className="flex items-center gap-3 text-background/70"><MapPin className="w-5 h-5 text-primary" /><span>{t('footer.address')}</span></li>
-              <li className="flex items-center gap-3 text-background/70"><Phone className="w-5 h-5 text-primary" /><span dir="ltr">+20 2 1234 5678</span></li>
-              <li className="flex items-center gap-3 text-background/70"><Mail className="w-5 h-5 text-primary" /><span>info@irecycle.eg</span></li>
+            <h4 className="text-base sm:text-lg font-bold mb-3 sm:mb-6">{t('footer.contactUs')}</h4>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2 sm:gap-3 text-background/70 text-sm"><MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0 mt-0.5" /><span>{t('footer.address')}</span></li>
+              <li className="flex items-center gap-2 sm:gap-3 text-background/70 text-sm"><Phone className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" /><span dir="ltr">+20 2 1234 5678</span></li>
+              <li className="flex items-center gap-2 sm:gap-3 text-background/70 text-sm"><Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" /><span>info@irecycle.eg</span></li>
             </ul>
           </div>
         </div>

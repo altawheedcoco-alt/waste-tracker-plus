@@ -29,8 +29,8 @@ const CTA = () => {
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white font-medium text-sm mb-6">
                   <Sparkles className="w-4 h-4" />{t('cta.badge')}
                 </div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">{t('cta.title1')}<br />{t('cta.title2')}</h2>
-                <p className="text-white/80 text-lg max-w-2xl mx-auto mb-8">{t('cta.desc')}</p>
+                <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 px-2">{t('cta.title1')}<br />{t('cta.title2')}</h2>
+                <p className="text-white/80 text-sm sm:text-lg max-w-2xl mx-auto mb-6 sm:mb-8 px-4">{t('cta.desc')}</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
                   {benefits.map((benefit, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 + i * 0.1 }} className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/10 backdrop-blur-sm">
