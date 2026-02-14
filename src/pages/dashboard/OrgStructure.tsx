@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useOrgStructure, Department } from '@/hooks/useOrgStructure';
 import { useAuth } from '@/contexts/auth/AuthContext';
+import OrgMembersPanel from '@/components/org-structure/OrgMembersPanel';
 import {
   Crown, Settings, Truck, Users, Shield, Calculator, Headphones,
   Leaf, Package, FileText, DoorOpen, Factory, FlaskConical, Scale,
@@ -172,6 +174,23 @@ const OrgStructure = () => {
         </CardContent></Card>
       </div>
 
+      {/* Tabs: Structure vs Members */}
+      <Tabs defaultValue="structure" dir="rtl">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="structure">
+            <Network className="w-4 h-4 ml-1" /> الهيكل التنظيمي
+          </TabsTrigger>
+          <TabsTrigger value="members">
+            <Users className="w-4 h-4 ml-1" /> الأعضاء والصلاحيات
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members" className="mt-4">
+          <OrgMembersPanel />
+        </TabsContent>
+
+        <TabsContent value="structure" className="mt-4">
+
       {/* Departments */}
       <div className="space-y-4">
         {structure.map((dept, idx) => {
@@ -303,6 +322,8 @@ const OrgStructure = () => {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </motion.div>
   );
 };
