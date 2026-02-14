@@ -850,7 +850,7 @@ const RecyclingCertificates = () => {
 
       {/* Hidden print element for PDF generation outside dialog */}
       {selectedReport && selectedReport.shipment && !showPreviewDialog && (
-        <div className="hidden print:block">
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, width: '210mm', background: '#fff' }}>
           <div ref={printRef}>
             <RecyclingCertificatePrint
               shipment={{
