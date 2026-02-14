@@ -38,6 +38,7 @@ interface Shipment {
   confirmed_at?: string | null;
   has_report?: boolean;
   has_receipt?: boolean;
+  has_delivery_certificate?: boolean;
   generator?: { name: string; city?: string } | null;
   transporter?: { name: string; city?: string } | null;
   recycler?: { name: string; city?: string } | null;
@@ -82,9 +83,9 @@ const BulkCertificateButton = ({ shipments, type, onSuccess }: BulkCertificateBu
   // Filter eligible shipments (not already certified)
   const getEligibleShipments = (targetShipments: Shipment[]) => {
     if (isDelivery) {
-      // For delivery: generator confirms handover - approved/collecting/in_transit and not yet delivered
+      // For delivery: generator confirms handover of waste - shipments registered/approved/pending that haven't been certified yet
       return targetShipments.filter(s => 
-        ['approved', 'collecting', 'in_transit', 'delivered'].includes(s.status) && !s.has_receipt
+        ['registered', 'pending', 'approved', 'collecting', 'in_transit'].includes(s.status) && !s.has_delivery_certificate
       );
     } else if (isReceipt) {
       // For receipts: must be delivered or confirmed, and not have receipt yet

@@ -35,6 +35,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Scale,
+  Send,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -160,19 +161,37 @@ const BulkCertificateDialog = ({
     try {
       const shipmentIds = selectedShipments.map(s => s.id);
 
-      if (isReceipt || isDelivery) {
-        // Create bulk receipts/delivery certificates
+      if (isDelivery) {
+        // Create bulk delivery certificates for generator handover
         const receipts = selectedShipments.map(shipment => ({
           shipment_id: shipment.id,
-          receipt_number: `${isDelivery ? 'DLV' : 'RCP'}-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+          receipt_number: `DLV-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
           status: 'confirmed',
           actual_weight: shipment.quantity,
           declared_weight: shipment.quantity,
           waste_type: shipment.waste_type,
-          notes: `${isDelivery ? 'شهادة تسليم مجمعة' : 'شهادة استلام مجمعة'} - ${reportNumber}`,
+          notes: `شهادة تسليم مجمعة من المولد - ${reportNumber}`,
           pickup_date: new Date().toISOString(),
-          transporter_id: isDelivery ? null : organization?.id || null,
-          generator_id: isDelivery ? organization?.id || null : null,
+          generator_id: organization?.id || null,
+        }));
+
+        const { error } = await supabase
+          .from('shipment_receipts')
+          .insert(receipts as any);
+
+        if (error) throw error;
+      } else if (isReceipt) {
+        // Create bulk receipt certificates
+        const receipts = selectedShipments.map(shipment => ({
+          shipment_id: shipment.id,
+          receipt_number: `RCP-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+          status: 'confirmed',
+          actual_weight: shipment.quantity,
+          declared_weight: shipment.quantity,
+          waste_type: shipment.waste_type,
+          notes: `شهادة استلام مجمعة - ${reportNumber}`,
+          pickup_date: new Date().toISOString(),
+          transporter_id: organization?.id || null,
         }));
 
         const { error } = await supabase
@@ -412,7 +431,7 @@ const BulkCertificateDialog = ({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {isReceipt ? <Truck className="w-5 h-5" /> : <Recycle className="w-5 h-5" />}
+            {isDelivery ? <Send className="w-5 h-5" /> : isReceipt ? <Truck className="w-5 h-5" /> : <Recycle className="w-5 h-5" />}
             {title}
           </DialogTitle>
           <DialogDescription>
