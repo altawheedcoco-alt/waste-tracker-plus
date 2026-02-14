@@ -543,11 +543,35 @@ const OrganizationProfile = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>{t('orgProfile.activityType')}</Label>
-                    <Input
+                    <select
                       value={orgData?.activity_type || ''}
                       onChange={(e) => setOrgData({ ...orgData, activity_type: e.target.value })}
                       disabled={!isCompanyAdmin}
-                    />
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">اختر نوع النشاط</option>
+                      <option value="تجاري">تجاري</option>
+                      <option value="صناعي">صناعي</option>
+                      <option value="خدمي">خدمي</option>
+                      <option value="زراعي">زراعي</option>
+                      <option value="حرفي">حرفي</option>
+                      <option value="مهني">مهني</option>
+                      <option value="صحي">صحي</option>
+                      <option value="تعليمي">تعليمي</option>
+                      <option value="سياحي">سياحي</option>
+                      <option value="عقاري">عقاري</option>
+                      <option value="لوجستي">لوجستي</option>
+                      <option value="تكنولوجي">تكنولوجي</option>
+                      <option value="بيئي">بيئي</option>
+                      <option value="إنشائي">إنشائي</option>
+                      <option value="تعديني">تعديني</option>
+                      <option value="غذائي">غذائي</option>
+                      <option value="بتروكيماوي">بتروكيماوي</option>
+                      <option value="حكومي">حكومي</option>
+                      <option value="غير ربحي">غير ربحي</option>
+                      <option value="مختلط">مختلط</option>
+                      <option value="أخرى">أخرى</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <Label>{t('orgProfile.productionCapacity')}</Label>
