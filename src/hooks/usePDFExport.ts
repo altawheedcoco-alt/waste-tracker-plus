@@ -180,7 +180,7 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       @page { size: A4; margin: 12mm 15mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; box-sizing: border-box; }
       body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; direction: rtl; }
-      .print-container { width: 180mm; max-width: 180mm; margin: 0 auto; padding: 3mm; box-sizing: border-box; max-height: 540mm; overflow: hidden; }
+      .print-container { width: 180mm; max-width: 180mm; margin: 0 auto; padding: 3mm; box-sizing: border-box; }
       .no-print { display: none !important; }
       img { max-width: 100%; height: auto; max-height: 60mm; object-fit: contain; }
       table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
