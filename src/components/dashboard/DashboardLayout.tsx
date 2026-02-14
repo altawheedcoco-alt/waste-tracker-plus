@@ -785,8 +785,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <span className="font-bold text-gradient-eco text-sm">{t('footer.brandName')}</span>
             </div>
 
-            {/* Command Palette - Hide on mobile */}
-            <div className={`${isMobile ? 'hidden' : 'block'} flex-1 max-w-md mx-4`}>
+            {/* Command Palette - Show on all devices */}
+            <div className={`flex-1 ${isMobile ? 'max-w-[40px]' : 'max-w-md mx-4'}`}>
               <CommandPalette />
             </div>
 
