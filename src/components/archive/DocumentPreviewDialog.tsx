@@ -1,7 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { Download, ExternalLink, Calendar, User, FileText, Tag } from 'lucide-react';
+import DocumentAIAnalysis from '@/components/documents/DocumentAIAnalysis';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { EntityDocument } from '@/hooks/useEntityDocuments';
@@ -160,6 +162,17 @@ export default function DocumentPreviewDialog({
                 <p className="text-sm bg-muted p-2 rounded">{doc.description}</p>
               </div>
             )}
+
+            {/* AI Analysis */}
+            <Separator />
+            <DocumentAIAnalysis
+              fileUrl={doc.file_url}
+              fileName={doc.file_name}
+              fileType={doc.file_type}
+              documentId={doc.id}
+              documentSourceType="entity_document"
+              compact
+            />
 
             {/* Tags */}
             {doc.tags && doc.tags.length > 0 && (
