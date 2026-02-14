@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, BookOpen, FileText, TrendingUp, Calculator, Trash2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 const accountTypeLabels: Record<string, string> = {
   asset: 'أصول',
@@ -146,7 +147,8 @@ const ERPAccounting = () => {
 
   return (
     <DashboardLayout>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6" dir="rtl">
+        <BackButton />
         <div className="flex items-center justify-between">
           <div className="text-right">
             <h1 className="text-2xl font-bold">المحاسبة والمالية</h1>

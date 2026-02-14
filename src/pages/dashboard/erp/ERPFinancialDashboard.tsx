@@ -17,6 +17,7 @@ import {
   Wallet, PiggyBank, Activity, Clock
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 // Types
 interface AccountBalance {
@@ -309,7 +310,8 @@ const ERPFinancialDashboard = () => {
 
   return (
     <DashboardLayout>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6" dir="rtl">
+        <BackButton />
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="text-right">
