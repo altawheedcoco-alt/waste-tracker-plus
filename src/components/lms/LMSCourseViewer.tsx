@@ -62,7 +62,7 @@ const LMSCourseViewer = ({ courseId }: Props) => {
               <div className="text-left min-w-[140px]">
                 <p className="text-xs text-muted-foreground mb-1">التقدم</p>
                 <Progress value={progressPercentage} className="h-2.5" />
-                <p className="text-xs text-muted-foreground mt-1">{completedLessons}/{totalLessons} دروس</p>
+                <p className="text-xs text-muted-foreground mt-1">{completedLessons}/{totalLessons} دورات</p>
               </div>
             )}
           </div>
@@ -78,7 +78,7 @@ const LMSCourseViewer = ({ courseId }: Props) => {
           className="gap-2"
         >
           <BookOpen className="w-4 h-4" />
-          الدروس ({totalLessons})
+          الدورات ({totalLessons})
         </Button>
         <Button
           variant={activeTab === 'quiz' ? 'default' : 'ghost'}
@@ -135,7 +135,7 @@ const LMSCourseViewer = ({ courseId }: Props) => {
                       >
                         <CardContent className="pt-0 pb-4 px-4 border-t">
                           <div className="prose prose-sm dark:prose-invert max-w-none mt-3 text-right">
-                            <ReactMarkdown>{lesson.content_ar || lesson.content || 'محتوى الدرس قيد الإعداد...'}</ReactMarkdown>
+                            <ReactMarkdown>{lesson.content_ar || lesson.content || 'محتوى الدورة قيد الإعداد...'}</ReactMarkdown>
                           </div>
                           {enrollment && !completed && (
                             <Button
@@ -148,7 +148,7 @@ const LMSCourseViewer = ({ courseId }: Props) => {
                               disabled={markCompleteMutation.isPending}
                             >
                               {markCompleteMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
-                              تم إكمال الدرس
+                              تم إكمال الدورة
                             </Button>
                           )}
                         </CardContent>
@@ -164,9 +164,9 @@ const LMSCourseViewer = ({ courseId }: Props) => {
             {!allLessonsCompleted ? (
               <div className="bg-muted/50 rounded-lg p-8 text-center">
                 <Lock className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
-                <p className="font-medium">أكمل جميع الدروس أولاً</p>
+                <p className="font-medium">أكمل جميع الدورات أولاً</p>
                 <p className="text-sm text-muted-foreground mt-1">
-                  أكملت {completedLessons} من {totalLessons} دروس
+                  أكملت {completedLessons} من {totalLessons} دورات
                 </p>
               </div>
             ) : (

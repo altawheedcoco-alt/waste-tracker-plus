@@ -210,7 +210,7 @@ export const useMarkLessonComplete = () => {
     },
     onSuccess: (_, { courseId }) => {
       qc.invalidateQueries({ queryKey: ['lms-lesson-progress', courseId] });
-      toast.success('تم إكمال الدرس');
+      toast.success('تم إكمال الدورة');
     },
   });
 };

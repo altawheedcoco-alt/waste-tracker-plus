@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Clock, Users, Star, Shield, AlertTriangle, Monitor, BarChart3, Recycle, Scale, ChevronDown, Truck } from 'lucide-react';
+import { BookOpen, Clock, Users, Star, Shield, AlertTriangle, Monitor, BarChart3, Recycle, Scale, ChevronDown, Truck, Package, FileText, Layers, Leaf, Building2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
   ShieldCheck: Shield, Recycle, Scale, Monitor, AlertTriangle, BarChart3, BookOpen, Truck,
+  Package, FileText, Layers, Leaf, Building: Building2,
 };
 
 const difficultyMap: Record<string, { label: string; color: string }> = {
