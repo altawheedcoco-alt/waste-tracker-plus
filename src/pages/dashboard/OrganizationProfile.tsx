@@ -30,7 +30,8 @@ import {
   XCircle,
   Stamp,
   PenSquare,
-  Target
+  Target,
+  Briefcase
 } from 'lucide-react';
 import OrganizationPosts from '@/components/organization/OrganizationPosts';
 import StampSignatureUpload from '@/components/organization/StampSignatureUpload';
@@ -42,6 +43,7 @@ import BiometricManager from '@/components/biometric/BiometricManager';
 import LocationSettings from '@/components/organization/LocationSettings';
 import OrganizationPhotoGallery from '@/components/organization/OrganizationPhotoGallery';
 import BusinessProfileView from '@/components/organization/BusinessProfileView';
+import BusinessProfileSettings from '@/components/organization/BusinessProfileSettings';
 
 interface OrganizationDocument {
   id: string;
@@ -158,6 +160,14 @@ const OrganizationProfile = () => {
           is_location_public: orgData.is_location_public,
           location_lat: orgData.location_lat,
           location_lng: orgData.location_lng,
+          bio: orgData.bio,
+          website_url: orgData.website_url,
+          price_range: orgData.price_range,
+          cta_type: orgData.cta_type,
+          services: orgData.services,
+          founded_year: orgData.founded_year,
+          business_email: orgData.business_email,
+          social_links: orgData.social_links,
         })
         .eq('id', organization.id);
 
@@ -341,6 +351,12 @@ const OrganizationProfile = () => {
               representative_name: orgData?.representative_name,
               representative_national_id: orgData?.representative_national_id,
               representative_phone: orgData?.representative_phone,
+              bio: orgData?.bio,
+              cta_type: orgData?.cta_type,
+              website_url: orgData?.website_url,
+              phone: orgData?.phone,
+              founded_year: orgData?.founded_year,
+              activity_type: orgData?.activity_type,
             }}
             isEditable={isCompanyAdmin}
             onUpdate={fetchOrganizationData}
@@ -352,6 +368,10 @@ const OrganizationProfile = () => {
             <TabsTrigger value="portfolio">
               <Target className="w-4 h-4 ml-2" />
               {t('orgProfile.portfolio')}
+            </TabsTrigger>
+            <TabsTrigger value="business">
+              <Briefcase className="w-4 h-4 ml-2" />
+              الملف التجاري
             </TabsTrigger>
             <TabsTrigger value="posts">
               <PenSquare className="w-4 h-4 ml-2" />
@@ -400,6 +420,17 @@ const OrganizationProfile = () => {
                 city: orgData?.city,
                 activity_type: orgData?.activity_type,
               }}
+              isEditable={isCompanyAdmin}
+              onUpdate={fetchOrganizationData}
+            />
+          </TabsContent>
+
+          {/* Business Profile Tab */}
+          <TabsContent value="business">
+            <BusinessProfileSettings
+              organizationId={organization.id}
+              organizationType={organization.organization_type}
+              data={orgData}
               isEditable={isCompanyAdmin}
               onUpdate={fetchOrganizationData}
             />

@@ -10344,12 +10344,15 @@ export type Database = {
           agent_name: string | null
           agent_national_id: string | null
           agent_phone: string | null
+          bio: string | null
           branches: Json | null
+          business_email: string | null
           city: string | null
           client_code: string | null
           commercial_register: string | null
           cover_url: string | null
           created_at: string | null
+          cta_type: string | null
           delegate_email: string | null
           delegate_name: string | null
           delegate_national_id: string | null
@@ -10361,6 +10364,7 @@ export type Database = {
           environmental_license: string | null
           establishment_registration: string | null
           field_of_work: string | null
+          founded_year: number | null
           hazardous_certified: boolean | null
           headquarters: string | null
           id: string
@@ -10385,9 +10389,11 @@ export type Database = {
           onboarding_completed: boolean | null
           onboarding_completed_at: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
+          page_transparency: Json | null
           partner_code: string
           phone: string
           policy: string | null
+          price_range: string | null
           production_capacity: string | null
           region: string | null
           registered_activity: string | null
@@ -10397,7 +10403,9 @@ export type Database = {
           representative_phone: string | null
           representative_position: string | null
           secondary_phone: string | null
+          services: Json | null
           signature_url: string | null
+          social_links: Json | null
           stamp_url: string | null
           suspended_at: string | null
           suspension_reason: string | null
@@ -10405,6 +10413,7 @@ export type Database = {
           terms_accepted: boolean | null
           updated_at: string | null
           vision: string | null
+          website_url: string | null
           wmra_license: string | null
           working_hours: Json | null
         }
@@ -10417,12 +10426,15 @@ export type Database = {
           agent_name?: string | null
           agent_national_id?: string | null
           agent_phone?: string | null
+          bio?: string | null
           branches?: Json | null
+          business_email?: string | null
           city?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
           created_at?: string | null
+          cta_type?: string | null
           delegate_email?: string | null
           delegate_name?: string | null
           delegate_national_id?: string | null
@@ -10434,6 +10446,7 @@ export type Database = {
           environmental_license?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
+          founded_year?: number | null
           hazardous_certified?: boolean | null
           headquarters?: string | null
           id?: string
@@ -10458,9 +10471,11 @@ export type Database = {
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           organization_type: Database["public"]["Enums"]["organization_type"]
+          page_transparency?: Json | null
           partner_code?: string
           phone: string
           policy?: string | null
+          price_range?: string | null
           production_capacity?: string | null
           region?: string | null
           registered_activity?: string | null
@@ -10470,7 +10485,9 @@ export type Database = {
           representative_phone?: string | null
           representative_position?: string | null
           secondary_phone?: string | null
+          services?: Json | null
           signature_url?: string | null
+          social_links?: Json | null
           stamp_url?: string | null
           suspended_at?: string | null
           suspension_reason?: string | null
@@ -10478,6 +10495,7 @@ export type Database = {
           terms_accepted?: boolean | null
           updated_at?: string | null
           vision?: string | null
+          website_url?: string | null
           wmra_license?: string | null
           working_hours?: Json | null
         }
@@ -10490,12 +10508,15 @@ export type Database = {
           agent_name?: string | null
           agent_national_id?: string | null
           agent_phone?: string | null
+          bio?: string | null
           branches?: Json | null
+          business_email?: string | null
           city?: string | null
           client_code?: string | null
           commercial_register?: string | null
           cover_url?: string | null
           created_at?: string | null
+          cta_type?: string | null
           delegate_email?: string | null
           delegate_name?: string | null
           delegate_national_id?: string | null
@@ -10507,6 +10528,7 @@ export type Database = {
           environmental_license?: string | null
           establishment_registration?: string | null
           field_of_work?: string | null
+          founded_year?: number | null
           hazardous_certified?: boolean | null
           headquarters?: string | null
           id?: string
@@ -10531,9 +10553,11 @@ export type Database = {
           onboarding_completed?: boolean | null
           onboarding_completed_at?: string | null
           organization_type?: Database["public"]["Enums"]["organization_type"]
+          page_transparency?: Json | null
           partner_code?: string
           phone?: string
           policy?: string | null
+          price_range?: string | null
           production_capacity?: string | null
           region?: string | null
           registered_activity?: string | null
@@ -10543,7 +10567,9 @@ export type Database = {
           representative_phone?: string | null
           representative_position?: string | null
           secondary_phone?: string | null
+          services?: Json | null
           signature_url?: string | null
+          social_links?: Json | null
           stamp_url?: string | null
           suspended_at?: string | null
           suspension_reason?: string | null
@@ -10551,6 +10577,7 @@ export type Database = {
           terms_accepted?: boolean | null
           updated_at?: string | null
           vision?: string | null
+          website_url?: string | null
           wmra_license?: string | null
           working_hours?: Json | null
         }
