@@ -31,7 +31,8 @@ import {
   Stamp,
   PenSquare,
   Target,
-  Briefcase
+  Briefcase,
+  Award
 } from 'lucide-react';
 import OrganizationPosts from '@/components/organization/OrganizationPosts';
 import StampSignatureUpload from '@/components/organization/StampSignatureUpload';
@@ -44,6 +45,7 @@ import LocationSettings from '@/components/organization/LocationSettings';
 import OrganizationPhotoGallery from '@/components/organization/OrganizationPhotoGallery';
 import BusinessProfileView from '@/components/organization/BusinessProfileView';
 import BusinessProfileSettings from '@/components/organization/BusinessProfileSettings';
+import LMSProfileCertificates from '@/components/lms/LMSProfileCertificates';
 
 interface OrganizationDocument {
   id: string;
@@ -400,6 +402,10 @@ const OrganizationProfile = () => {
             <TabsTrigger value="contact">
               <Phone className="w-4 h-4 ml-2" />
               {t('orgProfile.contactTab')}
+            </TabsTrigger>
+            <TabsTrigger value="certificates">
+              <Award className="w-4 h-4 ml-2" />
+              الشهادات
             </TabsTrigger>
           </TabsList>
 
@@ -999,6 +1005,11 @@ const OrganizationProfile = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Certificates Tab */}
+          <TabsContent value="certificates">
+            <LMSProfileCertificates />
           </TabsContent>
 
           {/* Contact Tab */}
