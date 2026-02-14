@@ -4320,6 +4320,96 @@ export type Database = {
           },
         ]
       }
+      document_ai_analysis: {
+        Row: {
+          ai_confidence: number | null
+          ai_document_type: string | null
+          ai_suggested_folder: string | null
+          ai_summary: string | null
+          ai_tags: string[] | null
+          analysis_duration_ms: number | null
+          analysis_model: string | null
+          analyzed_by: string | null
+          compliance_checks: Json | null
+          compliance_score: number | null
+          created_at: string
+          document_id: string | null
+          document_type: string
+          extracted_data: Json | null
+          extracted_fields: Json | null
+          file_name: string | null
+          id: string
+          organization_id: string
+          recommendations: Json | null
+          risk_level: string | null
+          source_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_document_type?: string | null
+          ai_suggested_folder?: string | null
+          ai_summary?: string | null
+          ai_tags?: string[] | null
+          analysis_duration_ms?: number | null
+          analysis_model?: string | null
+          analyzed_by?: string | null
+          compliance_checks?: Json | null
+          compliance_score?: number | null
+          created_at?: string
+          document_id?: string | null
+          document_type: string
+          extracted_data?: Json | null
+          extracted_fields?: Json | null
+          file_name?: string | null
+          id?: string
+          organization_id: string
+          recommendations?: Json | null
+          risk_level?: string | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_document_type?: string | null
+          ai_suggested_folder?: string | null
+          ai_summary?: string | null
+          ai_tags?: string[] | null
+          analysis_duration_ms?: number | null
+          analysis_model?: string | null
+          analyzed_by?: string | null
+          compliance_checks?: Json | null
+          compliance_score?: number | null
+          created_at?: string
+          document_id?: string | null
+          document_type?: string
+          extracted_data?: Json | null
+          extracted_fields?: Json | null
+          file_name?: string | null
+          id?: string
+          organization_id?: string
+          recommendations?: Json | null
+          risk_level?: string | null
+          source_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_ai_analysis_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "document_ai_analysis_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_endorsements: {
         Row: {
           biometric_verified: boolean | null
