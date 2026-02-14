@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Users, Calendar, Clock, Wallet, UserPlus } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 const contractLabels: Record<string, string> = {
   full_time: 'دوام كامل', part_time: 'دوام جزئي', contract: 'عقد', temporary: 'مؤقت',
@@ -105,7 +106,8 @@ const ERPHR = () => {
 
   return (
     <DashboardLayout>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6" dir="rtl">
+        <BackButton />
         <div className="text-right">
           <h1 className="text-2xl font-bold">الموارد البشرية</h1>
           <p className="text-muted-foreground">إدارة الموظفين والرواتب والحضور والإجازات</p>
