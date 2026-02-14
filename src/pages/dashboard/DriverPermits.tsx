@@ -12,9 +12,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Shield, Plus, Users, CheckCircle, XCircle, Clock, AlertTriangle, Search, FileText } from 'lucide-react';
+import { Shield, Plus, Users, CheckCircle, XCircle, Clock, AlertTriangle, Search, FileText, Printer } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import PermitPrintTemplate from '@/components/permits/PermitPrintTemplate';
 
 interface Permit {
   id: string;
@@ -46,6 +47,7 @@ const DriverPermits = () => {
   const [selectedDrivers, setSelectedDrivers] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [printPermit, setPrintPermit] = useState<Permit | null>(null);
   const [formData, setFormData] = useState({
     valid_from: new Date().toISOString().split('T')[0],
     valid_until: '',
@@ -343,40 +345,50 @@ const DriverPermits = () => {
                         </div>
                       )}
                     </div>
-                    {permit.status === 'active' && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-yellow-700"
-                          onClick={() => {
-                            const reason = prompt('سبب الإيقاف:');
-                            if (reason) updateStatusMutation.mutate({ id: permit.id, status: 'suspended', reason });
-                          }}
-                        >
-                          إيقاف
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            const reason = prompt('سبب الإلغاء:');
-                            if (reason) updateStatusMutation.mutate({ id: permit.id, status: 'revoked', reason });
-                          }}
-                        >
-                          إلغاء
-                        </Button>
-                      </div>
-                    )}
-                    {permit.status === 'suspended' && (
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => updateStatusMutation.mutate({ id: permit.id, status: 'active' })}
+                        onClick={() => setPrintPermit(permit)}
                       >
-                        إعادة تفعيل
+                        <Printer className="h-3 w-3 ml-1" />
+                        طباعة
                       </Button>
-                    )}
+                      {permit.status === 'active' && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-yellow-700"
+                            onClick={() => {
+                              const reason = prompt('سبب الإيقاف:');
+                              if (reason) updateStatusMutation.mutate({ id: permit.id, status: 'suspended', reason });
+                            }}
+                          >
+                            إيقاف
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => {
+                              const reason = prompt('سبب الإلغاء:');
+                              if (reason) updateStatusMutation.mutate({ id: permit.id, status: 'revoked', reason });
+                            }}
+                          >
+                            إلغاء
+                          </Button>
+                        </>
+                      )}
+                      {permit.status === 'suspended' && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateStatusMutation.mutate({ id: permit.id, status: 'active' })}
+                        >
+                          إعادة تفعيل
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -510,6 +522,36 @@ const DriverPermits = () => {
                 : `إصدار ${selectedDrivers.length} تصريح`}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Print Dialog */}
+      <Dialog open={!!printPermit} onOpenChange={(open) => !open && setPrintPermit(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Printer className="h-5 w-5" />
+              معاينة وطباعة التصريح
+            </DialogTitle>
+            <DialogDescription>معاينة التصريح قبل الطباعة بتنسيق A4</DialogDescription>
+          </DialogHeader>
+          {printPermit && (
+            <PermitPrintTemplate
+              permit={{
+                permitNumber: printPermit.permit_number,
+                orgName: organization?.name || '',
+                driverName: getDriverName(printPermit.driver_id),
+                vehiclePlate: getDriverPlate(printPermit.driver_id),
+                vehicleType: drivers.find((d: any) => d.id === printPermit.driver_id)?.vehicle_type || '',
+                validFrom: printPermit.valid_from,
+                validUntil: printPermit.valid_until,
+                scope: printPermit.scope,
+                conditions: printPermit.conditions || undefined,
+                issuedAt: printPermit.issued_at,
+              }}
+              onClose={() => setPrintPermit(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
