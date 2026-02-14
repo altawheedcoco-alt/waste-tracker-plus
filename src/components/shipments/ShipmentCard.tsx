@@ -61,6 +61,7 @@ import ShipmentRouteMap from './ShipmentRouteMap';
 import CancelShipmentDialog from './CancelShipmentDialog';
 import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
+import GeneratorDeliveryCertificateDialog from '@/components/receipts/GeneratorDeliveryCertificateDialog';
 import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
 import ShipmentApprovalBadge from './ShipmentApprovalBadge';
 import { supabase } from '@/integrations/supabase/client';
@@ -128,6 +129,7 @@ const ShipmentCard = ({
   const [isLiveTrackingOpen, setIsLiveTrackingOpen] = useState(false);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
   const [isDeclarationViewOpen, setIsDeclarationViewOpen] = useState(false);
+  const [isDeliveryCertOpen, setIsDeliveryCertOpen] = useState(false);
   const [showInlineMap, setShowInlineMap] = useState(false);
 
   // استخدام hook صلاحيات الرؤية
@@ -330,6 +332,19 @@ const ShipmentCard = ({
                       variant="outline"
                       size="sm"
                     />
+                  )}
+                  {/* Generator Delivery Certificate Button */}
+                  {isGenerator && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => { e.stopPropagation(); setIsDeliveryCertOpen(true); }}
+                      className="gap-1 text-xs text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:hover:bg-emerald-900/30"
+                      title="إقرار تسليم الشحنة"
+                    >
+                      <FileCheck className="w-3 h-3" />
+                      إقرار تسليم
+                    </Button>
                   )}
                   {/* Cancel Shipment Button */}
                   <CancelShipmentDialog
@@ -716,6 +731,18 @@ const ShipmentCard = ({
                         size="sm"
                       />
                     )}
+                    {/* Generator Delivery Certificate Button */}
+                    {isGenerator && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); setIsDeliveryCertOpen(true); }}
+                        className="gap-2 text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:hover:bg-emerald-900/30"
+                      >
+                        <FileCheck className="w-4 h-4" />
+                        إقرار تسليم
+                      </Button>
+                    )}
                     {canChange && availableNextStatuses.length > 0 ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -1054,6 +1081,27 @@ const ShipmentCard = ({
           declaration={declarationData as any}
         />
       )}
+
+      {/* Generator Delivery Certificate Dialog */}
+      <GeneratorDeliveryCertificateDialog
+        open={isDeliveryCertOpen}
+        onOpenChange={setIsDeliveryCertOpen}
+        shipment={{
+          id: shipment.id,
+          shipment_number: shipment.shipment_number,
+          waste_type: shipment.waste_type,
+          quantity: shipment.quantity,
+          unit: shipment.unit || 'كجم',
+          status: shipment.status,
+          created_at: shipment.created_at,
+          pickup_address: shipment.pickup_address || '',
+          delivery_address: shipment.delivery_address || '',
+          generator: shipment.generator ? { name: shipment.generator.name, city: (shipment.generator as any)?.city } : undefined,
+          transporter: shipment.transporter ? { name: shipment.transporter.name, city: (shipment.transporter as any)?.city } : undefined,
+          recycler: shipment.recycler ? { name: shipment.recycler.name, city: (shipment.recycler as any)?.city } : undefined,
+        } as any}
+        onSuccess={onStatusChange}
+      />
     </>
   );
 };
