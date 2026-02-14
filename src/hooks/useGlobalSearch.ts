@@ -10,6 +10,11 @@ export interface SearchResults {
   drivers: DriverResult[];
   employees: EmployeeResult[];
   invoices: InvoiceResult[];
+  contracts: ContractResult[];
+  deposits: DepositResult[];
+  award_letters: AwardLetterResult[];
+  declarations: DeclarationResult[];
+  receipts: ReceiptResult[];
 }
 
 export interface ShipmentResult {
@@ -76,6 +81,61 @@ export interface InvoiceResult {
   result_type: 'invoice';
 }
 
+export interface ContractResult {
+  id: string;
+  contract_number: string;
+  title: string;
+  status: string;
+  contract_type: string;
+  start_date: string;
+  end_date: string;
+  value: number;
+  partner_name: string;
+  result_type: 'contract';
+}
+
+export interface DepositResult {
+  id: string;
+  amount: number;
+  transfer_method: string;
+  deposit_date: string;
+  reference_number: string;
+  depositor_name: string;
+  partner_name: string;
+  result_type: 'deposit';
+}
+
+export interface AwardLetterResult {
+  id: string;
+  letter_number: string;
+  title: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  partner_name: string;
+  result_type: 'award_letter';
+}
+
+export interface DeclarationResult {
+  id: string;
+  declaration_type: string;
+  status: string;
+  created_at: string;
+  shipment_number: string;
+  waste_type: string;
+  generator_name: string;
+  result_type: 'declaration';
+}
+
+export interface ReceiptResult {
+  id: string;
+  receipt_number: string;
+  status: string;
+  created_at: string;
+  shipment_number: string;
+  result_type: 'receipt';
+}
+
 const emptyResults: SearchResults = {
   shipments: [],
   organizations: [],
@@ -83,6 +143,11 @@ const emptyResults: SearchResults = {
   drivers: [],
   employees: [],
   invoices: [],
+  contracts: [],
+  deposits: [],
+  award_letters: [],
+  declarations: [],
+  receipts: [],
 };
 
 export function useGlobalSearch() {
