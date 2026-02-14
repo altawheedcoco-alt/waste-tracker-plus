@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   CalendarDays, TrendingUp, TrendingDown, Package, Clock,
   CheckCircle2, Truck, FileText, Weight, AlertTriangle,
@@ -43,6 +44,7 @@ const AnimatedNumber = ({ value, decimals = 0 }: { value: number; decimals?: num
 const GeneratorCommandCenter = () => {
   const { organization } = useAuth();
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const navigate = useNavigate();
 
   const { data: stats, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['generator-command-center', organization?.id],
@@ -162,6 +164,7 @@ const GeneratorCommandCenter = () => {
       bg: 'bg-blue-100 dark:bg-blue-900/30',
       trend: trend,
       trendLabel: trend >= 0 ? `+${trend} عن أمس` : `${trend} عن أمس`,
+      link: '/dashboard/shipments',
     },
     {
       label: 'بانتظار الموافقة',
@@ -170,6 +173,7 @@ const GeneratorCommandCenter = () => {
       color: 'text-amber-600',
       bg: 'bg-amber-100 dark:bg-amber-900/30',
       alert: (stats?.pendingApproval || 0) > 5,
+      link: '/dashboard/shipments?status=pending',
     },
     {
       label: 'رحلات نشطة',
@@ -178,6 +182,7 @@ const GeneratorCommandCenter = () => {
       color: 'text-purple-600',
       bg: 'bg-purple-100 dark:bg-purple-900/30',
       pulse: (stats?.activeTrips || 0) > 0,
+      link: '/dashboard/shipments?status=in_transit',
     },
     {
       label: 'مكتملة اليوم',
@@ -185,6 +190,7 @@ const GeneratorCommandCenter = () => {
       icon: CheckCircle2,
       color: 'text-emerald-600',
       bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+      link: '/dashboard/shipments?status=completed',
     },
     {
       label: 'كمية اليوم (طن)',
@@ -195,6 +201,7 @@ const GeneratorCommandCenter = () => {
       bg: 'bg-teal-100 dark:bg-teal-900/30',
       trend: qtyTrend,
       trendLabel: qtyTrend >= 0 ? `+${qtyTrend.toFixed(1)}` : `${qtyTrend.toFixed(1)}`,
+      link: '/dashboard/shipments',
     },
     {
       label: 'شهادات معلّقة',
@@ -203,6 +210,7 @@ const GeneratorCommandCenter = () => {
       color: 'text-orange-600',
       bg: 'bg-orange-100 dark:bg-orange-900/30',
       alert: (stats?.pendingCertificates || 0) > 0,
+      link: '/dashboard/receipts',
     },
   ];
 
@@ -256,8 +264,9 @@ const GeneratorCommandCenter = () => {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05, duration: 0.3 }}
+                onClick={() => m.link && navigate(m.link)}
                 className={cn(
-                  "relative flex flex-col gap-1 p-3 rounded-lg border bg-card transition-shadow hover:shadow-md",
+                  "relative flex flex-col gap-1 p-3 rounded-lg border bg-card transition-shadow hover:shadow-md cursor-pointer",
                   m.alert && "border-orange-300 dark:border-orange-700"
                 )}
               >
