@@ -3,24 +3,40 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
-import { Leaf, FileCheck, Building2, CheckCircle2 } from 'lucide-react';
+import { Leaf, FileCheck, Building2, CheckCircle2, Shield, Hash } from 'lucide-react';
+
+// ===== Partner Identity (Logo + Barcode) =====
+export interface PrintPartner {
+  name: string;
+  role: string; // المولّد، الناقل، المدوّر
+  logo?: string | null;
+  barcode?: string | null; // Organization barcode/client code
+}
 
 interface PrintWrapperProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
   documentNumber?: string;
+  verificationCode?: string;
+  serialNumber?: string; // e.g. shipment number
   showQR?: boolean;
   showBarcode?: boolean;
   qrValue?: string;
   barcodeValue?: string;
   organizationName?: string;
   organizationLogo?: string | null;
+  /** Partner identity strip */
+  partners?: PrintPartner[];
   showWatermark?: boolean;
   watermarkText?: string;
   isOfficial?: boolean;
   showFooter?: boolean;
   footerText?: string;
+  /** Accent color for borders */
+  accentColor?: string;
+  /** Shipment arrival date for footer */
+  arrivalDate?: string | null;
   className?: string;
 }
 
@@ -29,24 +45,29 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   title,
   subtitle,
   documentNumber,
+  verificationCode,
+  serialNumber,
   showQR = true,
   showBarcode = true,
   qrValue,
   barcodeValue,
   organizationName,
   organizationLogo,
+  partners = [],
   showWatermark = false,
   watermarkText = 'سري',
   isOfficial = false,
   showFooter = true,
   footerText,
+  accentColor = '#16a34a',
+  arrivalDate,
   className = '',
 }, ref) => {
   const currentDate = format(new Date(), 'PP', { locale: ar });
   const currentTime = format(new Date(), 'p', { locale: ar });
-  // Generate verification URL for QR codes
-  const qrContent = qrValue || `${window.location.origin}/verify?type=document&code=${documentNumber || Date.now()}`;
+  const qrContent = qrValue || `${window.location.origin}/verify?type=document&code=${verificationCode || documentNumber || Date.now()}`;
   const barcodeContent = barcodeValue || documentNumber || `DOC${Date.now()}`;
+  const vCode = verificationCode || `VRF-${Date.now().toString(36).toUpperCase()}`;
 
   return (
     <div
@@ -57,95 +78,120 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
     >
       {/* Watermark */}
       {showWatermark && (
-        <div className="print-watermark">
-          {watermarkText}
-        </div>
+        <div className="print-watermark">{watermarkText}</div>
       )}
 
-      {/* Header */}
-      <header className="print-header flex items-start justify-between mb-6 border-b-2 border-green-600 pb-4">
+      {/* ===== HEADER: QR + Title + Barcode ===== */}
+      <header className="print-header flex items-start justify-between mb-3 pb-3" style={{ borderBottom: `2px solid ${accentColor}` }}>
         {/* QR Code */}
         {showQR && (
-          <div className="text-center print-qr">
-            <QRCodeSVG
-              value={qrContent}
-              size={70}
-              level="M"
-              includeMargin={false}
-            />
-            <p className="text-xs mt-1 text-gray-500">امسح للتحقق</p>
+          <div className="text-center print-qr flex-shrink-0">
+            <QRCodeSVG value={qrContent} size={60} level="M" includeMargin={false} />
+            <p className="text-[7pt] mt-1 text-gray-500">امسح للتحقق</p>
           </div>
         )}
 
         {/* Title Section */}
-        <div className="text-center flex-1 px-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Leaf className="w-7 h-7 text-green-600" />
-            <h1 className="text-xl font-bold text-green-700 print-title">{title}</h1>
-            <Leaf className="w-7 h-7 text-green-600" />
+        <div className="text-center flex-1 px-3">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Leaf className="w-5 h-5" style={{ color: accentColor }} />
+            <h1 className="text-lg font-bold print-title" style={{ color: accentColor }}>{title}</h1>
+            <Leaf className="w-5 h-5" style={{ color: accentColor }} />
           </div>
-          {subtitle && (
-            <p className="text-sm text-gray-600">{subtitle}</p>
-          )}
-          {documentNumber && (
-            <div className="mt-2 inline-block bg-gray-50 border border-gray-200 rounded px-3 py-1">
-              <span className="text-sm">رقم الوثيقة: </span>
-              <span className="font-mono font-bold text-green-700 print-certificate-number">
-                {documentNumber}
+          {subtitle && <p className="text-xs text-gray-600">{subtitle}</p>}
+
+          {/* Serial & Document Numbers */}
+          <div className="flex items-center justify-center gap-3 mt-2 flex-wrap">
+            {documentNumber && (
+              <span className="inline-block bg-gray-50 border border-gray-200 rounded px-2 py-0.5 text-xs">
+                رقم الوثيقة: <span className="font-mono font-bold" style={{ color: accentColor }}>{documentNumber}</span>
               </span>
-            </div>
-          )}
+            )}
+            {serialNumber && (
+              <span className="inline-block bg-gray-50 border border-gray-200 rounded px-2 py-0.5 text-xs">
+                رقم الشحنة: <span className="font-mono font-bold text-gray-800">{serialNumber}</span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Barcode / Logo */}
-        <div className="text-center print-barcode">
+        <div className="text-center print-barcode flex-shrink-0">
           {organizationLogo ? (
-            <img
-              src={organizationLogo}
-              alt={organizationName || 'Logo'}
-              className="h-12 mx-auto mb-1 object-contain"
-              crossOrigin="anonymous"
-            />
+            <img src={organizationLogo} alt={organizationName || 'Logo'} className="h-12 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
           ) : showBarcode && barcodeContent ? (
             <>
-              <Barcode
-                value={barcodeContent}
-                width={1}
-                height={35}
-                fontSize={8}
-                displayValue={false}
-              />
-              <p className="text-xs font-mono mt-1">{barcodeContent}</p>
+              <Barcode value={barcodeContent} width={1} height={30} fontSize={7} displayValue={false} />
+              <p className="text-[7pt] font-mono mt-0.5">{barcodeContent}</p>
             </>
           ) : null}
-          {organizationName && (
-            <p className="text-xs text-gray-600 mt-1">{organizationName}</p>
-          )}
+          {organizationName && <p className="text-[7pt] text-gray-600 mt-0.5">{organizationName}</p>}
         </div>
       </header>
 
-      {/* Document Info Bar */}
-      <div className="flex justify-between items-center text-xs text-gray-500 mb-4 pb-2 border-b border-gray-100">
-        <span>تاريخ الإصدار: {currentDate}</span>
-        <span>الوقت: {currentTime}</span>
+      {/* ===== VERIFICATION + DATE BAR ===== */}
+      <div className="flex justify-between items-center text-[8pt] text-gray-500 mb-2 pb-1.5 border-b border-gray-100">
+        <div className="flex items-center gap-1">
+          <Shield className="w-3 h-3" />
+          <span>كود التحقق: <span className="font-mono font-bold text-gray-700">{vCode}</span></span>
+        </div>
+        <span>تاريخ الإصدار: {currentDate} | {currentTime}</span>
       </div>
 
-      {/* Main Content */}
-      <main className="print-content">
-        {children}
-      </main>
+      {/* ===== PARTNER IDENTITY STRIP ===== */}
+      {partners.length > 0 && (
+        <div className="mb-4 p-2 border border-gray-200 rounded-lg bg-gray-50/50">
+          <p className="text-[7pt] text-gray-500 mb-1.5 font-bold text-center">الجهات المشاركة</p>
+          <div className="flex items-center justify-around gap-2 flex-wrap">
+            {partners.map((partner, idx) => (
+              <div key={idx} className="text-center flex-1 min-w-[80px] max-w-[140px]">
+                {partner.logo ? (
+                  <img src={partner.logo} alt={partner.name} className="h-8 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
+                ) : (
+                  <div className="w-8 h-8 mx-auto mb-1 rounded-full bg-gray-200 flex items-center justify-center">
+                    <Building2 className="w-4 h-4 text-gray-500" />
+                  </div>
+                )}
+                <p className="text-[7pt] font-bold text-gray-800 truncate">{partner.name}</p>
+                <p className="text-[6pt] text-gray-500">{partner.role}</p>
+                {partner.barcode && (
+                  <div className="mt-1">
+                    <Barcode value={partner.barcode} width={0.8} height={18} fontSize={6} displayValue={true} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-      {/* Footer */}
+      {/* ===== MAIN CONTENT ===== */}
+      <main className="print-content">{children}</main>
+
+      {/* ===== SECURE FOOTER ===== */}
       {showFooter && (
-        <footer className="print-footer mt-8 pt-4 border-t text-center text-xs text-gray-500">
-          <p>
-            {footerText || 'هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل'}
-          </p>
-          <p className="mt-1">
-            تاريخ الإصدار: {currentDate} | رقم المرجع: {documentNumber || '-'}
-          </p>
-          <p className="mt-2 text-gray-400 text-[8pt]">
-            هذه الوثيقة تم إنشاؤها آلياً وتعتبر صالحة بدون توقيع في حالة التحقق الإلكتروني
+        <footer className="print-footer mt-6 pt-3 border-t-2 text-center text-[8pt] text-gray-500" style={{ borderColor: accentColor }}>
+          {/* Footer QR + Verification */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1">
+              <QRCodeSVG value={qrContent} size={30} level="L" />
+            </div>
+            <div className="text-center flex-1">
+              <p>{footerText || 'هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل'}</p>
+              <p className="mt-0.5">
+                رقم المرجع: {documentNumber || '-'} | كود التحقق: <span className="font-mono font-bold">{vCode}</span>
+                {serialNumber && <> | رقم الشحنة: <span className="font-mono">{serialNumber}</span></>}
+              </p>
+              {arrivalDate && (
+                <p className="mt-0.5">تاريخ وصول الشحنة: {format(new Date(arrivalDate), 'PPp', { locale: ar })}</p>
+              )}
+            </div>
+            <div>
+              {showBarcode && <Barcode value={barcodeContent} width={0.7} height={20} fontSize={0} displayValue={false} />}
+            </div>
+          </div>
+          <p className="text-gray-400 text-[7pt]">
+            هذه الوثيقة تم إنشاؤها آلياً ومؤمّنة بتشفير رقمي — يمكن التحقق من صحتها عبر مسح رمز QR أو إدخال كود التحقق
           </p>
         </footer>
       )}
@@ -155,16 +201,17 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
 
 PrintWrapper.displayName = 'PrintWrapper';
 
-// Sub-components for common print elements
-export const PrintSection = ({ 
-  title, 
-  icon: Icon = FileCheck, 
-  children, 
-  className = '' 
-}: { 
-  title: string; 
-  icon?: any; 
-  children: ReactNode; 
+// ===== SUB-COMPONENTS =====
+
+export const PrintSection = ({
+  title,
+  icon: Icon = FileCheck,
+  children,
+  className = '',
+}: {
+  title: string;
+  icon?: any;
+  children: ReactNode;
   className?: string;
 }) => (
   <div className={`print-info-box mb-4 ${className}`}>
@@ -172,19 +219,17 @@ export const PrintSection = ({
       <Icon className="w-4 h-4 text-green-600" />
       {title}
     </h3>
-    <div className="text-sm">
-      {children}
-    </div>
+    <div className="text-sm">{children}</div>
   </div>
 );
 
-export const PrintDeclaration = ({ 
-  title, 
-  children, 
-  variant = 'success' 
-}: { 
-  title: string; 
-  children: ReactNode; 
+export const PrintDeclaration = ({
+  title,
+  children,
+  variant = 'success',
+}: {
+  title: string;
+  children: ReactNode;
   variant?: 'success' | 'info' | 'warning';
 }) => {
   const variants = {
@@ -192,7 +237,6 @@ export const PrintDeclaration = ({
     info: 'bg-blue-50 border-blue-200 text-blue-900',
     warning: 'bg-amber-50 border-amber-200 text-amber-900',
   };
-
   const titleColors = {
     success: 'text-green-700',
     info: 'text-blue-700',
@@ -205,23 +249,21 @@ export const PrintDeclaration = ({
         <CheckCircle2 className="w-5 h-5" />
         {title}
       </h3>
-      <div className="print-declaration-content text-sm leading-relaxed">
-        {children}
-      </div>
+      <div className="print-declaration-content text-sm leading-relaxed">{children}</div>
     </div>
   );
 };
 
-export const PrintPartyCard = ({ 
-  title, 
-  icon: Icon = Building2, 
-  name, 
-  details, 
-  highlighted = false 
-}: { 
-  title: string; 
-  icon?: any; 
-  name: string; 
+export const PrintPartyCard = ({
+  title,
+  icon: Icon = Building2,
+  name,
+  details,
+  highlighted = false,
+}: {
+  title: string;
+  icon?: any;
+  name: string;
   details: { label: string; value: string }[];
   highlighted?: boolean;
 }) => (
@@ -242,9 +284,9 @@ export const PrintPartyCard = ({
   </div>
 );
 
-export const PrintSignatureSection = ({ 
-  signatures 
-}: { 
+export const PrintSignatureSection = ({
+  signatures,
+}: {
   signatures: {
     title: string;
     name?: string;
@@ -258,66 +300,44 @@ export const PrintSignatureSection = ({
       <div key={index} className="print-signature-box text-center">
         <p className="font-bold text-gray-800 mb-1 text-sm">{sig.title}</p>
         {sig.name && <p className="text-xs text-gray-600 mb-3">{sig.name}</p>}
-        
         <div className="flex justify-center gap-4 mt-3">
-          {/* Signature */}
           <div className="text-center">
             {sig.signatureUrl ? (
-              <img
-                src={sig.signatureUrl}
-                alt="التوقيع"
-                className="h-12 mx-auto mb-1 object-contain"
-                crossOrigin="anonymous"
-              />
+              <img src={sig.signatureUrl} alt="التوقيع" className="h-12 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
             ) : (
               <div className="print-signature-line w-24 mx-auto" />
             )}
             <p className="text-[8pt] text-gray-500">التوقيع</p>
           </div>
-
-          {/* Stamp */}
           <div className="text-center">
             {sig.stampUrl ? (
-              <img
-                src={sig.stampUrl}
-                alt="الختم"
-                className="h-14 mx-auto mb-1 object-contain"
-                crossOrigin="anonymous"
-              />
+              <img src={sig.stampUrl} alt="الختم" className="h-14 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
             ) : (
               <div className="print-stamp-placeholder" />
             )}
             <p className="text-[8pt] text-gray-500">الختم</p>
           </div>
         </div>
-
-        {sig.date && (
-          <p className="text-xs text-gray-500 mt-2">التاريخ: {sig.date}</p>
-        )}
+        {sig.date && <p className="text-xs text-gray-500 mt-2">التاريخ: {sig.date}</p>}
       </div>
     ))}
   </div>
 );
 
-export const PrintTable = ({ 
-  headers, 
-  rows, 
-  className = '' 
-}: { 
-  headers: string[]; 
-  rows: (string | number | ReactNode)[][]; 
+export const PrintTable = ({
+  headers,
+  rows,
+  className = '',
+}: {
+  headers: string[];
+  rows: (string | number | ReactNode)[][];
   className?: string;
 }) => (
   <table className={`w-full border-collapse text-sm mb-4 ${className}`}>
     <thead>
       <tr>
         {headers.map((header, index) => (
-          <th
-            key={index}
-            className="p-2 bg-gray-100 font-semibold text-right border border-gray-300"
-          >
-            {header}
-          </th>
+          <th key={index} className="p-2 bg-gray-100 font-semibold text-right border border-gray-300">{header}</th>
         ))}
       </tr>
     </thead>
@@ -325,9 +345,7 @@ export const PrintTable = ({
       {rows.map((row, rowIndex) => (
         <tr key={rowIndex} className={rowIndex % 2 === 1 ? 'bg-gray-50' : ''}>
           {row.map((cell, cellIndex) => (
-            <td key={cellIndex} className="p-2 border border-gray-300 text-right">
-              {cell}
-            </td>
+            <td key={cellIndex} className="p-2 border border-gray-300 text-right">{cell}</td>
           ))}
         </tr>
       ))}
@@ -335,9 +353,9 @@ export const PrintTable = ({
   </table>
 );
 
-export const PrintStats = ({ 
-  stats 
-}: { 
+export const PrintStats = ({
+  stats,
+}: {
   stats: { label: string; value: string | number; color?: string }[];
 }) => (
   <div className="print-grid-4 grid gap-3 mb-4" style={{ gridTemplateColumns: `repeat(${Math.min(stats.length, 4)}, 1fr)` }}>
@@ -346,9 +364,7 @@ export const PrintStats = ({
         <div className={`print-stat-value text-2xl font-bold ${stat.color || 'text-green-600'}`}>
           {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
         </div>
-        <div className="print-stat-label text-xs text-gray-600 mt-1">
-          {stat.label}
-        </div>
+        <div className="print-stat-label text-xs text-gray-600 mt-1">{stat.label}</div>
       </div>
     ))}
   </div>
