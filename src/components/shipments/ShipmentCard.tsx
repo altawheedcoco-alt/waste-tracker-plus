@@ -99,6 +99,7 @@ interface ShipmentCardProps {
     transporter?: { name: string; id?: string } | null;
     has_report?: boolean;
     has_receipt?: boolean;
+    has_delivery_certificate?: boolean;
     // Approval status fields
     generator_approval_status?: 'pending' | 'approved' | 'rejected' | 'auto_approved' | null;
     generator_approval_at?: string | null;
@@ -415,6 +416,13 @@ const ShipmentCard = ({
                 </div>
                 <div className="flex-1 text-right">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
+                    {/* Delivery Certificate Badge */}
+                    {shipment.has_delivery_certificate && (
+                      <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 border-indigo-300 dark:border-indigo-700 gap-1">
+                        <FileCheck className="w-3 h-3" />
+                        إقرار تسليم
+                      </Badge>
+                    )}
                     {/* Receipt Issued Badge - Show to Generator and Transporter */}
                     {shipment.has_receipt && (isGenerator || isTransporter) && (
                       <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-700 gap-1">
@@ -543,6 +551,13 @@ const ShipmentCard = ({
                         type="recycler"
                         compact
                       />
+                    )}
+                    {/* Delivery Certificate Badge */}
+                    {shipment.has_delivery_certificate && (
+                      <Badge className="bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 border border-indigo-300 dark:border-indigo-700 gap-1.5">
+                        <FileCheck className="w-4 h-4" />
+                        إقرار تسليم
+                      </Badge>
                     )}
                     {/* Receipt Issued Badge - Show to Generator and Transporter */}
                     {shipment.has_receipt && (isGenerator || isTransporter) && (
