@@ -529,7 +529,7 @@ export const ar = {
     teamData: 'بيانات الفريق',
     shipmentsOps: 'الشحنات والعمليات',
     shipments: 'الشحنات',
-    receiptCerts: 'شهادات التسليم والاستلام',
+    receiptCerts: 'الشهادات والإقرارات',
     deliveryDeclarations: 'إقرارات التسليم',
     recyclingCerts: 'شهادات إعادة التدوير',
     guilloche: 'الرسم الغيوشي للمستندات',

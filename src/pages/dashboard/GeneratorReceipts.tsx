@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 import { getTabChannelName } from '@/lib/tabSession';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
@@ -29,11 +30,16 @@ import {
   Send,
   FileText,
   Plus,
+  Eye,
+  ClipboardCheck,
 } from 'lucide-react';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 import ReceiptCard from '@/components/receipts/ReceiptCard';
 import ReceiptDetailsDialog from '@/components/receipts/ReceiptDetailsDialog';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import GeneratorDeliveryCertificateDialog from '@/components/receipts/GeneratorDeliveryCertificateDialog';
+import DeliveryDeclarationViewDialog from '@/components/shipments/DeliveryDeclarationViewDialog';
 
 interface Receipt {
   id: string;
@@ -97,6 +103,46 @@ const GeneratorReceipts = () => {
   const [loadingShipments, setLoadingShipments] = useState(false);
   const [deliveryCertDialogOpen, setDeliveryCertDialogOpen] = useState(false);
   const [selectedShipmentForCert, setSelectedShipmentForCert] = useState<EligibleShipment | null>(null);
+  const [selectedDeclaration, setSelectedDeclaration] = useState<any>(null);
+  const [declarationViewOpen, setDeclarationViewOpen] = useState(false);
+
+  // === Declarations query ===
+  const { data: declarations = [], isLoading: declarationsLoading } = useQuery({
+    queryKey: ['all-delivery-declarations', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data, error } = await supabase
+        .from('delivery_declarations')
+        .select('*')
+        .or(`declared_by_organization_id.eq.${organization.id}`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching declarations:', error);
+        return [];
+      }
+
+      // Also fetch declarations for shipments where org is involved
+      const { data: shipmentDeclarations, error: err2 } = await supabase
+        .from('shipments')
+        .select('id')
+        .or(`organization_id.eq.${organization.id},generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`);
+
+      if (err2 || !shipmentDeclarations?.length) return data || [];
+      const shipmentIds = shipmentDeclarations.map((s: any) => s.id);
+      const { data: allDeclarations, error: err3 } = await supabase
+        .from('delivery_declarations')
+        .select('*')
+        .in('shipment_id', shipmentIds)
+        .order('created_at', { ascending: false });
+
+      if (err3) return data || [];
+      const merged = [...(data || []), ...(allDeclarations || [])];
+      return Array.from(new Map(merged.map((d: any) => [d.id, d])).values());
+    },
+    enabled: !!organization?.id,
+    staleTime: 1000 * 60 * 5,
+  });
 
   useEffect(() => {
     if (organization?.id) {
@@ -109,52 +155,24 @@ const GeneratorReceipts = () => {
 
   useEffect(() => {
     if (!organization?.id) return;
-    
     const channel = supabase
       .channel(getTabChannelName('generator-receipts'))
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'shipment_receipts',
-          filter: `generator_id=eq.${organization.id}`,
-        },
-        () => {
-          loadReceipts();
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipment_receipts', filter: `generator_id=eq.${organization.id}` }, () => loadReceipts())
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [organization?.id]);
 
   const loadReceipts = async () => {
     try {
       const { data, error } = await supabase
         .from('shipment_receipts')
-        .select(`
-          id,
-          receipt_number,
-          pickup_date,
-          waste_type,
-          actual_weight,
-          declared_weight,
-          unit,
-          status,
-          notes,
-          pickup_location,
-          created_by,
+        .select(`id, receipt_number, pickup_date, waste_type, actual_weight, declared_weight, unit, status, notes, pickup_location, created_by,
           shipment:shipments(id, shipment_number),
           generator:organizations!shipment_receipts_generator_id_fkey(id, name),
           transporter:organizations!shipment_receipts_transporter_id_fkey(id, name),
-          driver:drivers(id, profile:profiles(full_name))
-        `)
+          driver:drivers(id, profile:profiles(full_name))`)
         .eq('generator_id', organization?.id)
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setReceipts(data as unknown as Receipt[]);
     } catch (error) {
@@ -169,26 +187,13 @@ const GeneratorReceipts = () => {
     try {
       const { data, error } = await supabase
         .from('shipments')
-        .select(`
-          id,
-          shipment_number,
-          status,
-          created_at,
-          waste_type,
-          quantity,
-          unit,
-          delivered_at,
-          confirmed_at,
-          pickup_address,
-          delivery_address,
+        .select(`id, shipment_number, status, created_at, waste_type, quantity, unit, delivered_at, confirmed_at, pickup_address, delivery_address,
           generator:organizations!shipments_generator_id_fkey(name, city),
           transporter:organizations!shipments_transporter_id_fkey(name, city),
-          recycler:organizations!shipments_recycler_id_fkey(name, city)
-        `)
+          recycler:organizations!shipments_recycler_id_fkey(name, city)`)
         .eq('generator_id', organization?.id)
         .in('status', ['approved', 'collecting', 'in_transit', 'delivered', 'confirmed'])
         .order('created_at', { ascending: false });
-
       if (error) throw error;
       setEligibleShipments(data as unknown as EligibleShipment[]);
     } catch (error) {
@@ -198,46 +203,36 @@ const GeneratorReceipts = () => {
     }
   };
 
-  // Separate delivery certificates (created by generator) from receipt certificates (from transporters)
   const deliveryCertificates = receipts.filter(r => r.created_by === user?.id || (!r.transporter && r.generator?.id === organization?.id));
   const receiptCertificates = receipts.filter(r => r.transporter && r.created_by !== user?.id);
 
   const handleView = (id: string) => {
     const receipt = receipts.find(r => r.id === id);
-    if (receipt) {
-      setSelectedReceipt(receipt);
-      setDetailsDialogOpen(true);
-    }
+    if (receipt) { setSelectedReceipt(receipt); setDetailsDialogOpen(true); }
   };
-
-  const handlePrint = (id: string) => {
-    const receipt = receipts.find(r => r.id === id);
-    if (receipt) {
-      setSelectedReceipt(receipt);
-      setDetailsDialogOpen(true);
-    }
-  };
-
+  const handlePrint = (id: string) => handleView(id);
   const handleIssueDeliveryCert = (shipment: EligibleShipment) => {
-    setSelectedShipmentForCert(shipment);
-    setDeliveryCertDialogOpen(true);
+    setSelectedShipmentForCert(shipment); setDeliveryCertDialogOpen(true);
   };
 
-  const filterReceipts = (list: Receipt[]) => {
-    return list.filter(receipt => {
-      const matchesSearch =
-        receipt.receipt_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        receipt.transporter?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        receipt.shipment?.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || receipt.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  };
+  const filterReceipts = (list: Receipt[]) => list.filter(receipt => {
+    const matchesSearch = receipt.receipt_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      receipt.transporter?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      receipt.shipment?.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || receipt.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const filteredDelivery = filterReceipts(deliveryCertificates);
   const filteredReceipts = filterReceipts(receiptCertificates);
 
-  // Shipments that don't have delivery certificates yet
+  const filteredDeclarations = declarations.filter((d: any) => {
+    if (!searchQuery) return true;
+    const s = searchQuery.toLowerCase();
+    return d.shipment_number?.toLowerCase().includes(s) || d.driver_name?.toLowerCase().includes(s) ||
+      d.generator_name?.toLowerCase().includes(s) || d.transporter_name?.toLowerCase().includes(s);
+  });
+
   const shipmentIdsWithCerts = new Set(deliveryCertificates.map(r => r.shipment?.id).filter(Boolean));
   const shipmentsNeedingCerts = eligibleShipments.filter(s => !shipmentIdsWithCerts.has(s.id));
 
@@ -247,6 +242,7 @@ const GeneratorReceipts = () => {
     pending: receiptCertificates.filter(r => r.status === 'pending').length,
     confirmed: receiptCertificates.filter(r => r.status === 'confirmed').length,
     needsCert: shipmentsNeedingCerts.length,
+    declarationsTotal: declarations.length,
   };
 
   return (
@@ -258,10 +254,10 @@ const GeneratorReceipts = () => {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <FileCheck className="h-6 w-6 text-primary" />
-              شهادات التسليم والاستلام
+              شهادات التسليم والاستلام والإقرارات
             </h1>
             <p className="text-muted-foreground">
-              إصدار شهادات تسليم الشحنات وعرض شهادات الاستلام الواردة
+              إصدار شهادات تسليم الشحنات وعرض شهادات الاستلام والإقرارات القانونية
             </p>
           </div>
           <div className="flex gap-2">
@@ -274,48 +270,59 @@ const GeneratorReceipts = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                <Send className="w-6 h-6 text-blue-600" />
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                <Send className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.deliveryTotal}</p>
-                <p className="text-sm text-muted-foreground">شهادات تسليم صادرة</p>
+                <p className="text-xl font-bold">{stats.deliveryTotal}</p>
+                <p className="text-xs text-muted-foreground">شهادات تسليم</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                <Package className="w-6 h-6 text-amber-600" />
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+                <Package className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.needsCert}</p>
-                <p className="text-sm text-muted-foreground">بحاجة لشهادة تسليم</p>
+                <p className="text-xl font-bold">{stats.needsCert}</p>
+                <p className="text-xs text-muted-foreground">بحاجة لشهادة</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
-                <Truck className="w-6 h-6 text-green-600" />
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center shrink-0">
+                <Truck className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.receiptTotal}</p>
-                <p className="text-sm text-muted-foreground">شهادات استلام واردة</p>
+                <p className="text-xl font-bold">{stats.receiptTotal}</p>
+                <p className="text-xs text-muted-foreground">شهادات استلام</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-600" />
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shrink-0">
+                <ClipboardCheck className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.pending}</p>
-                <p className="text-sm text-muted-foreground">بانتظار التأكيد</p>
+                <p className="text-xl font-bold">{stats.declarationsTotal}</p>
+                <p className="text-xs text-muted-foreground">إقرارات قانونية</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-xl font-bold">{stats.pending}</p>
+                <p className="text-xs text-muted-foreground">بانتظار التأكيد</p>
               </div>
             </CardContent>
           </Card>
@@ -372,24 +379,28 @@ const GeneratorReceipts = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs */}
+        {/* Tabs - 3 tabs now */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-2">
-            <TabsTrigger value="delivery" className="gap-2">
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger value="delivery" className="gap-1.5 text-xs sm:text-sm">
               <Send className="w-4 h-4" />
-              شهادات التسليم
-              {stats.deliveryTotal > 0 && <Badge variant="secondary" className="mr-1">{stats.deliveryTotal}</Badge>}
+              <span className="hidden sm:inline">شهادات</span> التسليم
+              {stats.deliveryTotal > 0 && <Badge variant="secondary" className="mr-1 text-xs">{stats.deliveryTotal}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="receipts" className="gap-2">
+            <TabsTrigger value="receipts" className="gap-1.5 text-xs sm:text-sm">
               <Truck className="w-4 h-4" />
-              شهادات الاستلام الواردة
-              {stats.receiptTotal > 0 && <Badge variant="secondary" className="mr-1">{stats.receiptTotal}</Badge>}
+              <span className="hidden sm:inline">شهادات</span> الاستلام
+              {stats.receiptTotal > 0 && <Badge variant="secondary" className="mr-1 text-xs">{stats.receiptTotal}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="declarations" className="gap-1.5 text-xs sm:text-sm">
+              <ClipboardCheck className="w-4 h-4" />
+              الإقرارات
+              {stats.declarationsTotal > 0 && <Badge variant="secondary" className="mr-1 text-xs">{stats.declarationsTotal}</Badge>}
             </TabsTrigger>
           </TabsList>
 
-          {/* Delivery Certificates Tab */}
+          {/* === Delivery Certificates Tab === */}
           <TabsContent value="delivery" className="space-y-4">
-            {/* Shipments needing delivery certificates */}
             {shipmentsNeedingCerts.length > 0 && (
               <Card className="border-blue-500/30 bg-blue-50/50 dark:bg-blue-950/20">
                 <CardHeader className="pb-3">
@@ -397,7 +408,7 @@ const GeneratorReceipts = () => {
                     <Package className="w-5 h-5 text-blue-600" />
                     شحنات بحاجة لشهادة تسليم ({shipmentsNeedingCerts.length})
                   </CardTitle>
-                  <CardDescription>اختر شحنة لإصدار شهادة تسليم</CardDescription>
+                  <CardDescription>اختر شحنة لإصدار شهادة تسليم وإقرار قانوني</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -411,8 +422,7 @@ const GeneratorReceipts = () => {
                             </p>
                           </div>
                           <Button size="sm" variant="outline" className="gap-1">
-                            <Plus className="w-3 h-3" />
-                            إصدار
+                            <Plus className="w-3 h-3" /> إصدار
                           </Button>
                         </CardContent>
                       </Card>
@@ -427,7 +437,6 @@ const GeneratorReceipts = () => {
               </Card>
             )}
 
-            {/* Issued delivery certificates */}
             <Card>
               <CardHeader>
                 <CardTitle>شهادات التسليم الصادرة</CardTitle>
@@ -442,26 +451,13 @@ const GeneratorReceipts = () => {
                   <div className="text-center py-12">
                     <Send className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">لا توجد شهادات تسليم</h3>
-                    <p className="text-muted-foreground">
-                      لم يتم إصدار أي شهادات تسليم بعد
-                    </p>
+                    <p className="text-muted-foreground">لم يتم إصدار أي شهادات تسليم بعد</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {filteredDelivery.map((receipt, index) => (
-                      <motion.div
-                        key={receipt.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <ReceiptCard
-                          receipt={receipt}
-                          onView={handleView}
-                          onPrint={handlePrint}
-                          showTransporter={true}
-                          showGenerator={false}
-                        />
+                      <motion.div key={receipt.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+                        <ReceiptCard receipt={receipt} onView={handleView} onPrint={handlePrint} showTransporter={true} showGenerator={false} />
                       </motion.div>
                     ))}
                   </div>
@@ -470,7 +466,7 @@ const GeneratorReceipts = () => {
             </Card>
           </TabsContent>
 
-          {/* Receipt Certificates Tab */}
+          {/* === Receipt Certificates Tab === */}
           <TabsContent value="receipts">
             <Card>
               <CardHeader>
@@ -486,26 +482,101 @@ const GeneratorReceipts = () => {
                   <div className="text-center py-12">
                     <FileCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-semibold mb-2">لا توجد شهادات استلام</h3>
-                    <p className="text-muted-foreground">
-                      لم يتم استلام أي شهادات من الجهات الناقلة بعد
-                    </p>
+                    <p className="text-muted-foreground">لم يتم استلام أي شهادات من الجهات الناقلة بعد</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {filteredReceipts.map((receipt, index) => (
-                      <motion.div
-                        key={receipt.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <ReceiptCard
-                          receipt={receipt}
-                          onView={handleView}
-                          onPrint={handlePrint}
-                          showTransporter={true}
-                          showGenerator={false}
-                        />
+                      <motion.div key={receipt.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
+                        <ReceiptCard receipt={receipt} onView={handleView} onPrint={handlePrint} showTransporter={true} showGenerator={false} />
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* === Declarations Tab === */}
+          <TabsContent value="declarations">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ClipboardCheck className="w-5 h-5 text-primary" />
+                  الإقرارات القانونية
+                </CardTitle>
+                <CardDescription>
+                  {filteredDeclarations.length} إقرار - جميع إقرارات التسليم والاستلام الموقعة
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {declarationsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : filteredDeclarations.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ClipboardCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">لا توجد إقرارات</h3>
+                    <p className="text-muted-foreground">لم يتم تسجيل أي إقرارات تسليم بعد</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredDeclarations.map((declaration: any, index: number) => (
+                      <motion.div key={declaration.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }}>
+                        <Card className="hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between gap-4">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="gap-1.5 shrink-0"
+                                onClick={() => { setSelectedDeclaration(declaration); setDeclarationViewOpen(true); }}
+                              >
+                                <Eye className="w-4 h-4" /> عرض
+                              </Button>
+
+                              <div className="flex-1 text-right space-y-2">
+                                <div className="flex items-center gap-2 justify-end flex-wrap">
+                                  <Badge variant="outline" className="font-mono text-xs">
+                                    {declaration.shipment_number || 'غير محدد'}
+                                  </Badge>
+                                  <Badge className={
+                                    declaration.declaration_type === 'generator_handover' || declaration.declaration_type === 'generator_delivery'
+                                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                      : declaration.declaration_type === 'recycler_receipt'
+                                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                      : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                                  }>
+                                    <FileCheck className="w-3 h-3 ml-1" />
+                                    {declaration.declaration_type === 'generator_handover' || declaration.declaration_type === 'generator_delivery'
+                                      ? 'إقرار مولّد'
+                                      : declaration.declaration_type === 'recycler_receipt'
+                                      ? 'إقرار مدوّر'
+                                      : 'إقرار ناقل'}
+                                  </Badge>
+                                  {declaration.auto_generated && (
+                                    <Badge variant="secondary" className="text-xs">تلقائي</Badge>
+                                  )}
+                                  <span className="font-semibold">{declaration.driver_name || declaration.generator_name || 'غير محدد'}</span>
+                                </div>
+
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap justify-end">
+                                  {declaration.waste_type && <span>النفايات: {declaration.waste_type}</span>}
+                                  {declaration.quantity && <span>الكمية: {declaration.quantity} {declaration.unit || 'طن'}</span>}
+                                  {declaration.generator_name && <span>المولد: {declaration.generator_name}</span>}
+                                  {declaration.transporter_name && <span>الناقل: {declaration.transporter_name}</span>}
+                                  <span>
+                                    التاريخ: {format(new Date(declaration.declared_at || declaration.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                                  </span>
+                                  {declaration.status === 'rejected' && (
+                                    <Badge variant="destructive" className="text-xs">مرفوض</Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
                       </motion.div>
                     ))}
                   </div>
@@ -535,6 +606,15 @@ const GeneratorReceipts = () => {
               loadEligibleShipments();
               setDeliveryCertDialogOpen(false);
             }}
+          />
+        )}
+
+        {/* Declaration View Dialog */}
+        {selectedDeclaration && (
+          <DeliveryDeclarationViewDialog
+            open={declarationViewOpen}
+            onOpenChange={setDeclarationViewOpen}
+            declaration={selectedDeclaration}
           />
         )}
       </div>

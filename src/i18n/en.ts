@@ -528,7 +528,7 @@ export const en = {
     teamData: 'Team Data',
     shipmentsOps: 'Shipments & Operations',
     shipments: 'Shipments',
-    receiptCerts: 'Delivery & Receipt Certificates',
+    receiptCerts: 'Certificates & Declarations',
     deliveryDeclarations: 'Delivery Declarations',
     recyclingCerts: 'Recycling Certificates',
     guilloche: 'Document Guilloché Patterns',
