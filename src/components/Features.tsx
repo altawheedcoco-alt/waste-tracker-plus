@@ -15,7 +15,7 @@ const Features = () => {
   ];
 
   return (
-    <section id="features" className="py-24 bg-muted/30">
+    <section id="features" className="py-12 sm:py-24 bg-muted/30">
       <div className="container px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-16">
           <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4">{t('features.badge')}</span>
@@ -25,7 +25,7 @@ const Features = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, index) => (
             <motion.div key={feature.title} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }}>
-              <motion.div whileHover={{ y: -5, scale: 1.02 }} className="group relative p-8 rounded-2xl bg-card shadow-eco-sm hover:shadow-eco-lg transition-all duration-300 border border-border/50">
+              <motion.div whileHover={{ y: -5, scale: 1.02 }} className="group relative p-5 sm:p-8 rounded-xl sm:rounded-2xl bg-card shadow-eco-sm hover:shadow-eco-lg transition-all duration-300 border border-border/50">
                 <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
                   <feature.icon className="w-7 h-7 text-primary-foreground" />
                 </div>

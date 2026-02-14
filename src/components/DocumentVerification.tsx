@@ -57,7 +57,7 @@ const DocumentVerification = () => {
     : '';
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="py-10 sm:py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -106,20 +106,20 @@ const DocumentVerification = () => {
                 </TabsList>
 
                 <TabsContent value="number" className="space-y-4">
-                  <div className="flex gap-3 items-center">
-                    <Button onClick={handleVerify} disabled={loading} size="lg" className="h-12 px-6">
-                      {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                        <><Search className="w-5 h-5 ml-2" />{t('docVerify.verifyBtn')}</>
-                      )}
-                    </Button>
+                  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
                     <Input
                       placeholder={t('docVerify.placeholder')}
                       value={documentNumber}
                       onChange={(e) => setDocumentNumber(e.target.value)}
                       onKeyDown={handleKeyPress}
-                      className="flex-1 text-lg h-12"
+                      className="flex-1 text-base sm:text-lg h-12"
                       dir="ltr"
                     />
+                    <Button onClick={handleVerify} disabled={loading} size="lg" className="h-12 px-6">
+                      {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                        <><Search className="w-5 h-5 ml-2" />{t('docVerify.verifyBtn')}</>
+                      )}
+                    </Button>
                   </div>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {['shipment', 'certificate', 'receipt', 'contract', 'invoice', 'disposal', 'award_letter'].map(docType => (

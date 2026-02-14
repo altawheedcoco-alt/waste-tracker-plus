@@ -7,9 +7,9 @@ const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-foreground text-background pt-16 pb-8">
+    <footer className="bg-foreground text-background pt-10 sm:pt-16 pb-6 sm:pb-8">
       <div className="container px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-12 mb-8 sm:mb-12">
           <div>
             <div className="flex items-center gap-3 mb-6">
               <img src={logo} alt={t('footer.brandName')} className="h-12 w-12 object-contain brightness-0 invert" />
