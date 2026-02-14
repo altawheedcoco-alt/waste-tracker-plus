@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
+import { useQuery } from '@tanstack/react-query';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +40,9 @@ import {
   XCircle,
   Route,
   Lock,
+  ScrollText,
+  Send,
+  ClipboardCheck,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -61,7 +65,7 @@ import QuickCertificateButton from '@/components/reports/QuickCertificateButton'
 import ShipmentApprovalBadge from './ShipmentApprovalBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useDeliveryDeclaration } from '@/hooks/useDeliveryDeclaration';
+import { useDeliveryDeclaration, useShipmentDeclarations } from '@/hooks/useDeliveryDeclaration';
 import DeliveryDeclarationViewDialog from './DeliveryDeclarationViewDialog';
 
 // Lazy load the live tracking map dialog and inline map
@@ -128,8 +132,41 @@ const ShipmentCard = ({
   // استخدام hook صلاحيات الرؤية
   const visibility = useShipmentVisibility(shipment.id);
   const { data: declarationData } = useDeliveryDeclaration(shipment.id);
+  const { data: allDeclarations = [] } = useShipmentDeclarations(shipment.id);
 
-  // Map legacy status to new status
+  // Fetch linked receipts/certificates for this shipment
+  const { data: linkedReceipts = [] } = useQuery({
+    queryKey: ['shipment-receipts-summary', shipment.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('shipment_receipts')
+        .select('id, receipt_number, status, receipt_type, created_at, actual_weight, unit')
+        .eq('shipment_id', shipment.id)
+        .order('created_at', { ascending: true });
+      if (error) { console.error(error); return []; }
+      return data || [];
+    },
+    enabled: !!shipment.id,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  // Fetch recycling reports/certificates
+  const { data: linkedReports = [] } = useQuery({
+    queryKey: ['shipment-reports-summary', shipment.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('recycling_reports')
+        .select('id, report_number, status, created_at')
+        .eq('shipment_id', shipment.id)
+        .order('created_at', { ascending: true });
+      if (error) { console.error(error); return []; }
+      return data || [];
+    },
+    enabled: !!shipment.id,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const totalDocuments = linkedReceipts.length + linkedReports.length + allDeclarations.length;
   const mappedStatus = mapLegacyStatus(shipment.status);
   const currentStatusConfig = getStatusConfig(mappedStatus);
   
@@ -838,6 +875,74 @@ const ShipmentCard = ({
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </div>
+            )}
+
+            {/* Documents Summary Section */}
+            {totalDocuments > 0 && (
+              <div className="border-t px-4 py-2.5 bg-muted/30" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-2 mb-2">
+                  <ScrollText className="w-4 h-4 text-primary" />
+                  <span className="text-xs font-medium">المستندات المرتبطة ({totalDocuments})</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {/* Delivery Certificates */}
+                  {linkedReceipts.filter((r: any) => r.receipt_type === 'delivery').map((r: any) => (
+                    <Badge
+                      key={r.id}
+                      variant="outline"
+                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
+                      onClick={() => navigate(`/dashboard/receipts/${r.id}`)}
+                    >
+                      <Send className="w-3 h-3 text-blue-500" />
+                      شهادة تسليم
+                      {r.status === 'confirmed' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
+                      {r.status === 'pending' && <Clock className="w-2.5 h-2.5 text-yellow-500" />}
+                    </Badge>
+                  ))}
+                  {/* Receipt Certificates */}
+                  {linkedReceipts.filter((r: any) => r.receipt_type === 'receipt' || !r.receipt_type).map((r: any) => (
+                    <Badge
+                      key={r.id}
+                      variant="outline"
+                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
+                      onClick={() => navigate(`/dashboard/receipts/${r.id}`)}
+                    >
+                      <FileCheck className="w-3 h-3 text-emerald-500" />
+                      شهادة استلام
+                      {r.status === 'confirmed' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
+                      {r.status === 'pending' && <Clock className="w-2.5 h-2.5 text-yellow-500" />}
+                    </Badge>
+                  ))}
+                  {/* Recycling Certificates */}
+                  {linkedReports.map((r: any) => (
+                    <Badge
+                      key={r.id}
+                      variant="outline"
+                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
+                      onClick={() => navigate(`/dashboard/recycling-reports/${r.id}`)}
+                    >
+                      <Recycle className="w-3 h-3 text-green-600" />
+                      شهادة تدوير
+                      {r.status === 'approved' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
+                      {r.status === 'pending' && <Clock className="w-2.5 h-2.5 text-yellow-500" />}
+                    </Badge>
+                  ))}
+                  {/* Declarations */}
+                  {allDeclarations.map((d: any, i: number) => (
+                    <Badge
+                      key={d.id}
+                      variant="outline"
+                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
+                      onClick={() => setIsDeclarationViewOpen(true)}
+                    >
+                      <ClipboardCheck className="w-3 h-3 text-purple-500" />
+                      إقرار {d.declaration_type === 'generator' ? 'المولد' : d.declaration_type === 'recycler' ? 'المدور' : `#${i + 1}`}
+                      {d.status === 'signed' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
+                      {d.status === 'rejected' && <XCircle className="w-2.5 h-2.5 text-red-500" />}
+                    </Badge>
+                  ))}
+                </div>
               </div>
             )}
 
