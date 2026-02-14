@@ -9135,6 +9135,525 @@ export type Database = {
           },
         ]
       }
+      lms_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_ar: string
+          sort_order: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_ar: string
+          sort_order?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_ar?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      lms_certificates: {
+        Row: {
+          certificate_number: string
+          course_id: string
+          created_at: string
+          enrollment_id: string | null
+          expires_at: string | null
+          id: string
+          is_valid: boolean | null
+          issued_at: string
+          pdf_url: string | null
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          certificate_number: string
+          course_id: string
+          created_at?: string
+          enrollment_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_valid?: boolean | null
+          issued_at?: string
+          pdf_url?: string | null
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          certificate_number?: string
+          course_id?: string
+          created_at?: string
+          enrollment_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_valid?: boolean | null
+          issued_at?: string
+          pdf_url?: string | null
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_certificates_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "lms_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_certificates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_courses: {
+        Row: {
+          category_id: string | null
+          certificate_template: string | null
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_ar: string | null
+          difficulty_level: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          is_mandatory: boolean | null
+          is_published: boolean | null
+          organization_id: string | null
+          passing_score: number | null
+          sort_order: number | null
+          target_audience: string[] | null
+          title: string
+          title_ar: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          certificate_template?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          difficulty_level?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_mandatory?: boolean | null
+          is_published?: boolean | null
+          organization_id?: string | null
+          passing_score?: number | null
+          sort_order?: number | null
+          target_audience?: string[] | null
+          title: string
+          title_ar: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          certificate_template?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          difficulty_level?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_mandatory?: boolean | null
+          is_published?: boolean | null
+          organization_id?: string | null
+          passing_score?: number | null
+          sort_order?: number | null
+          target_audience?: string[] | null
+          title?: string
+          title_ar?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_courses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "lms_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "lms_courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_enrollments: {
+        Row: {
+          assigned_by: string | null
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          due_date: string | null
+          enrollment_type: string | null
+          id: string
+          organization_id: string | null
+          progress_percentage: number | null
+          started_at: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          due_date?: string | null
+          enrollment_type?: string | null
+          id?: string
+          organization_id?: string | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_by?: string | null
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          due_date?: string | null
+          enrollment_type?: string | null
+          id?: string
+          organization_id?: string | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_enrollments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_enrollments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "lms_enrollments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_enrollments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          id: string
+          is_completed: boolean | null
+          lesson_id: string
+          time_spent_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean | null
+          lesson_id: string
+          time_spent_seconds?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          is_completed?: boolean | null
+          lesson_id?: string
+          time_spent_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_lesson_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lms_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_lesson_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_lessons: {
+        Row: {
+          content: string | null
+          content_ar: string | null
+          course_id: string
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          is_published: boolean | null
+          lesson_type: string | null
+          pdf_url: string | null
+          sort_order: number | null
+          title: string
+          title_ar: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          content_ar?: string | null
+          course_id: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          is_published?: boolean | null
+          lesson_type?: string | null
+          pdf_url?: string | null
+          sort_order?: number | null
+          title: string
+          title_ar: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          content_ar?: string | null
+          course_id?: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          is_published?: boolean | null
+          lesson_type?: string | null
+          pdf_url?: string | null
+          sort_order?: number | null
+          title?: string
+          title_ar?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_quiz_attempts: {
+        Row: {
+          answers: Json | null
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          id: string
+          passed: boolean | null
+          percentage: number | null
+          score: number | null
+          started_at: string | null
+          total_points: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          started_at?: string | null
+          total_points?: number | null
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          passed?: boolean | null
+          percentage?: number | null
+          score?: number | null
+          started_at?: string | null
+          total_points?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_quiz_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lms_quiz_questions: {
+        Row: {
+          correct_answer: string | null
+          course_id: string
+          created_at: string
+          explanation: string | null
+          explanation_ar: string | null
+          id: string
+          lesson_id: string | null
+          options: Json | null
+          points: number | null
+          question: string
+          question_ar: string
+          question_type: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          correct_answer?: string | null
+          course_id: string
+          created_at?: string
+          explanation?: string | null
+          explanation_ar?: string | null
+          id?: string
+          lesson_id?: string | null
+          options?: Json | null
+          points?: number | null
+          question: string
+          question_ar: string
+          question_type?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          correct_answer?: string | null
+          course_id?: string
+          created_at?: string
+          explanation?: string | null
+          explanation_ar?: string | null
+          id?: string
+          lesson_id?: string | null
+          options?: Json | null
+          points?: number | null
+          question?: string
+          question_ar?: string
+          question_type?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lms_quiz_questions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lms_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lms_quiz_questions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lms_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materialized_view_refresh_log: {
         Row: {
           duration_ms: number | null

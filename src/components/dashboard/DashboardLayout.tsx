@@ -65,6 +65,7 @@ import {
   Inbox,
   TreePine,
   Store,
+  GraduationCap,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -429,6 +430,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Banknote, label: t('sidebar.cogs'), path: '/dashboard/erp/cogs', key: 'erp-cogs' },
       { icon: GitCompareArrows, label: t('sidebar.financialComparisons'), path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons' },
     ]},
+    // Learning Center
+    { icon: GraduationCap, label: language === 'ar' ? 'المركز التعليمي' : 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
     // System & Support group
     { icon: Settings, label: t('sidebar.systemSupport'), path: '#', key: 'system-support-group', badge: notificationCount, children: [
       { icon: Headphones, label: t('sidebar.techSupport'), path: '/dashboard/support', key: 'support' },
