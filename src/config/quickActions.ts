@@ -139,7 +139,7 @@ export const adminQuickActions: QuickActionConfig[] = [
 export const generatorQuickActions: QuickActionConfig[] = [
   // 1️⃣ العمليات الأساسية
   { id: 'shipments', title: 'الشحنات', subtitle: 'عرض وتتبع جميع الشحنات', icon: Package, path: '/dashboard/shipments', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
-  { id: 'generator-receipts', title: 'شهادات استلام الشحنات', subtitle: 'شهادات الاستلام من الناقلين', icon: FileCheck, path: '/dashboard/generator-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'primary' },
+  { id: 'generator-receipts', title: 'شهادات التسليم والاستلام', subtitle: 'إصدار شهادات تسليم وعرض شهادات الاستلام', icon: FileCheck, path: '/dashboard/generator-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'primary' },
   { id: 'recycling-certificates', title: 'شهادات إعادة التدوير', subtitle: 'تقارير من جهات التدوير', icon: FolderCheck, path: '/dashboard/recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
   
   // 2️⃣ المالية والعقود
