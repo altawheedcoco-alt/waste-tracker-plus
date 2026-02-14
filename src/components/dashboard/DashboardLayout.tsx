@@ -64,6 +64,7 @@ import {
   FolderOpen,
   Inbox,
   TreePine,
+  Store,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -119,7 +120,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   const sectionBadges = useNotificationCounts();
   const location = useLocation();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   // Use display mode for responsive layout
   const { 
@@ -390,6 +391,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: AlertTriangle, label: t('sidebar.hazardous'), path: '/dashboard/hazardous-register', key: 'hazardous' },
       { icon: Layers, label: t('sidebar.wasteClassification'), path: '/dashboard/waste-types', key: 'waste-types' },
     ]},
+    // Waste Exchange - only for transporter, recycler, admin
+    ...((organization?.organization_type === 'transporter' || organization?.organization_type === 'recycler' || isAdmin)
+      ? [{ icon: Store, label: language === 'ar' ? 'بورصة المخلفات' : 'Waste Exchange', path: '/dashboard/waste-exchange', key: 'waste-exchange' } as SidebarMenuItem]
+      : []),
     // Location group
     { icon: MapPin, label: t('sidebar.locationMaps'), path: '#', key: 'location-group', children: [
       { icon: Search, label: t('sidebar.map'), path: '/dashboard/map-explorer', key: 'map-explorer' },
