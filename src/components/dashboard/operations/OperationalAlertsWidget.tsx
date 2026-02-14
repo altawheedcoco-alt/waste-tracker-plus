@@ -597,14 +597,36 @@ const OperationalAlertsWidget = () => {
                 >
                   {/* Collapsed header */}
                   <div
-                    className="flex items-center gap-3 p-3 cursor-pointer"
+                    className="flex items-start gap-3 p-3 cursor-pointer"
                     onClick={() => setExpandedId(isExpanded ? null : alert.id)}
                   >
-                    <div className="flex-1 text-right min-w-0">
+                    <div className="flex-1 text-right min-w-0 space-y-1.5">
                       <p className="text-sm font-semibold truncate">{alert.message}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{alert.detail}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{alert.detail}</p>
+                      
+                      {/* Quick solutions preview - always visible */}
+                      {alert.solutions && alert.solutions.length > 0 && !isExpanded && (
+                        <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                          <Sparkles className="w-3 h-3 text-emerald-500 shrink-0" />
+                          {alert.solutions.slice(0, 2).map((sol, idx) => (
+                            <Badge
+                              key={idx}
+                              variant="outline"
+                              className="text-[10px] px-1.5 py-0 h-5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 cursor-default"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {sol.length > 40 ? sol.slice(0, 40) + '…' : sol}
+                            </Badge>
+                          ))}
+                          {alert.solutions.length > 2 && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">
+                              +{alert.solutions.length - 2} حلول
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 mt-0.5">
                       <Badge variant="outline" className="text-[10px]">
                         {TYPE_LABELS[alert.type] || alert.type}
                       </Badge>
