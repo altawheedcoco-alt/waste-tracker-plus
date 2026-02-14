@@ -15352,6 +15352,383 @@ export type Database = {
           },
         ]
       }
+      waste_exchange_bids: {
+        Row: {
+          bid_price_per_ton: number
+          bid_quantity_tons: number
+          bidder_organization_id: string
+          counter_offer_notes: string | null
+          counter_offer_price: number | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          delivery_terms: string | null
+          id: string
+          listing_id: string
+          message: string | null
+          status: string | null
+          updated_at: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          bid_price_per_ton: number
+          bid_quantity_tons: number
+          bidder_organization_id: string
+          counter_offer_notes?: string | null
+          counter_offer_price?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          delivery_terms?: string | null
+          id?: string
+          listing_id: string
+          message?: string | null
+          status?: string | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          bid_price_per_ton?: number
+          bid_quantity_tons?: number
+          bidder_organization_id?: string
+          counter_offer_notes?: string | null
+          counter_offer_price?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          delivery_terms?: string | null
+          id?: string
+          listing_id?: string
+          message?: string | null
+          status?: string | null
+          updated_at?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_exchange_bids_bidder_organization_id_fkey"
+            columns: ["bidder_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_bids_bidder_organization_id_fkey"
+            columns: ["bidder_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_bids_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "waste_exchange_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waste_exchange_listings: {
+        Row: {
+          available_from: string | null
+          available_until: string | null
+          bids_count: number | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          delivery_available: boolean | null
+          description: string | null
+          id: string
+          lab_report_url: string | null
+          listing_type: string
+          location_city: string | null
+          location_governorate: string | null
+          min_quantity_tons: number | null
+          organization_id: string
+          photo_urls: string[] | null
+          pickup_available: boolean | null
+          price_negotiable: boolean | null
+          price_per_ton: number | null
+          quality_grade: string | null
+          quantity_tons: number
+          status: string | null
+          title: string
+          updated_at: string | null
+          views_count: number | null
+          waste_category: string | null
+          waste_subtype: string | null
+          waste_type: string
+        }
+        Insert: {
+          available_from?: string | null
+          available_until?: string | null
+          bids_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          delivery_available?: boolean | null
+          description?: string | null
+          id?: string
+          lab_report_url?: string | null
+          listing_type: string
+          location_city?: string | null
+          location_governorate?: string | null
+          min_quantity_tons?: number | null
+          organization_id: string
+          photo_urls?: string[] | null
+          pickup_available?: boolean | null
+          price_negotiable?: boolean | null
+          price_per_ton?: number | null
+          quality_grade?: string | null
+          quantity_tons: number
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          views_count?: number | null
+          waste_category?: string | null
+          waste_subtype?: string | null
+          waste_type: string
+        }
+        Update: {
+          available_from?: string | null
+          available_until?: string | null
+          bids_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          delivery_available?: boolean | null
+          description?: string | null
+          id?: string
+          lab_report_url?: string | null
+          listing_type?: string
+          location_city?: string | null
+          location_governorate?: string | null
+          min_quantity_tons?: number | null
+          organization_id?: string
+          photo_urls?: string[] | null
+          pickup_available?: boolean | null
+          price_negotiable?: boolean | null
+          price_per_ton?: number | null
+          quality_grade?: string | null
+          quantity_tons?: number
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          views_count?: number | null
+          waste_category?: string | null
+          waste_subtype?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_exchange_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waste_exchange_price_index: {
+        Row: {
+          avg_price_per_ton: number
+          change_percent: number | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          max_price: number | null
+          min_price: number | null
+          price_date: string | null
+          region: string | null
+          total_transactions: number | null
+          total_volume_tons: number | null
+          trend: string | null
+          waste_subtype: string | null
+          waste_type: string
+        }
+        Insert: {
+          avg_price_per_ton: number
+          change_percent?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          max_price?: number | null
+          min_price?: number | null
+          price_date?: string | null
+          region?: string | null
+          total_transactions?: number | null
+          total_volume_tons?: number | null
+          trend?: string | null
+          waste_subtype?: string | null
+          waste_type: string
+        }
+        Update: {
+          avg_price_per_ton?: number
+          change_percent?: number | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          max_price?: number | null
+          min_price?: number | null
+          price_date?: string | null
+          region?: string | null
+          total_transactions?: number | null
+          total_volume_tons?: number | null
+          trend?: string | null
+          waste_subtype?: string | null
+          waste_type?: string
+        }
+        Relationships: []
+      }
+      waste_exchange_transactions: {
+        Row: {
+          agreed_price_per_ton: number
+          agreed_quantity_tons: number
+          bid_id: string | null
+          buyer_organization_id: string
+          completed_at: string | null
+          created_at: string | null
+          currency: string | null
+          delivery_status: string | null
+          id: string
+          listing_id: string | null
+          notes: string | null
+          payment_status: string | null
+          seller_organization_id: string
+          shipment_id: string | null
+          total_value: number
+          updated_at: string | null
+          waste_subtype: string | null
+          waste_type: string
+        }
+        Insert: {
+          agreed_price_per_ton: number
+          agreed_quantity_tons: number
+          bid_id?: string | null
+          buyer_organization_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          delivery_status?: string | null
+          id?: string
+          listing_id?: string | null
+          notes?: string | null
+          payment_status?: string | null
+          seller_organization_id: string
+          shipment_id?: string | null
+          total_value: number
+          updated_at?: string | null
+          waste_subtype?: string | null
+          waste_type: string
+        }
+        Update: {
+          agreed_price_per_ton?: number
+          agreed_quantity_tons?: number
+          bid_id?: string | null
+          buyer_organization_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          delivery_status?: string | null
+          id?: string
+          listing_id?: string | null
+          notes?: string | null
+          payment_status?: string | null
+          seller_organization_id?: string
+          shipment_id?: string | null
+          total_value?: number
+          updated_at?: string | null
+          waste_subtype?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_exchange_transactions_bid_id_fkey"
+            columns: ["bid_id"]
+            isOneToOne: false
+            referencedRelation: "waste_exchange_bids"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_transactions_buyer_organization_id_fkey"
+            columns: ["buyer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_transactions_buyer_organization_id_fkey"
+            columns: ["buyer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_transactions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "waste_exchange_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_transactions_seller_organization_id_fkey"
+            columns: ["seller_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_transactions_seller_organization_id_fkey"
+            columns: ["seller_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "waste_exchange_transactions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waste_exchange_watchlist: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_exchange_watchlist_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "waste_exchange_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       waste_flow_analytics: {
         Row: {
           avg_price_per_ton: number | null

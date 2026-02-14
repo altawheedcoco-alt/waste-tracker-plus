@@ -143,6 +143,7 @@ const ERPCogs = lazy(() => import("./pages/dashboard/erp/ERPCogs"));
 const ERPFinancialComparisons = lazy(() => import("./pages/dashboard/erp/ERPFinancialComparisons"));
 const DocumentArchive = lazy(() => import("./pages/dashboard/DocumentArchive"));
 const GlobalCommodityExchange = lazy(() => import("./pages/dashboard/GlobalCommodityExchange"));
+const WasteExchange = lazy(() => import("./pages/dashboard/WasteExchange"));
 const DetailedWasteAnalysis = lazy(() => import("./pages/dashboard/DetailedWasteAnalysis"));
 const WasteFlowHeatmap = lazy(() => import("./pages/dashboard/WasteFlowHeatmap"));
 const ESGReports = lazy(() => import("./pages/dashboard/ESGReports"));
@@ -338,6 +339,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/erp/financial-comparisons" element={<ERPFinancialComparisons />} />
         <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
         <Route path="/dashboard/commodity-exchange" element={<GlobalCommodityExchange />} />
+        <Route path="/dashboard/waste-exchange" element={<WasteExchange />} />
         <Route path="/dashboard/waste-flow-heatmap" element={<WasteFlowHeatmap />} />
         <Route path="/dashboard/esg-reports" element={<ESGReports />} />
         <Route path="/dashboard/detailed-waste-analysis" element={<DetailedWasteAnalysis />} />
