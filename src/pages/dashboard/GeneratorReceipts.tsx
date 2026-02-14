@@ -116,15 +116,31 @@ const GeneratorReceipts = () => {
   const [selectedDeclaration, setSelectedDeclaration] = useState<any>(null);
   const [declarationViewOpen, setDeclarationViewOpen] = useState(false);
 
+  // Helper: get partner org IDs linked to current org
+  const getPartnerOrgIds = async (): Promise<string[]> => {
+    if (!organization?.id) return [];
+    const { data: links } = await supabase
+      .from('partner_links')
+      .select('partner_organization_id, organization_id')
+      .or(`organization_id.eq.${organization.id},partner_organization_id.eq.${organization.id}`)
+      .eq('status', 'active');
+    if (!links?.length) return [];
+    return links.map(l => l.organization_id === organization.id ? l.partner_organization_id : l.organization_id).filter(Boolean) as string[];
+  };
+
   // === Declarations query ===
   const { data: declarations = [], isLoading: declarationsLoading } = useQuery({
     queryKey: ['all-delivery-declarations', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
+      
+      const partnerIds = await getPartnerOrgIds();
+      const allOrgIds = [organization.id, ...partnerIds];
+
       const { data, error } = await supabase
         .from('delivery_declarations')
         .select('*')
-        .or(`declared_by_organization_id.eq.${organization.id}`)
+        .in('declared_by_organization_id', allOrgIds)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -132,11 +148,10 @@ const GeneratorReceipts = () => {
         return [];
       }
 
-      // Also fetch declarations for shipments where org is involved
       const { data: shipmentDeclarations, error: err2 } = await supabase
         .from('shipments')
         .select('id')
-        .or(`organization_id.eq.${organization.id},generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`);
+        .or(allOrgIds.map(id => `organization_id.eq.${id},generator_id.eq.${id},transporter_id.eq.${id},recycler_id.eq.${id}`).join(','));
 
       if (err2 || !shipmentDeclarations?.length) return data || [];
       const shipmentIds = shipmentDeclarations.map((s: any) => s.id);
@@ -167,13 +182,16 @@ const GeneratorReceipts = () => {
     if (!organization?.id) return;
     const channel = supabase
       .channel(getTabChannelName('generator-receipts'))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipment_receipts', filter: `generator_id=eq.${organization.id}` }, () => loadReceipts())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipment_receipts' }, () => loadReceipts())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [organization?.id]);
 
   const loadReceipts = async () => {
     try {
+      const partnerIds = await getPartnerOrgIds();
+      const allOrgIds = [organization?.id, ...partnerIds].filter(Boolean) as string[];
+
       const { data, error } = await supabase
         .from('shipment_receipts')
         .select(`id, receipt_number, pickup_date, waste_type, actual_weight, declared_weight, unit, status, notes, pickup_location, created_by,
@@ -181,7 +199,7 @@ const GeneratorReceipts = () => {
           generator:organizations!shipment_receipts_generator_id_fkey(id, name, city),
           transporter:organizations!shipment_receipts_transporter_id_fkey(id, name, city),
           driver:drivers(id, profile:profiles(full_name))`)
-        .eq('generator_id', organization?.id)
+        .in('generator_id', allOrgIds)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setReceipts(data as unknown as Receipt[]);
@@ -195,13 +213,16 @@ const GeneratorReceipts = () => {
   const loadEligibleShipments = async () => {
     setLoadingShipments(true);
     try {
+      const partnerIds = await getPartnerOrgIds();
+      const allOrgIds = [organization?.id, ...partnerIds].filter(Boolean) as string[];
+
       const { data, error } = await supabase
         .from('shipments')
         .select(`id, shipment_number, status, created_at, waste_type, quantity, unit, delivered_at, confirmed_at, pickup_address, delivery_address,
           generator:organizations!shipments_generator_id_fkey(name, city),
           transporter:organizations!shipments_transporter_id_fkey(name, city),
           recycler:organizations!shipments_recycler_id_fkey(name, city)`)
-        .eq('generator_id', organization?.id)
+        .in('generator_id', allOrgIds)
         .in('status', ['approved', 'collecting', 'in_transit', 'delivered', 'confirmed'])
         .order('created_at', { ascending: false });
       if (error) throw error;
