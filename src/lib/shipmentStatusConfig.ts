@@ -366,10 +366,10 @@ export const getAvailableNextStatuses = (
     return allStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Generator can change early-phase statuses (pending/registered) for shipments they created
+  // Generator can only hand over the shipment (mark as picked_up)
   if (organizationType === 'generator') {
     const generatorAllowed = transporterStatuses.filter(s => 
-      ['pending', 'registered'].includes(s.key)
+      ['picked_up'].includes(s.key)
     );
     return generatorAllowed.filter(s => s.key !== currentStatus);
   }
