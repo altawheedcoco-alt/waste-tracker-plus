@@ -9707,6 +9707,54 @@ export type Database = {
           },
         ]
       }
+      organization_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          is_public: boolean | null
+          organization_id: string
+          photo_url: string
+          sort_order: number | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          organization_id: string
+          photo_url: string
+          sort_order?: number | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          is_public?: boolean | null
+          organization_id?: string
+          photo_url?: string
+          sort_order?: number | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_photos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_positions: {
         Row: {
           assigned_user_id: string | null
@@ -10291,6 +10339,7 @@ export type Database = {
           activation_blocked_reason: string | null
           activity_type: string | null
           address: string | null
+          address_details: string | null
           agent_email: string | null
           agent_name: string | null
           agent_national_id: string | null
@@ -10319,12 +10368,17 @@ export type Database = {
           identity_verified: boolean | null
           industrial_registry: string | null
           is_active: boolean | null
+          is_location_public: boolean | null
           is_suspended: boolean | null
           is_verified: boolean | null
           land_transport_license: string | null
           license_expiry_date: string | null
           license_number: string | null
           license_renewal_url: string | null
+          location_description: string | null
+          location_lat: number | null
+          location_lng: number | null
+          location_url: string | null
           logo_url: string | null
           name: string
           name_en: string | null
@@ -10352,11 +10406,13 @@ export type Database = {
           updated_at: string | null
           vision: string | null
           wmra_license: string | null
+          working_hours: Json | null
         }
         Insert: {
           activation_blocked_reason?: string | null
           activity_type?: string | null
           address?: string | null
+          address_details?: string | null
           agent_email?: string | null
           agent_name?: string | null
           agent_national_id?: string | null
@@ -10385,12 +10441,17 @@ export type Database = {
           identity_verified?: boolean | null
           industrial_registry?: string | null
           is_active?: boolean | null
+          is_location_public?: boolean | null
           is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
           license_expiry_date?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
+          location_description?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_url?: string | null
           logo_url?: string | null
           name: string
           name_en?: string | null
@@ -10418,11 +10479,13 @@ export type Database = {
           updated_at?: string | null
           vision?: string | null
           wmra_license?: string | null
+          working_hours?: Json | null
         }
         Update: {
           activation_blocked_reason?: string | null
           activity_type?: string | null
           address?: string | null
+          address_details?: string | null
           agent_email?: string | null
           agent_name?: string | null
           agent_national_id?: string | null
@@ -10451,12 +10514,17 @@ export type Database = {
           identity_verified?: boolean | null
           industrial_registry?: string | null
           is_active?: boolean | null
+          is_location_public?: boolean | null
           is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
           license_expiry_date?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
+          location_description?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          location_url?: string | null
           logo_url?: string | null
           name?: string
           name_en?: string | null
@@ -10484,6 +10552,7 @@ export type Database = {
           updated_at?: string | null
           vision?: string | null
           wmra_license?: string | null
+          working_hours?: Json | null
         }
         Relationships: []
       }

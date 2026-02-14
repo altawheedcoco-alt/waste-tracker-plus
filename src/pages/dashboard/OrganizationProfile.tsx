@@ -39,6 +39,9 @@ import BackButton from '@/components/ui/back-button';
 import OrganizationPortfolio from '@/components/organization/OrganizationPortfolio';
 import { OrganizationSignatureSettings } from '@/components/signature';
 import BiometricManager from '@/components/biometric/BiometricManager';
+import LocationSettings from '@/components/organization/LocationSettings';
+import OrganizationPhotoGallery from '@/components/organization/OrganizationPhotoGallery';
+import BusinessProfileView from '@/components/organization/BusinessProfileView';
 
 interface OrganizationDocument {
   id: string;
@@ -148,6 +151,13 @@ const OrganizationProfile = () => {
           ida_license: orgData.ida_license,
           industrial_registry: orgData.industrial_registry,
           license_number: orgData.license_number,
+          location_url: orgData.location_url,
+          address_details: orgData.address_details,
+          location_description: orgData.location_description,
+          working_hours: orgData.working_hours,
+          is_location_public: orgData.is_location_public,
+          location_lat: orgData.location_lat,
+          location_lng: orgData.location_lng,
         })
         .eq('id', organization.id);
 
@@ -338,7 +348,7 @@ const OrganizationProfile = () => {
         </Card>
 
         <Tabs defaultValue="portfolio" className="space-y-4" dir="rtl">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="flex flex-wrap w-full gap-1">
             <TabsTrigger value="portfolio">
               <Target className="w-4 h-4 ml-2" />
               {t('orgProfile.portfolio')}
@@ -346,6 +356,10 @@ const OrganizationProfile = () => {
             <TabsTrigger value="posts">
               <PenSquare className="w-4 h-4 ml-2" />
               {t('orgProfile.posts')}
+            </TabsTrigger>
+            <TabsTrigger value="location">
+              <MapPin className="w-4 h-4 ml-2" />
+              الموقع والصور
             </TabsTrigger>
             <TabsTrigger value="basic">
               <Building2 className="w-4 h-4 ml-2" />
@@ -399,6 +413,47 @@ const OrganizationProfile = () => {
               organizationLogo={orgData?.logo_url}
               isOwnOrganization={true}
             />
+          </TabsContent>
+
+          {/* Location & Photos Tab */}
+          <TabsContent value="location">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Settings Side (Edit) */}
+              <div className="space-y-6">
+                <LocationSettings
+                  organizationId={organization.id}
+                  data={{
+                    location_url: orgData?.location_url,
+                    address_details: orgData?.address_details,
+                    location_description: orgData?.location_description,
+                    working_hours: orgData?.working_hours,
+                    is_location_public: orgData?.is_location_public,
+                    location_lat: orgData?.location_lat,
+                    location_lng: orgData?.location_lng,
+                    address: orgData?.address,
+                    city: orgData?.city,
+                    region: orgData?.region,
+                  }}
+                  isEditable={isCompanyAdmin}
+                  onUpdate={fetchOrganizationData}
+                />
+                <OrganizationPhotoGallery
+                  organizationId={organization.id}
+                  isEditable={isCompanyAdmin}
+                />
+              </div>
+
+              {/* Preview Side (How others see it) */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-center">👁️ كيف يراك الآخرون</h3>
+                <BusinessProfileView
+                  organizationId={organization.id}
+                  organizationName={organization.name}
+                  orgData={orgData}
+                  isAuthorized={true}
+                />
+              </div>
+            </div>
           </TabsContent>
 
           {/* Basic Information Tab */}
