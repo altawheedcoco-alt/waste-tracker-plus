@@ -187,7 +187,7 @@ const ReceiptCard = ({
           </div>
 
           {/* Details Grid */}
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
@@ -199,7 +199,7 @@ const ReceiptCard = ({
             </div>
 
             <div className="space-y-0.5">
-              <p className="text-xs text-muted-foreground">نوع النفايات</p>
+              <p className="text-xs text-muted-foreground">نوع المخلفات</p>
               <p className="text-sm font-medium">
                 {wasteTypeLabels[receipt.waste_type] || receipt.waste_type}
               </p>
@@ -213,36 +213,44 @@ const ReceiptCard = ({
               <p className="text-sm font-bold text-primary">
                 {receipt.actual_weight || receipt.declared_weight || '-'} {receipt.unit}
               </p>
-            </div>
-
-            {showGenerator && receipt.generator && (
-              <div className="space-y-0.5">
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Building2 className="w-3 h-3" />
-                  الجهة المولدة
+              {receipt.actual_weight && receipt.declared_weight && receipt.actual_weight !== receipt.declared_weight && (
+                <p className="text-[10px] text-muted-foreground">
+                  المُعلن: {receipt.declared_weight} {receipt.unit}
                 </p>
-                <p className="text-sm font-medium truncate">{receipt.generator.name}</p>
-                {receipt.generator.city && <p className="text-xs text-muted-foreground">{receipt.generator.city}</p>}
+              )}
+            </div>
+          </div>
+
+          {/* Parties Section */}
+          <div className="mt-3 pt-3 border-t grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {receipt.generator && (
+              <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/50">
+                <Building2 className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground">الجهة المولدة</p>
+                  <p className="text-sm font-medium truncate">{receipt.generator.name}</p>
+                  {receipt.generator.city && <p className="text-[10px] text-muted-foreground">{receipt.generator.city}</p>}
+                </div>
               </div>
             )}
-            {showTransporter && receipt.transporter && (
-              <div className="space-y-0.5">
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Truck className="w-3 h-3" />
-                  الجهة الناقلة
-                </p>
-                <p className="text-sm font-medium truncate">{receipt.transporter.name}</p>
-                {receipt.transporter.city && <p className="text-xs text-muted-foreground">{receipt.transporter.city}</p>}
+            {receipt.transporter && (
+              <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/50">
+                <Truck className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground">الجهة الناقلة</p>
+                  <p className="text-sm font-medium truncate">{receipt.transporter.name}</p>
+                  {receipt.transporter.city && <p className="text-[10px] text-muted-foreground">{receipt.transporter.city}</p>}
+                </div>
               </div>
             )}
             {(receipt.recycler || receipt.shipment?.recycler) && (
-              <div className="space-y-0.5">
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Recycle className="w-3 h-3" />
-                  جهة التدوير
-                </p>
-                <p className="text-sm font-medium truncate">{(receipt.recycler || receipt.shipment?.recycler)?.name}</p>
-                {(receipt.recycler || receipt.shipment?.recycler)?.city && <p className="text-xs text-muted-foreground">{(receipt.recycler || receipt.shipment?.recycler)?.city}</p>}
+              <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/50">
+                <Recycle className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] text-muted-foreground">جهة التدوير</p>
+                  <p className="text-sm font-medium truncate">{(receipt.recycler || receipt.shipment?.recycler)?.name}</p>
+                  {(receipt.recycler || receipt.shipment?.recycler)?.city && <p className="text-[10px] text-muted-foreground">{(receipt.recycler || receipt.shipment?.recycler)?.city}</p>}
+                </div>
               </div>
             )}
           </div>

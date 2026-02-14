@@ -538,7 +538,7 @@ const GeneratorReceipts = () => {
                   <div className="space-y-4">
                     {filteredDelivery.map((receipt, index) => (
                       <motion.div key={receipt.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-                        <ReceiptCard receipt={receipt} onView={handleView} onPrint={handlePrint} showTransporter={true} showGenerator={false} />
+                        <ReceiptCard receipt={receipt} onView={handleView} onPrint={handlePrint} showTransporter={true} showGenerator={true} />
                       </motion.div>
                     ))}
                   </div>
@@ -569,7 +569,7 @@ const GeneratorReceipts = () => {
                   <div className="space-y-4">
                     {filteredReceipts.map((receipt, index) => (
                       <motion.div key={receipt.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
-                        <ReceiptCard receipt={receipt} onView={handleView} onPrint={handlePrint} showTransporter={true} showGenerator={false} />
+                        <ReceiptCard receipt={receipt} onView={handleView} onPrint={handlePrint} showTransporter={true} showGenerator={true} />
                       </motion.div>
                     ))}
                   </div>
