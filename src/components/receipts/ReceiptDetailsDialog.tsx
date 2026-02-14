@@ -154,15 +154,6 @@ const ReceiptDetailsDialog = ({
   const handleThemedPrint = (themeId: PrintThemeId) => {
     if (printRef.current) {
       printWithTheme(printRef.current, themeId);
-    } else {
-      // Fallback to legacy print
-      const printContent = generateReceiptPrintHTML(receipt);
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-        setTimeout(() => { printWindow.print(); }, 500);
-      }
     }
   };
 

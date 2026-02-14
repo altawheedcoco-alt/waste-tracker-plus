@@ -141,7 +141,7 @@ const TransporterReceiptCertificateDialog = ({
 }: TransporterReceiptCertificateDialogProps) => {
   const { organization } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, isExporting } = usePDFExport({
+  const { exportToPDF, printContent, isExporting } = usePDFExport({
     filename: `transport-receipt-${shipment.shipment_number}`,
     orientation: 'portrait',
   });
@@ -162,24 +162,9 @@ const TransporterReceiptCertificateDialog = ({
     }
   }, [isOpen]);
 
-  const handlePrint = async () => {
-    if (!printRef.current) {
-      toast.error('لا يوجد محتوى للطباعة');
-      return;
-    }
-    try {
-      const pdfBlob = await generatePdfBlob();
-      if (!pdfBlob) { toast.error('فشل في إنشاء ملف PDF'); return; }
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const printWindow = window.open(blobUrl, '_blank');
-      if (printWindow) {
-        printWindow.onload = () => { printWindow.focus(); printWindow.print(); };
-      } else {
-        window.print();
-      }
-    } catch (error) {
-      console.error('Error preparing print:', error);
-      window.print();
+  const handlePrint = () => {
+    if (printRef.current) {
+      printContent(printRef.current);
     }
   };
 
