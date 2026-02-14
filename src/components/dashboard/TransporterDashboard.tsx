@@ -40,6 +40,8 @@ import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSear
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import TransporterCommandCenter from './transporter/TransporterCommandCenter';
 import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield } from 'lucide-react';
 
 // Lazy load heavy tab content
 const DriverPerformancePanel = lazy(() => import('./transporter/DriverPerformancePanel'));
@@ -66,10 +68,21 @@ const TransporterDeliveryApproval = lazy(() => import('@/components/receipts/Tra
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
-    <Skeleton className="h-32 w-full" />
-    <Skeleton className="h-48 w-full" />
+    <Skeleton className="h-32 w-full rounded-xl" />
+    <Skeleton className="h-48 w-full rounded-xl" />
   </div>
 );
+
+const tabItems = [
+  { value: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
+  { value: 'ai', label: 'الذكاء الاصطناعي', icon: Brain },
+  { value: 'performance', label: 'الأداء والتكاليف', icon: BarChart3 },
+  { value: 'calendar', label: 'التقويم', icon: CalendarDays },
+  { value: 'intelligence', label: 'الأتمتة', icon: Cpu },
+  { value: 'partners', label: 'الشركاء', icon: Handshake },
+  { value: 'tracking', label: 'تتبع السائقين', icon: MapPin },
+  { value: 'compliance', label: 'الامتثال', icon: Shield },
+];
 
 const TransporterDashboard = () => {
   const { organization } = useAuth();
@@ -137,126 +150,135 @@ const TransporterDashboard = () => {
       <UnifiedDocumentSearch />
       <DocumentVerificationWidget />
 
-      <Tabs defaultValue="overview" className="w-full" dir="rtl">
-        <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="ai" className="text-xs sm:text-sm whitespace-nowrap gap-1">
-            🤖 الذكاء الاصطناعي
-          </TabsTrigger>
-          <TabsTrigger value="performance" className="text-xs sm:text-sm whitespace-nowrap">الأداء والتكاليف</TabsTrigger>
-          <TabsTrigger value="calendar" className="text-xs sm:text-sm whitespace-nowrap">التقويم</TabsTrigger>
-          <TabsTrigger value="intelligence" className="text-xs sm:text-sm whitespace-nowrap">الأتمتة</TabsTrigger>
-          <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الشركاء</TabsTrigger>
-          <TabsTrigger value="tracking" className="text-xs sm:text-sm whitespace-nowrap">تتبع السائقين</TabsTrigger>
-          <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap">الامتثال القانوني</TabsTrigger>
-        </TabsList>
+      {/* ★ Enhanced Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <Tabs defaultValue="overview" className="w-full" dir="rtl">
+          <div className="relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-r from-slate-900/80 to-slate-800/80 dark:from-slate-950/80 dark:to-slate-900/80 p-1.5 backdrop-blur-sm">
+            <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-1 h-auto p-0">
+              {tabItems.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="text-xs sm:text-sm whitespace-nowrap gap-1.5 px-3 py-2.5 rounded-lg text-slate-400 data-[state=active]:bg-gradient-to-br data-[state=active]:from-cyan-500/20 data-[state=active]:to-blue-600/20 data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-cyan-500/30 data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/10 hover:text-white/80 transition-all duration-200"
+                >
+                  <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
-        <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-          <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
-            <FleetUtilizationWidget />
-          </ErrorBoundary>
+          <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+            <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
+              <FleetUtilizationWidget />
+            </ErrorBoundary>
 
-          <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
-            <TransporterPerformanceCharts />
-          </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
+              <TransporterPerformanceCharts />
+            </ErrorBoundary>
 
-          <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => {
-            setShipmentStatusFilter(f === 'active' ? 'in_transit' : f);
-            setShipmentPage(1);
-          }} />
+            <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => {
+              setShipmentStatusFilter(f === 'active' ? 'in_transit' : f);
+              setShipmentPage(1);
+            }} />
 
-          <TransporterKPICards
-            financials={financials}
-            kpis={kpis}
-            financialsLoading={financialsLoading}
-            kpisLoading={kpisLoading}
-          />
-
-          <TransporterPartnerSummary />
-
-          <QuickActionsGrid
-            actions={quickActions}
-            title="الإجراءات السريعة"
-            subtitle="إدارة الشحنات والسائقين والتقارير"
-          />
-
-          <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
-            <TransporterShipmentsList
-              shipments={shipments}
-              isLoading={shipmentsLoading}
-              onRefresh={handleRefresh}
-              statusFilter={shipmentStatusFilter}
-              onPrintShipment={(s) => {
-                setSelectedShipment(s);
-                setShowPrintDialog(true);
-              }}
-              onChangeStatus={(s) => {
-                setStatusShipment(s);
-                setShowStatusDialog(true);
-              }}
+            <TransporterKPICards
+              financials={financials}
+              kpis={kpis}
+              financialsLoading={financialsLoading}
+              kpisLoading={kpisLoading}
             />
-          </ErrorBoundary>
 
-          <TransporterAggregateReport shipments={shipments} />
-        </TabsContent>
+            <TransporterPartnerSummary />
 
-        <TabsContent value="ai" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في تحليلات الذكاء الاصطناعي">
-              <TransporterAIInsights />
+            <QuickActionsGrid
+              actions={quickActions}
+              title="الإجراءات السريعة"
+              subtitle="إدارة الشحنات والسائقين والتقارير"
+            />
+
+            <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
+              <TransporterShipmentsList
+                shipments={shipments}
+                isLoading={shipmentsLoading}
+                onRefresh={handleRefresh}
+                statusFilter={shipmentStatusFilter}
+                onPrintShipment={(s) => {
+                  setSelectedShipment(s);
+                  setShowPrintDialog(true);
+                }}
+                onChangeStatus={(s) => {
+                  setStatusShipment(s);
+                  setShowStatusDialog(true);
+                }}
+              />
             </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
 
-        <TabsContent value="performance" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
-              <DriverPerformancePanel />
-              <TripCostManagement />
-              <MaintenanceScheduler />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
+            <TransporterAggregateReport shipments={shipments} />
+          </TabsContent>
 
-        <TabsContent value="calendar" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ShipmentCalendarWidget />
-          </Suspense>
-        </TabsContent>
+          <TabsContent value="ai" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في تحليلات الذكاء الاصطناعي">
+                <TransporterAIInsights />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
 
-        <TabsContent value="intelligence" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <SmartSchedulerPanel />
-            <RouteOptimizerPanel driverId="" destinations={[]} />
-            <PartnerProfitabilityPanel />
-          </Suspense>
-        </TabsContent>
+          <TabsContent value="performance" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
+                <DriverPerformancePanel />
+                <TripCostManagement />
+                <MaintenanceScheduler />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
 
-        <TabsContent value="partners" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <PartnerRatingsWidget />
-            <PartnersView />
-          </Suspense>
-        </TabsContent>
+          <TabsContent value="calendar" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ShipmentCalendarWidget />
+            </Suspense>
+          </TabsContent>
 
-        <TabsContent value="tracking" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <SignalMonitorWidget />
-            <DriverLinkingCode />
-            <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
-          </Suspense>
-        </TabsContent>
+          <TabsContent value="intelligence" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <SmartSchedulerPanel />
+              <RouteOptimizerPanel driverId="" destinations={[]} />
+              <PartnerProfitabilityPanel />
+            </Suspense>
+          </TabsContent>
 
-        <TabsContent value="compliance" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <LegalComplianceWidget />
-            <LegalArchiveWidget />
-            <VehicleComplianceManager />
-            <DriverComplianceManager />
-            <IncidentReportManager />
-          </Suspense>
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="partners" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <PartnerRatingsWidget />
+              <PartnersView />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="tracking" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <SignalMonitorWidget />
+              <DriverLinkingCode />
+              <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="compliance" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <LegalComplianceWidget />
+              <LegalArchiveWidget />
+              <VehicleComplianceManager />
+              <DriverComplianceManager />
+              <IncidentReportManager />
+            </Suspense>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
 
       {/* Dialogs */}
       <EnhancedShipmentPrintView
