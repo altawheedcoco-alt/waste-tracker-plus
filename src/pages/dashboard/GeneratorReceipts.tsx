@@ -100,12 +100,21 @@ interface EligibleShipment {
   recycler?: { name: string; city?: string } | null;
 }
 
+const wasteTypeLabels: Record<string, string> = {
+  plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
+  electronic: 'إلكترونيات', organic: 'عضوية', chemical: 'كيميائية',
+  medical: 'طبية', construction: 'مخلفات بناء', wood: 'أخشاب',
+  hazardous: 'خطرة', textile: 'منسوجات', leather: 'جلود', other: 'أخرى',
+};
+
 const GeneratorReceipts = () => {
   const { organization, user } = useAuth();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [wasteTypeFilter, setWasteTypeFilter] = useState('all');
+  const [generatorFilter, setGeneratorFilter] = useState('all');
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('delivery');
@@ -249,20 +258,35 @@ const GeneratorReceipts = () => {
   const filterReceipts = (list: Receipt[]) => list.filter(receipt => {
     const matchesSearch = receipt.receipt_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
       receipt.transporter?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      receipt.generator?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       receipt.shipment?.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || receipt.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesWasteType = wasteTypeFilter === 'all' || receipt.waste_type === wasteTypeFilter;
+    const matchesGenerator = generatorFilter === 'all' || receipt.generator?.id === generatorFilter;
+    return matchesSearch && matchesStatus && matchesWasteType && matchesGenerator;
   });
 
   const filteredDelivery = filterReceipts(deliveryCertificates);
   const filteredReceipts = filterReceipts(receiptCertificates);
 
   const filteredDeclarations = declarations.filter((d: any) => {
-    if (!searchQuery) return true;
-    const s = searchQuery.toLowerCase();
-    return d.shipment_number?.toLowerCase().includes(s) || d.driver_name?.toLowerCase().includes(s) ||
-      d.generator_name?.toLowerCase().includes(s) || d.transporter_name?.toLowerCase().includes(s);
+    const matchesSearch = !searchQuery || 
+      d.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      d.driver_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.generator_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      d.transporter_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesWasteType = wasteTypeFilter === 'all' || d.waste_type === wasteTypeFilter;
+    return matchesSearch && matchesWasteType;
   });
+
+  // Unique generators and waste types for filter dropdowns
+  const uniqueGenerators = receipts.reduce<{ id: string; name: string }[]>((acc, r) => {
+    if (r.generator?.id && !acc.find(g => g.id === r.generator?.id)) {
+      acc.push({ id: r.generator.id, name: r.generator.name });
+    }
+    return acc;
+  }, []);
+  const uniqueWasteTypes = Array.from(new Set(receipts.map(r => r.waste_type).filter(Boolean)));
 
   const shipmentIdsWithCerts = new Set(deliveryCertificates.map(r => r.shipment?.id).filter(Boolean));
   const shipmentsNeedingCerts = eligibleShipments.filter(s => !shipmentIdsWithCerts.has(s.id));
@@ -381,20 +405,20 @@ const GeneratorReceipts = () => {
         {/* Filters */}
         <Card>
           <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
+            <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+              <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="بحث برقم الشهادة أو الشحنة أو الناقل..."
+                  placeholder="بحث برقم الشهادة أو الشحنة أو الجهة..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pr-10"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[150px]">
                     <SelectValue placeholder="الحالة" />
                   </SelectTrigger>
                   <SelectContent>
@@ -405,6 +429,32 @@ const GeneratorReceipts = () => {
                     <SelectItem value="cancelled">ملغية</SelectItem>
                   </SelectContent>
                 </Select>
+                <Select value={wasteTypeFilter} onValueChange={setWasteTypeFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="نوع المخلفات" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">جميع الأنواع</SelectItem>
+                    {uniqueWasteTypes.map(type => (
+                      <SelectItem key={type} value={type}>
+                        {wasteTypeLabels[type] || type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {uniqueGenerators.length > 1 && (
+                  <Select value={generatorFilter} onValueChange={setGeneratorFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="الجهة المولدة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">جميع الجهات</SelectItem>
+                      {uniqueGenerators.map(g => (
+                        <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
           </CardContent>
