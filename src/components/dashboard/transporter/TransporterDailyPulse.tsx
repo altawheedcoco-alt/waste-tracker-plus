@@ -84,17 +84,17 @@ const TransporterDailyPulse = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.5 }}
     >
-      <Card className="border border-white/[0.06] bg-gradient-to-r from-slate-900/80 to-slate-800/80 dark:from-slate-950/80 dark:to-slate-900/80 backdrop-blur-sm overflow-hidden relative">
-        <div className="absolute inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+      <Card className="border border-border/50 bg-card backdrop-blur-sm overflow-hidden relative">
+        <div className="absolute inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)', backgroundSize: '20px 20px' }} />
         <CardContent className="p-3 sm:p-4 relative z-10">
           <div className="flex items-center justify-between mb-3">
-            <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/20 gap-1 text-[10px]">
+            <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-[10px]">
               <Sparkles className="w-3 h-3" />
               تحليل مباشر
             </Badge>
             <div className="flex items-center gap-1.5 text-right">
-              <span className="text-xs font-semibold text-white">النبض اليومي</span>
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-xs font-semibold text-foreground">النبض اليومي</span>
+              <Zap className="w-3.5 h-3.5 text-primary" />
             </div>
           </div>
 
@@ -105,14 +105,14 @@ const TransporterDailyPulse = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + i * 0.1, type: 'spring' }}
-                className={`${item.bg} rounded-xl p-3 border border-white/[0.04] text-right`}
+                className={`${item.bg} rounded-xl p-3 border border-border/30 text-right`}
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <item.icon className={`w-4 h-4 ${item.color}`} />
-                  <span className="text-[10px] text-slate-400">{item.label}</span>
+                  <span className="text-[10px] text-muted-foreground">{item.label}</span>
                 </div>
                 <p className={`text-xl sm:text-2xl font-black ${item.color} tabular-nums`}>{item.value}</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
               </motion.div>
             ))}
           </div>
