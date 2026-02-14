@@ -67,6 +67,7 @@ import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { usePDFExport } from '@/hooks/usePDFExport';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 
@@ -174,6 +175,7 @@ const RecyclingCertificates = () => {
   const [isExporting, setIsExporting] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { printContent } = usePDFExport({ filename: 'recycling-certificate' });
 
   const isAdmin = roles.includes('admin');
   const isTransporter = organization?.organization_type === 'transporter';
@@ -395,7 +397,11 @@ const RecyclingCertificates = () => {
 
   const handlePrint = (report: RecyclingReport) => {
     setSelectedReport(report);
-    setTimeout(() => window.print(), 300);
+    setTimeout(() => {
+      if (printRef.current) {
+        printContent(printRef.current);
+      }
+    }, 300);
   };
 
   const clearFilters = () => {
