@@ -18,6 +18,7 @@ import RouteProgressBar from '@/components/tracking/RouteProgressBar';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 import GeneratorCompletionCard from '@/components/shipments/GeneratorCompletionCard';
+import VirtualRouteMap from '@/components/shipments/VirtualRouteMap';
 
 // Lazy load the live tracking components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -297,7 +298,16 @@ const ShipmentDetailsPage = () => {
 
         {/* Generator Completion Card - shown when shipment delivered/confirmed and user is generator */}
         {organization?.organization_type === 'generator' && ['delivered', 'confirmed'].includes(shipment.status) && (
-          <GeneratorCompletionCard shipment={shipment} />
+          <>
+            <GeneratorCompletionCard shipment={shipment} />
+            <VirtualRouteMap
+              pickupLocation={generatorLocation}
+              deliveryLocation={recyclerLocation}
+              pickupLabel={shipment.pickup_address || 'موقع المولّد'}
+              deliveryLabel={shipment.delivery_address || 'موقع المدوّر'}
+              shipmentNumber={shipment.shipment_number}
+            />
+          </>
         )}
 
         {/* Documents Chain Timeline */}
