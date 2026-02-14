@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Leaf, Download, TrendingDown, Flame, Recycle, Trash2, BarChart3, TrendingUp, Calendar } from 'lucide-react';
+import { Leaf, Download, TrendingDown, Flame, Recycle, Trash2, BarChart3, TrendingUp, Calendar, Users, Building2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,11 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useState, useMemo } from 'react';
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip as RechartsTooltip, Legend } from 'recharts';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subMonths, startOfMonth } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(142, 76%, 36%)', 'hsl(25, 95%, 53%)', 'hsl(262, 83%, 58%)'];
 
@@ -22,24 +23,72 @@ const ESGReportWidget = () => {
   const [generating, setGenerating] = useState(false);
   const [period, setPeriod] = useState('6');
 
-  const { data: rawShipments = [], isLoading } = useQuery({
-    queryKey: ['generator-esg-detailed', orgId, period],
+  // Fetch partner org IDs (recyclers & disposal)
+  const { data: partnerOrgs = [] } = useQuery({
+    queryKey: ['esg-partner-orgs', orgId],
     queryFn: async () => {
       if (!orgId) return [];
+      const { data: partnerships } = await supabase
+        .from('verified_partnerships')
+        .select('requester_org_id, partner_org_id')
+        .or(`requester_org_id.eq.${orgId},partner_org_id.eq.${orgId}`)
+        .eq('status', 'active');
+
+      if (!partnerships?.length) return [];
+
+      const partnerIds = partnerships.map(p =>
+        p.requester_org_id === orgId ? p.partner_org_id : p.requester_org_id
+      );
+
+      const { data: orgs } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type')
+        .in('id', partnerIds)
+        .in('organization_type', ['recycler', 'disposal'])
+        .eq('is_active', true);
+
+      return orgs || [];
+    },
+    enabled: !!orgId,
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const allOrgIds = useMemo(() => {
+    const ids = [orgId];
+    partnerOrgs.forEach((p: any) => ids.push(p.id));
+    return ids.filter(Boolean) as string[];
+  }, [orgId, partnerOrgs]);
+
+  const { data: rawShipments = [], isLoading } = useQuery({
+    queryKey: ['generator-esg-detailed', orgId, period, allOrgIds],
+    queryFn: async () => {
+      if (!orgId || allOrgIds.length === 0) return [];
       const monthsBack = parseInt(period);
       const fromDate = startOfMonth(subMonths(new Date(), monthsBack - 1)).toISOString();
 
+      const orFilter = [
+        ...allOrgIds.map(id => `generator_id.eq.${id}`),
+        ...allOrgIds.map(id => `recycler_id.eq.${id}`),
+      ].join(',');
+
       const { data, error } = await supabase
         .from('shipments')
-        .select('quantity, unit, disposal_method, status, created_at, waste_type')
-        .eq('generator_id', orgId)
+        .select('quantity, unit, disposal_method, status, created_at, waste_type, generator_id, recycler_id')
+        .or(orFilter)
         .in('status', ['delivered', 'confirmed'])
         .gte('created_at', fromDate);
 
       if (error) throw error;
-      return data || [];
+      // Deduplicate by removing shipments already counted
+      const seen = new Set<string>();
+      return (data || []).filter((s: any) => {
+        const key = `${s.created_at}-${s.quantity}-${s.waste_type}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     },
-    enabled: !!orgId,
+    enabled: !!orgId && allOrgIds.length > 0,
   });
 
   const stats = useMemo(() => {
@@ -134,6 +183,9 @@ const ESGReportWidget = () => {
 
   if (stats.shipmentCount === 0) return null;
 
+  const recyclerPartners = partnerOrgs.filter((p: any) => p.organization_type === 'recycler');
+  const disposalPartners = partnerOrgs.filter((p: any) => p.organization_type === 'disposal');
+
   return (
     <Card className="border-green-200 dark:border-green-800/40 bg-gradient-to-br from-green-50/50 to-background dark:from-green-950/10">
       <CardHeader className="pb-3">
@@ -160,9 +212,33 @@ const ESGReportWidget = () => {
             مؤشرات الاستدامة البيئية
           </CardTitle>
         </div>
-        <CardDescription className="text-right">ملخص الأثر البيئي لعملياتك</CardDescription>
+        <CardDescription className="text-right">ملخص الأثر البيئي لعملياتك وشركائك</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Partner Sources Banner */}
+        {partnerOrgs.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap p-2 rounded-lg bg-muted/50 border text-xs">
+            <Users className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-muted-foreground">مصادر البيانات:</span>
+            <Badge variant="outline" className="text-[10px] gap-1">
+              <Building2 className="w-3 h-3" />
+              {organization?.name}
+            </Badge>
+            {recyclerPartners.map((p: any) => (
+              <Badge key={p.id} variant="secondary" className="text-[10px] gap-1">
+                <Recycle className="w-3 h-3" />
+                {p.name}
+              </Badge>
+            ))}
+            {disposalPartners.map((p: any) => (
+              <Badge key={p.id} variant="secondary" className="text-[10px] gap-1">
+                <Flame className="w-3 h-3" />
+                {p.name}
+              </Badge>
+            ))}
+          </div>
+        )}
+
         {/* KPI Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="text-center p-3 rounded-lg bg-muted/50 border">
@@ -246,7 +322,7 @@ const ESGReportWidget = () => {
         {/* Impact Summary */}
         <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/30">
           <p className="text-xs text-emerald-700 dark:text-emerald-400 text-center">
-            🌱 ساهمت في تقليل انبعاثات الكربون بمقدار <strong>{stats.carbonSaved} طن CO₂</strong> عبر {stats.shipmentCount} عملية خلال {period} أشهر
+            🌱 ساهمت مع شركائك في تقليل انبعاثات الكربون بمقدار <strong>{stats.carbonSaved} طن CO₂</strong> عبر {stats.shipmentCount} عملية خلال {period} أشهر
           </p>
           <div className="flex items-center justify-center gap-4 mt-2 text-[10px] text-emerald-600 dark:text-emerald-500">
             <span>🌳 ≈ {Math.round(stats.carbonSaved / 0.022)} شجرة مزروعة</span>
