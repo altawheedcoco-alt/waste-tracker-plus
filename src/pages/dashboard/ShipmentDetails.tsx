@@ -19,6 +19,10 @@ import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 import GeneratorCompletionCard from '@/components/shipments/GeneratorCompletionCard';
 import VirtualRouteMap from '@/components/shipments/VirtualRouteMap';
+import DriverAssignmentPanel from '@/components/shipments/DriverAssignmentPanel';
+import ShipmentRatingDialog from '@/components/shipments/ShipmentRatingDialog';
+import ShipmentDisputePanel from '@/components/shipments/ShipmentDisputePanel';
+import ChainNotificationsWidget from '@/components/shipments/ChainNotificationsWidget';
 
 // Lazy load the live tracking components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -318,6 +322,79 @@ const ShipmentDetailsPage = () => {
 
         {/* Progress Logs - Auto-recorded milestones */}
         <ShipmentProgressLogs shipmentId={shipment.id} maxHeight={350} />
+
+        {/* Chain Notifications */}
+        {organization?.id && (
+          <ChainNotificationsWidget organizationId={organization.id} shipmentId={shipment.id} />
+        )}
+
+        {/* Driver Assignment & Acceptance */}
+        {organization?.id && (
+          <DriverAssignmentPanel
+            shipmentId={shipment.id}
+            shipmentStatus={shipment.status}
+            currentDriverId={shipment.driver_id}
+            organizationId={organization.id}
+            isTransporter={organization.organization_type === 'transporter'}
+            onAssigned={fetchShipmentDetails}
+          />
+        )}
+
+        {/* Dispute Log */}
+        {organization?.id && (
+          <ShipmentDisputePanel
+            shipmentId={shipment.id}
+            organizationId={organization.id}
+            partnerOrgs={[
+              ...(shipment.generator ? [{ id: shipment.generator_id!, name: shipment.generator.name, type: 'generator' }] : []),
+              ...(shipment.transporter && shipment.transporter_id !== organization.id ? [{ id: shipment.transporter_id!, name: shipment.transporter.name, type: 'transporter' }] : []),
+              ...(shipment.recycler ? [{ id: shipment.recycler_id!, name: shipment.recycler.name, type: 'recycler' }] : []),
+            ].filter(o => o.id !== organization.id)}
+          />
+        )}
+
+        {/* Mutual Ratings - Show after delivery */}
+        {organization?.id && ['delivered', 'confirmed'].includes(shipment.status) && (
+          <Card>
+            <CardHeader className="text-right pb-3">
+              <CardTitle className="text-base">تقييم الأطراف</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2 justify-end">
+                {shipment.generator && shipment.generator_id !== organization.id && (
+                  <ShipmentRatingDialog
+                    shipmentId={shipment.id}
+                    raterOrgId={organization.id}
+                    ratedOrgId={shipment.generator_id!}
+                    raterType={organization.organization_type as any}
+                    ratedType="generator"
+                    ratedOrgName={shipment.generator.name}
+                  />
+                )}
+                {shipment.transporter && shipment.transporter_id !== organization.id && (
+                  <ShipmentRatingDialog
+                    shipmentId={shipment.id}
+                    raterOrgId={organization.id}
+                    ratedOrgId={shipment.transporter_id!}
+                    raterType={organization.organization_type as any}
+                    ratedType="transporter"
+                    ratedOrgName={shipment.transporter.name}
+                  />
+                )}
+                {shipment.recycler && shipment.recycler_id !== organization.id && (
+                  <ShipmentRatingDialog
+                    shipmentId={shipment.id}
+                    raterOrgId={organization.id}
+                    ratedOrgId={shipment.recycler_id!}
+                    raterType={organization.organization_type as any}
+                    ratedType="recycler"
+                    ratedOrgName={shipment.recycler.name}
+                  />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tracking & Live Map - Hide for generators when shipment is completed */}
         {!(organization?.organization_type === 'generator' && ['delivered', 'confirmed'].includes(shipment.status)) && (
