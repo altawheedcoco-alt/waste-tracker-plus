@@ -313,7 +313,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
         <div ref={printRef} className="bg-white p-3 rounded-lg border text-foreground" style={{ direction: 'rtl', fontSize: '7pt' }}>
           <div className="page">
             {/* Header Table - Barcode left, QR right */}
-            <table style={{ marginBottom: '6px', border: 'none' }}>
+            <table style={{ marginBottom: '4px', border: 'none' }}>
               <tbody>
                 <tr>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
@@ -322,8 +322,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   </td>
                   <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
                     <div style={{ fontSize: '14pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
-                    <div style={{ fontSize: '9pt', color: '#6b7280', marginBottom: '6px' }}>Waste Transport Tracking Form</div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ fontSize: '9pt', color: '#6b7280', marginBottom: '4px' }}>Waste Transport Tracking Form</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                       <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '3px 12px', borderRadius: theme.borderRadius, fontSize: '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
@@ -331,10 +331,51 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                         {shipment.shipment_number}
                       </span>
                     </div>
+                    <div style={{ fontSize: '7pt', color: '#6b7280' }}>
+                      الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: theme.colors.primary }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
+                    </div>
                   </td>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
                     {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '70px', height: '70px' }} />}
                     <div style={{ fontSize: '6pt', color: '#6b7280' }}>امسح للتتبع</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Organization Logos & Security Bar */}
+            <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
+              <tbody>
+                <tr>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.generatorLight || '#f0f9ff' }}>
+                    {shipment.generator?.stamp_url ? (
+                      <img src={shipment.generator.stamp_url} alt="لوجو المولد" style={{ maxHeight: '25px', maxWidth: '70px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                    ) : (
+                      <div style={{ fontSize: '7pt', color: theme.colors.generatorBg, fontWeight: '600' }}>🏢 {shipment.generator?.name || 'الجهة المولدة'}</div>
+                    )}
+                    {shipment.generator?.client_code && (
+                      <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280', marginTop: '1px' }}>{shipment.generator.client_code}</div>
+                    )}
+                  </td>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.transporterLight || '#fffbeb' }}>
+                    {shipment.transporter?.stamp_url ? (
+                      <img src={shipment.transporter.stamp_url} alt="لوجو الناقل" style={{ maxHeight: '25px', maxWidth: '70px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                    ) : (
+                      <div style={{ fontSize: '7pt', color: theme.colors.transporterBg, fontWeight: '600' }}>🚛 {shipment.transporter?.name || 'الجهة الناقلة'}</div>
+                    )}
+                    {shipment.transporter?.client_code && (
+                      <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280', marginTop: '1px' }}>{shipment.transporter.client_code}</div>
+                    )}
+                  </td>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.recyclerLight || '#f0fdf4' }}>
+                    {shipment.recycler?.stamp_url ? (
+                      <img src={shipment.recycler.stamp_url} alt="لوجو المدور" style={{ maxHeight: '25px', maxWidth: '70px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                    ) : (
+                      <div style={{ fontSize: '7pt', color: theme.colors.recyclerBg, fontWeight: '600' }}>♻️ {shipment.recycler?.name || 'جهة التدوير'}</div>
+                    )}
+                    {shipment.recycler?.client_code && (
+                      <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280', marginTop: '1px' }}>{shipment.recycler.client_code}</div>
+                    )}
                   </td>
                 </tr>
               </tbody>
@@ -535,7 +576,12 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             {/* Footer */}
             <div style={{ textAlign: 'center', fontSize: '6pt', color: theme.colors.footerText, paddingTop: '4px', borderTop: `1px solid ${theme.colors.borderLight}` }}>
               <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
-              <div style={{ marginTop: '2px' }}>رقم التتبع: {shipment.shipment_number}</div>
+              <div style={{ marginTop: '2px' }}>
+                رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`}
+              </div>
+              <div style={{ marginTop: '3px', fontSize: '6pt', color: theme.colors.footerText }}>
+                📅 تاريخ وصول الشحنة: {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.created_at ? format(new Date(shipment.created_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : '-'}
+              </div>
               <div style={{ marginTop: '3px', fontSize: '5pt', fontStyle: 'italic', color: theme.colors.footerText }}>
                 إخلاء مسؤولية: هذا المستند تم إنشاؤه آلياً بناءً على البيانات المدخلة، والمنصة غير مسؤولة عن صحة المعلومات الواردة فيه.
               </div>
