@@ -366,8 +366,13 @@ export const getAvailableNextStatuses = (
     return allStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Generator can only view, not change
-  if (organizationType === 'generator') return [];
+  // Generator can change early-phase statuses (pending/registered) for shipments they created
+  if (organizationType === 'generator') {
+    const generatorAllowed = transporterStatuses.filter(s => 
+      ['pending', 'registered'].includes(s.key)
+    );
+    return generatorAllowed.filter(s => s.key !== currentStatus);
+  }
 
   // Transporter can change all transporter phase statuses (not just next ones)
   if (organizationType === 'transporter') {
