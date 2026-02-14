@@ -69,8 +69,8 @@ const DocumentVerification = () => {
             <Shield className="w-5 h-5" />
             <span className="font-medium">{t('docVerify.sectionBadge')}</span>
           </div>
-          <h2 className="text-3xl font-bold mb-4">{t('docVerify.title')}</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <h2 className="text-xl sm:text-3xl font-bold mb-3 sm:mb-4 px-2">{t('docVerify.title')}</h2>
+          <p className="text-xs sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
             {t('docVerify.subtitle')}
           </p>
         </motion.div>

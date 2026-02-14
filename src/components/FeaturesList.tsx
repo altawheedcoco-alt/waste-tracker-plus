@@ -29,13 +29,13 @@ const FeaturesList = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.08 }}
-              className="flex items-start gap-4 p-4 rounded-xl hover:bg-muted/50 transition-colors border-b border-border/30"
+              className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-muted/50 transition-colors border-b border-border/30"
             >
-              <div className="flex-shrink-0 mt-1"><CheckCircle2 className="w-6 h-6 text-primary" /></div>
+              <div className="flex-shrink-0 mt-0.5"><CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /></div>
               <div className="text-right flex-1">
-                <h3 className="font-bold text-foreground leading-relaxed">
+                <h3 className="font-bold text-foreground leading-relaxed text-sm sm:text-base">
                   {capability.title}
-                  {capability.description && <span className="font-normal text-muted-foreground">: "{capability.description}"</span>}
+                  {capability.description && <span className="font-normal text-muted-foreground text-xs sm:text-base">: "{capability.description}"</span>}
                 </h3>
               </div>
             </motion.div>
