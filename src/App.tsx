@@ -13,6 +13,7 @@ import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 // Offline & Performance components
 const OfflineIndicator = lazy(() => import("./components/offline/OfflineIndicator"));
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
+const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
 const MobileOptimizations = lazy(() => import("./components/mobile/MobileOptimizations"));
 
 // Minimal loading component - optimized for speed
@@ -198,6 +199,7 @@ const Providers = memo(() => (
                     <BetaBanner />
                     <AccessibilityPanel />
                     <OfflineBanner />
+                    <ScrollToTopButton />
                   </Suspense>
                   <Suspense fallback={null}>
                     <MobileOptimizations>{null}</MobileOptimizations>
