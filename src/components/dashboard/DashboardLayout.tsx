@@ -326,6 +326,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           icon: Users, label: t('sidebar.driversGroup'), path: '#', key: 'transporter-drivers-group', children: [
             { icon: Users, label: t('sidebar.driversGroup'), path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
             { icon: MapPin, label: t('sidebar.driverTracking'), path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
+            { icon: Shield, label: language === 'ar' ? 'تصاريح السائقين' : 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits' },
           ]
         } as SidebarMenuItem]
       : (organization?.organization_type as string) === 'recycler'
