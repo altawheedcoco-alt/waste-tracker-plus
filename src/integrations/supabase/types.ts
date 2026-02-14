@@ -2840,11 +2840,11 @@ export type Database = {
         Row: {
           auto_generated: boolean
           created_at: string
-          declaration_text: string
+          declaration_text: string | null
           declaration_type: string
           declared_at: string
           declared_by_organization_id: string
-          declared_by_user_id: string
+          declared_by_user_id: string | null
           disposal_name: string | null
           driver_name: string | null
           driver_national_id: string | null
@@ -2867,11 +2867,11 @@ export type Database = {
         Insert: {
           auto_generated?: boolean
           created_at?: string
-          declaration_text: string
+          declaration_text?: string | null
           declaration_type?: string
           declared_at?: string
           declared_by_organization_id: string
-          declared_by_user_id: string
+          declared_by_user_id?: string | null
           disposal_name?: string | null
           driver_name?: string | null
           driver_national_id?: string | null
@@ -2894,11 +2894,11 @@ export type Database = {
         Update: {
           auto_generated?: boolean
           created_at?: string
-          declaration_text?: string
+          declaration_text?: string | null
           declaration_type?: string
           declared_at?: string
           declared_by_organization_id?: string
-          declared_by_user_id?: string
+          declared_by_user_id?: string | null
           disposal_name?: string | null
           driver_name?: string | null
           driver_national_id?: string | null
