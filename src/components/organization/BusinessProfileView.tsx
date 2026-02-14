@@ -4,14 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Clock, Phone, Navigation, ImageIcon, Lock, ExternalLink } from 'lucide-react';
+import { MapPin, Clock, Phone, Navigation, ImageIcon, Lock, ExternalLink, Globe, ShoppingBag, Info, Calendar } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 
 interface BusinessProfileViewProps {
   organizationId: string;
   organizationName: string;
   orgData: any;
-  isAuthorized?: boolean; // e.g. driver with active shipment
+  isAuthorized?: boolean;
 }
 
 const DAYS_AR: Record<string, string> = {
@@ -43,6 +43,9 @@ const BusinessProfileView = ({ organizationId, organizationName, orgData, isAuth
   const coords = orgData?.location_lat && orgData?.location_lng
     ? { lat: orgData.location_lat, lng: orgData.location_lng }
     : null;
+  const services = (orgData?.services as string[]) || [];
+  const socialLinks = (orgData?.social_links as Record<string, string>) || {};
+  const hasSocialLinks = Object.values(socialLinks).some(v => v);
 
   if (!canView) {
     return (
@@ -58,6 +61,25 @@ const BusinessProfileView = ({ organizationId, organizationName, orgData, isAuth
 
   return (
     <div className="space-y-4">
+      {/* Services */}
+      {services.length > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <ShoppingBag className="w-4 h-4 text-primary" />
+              <span className="font-semibold text-sm">🛠️ خدماتنا</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {services.map((service: string) => (
+                <Badge key={service} variant="secondary" className="text-xs">
+                  {service}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Photo Gallery */}
       {photos.length > 0 && (
         <Card>
@@ -116,7 +138,6 @@ const BusinessProfileView = ({ organizationId, organizationName, orgData, isAuth
             </div>
           </div>
 
-          {/* Navigate Button */}
           {orgData?.location_url && (
             <Button asChild className="w-full gap-2">
               <a href={orgData.location_url} target="_blank" rel="noopener noreferrer">
@@ -127,7 +148,6 @@ const BusinessProfileView = ({ organizationId, organizationName, orgData, isAuth
             </Button>
           )}
 
-          {/* Embedded Map */}
           {coords && (
             <div className="rounded-lg overflow-hidden border">
               <iframe
@@ -189,6 +209,91 @@ const BusinessProfileView = ({ organizationId, organizationName, orgData, isAuth
               </div>
             </>
           )}
+
+          {/* Website & Email */}
+          {(orgData?.website_url || orgData?.business_email) && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                {orgData?.website_url && (
+                  <div className="flex items-center gap-3">
+                    <Globe className="w-5 h-5 text-primary shrink-0" />
+                    <a href={orgData.website_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline" dir="ltr">
+                      {orgData.website_url}
+                    </a>
+                  </div>
+                )}
+                {orgData?.business_email && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-5 h-5 text-primary shrink-0 text-center">✉️</span>
+                    <a href={`mailto:${orgData.business_email}`} className="text-sm text-primary hover:underline" dir="ltr">
+                      {orgData.business_email}
+                    </a>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Price Range */}
+          {orgData?.price_range && (
+            <>
+              <Separator />
+              <div className="flex items-center gap-3">
+                <span className="text-primary">💰</span>
+                <span className="text-sm">نطاق الأسعار: <strong>{orgData.price_range}</strong></span>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Social Links */}
+      {hasSocialLinks && (
+        <Card>
+          <CardContent className="p-4">
+            <h4 className="font-semibold text-sm mb-3">🔗 تابعنا على</h4>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(socialLinks).map(([platform, url]) => {
+                if (!url) return null;
+                return (
+                  <Button key={platform} variant="outline" size="sm" asChild>
+                    <a href={url as string} target="_blank" rel="noopener noreferrer" className="capitalize">
+                      {platform}
+                    </a>
+                  </Button>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Page Transparency */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Info className="w-4 h-4 text-primary" />
+            <span className="font-semibold text-sm">🔍 شفافية الصفحة</span>
+          </div>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5" />
+              <span>تاريخ إنشاء الصفحة: {orgData?.created_at ? new Date(orgData.created_at).toLocaleDateString('ar-EG') : 'غير محدد'}</span>
+            </div>
+            {orgData?.founded_year && (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>سنة التأسيس: {orgData.founded_year}</span>
+              </div>
+            )}
+            {orgData?.activity_type && (
+              <div className="flex items-center gap-2">
+                <span>🏭</span>
+                <span>نوع النشاط: {orgData.activity_type}</span>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -26,6 +26,12 @@ interface ProfileHeaderProps {
     representative_name?: string;
     representative_national_id?: string;
     representative_phone?: string;
+    bio?: string;
+    cta_type?: string;
+    website_url?: string;
+    phone?: string;
+    founded_year?: number;
+    activity_type?: string;
   };
   isEditable?: boolean;
   onUpdate?: () => void;
@@ -359,13 +365,50 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
                 <OrgIcon className="w-3 h-3" />
                 {getOrganizationTypeLabel()}
               </Badge>
+              {organization.activity_type && (
+                <Badge variant="outline" className="gap-1">
+                  🏭 {organization.activity_type}
+                </Badge>
+              )}
               {organization.city && (
                 <Badge variant="outline" className="gap-1">
                   📍 {organization.city}
                   {organization.region && ` - ${organization.region}`}
                 </Badge>
               )}
+              {organization.founded_year && (
+                <Badge variant="outline" className="gap-1">
+                  📅 تأسست {organization.founded_year}
+                </Badge>
+              )}
             </div>
+
+            {/* Bio */}
+            {organization.bio && (
+              <p className="text-sm text-muted-foreground mt-2 max-w-xl">{organization.bio}</p>
+            )}
+
+            {/* CTA Button */}
+            {organization.cta_type && (
+              <div className="flex gap-2 mt-3">
+                <Button size="sm" className="gap-1.5">
+                  {organization.cta_type === 'contact' && '📞 تواصل معنا'}
+                  {organization.cta_type === 'message' && '💬 ارسل رسالة'}
+                  {organization.cta_type === 'call' && '📱 اتصل الآن'}
+                  {organization.cta_type === 'shop' && '🛒 تسوق الآن'}
+                  {organization.cta_type === 'visit' && '🌐 زيارة الموقع'}
+                  {organization.cta_type === 'quote' && '💰 اطلب عرض سعر'}
+                  {organization.cta_type === 'book' && '📅 احجز موعد'}
+                </Button>
+                {organization.website_url && (
+                  <Button size="sm" variant="outline" asChild>
+                    <a href={organization.website_url} target="_blank" rel="noopener noreferrer">
+                      🌐 الموقع
+                    </a>
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
