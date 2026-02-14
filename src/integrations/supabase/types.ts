@@ -4906,6 +4906,100 @@ export type Database = {
           },
         ]
       }
+      driver_permits: {
+        Row: {
+          conditions: string | null
+          created_at: string
+          driver_id: string
+          id: string
+          issued_at: string
+          issued_by: string | null
+          notes: string | null
+          organization_id: string
+          permit_number: string
+          permit_type: string
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          scope: Json | null
+          status: string
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
+          updated_at: string
+          valid_from: string
+          valid_until: string
+        }
+        Insert: {
+          conditions?: string | null
+          created_at?: string
+          driver_id: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          notes?: string | null
+          organization_id: string
+          permit_number: string
+          permit_type?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          scope?: Json | null
+          status?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
+          updated_at?: string
+          valid_from?: string
+          valid_until: string
+        }
+        Update: {
+          conditions?: string | null
+          created_at?: string
+          driver_id?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          notes?: string | null
+          organization_id?: string
+          permit_number?: string
+          permit_type?: string
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          scope?: Json | null
+          status?: string
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_permits_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_permits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_permits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_quick_links: {
         Row: {
           allow_name_edit: boolean | null
@@ -16476,6 +16570,7 @@ export type Database = {
       }
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
+      generate_permit_number: { Args: { org_id: string }; Returns: string }
       generate_seal_number: { Args: never; Returns: string }
       generate_system_seal_number: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }
