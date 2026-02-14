@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, FileText } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { usePDFExport } from '@/hooks/usePDFExport';
 
 interface ChartData {
   shipmentsByStatus: { name: string; value: number; color: string }[];
@@ -37,6 +38,7 @@ const OfficialReportPrint: React.FC<OfficialReportPrintProps> = ({
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const chartsRef = useRef<HTMLDivElement>(null);
+  const { printContent } = usePDFExport({ filename: 'تقرير-رسمي' });
 
   const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
@@ -57,7 +59,9 @@ const OfficialReportPrint: React.FC<OfficialReportPrintProps> = ({
   const completionRate = totalShipments > 0 ? ((completedShipments / totalShipments) * 100).toFixed(1) : '0';
 
   const handlePrint = () => {
-    window.print();
+    if (printRef.current) {
+      printContent(printRef.current);
+    }
   };
 
   const handleExportPDF = async () => {

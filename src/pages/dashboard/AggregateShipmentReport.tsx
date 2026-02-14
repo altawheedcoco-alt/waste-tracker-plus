@@ -117,6 +117,7 @@ const AggregateShipmentReport = () => {
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isSavingToStorage, setIsSavingToStorage] = useState(false);
+  const { printContent } = usePDFExport({ filename: 'تقرير-الشحنات-التجميعي' });
 
   // Generate PDF from the print component
   const generatePDF = useCallback(async (): Promise<Blob | null> => {
@@ -414,11 +415,11 @@ const AggregateShipmentReport = () => {
   };
 
   const handlePrint = () => {
-    setIsPrinting(true);
-    setTimeout(() => {
-      window.print();
-      setIsPrinting(false);
-    }, 500);
+    if (printRef.current) {
+      setIsPrinting(true);
+      printContent(printRef.current);
+      setTimeout(() => setIsPrinting(false), 500);
+    }
   };
 
   // Legacy handleShare kept for backward compatibility (redirects to new method)

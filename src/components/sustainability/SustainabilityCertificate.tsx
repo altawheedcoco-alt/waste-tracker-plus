@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { usePDFExport } from '@/hooks/usePDFExport';
 
 interface Organization {
   id: string;
@@ -54,6 +55,7 @@ const SustainabilityCertificate = ({
   const { toast } = useToast();
   const certificateRef = useRef<HTMLDivElement>(null);
   const [exporting, setExporting] = useState(false);
+  const { printContent } = usePDFExport({ filename: 'شهادة-الاستدامة' });
 
   const certificateNumber = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
   const issueDate = new Date().toLocaleDateString("en-US", {
@@ -123,7 +125,9 @@ const SustainabilityCertificate = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    if (certificateRef.current) {
+      printContent(certificateRef.current);
+    }
   };
 
   if (!organization) return null;

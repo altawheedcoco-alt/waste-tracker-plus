@@ -120,7 +120,7 @@ const HazardousWasteRegister = () => {
   const printRef = useRef<HTMLDivElement>(null);
   
   // PDF Export
-  const { exportToPDF, isExporting: isExportingPDF } = usePDFExport({
+  const { exportToPDF, printContent, isExporting: isExportingPDF } = usePDFExport({
     filename: 'سجل-المخلفات-الخطرة',
     orientation: 'landscape',
   });
@@ -388,7 +388,9 @@ const HazardousWasteRegister = () => {
 
   // Print register
   const handlePrint = () => {
-    window.print();
+    if (printRef.current) {
+      printContent(printRef.current);
+    }
   };
 
   // Clear filters
