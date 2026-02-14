@@ -33,6 +33,11 @@ import {
   Hash,
   ArrowRight,
   ExternalLink,
+  ScrollText,
+  Banknote,
+  Award,
+  ClipboardCheck,
+  FileCheck,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -128,7 +133,7 @@ const CommandPalette = () => {
               onClick={() => setOpen(true)}
             >
               <Search className="h-4 w-4 xl:ml-2 text-muted-foreground group-hover:text-foreground transition-colors" />
-              <span className="hidden xl:inline-flex text-muted-foreground text-sm">بحث شامل... (شحنات، شركاء، سائقين)</span>
+              <span className="hidden xl:inline-flex text-muted-foreground text-sm">بحث شامل... (شحنات، عقود، فواتير، شركاء)</span>
               <kbd className="pointer-events-none absolute left-1.5 top-1.5 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
                 <span className="text-xs">⌘</span>K
               </kbd>
@@ -142,7 +147,7 @@ const CommandPalette = () => {
 
       <CommandDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setQuery(''); }}>
         <CommandInput 
-          placeholder="ابحث عن شحنة، شريك، سائق، فاتورة، موظف..." 
+          placeholder="ابحث عن شحنة، عقد، فاتورة، شريك، إيداع، إقرار..." 
           className="text-right"
           value={query}
           onValueChange={setQuery}
@@ -345,6 +350,166 @@ const CommandPalette = () => {
                   </CommandGroup>
                 </>
               )}
+
+              {/* Contracts */}
+              {results.contracts?.length > 0 && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup heading={`📜 العقود (${results.contracts.length})`}>
+                    {results.contracts.map((ct) => (
+                      <CommandItem
+                        key={ct.id}
+                        value={`contract ${ct.contract_number} ${ct.title} ${ct.partner_name}`}
+                        onSelect={() => runCommand(`/dashboard/contracts`)}
+                        className="flex items-center gap-3 cursor-pointer py-3"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                          <ScrollText className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-right">
+                          <div className="flex items-center gap-2 justify-end">
+                            <Badge variant="outline" className={`text-[10px] px-1.5 ${statusColors[ct.status] || ''}`}>
+                              {ct.status}
+                            </Badge>
+                            <span className="font-medium text-sm">{ct.contract_number}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {ct.title} {ct.partner_name ? `• ${ct.partner_name}` : ''}
+                          </p>
+                        </div>
+                        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
+
+              {/* Deposits */}
+              {results.deposits?.length > 0 && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup heading={`💰 الإيداعات (${results.deposits.length})`}>
+                    {results.deposits.map((dep) => (
+                      <CommandItem
+                        key={dep.id}
+                        value={`deposit ${dep.reference_number} ${dep.depositor_name} ${dep.partner_name}`}
+                        onSelect={() => runCommand(`/dashboard/deposits`)}
+                        className="flex items-center gap-3 cursor-pointer py-3"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center">
+                          <Banknote className="h-4 w-4 text-teal-600" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-right">
+                          <span className="font-medium text-sm">{dep.depositor_name || dep.reference_number || 'إيداع'}</span>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {dep.amount?.toLocaleString()} ج.م • {dep.transfer_method} {dep.partner_name ? `• ${dep.partner_name}` : ''}
+                          </p>
+                        </div>
+                        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
+
+              {/* Award Letters */}
+              {results.award_letters?.length > 0 && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup heading={`🏆 خطابات الترسية (${results.award_letters.length})`}>
+                    {results.award_letters.map((al) => (
+                      <CommandItem
+                        key={al.id}
+                        value={`award ${al.letter_number} ${al.title} ${al.partner_name}`}
+                        onSelect={() => runCommand(`/dashboard/award-letters`)}
+                        className="flex items-center gap-3 cursor-pointer py-3"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                          <Award className="h-4 w-4 text-indigo-600" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-right">
+                          <div className="flex items-center gap-2 justify-end">
+                            <Badge variant="outline" className={`text-[10px] px-1.5 ${statusColors[al.status] || ''}`}>
+                              {al.status}
+                            </Badge>
+                            <span className="font-medium text-sm">{al.letter_number}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            {al.title} {al.partner_name ? `• ${al.partner_name}` : ''}
+                          </p>
+                        </div>
+                        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
+
+              {/* Declarations */}
+              {results.declarations?.length > 0 && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup heading={`📋 الإقرارات (${results.declarations.length})`}>
+                    {results.declarations.map((dcl) => (
+                      <CommandItem
+                        key={dcl.id}
+                        value={`declaration ${dcl.shipment_number} ${dcl.declaration_type} ${dcl.waste_type}`}
+                        onSelect={() => runCommand(`/dashboard/generator-receipts`)}
+                        className="flex items-center gap-3 cursor-pointer py-3"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                          <ClipboardCheck className="h-4 w-4 text-rose-600" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-right">
+                          <div className="flex items-center gap-2 justify-end">
+                            <Badge variant="outline" className={`text-[10px] px-1.5 ${statusColors[dcl.status] || ''}`}>
+                              {dcl.status}
+                            </Badge>
+                            <span className="font-medium text-sm">{dcl.declaration_type}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            شحنة: {dcl.shipment_number} {dcl.waste_type ? `• ${dcl.waste_type}` : ''}
+                          </p>
+                        </div>
+                        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
+
+              {/* Receipts */}
+              {results.receipts?.length > 0 && (
+                <>
+                  <CommandSeparator />
+                  <CommandGroup heading={`📄 شهادات الاستلام (${results.receipts.length})`}>
+                    {results.receipts.map((rct) => (
+                      <CommandItem
+                        key={rct.id}
+                        value={`receipt ${rct.receipt_number} ${rct.shipment_number}`}
+                        onSelect={() => runCommand(`/dashboard/generator-receipts`)}
+                        className="flex items-center gap-3 cursor-pointer py-3"
+                      >
+                        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                          <FileCheck className="h-4 w-4 text-cyan-600" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-right">
+                          <div className="flex items-center gap-2 justify-end">
+                            <Badge variant="outline" className={`text-[10px] px-1.5 ${statusColors[rct.status] || ''}`}>
+                              {rct.status}
+                            </Badge>
+                            <span className="font-medium text-sm">{rct.receipt_number}</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate mt-0.5">
+                            شحنة: {rct.shipment_number}
+                          </p>
+                        </div>
+                        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </>
+              )}
             </>
           )}
 
@@ -423,7 +588,7 @@ const CommandPalette = () => {
 
           {/* Footer hint */}
           <div className="border-t px-3 py-2 text-[11px] text-muted-foreground flex items-center justify-between">
-            <span>اكتب حرفين أو أكثر للبحث في البيانات</span>
+            <span>اكتب حرفين أو أكثر للبحث في 11 فئة من البيانات</span>
             <div className="flex gap-1.5">
               <kbd className="rounded border bg-muted px-1 font-mono text-[10px]">↑↓</kbd>
               <span>تنقل</span>
