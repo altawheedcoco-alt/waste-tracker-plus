@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, TrendingUp, TrendingDown, Truck, Clock, CheckCircle2, Users, Route } from 'lucide-react';
+import { TrendingUp, TrendingDown, Truck, CheckCircle2, Users, Route, Gauge, Zap, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { motion } from 'framer-motion';
 
 const TransporterCommandCenter = () => {
   const { organization } = useAuth();
@@ -63,12 +64,12 @@ const TransporterCommandCenter = () => {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
         <CardContent className="p-6">
-          <div className="animate-pulse space-y-3">
-            <div className="h-4 bg-muted rounded w-1/3" />
-            <div className="grid grid-cols-4 gap-3">
-              {[1, 2, 3, 4].map(i => <div key={i} className="h-16 bg-muted rounded" />)}
+          <div className="animate-pulse space-y-4">
+            <div className="h-5 bg-white/10 rounded w-1/3" />
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-white/5 rounded-2xl" />)}
             </div>
           </div>
         </CardContent>
@@ -86,70 +87,163 @@ const TransporterCommandCenter = () => {
       label: 'رحلات اليوم',
       value: stats?.todayTrips || 0,
       icon: Truck,
-      color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30',
+      gradient: 'from-blue-500 to-cyan-400',
+      glow: 'shadow-blue-500/25',
+      ring: 'ring-blue-400/20',
+      bg: 'bg-blue-500/10',
     },
     {
       label: 'شحنات نشطة',
       value: stats?.activeShipments || 0,
       icon: Route,
-      color: 'text-amber-600 bg-amber-100 dark:bg-amber-900/30',
+      gradient: 'from-amber-500 to-orange-400',
+      glow: 'shadow-amber-500/25',
+      ring: 'ring-amber-400/20',
+      bg: 'bg-amber-500/10',
     },
     {
-      label: 'تم التسليم اليوم',
+      label: 'تم التسليم',
       value: stats?.todayDelivered || 0,
       icon: CheckCircle2,
-      color: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30',
+      gradient: 'from-emerald-500 to-teal-400',
+      glow: 'shadow-emerald-500/25',
+      ring: 'ring-emerald-400/20',
+      bg: 'bg-emerald-500/10',
     },
     {
-      label: 'سائقين نشطين',
+      label: 'السائقين',
       value: stats?.activeDrivers || 0,
       icon: Users,
-      color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30',
+      gradient: 'from-violet-500 to-purple-400',
+      glow: 'shadow-violet-500/25',
+      ring: 'ring-violet-400/20',
+      bg: 'bg-violet-500/10',
     },
   ];
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {trend >= 0 ? (
-              <Badge variant="secondary" className="gap-1 text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30">
-                <TrendingUp className="w-3 h-3" />
-                {trendPercent > 0 ? `+${trendPercent}%` : 'مستقر'}
-              </Badge>
-            ) : (
-              <Badge variant="secondary" className="gap-1 text-red-700 bg-red-100 dark:bg-red-900/30">
-                <TrendingDown className="w-3 h-3" />
-                {trendPercent}%
-              </Badge>
-            )}
-          </div>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <CalendarDays className="w-5 h-5 text-primary" />
-            مركز القيادة - الناقل
-            <span className="text-xs text-muted-foreground font-normal">
-              {format(new Date(), 'EEEE d MMMM', { locale: ar })}
-            </span>
-          </CardTitle>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+    >
+      <Card className="overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 relative">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-violet-500/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-32 bg-cyan-500/3 rounded-full blur-3xl" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {metrics.map((m) => (
-            <div key={m.label} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${m.color}`}>
-                <m.icon className="w-5 h-5" />
-              </div>
-              <div className="min-w-0 text-right">
-                <p className="text-2xl font-bold">{m.value}</p>
-                <p className="text-xs text-muted-foreground truncate">{m.label}</p>
-              </div>
+
+        <CardContent className="p-4 sm:p-6 relative z-10">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              {trend >= 0 ? (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}>
+                  <Badge className="gap-1.5 bg-emerald-500/15 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20 backdrop-blur-sm">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    {trendPercent > 0 ? `+${trendPercent}%` : 'مستقر'}
+                  </Badge>
+                </motion.div>
+              ) : (
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3, type: 'spring' }}>
+                  <Badge className="gap-1.5 bg-red-500/15 text-red-400 border-red-500/20 hover:bg-red-500/20 backdrop-blur-sm">
+                    <TrendingDown className="w-3.5 h-3.5" />
+                    {trendPercent}%
+                  </Badge>
+                </motion.div>
+              )}
+              <span className="text-xs text-slate-400 hidden sm:inline">
+                مقارنة بالأمس
+              </span>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2 justify-end">
+                  مركز القيادة
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  >
+                    <Gauge className="w-5 h-5 text-cyan-400" />
+                  </motion.div>
+                </h2>
+                <p className="text-xs text-slate-400">
+                  {format(new Date(), 'EEEE d MMMM yyyy', { locale: ar })}
+                </p>
+              </div>
+              <motion.div
+                className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Activity className="w-6 h-6 text-white" />
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            {metrics.map((m, index) => (
+              <motion.div
+                key={m.label}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ delay: 0.1 + index * 0.08, duration: 0.4, type: 'spring', stiffness: 200 }}
+                whileHover={{ y: -4, scale: 1.02 }}
+                className={`relative group rounded-2xl border border-white/[0.06] ${m.bg} backdrop-blur-sm p-4 ring-1 ${m.ring} transition-all duration-300 hover:shadow-xl ${m.glow} cursor-default`}
+              >
+                {/* Icon */}
+                <div className="flex items-center justify-between mb-3">
+                  <motion.div
+                    whileHover={{ rotate: 15 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <Zap className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </motion.div>
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.gradient} flex items-center justify-center shadow-lg ${m.glow}`}>
+                    <m.icon className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+
+                {/* Value */}
+                <div className="text-right">
+                  <motion.p
+                    className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                  >
+                    {m.value}
+                  </motion.p>
+                  <p className="text-[11px] sm:text-xs text-slate-400 mt-1 font-medium">{m.label}</p>
+                </div>
+
+                {/* Hover glow effect */}
+                <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${m.gradient} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bottom bar */}
+          {stats && stats.todayQuantity > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-4 flex items-center justify-center gap-2 text-xs text-slate-400 bg-white/[0.03] rounded-xl py-2.5 px-4 border border-white/[0.04]"
+            >
+              <Truck className="w-3.5 h-3.5 text-cyan-400" />
+              <span>إجمالي الكمية اليوم:</span>
+              <span className="font-bold text-white">{stats.todayQuantity.toLocaleString('ar-SA')}</span>
+              <span>طن</span>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
