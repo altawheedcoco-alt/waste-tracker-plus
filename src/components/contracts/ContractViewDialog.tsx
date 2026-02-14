@@ -25,7 +25,7 @@ const ContractViewDialog = ({
   getContractStatus,
 }: ContractViewDialogProps) => {
   const printRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, isExporting } = usePDFExport({
+  const { exportToPDF, printContent, isExporting } = usePDFExport({
     filename: contract ? `عقد_${contract.contract_number}` : 'عقد',
     orientation: 'portrait',
     scale: 2,
@@ -211,7 +211,7 @@ const ContractViewDialog = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.print()}
+              onClick={() => printRef.current && printContent(printRef.current)}
             >
               <Printer className="w-4 h-4 ml-1" />
               طباعة للتوقيع

@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
+import { usePDFExport } from '@/hooks/usePDFExport';
 import { 
   Printer,
   FileText,
@@ -138,6 +139,7 @@ const OperationalPlans = () => {
   const [hidePercentageInPrint, setHidePercentageInPrint] = useState(false);
   const [hideHazardLevelInPrint, setHideHazardLevelInPrint] = useState(false);
 
+  const { printContent } = usePDFExport({ filename: 'خطة-تشغيلية' });
   const isAdmin = roles.includes('admin');
 
   // Filter shipments by waste category
@@ -423,11 +425,11 @@ const OperationalPlans = () => {
   }, {} as Record<string, { count: number; quantity: number; clientCode?: string | null; city?: string; phone?: string }>);
 
   const handlePrint = () => {
-    setIsPrinting(true);
-    setTimeout(() => {
-      window.print();
-      setIsPrinting(false);
-    }, 500);
+    if (printRef.current) {
+      setIsPrinting(true);
+      printContent(printRef.current);
+      setTimeout(() => setIsPrinting(false), 500);
+    }
   };
 
   const handleExportPDF = async () => {
