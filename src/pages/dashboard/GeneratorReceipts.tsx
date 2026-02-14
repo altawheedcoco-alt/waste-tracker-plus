@@ -107,6 +107,51 @@ const wasteTypeLabels: Record<string, string> = {
   hazardous: 'خطرة', textile: 'منسوجات', leather: 'جلود', other: 'أخرى',
 };
 
+const DeclarationCard = ({ declaration, index, onView }: { declaration: any; index: number; onView: () => void }) => (
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }}>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-4">
+          <Button size="sm" variant="outline" className="gap-1.5 shrink-0" onClick={onView}>
+            <Eye className="w-4 h-4" /> عرض
+          </Button>
+          <div className="flex-1 text-right space-y-2">
+            <div className="flex items-center gap-2 justify-end flex-wrap">
+              <Badge variant="outline" className="font-mono text-xs">
+                {declaration.shipment_number || 'غير محدد'}
+              </Badge>
+              <Badge className={
+                declaration.declaration_type === 'generator_handover' || declaration.declaration_type === 'generator_delivery'
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                  : declaration.declaration_type === 'recycler_receipt'
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                  : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+              }>
+                <FileCheck className="w-3 h-3 ml-1" />
+                {declaration.declaration_type === 'generator_handover' || declaration.declaration_type === 'generator_delivery'
+                  ? 'إقرار مولّد'
+                  : declaration.declaration_type === 'recycler_receipt'
+                  ? 'إقرار مدوّر'
+                  : 'إقرار ناقل'}
+              </Badge>
+              {declaration.auto_generated && <Badge variant="secondary" className="text-xs">تلقائي</Badge>}
+              <span className="font-semibold">{declaration.driver_name || declaration.generator_name || 'غير محدد'}</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap justify-end">
+              {declaration.waste_type && <span>النفايات: {declaration.waste_type}</span>}
+              {declaration.quantity && <span>الكمية: {declaration.quantity} {declaration.unit || 'طن'}</span>}
+              {declaration.generator_name && <span>المولد: {declaration.generator_name}</span>}
+              {declaration.transporter_name && <span>الناقل: {declaration.transporter_name}</span>}
+              <span>التاريخ: {format(new Date(declaration.declared_at || declaration.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+              {declaration.status === 'rejected' && <Badge variant="destructive" className="text-xs">مرفوض</Badge>}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  </motion.div>
+);
+
 const GeneratorReceipts = () => {
   const { organization, user } = useAuth();
   const [receipts, setReceipts] = useState<Receipt[]>([]);
@@ -269,15 +314,8 @@ const GeneratorReceipts = () => {
   const filteredDelivery = filterReceipts(deliveryCertificates);
   const filteredReceipts = filterReceipts(receiptCertificates);
 
-  const filteredDeclarations = declarations.filter((d: any) => {
-    const matchesSearch = !searchQuery || 
-      d.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      d.driver_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.generator_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      d.transporter_name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesWasteType = wasteTypeFilter === 'all' || d.waste_type === wasteTypeFilter;
-    return matchesSearch && matchesWasteType;
-  });
+
+
 
   // Unique generators and waste types for filter dropdowns
   const uniqueGenerators = receipts.reduce<{ id: string; name: string }[]>((acc, r) => {
@@ -291,6 +329,26 @@ const GeneratorReceipts = () => {
   const shipmentIdsWithCerts = new Set(deliveryCertificates.map(r => r.shipment?.id).filter(Boolean));
   const shipmentsNeedingCerts = eligibleShipments.filter(s => !shipmentIdsWithCerts.has(s.id));
 
+  const generatorDeclarations = declarations.filter((d: any) => d.declaration_type === 'generator_handover' || d.declaration_type === 'generator_delivery');
+  const transporterDeclarations = declarations.filter((d: any) => d.declaration_type === 'transporter_delivery' || d.declaration_type === 'transporter_handover');
+  const recyclerDeclarations = declarations.filter((d: any) => d.declaration_type === 'recycler_receipt' || d.declaration_type === 'recycler_delivery');
+
+  const filteredGeneratorDeclarations = generatorDeclarations.filter((d: any) => {
+    const matchesSearch = !searchQuery || d.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase()) || d.driver_name?.toLowerCase().includes(searchQuery.toLowerCase()) || d.generator_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesWasteType = wasteTypeFilter === 'all' || d.waste_type === wasteTypeFilter;
+    return matchesSearch && matchesWasteType;
+  });
+  const filteredTransporterDeclarations = transporterDeclarations.filter((d: any) => {
+    const matchesSearch = !searchQuery || d.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase()) || d.driver_name?.toLowerCase().includes(searchQuery.toLowerCase()) || d.transporter_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesWasteType = wasteTypeFilter === 'all' || d.waste_type === wasteTypeFilter;
+    return matchesSearch && matchesWasteType;
+  });
+  const filteredRecyclerDeclarations = recyclerDeclarations.filter((d: any) => {
+    const matchesSearch = !searchQuery || d.shipment_number?.toLowerCase().includes(searchQuery.toLowerCase()) || d.driver_name?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesWasteType = wasteTypeFilter === 'all' || d.waste_type === wasteTypeFilter;
+    return matchesSearch && matchesWasteType;
+  });
+
   const stats = {
     deliveryTotal: deliveryCertificates.length,
     receiptTotal: receiptCertificates.length,
@@ -298,6 +356,9 @@ const GeneratorReceipts = () => {
     confirmed: receiptCertificates.filter(r => r.status === 'confirmed').length,
     needsCert: shipmentsNeedingCerts.length,
     declarationsTotal: declarations.length,
+    generatorDecl: generatorDeclarations.length,
+    transporterDecl: transporterDeclarations.length,
+    recyclerDecl: recyclerDeclarations.length,
   };
 
   return (
@@ -460,23 +521,33 @@ const GeneratorReceipts = () => {
           </CardContent>
         </Card>
 
-        {/* Tabs - 3 tabs now */}
+        {/* Tabs - 5 tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full grid grid-cols-3">
-            <TabsTrigger value="delivery" className="gap-1.5 text-xs sm:text-sm">
-              <Send className="w-4 h-4" />
+          <TabsList className="w-full grid grid-cols-5">
+            <TabsTrigger value="delivery" className="gap-1 text-[10px] sm:text-sm px-1 sm:px-3">
+              <Send className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">شهادات</span> التسليم
-              {stats.deliveryTotal > 0 && <Badge variant="secondary" className="mr-1 text-xs">{stats.deliveryTotal}</Badge>}
+              {stats.deliveryTotal > 0 && <Badge variant="secondary" className="mr-1 text-[10px] px-1.5">{stats.deliveryTotal}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="receipts" className="gap-1.5 text-xs sm:text-sm">
-              <Truck className="w-4 h-4" />
+            <TabsTrigger value="receipts" className="gap-1 text-[10px] sm:text-sm px-1 sm:px-3">
+              <Truck className="w-3.5 h-3.5 shrink-0" />
               <span className="hidden sm:inline">شهادات</span> الاستلام
-              {stats.receiptTotal > 0 && <Badge variant="secondary" className="mr-1 text-xs">{stats.receiptTotal}</Badge>}
+              {stats.receiptTotal > 0 && <Badge variant="secondary" className="mr-1 text-[10px] px-1.5">{stats.receiptTotal}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="declarations" className="gap-1.5 text-xs sm:text-sm">
-              <ClipboardCheck className="w-4 h-4" />
-              الإقرارات
-              {stats.declarationsTotal > 0 && <Badge variant="secondary" className="mr-1 text-xs">{stats.declarationsTotal}</Badge>}
+            <TabsTrigger value="generator-decl" className="gap-1 text-[10px] sm:text-sm px-1 sm:px-3">
+              <ClipboardCheck className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">إقرارات</span> المولد
+              {stats.generatorDecl > 0 && <Badge variant="secondary" className="mr-1 text-[10px] px-1.5">{stats.generatorDecl}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="transporter-decl" className="gap-1 text-[10px] sm:text-sm px-1 sm:px-3">
+              <Truck className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">إقرارات</span> الناقل
+              {stats.transporterDecl > 0 && <Badge variant="secondary" className="mr-1 text-[10px] px-1.5">{stats.transporterDecl}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="recycler-decl" className="gap-1 text-[10px] sm:text-sm px-1 sm:px-3">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">إقرارات</span> المدور
+              {stats.recyclerDecl > 0 && <Badge variant="secondary" className="mr-1 text-[10px] px-1.5">{stats.recyclerDecl}</Badge>}
             </TabsTrigger>
           </TabsList>
 
@@ -578,16 +649,16 @@ const GeneratorReceipts = () => {
             </Card>
           </TabsContent>
 
-          {/* === Declarations Tab === */}
-          <TabsContent value="declarations">
+          {/* === Generator Declarations Tab === */}
+          <TabsContent value="generator-decl">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ClipboardCheck className="w-5 h-5 text-primary" />
-                  الإقرارات القانونية
+                  إقرارات المولّد
                 </CardTitle>
                 <CardDescription>
-                  {filteredDeclarations.length} إقرار - جميع إقرارات التسليم والاستلام الموقعة
+                  {filteredGeneratorDeclarations.length} إقرار - إقرارات تسليم النفايات من الجهة المولدة
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -595,70 +666,84 @@ const GeneratorReceipts = () => {
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
-                ) : filteredDeclarations.length === 0 ? (
+                ) : filteredGeneratorDeclarations.length === 0 ? (
                   <div className="text-center py-12">
                     <ClipboardCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">لا توجد إقرارات</h3>
-                    <p className="text-muted-foreground">لم يتم تسجيل أي إقرارات تسليم بعد</p>
+                    <h3 className="text-lg font-semibold mb-2">لا توجد إقرارات مولّد</h3>
+                    <p className="text-muted-foreground">لم يتم تسجيل أي إقرارات تسليم من المولّد بعد</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {filteredDeclarations.map((declaration: any, index: number) => (
-                      <motion.div key={declaration.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }}>
-                        <Card className="hover:shadow-md transition-shadow">
-                          <CardContent className="p-4">
-                            <div className="flex items-start justify-between gap-4">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="gap-1.5 shrink-0"
-                                onClick={() => { setSelectedDeclaration(declaration); setDeclarationViewOpen(true); }}
-                              >
-                                <Eye className="w-4 h-4" /> عرض
-                              </Button>
+                    {filteredGeneratorDeclarations.map((declaration: any, index: number) => (
+                      <DeclarationCard key={declaration.id} declaration={declaration} index={index} onView={() => { setSelectedDeclaration(declaration); setDeclarationViewOpen(true); }} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                              <div className="flex-1 text-right space-y-2">
-                                <div className="flex items-center gap-2 justify-end flex-wrap">
-                                  <Badge variant="outline" className="font-mono text-xs">
-                                    {declaration.shipment_number || 'غير محدد'}
-                                  </Badge>
-                                  <Badge className={
-                                    declaration.declaration_type === 'generator_handover' || declaration.declaration_type === 'generator_delivery'
-                                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                                      : declaration.declaration_type === 'recycler_receipt'
-                                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                      : 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
-                                  }>
-                                    <FileCheck className="w-3 h-3 ml-1" />
-                                    {declaration.declaration_type === 'generator_handover' || declaration.declaration_type === 'generator_delivery'
-                                      ? 'إقرار مولّد'
-                                      : declaration.declaration_type === 'recycler_receipt'
-                                      ? 'إقرار مدوّر'
-                                      : 'إقرار ناقل'}
-                                  </Badge>
-                                  {declaration.auto_generated && (
-                                    <Badge variant="secondary" className="text-xs">تلقائي</Badge>
-                                  )}
-                                  <span className="font-semibold">{declaration.driver_name || declaration.generator_name || 'غير محدد'}</span>
-                                </div>
+          {/* === Transporter Declarations Tab === */}
+          <TabsContent value="transporter-decl">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-primary" />
+                  إقرارات الناقل
+                </CardTitle>
+                <CardDescription>
+                  {filteredTransporterDeclarations.length} إقرار - إقرارات النقل والتسليم من الجهة الناقلة
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {declarationsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : filteredTransporterDeclarations.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">لا توجد إقرارات ناقل</h3>
+                    <p className="text-muted-foreground">لم يتم تسجيل أي إقرارات من الجهة الناقلة بعد</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredTransporterDeclarations.map((declaration: any, index: number) => (
+                      <DeclarationCard key={declaration.id} declaration={declaration} index={index} onView={() => { setSelectedDeclaration(declaration); setDeclarationViewOpen(true); }} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                                <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap justify-end">
-                                  {declaration.waste_type && <span>النفايات: {declaration.waste_type}</span>}
-                                  {declaration.quantity && <span>الكمية: {declaration.quantity} {declaration.unit || 'طن'}</span>}
-                                  {declaration.generator_name && <span>المولد: {declaration.generator_name}</span>}
-                                  {declaration.transporter_name && <span>الناقل: {declaration.transporter_name}</span>}
-                                  <span>
-                                    التاريخ: {format(new Date(declaration.declared_at || declaration.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
-                                  </span>
-                                  {declaration.status === 'rejected' && (
-                                    <Badge variant="destructive" className="text-xs">مرفوض</Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
+          {/* === Recycler Declarations Tab === */}
+          <TabsContent value="recycler-decl">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  إقرارات المدوّر
+                </CardTitle>
+                <CardDescription>
+                  {filteredRecyclerDeclarations.length} إقرار - إقرارات استلام ومعالجة النفايات من جهة التدوير
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {declarationsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : filteredRecyclerDeclarations.length === 0 ? (
+                  <div className="text-center py-12">
+                    <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">لا توجد إقرارات مدوّر</h3>
+                    <p className="text-muted-foreground">لم يتم تسجيل أي إقرارات من جهة التدوير بعد</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredRecyclerDeclarations.map((declaration: any, index: number) => (
+                      <DeclarationCard key={declaration.id} declaration={declaration} index={index} onView={() => { setSelectedDeclaration(declaration); setDeclarationViewOpen(true); }} />
                     ))}
                   </div>
                 )}
