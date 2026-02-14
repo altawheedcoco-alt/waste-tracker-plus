@@ -42,7 +42,7 @@ const DeliveryDeclarationViewDialog = ({
   declaration,
 }: DeliveryDeclarationViewDialogProps) => {
   const printRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, isExporting } = usePDFExport({
+  const { exportToPDF, printContent, isExporting } = usePDFExport({
     filename: `delivery-declaration-${declaration?.shipment_number || 'doc'}`,
     orientation: 'portrait',
     format: 'a4',
@@ -58,27 +58,7 @@ const DeliveryDeclarationViewDialog = ({
 
   const handlePrint = () => {
     if (printRef.current) {
-      const printWindow = window.open('', '_blank');
-      if (!printWindow) return;
-      printWindow.document.write(`
-        <html dir="rtl"><head><title>إقرار تسليم - ${declaration.shipment_number}</title>
-        <style>
-          body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 40px; direction: rtl; }
-          .header { text-align: center; border-bottom: 3px solid #16a34a; padding-bottom: 20px; margin-bottom: 20px; }
-          .header h1 { color: #16a34a; font-size: 24px; }
-          .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; padding: 15px; background: #f0fdf4; border-radius: 8px; }
-          .info-item { font-size: 14px; }
-          .info-item span { color: #6b7280; }
-          .declaration-text { white-space: pre-wrap; line-height: 2; font-size: 14px; margin: 20px 0; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; }
-          .footer { margin-top: 30px; padding-top: 20px; border-top: 2px solid #e5e7eb; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 12px; color: #6b7280; }
-          .signature-box { border: 1px dashed #d1d5db; padding: 20px; text-align: center; margin-top: 40px; border-radius: 8px; }
-          @media print { body { padding: 20px; } }
-        </style></head><body>
-        ${printRef.current.innerHTML}
-        </body></html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
+      printContent(printRef.current);
     }
   };
 
