@@ -177,16 +177,34 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
 
     const defaultPrintStyles = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-      @page { size: A4; margin: 10mm; }
+      @page { size: A4; margin: 12mm 15mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; box-sizing: border-box; }
       body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; direction: rtl; }
-      .print-container { width: 190mm; max-width: 190mm; margin: 0 auto; padding: 5mm; box-sizing: border-box; }
+      .print-container { width: 180mm; max-width: 180mm; margin: 0 auto; padding: 3mm; box-sizing: border-box; max-height: 540mm; overflow: hidden; }
       .no-print { display: none !important; }
-      img { max-width: 100%; height: auto; }
+      img { max-width: 100%; height: auto; max-height: 60mm; object-fit: contain; }
       table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
       tr { page-break-inside: avoid; page-break-after: auto; }
-      th, td { padding: 4px 8px; border: 1px solid #ddd; text-align: right; font-size: 11px; }
+      th, td { padding: 2px 6px; border: 1px solid #ddd; text-align: right; font-size: 10px; line-height: 1.3; }
+      h1 { font-size: 18px; margin: 4px 0; }
+      h2 { font-size: 15px; margin: 3px 0; }
+      h3 { font-size: 13px; margin: 2px 0; }
+      h4, h5, h6 { font-size: 11px; margin: 2px 0; }
       h1, h2, h3, h4, h5, h6 { page-break-after: avoid; }
+      p { font-size: 10px; margin: 2px 0; line-height: 1.4; }
+      .gap-4, .gap-6, .gap-8 { gap: 8px !important; }
+      .space-y-4 > * + *, .space-y-6 > * + *, .space-y-8 > * + * { margin-top: 6px !important; }
+      .p-6, .p-8 { padding: 8px !important; }
+      .p-4, .p-5 { padding: 6px !important; }
+      .mb-4, .mb-6, .mb-8 { margin-bottom: 6px !important; }
+      .mt-4, .mt-6, .mt-8 { margin-top: 6px !important; }
+      .py-4, .py-6 { padding-top: 4px !important; padding-bottom: 4px !important; }
+      .text-3xl { font-size: 16px !important; }
+      .text-4xl { font-size: 18px !important; }
+      .text-6xl { font-size: 22px !important; }
+      .text-2xl { font-size: 14px !important; }
+      .text-xl { font-size: 12px !important; }
+      .text-lg { font-size: 11px !important; }
       @media print { body { margin: 0; padding: 0; } }
     `;
 
