@@ -185,7 +185,6 @@ const AIOperationsAssistant = () => {
   const exportAsPDF = () => {
     const lastAssistant = [...messages].reverse().find(m => m.role === 'assistant');
     if (!lastAssistant) return;
-    // Create a printable window
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
     printWindow.document.write(`
@@ -196,23 +195,16 @@ const AIOperationsAssistant = () => {
         body { font-family: 'Cairo', Arial, sans-serif; padding: 40px; line-height: 2; direction: rtl; color: #1a1a1a; font-size: 13px; }
         h1 { font-size: 18px; font-weight: 700; color: #1a5632; border-bottom: 3px solid #1a5632; padding-bottom: 8px; margin-bottom: 20px; }
         h2 { font-size: 15px; font-weight: 700; color: #1a5632; border-right: 4px solid #1a5632; padding-right: 12px; margin-top: 24px; margin-bottom: 10px; }
-        h3 { font-size: 14px; font-weight: 600; color: #333; margin-top: 16px; margin-bottom: 6px; }
         table { border-collapse: collapse; width: 100%; margin: 12px 0; }
         td, th { border: 1px solid #ddd; padding: 8px 12px; text-align: right; font-size: 12px; }
         th { background: #e8f5e9; font-weight: 700; color: #1a5632; }
-        tr:nth-child(even) { background: #f9f9f9; }
         strong { color: #1a5632; }
-        hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
-        blockquote { border-right: 4px solid #1a5632; padding-right: 16px; color: #666; font-style: italic; }
-        ul, ol { padding-right: 24px; }
-        li { margin-bottom: 4px; }
-        p { margin-bottom: 8px; }
       </style></head>
       <body>
       <div>${lastAssistant.content.replace(/\n/g, '<br/>')}</div>
       </body></html>`);
     printWindow.document.close();
-    printWindow.print();
+    printWindow.onload = () => { setTimeout(() => printWindow.print(), 300); };
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

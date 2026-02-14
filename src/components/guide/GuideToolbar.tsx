@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { usePDFExport } from '@/hooks/usePDFExport';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +45,7 @@ interface GuideToolbarProps {
 }
 
 const GuideToolbar = ({ sections, guideTitle, primaryColor = 'blue' }: GuideToolbarProps) => {
+  const { printContent } = usePDFExport({ filename: guideTitle });
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
@@ -180,167 +182,40 @@ const GuideToolbar = ({ sections, guideTitle, primaryColor = 'blue' }: GuideTool
   };
 
   const handlePrint = () => {
-    // Create printable content
-    const printContent = `
-      <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
-      <head>
-        <meta charset="UTF-8">
-        <title>${guideTitle}</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
-          
-          * {
-            box-sizing: border-box;
-          }
-          
-          body {
-            font-family: 'Tajawal', 'Segoe UI', Arial, sans-serif;
-            line-height: 1.8;
-            padding: 40px;
-            max-width: 800px;
-            margin: 0 auto;
-            color: #1a1a1a;
-            background: white;
-          }
-          
-          h1 {
-            text-align: center;
-            font-size: 28px;
-            margin-bottom: 10px;
-            color: #1e3a8a;
-            border-bottom: 3px solid #3b82f6;
-            padding-bottom: 15px;
-          }
-          
-          .subtitle {
-            text-align: center;
-            color: #64748b;
-            margin-bottom: 30px;
-          }
-          
-          .toc {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-          }
-          
-          .toc h2 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #1e3a8a;
-          }
-          
-          .toc ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            columns: 2;
-          }
-          
-          .toc li {
-            padding: 5px 0;
-            font-size: 14px;
-          }
-          
-          .toc li::before {
-            content: "•";
-            color: #3b82f6;
-            margin-left: 8px;
-          }
-          
-          .section {
-            margin-bottom: 30px;
-            page-break-inside: avoid;
-          }
-          
-          .section-header {
-            background: linear-gradient(to left, #eff6ff, #dbeafe);
-            padding: 15px 20px;
-            border-radius: 8px 8px 0 0;
-            border-right: 4px solid #3b82f6;
-          }
-          
-          .section-number {
-            font-size: 12px;
-            color: #3b82f6;
-          }
-          
-          .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1e3a8a;
-            margin: 5px 0 0 0;
-          }
-          
-          .section-content {
-            padding: 20px;
-            background: #fafafa;
-            border-radius: 0 0 8px 8px;
-            white-space: pre-line;
-            font-size: 14px;
-          }
-          
-          .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            color: #64748b;
-            font-size: 12px;
-          }
-          
-          @media print {
-            body { padding: 20px; }
-            .section { page-break-inside: avoid; }
-            .toc { page-break-after: always; }
-          }
-        </style>
-      </head>
-      <body>
-        <h1>📘 ${guideTitle}</h1>
-        <p class="subtitle">منصة آي ريسايكل لإدارة المخلفات</p>
-        
-        <div class="toc">
-          <h2>📑 فهرس المحتويات</h2>
-          <ul>
-            ${sections.map((s, i) => `<li>${i + 1}. ${s.title}</li>`).join('')}
+    // Create a temporary container with guide content
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.innerHTML = `
+      <div dir="rtl" style="font-family:'Tajawal','Segoe UI',Arial,sans-serif;line-height:1.8;padding:40px;max-width:800px;margin:0 auto;color:#1a1a1a;background:white;">
+        <h1 style="text-align:center;font-size:28px;margin-bottom:10px;color:#1e3a8a;border-bottom:3px solid #3b82f6;padding-bottom:15px;">📘 ${guideTitle}</h1>
+        <p style="text-align:center;color:#64748b;margin-bottom:30px;">منصة آي ريسايكل لإدارة المخلفات</p>
+        <div style="background:#f8fafc;padding:20px;border-radius:8px;margin-bottom:30px;">
+          <h2 style="font-size:18px;margin-bottom:15px;color:#1e3a8a;">📑 فهرس المحتويات</h2>
+          <ul style="list-style:none;padding:0;columns:2;">
+            ${sections.map((s, i) => `<li style="padding:5px 0;font-size:14px;">• ${i + 1}. ${s.title}</li>`).join('')}
           </ul>
         </div>
-        
         ${sections.map((section, i) => `
-          <div class="section">
-            <div class="section-header">
-              <div class="section-number">القسم ${i + 1}</div>
-              <h3 class="section-title">${section.title}</h3>
+          <div style="margin-bottom:30px;">
+            <div style="background:linear-gradient(to left,#eff6ff,#dbeafe);padding:15px 20px;border-radius:8px 8px 0 0;border-right:4px solid #3b82f6;">
+              <div style="font-size:12px;color:#3b82f6;">القسم ${i + 1}</div>
+              <h3 style="font-size:18px;font-weight:700;color:#1e3a8a;margin:5px 0 0 0;">${section.title}</h3>
             </div>
-            <div class="section-content">${section.content.replace(/\n/g, '<br>')}</div>
+            <div style="padding:20px;background:#fafafa;border-radius:0 0 8px 8px;white-space:pre-line;font-size:14px;">${section.content.replace(/\n/g, '<br>')}</div>
           </div>
         `).join('')}
-        
-        <div class="footer">
+        <div style="text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0;color:#64748b;font-size:12px;">
           <p>تم إنشاء هذا المستند من منصة آي ريسايكل</p>
           <p>© ${new Date().getFullYear()} جميع الحقوق محفوظة</p>
         </div>
-      </body>
-      </html>
+      </div>
     `;
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(printContent);
-      printWindow.document.close();
-      
-      // Wait for fonts to load
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
-      
-      toast.success('جاري تحضير الطباعة...');
-    } else {
-      toast.error('فشل في فتح نافذة الطباعة');
-    }
+    document.body.appendChild(container);
+    const element = container.firstChild as HTMLElement;
+    printContent(element);
+    setTimeout(() => document.body.removeChild(container), 500);
+    toast.success('جاري تحضير الطباعة...');
   };
 
   const toggleMute = () => {
