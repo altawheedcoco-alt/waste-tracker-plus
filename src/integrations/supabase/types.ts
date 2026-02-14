@@ -1775,6 +1775,93 @@ export type Database = {
           },
         ]
       }
+      chain_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_auto: boolean | null
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          notification_type: string
+          read_at: string | null
+          shipment_id: string
+          target_organization_id: string
+          target_user_id: string | null
+          title: string
+          trigger_event: string
+          trigger_organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_auto?: boolean | null
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          notification_type?: string
+          read_at?: string | null
+          shipment_id: string
+          target_organization_id: string
+          target_user_id?: string | null
+          title: string
+          trigger_event: string
+          trigger_organization_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_auto?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          notification_type?: string
+          read_at?: string | null
+          shipment_id?: string
+          target_organization_id?: string
+          target_user_id?: string | null
+          title?: string
+          trigger_event?: string
+          trigger_organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chain_notifications_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_notifications_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chain_notifications_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_notifications_trigger_organization_id_fkey"
+            columns: ["trigger_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chain_notifications_trigger_organization_id_fkey"
+            columns: ["trigger_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
@@ -5175,6 +5262,99 @@ export type Database = {
             columns: ["driver_id"]
             isOneToOne: false
             referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_shipment_assignments: {
+        Row: {
+          accepted_at: string | null
+          assigned_at: string
+          assigned_by: string | null
+          assignment_type: string
+          completed_at: string | null
+          created_at: string
+          driver_id: string
+          id: string
+          notes: string | null
+          organization_id: string
+          rejected_at: string | null
+          rejection_reason: string | null
+          shipment_id: string
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          assigned_at?: string
+          assigned_by?: string | null
+          assignment_type?: string
+          completed_at?: string | null
+          created_at?: string
+          driver_id: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          shipment_id: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          assigned_at?: string
+          assigned_by?: string | null
+          assignment_type?: string
+          completed_at?: string | null
+          created_at?: string
+          driver_id?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          shipment_id?: string
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_shipment_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_assignments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_assignments_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -10942,47 +11122,69 @@ export type Database = {
       partner_links: {
         Row: {
           auto_created: boolean | null
+          auto_renew: boolean | null
+          contract_id: string | null
           created_at: string
+          expires_at: string | null
           external_partner_id: string | null
           first_shipment_id: string | null
           first_transaction_date: string | null
           id: string
+          is_expired: boolean | null
           notes: string | null
           organization_id: string
           partner_organization_id: string | null
           partner_type: string
+          renewal_period_days: number | null
           status: string
           updated_at: string
         }
         Insert: {
           auto_created?: boolean | null
+          auto_renew?: boolean | null
+          contract_id?: string | null
           created_at?: string
+          expires_at?: string | null
           external_partner_id?: string | null
           first_shipment_id?: string | null
           first_transaction_date?: string | null
           id?: string
+          is_expired?: boolean | null
           notes?: string | null
           organization_id: string
           partner_organization_id?: string | null
           partner_type: string
+          renewal_period_days?: number | null
           status?: string
           updated_at?: string
         }
         Update: {
           auto_created?: boolean | null
+          auto_renew?: boolean | null
+          contract_id?: string | null
           created_at?: string
+          expires_at?: string | null
           external_partner_id?: string | null
           first_shipment_id?: string | null
           first_transaction_date?: string | null
           id?: string
+          is_expired?: boolean | null
           notes?: string | null
           organization_id?: string
           partner_organization_id?: string | null
           partner_type?: string
+          renewal_period_days?: number | null
           status?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "partner_links_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "partner_links_organization_id_fkey"
             columns: ["organization_id"]
@@ -13170,6 +13372,112 @@ export type Database = {
           },
         ]
       }
+      shipment_disputes: {
+        Row: {
+          actual_value: number | null
+          against_organization_id: string
+          auto_created: boolean | null
+          created_at: string
+          description: string
+          dispute_type: string
+          evidence_urls: string[] | null
+          expected_value: number | null
+          id: string
+          raised_by_organization_id: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          shipment_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual_value?: number | null
+          against_organization_id: string
+          auto_created?: boolean | null
+          created_at?: string
+          description: string
+          dispute_type: string
+          evidence_urls?: string[] | null
+          expected_value?: number | null
+          id?: string
+          raised_by_organization_id: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          shipment_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual_value?: number | null
+          against_organization_id?: string
+          auto_created?: boolean | null
+          created_at?: string
+          description?: string
+          dispute_type?: string
+          evidence_urls?: string[] | null
+          expected_value?: number | null
+          id?: string
+          raised_by_organization_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          shipment_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_disputes_against_organization_id_fkey"
+            columns: ["against_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_disputes_against_organization_id_fkey"
+            columns: ["against_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_disputes_raised_by_organization_id_fkey"
+            columns: ["raised_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_disputes_raised_by_organization_id_fkey"
+            columns: ["raised_by_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_disputes_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_disputes_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_doc_signatures: {
         Row: {
           created_at: string
@@ -13369,6 +13677,96 @@ export type Database = {
           },
           {
             foreignKeyName: "shipment_logs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipment_ratings: {
+        Row: {
+          comment: string | null
+          communication_rating: number | null
+          created_at: string
+          id: string
+          is_anonymous: boolean | null
+          overall_rating: number
+          punctuality_rating: number | null
+          quality_rating: number | null
+          rated_organization_id: string
+          rated_type: string
+          rater_organization_id: string
+          rater_type: string
+          safety_rating: number | null
+          shipment_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          overall_rating: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          rated_organization_id: string
+          rated_type: string
+          rater_organization_id: string
+          rater_type: string
+          safety_rating?: number | null
+          shipment_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          overall_rating?: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          rated_organization_id?: string
+          rated_type?: string
+          rater_organization_id?: string
+          rater_type?: string
+          safety_rating?: number | null
+          shipment_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_ratings_rated_organization_id_fkey"
+            columns: ["rated_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_ratings_rated_organization_id_fkey"
+            columns: ["rated_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_ratings_rater_organization_id_fkey"
+            columns: ["rater_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_ratings_rater_organization_id_fkey"
+            columns: ["rater_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_ratings_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
