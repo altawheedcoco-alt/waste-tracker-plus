@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Plus, Search, FileText, Settings, Loader2 } from 'lucide-react';
+import { Plus, Search, FileText, Settings, Loader2, Wand2 } from 'lucide-react';
 import { usePermits, Permit } from '@/hooks/usePermits';
 import PermitCard from '@/components/permits/PermitCard';
 import CreatePermitDialog from '@/components/permits/CreatePermitDialog';
@@ -15,7 +15,7 @@ import PermitSignatoryRolesManager from '@/components/permits/PermitSignatoryRol
 import PermitViewDialog from '@/components/permits/PermitViewDialog';
 
 const Permits = () => {
-  const { permits, signatoryRoles, isLoading } = usePermits();
+  const { permits, signatoryRoles, isLoading, autoGeneratePermits } = usePermits();
   const [createOpen, setCreateOpen] = useState(false);
   const [signPermit, setSignPermit] = useState<Permit | null>(null);
   const [viewPermit, setViewPermit] = useState<Permit | null>(null);
@@ -40,10 +40,16 @@ const Permits = () => {
             إدارة التصاريح والأذونات الرسمية مع توقيعات متعددة الأطراف
           </p>
         </div>
-        <Button className="gap-2" onClick={() => setCreateOpen(true)}>
-          <Plus className="w-4 h-4" />
-          تصريح جديد
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => autoGeneratePermits.mutate()} disabled={autoGeneratePermits.isPending}>
+            {autoGeneratePermits.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+            توليد تلقائي
+          </Button>
+          <Button className="gap-2" onClick={() => setCreateOpen(true)}>
+            <Plus className="w-4 h-4" />
+            تصريح جديد
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="permits">
