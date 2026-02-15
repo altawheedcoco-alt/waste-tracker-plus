@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { EntityProfileArchive } from '@/components/archive';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,7 +24,8 @@ import {
   Briefcase,
   FileText,
   Newspaper,
-  Target
+  Target,
+  FolderOpen,
 } from 'lucide-react';
 import ProfileHeader from '@/components/organization/ProfileHeader';
 import BackButton from '@/components/ui/back-button';
@@ -194,10 +196,14 @@ const OrganizationView = () => {
 
         {/* Organization Details */}
         <Tabs defaultValue="portfolio" className="space-y-4" dir="rtl">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="portfolio">
               <Target className="w-4 h-4 ml-2" />
               البورتفوليو
+            </TabsTrigger>
+            <TabsTrigger value="archive">
+              <FolderOpen className="w-4 h-4 ml-2" />
+              الأرشيف
             </TabsTrigger>
             <TabsTrigger value="posts">
               <Newspaper className="w-4 h-4 ml-2" />
@@ -236,6 +242,14 @@ const OrganizationView = () => {
               }}
               isEditable={false}
               onUpdate={() => {}}
+            />
+          </TabsContent>
+
+          {/* Archive Tab */}
+          <TabsContent value="archive">
+            <EntityProfileArchive
+              partnerId={orgData.id}
+              partnerName={orgData.name}
             />
           </TabsContent>
 

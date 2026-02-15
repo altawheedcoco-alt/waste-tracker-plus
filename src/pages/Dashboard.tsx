@@ -60,8 +60,17 @@ const Dashboard = () => {
   const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal');
 
   const renderDashboard = () => {
-    if (isAdmin) return <AdminDashboard />;
     if (isDriver) return <DriverDashboard />;
+    // Admin sees the target org's dashboard when impersonating, otherwise AdminDashboard
+    if (isAdmin) {
+      switch (orgType) {
+        case 'generator': return <GeneratorDashboard />;
+        case 'transporter': return <TransporterDashboard />;
+        case 'recycler': return <RecyclerDashboard />;
+        case 'disposal': return <DisposalDashboard embedded />;
+        default: return <AdminDashboard />;
+      }
+    }
     switch (orgType) {
       case 'generator': return <GeneratorDashboard />;
       case 'transporter': return <TransporterDashboard />;
