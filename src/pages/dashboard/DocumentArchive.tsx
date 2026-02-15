@@ -31,7 +31,7 @@ interface ArchiveDoc {
   title: string;
   type: string;
   date: string;
-  source: 'issued' | 'received' | 'sent' | 'system';
+  source: 'issued' | 'received' | 'sent' | 'system' | 'auto';
   fileUrl?: string;
   referenceId?: string;
   trackingCode?: string;
@@ -41,6 +41,9 @@ interface ArchiveDoc {
   status?: string;
   signed?: boolean;
   amount?: number;
+  description?: string;
+  aiSummary?: string;
+  actionType?: string;
   dedupKey: string;
 }
 
@@ -85,10 +88,16 @@ const DocumentArchive = () => {
       if (!orgId) return [];
       const { data, error } = await supabase.from('document_print_log').select('*').eq('organization_id', orgId).order('created_at', { ascending: false }).limit(500);
       if (error) throw error;
-      return (data || []).map((d): ArchiveDoc => ({
-        id: d.id, title: d.document_number || d.print_tracking_code || t('archive.issuedDoc'), type: d.document_type || 'other', date: d.created_at, source: 'issued',
-        issuedBy: d.printed_by_name || t('archive.system'), trackingCode: d.print_tracking_code, referenceId: d.document_id, dedupKey: `print-${d.document_id || d.id}`,
-      }));
+      return (data || []).map((d): ArchiveDoc => {
+        const isAuto = d.action_type === 'auto_created';
+        return {
+          id: d.id, title: d.document_number || d.print_tracking_code || t('archive.issuedDoc'), type: d.document_type || 'other', date: d.created_at,
+          source: isAuto ? 'auto' : 'issued',
+          issuedBy: d.printed_by_name || t('archive.system'), trackingCode: d.print_tracking_code, referenceId: d.document_id,
+          description: d.description || undefined, aiSummary: d.ai_summary || undefined, actionType: d.action_type || undefined,
+          dedupKey: `print-${d.document_id || d.id}`,
+        };
+      });
     },
     enabled: !!orgId,
   });
@@ -254,7 +263,7 @@ const DocumentArchive = () => {
   const allDocs = useMemo(() => {
     const combined: ArchiveDoc[] = [...issuedDocs, ...receivedDocs, ...sentDocs, ...invoiceDocs, ...certDocs, ...awardDocs, ...contractDocs, ...entityDocs, ...depositDocs, ...weightDocs, ...weighbridgeDocs];
     const seen = new Map<string, ArchiveDoc>();
-    const sourcePriority: Record<string, number> = { issued: 4, system: 3, received: 2, sent: 1 };
+    const sourcePriority: Record<string, number> = { issued: 5, auto: 4, system: 3, received: 2, sent: 1 };
     for (const doc of combined) {
       const existing = seen.get(doc.dedupKey);
       if (!existing || (sourcePriority[doc.source] || 0) > (sourcePriority[existing.source] || 0)) seen.set(doc.dedupKey, doc);
@@ -271,6 +280,7 @@ const DocumentArchive = () => {
     else if (activeTab === 'received') docs = docs.filter(d => d.source === 'received');
     else if (activeTab === 'sent') docs = docs.filter(d => d.source === 'sent');
     else if (activeTab === 'system') docs = docs.filter(d => d.source === 'system');
+    else if (activeTab === 'auto') docs = docs.filter(d => d.source === 'auto');
     else if (activeTab !== 'all') docs = docs.filter(d => d.type === activeTab);
     if (search.trim()) {
       const s = search.toLowerCase();
@@ -280,7 +290,7 @@ const DocumentArchive = () => {
   }, [allDocs, activeTab, search]);
 
   const statsByType = useMemo(() => { const counts: Record<string, number> = {}; allDocs.forEach(d => { counts[d.type] = (counts[d.type] || 0) + 1; }); return counts; }, [allDocs]);
-  const sourceStats = useMemo(() => ({ issued: allDocs.filter(d => d.source === 'issued').length, received: allDocs.filter(d => d.source === 'received').length, sent: allDocs.filter(d => d.source === 'sent').length, system: allDocs.filter(d => d.source === 'system').length }), [allDocs]);
+  const sourceStats = useMemo(() => ({ issued: allDocs.filter(d => d.source === 'issued').length, received: allDocs.filter(d => d.source === 'received').length, sent: allDocs.filter(d => d.source === 'sent').length, system: allDocs.filter(d => d.source === 'system').length, auto: allDocs.filter(d => d.source === 'auto').length }), [allDocs]);
 
   // ─── Realtime ───
   useEffect(() => {
@@ -304,6 +314,7 @@ const DocumentArchive = () => {
       case 'issued': return <Badge variant="outline" className="text-[10px] gap-1"><FolderOpen className="w-3 h-3" /> {t('archive.issued')}</Badge>;
       case 'received': return <Badge variant="secondary" className="text-[10px] gap-1"><Inbox className="w-3 h-3" /> {t('archive.received')}</Badge>;
       case 'sent': return <Badge className="text-[10px] gap-1 bg-primary/10 text-primary"><SendIcon className="w-3 h-3" /> {t('archive.sent')}</Badge>;
+      case 'auto': return <Badge variant="outline" className="text-[10px] gap-1 border-primary/40 text-primary"><Bell className="w-3 h-3" /> {language === 'ar' ? 'تلقائي' : 'Auto'}</Badge>;
       case 'system': return <Badge variant="outline" className="text-[10px] gap-1 border-muted-foreground/30"><FileArchive className="w-3 h-3" /> {t('archive.system')}</Badge>;
       default: return null;
     }
@@ -332,12 +343,13 @@ const DocumentArchive = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
           {[
             { key: 'all', label: t('archive.total'), count: allDocs.length, icon: FileText, bg: 'bg-primary/10', iconColor: 'text-primary' },
-            { key: 'issued', label: t('archive.issued'), count: sourceStats.issued, icon: FolderOpen, bg: 'bg-emerald-500/10', iconColor: 'text-emerald-600' },
-            { key: 'received', label: t('archive.received'), count: sourceStats.received, icon: Inbox, bg: 'bg-blue-500/10', iconColor: 'text-blue-600' },
-            { key: 'sent', label: t('archive.sent'), count: sourceStats.sent, icon: SendIcon, bg: 'bg-purple-500/10', iconColor: 'text-purple-600' },
+            { key: 'auto', label: language === 'ar' ? 'تلقائي' : 'Auto', count: sourceStats.auto, icon: Bell, bg: 'bg-accent', iconColor: 'text-accent-foreground' },
+            { key: 'issued', label: t('archive.issued'), count: sourceStats.issued, icon: FolderOpen, bg: 'bg-primary/5', iconColor: 'text-primary' },
+            { key: 'received', label: t('archive.received'), count: sourceStats.received, icon: Inbox, bg: 'bg-secondary', iconColor: 'text-secondary-foreground' },
+            { key: 'sent', label: t('archive.sent'), count: sourceStats.sent, icon: SendIcon, bg: 'bg-muted', iconColor: 'text-muted-foreground' },
             { key: 'system', label: t('archive.system'), count: sourceStats.system, icon: FileArchive, bg: 'bg-muted', iconColor: 'text-muted-foreground' },
           ].map(stat => (
             <Card key={stat.key} className={`p-2.5 cursor-pointer hover:shadow-md transition-shadow ${activeTab === stat.key ? 'ring-2 ring-primary' : ''}`} onClick={() => setActiveTab(stat.key)}>
@@ -371,9 +383,10 @@ const DocumentArchive = () => {
           <ScrollArea className="w-full">
             <TabsList className="h-auto flex-wrap gap-1 bg-transparent p-0 justify-end">
               <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5">{t('archive.all')} ({allDocs.length})</TabsTrigger>
-              <TabsTrigger value="issued" className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-xs px-3 py-1.5">{t('archive.issued')} ({sourceStats.issued})</TabsTrigger>
-              <TabsTrigger value="received" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs px-3 py-1.5">{t('archive.received')} ({sourceStats.received})</TabsTrigger>
-              <TabsTrigger value="sent" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-xs px-3 py-1.5">{t('archive.sent')} ({sourceStats.sent})</TabsTrigger>
+              <TabsTrigger value="auto" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5">{language === 'ar' ? 'تلقائي' : 'Auto'} ({sourceStats.auto})</TabsTrigger>
+              <TabsTrigger value="issued" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5">{t('archive.issued')} ({sourceStats.issued})</TabsTrigger>
+              <TabsTrigger value="received" className="data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground text-xs px-3 py-1.5">{t('archive.received')} ({sourceStats.received})</TabsTrigger>
+              <TabsTrigger value="sent" className="data-[state=active]:bg-muted data-[state=active]:text-muted-foreground text-xs px-3 py-1.5">{t('archive.sent')} ({sourceStats.sent})</TabsTrigger>
               {Object.entries(statsByType).filter(([, count]) => count > 0).map(([type, count]) => {
                 const config = DOC_TYPES[type] || DOC_TYPES.other;
                 return <TabsTrigger key={type} value={type} className="text-xs px-3 py-1.5 gap-1">{config.label} ({count})</TabsTrigger>;
@@ -424,8 +437,14 @@ const DocumentArchive = () => {
                           </div>
                           {/* Document description */}
                           <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1 text-right">
-                            {docDesc}
+                            {doc.description || docDesc}
                           </p>
+                          {doc.aiSummary && (
+                            <p className="text-[10px] text-muted-foreground/70 mt-0.5 line-clamp-2 text-right italic">
+                              <Info className="w-2.5 h-2.5 inline ml-0.5" />
+                              {doc.aiSummary}
+                            </p>
+                          )}
                           <div className="flex items-center gap-2 justify-end mt-1 text-xs text-muted-foreground flex-wrap">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
