@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useOrgMembers, OrgMember } from '@/hooks/useOrgMembers';
 import { useOrgStructure } from '@/hooks/useOrgStructure';
+import { useAuth } from '@/contexts/auth/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,16 +11,61 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import {
   UserPlus, User, Mail, Phone, Building2, Briefcase, Shield,
-  MoreVertical, UserX, Edit, Eye, Loader2, Search, Hash,
+  MoreVertical, UserX, Edit, Eye, Loader2, Search, Hash, Wand2,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import PositionPermissionsEditor from './PositionPermissionsEditor';
 import MemberProfileSheet from './MemberProfileSheet';
+
+/**
+ * Generates an automatic email in the format:
+ * job_title-firstname.lastname@orgname.ayrecycle.com
+ */
+function generateAutoEmail(fullName: string, jobTitle: string, orgName: string): string {
+  // Transliterate Arabic to Latin for email
+  const arabicToLatin: Record<string, string> = {
+    'أ': 'a', 'إ': 'e', 'آ': 'a', 'ا': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th',
+    'ج': 'j', 'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z',
+    'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'z',
+    'ع': 'a', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm',
+    'ن': 'n', 'ه': 'h', 'و': 'w', 'ي': 'y', 'ى': 'a', 'ة': 'a',
+    'ؤ': 'w', 'ئ': 'y', 'ء': 'a',
+  };
+
+  const transliterate = (text: string) => {
+    // If already latin, just lowercase and clean
+    if (/^[a-zA-Z\s\-_]+$/.test(text)) {
+      return text.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+    }
+    let result = '';
+    for (const char of text) {
+      if (arabicToLatin[char]) {
+        result += arabicToLatin[char];
+      } else if (/[a-zA-Z0-9]/.test(char)) {
+        result += char.toLowerCase();
+      }
+      // Skip spaces, diacritics, etc.
+    }
+    return result;
+  };
+
+  const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] ? transliterate(nameParts[0]) : '';
+  const lastName = nameParts[1] ? transliterate(nameParts[1]) : '';
+  const nameSlug = lastName ? `${firstName}.${lastName}` : firstName;
+
+  const jobSlug = transliterate(jobTitle || 'employee');
+  const orgSlug = transliterate(orgName || 'org');
+
+  if (!nameSlug) return '';
+  return `${jobSlug}-${nameSlug}@${orgSlug}.ayrecycle.com`;
+}
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   active: { label: 'نشط', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
@@ -32,14 +78,27 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 export default function OrgMembersPanel() {
   const { members, isLoading, addMember, updateMember, removeMember } = useOrgMembers();
   const { departments, positions } = useOrgStructure();
+  const { organization } = useAuth();
   const [addOpen, setAddOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedMember, setSelectedMember] = useState<OrgMember | null>(null);
   const [editPermsId, setEditPermsId] = useState<string | null>(null);
+  const [useAutoEmail, setUseAutoEmail] = useState(true);
   const [form, setForm] = useState({
     email: '', full_name: '', phone: '', position_id: '', department_id: '',
     job_title_ar: '', employee_number: '',
   });
+
+  const autoEmail = useMemo(() => {
+    if (!form.full_name || !organization?.name) return '';
+    return generateAutoEmail(form.full_name, form.job_title_ar, organization.name);
+  }, [form.full_name, form.job_title_ar, organization?.name]);
+
+  useEffect(() => {
+    if (useAutoEmail && autoEmail) {
+      setForm(p => ({ ...p, email: autoEmail }));
+    }
+  }, [useAutoEmail, autoEmail]);
 
   const handleAdd = () => {
     if (!form.email || !form.full_name) {
@@ -50,6 +109,7 @@ export default function OrgMembersPanel() {
       onSuccess: () => {
         setAddOpen(false);
         setForm({ email: '', full_name: '', phone: '', position_id: '', department_id: '', job_title_ar: '', employee_number: '' });
+        setUseAutoEmail(true);
       },
     });
   };
@@ -90,8 +150,42 @@ export default function OrgMembersPanel() {
                 <Input value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} placeholder="أحمد محمد" className="text-right" />
               </div>
               <div>
-                <Label>البريد الإلكتروني *</Label>
-                <Input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="ahmed@company.com" type="email" dir="ltr" />
+                <Label>المسمى الوظيفي</Label>
+                <Input value={form.job_title_ar} onChange={e => setForm(p => ({ ...p, job_title_ar: e.target.value }))} placeholder="مثال: محاسب" className="text-right" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="auto-email"
+                      checked={useAutoEmail}
+                      onCheckedChange={(v) => {
+                        setUseAutoEmail(!!v);
+                        if (!v) setForm(p => ({ ...p, email: '' }));
+                      }}
+                    />
+                    <label htmlFor="auto-email" className="text-xs text-muted-foreground cursor-pointer flex items-center gap-1">
+                      <Wand2 className="w-3 h-3" /> توليد تلقائي
+                    </label>
+                  </div>
+                  <Label>البريد الإلكتروني *</Label>
+                </div>
+                <Input
+                  value={form.email}
+                  onChange={e => {
+                    if (!useAutoEmail) setForm(p => ({ ...p, email: e.target.value }));
+                  }}
+                  readOnly={useAutoEmail}
+                  placeholder={useAutoEmail ? 'سيتم التوليد تلقائياً...' : 'ahmed@company.com'}
+                  type="email"
+                  dir="ltr"
+                  className={useAutoEmail ? 'bg-muted/50 text-xs' : ''}
+                />
+                {useAutoEmail && autoEmail && (
+                  <p className="text-[10px] text-muted-foreground mt-1 dir-ltr text-left">
+                    ✨ {autoEmail}
+                  </p>
+                )}
               </div>
               <div>
                 <Label>رقم الجوال</Label>
@@ -119,15 +213,9 @@ export default function OrgMembersPanel() {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label>المسمى الوظيفي</Label>
-                  <Input value={form.job_title_ar} onChange={e => setForm(p => ({ ...p, job_title_ar: e.target.value }))} placeholder="مثال: محاسب أول" className="text-right" />
-                </div>
-                <div>
-                  <Label>الرقم الوظيفي</Label>
-                  <Input value={form.employee_number} onChange={e => setForm(p => ({ ...p, employee_number: e.target.value }))} placeholder="EMP-001" dir="ltr" />
-                </div>
+              <div>
+                <Label>الرقم الوظيفي</Label>
+                <Input value={form.employee_number} onChange={e => setForm(p => ({ ...p, employee_number: e.target.value }))} placeholder="EMP-001" dir="ltr" />
               </div>
               <Button onClick={handleAdd} disabled={addMember.isPending} className="w-full">
                 {addMember.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'إضافة العضو'}
