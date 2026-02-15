@@ -220,19 +220,14 @@ const ShipmentLinksManager = () => {
     if (!profile?.organization_id) return;
 
     try {
-      // Load generators (registered organizations)
-      const { data: genOrgs } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type')
-        .eq('organization_type', 'generator')
-        .order('name');
+      // Load ONLY linked partners via verified_partnerships
+      const { fetchLinkedPartnerOrgs } = await import('@/hooks/useLinkedPartnerIds');
+      const orgId = profile.organization_id;
 
-      // Load recyclers (registered organizations)
-      const { data: recOrgs } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type')
-        .eq('organization_type', 'recycler')
-        .order('name');
+      const [genOrgs, recOrgs] = await Promise.all([
+        fetchLinkedPartnerOrgs<{ id: string; name: string; organization_type: string }>(orgId, 'generator', 'id, name, organization_type'),
+        fetchLinkedPartnerOrgs<{ id: string; name: string; organization_type: string }>(orgId, 'recycler', 'id, name, organization_type'),
+      ]);
 
       // Load external partners
       const { data: externals } = await supabase
