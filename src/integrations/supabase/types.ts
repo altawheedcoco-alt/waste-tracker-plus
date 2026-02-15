@@ -19283,6 +19283,13 @@ export type Database = {
       }
       auto_approve_delivery_certificates: { Args: never; Returns: undefined }
       auto_approve_expired_shipments: { Args: never; Returns: undefined }
+      auto_generate_permits_for_shipments: {
+        Args: never
+        Returns: {
+          permits_created: number
+          shipments_processed: number
+        }[]
+      }
       can_access_contract: {
         Args: { _contract_id: string; _user_id: string }
         Returns: boolean

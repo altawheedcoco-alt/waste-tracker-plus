@@ -200,6 +200,20 @@ export function usePermits() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const autoGeneratePermits = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc('auto_generate_permits_for_shipments');
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data: any) => {
+      const result = Array.isArray(data) ? data[0] : data;
+      toast.success(`تم إنشاء ${result?.permits_created || 0} تصريح لـ ${result?.shipments_processed || 0} شحنة`);
+      queryClient.invalidateQueries({ queryKey: ['permits'] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   return {
     permits: permits || [],
     signatoryRoles: signatoryRoles || [],
@@ -208,6 +222,7 @@ export function usePermits() {
     signPermit,
     addSignatoryRole,
     seedDefaultRoles,
+    autoGeneratePermits,
   };
 }
 
