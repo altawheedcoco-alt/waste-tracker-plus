@@ -16,6 +16,15 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
+    // Allow ping without auth
+    const rawBody = await req.text()
+    let data: any
+    try { data = JSON.parse(rawBody) } catch { data = {} }
+    
+    if (data.action === 'ping') {
+      return new Response(JSON.stringify({ success: true, message: 'Carbon Calculator service is running', timestamp: new Date().toISOString() }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -26,7 +35,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    const data = await req.json()
     const { action } = data
 
     // Load emission factors

@@ -208,9 +208,15 @@ Deno.serve(async (req) => {
         );
       }
 
+      case 'ping':
+        return new Response(
+          JSON.stringify({ success: true, message: 'Send Notification service is running', timestamp: new Date().toISOString() }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+
       default:
         return new Response(
-          JSON.stringify({ error: 'Invalid action', available: ['send', 'broadcast', 'status'] }),
+          JSON.stringify({ error: 'Invalid action', available: ['send', 'broadcast', 'status', 'ping'] }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
