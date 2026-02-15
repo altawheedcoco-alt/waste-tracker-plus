@@ -68,6 +68,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useDeliveryDeclaration, useShipmentDeclarations } from '@/hooks/useDeliveryDeclaration';
 import DeliveryDeclarationViewDialog from './DeliveryDeclarationViewDialog';
+import CompleteShipmentDocButton from './CompleteShipmentDocButton';
 
 // Lazy load the live tracking map dialog and inline map
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -984,7 +985,27 @@ const ShipmentCard = ({
                       {d.status === 'rejected' && <XCircle className="w-2.5 h-2.5 text-red-500" />}
                     </Badge>
                   ))}
+                  {/* Complete Shipment Document Button */}
+                  <CompleteShipmentDocButton
+                    shipmentId={shipment.id}
+                    shipmentNumber={shipment.shipment_number}
+                    shipmentStatus={shipment.status}
+                    variant="outline"
+                    size="sm"
+                    className="text-[10px] h-5 px-2"
+                  />
                 </div>
+              </div>
+            )}
+
+            {/* Complete Shipment Doc - shown even without other documents */}
+            {totalDocuments === 0 && ['confirmed', 'completed'].includes(shipment.status) && (
+              <div className="border-t px-4 py-2.5 bg-muted/30" onClick={(e) => e.stopPropagation()}>
+                <CompleteShipmentDocButton
+                  shipmentId={shipment.id}
+                  shipmentNumber={shipment.shipment_number}
+                  shipmentStatus={shipment.status}
+                />
               </div>
             )}
 

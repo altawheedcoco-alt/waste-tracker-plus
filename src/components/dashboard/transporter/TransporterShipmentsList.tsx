@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Eye, Plus, Search, ChevronLeft, ChevronRight, RefreshCw, Download, Filter, Printer, Settings2 } from 'lucide-react';
+import { AlertCircle, Eye, Plus, Search, ChevronLeft, ChevronRight, RefreshCw, Download, Filter, Printer, Settings2, FileArchive } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkStatusChangeDropdown from '@/components/shipments/BulkStatusChangeDropdown';
@@ -12,6 +12,7 @@ import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import CompleteShipmentDocButton from '@/components/shipments/CompleteShipmentDocButton';
 
 interface TransporterShipmentsListProps {
   shipments: TransporterShipment[];
@@ -277,6 +278,13 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilte
                       <Eye className="h-3.5 w-3.5" />
                       التفاصيل
                     </Button>
+                    <CompleteShipmentDocButton
+                      shipmentId={shipment.id}
+                      shipmentNumber={shipment.shipment_number}
+                      shipmentStatus={shipment.status}
+                      size="sm"
+                      className="text-xs h-7 gap-1.5 rounded-full px-3"
+                    />
                   </div>
                 )}
               </div>
