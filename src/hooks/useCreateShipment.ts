@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { fetchLinkedPartnerOrgs } from '@/hooks/useLinkedPartnerIds';
 import { useAutoChat } from '@/hooks/useAutoChat';
 import { usePinnedParties } from '@/hooks/usePinnedParties';
 import type { Database } from '@/integrations/supabase/types';
@@ -316,52 +317,43 @@ export const useCreateShipment = () => {
 
   const fetchOrganizationsAndDrivers = async () => {
     try {
-      const { data: generatorData } = await supabase
-        .from('organizations')
-        .select('id, name, address, city')
-        .eq('organization_type', 'generator')
-        .eq('is_verified', true)
-        .eq('is_active', true);
-
-      const { data: recyclerData } = await supabase
-        .from('organizations')
-        .select('id, name, address, city')
-        .eq('organization_type', 'recycler')
-        .eq('is_verified', true)
-        .eq('is_active', true);
-
-      // Fetch disposal facilities
-      const { data: disposalData } = await supabase
-        .from('organizations')
-        .select('id, name, address, city')
-        .eq('organization_type', 'disposal')
-        .eq('is_verified', true)
-        .eq('is_active', true);
+      const orgId = organization?.id;
 
       if (isAdmin) {
-        const { data: transporterData } = await supabase
-          .from('organizations')
-          .select('id, name, address, city, hazardous_certified, is_suspended')
-          .eq('organization_type', 'transporter')
-          .eq('is_verified', true)
-          .eq('is_active', true)
-          .eq('is_suspended', false);
-        if (transporterData) setTransporters(transporterData as unknown as Organization[]);
+        // Admin sees all organizations (system-wide view)
+        const [genRes, recRes, dispRes, transRes] = await Promise.all([
+          supabase.from('organizations').select('id, name, address, city').eq('organization_type', 'generator').eq('is_verified', true).eq('is_active', true),
+          supabase.from('organizations').select('id, name, address, city').eq('organization_type', 'recycler').eq('is_verified', true).eq('is_active', true),
+          supabase.from('organizations').select('id, name, address, city').eq('organization_type', 'disposal').eq('is_verified', true).eq('is_active', true),
+          supabase.from('organizations').select('id, name, address, city, hazardous_certified, is_suspended').eq('organization_type', 'transporter').eq('is_verified', true).eq('is_active', true).eq('is_suspended', false),
+        ]);
+        if (genRes.data) setGenerators(genRes.data);
+        if (recRes.data) setRecyclers(recRes.data);
+        if (dispRes.data) setDisposalFacilities(dispRes.data);
+        if (transRes.data) setTransporters(transRes.data as unknown as Organization[]);
+      } else if (orgId) {
+        // Non-admin: ONLY show linked partners via verified_partnerships
+        const [generatorData, recyclerData, disposalData, transporterData] = await Promise.all([
+          fetchLinkedPartnerOrgs<Organization>(orgId, 'generator', 'id, name, address, city'),
+          fetchLinkedPartnerOrgs<Organization>(orgId, 'recycler', 'id, name, address, city'),
+          fetchLinkedPartnerOrgs<Organization>(orgId, 'disposal', 'id, name, address, city'),
+          fetchLinkedPartnerOrgs<Organization>(orgId, 'transporter', 'id, name, address, city, hazardous_certified, is_suspended'),
+        ]);
+        setGenerators(generatorData);
+        setRecyclers(recyclerData);
+        setDisposalFacilities(disposalData);
+        setTransporters(transporterData);
       }
 
-      if (!isDriver && organization?.id) {
+      if (!isDriver && orgId) {
         const { data: driverData } = await supabase
           .from('drivers')
           .select('id, vehicle_type, vehicle_plate, profile:profiles(full_name)')
-          .eq('organization_id', organization.id)
+          .eq('organization_id', orgId)
           .eq('is_available', true);
 
         if (driverData) setDrivers(driverData as unknown as Driver[]);
       }
-
-      if (generatorData) setGenerators(generatorData);
-      if (recyclerData) setRecyclers(recyclerData);
-      if (disposalData) setDisposalFacilities(disposalData);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
