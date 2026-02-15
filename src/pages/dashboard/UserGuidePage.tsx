@@ -1,8 +1,9 @@
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Printer, ArrowRight, Package, FileText, Users, Shield, Truck, Recycle, Factory, Brain, MapPin, BarChart3, Settings, Bell, MessageCircle, Calculator, BookOpen } from 'lucide-react';
+import { Printer, ArrowRight, Package, FileText, Users, Shield, Truck, Recycle, Factory, Brain, MapPin, BarChart3, Settings, Bell, MessageCircle, Calculator, BookOpen, Download, Eye, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { usePDFExport } from '@/hooks/usePDFExport';
 
 const Section = ({ id, icon: Icon, title, children }: { id: string; icon: any; title: string; children: React.ReactNode }) => (
   <section id={id} className="mb-8 scroll-mt-20">
@@ -65,8 +66,14 @@ const TableOfContents = () => {
 
 const UserGuidePage = () => {
   const printRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, previewPDF, printContent, isExporting } = usePDFExport({
+    filename: 'دليل-المستخدم-iRecycle',
+    orientation: 'portrait',
+  });
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => printRef.current && printContent(printRef.current);
+  const handlePDF = () => printRef.current && exportToPDF(printRef.current);
+  const handlePreview = () => printRef.current && previewPDF(printRef.current);
 
   return (
     <DashboardLayout>
@@ -77,10 +84,20 @@ const UserGuidePage = () => {
             <h1 className="text-2xl font-bold text-foreground">📖 دليل المستخدم الشامل</h1>
             <p className="text-sm text-muted-foreground mt-1">الشرح التفصيلي الكامل لجميع وظائف وخدمات منصة iRecycle</p>
           </div>
-          <Button variant="outline" onClick={handlePrint} className="gap-2">
-            <Printer className="w-4 h-4" />
-            طباعة الدليل
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handlePrint} className="gap-2" disabled={isExporting}>
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Printer className="w-4 h-4" />}
+              طباعة
+            </Button>
+            <Button variant="outline" onClick={handlePDF} className="gap-2" disabled={isExporting}>
+              <Download className="w-4 h-4" />
+              PDF
+            </Button>
+            <Button variant="outline" onClick={handlePreview} className="gap-2" disabled={isExporting}>
+              <Eye className="w-4 h-4" />
+              معاينة
+            </Button>
+          </div>
         </div>
 
         <TableOfContents />
