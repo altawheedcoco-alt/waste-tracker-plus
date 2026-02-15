@@ -155,7 +155,7 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         
-        {!isAdmin && (
+        {(
           <AnimatePresence>
             {userOrganizations.map((org, index) => {
               const Icon = getOrganizationIcon(org.organization_type);
@@ -219,6 +219,10 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
           </AnimatePresence>
         )}
         
+        {isAdmin && userOrganizations.length > 0 && (
+          <DropdownMenuSeparator />
+        )}
+
         {isAdmin && (
           <>
             <DropdownMenuSeparator />
