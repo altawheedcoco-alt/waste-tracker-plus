@@ -43,6 +43,7 @@ import {
 import { generateReceiptPrintHTML } from './ReceiptPrintTemplate';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
+import AddNoteButton from '@/components/notes/AddNoteButton';
 
 interface ReceiptDetailsDialogProps {
   open: boolean;
@@ -407,6 +408,7 @@ const ReceiptDetailsDialog = ({
               )}
               تحميل PDF
             </Button>
+            <AddNoteButton resourceType="receipt" resourceId={receipt.id || receipt.receipt_number} />
             <ShareDocumentButton
               referenceId={receipt.receipt_number}
               referenceType="receipt"

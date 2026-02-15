@@ -10165,6 +10165,167 @@ export type Database = {
           },
         ]
       }
+      note_reads: {
+        Row: {
+          id: string
+          note_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          note_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          note_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "note_reads_note_id_fkey"
+            columns: ["note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notes: {
+        Row: {
+          attachment_name: string | null
+          attachment_url: string | null
+          author_id: string
+          content: string
+          created_at: string
+          edited_at: string | null
+          id: string
+          is_edited: boolean | null
+          is_pinned: boolean | null
+          is_resolved: boolean | null
+          mentioned_user_ids: string[] | null
+          note_type: string
+          organization_id: string
+          parent_note_id: string | null
+          priority: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          resource_id: string
+          resource_type: string
+          target_organization_id: string | null
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          author_id: string
+          content: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_edited?: boolean | null
+          is_pinned?: boolean | null
+          is_resolved?: boolean | null
+          mentioned_user_ids?: string[] | null
+          note_type?: string
+          organization_id: string
+          parent_note_id?: string | null
+          priority?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resource_id: string
+          resource_type: string
+          target_organization_id?: string | null
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          attachment_name?: string | null
+          attachment_url?: string | null
+          author_id?: string
+          content?: string
+          created_at?: string
+          edited_at?: string | null
+          id?: string
+          is_edited?: boolean | null
+          is_pinned?: boolean | null
+          is_resolved?: boolean | null
+          mentioned_user_ids?: string[] | null
+          note_type?: string
+          organization_id?: string
+          parent_note_id?: string | null
+          priority?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resource_id?: string
+          resource_type?: string
+          target_organization_id?: string | null
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_parent_note_id_fkey"
+            columns: ["parent_note_id"]
+            isOneToOne: false
+            referencedRelation: "notes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "notes_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_channels: {
         Row: {
           channel_type: string

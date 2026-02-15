@@ -35,6 +35,7 @@ import StampSignatureSettings, { StampSignatureConfig, defaultConfig } from './S
 import { usePDFExport } from '@/hooks/usePDFExport';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
+import AddNoteButton from '@/components/notes/AddNoteButton';
 
 interface OrganizationData {
   name: string;
@@ -784,6 +785,7 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
             إغلاق
           </Button>
           <div className="flex items-center gap-2">
+            <AddNoteButton resourceType="shipment" resourceId={shipment.id} />
             <SignDocumentButton
               documentType="shipment"
               documentId={shipment.id}
