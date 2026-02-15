@@ -109,6 +109,19 @@ interface RecyclerOrg {
   client_code?: string | null;
 }
 
+interface CarbonData {
+  transportEmissions: number;
+  processingEmissions: number;
+  totalEmissions: number;
+  co2Saved: number;
+  netImpact: number;
+  distanceKm: number;
+  treesEquivalent: number;
+  carsEquivalent: number;
+  homesEquivalent: number;
+  recyclingRate: number;
+}
+
 interface RecyclingCertificatePrintProps {
   shipment: Shipment;
   template: string;
@@ -118,6 +131,7 @@ interface RecyclingCertificatePrintProps {
   closingDeclaration?: string;
   recyclerOrg: RecyclerOrg | null;
   includeCoverPage?: boolean;
+  carbonData?: CarbonData | null;
 }
 
 const wasteTypeLabels: Record<string, string> = {
@@ -149,6 +163,7 @@ const RecyclingCertificatePrint = ({
   closingDeclaration,
   recyclerOrg,
   includeCoverPage = true,
+  carbonData,
 }: RecyclingCertificatePrintProps) => {
   const currentDate = format(new Date(), 'PP', { locale: ar });
   const deliveryDate = shipment.delivered_at
@@ -460,6 +475,73 @@ const RecyclingCertificatePrint = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Environmental Impact / Carbon Footprint Section */}
+      {carbonData && (
+        <div className="mb-2 print-info-box print-avoid-break">
+          <h3 
+            className="font-bold mb-1 flex items-center gap-1 p-1 rounded" 
+            style={{ backgroundColor: '#ecfdf5', color: '#065f46', fontSize: '9pt' }}
+          >
+            <Leaf className="w-3 h-3" style={{ color: '#059669' }} />
+            البصمة الكربونية والأثر البيئي
+          </h3>
+          <div className="grid grid-cols-2 gap-2">
+            {/* Emissions Table */}
+            <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '7.5pt' }}>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #d1fae5' }}>
+                  <td className="p-1 font-semibold" style={{ backgroundColor: '#f0fdf4', width: '55%' }}>انبعاثات النقل (CO₂)</td>
+                  <td className="p-1 font-mono" style={{ color: '#dc2626' }}>{carbonData.transportEmissions.toFixed(3)} طن</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #d1fae5' }}>
+                  <td className="p-1 font-semibold" style={{ backgroundColor: '#f0fdf4' }}>انبعاثات المعالجة (CO₂)</td>
+                  <td className="p-1 font-mono" style={{ color: '#dc2626' }}>{carbonData.processingEmissions.toFixed(3)} طن</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #d1fae5' }}>
+                  <td className="p-1 font-semibold" style={{ backgroundColor: '#f0fdf4' }}>إجمالي الانبعاثات</td>
+                  <td className="p-1 font-mono font-bold" style={{ color: '#dc2626' }}>{carbonData.totalEmissions.toFixed(3)} طن</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #d1fae5', backgroundColor: '#f0fdf4' }}>
+                  <td className="p-1 font-semibold" style={{ color: '#059669' }}>CO₂ تم توفيره (التدوير)</td>
+                  <td className="p-1 font-mono font-bold" style={{ color: '#059669' }}>{carbonData.co2Saved.toFixed(3)} طن</td>
+                </tr>
+                <tr>
+                  <td className="p-1 font-semibold" style={{ backgroundColor: '#ecfdf5' }}>صافي الأثر الكربوني</td>
+                  <td className="p-1 font-mono font-bold" style={{ color: carbonData.netImpact <= 0 ? '#059669' : '#dc2626' }}>
+                    {carbonData.netImpact <= 0 ? '✅ ' : ''}{carbonData.netImpact.toFixed(3)} طن
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Environmental Equivalents */}
+            <div className="rounded p-2" style={{ backgroundColor: '#f0fdf4', border: '1px solid #a7f3d0' }}>
+              <p className="font-bold mb-1" style={{ fontSize: '7.5pt', color: '#065f46' }}>المكافئات البيئية</p>
+              <div style={{ fontSize: '7pt', lineHeight: '1.6' }}>
+                <p style={{ margin: 0 }}>🌳 يعادل زراعة <strong style={{ color: '#059669' }}>{carbonData.treesEquivalent}</strong> شجرة/سنة</p>
+                <p style={{ margin: 0 }}>🚗 يعادل إخراج <strong style={{ color: '#059669' }}>{carbonData.carsEquivalent}</strong> سيارة من الطريق</p>
+                <p style={{ margin: 0 }}>🏠 يعادل طاقة <strong style={{ color: '#059669' }}>{carbonData.homesEquivalent}</strong> منزل/سنة</p>
+                <p style={{ margin: '4px 0 0 0' }}>📏 مسافة النقل: <strong>{carbonData.distanceKm} كم</strong></p>
+              </div>
+
+              {/* Simple visual bar */}
+              <div className="mt-1">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '6.5pt' }}>
+                  <span>الانبعاثات</span>
+                  <div style={{ flex: 1, height: '8px', backgroundColor: '#fecaca', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ 
+                      width: `${Math.min(100, carbonData.totalEmissions > 0 ? (carbonData.co2Saved / carbonData.totalEmissions) * 100 : 0)}%`,
+                      height: '100%', backgroundColor: '#10b981', borderRadius: '4px',
+                    }} />
+                  </div>
+                  <span>التوفير</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

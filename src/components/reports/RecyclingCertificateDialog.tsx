@@ -14,6 +14,7 @@ import { usePDFExport } from '@/hooks/usePDFExport';
 import { useReportTemplates, ReportTemplate, getWasteCategoryFromType, systemTemplates } from '@/hooks/useReportTemplates';
 import { useRecyclingReports } from '@/hooks/useRecyclingReports';
 import { supabase } from '@/integrations/supabase/client';
+import { calculateShipmentCarbon, type ShipmentCarbonResult } from '@/lib/carbonEngine';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -158,6 +159,7 @@ const RecyclingCertificateDialog = ({
   const { templates, loading: templatesLoading, getApplicableTemplates, incrementUsage } = useReportTemplates();
   const { saveReport, loading: savingReport, getReportByShipmentId, updateReportPdfUrl } = useRecyclingReports();
   const [isSendingPdf, setIsSendingPdf] = useState(false);
+  const [carbonData, setCarbonData] = useState<ShipmentCarbonResult | null>(null);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [customNotes, setCustomNotes] = useState('');
@@ -170,7 +172,7 @@ const RecyclingCertificateDialog = ({
   const [isSaved, setIsSaved] = useState(false);
   const [existingReportId, setExistingReportId] = useState<string | null>(null);
 
-  // Check if report already exists for this shipment
+  // Check if report already exists and load carbon data
   useEffect(() => {
     const checkExistingReport = async () => {
       const existing = await getReportByShipmentId(shipment.id);
@@ -183,8 +185,13 @@ const RecyclingCertificateDialog = ({
         setIsSaved(true);
       }
     };
+    const loadCarbon = async () => {
+      const result = await calculateShipmentCarbon(shipment.id);
+      setCarbonData(result);
+    };
     if (isOpen) {
       checkExistingReport();
+      loadCarbon();
     }
   }, [isOpen, shipment.id, getReportByShipmentId]);
 
@@ -716,6 +723,38 @@ const RecyclingCertificateDialog = ({
                     />
                   </div>
 
+                  {/* Carbon Impact Preview */}
+                  {carbonData && (
+                    <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
+                      <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-3 flex items-center gap-2">
+                        <Leaf className="w-5 h-5" />
+                        البصمة الكربونية (محسوبة تلقائياً)
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div className="text-center p-2 bg-white dark:bg-background rounded">
+                          <p className="text-xs text-muted-foreground">إجمالي الانبعاثات</p>
+                          <p className="font-bold text-lg text-destructive">{carbonData.totalEmissions.toFixed(3)}</p>
+                          <p className="text-xs">طن CO₂</p>
+                        </div>
+                        <div className="text-center p-2 bg-white dark:bg-background rounded">
+                          <p className="text-xs text-muted-foreground">CO₂ تم توفيره</p>
+                          <p className="font-bold text-lg text-emerald-600">{carbonData.co2Saved.toFixed(3)}</p>
+                          <p className="text-xs">طن CO₂</p>
+                        </div>
+                        <div className="text-center p-2 bg-white dark:bg-background rounded">
+                          <p className="text-xs text-muted-foreground">يعادل زراعة</p>
+                          <p className="font-bold text-lg text-emerald-600">{carbonData.treesEquivalent}</p>
+                          <p className="text-xs">🌳 شجرة/سنة</p>
+                        </div>
+                        <div className="text-center p-2 bg-white dark:bg-background rounded">
+                          <p className="text-xs text-muted-foreground">مسافة النقل</p>
+                          <p className="font-bold text-lg">{carbonData.distanceKm}</p>
+                          <p className="text-xs">كم</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Closing Declaration Preview */}
                   <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
                     <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-2">
@@ -755,6 +794,7 @@ const RecyclingCertificateDialog = ({
                     openingDeclaration={openingDeclaration}
                     closingDeclaration={closingDeclaration || `نقر نحن ${organization?.name || 'جهة التدوير'} بأنه قد تم استلام الشحنة رقم ${shipment.shipment_number} بكامل محتوياتها وبحالة سليمة، وقد تمت إعادة تدويرها بالكامل وفقاً للمعايير والمتطلبات البيئية والقانونية والصناعية المنظمة لنشاط إعادة تدوير المخلفات، وذلك طبقاً للأنظمة واللوائح المعمول بها.`}
                     recyclerOrg={organization}
+                    carbonData={carbonData}
                   />
                 </div>
               </ScrollArea>
