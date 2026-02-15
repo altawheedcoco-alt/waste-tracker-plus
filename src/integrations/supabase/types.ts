@@ -4863,7 +4863,10 @@ export type Database = {
       document_print_log: {
         Row: {
           action_type: string
+          ai_summary: string | null
           created_at: string
+          description: string | null
+          document_category: string | null
           document_id: string | null
           document_number: string | null
           document_type: string
@@ -4879,7 +4882,10 @@ export type Database = {
         }
         Insert: {
           action_type?: string
+          ai_summary?: string | null
           created_at?: string
+          description?: string | null
+          document_category?: string | null
           document_id?: string | null
           document_number?: string | null
           document_type: string
@@ -4895,7 +4901,10 @@ export type Database = {
         }
         Update: {
           action_type?: string
+          ai_summary?: string | null
           created_at?: string
+          description?: string | null
+          document_category?: string | null
           document_id?: string | null
           document_number?: string | null
           document_type?: string

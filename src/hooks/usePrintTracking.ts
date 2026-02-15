@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { getDocumentDescription, getDocumentCategory } from '@/lib/documentDescriptions';
 
 /** Generate a unique print tracking code: PRN-YYMM-XXXXXX */
 const generateTrackingCode = (): string => {
@@ -19,6 +20,7 @@ interface LogPrintParams {
   themeId?: string;
   actionType?: 'print' | 'pdf_export' | 'email' | 'whatsapp' | 'save';
   metadata?: Record<string, any>;
+  description?: string;
 }
 
 export const usePrintTracking = () => {
@@ -29,6 +31,8 @@ export const usePrintTracking = () => {
 
     const trackingCode = generateTrackingCode();
     const employeeCode = user.id.slice(0, 8).toUpperCase();
+    const autoDescription = params.description || getDocumentDescription(params.documentType, 'ar');
+    const category = getDocumentCategory(params.documentType);
 
     try {
       const { error } = await supabase.from('document_print_log').insert({
@@ -43,6 +47,8 @@ export const usePrintTracking = () => {
         action_type: params.actionType || 'print',
         printed_by_name: profile.full_name || user.email,
         printed_by_employee_code: employeeCode,
+        description: autoDescription,
+        document_category: category,
         metadata: params.metadata || {},
       });
 
@@ -50,7 +56,7 @@ export const usePrintTracking = () => {
       return trackingCode;
     } catch (e) {
       console.error('Failed to log print:', e);
-      return trackingCode; // still return code even if logging fails
+      return trackingCode;
     }
   }, [user, profile]);
 
