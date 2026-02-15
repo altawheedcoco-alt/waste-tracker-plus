@@ -890,6 +890,96 @@ export type Database = {
           },
         ]
       }
+      auto_signature_settings: {
+        Row: {
+          auto_sign: boolean
+          auto_stamp: boolean
+          created_at: string
+          created_by: string | null
+          default_signatory_id: string | null
+          default_signature_id: string | null
+          default_stamp_id: string | null
+          document_type: string
+          id: string
+          is_enabled: boolean
+          notes: string | null
+          organization_id: string
+          trigger_on: string
+          trigger_status: string | null
+          updated_at: string
+        }
+        Insert: {
+          auto_sign?: boolean
+          auto_stamp?: boolean
+          created_at?: string
+          created_by?: string | null
+          default_signatory_id?: string | null
+          default_signature_id?: string | null
+          default_stamp_id?: string | null
+          document_type: string
+          id?: string
+          is_enabled?: boolean
+          notes?: string | null
+          organization_id: string
+          trigger_on?: string
+          trigger_status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auto_sign?: boolean
+          auto_stamp?: boolean
+          created_at?: string
+          created_by?: string | null
+          default_signatory_id?: string | null
+          default_signature_id?: string | null
+          default_stamp_id?: string | null
+          document_type?: string
+          id?: string
+          is_enabled?: boolean
+          notes?: string | null
+          organization_id?: string
+          trigger_on?: string
+          trigger_status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_signature_settings_default_signatory_id_fkey"
+            columns: ["default_signatory_id"]
+            isOneToOne: false
+            referencedRelation: "authorized_signatories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_signature_settings_default_signature_id_fkey"
+            columns: ["default_signature_id"]
+            isOneToOne: false
+            referencedRelation: "organization_signatures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_signature_settings_default_stamp_id_fkey"
+            columns: ["default_stamp_id"]
+            isOneToOne: false
+            referencedRelation: "organization_stamps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_signature_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "auto_signature_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       award_letter_items: {
         Row: {
           award_letter_id: string
