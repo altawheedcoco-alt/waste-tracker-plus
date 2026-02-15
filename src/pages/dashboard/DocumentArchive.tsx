@@ -14,9 +14,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Search, FileText, FileCheck, Receipt, Truck, Recycle, Factory,
-  Download, Eye, Clock, Building2, ArrowUpDown,
+  Download, Eye, Clock, Building2, ArrowUpDown, Printer,
   FolderOpen, Inbox, Send as SendIcon, FileArchive, Scale, Briefcase, Bell,
-  Weight, Banknote, Image, Info, Tag,
+  Weight, Banknote, Image, Info, Tag, ExternalLink,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
@@ -373,8 +373,25 @@ const DocumentArchive = () => {
   };
 
   const handleDownload = (doc: ArchiveDoc) => {
-    if (doc.fileUrl) { const a = document.createElement('a'); a.href = doc.fileUrl; a.download = doc.title || 'document'; a.target = '_blank'; a.click(); }
-    else toast.info(t('archive.noFileAvailable'));
+    if (doc.fileUrl) {
+      const a = document.createElement('a'); a.href = doc.fileUrl; a.download = doc.title || 'document'; a.target = '_blank'; a.click();
+    } else {
+      // Navigate to source for PDF generation
+      handleView(doc);
+      toast.info(language === 'ar' ? 'افتح المستند ثم اضغط طباعة/تنزيل PDF' : 'Open the document then use print/download PDF');
+    }
+  };
+
+  const handlePrint = (doc: ArchiveDoc) => {
+    if (doc.fileUrl) {
+      const printWindow = window.open(doc.fileUrl, '_blank');
+      if (printWindow) {
+        printWindow.addEventListener('load', () => { printWindow.print(); });
+      }
+    } else {
+      handleView(doc);
+      toast.info(language === 'ar' ? 'افتح المستند ثم اضغط طباعة' : 'Open the document then print');
+    }
   };
 
   return (
@@ -458,23 +475,39 @@ const DocumentArchive = () => {
                   return (
                     <Card key={doc.dedupKey} className="p-3 hover:shadow-sm transition-shadow cursor-pointer" onClick={() => handleView(doc)}>
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleView(doc)}>
                                 <Eye className="w-3.5 h-3.5" />
                               </Button>
                             </TooltipTrigger>
-                            <TooltipContent>{language === 'ar' ? 'عرض / الذهاب للمستند' : 'View / Go to document'}</TooltipContent>
+                            <TooltipContent>{language === 'ar' ? 'عرض التفاصيل' : 'View Details'}</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handlePrint(doc)}>
+                                <Printer className="w-3.5 h-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{language === 'ar' ? 'طباعة' : 'Print'}</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)}>
+                                <Download className="w-3.5 h-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{language === 'ar' ? 'تحميل PDF' : 'Download PDF'}</TooltipContent>
                           </Tooltip>
                           {doc.fileUrl && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)}>
-                                  <Download className="w-3.5 h-3.5" />
+                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => window.open(doc.fileUrl, '_blank')}>
+                                  <ExternalLink className="w-3.5 h-3.5" />
                                 </Button>
                               </TooltipTrigger>
-                              <TooltipContent>{language === 'ar' ? 'تحميل' : 'Download'}</TooltipContent>
+                              <TooltipContent>{language === 'ar' ? 'فتح الملف' : 'Open File'}</TooltipContent>
                             </Tooltip>
                           )}
                         </div>
