@@ -162,6 +162,7 @@ const Permits = lazy(() => import("./pages/dashboard/Permits"));
 const EnvironmentalConsultants = lazy(() => import("./pages/dashboard/EnvironmentalConsultants"));
 const SigningInbox = lazy(() => import("./pages/dashboard/SigningInbox"));
 const AllNotes = lazy(() => import("./pages/dashboard/AllNotes"));
+const SystemCommands = lazy(() => import("./pages/dashboard/SystemCommands"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -311,6 +312,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/demo-scenario" element={<DemoScenario />} />
         <Route path="/dashboard/map-explorer" element={<MapExplorer />} />
         <Route path="/dashboard/system-status" element={<SystemStatus />} />
+        <Route path="/dashboard/system-commands" element={<SystemCommands />} />
         <Route path="/dashboard/support" element={<SupportCenter />} />
         <Route path="/dashboard/api" element={<ApiManagement />} />
         <Route path="/dashboard/security-testing" element={<SecurityPenetrationTesting />} />
