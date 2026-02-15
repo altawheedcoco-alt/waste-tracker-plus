@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -131,6 +132,7 @@ const OnboardingReview = () => {
   return (
     <DashboardLayout>
       <div className="p-6 space-y-6" dir="rtl">
+        <BackButton />
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Printer, ArrowRight, Package, FileText, Users, Shield, Truck, Recycle, Factory, Brain, MapPin, BarChart3, Settings, Bell, MessageCircle, Calculator, BookOpen, Download, Eye, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { usePDFExport } from '@/hooks/usePDFExport';
 
 const Section = ({ id, icon: Icon, title, children }: { id: string; icon: any; title: string; children: React.ReactNode }) => (
@@ -78,6 +79,7 @@ const UserGuidePage = () => {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto p-4 md:p-6">
+        <BackButton />
         {/* Header */}
         <div className="flex items-center justify-between mb-6 print:hidden">
           <div>

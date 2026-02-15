@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { useSigningInbox, SigningRequest } from '@/hooks/useSigningInbox';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -225,6 +226,7 @@ export default function SigningInbox() {
 
   return (
     <div className="space-y-6 p-4 md:p-6" dir="rtl">
+      <BackButton />
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <Dialog open={sendOpen} onOpenChange={setSendOpen}>

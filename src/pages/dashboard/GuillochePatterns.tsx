@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -447,6 +448,7 @@ export default function GuillochePatterns() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        <BackButton />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

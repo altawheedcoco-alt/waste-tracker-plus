@@ -1,4 +1,5 @@
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { useStories } from '@/hooks/useStories';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,6 +23,7 @@ const Stories = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
+        <BackButton />
         <div>
           <h1 className="text-2xl font-bold">الحالات</h1>
           <p className="text-muted-foreground">شاهد حالات شركائك وانشر حالتك</p>
