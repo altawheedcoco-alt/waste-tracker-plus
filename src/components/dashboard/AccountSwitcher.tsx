@@ -13,54 +13,41 @@ import {
   Shield
 } from 'lucide-react';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 const getOrganizationIcon = (type: string) => {
   switch (type) {
-    case 'generator':
-      return Factory;
-    case 'transporter':
-      return Truck;
-    case 'recycler':
-      return Recycle;
-    default:
-      return Building2;
+    case 'generator': return Factory;
+    case 'transporter': return Truck;
+    case 'recycler': return Recycle;
+    default: return Building2;
   }
 };
 
 const getOrganizationLabel = (type: string) => {
   switch (type) {
-    case 'generator':
-      return 'مولد';
-    case 'transporter':
-      return 'ناقل';
-    case 'recycler':
-      return 'معالج';
-    default:
-      return 'منظمة';
+    case 'generator': return 'مولد';
+    case 'transporter': return 'ناقل';
+    case 'recycler': return 'معالج';
+    default: return 'منظمة';
   }
 };
 
 const getOrganizationColor = (type: string) => {
   switch (type) {
-    case 'generator':
-      return 'bg-amber-500/10 text-amber-600 border-amber-200';
-    case 'transporter':
-      return 'bg-blue-500/10 text-blue-600 border-blue-200';
-    case 'recycler':
-      return 'bg-green-500/10 text-green-600 border-green-200';
-    default:
-      return 'bg-muted text-muted-foreground';
+    case 'generator': return 'bg-amber-500/10 text-amber-600 border-amber-200';
+    case 'transporter': return 'bg-blue-500/10 text-blue-600 border-blue-200';
+    case 'recycler': return 'bg-green-500/10 text-green-600 border-green-200';
+    default: return 'bg-muted text-muted-foreground';
   }
 };
 
@@ -84,9 +71,6 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
 
   if (!organization) return null;
 
-  // Add organization feature removed
-
-  // Collapsed view - just show icon
   if (collapsed) {
     const Icon = getOrganizationIcon(organization.organization_type);
     return (
@@ -104,13 +88,12 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
   const CurrentIcon = getOrganizationIcon(organization.organization_type);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button
           variant="ghost"
           className={cn(
             "w-full justify-start gap-3 h-auto p-3 hover:bg-muted/80",
-            collapsed && "justify-center p-2",
             className
           )}
           disabled={switchingOrganization}
@@ -125,132 +108,121 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
               )}>
                 <CurrentIcon className="w-5 h-5" />
               </div>
-              
-              {!collapsed && (
-                <>
-                  <div className="flex-1 min-w-0 text-right">
-                    <p className="font-medium text-sm truncate">{organization.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {getOrganizationLabel(organization.organization_type)}
-                    </p>
-                  </div>
-                  <ChevronDown className={cn(
-                    "w-4 h-4 text-muted-foreground transition-transform shrink-0",
-                    open && "rotate-180"
-                  )} />
-                </>
-              )}
+              <div className="flex-1 min-w-0 text-right">
+                <p className="font-medium text-sm truncate">{organization.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {getOrganizationLabel(organization.organization_type)}
+                </p>
+              </div>
+              <ChevronDown className={cn(
+                "w-4 h-4 text-muted-foreground transition-transform shrink-0",
+                open && "rotate-180"
+              )} />
             </>
           )}
         </Button>
-      </DropdownMenuTrigger>
+      </SheetTrigger>
       
-      <DropdownMenuContent 
-        align="start" 
-        className="w-72"
-        sideOffset={8}
-      >
-        <DropdownMenuLabel className="text-muted-foreground font-normal">
-          المنظمات المرتبطة بحسابك
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      <SheetContent side="right" className="w-80 p-0">
+        <SheetHeader className="p-4 pb-2 border-b">
+          <SheetTitle className="text-right text-base">المنظمات المرتبطة بحسابك</SheetTitle>
+        </SheetHeader>
         
-        {(
-          <AnimatePresence>
-            {userOrganizations.map((org, index) => {
-              const Icon = getOrganizationIcon(org.organization_type);
-              const isActive = org.organization_id === organization.id;
-              
-              return (
-                <motion.div
-                  key={org.organization_id}
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <DropdownMenuItem
-                    className={cn(
-                      "flex items-center gap-3 p-3 cursor-pointer",
-                      isActive && "bg-primary/5"
-                    )}
-                    onClick={() => {
-                      if (!isActive) {
-                        switchOrganization(org.organization_id);
-                        setOpen(false);
-                      }
-                    }}
-                    disabled={switchingOrganization}
+        <ScrollArea className="h-[calc(100vh-80px)]">
+          <div className="p-3 space-y-1">
+            <AnimatePresence>
+              {userOrganizations.map((org, index) => {
+                const Icon = getOrganizationIcon(org.organization_type);
+                const isActive = org.organization_id === organization.id;
+                
+                return (
+                  <motion.div
+                    key={org.organization_id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.04 }}
                   >
-                    <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                      getOrganizationColor(org.organization_type)
-                    )}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-sm truncate">{org.organization_name}</p>
-                        {org.is_primary && (
-                          <Badge variant="outline" className="text-[10px] h-4 px-1">
-                            الرئيسية
-                          </Badge>
-                        )}
+                    <button
+                      className={cn(
+                        "w-full flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors text-right",
+                        isActive 
+                          ? "bg-primary/10 border border-primary/20" 
+                          : "hover:bg-muted/80 border border-transparent"
+                      )}
+                      onClick={() => {
+                        if (!isActive) {
+                          switchOrganization(org.organization_id);
+                          setOpen(false);
+                        }
+                      }}
+                      disabled={switchingOrganization}
+                    >
+                      <div className={cn(
+                        "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                        getOrganizationColor(org.organization_type)
+                      )}>
+                        <Icon className="w-5 h-5" />
                       </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-muted-foreground">
-                          {getOrganizationLabel(org.organization_type)}
-                        </p>
-                        {!org.is_verified && (
-                          <Badge variant="secondary" className="text-[10px] h-4 px-1">
-                            قيد المراجعة
-                          </Badge>
-                        )}
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-sm truncate">{org.organization_name}</p>
+                          {org.is_primary && (
+                            <Badge variant="outline" className="text-[10px] h-4 px-1">
+                              الرئيسية
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-muted-foreground">
+                            {getOrganizationLabel(org.organization_type)}
+                          </p>
+                          {!org.is_verified && (
+                            <Badge variant="secondary" className="text-[10px] h-4 px-1">
+                              قيد المراجعة
+                            </Badge>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                    
-                    {isActive && (
-                      <Check className="w-4 h-4 text-primary shrink-0" />
-                    )}
-                  </DropdownMenuItem>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        )}
-        
-        {isAdmin && userOrganizations.length > 0 && (
-          <DropdownMenuSeparator />
-        )}
+                      
+                      {isActive && (
+                        <Check className="w-4 h-4 text-primary shrink-0" />
+                      )}
+                    </button>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
 
-        {isAdmin && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="flex items-center gap-3 p-3 cursor-pointer"
-              onClick={() => {
-                navigate('/dashboard/system-overview');
-                setOpen(false);
-              }}
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-red-500/10 text-red-600 border-red-200 shrink-0">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-sm">مدير النظام</p>
-                  <Badge variant="outline" className="text-[10px] h-4 px-1 border-red-200 text-red-600">
-                    Admin
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة الشاملة</p>
-              </div>
-            </DropdownMenuItem>
-          </>
-        )}
-        
-      </DropdownMenuContent>
-    </DropdownMenu>
+            {isAdmin && (
+              <>
+                <div className="my-2 border-t" />
+                <button
+                  className="w-full flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted/80 transition-colors text-right"
+                  onClick={() => {
+                    navigate('/dashboard/system-overview');
+                    setOpen(false);
+                  }}
+                >
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-red-500/10 text-red-600 shrink-0">
+                    <Shield className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-sm">مدير النظام</p>
+                      <Badge variant="outline" className="text-[10px] h-4 px-1 border-red-200 text-red-600">
+                        Admin
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة الشاملة</p>
+                  </div>
+                </button>
+              </>
+            )}
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 };
 
