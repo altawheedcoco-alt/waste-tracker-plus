@@ -64,7 +64,7 @@ function generateAutoEmail(fullName: string, jobTitle: string, orgName: string):
   const orgSlug = transliterate(orgName || 'org');
 
   if (!nameSlug) return '';
-  return `${jobSlug}-${nameSlug}@${orgSlug}.ayrecycle.com`;
+  return `${jobSlug}-${nameSlug}@${orgSlug}.irecycle.com`;
 }
 
 const statusConfig: Record<string, { label: string; color: string }> = {
