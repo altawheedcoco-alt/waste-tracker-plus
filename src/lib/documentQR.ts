@@ -26,7 +26,12 @@ export type DocumentQRType =
   | 'statement' 
   | 'report' 
   | 'award_letter' 
-  | 'entity_certificate';
+  | 'entity_certificate'
+  | 'signer'
+  | 'permit'
+  | 'delivery_cert'
+  | 'transport_receipt'
+  | 'operational_plan';
 
 /**
  * Generate a standardized QR verification URL for any document
@@ -52,4 +57,9 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentQRType, { ar: string; en: stri
   report: { ar: 'تقرير مجمع', en: 'Aggregate Report', icon: 'FileText' },
   award_letter: { ar: 'خطاب ترسية', en: 'Award Letter', icon: 'FileText' },
   entity_certificate: { ar: 'شهادة جهة', en: 'Entity Certificate', icon: 'Building2' },
+  signer: { ar: 'توقيع مفوض', en: 'Authorized Signer', icon: 'FileSignature' },
+  permit: { ar: 'تصريح', en: 'Permit', icon: 'Shield' },
+  delivery_cert: { ar: 'شهادة تسليم', en: 'Delivery Certificate', icon: 'FileCheck' },
+  transport_receipt: { ar: 'إيصال نقل', en: 'Transport Receipt', icon: 'Truck' },
+  operational_plan: { ar: 'خطة تشغيلية', en: 'Operational Plan', icon: 'FileText' },
 };

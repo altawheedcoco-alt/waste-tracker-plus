@@ -166,7 +166,7 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
           <p><strong>تنبيه قانوني:</strong> هذه الشهادة صادرة وفقاً لأحكام القانون رقم 4 لسنة 1994 بشأن حماية البيئة ولائحته التنفيذية، وقانون إدارة المخلفات رقم 202 لسنة 2020. أي تلاعب أو تزوير في هذه الشهادة يُعرض مرتكبه للمساءلة الجنائية.</p>
         </div>
 
-        {/* Signature section */}
+        {/* Signature section with QR */}
         <div className="pt-4" style={{ borderTop: '2px solid #991b1b' }}>
           <div className="grid grid-cols-2 gap-8">
             <div className="text-center">
@@ -186,12 +186,30 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
                   </div>
                 )}
               </div>
+              {/* Signer QR */}
+              <div className="mt-2 flex justify-center">
+                <QRCodeSVG 
+                  value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(data.facility_license || data.certificate_number)}&doc=${encodeURIComponent(data.certificate_number)}`} 
+                  size={30} 
+                  level="L" 
+                />
+              </div>
+              <p style={{ fontSize: '5pt', color: '#9ca3af', marginTop: '2px' }}>QR الموقع</p>
             </div>
             <div className="text-center">
               <p style={{ fontWeight: 'bold', fontSize: '9pt', marginBottom: '8px' }}>ممثل العميل (المولّد)</p>
               <p style={{ fontSize: '8pt', color: '#666', marginBottom: '12px' }}>{data.client_name}</p>
               <div style={{ borderBottom: '1px dotted #999', width: '150px', margin: '30px auto 0' }} />
               <p style={{ fontSize: '6pt', color: '#9ca3af', marginTop: '4px' }}>التوقيع</p>
+              {/* Client QR placeholder */}
+              <div className="mt-2 flex justify-center">
+                <QRCodeSVG 
+                  value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(data.client_name || 'client')}&doc=${encodeURIComponent(data.certificate_number)}`} 
+                  size={30} 
+                  level="L" 
+                />
+              </div>
+              <p style={{ fontSize: '5pt', color: '#9ca3af', marginTop: '2px' }}>QR الموقع</p>
             </div>
           </div>
           <p className="text-center" style={{ fontSize: '7pt', color: '#9ca3af', marginTop: '16px' }}>

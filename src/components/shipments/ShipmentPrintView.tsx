@@ -509,27 +509,31 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '60px', height: '60px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
-                      {shipment.generator?.stamp_url && <img src={shipment.generator.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
-                      {shipment.generator?.signature_url && <img src={shipment.generator.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
-                    </div>
-                    <div style={{ borderTop: `1px dashed ${theme.colors.accent}`, marginTop: '8px', paddingTop: '3px', fontSize: '6pt', color: theme.colors.footerText }}>التوقيع والختم</div>
-                  </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '60px', height: '60px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
-                      {shipment.transporter?.stamp_url && <img src={shipment.transporter.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
-                      {shipment.transporter?.signature_url && <img src={shipment.transporter.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
-                    </div>
-                    <div style={{ borderTop: `1px dashed ${theme.colors.accent}`, marginTop: '8px', paddingTop: '3px', fontSize: '6pt', color: theme.colors.footerText }}>التوقيع والختم</div>
-                  </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '60px', height: '60px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
-                      {shipment.recycler?.stamp_url && <img src={shipment.recycler.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
-                      {shipment.recycler?.signature_url && <img src={shipment.recycler.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
-                    </div>
-                    <div style={{ borderTop: `1px dashed ${theme.colors.accent}`, marginTop: '8px', paddingTop: '3px', fontSize: '6pt', color: theme.colors.footerText }}>التوقيع والختم</div>
-                  </td>
+                  {[
+                    { org: shipment.generator, label: 'المولدة' },
+                    { org: shipment.transporter, label: 'الناقلة' },
+                    { org: shipment.recycler, label: 'المدورة' },
+                  ].map((item, idx) => (
+                    <td key={idx} style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '80px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
+                        {item.org?.stamp_url && <img src={item.org.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
+                        {item.org?.signature_url && <img src={item.org.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
+                      </div>
+                      <div style={{ borderTop: `1px dashed ${theme.colors.accent}`, marginTop: '6px', paddingTop: '3px', fontSize: '6pt', color: theme.colors.footerText }}>التوقيع والختم</div>
+                      {/* Signer QR */}
+                      <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
+                        <QRCodeCanvas 
+                          value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
+                          size={28} 
+                          level="L" 
+                        />
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: theme.colors.footerText }}>{item.org?.commercial_register || '-'}</div>
+                          <div style={{ fontSize: '5pt', color: theme.colors.footerText }}>QR الموقع</div>
+                        </div>
+                      </div>
+                    </td>
+                  ))}
                 </tr>
               </tbody>
             </table>
