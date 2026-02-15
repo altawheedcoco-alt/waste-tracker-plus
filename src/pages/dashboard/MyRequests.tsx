@@ -222,7 +222,7 @@ const MyRequests = () => {
         </Badge>
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
-        {format(new Date(request.created_at), 'dd MMM yyyy - HH:mm', { locale: ar })}
+        {format(new Date(request.created_at), 'dd MMM yyyy - hh:mm a', { locale: ar })}
       </TableCell>
       <TableCell>
         <Button
@@ -461,14 +461,14 @@ const MyRequests = () => {
                   <div>
                     <label className="text-sm text-muted-foreground">تاريخ الإرسال</label>
                     <p className="font-medium">
-                      {format(new Date(selectedRequest.created_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
+                      {format(new Date(selectedRequest.created_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
                     </p>
                   </div>
                   {selectedRequest.reviewed_at && (
                     <div>
                       <label className="text-sm text-muted-foreground">تاريخ المراجعة</label>
                       <p className="font-medium">
-                        {format(new Date(selectedRequest.reviewed_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
+                        {format(new Date(selectedRequest.reviewed_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
                       </p>
                     </div>
                   )}

@@ -142,7 +142,7 @@ const DeclarationCard = ({ declaration, index, onView }: { declaration: any; ind
               {declaration.quantity && <span>الكمية: {declaration.quantity} {declaration.unit || 'طن'}</span>}
               {declaration.generator_name && <span>المولد: {declaration.generator_name}</span>}
               {declaration.transporter_name && <span>الناقل: {declaration.transporter_name}</span>}
-              <span>التاريخ: {format(new Date(declaration.declared_at || declaration.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+              <span>التاريخ: {format(new Date(declaration.declared_at || declaration.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
               {declaration.status === 'rejected' && <Badge variant="destructive" className="text-xs">مرفوض</Badge>}
             </div>
           </div>

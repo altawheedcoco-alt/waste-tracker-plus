@@ -132,7 +132,7 @@ export function BackupStatus() {
                   {getStatusBadge(log.status)}
                   <div>
                     <p className="text-sm font-medium">
-                      {format(new Date(log.started_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
+                      {format(new Date(log.started_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {log.tables_backed_up?.length || 0} جدول • {formatBytes(log.file_size_bytes)}

@@ -243,7 +243,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
 
   const formatDateTime = (date: string | null) => {
     if (!date) return '-';
-    return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ar });
+    return format(new Date(date), 'dd/MM/yyyy hh:mm a', { locale: ar });
   };
 
   const driverName = shipment.driver?.profile?.full_name || shipment.manual_driver_name || '-';
@@ -540,7 +540,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
 
             {/* Footer */}
             <div style={{ textAlign: 'center', fontSize: '6pt', color: theme.colors.footerText, paddingTop: '4px', borderTop: `1px solid ${theme.colors.borderLight}` }}>
-              <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
+              <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
               <div style={{ marginTop: '2px' }}>
                 رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`}
               </div>

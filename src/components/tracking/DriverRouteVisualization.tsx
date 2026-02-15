@@ -490,7 +490,7 @@ const DriverRouteVisualization = memo(({
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 <span>
-                  آخر تحديث: {format(new Date(driverLocation.recorded_at), 'HH:mm:ss dd/MM', { locale: ar })}
+                  آخر تحديث: {format(new Date(driverLocation.recorded_at), 'hh:mm:ss a dd/MM', { locale: ar })}
                 </span>
               </div>
             )}

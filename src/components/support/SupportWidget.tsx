@@ -169,7 +169,7 @@ const SupportWidget = () => {
                             <p className="font-medium text-sm line-clamp-1">{ticket.title}</p>
                             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
-                              {format(new Date(ticket.created_at), 'dd/MM HH:mm', { locale: ar })}
+                              {format(new Date(ticket.created_at), 'dd/MM hh:mm a', { locale: ar })}
                             </div>
                           </div>
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />

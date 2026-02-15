@@ -51,7 +51,7 @@ const VerificationHistoryPanel = ({
               <div key={h.id} className="p-3 rounded-lg border text-sm">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-muted-foreground">
-                    {format(new Date(h.created_at), 'dd/MM/yyyy HH:mm', { locale: dateLocale })}
+                    {format(new Date(h.created_at), 'dd/MM/yyyy hh:mm a', { locale: dateLocale })}
                   </span>
                   <Badge variant="outline">
                     {getVerificationTypeLabel(h.verification_type)}

@@ -323,7 +323,7 @@ export default function DetailedAccountLedger({
             partnerType={partnerType}
             entries={filteredEntries}
             organizationName={organizationName}
-            printDate={`${format(new Date(), 'dd/MM/yyyy - HH:mm', { locale: ar })}${dateFrom || dateTo ? ' (مفلتر)' : ''}`}
+            printDate={`${format(new Date(), 'dd/MM/yyyy - hh:mm a', { locale: ar })}${dateFrom || dateTo ? ' (مفلتر)' : ''}`}
           />
         );
         setTimeout(resolve, 100);

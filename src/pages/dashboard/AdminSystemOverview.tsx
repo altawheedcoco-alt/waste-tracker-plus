@@ -761,7 +761,7 @@ const AdminSystemOverview = () => {
                             <p className="font-medium">{log.action}</p>
                             <p className="text-xs text-muted-foreground">
                               {log.resource_type && `${log.resource_type} • `}
-                              {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                              {format(new Date(log.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                             </p>
                           </div>
                           <Activity className="w-5 h-5 text-muted-foreground" />

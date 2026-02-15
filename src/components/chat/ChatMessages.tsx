@@ -332,7 +332,7 @@ const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) 
                           "text-[10px] text-muted-foreground px-2",
                           isOwn ? "text-left" : "text-right"
                         )}>
-                          {format(new Date(message.created_at), 'HH:mm', { locale: ar })}
+                          {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                         </p>
                       </div>
                     </div>

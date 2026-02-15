@@ -245,7 +245,7 @@ const CustodyChainQR = ({
                     <div className="text-xs text-muted-foreground space-y-0.5">
                       <p className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
-                        {format(new Date(event.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                        {format(new Date(event.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                       </p>
                       {event.gps_latitude && (
                         <p className="flex items-center gap-1">

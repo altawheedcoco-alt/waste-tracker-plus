@@ -365,7 +365,7 @@ const ShipmentStatusTimeline = ({ shipment, showCard = true, showProgressMilesto
                         <div className="flex-1 text-right space-y-1">
                           <div className="flex items-center justify-between gap-2">
                             <span className="text-xs text-muted-foreground">
-                              {format(new Date(log.created_at), 'HH:mm - yyyy/MM/dd', { locale: ar })}
+                              {format(new Date(log.created_at), 'hh:mm a - yyyy/MM/dd', { locale: ar })}
                             </span>
                             {log.user_name && (
                               <span className="text-xs font-semibold text-foreground">
@@ -502,7 +502,7 @@ const ShipmentStatusTimeline = ({ shipment, showCard = true, showProgressMilesto
                             </p>
                           </div>
                           <span className="text-xs text-muted-foreground">
-                            {format(new Date(milestone.created_at), 'HH:mm', { locale: ar })}
+                            {format(new Date(milestone.created_at), 'hh:mm a', { locale: ar })}
                           </span>
                         </motion.div>
                       );

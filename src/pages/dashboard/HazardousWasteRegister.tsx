@@ -300,7 +300,7 @@ const HazardousWasteRegister = () => {
     const rows = filteredShipments.map((s: any, i: number) => ({
       '#': i + 1,
       'رقم الشحنة': s.shipment_number,
-      'التاريخ': format(new Date(s.created_at), 'dd/MM/yyyy HH:mm'),
+      'التاريخ': format(new Date(s.created_at), 'dd/MM/yyyy hh:mm a'),
       'نوع المخلف': wasteTypeLabels[s.waste_type] || s.waste_type,
       'مستوى الخطورة': hazardLevelLabels[s.hazard_level] || s.hazard_level || 'غير محدد',
       'الكمية': s.quantity,
@@ -463,7 +463,7 @@ const HazardousWasteRegister = () => {
                       <div>
                         <p className="font-medium">في انتظار الإعداد</p>
                         <p className="text-sm text-muted-foreground">
-                          طلب بواسطة: {registerRequest.requested_by} - {format(new Date(registerRequest.requested_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                          طلب بواسطة: {registerRequest.requested_by} - {format(new Date(registerRequest.requested_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                         </p>
                       </div>
                     </>
@@ -483,7 +483,7 @@ const HazardousWasteRegister = () => {
                       <div>
                         <p className="font-medium">السجل جاهز للإرسال</p>
                         <p className="text-sm text-muted-foreground">
-                          تم الإعداد: {registerRequest.prepared_at && format(new Date(registerRequest.prepared_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                          تم الإعداد: {registerRequest.prepared_at && format(new Date(registerRequest.prepared_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                         </p>
                       </div>
                     </>
@@ -494,7 +494,7 @@ const HazardousWasteRegister = () => {
                       <div>
                         <p className="font-medium">تم إرسال السجل</p>
                         <p className="text-sm text-muted-foreground">
-                          تم الإرسال: {registerRequest.sent_at && format(new Date(registerRequest.sent_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                          تم الإرسال: {registerRequest.sent_at && format(new Date(registerRequest.sent_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                         </p>
                       </div>
                     </>
@@ -850,7 +850,7 @@ const HazardousWasteRegister = () => {
               {organization?.name} | كود العميل: {(organization as any)?.client_code}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })}
+              تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
               {dateFrom && ` | من: ${format(dateFrom, 'dd/MM/yyyy')}`}
               {dateTo && ` | إلى: ${format(dateTo, 'dd/MM/yyyy')}`}
             </p>
@@ -913,7 +913,7 @@ const HazardousWasteRegister = () => {
                           <div className="text-sm">
                             {format(new Date(shipment.created_at), 'dd/MM/yyyy', { locale: ar })}
                             <span className="block text-xs text-muted-foreground">
-                              {format(new Date(shipment.created_at), 'HH:mm')}
+                              {format(new Date(shipment.created_at), 'hh:mm a')}
                             </span>
                           </div>
                         </TableCell>

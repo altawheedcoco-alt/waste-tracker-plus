@@ -63,7 +63,7 @@ const DeliveryDeclarationViewDialog = ({
   };
 
   const declaredDate = declaration.declared_at 
-    ? format(new Date(declaration.declared_at), 'dd MMMM yyyy - HH:mm', { locale: ar })
+    ? format(new Date(declaration.declared_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })
     : '';
 
   return (

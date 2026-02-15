@@ -196,7 +196,7 @@ export const SecurityEventsList = memo(function SecurityEventsList({
                               <div>
                                 <span className="text-muted-foreground">الوقت:</span>
                                 <span className="mr-1 font-mono">
-                                  {format(new Date(event.created_at), 'yyyy/MM/dd HH:mm:ss', { locale: ar })}
+                                  {format(new Date(event.created_at), 'yyyy/MM/dd hh:mm:ss a', { locale: ar })}
                                 </span>
                               </div>
                               {event.user_agent && (

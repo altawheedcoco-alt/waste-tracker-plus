@@ -400,7 +400,7 @@ const TicketCard = ({ ticket, onClick }: TicketCardProps) => {
             )}
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {format(new Date(ticket.created_at), 'dd/MM HH:mm', { locale: ar })}
+              {format(new Date(ticket.created_at), 'dd/MM hh:mm a', { locale: ar })}
             </div>
           </div>
         </div>

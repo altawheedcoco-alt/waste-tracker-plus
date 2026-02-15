@@ -626,7 +626,7 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                             </div>
                             <div style={{ marginBottom: '4px' }}>
                               <span style={{ color: '#6b7280' }}>تاريخ الإقرار: </span>
-                              <strong>{(declarationData as any).declared_at ? format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : '-'}</strong>
+                              <strong>{(declarationData as any).declared_at ? format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy hh:mm a', { locale: ar }) : '-'}</strong>
                               <span style={{ marginRight: '10px', color: '#6b7280' }}>رقم الوثيقة: </span>
                               <strong style={{ fontFamily: 'monospace', color: '#7c3aed' }}>DEC-{(declarationData as any).id?.slice(0, 8).toUpperCase()}</strong>
                             </div>
@@ -656,7 +656,7 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
 
                   {/* Footer */}
                   <div style={{ textAlign: 'center', fontSize: '6pt', color: '#9ca3af', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
-                    <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
+                    <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
                     <div style={{ marginTop: '2px' }}>
                       رقم التتبع: {shipment.shipment_number} | رقم الوثيقة: {documentSerial} | كود التحقق: {verificationCode}
                     </div>
@@ -687,36 +687,36 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                   <h3 className="font-bold text-right">سجل الحالات</h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                      <span>{format(new Date(shipment.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                      <span>{format(new Date(shipment.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
                       <span>تم الإنشاء</span>
                     </div>
                     {shipment.approved_at && (
                       <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <span>{format(new Date(shipment.approved_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                        <span>{format(new Date(shipment.approved_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
                         <span>تمت الموافقة</span>
                       </div>
                     )}
                     {shipment.collection_started_at && (
                       <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <span>{format(new Date(shipment.collection_started_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                        <span>{format(new Date(shipment.collection_started_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
                         <span>بدء التجميع</span>
                       </div>
                     )}
                     {shipment.in_transit_at && (
                       <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <span>{format(new Date(shipment.in_transit_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                        <span>{format(new Date(shipment.in_transit_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
                         <span>في الطريق</span>
                       </div>
                     )}
                     {shipment.delivered_at && (
                       <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                        <span>{format(new Date(shipment.delivered_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                        <span>{format(new Date(shipment.delivered_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
                         <span>تم التسليم</span>
                       </div>
                     )}
                     {shipment.confirmed_at && (
                       <div className="flex justify-between items-center p-2 bg-green-100 rounded">
-                        <span>{format(new Date(shipment.confirmed_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                        <span>{format(new Date(shipment.confirmed_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
                         <span>تم التأكيد</span>
                       </div>
                     )}
@@ -767,7 +767,7 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                       <div className="grid grid-cols-2 gap-2">
                         <div><span className="text-muted-foreground">المُقِر: </span><strong>{(declarationData as any).driver_name || 'غير محدد'}</strong></div>
                         <div><span className="text-muted-foreground">رقم الهوية: </span><strong>{(declarationData as any).driver_national_id || 'غير محدد'}</strong></div>
-                        <div><span className="text-muted-foreground">تاريخ الإقرار: </span><strong>{(declarationData as any).declared_at ? format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : '-'}</strong></div>
+                        <div><span className="text-muted-foreground">تاريخ الإقرار: </span><strong>{(declarationData as any).declared_at ? format(new Date((declarationData as any).declared_at), 'dd/MM/yyyy hh:mm a', { locale: ar }) : '-'}</strong></div>
                         <div><span className="text-muted-foreground">رقم الوثيقة: </span><strong>DEC-{(declarationData as any).id?.slice(0, 8).toUpperCase()}</strong></div>
                       </div>
                       <div className="text-xs whitespace-pre-wrap leading-relaxed border-t pt-2 mt-2 max-h-32 overflow-hidden">

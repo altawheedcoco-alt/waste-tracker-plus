@@ -114,7 +114,7 @@ const ComplianceMonitorTab = ({ facilityId, organizationId }: ComplianceMonitorT
     doc.text('Digital Waste Manifest', 105, 20, { align: 'center' });
     doc.setFontSize(10);
     doc.text(`Manifest #: ${shipment.shipment_number}`, 105, 28, { align: 'center' });
-    doc.text(`Date: ${format(new Date(shipment.created_at), 'yyyy-MM-dd HH:mm')}`, 105, 34, { align: 'center' });
+    doc.text(`Date: ${format(new Date(shipment.created_at), 'yyyy-MM-dd hh:mm a')}`, 105, 34, { align: 'center' });
     
     doc.line(20, 38, 190, 38);
     
@@ -155,7 +155,7 @@ const ComplianceMonitorTab = ({ facilityId, organizationId }: ComplianceMonitorT
     y += 8;
     doc.setFontSize(8);
     doc.text('This manifest is digitally generated and verified via GPS tracking system.', 105, y, { align: 'center' });
-    doc.text(`Generated: ${format(new Date(), 'yyyy-MM-dd HH:mm:ss')}`, 105, y + 5, { align: 'center' });
+    doc.text(`Generated: ${format(new Date(), 'yyyy-MM-dd hh:mm:ss a')}`, 105, y + 5, { align: 'center' });
 
     doc.save(`manifest-${shipment.shipment_number}.pdf`);
     toast.success('تم تحميل المانيفست الرقمي بنجاح');
@@ -296,7 +296,7 @@ const ComplianceMonitorTab = ({ facilityId, organizationId }: ComplianceMonitorT
                   <div className="flex-1 text-right">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">
-                        {format(new Date(log.created_at), 'yyyy/MM/dd HH:mm:ss')}
+                        {format(new Date(log.created_at), 'yyyy/MM/dd hh:mm:ss a')}
                       </span>
                       <Badge variant="outline" className="text-xs">{log.status}</Badge>
                     </div>

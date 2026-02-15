@@ -193,7 +193,7 @@ const AIConversationsPanel = () => {
                         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {format(new Date(conv.started_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                            {format(new Date(conv.started_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                           </div>
                           {conv.escalated_to_ticket_id && (
                             <Badge variant="secondary" className="text-xs">
@@ -239,7 +239,7 @@ const AIConversationsPanel = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  {format(new Date(selectedConversation.started_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                  {format(new Date(selectedConversation.started_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                 </div>
               </div>
 
@@ -288,7 +288,7 @@ const AIConversationsPanel = () => {
                               {msg.role === 'user' ? 'العميل' : 'المساعد'}
                             </span>
                             <span className="text-[10px] opacity-50">
-                              {format(new Date(msg.created_at), 'HH:mm', { locale: ar })}
+                              {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
                             </span>
                           </div>
                           <p className="text-sm whitespace-pre-wrap">{msg.content}</p>

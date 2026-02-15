@@ -109,7 +109,7 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
               )}
               <span className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
-                {format(new Date(request.created_at), 'dd MMM yyyy - HH:mm', { locale: ar })}
+                {format(new Date(request.created_at), 'dd MMM yyyy - hh:mm a', { locale: ar })}
               </span>
               {request.deadline && (
                 <span className="flex items-center gap-1 text-destructive">

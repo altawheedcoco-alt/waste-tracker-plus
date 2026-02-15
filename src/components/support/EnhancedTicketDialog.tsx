@@ -249,7 +249,7 @@ const EnhancedTicketDialog = ({ ticketId, open, onOpenChange, onUpdate }: Enhanc
                 )}
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {format(new Date(ticket.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                  {format(new Date(ticket.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                 </span>
               </div>
             </div>
@@ -380,7 +380,7 @@ const EnhancedTicketDialog = ({ ticketId, open, onOpenChange, onUpdate }: Enhanc
                         </div>
                         <p className="text-sm whitespace-pre-wrap">{message.message}</p>
                         <span className="text-[10px] opacity-70 mt-1 block">
-                          {format(new Date(message.created_at), 'HH:mm', { locale: ar })}
+                          {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                         </span>
                       </div>
                     </div>

@@ -331,7 +331,7 @@ const EnhancedChatMessages = ({
                             isOwn ? "justify-start" : "justify-end"
                           )}>
                             <span className="text-[10px] text-muted-foreground">
-                              {format(new Date(message.created_at), 'HH:mm', { locale: ar })}
+                              {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                             </span>
                             {getMessageStatus(message, isOwn)}
                           </div>

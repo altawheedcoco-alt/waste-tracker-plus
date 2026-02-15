@@ -1177,7 +1177,7 @@ const OperationalPlans = () => {
                   {/* Footer */}
                   <div className="print:block hidden text-center text-sm text-muted-foreground pt-8 border-t">
                     <p>تم إنشاء هذه الخطة التشغيلية بواسطة نظام إدارة المخلفات</p>
-                    <p className="mt-1">تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
+                    <p className="mt-1">تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}</p>
                   </div>
                 </div>
               )}

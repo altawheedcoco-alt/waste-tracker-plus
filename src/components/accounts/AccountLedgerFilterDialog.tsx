@@ -164,7 +164,7 @@ export default function AccountLedgerFilterDialog({
             partnerType={partnerType}
             entries={filteredEntries}
             organizationName={organizationName}
-            printDate={`${format(new Date(), 'dd/MM/yyyy - HH:mm', { locale: ar })} (مفلتر)`}
+            printDate={`${format(new Date(), 'dd/MM/yyyy - hh:mm a', { locale: ar })} (مفلتر)`}
           />
         );
         setTimeout(resolve, 100);

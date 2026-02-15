@@ -306,7 +306,7 @@ const TrackingModeController = ({
                 <p className="text-xs text-muted-foreground">وقت الوصول المتوقع</p>
                 <p className="font-bold text-sm">
                   {aiTracking.analysis.estimatedArrival 
-                    ? format(aiTracking.analysis.estimatedArrival, 'HH:mm', { locale: ar })
+                    ? format(aiTracking.analysis.estimatedArrival, 'hh:mm a', { locale: ar })
                     : '--'}
                 </p>
               </div>

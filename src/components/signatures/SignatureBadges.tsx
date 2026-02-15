@@ -89,7 +89,7 @@ const SignatureBadges = ({ signatures, compact = false }: SignatureBadgesProps) 
                   <Clock className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <p className="text-xs text-muted-foreground">التاريخ</p>
-                    <p className="font-medium">{format(new Date(viewSig.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
+                    <p className="font-medium">{format(new Date(viewSig.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</p>
                   </div>
                 </div>
               </div>

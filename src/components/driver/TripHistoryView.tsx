@@ -556,7 +556,7 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
                             <span>{trip.avg_speed} كم/س</span>
                             <span>•</span>
                             <span>
-                              {format(new Date(trip.start_time), 'HH:mm')} - {format(new Date(trip.end_time), 'HH:mm')}
+                              {format(new Date(trip.start_time), 'hh:mm a')} - {format(new Date(trip.end_time), 'hh:mm a')}
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">
@@ -619,7 +619,7 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
               <div className="p-4 rounded-lg bg-muted/30 border">
                 <div className="flex items-center justify-between gap-4 mb-3">
                   <span className="text-sm text-muted-foreground">
-                    {format(new Date(selectedTrip.start_time), 'HH:mm')}
+                    {format(new Date(selectedTrip.start_time), 'hh:mm a')}
                   </span>
                   <div className="flex items-center gap-2">
                     <Button
@@ -647,7 +647,7 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
                     </Button>
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {format(new Date(selectedTrip.end_time), 'HH:mm')}
+                    {format(new Date(selectedTrip.end_time), 'hh:mm a')}
                   </span>
                 </div>
                 <Slider
@@ -658,7 +658,7 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
                   className="w-full"
                 />
                 <p className="text-center text-sm text-muted-foreground mt-2">
-                  {selectedTrip.locations[playbackIndex] && format(new Date(selectedTrip.locations[playbackIndex].recorded_at), 'HH:mm:ss')}
+                  {selectedTrip.locations[playbackIndex] && format(new Date(selectedTrip.locations[playbackIndex].recorded_at), 'hh:mm:ss a')}
                 </p>
               </div>
 

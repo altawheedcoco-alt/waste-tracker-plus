@@ -186,7 +186,7 @@ const TicketDetailDialog = ({ ticketId, open, onOpenChange, onUpdate }: TicketDe
               )}
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                {format(new Date(ticket.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                {format(new Date(ticket.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
               </div>
               {ticket.partner_organization && (
                 <div className="flex items-center gap-1">
@@ -366,7 +366,7 @@ const TicketDetailDialog = ({ ticketId, open, onOpenChange, onUpdate }: TicketDe
                           </Badge>
                         )}
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(message.created_at), 'HH:mm', { locale: ar })}
+                          {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                         </span>
                       </div>
                       <p className="text-sm whitespace-pre-wrap">{message.message}</p>
