@@ -116,6 +116,10 @@ const SystemStatus = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
+            <Button variant="default" size="sm" onClick={() => navigate('/dashboard/system-commands')}>
+              <Wrench className="w-4 h-4 ml-2" />
+              أوامر تشخيص النظام
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/support')}>
               <Sparkles className="w-4 h-4 ml-2" />
               الدعم الفني
