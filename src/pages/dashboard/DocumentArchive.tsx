@@ -321,9 +321,55 @@ const DocumentArchive = () => {
   };
 
   const handleView = (doc: ArchiveDoc) => {
-    if (doc.fileUrl) window.open(doc.fileUrl, '_blank');
-    else if (doc.referenceId) navigate(`/dashboard/verify?code=${doc.referenceId}`);
-    else toast.info(t('archive.noPreviewAvailable'));
+    if (doc.fileUrl) { window.open(doc.fileUrl, '_blank'); return; }
+    
+    // Navigate to the document's source page based on type
+    const docId = doc.referenceId;
+    switch (doc.type) {
+      case 'shipment':
+        if (docId) navigate(`/dashboard/shipments/${docId}`);
+        else navigate('/dashboard/shipments');
+        break;
+      case 'invoice':
+        if (docId) navigate(`/dashboard/invoices?view=${docId}`);
+        else navigate('/dashboard/invoices');
+        break;
+      case 'contract':
+        if (docId) navigate(`/dashboard/contracts?view=${docId}`);
+        else navigate('/dashboard/contracts');
+        break;
+      case 'certificate':
+        if (docId) navigate(`/dashboard/shipments/${docId}?tab=certificate`);
+        else navigate('/dashboard/shipments');
+        break;
+      case 'award_letter':
+        navigate('/dashboard/award-letters');
+        break;
+      case 'deposit':
+        navigate('/dashboard/accounting');
+        break;
+      case 'statement':
+        navigate('/dashboard/accounting?tab=statements');
+        break;
+      case 'disposal':
+        if (docId) navigate(`/dashboard/shipments/${docId}`);
+        else navigate('/dashboard/disposal');
+        break;
+      case 'receipt':
+        if (docId) navigate(`/dashboard/shipments/${docId}`);
+        else navigate('/dashboard/shipments');
+        break;
+      case 'report':
+        navigate('/dashboard/reports');
+        break;
+      case 'entity_certificate':
+      case 'entity_document':
+        navigate('/dashboard/entity-profile');
+        break;
+      default:
+        if (docId) navigate(`/dashboard/verify?code=${docId}`);
+        else toast.info(t('archive.noPreviewAvailable'));
+    }
   };
 
   const handleDownload = (doc: ArchiveDoc) => {
@@ -410,16 +456,26 @@ const DocumentArchive = () => {
                   const catLabel = CATEGORY_LABELS[docCat]?.[language === 'ar' ? 'ar' : 'en'] || docCat;
                   
                   return (
-                    <Card key={doc.dedupKey} className="p-3 hover:shadow-sm transition-shadow">
+                    <Card key={doc.dedupKey} className="p-3 hover:shadow-sm transition-shadow cursor-pointer" onClick={() => handleView(doc)}>
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-1 shrink-0">
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title={t('archive.preview')} onClick={() => handleView(doc)}>
-                            <Eye className="w-3.5 h-3.5" />
-                          </Button>
+                        <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleView(doc)}>
+                                <Eye className="w-3.5 h-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{language === 'ar' ? 'عرض / الذهاب للمستند' : 'View / Go to document'}</TooltipContent>
+                          </Tooltip>
                           {doc.fileUrl && (
-                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title={t('archive.download')} onClick={() => handleDownload(doc)}>
-                              <Download className="w-3.5 h-3.5" />
-                            </Button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)}>
+                                  <Download className="w-3.5 h-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>{language === 'ar' ? 'تحميل' : 'Download'}</TooltipContent>
+                            </Tooltip>
                           )}
                         </div>
                         <div className="flex-1 text-right min-w-0">
