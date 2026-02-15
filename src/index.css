@@ -443,10 +443,10 @@
    ======================================== */
 
 @media print {
-  /* Page Setup - A4 Portrait */
+  /* Page Setup - A4 Portrait with minimal margins */
   @page {
     size: A4 portrait;
-    margin: 12mm 15mm;
+    margin: 8mm 10mm;
   }
 
   /* Force color printing */
@@ -538,11 +538,11 @@
     visibility: visible !important;
   }
 
-  /* ===== Print Container: Centered A4 ===== */
+  /* ===== Print Container: Centered A4 with tight margins ===== */
   .print-container,
   [data-print-content] {
     width: 100% !important;
-    max-width: 180mm !important;
+    max-width: 190mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     background: #fff !important;

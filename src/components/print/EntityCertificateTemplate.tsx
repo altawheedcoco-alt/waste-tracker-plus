@@ -135,7 +135,7 @@ const EntityCertificateTemplate = forwardRef<HTMLDivElement, EntityCertificateTe
           width: '210mm',
           minHeight: '297mm',
           margin: '0 auto',
-          padding: designVariant === 'minimal' ? '15mm' : '10mm',
+          padding: designVariant === 'minimal' ? '12mm' : '8mm',
           fontFamily: "'Cairo', 'Amiri', sans-serif",
           position: 'relative',
           ...borderStyle,

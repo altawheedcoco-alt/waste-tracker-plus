@@ -72,9 +72,9 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   return (
     <div
       ref={ref}
-      className={`print-container bg-white text-black p-8 ${isOfficial ? 'print-official' : ''} ${className}`}
+      className={`print-container bg-white text-black p-6 ${isOfficial ? 'print-official' : ''} ${className}`}
       dir="rtl"
-      style={{ maxWidth: '210mm', margin: '0 auto' }}
+      style={{ maxWidth: '210mm', margin: '0 auto', boxSizing: 'border-box' }}
     >
       {/* Watermark */}
       {showWatermark && (
