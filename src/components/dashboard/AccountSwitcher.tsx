@@ -74,6 +74,15 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
   if (!organization) return null;
 
   if (collapsed) {
+    if (isOnSystemOverview && isAdmin) {
+      return (
+        <div className={cn("p-2", className)}>
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-destructive/10 text-destructive">
+            <Shield className="w-5 h-5" />
+          </div>
+        </div>
+      );
+    }
     const Icon = getOrganizationIcon(organization.organization_type);
     return (
       <div className={cn("p-2", className)}>
@@ -102,6 +111,20 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
         >
           {switchingOrganization ? (
             <Loader2 className="w-5 h-5 animate-spin" />
+          ) : isOnSystemOverview && isAdmin ? (
+            <>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-destructive/10 text-destructive">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0 text-right">
+                <p className="font-medium text-sm truncate">مدير النظام</p>
+                <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة</p>
+              </div>
+              <ChevronDown className={cn(
+                "w-4 h-4 text-muted-foreground transition-transform shrink-0",
+                open && "rotate-180"
+              )} />
+            </>
           ) : (
             <>
               <div className={cn(
