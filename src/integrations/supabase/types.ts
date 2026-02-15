@@ -16851,6 +16851,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_schema_log: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          snapshot_data: Json
+          snapshot_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          snapshot_data: Json
+          snapshot_type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          snapshot_data?: Json
+          snapshot_type?: string
+        }
+        Relationships: []
+      }
       terms_acceptances: {
         Row: {
           accepted_at: string
@@ -19374,6 +19401,10 @@ export type Database = {
           _transporter_id: string
         }
         Returns: boolean
+      }
+      capture_schema_snapshot: {
+        Args: { p_description?: string }
+        Returns: string
       }
       check_api_rate_limit: {
         Args: { p_api_key_id: string }
