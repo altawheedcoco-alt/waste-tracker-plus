@@ -70,6 +70,7 @@ import { enUS } from 'date-fns/locale';
 import { getCityById } from '@/lib/egyptianCities';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { canChangeStatus, getAvailableNextStatuses, mapLegacyStatus } from '@/lib/shipmentStatusConfig';
 
 // Using EnrichedShipment from useShipmentData.ts
 type ShipmentDetails = EnrichedShipment;
@@ -279,10 +280,12 @@ const ShipmentDetailsPage = () => {
                 size="default"
               />
             )}
-            <Button variant="outline" onClick={() => setShowStatusDialog(true)}>
-              <Edit className="ml-2 h-4 w-4" />
-              {t('shipmentDetails.changeStatus')}
-            </Button>
+            {canChangeStatus(mapLegacyStatus(shipment.status), (organization?.organization_type || 'generator') as any) && (
+              <Button variant="outline" onClick={() => setShowStatusDialog(true)}>
+                <Edit className="ml-2 h-4 w-4" />
+                {t('shipmentDetails.changeStatus')}
+              </Button>
+            )}
             <Button variant="eco" onClick={() => setShowPrintDialog(true)}>
               <Printer className="ml-2 h-4 w-4" />
               {t('shipmentDetails.printPdf')}
