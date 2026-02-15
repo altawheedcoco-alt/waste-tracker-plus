@@ -456,14 +456,14 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             {!canChange && (
               <p className="text-sm text-muted-foreground mt-2">
                 {organizationType === 'generator' 
-                  ? 'الجهات المولدة لا يمكنها تغيير حالات الشحنات'
+                  ? 'الشحنة تجاوزت مرحلة التسليم - لا يمكن للجهة المولدة تغيير الحالة الآن'
                   : organizationType === 'transporter' && (currentStatusConfig?.phase === 'recycler' || currentStatusConfig?.phase === 'disposal')
                   ? 'هذه الشحنة في مرحلة الوجهة - فقط جهة الاستلام يمكنها تغيير الحالة'
                   : organizationType === 'recycler' && currentStatusConfig?.phase === 'transporter'
                   ? 'هذه الشحنة في مرحلة النقل - فقط جهة النقل يمكنها تغيير الحالة'
                   : organizationType === 'disposal' && currentStatusConfig?.phase === 'transporter'
                   ? 'هذه الشحنة في مرحلة النقل - فقط جهة النقل يمكنها تغيير الحالة'
-                  : 'لا توجد حالات متاحة للتغيير'
+                  : 'لا توجد حالات متاحة للتغيير حالياً'
                 }
               </p>
             )}
