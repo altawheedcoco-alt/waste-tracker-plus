@@ -415,10 +415,13 @@ const AggregateShipmentReport = () => {
   };
 
   const handlePrint = () => {
-    if (printRef.current) {
+    const el = printRef.current;
+    if (el) {
       setIsPrinting(true);
-      printContent(printRef.current);
+      printContent(el);
       setTimeout(() => setIsPrinting(false), 500);
+    } else {
+      toast.error('لا يوجد محتوى للطباعة. يرجى الانتظار حتى يتم تحميل البيانات.');
     }
   };
 
@@ -1013,7 +1016,7 @@ const AggregateShipmentReport = () => {
           </DialogHeader>
           
           <div className="border rounded-lg overflow-hidden">
-            <div ref={printRef}>
+            <div>
               <AggregateReportPrint
                 shipments={filteredShipments}
                 organization={organization}
@@ -1039,6 +1042,19 @@ const AggregateShipmentReport = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Off-screen printable content - always rendered */}
+      <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '794px' }}>
+        <div ref={printRef}>
+          <AggregateReportPrint
+            shipments={filteredShipments}
+            organization={organization}
+            includeStamps={includeStamps}
+            includeSignatures={includeSignatures}
+            dateRange={{ start: startDate, end: endDate }}
+          />
+        </div>
+      </div>
 
       {/* Print Styles */}
       <style>{`
