@@ -11,6 +11,9 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { usePermits, CreatePermitData } from '@/hooks/usePermits';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 
 const PERMIT_TYPES = [
   { value: 'waste_exit', label: 'تصريح خروج مخلفات' },
@@ -26,6 +29,25 @@ interface Props {
 
 const CreatePermitDialog = ({ open, onOpenChange }: Props) => {
   const { createPermit } = usePermits();
+  const { profile } = useAuth();
+  const orgId = profile?.organization_id;
+
+  const { data: shipments } = useQuery({
+    queryKey: ['shipments-for-permit', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data, error } = await supabase
+        .from('shipments')
+        .select('id, shipment_number, status, waste_type')
+        .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId}`)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!orgId && open,
+  });
+
   const [form, setForm] = useState<CreatePermitData>({
     permit_type: 'waste_exit',
     purpose: '',
@@ -68,6 +90,21 @@ const CreatePermitDialog = ({ open, onOpenChange }: Props) => {
           <div className="space-y-2">
             <Label>الغرض</Label>
             <Input value={form.purpose || ''} onChange={e => update('purpose', e.target.value)} placeholder="غرض التصريح" />
+          </div>
+
+          <div className="space-y-2">
+            <Label>ربط بشحنة (اختياري)</Label>
+            <Select value={form.shipment_id || '_none'} onValueChange={v => update('shipment_id', v === '_none' ? undefined : v)}>
+              <SelectTrigger><SelectValue placeholder="بدون ربط بشحنة" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="_none">بدون ربط بشحنة</SelectItem>
+                {shipments?.map(s => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.shipment_number} - {s.waste_type || 'بدون نوع'} ({s.status})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {showPersonFields && (
