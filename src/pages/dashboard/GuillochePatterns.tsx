@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useRef } from 'react';
 import BackButton from '@/components/ui/back-button';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -345,6 +346,8 @@ const GuillochePatternSVG = ({ pattern, size = 200 }: { pattern: PatternConfig; 
 };
 
 export default function GuillochePatterns() {
+  const { roles } = useAuth();
+  const isAdmin = roles.includes('admin');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
@@ -1014,36 +1017,38 @@ export default function GuillochePatterns() {
               <Button variant="outline" onClick={() => setDocumentPreviewOpen(false)}>
                 إغلاق
               </Button>
-              <Button
-                className="gap-2"
-                onClick={() => {
-                  const printContent = document.getElementById('guilloche-document-preview');
-                  if (!printContent) return;
-                  const printWindow = window.open('', '_blank');
-                  if (!printWindow) return;
-                  printWindow.document.write(`
-                    <html dir="rtl">
-                    <head>
-                      <title>طباعة الرسم الغيوشي</title>
-                      <style>
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        @page { size: A4; margin: 0; }
-                        body { display: flex; justify-content: center; align-items: flex-start; }
-                        .print-container { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
-                      </style>
-                    </head>
-                    <body>
-                      <div class="print-container">${printContent.innerHTML}</div>
-                    </body>
-                    </html>
-                  `);
-                  printWindow.document.close();
-                  setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
-                }}
-              >
-                <Printer className="h-4 w-4" />
-                طباعة
-              </Button>
+              {isAdmin && (
+                <Button
+                  className="gap-2"
+                  onClick={() => {
+                    const printContent = document.getElementById('guilloche-document-preview');
+                    if (!printContent) return;
+                    const printWindow = window.open('', '_blank');
+                    if (!printWindow) return;
+                    printWindow.document.write(`
+                      <html dir="rtl">
+                      <head>
+                        <title>طباعة الرسم الغيوشي</title>
+                        <style>
+                          * { margin: 0; padding: 0; box-sizing: border-box; }
+                          @page { size: A4; margin: 0; }
+                          body { display: flex; justify-content: center; align-items: flex-start; }
+                          .print-container { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
+                        </style>
+                      </head>
+                      <body>
+                        <div class="print-container">${printContent.innerHTML}</div>
+                      </body>
+                      </html>
+                    `);
+                    printWindow.document.close();
+                    setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+                  }}
+                >
+                  <Printer className="h-4 w-4" />
+                  طباعة
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
