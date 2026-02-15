@@ -826,6 +826,7 @@ export type Database = {
           job_title: string | null
           national_id: string | null
           organization_id: string
+          signatory_code: string | null
           signature_image_url: string | null
           updated_at: string
           user_id: string
@@ -846,6 +847,7 @@ export type Database = {
           job_title?: string | null
           national_id?: string | null
           organization_id: string
+          signatory_code?: string | null
           signature_image_url?: string | null
           updated_at?: string
           user_id: string
@@ -866,6 +868,7 @@ export type Database = {
           job_title?: string | null
           national_id?: string | null
           organization_id?: string
+          signatory_code?: string | null
           signature_image_url?: string | null
           updated_at?: string
           user_id?: string

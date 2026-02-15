@@ -156,6 +156,8 @@ const ESGReports = lazy(() => import("./pages/dashboard/ESGReports"));
 const DriverPermits = lazy(() => import("./pages/dashboard/DriverPermits"));
 const LearningCenter = lazy(() => import("./pages/dashboard/LearningCenter"));
 const UserGuidePage = lazy(() => import("./pages/dashboard/UserGuidePage"));
+const AuthorizedSignatories = lazy(() => import("./pages/dashboard/AuthorizedSignatories"));
+const VerifySignatory = lazy(() => import("./pages/VerifySignatory"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -361,6 +363,8 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/learning-center" element={<LearningCenter />} />
         <Route path="/dashboard/user-guide" element={<UserGuidePage />} />
         <Route path="/dashboard/detailed-waste-analysis" element={<DetailedWasteAnalysis />} />
+        <Route path="/dashboard/authorized-signatories" element={<AuthorizedSignatories />} />
+        <Route path="/verify-signatory/:code" element={<VerifySignatory />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
