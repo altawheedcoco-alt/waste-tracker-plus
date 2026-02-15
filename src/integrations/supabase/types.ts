@@ -12800,6 +12800,287 @@ export type Database = {
           },
         ]
       }
+      permit_signatory_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          organization_id: string
+          role_key: string
+          role_title: string
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          organization_id: string
+          role_key: string
+          role_title: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          organization_id?: string
+          role_key?: string
+          role_title?: string
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permit_signatory_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "permit_signatory_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permit_signatures: {
+        Row: {
+          created_at: string | null
+          device_info: string | null
+          id: string
+          integrity_hash: string | null
+          ip_address: string | null
+          organization_id: string
+          permit_id: string
+          rejection_reason: string | null
+          role_title: string
+          signatory_role_id: string | null
+          signature_image_url: string | null
+          signed_at: string | null
+          signer_name: string
+          signer_profile_id: string | null
+          stamp_image_url: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          integrity_hash?: string | null
+          ip_address?: string | null
+          organization_id: string
+          permit_id: string
+          rejection_reason?: string | null
+          role_title: string
+          signatory_role_id?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_name: string
+          signer_profile_id?: string | null
+          stamp_image_url?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          device_info?: string | null
+          id?: string
+          integrity_hash?: string | null
+          ip_address?: string | null
+          organization_id?: string
+          permit_id?: string
+          rejection_reason?: string | null
+          role_title?: string
+          signatory_role_id?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_name?: string
+          signer_profile_id?: string | null
+          stamp_image_url?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permit_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "permit_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permit_signatures_permit_id_fkey"
+            columns: ["permit_id"]
+            isOneToOne: false
+            referencedRelation: "permits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permit_signatures_signatory_role_id_fkey"
+            columns: ["signatory_role_id"]
+            isOneToOne: false
+            referencedRelation: "permit_signatory_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permit_signatures_signer_profile_id_fkey"
+            columns: ["signer_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permits: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          driver_id: string | null
+          estimated_quantity: number | null
+          id: string
+          issuer_organization_id: string
+          notes: string | null
+          organization_id: string
+          permit_number: string
+          permit_type: string
+          person_id_number: string | null
+          person_name: string | null
+          person_role: string | null
+          purpose: string | null
+          qr_data: Json | null
+          quantity_unit: string | null
+          shipment_id: string | null
+          special_instructions: string | null
+          status: string
+          updated_at: string | null
+          valid_from: string | null
+          valid_until: string | null
+          vehicle_plate: string | null
+          verification_code: string | null
+          waste_description: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          driver_id?: string | null
+          estimated_quantity?: number | null
+          id?: string
+          issuer_organization_id: string
+          notes?: string | null
+          organization_id: string
+          permit_number: string
+          permit_type?: string
+          person_id_number?: string | null
+          person_name?: string | null
+          person_role?: string | null
+          purpose?: string | null
+          qr_data?: Json | null
+          quantity_unit?: string | null
+          shipment_id?: string | null
+          special_instructions?: string | null
+          status?: string
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+          vehicle_plate?: string | null
+          verification_code?: string | null
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          driver_id?: string | null
+          estimated_quantity?: number | null
+          id?: string
+          issuer_organization_id?: string
+          notes?: string | null
+          organization_id?: string
+          permit_number?: string
+          permit_type?: string
+          person_id_number?: string | null
+          person_name?: string | null
+          person_role?: string | null
+          purpose?: string | null
+          qr_data?: Json | null
+          quantity_unit?: string | null
+          shipment_id?: string | null
+          special_instructions?: string | null
+          status?: string
+          updated_at?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+          vehicle_plate?: string | null
+          verification_code?: string | null
+          waste_description?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permits_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_issuer_organization_id_fkey"
+            columns: ["issuer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "permits_issuer_organization_id_fkey"
+            columns: ["issuer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "permits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pin_backup_codes: {
         Row: {
           code_hash: string
@@ -18842,6 +19123,10 @@ export type Database = {
       }
       run_full_archive: { Args: never; Returns: Json }
       run_security_audit: { Args: never; Returns: Json }
+      seed_default_permit_roles: {
+        Args: { org_id: string }
+        Returns: undefined
+      }
       seed_org_structure: {
         Args: { p_org_id: string; p_org_type: string }
         Returns: undefined
