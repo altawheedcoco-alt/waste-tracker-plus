@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -221,6 +222,7 @@ const DriverPermits = () => {
 
   return (
     <div className="space-y-6 p-4 md:p-6" dir="rtl">
+      <BackButton />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>

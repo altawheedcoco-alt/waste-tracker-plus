@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, BookOpen, Award, TrendingUp, ChevronLeft, Filter } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +38,7 @@ const LearningCenter = () => {
       title="المركز التعليمي"
       subtitle="تطوير المهارات والامتثال للمتطلبات التنظيمية"
     >
+      <BackButton />
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[

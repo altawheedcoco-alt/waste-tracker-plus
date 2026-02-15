@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -119,6 +120,7 @@ const OrgStructure = () => {
       className="space-y-6"
       dir="rtl"
     >
+      <BackButton />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">

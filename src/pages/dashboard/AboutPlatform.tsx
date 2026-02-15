@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import BackButton from '@/components/ui/back-button';
 import {
   Leaf,
   Target,
@@ -350,6 +351,7 @@ const AboutPlatform = () => {
   return (
     <DashboardLayout>
       <div className={cn('space-y-6', containerPadding)}>
+        <BackButton />
         {/* Hero Section */}
         <motion.div
           {...fadeInUp}

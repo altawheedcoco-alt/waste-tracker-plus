@@ -1,4 +1,5 @@
 import { Award, Trophy, TrendingUp, Target } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -33,6 +34,7 @@ const PrideCertificates = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
+        <BackButton />
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-white">

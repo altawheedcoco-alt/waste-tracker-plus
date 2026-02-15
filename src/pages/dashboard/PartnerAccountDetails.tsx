@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -308,6 +309,7 @@ export default function PartnerAccountDetails() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        <BackButton fallbackPath="/dashboard/partner-accounts" />
         {/* Header */}
         <PartnerHeader 
           partner={partner} 
