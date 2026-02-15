@@ -432,6 +432,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     ]},
     // Learning Center
     { icon: GraduationCap, label: language === 'ar' ? 'المركز التعليمي' : 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
+    { icon: BookOpen, label: language === 'ar' ? '📖 دليل المستخدم' : 'User Guide', path: '/dashboard/user-guide', key: 'user-guide' },
     // System & Support group
     { icon: Settings, label: t('sidebar.systemSupport'), path: '#', key: 'system-support-group', badge: notificationCount, children: [
       { icon: Headphones, label: t('sidebar.techSupport'), path: '/dashboard/support', key: 'support' },
