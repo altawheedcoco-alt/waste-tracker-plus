@@ -230,6 +230,16 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
                 هذا التوقيع الإلكتروني له نفس الحجية القانونية للتوقيع الخطي
               </p>
             </div>
+
+            {/* Legal Binding Notice */}
+            <div className="mt-4 bg-red-50 border border-red-200 rounded p-3">
+              <p className="text-xs font-bold text-red-800 text-center mb-1">
+                ⚖️ إقرار قانوني ملزم
+              </p>
+              <p className="text-[10px] text-red-700 text-center leading-relaxed">
+                يُعتبر تسجيل المستخدم على منصة I-Recycle وإتمام عملية التسجيل بمثابة موافقة صريحة وكاملة وغير مشروطة على جميع الشروط والأحكام والسياسات المنصوص عليها في هذه الوثيقة، ويُعد التوقيع الإلكتروني المثبت أعلاه بمثابة إقرار قانوني ملزم بقبول كافة البنود والالتزامات الواردة فيها، وذلك وفقاً لأحكام القانون المصري رقم 15 لسنة 2004 بشأن التوقيع الإلكتروني ولائحته التنفيذية.
+              </p>
+            </div>
           </div>
 
           {/* Verification Status */}
