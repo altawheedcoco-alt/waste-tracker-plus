@@ -15,6 +15,8 @@ const OfflineIndicator = lazy(() => import("./components/offline/OfflineIndicato
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
 const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
 const MobileOptimizations = lazy(() => import("./components/mobile/MobileOptimizations"));
+const PWAShortcuts = lazy(() => import("./components/mobile/PWAShortcuts"));
+const TouchOptimizations = lazy(() => import("./components/mobile/TouchOptimizations"));
 
 // Minimal loading component - optimized for speed
 const PageLoader = memo(() => (
@@ -103,6 +105,7 @@ const ApiManagement = lazy(() => import("./pages/dashboard/ApiManagement"));
 const SecurityPenetrationTesting = lazy(() => import("./pages/dashboard/SecurityPenetrationTesting"));
 const DatabaseQueryOptimization = lazy(() => import("./pages/dashboard/DatabaseQueryOptimization"));
 const AdvancedAnalytics = lazy(() => import("./pages/dashboard/AdvancedAnalytics"));
+const GDPRCompliance = lazy(() => import("./pages/dashboard/GDPRCompliance"));
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const SavedLocationsPage = lazy(() => import("./pages/SavedLocationsPage"));
 const QuickDeposit = lazy(() => import("./pages/QuickDeposit"));
@@ -206,6 +209,8 @@ const Providers = memo(() => (
                   </Suspense>
                   <Suspense fallback={null}>
                     <MobileOptimizations>{null}</MobileOptimizations>
+                    <PWAShortcuts />
+                    <TouchOptimizations />
                   </Suspense>
                 </AuthProvider>
               </BrowserRouter>
@@ -304,6 +309,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/security-testing" element={<SecurityPenetrationTesting />} />
         <Route path="/dashboard/db-optimization" element={<DatabaseQueryOptimization />} />
         <Route path="/dashboard/advanced-analytics" element={<AdvancedAnalytics />} />
+        <Route path="/dashboard/gdpr-compliance" element={<GDPRCompliance />} />
         <Route path="/dashboard/saved-locations" element={<SavedLocationsPage />} />
         <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
         <Route path="/dashboard/quick-shipment-links" element={<QuickShipmentLinks />} />

@@ -117,6 +117,27 @@ export default defineConfig(({ mode }) => ({
             purpose: "maskable",
           },
         ],
+        shortcuts: [
+          {
+            name: "لوحة التحكم",
+            short_name: "الداشبورد",
+            url: "/dashboard",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "شحنة جديدة",
+            short_name: "شحنة",
+            url: "/dashboard/shipments?action=new",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "تتبع السائقين",
+            short_name: "تتبع",
+            url: "/dashboard/tracking",
+            icons: [{ src: "/pwa-192x192.png", sizes: "192x192" }],
+          },
+        ],
+        categories: ["business", "logistics", "environment"],
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
