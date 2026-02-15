@@ -2123,6 +2123,187 @@ export type Database = {
         }
         Relationships: []
       }
+      consultant_credentials: {
+        Row: {
+          consultant_id: string
+          document_name: string
+          document_type: string
+          document_url: string
+          expiry_date: string | null
+          id: string
+          is_verified: boolean | null
+          uploaded_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          consultant_id: string
+          document_name: string
+          document_type: string
+          document_url: string
+          expiry_date?: string | null
+          id?: string
+          is_verified?: boolean | null
+          uploaded_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          consultant_id?: string
+          document_name?: string
+          document_type?: string
+          document_url?: string
+          expiry_date?: string | null
+          id?: string
+          is_verified?: boolean | null
+          uploaded_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_credentials_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_document_signatures: {
+        Row: {
+          consultant_id: string
+          device_info: string | null
+          document_id: string
+          document_type: string
+          id: string
+          ip_address: string | null
+          notes: string | null
+          organization_id: string
+          signature_data: string | null
+          signature_hash: string | null
+          signed_at: string | null
+          stamp_applied: boolean | null
+        }
+        Insert: {
+          consultant_id: string
+          device_info?: string | null
+          document_id: string
+          document_type: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          organization_id: string
+          signature_data?: string | null
+          signature_hash?: string | null
+          signed_at?: string | null
+          stamp_applied?: boolean | null
+        }
+        Update: {
+          consultant_id?: string
+          device_info?: string | null
+          document_id?: string
+          document_type?: string
+          id?: string
+          ip_address?: string | null
+          notes?: string | null
+          organization_id?: string
+          signature_data?: string | null
+          signature_hash?: string | null
+          signed_at?: string | null
+          stamp_applied?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_document_signatures_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_document_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_document_signatures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_organization_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          can_sign_certificates: boolean | null
+          can_sign_permits: boolean | null
+          can_sign_reports: boolean | null
+          can_sign_shipments: boolean | null
+          consultant_id: string
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          organization_id: string
+          role_title: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          can_sign_certificates?: boolean | null
+          can_sign_permits?: boolean | null
+          can_sign_reports?: boolean | null
+          can_sign_shipments?: boolean | null
+          consultant_id: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id: string
+          role_title?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          can_sign_certificates?: boolean | null
+          can_sign_permits?: boolean | null
+          can_sign_reports?: boolean | null
+          can_sign_shipments?: boolean | null
+          consultant_id?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id?: string
+          role_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_organization_assignments_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_organization_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_organization_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_custom_versions: {
         Row: {
           created_at: string
@@ -6212,6 +6393,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      environmental_consultants: {
+        Row: {
+          bio: string | null
+          consultant_code: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string
+          full_name_en: string | null
+          id: string
+          is_active: boolean | null
+          license_expiry: string | null
+          license_issuer: string | null
+          license_number: string | null
+          national_id: string | null
+          phone: string | null
+          profile_photo_url: string | null
+          qualification: string | null
+          signature_url: string | null
+          specialization: string | null
+          stamp_url: string | null
+          updated_at: string | null
+          user_id: string
+          years_of_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          consultant_code?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name: string
+          full_name_en?: string | null
+          id?: string
+          is_active?: boolean | null
+          license_expiry?: string | null
+          license_issuer?: string | null
+          license_number?: string | null
+          national_id?: string | null
+          phone?: string | null
+          profile_photo_url?: string | null
+          qualification?: string | null
+          signature_url?: string | null
+          specialization?: string | null
+          stamp_url?: string | null
+          updated_at?: string | null
+          user_id: string
+          years_of_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          consultant_code?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string
+          full_name_en?: string | null
+          id?: string
+          is_active?: boolean | null
+          license_expiry?: string | null
+          license_issuer?: string | null
+          license_number?: string | null
+          national_id?: string | null
+          phone?: string | null
+          profile_photo_url?: string | null
+          qualification?: string | null
+          signature_url?: string | null
+          specialization?: string | null
+          stamp_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+          years_of_experience?: number | null
+        }
+        Relationships: []
       }
       erp_attendance: {
         Row: {

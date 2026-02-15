@@ -433,6 +433,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     // Signatories & Authorization
     { icon: Shield, label: language === 'ar' ? '🛡️ المفوضون المعتمدون' : 'Authorized Signatories', path: '/dashboard/authorized-signatories', key: 'authorized-signatories' },
     { icon: FileText, label: language === 'ar' ? '📋 التصاريح والأذونات' : 'Permits', path: '/dashboard/permits', key: 'permits' },
+    { icon: Shield, label: language === 'ar' ? '🌿 الاستشاريون البيئيون' : 'Env. Consultants', path: '/dashboard/environmental-consultants', key: 'env-consultants' },
     // Learning Center
     { icon: GraduationCap, label: language === 'ar' ? 'المركز التعليمي' : 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
     { icon: BookOpen, label: language === 'ar' ? '📖 دليل المستخدم' : 'User Guide', path: '/dashboard/user-guide', key: 'user-guide' },
