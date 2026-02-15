@@ -155,6 +155,7 @@ const WasteFlowHeatmap = lazy(() => import("./pages/dashboard/WasteFlowHeatmap")
 const ESGReports = lazy(() => import("./pages/dashboard/ESGReports"));
 const DriverPermits = lazy(() => import("./pages/dashboard/DriverPermits"));
 const LearningCenter = lazy(() => import("./pages/dashboard/LearningCenter"));
+const UserGuidePage = lazy(() => import("./pages/dashboard/UserGuidePage"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -358,6 +359,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/esg-reports" element={<ESGReports />} />
         <Route path="/dashboard/driver-permits" element={<DriverPermits />} />
         <Route path="/dashboard/learning-center" element={<LearningCenter />} />
+        <Route path="/dashboard/user-guide" element={<UserGuidePage />} />
         <Route path="/dashboard/detailed-waste-analysis" element={<DetailedWasteAnalysis />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
