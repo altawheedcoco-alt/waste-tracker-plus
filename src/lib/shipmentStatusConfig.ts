@@ -366,11 +366,11 @@ export const getAvailableNextStatuses = (
     return allStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Generator can only hand over the shipment (mark as picked_up)
+  // Generator can only hand over the shipment (mark as picked_up = "تم التسليم" from generator perspective)
   if (organizationType === 'generator') {
-    const generatorAllowed = transporterStatuses.filter(s => 
-      ['picked_up'].includes(s.key)
-    );
+    const generatorAllowed = transporterStatuses
+      .filter(s => ['picked_up'].includes(s.key))
+      .map(s => ({ ...s, labelAr: 'تم التسليم' })); // Override label for generator context
     return generatorAllowed.filter(s => s.key !== currentStatus);
   }
 
