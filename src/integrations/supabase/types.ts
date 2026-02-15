@@ -19668,6 +19668,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      is_current_user_admin: { Args: never; Returns: boolean }
       is_user_driver: {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
