@@ -11,17 +11,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Search, FileText, FileCheck, Receipt, Truck, Recycle, Factory,
   Download, Eye, Clock, Building2, ArrowUpDown,
   FolderOpen, Inbox, Send as SendIcon, FileArchive, Scale, Briefcase, Bell,
-  Weight, Banknote, Image,
+  Weight, Banknote, Image, Info, Tag,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getDocumentDescription, getDocumentCategory, CATEGORY_LABELS } from '@/lib/documentDescriptions';
 
 // ─── Unified document interface ───
 interface ArchiveDoc {
@@ -389,44 +391,58 @@ const DocumentArchive = () => {
               </Card>
             ) : (
               <div className="space-y-1.5">
-                {filteredDocs.map(doc => (
-                  <Card key={doc.dedupKey} className="p-3 hover:shadow-sm transition-shadow">
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title={t('archive.preview')} onClick={() => handleView(doc)}>
-                          <Eye className="w-3.5 h-3.5" />
-                        </Button>
-                        {doc.fileUrl && (
-                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title={t('archive.download')} onClick={() => handleDownload(doc)}>
-                            <Download className="w-3.5 h-3.5" />
+                {filteredDocs.map(doc => {
+                  const docDesc = getDocumentDescription(doc.type, language === 'ar' ? 'ar' : 'en');
+                  const docCat = getDocumentCategory(doc.type);
+                  const catLabel = CATEGORY_LABELS[docCat]?.[language === 'ar' ? 'ar' : 'en'] || docCat;
+                  
+                  return (
+                    <Card key={doc.dedupKey} className="p-3 hover:shadow-sm transition-shadow">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title={t('archive.preview')} onClick={() => handleView(doc)}>
+                            <Eye className="w-3.5 h-3.5" />
                           </Button>
-                        )}
-                      </div>
-                      <div className="flex-1 text-right min-w-0">
-                        <div className="flex items-center gap-2 justify-end flex-wrap">
-                          {getSourceBadge(doc.source)}
-                          {doc.signed && <Badge className="text-[10px] bg-emerald-500/10 text-emerald-600">{t('archive.signed')}</Badge>}
-                          {doc.status === 'pending' && <Badge variant="outline" className="text-[10px] text-amber-600">{t('archive.pendingReview')}</Badge>}
-                          {doc.amount && <Badge variant="secondary" className="text-[10px]">{doc.amount} ج.م</Badge>}
-                          <span className="font-medium text-sm truncate">{doc.title}</span>
-                          {getDocIcon(doc.type)}
+                          {doc.fileUrl && (
+                            <Button size="sm" variant="ghost" className="h-7 w-7 p-0" title={t('archive.download')} onClick={() => handleDownload(doc)}>
+                              <Download className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                         </div>
-                        <div className="flex items-center gap-2 justify-end mt-1 text-xs text-muted-foreground flex-wrap">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {formatDistanceToNow(new Date(doc.date), { locale: dateLocale, addSuffix: true })}
-                          </span>
-                          <span>•</span>
-                          <span>{format(new Date(doc.date), 'dd/MM/yyyy', { locale: dateLocale })}</span>
-                          {doc.source === 'received' && doc.senderName && (<><span>•</span><span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {t('archive.from')}: {doc.senderName}</span></>)}
-                          {doc.source === 'sent' && doc.recipientName && (<><span>•</span><span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {t('archive.to')}: {doc.recipientName}</span></>)}
-                          {doc.issuedBy && doc.source === 'issued' && (<><span>•</span><span>{t('archive.by')}: {doc.issuedBy}</span></>)}
-                          {doc.trackingCode && (<><span>•</span><span className="font-mono text-[10px]">{doc.trackingCode}</span></>)}
+                        <div className="flex-1 text-right min-w-0">
+                          <div className="flex items-center gap-2 justify-end flex-wrap">
+                            {getSourceBadge(doc.source)}
+                            {doc.signed && <Badge className="text-[10px] bg-emerald-500/10 text-emerald-600">{t('archive.signed')}</Badge>}
+                            {doc.status === 'pending' && <Badge variant="outline" className="text-[10px] text-amber-600">{t('archive.pendingReview')}</Badge>}
+                            {doc.amount && <Badge variant="secondary" className="text-[10px]">{doc.amount} ج.م</Badge>}
+                            <Badge variant="outline" className="text-[9px] gap-0.5">
+                              <Tag className="w-2.5 h-2.5" />
+                              {catLabel}
+                            </Badge>
+                            <span className="font-medium text-sm truncate">{doc.title}</span>
+                            {getDocIcon(doc.type)}
+                          </div>
+                          {/* Document description */}
+                          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1 text-right">
+                            {docDesc}
+                          </p>
+                          <div className="flex items-center gap-2 justify-end mt-1 text-xs text-muted-foreground flex-wrap">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDistanceToNow(new Date(doc.date), { locale: dateLocale, addSuffix: true })}
+                            </span>
+                            <span>•</span>
+                            <span>{format(new Date(doc.date), 'dd/MM/yyyy', { locale: dateLocale })}</span>
+                            {doc.source === 'received' && doc.senderName && (<><span>•</span><span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {t('archive.from')}: {doc.senderName}</span></>)}
+                            {doc.source === 'sent' && doc.recipientName && (<><span>•</span><span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {t('archive.to')}: {doc.recipientName}</span></>)}
+                            {doc.issuedBy && doc.source === 'issued' && (<><span>•</span><span>{t('archive.by')}: {doc.issuedBy}</span></>)}
+                            {doc.trackingCode && (<><span>•</span><span className="font-mono text-[10px]">{doc.trackingCode}</span></>)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </TabsContent>
