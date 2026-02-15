@@ -202,7 +202,7 @@ const DocumentSignatureSection = ({
                       <p className="text-sm font-medium">{sig.signedBy}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {format(new Date(sig.signedAt), 'dd MMM yyyy - HH:mm', { locale: ar })}
+                        {format(new Date(sig.signedAt), 'dd MMM yyyy - hh:mm a', { locale: ar })}
                       </p>
                     </div>
                   </div>

@@ -264,7 +264,7 @@ const GoogleMapsDriverHistory = memo(({
               {isPlaying && (
                 <Badge variant="secondary" className="gap-1">
                   <Clock className="w-3 h-3" />
-                  {format(new Date(locations[currentIndex].recorded_at), 'HH:mm:ss', { locale: ar })}
+                  {format(new Date(locations[currentIndex].recorded_at), 'hh:mm:ss a', { locale: ar })}
                 </Badge>
               )}
             </div>

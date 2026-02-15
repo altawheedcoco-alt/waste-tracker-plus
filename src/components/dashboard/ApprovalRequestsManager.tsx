@@ -461,7 +461,7 @@ const ApprovalRequestsManager = () => {
         </Badge>
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
-        {format(new Date(request.created_at), 'dd MMM yyyy - HH:mm', { locale: ar })}
+        {format(new Date(request.created_at), 'dd MMM yyyy - hh:mm a', { locale: ar })}
       </TableCell>
       <TableCell>
         <Button
@@ -710,7 +710,7 @@ const ApprovalRequestsManager = () => {
                 <div className="col-span-2">
                   <label className="text-sm text-muted-foreground">تاريخ الطلب</label>
                   <p className="font-medium">
-                    {format(new Date(selectedRequest.created_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
+                    {format(new Date(selectedRequest.created_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
                   </p>
                 </div>
               </div>
@@ -786,7 +786,7 @@ const ApprovalRequestsManager = () => {
                 <div>
                   <label className="text-sm text-muted-foreground">تاريخ المراجعة</label>
                   <p className="font-medium">
-                    {format(new Date(selectedRequest.reviewed_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
+                    {format(new Date(selectedRequest.reviewed_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
                   </p>
                 </div>
               )}

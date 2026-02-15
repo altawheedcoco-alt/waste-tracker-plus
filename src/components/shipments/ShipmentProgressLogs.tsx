@@ -216,7 +216,7 @@ const ShipmentProgressLogs = ({
                       </div>
                       <span className="text-xs text-muted-foreground whitespace-nowrap flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {format(new Date(log.created_at), 'HH:mm:ss', { locale: ar })}
+                        {format(new Date(log.created_at), 'hh:mm:ss a', { locale: ar })}
                       </span>
                     </div>
                     

@@ -232,7 +232,7 @@ export default function EntityTimeline({
                                   <span>{doc.uploader.full_name}</span>
                                 </div>
                               )}
-                              <span>{format(new Date(doc.created_at), 'dd/MM/yyyy HH:mm')}</span>
+                              <span>{format(new Date(doc.created_at), 'dd/MM/yyyy hh:mm a')}</span>
                             </div>
 
                             {/* Linked shipment */}

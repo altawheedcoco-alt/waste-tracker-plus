@@ -338,7 +338,7 @@ const ReceiptDetailsDialog = ({
                   <p className="text-xs text-blue-700 dark:text-blue-400">
                     موقّع بواسطة: {(generatorDeclaration as any).driver_name || (generatorDeclaration as any).generator_name || 'مُوقّع'}
                     {(generatorDeclaration as any).declared_at && (
-                      <> — {format(new Date((generatorDeclaration as any).declared_at), 'dd/MM/yyyy HH:mm')}</>
+                      <> — {format(new Date((generatorDeclaration as any).declared_at), 'dd/MM/yyyy hh:mm a')}</>
                     )}
                   </p>
                   <p className="text-[10px] text-blue-600 dark:text-blue-500 mt-1">
@@ -360,7 +360,7 @@ const ReceiptDetailsDialog = ({
                   <p className="text-xs text-green-700 dark:text-green-400">
                     موقّع بواسطة: {(transporterDeclaration as any).driver_name || 'مُوقّع'} 
                     {(transporterDeclaration as any).declared_at && (
-                      <> — {format(new Date((transporterDeclaration as any).declared_at), 'dd/MM/yyyy HH:mm')}</>
+                      <> — {format(new Date((transporterDeclaration as any).declared_at), 'dd/MM/yyyy hh:mm a')}</>
                     )}
                   </p>
                   <p className="text-[10px] text-green-600 dark:text-green-500 mt-1">

@@ -914,7 +914,7 @@ const AggregateShipmentReport = () => {
                   {/* Footer */}
                   <div className="mt-6 pt-4 border-t text-center text-xs text-muted-foreground print:mt-8">
                     <p>تم إنشاء هذا التقرير بواسطة نظام آي ريسايكل لإدارة النفايات</p>
-                    <p className="mt-1">تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })}</p>
+                    <p className="mt-1">تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}</p>
                   </div>
                 </div>
               )}

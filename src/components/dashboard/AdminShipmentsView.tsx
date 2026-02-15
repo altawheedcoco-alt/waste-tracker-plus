@@ -560,7 +560,7 @@ const AdminShipmentsView = () => {
                   <div>
                     <p className="text-xs text-muted-foreground">تاريخ الإنشاء</p>
                     <p className="text-sm font-medium">
-                      {format(new Date(selectedShipment.created_at), 'dd MMM yyyy HH:mm', { locale: ar })}
+                      {format(new Date(selectedShipment.created_at), 'dd MMM yyyy hh:mm a', { locale: ar })}
                     </p>
                   </div>
                 </div>
@@ -581,7 +581,7 @@ const AdminShipmentsView = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">تاريخ الاعتماد</p>
                       <p className="text-sm font-medium">
-                        {format(new Date(selectedShipment.approved_at), 'dd MMM yyyy HH:mm', { locale: ar })}
+                        {format(new Date(selectedShipment.approved_at), 'dd MMM yyyy hh:mm a', { locale: ar })}
                       </p>
                     </div>
                   </div>
@@ -592,7 +592,7 @@ const AdminShipmentsView = () => {
                     <div>
                       <p className="text-xs text-muted-foreground">تاريخ التسليم</p>
                       <p className="text-sm font-medium">
-                        {format(new Date(selectedShipment.delivered_at), 'dd MMM yyyy HH:mm', { locale: ar })}
+                        {format(new Date(selectedShipment.delivered_at), 'dd MMM yyyy hh:mm a', { locale: ar })}
                       </p>
                     </div>
                   </div>

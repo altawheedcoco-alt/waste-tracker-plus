@@ -172,7 +172,7 @@ const VehicleMovementLog: React.FC<VehicleMovementLogProps> = ({ trigger }) => {
     const headers = ['التاريخ', 'الوقت', 'الجهاز', 'خط العرض', 'خط الطول', 'السرعة', 'الاتجاه', 'نوع الحدث'];
     const rows = filteredLogs.map(log => [
       format(new Date(log.recorded_at), 'yyyy-MM-dd'),
-      format(new Date(log.recorded_at), 'HH:mm:ss'),
+      format(new Date(log.recorded_at), 'hh:mm:ss a'),
       log.device_name,
       log.latitude.toFixed(6),
       log.longitude.toFixed(6),
@@ -359,7 +359,7 @@ const VehicleMovementLog: React.FC<VehicleMovementLogProps> = ({ trigger }) => {
                           <TableCell>
                             <div>
                               <p className="font-medium">
-                                {format(new Date(log.recorded_at), 'HH:mm:ss')}
+                                {format(new Date(log.recorded_at), 'hh:mm:ss a')}
                               </p>
                               <p className="text-xs text-muted-foreground">
                                 {format(new Date(log.recorded_at), 'dd/MM/yyyy')}

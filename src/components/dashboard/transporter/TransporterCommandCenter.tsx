@@ -167,7 +167,7 @@ const TransporterCommandCenter = () => {
                 </h2>
                 <div className="flex items-center gap-2 justify-end">
                   <span className="text-[10px] text-primary/60 font-mono">
-                    {format(now, 'HH:mm', { locale: ar })}
+                    {format(now, 'hh:mm a', { locale: ar })}
                   </span>
                   <p className="text-[11px] text-muted-foreground">
                     {format(now, 'EEEE d MMMM', { locale: ar })}

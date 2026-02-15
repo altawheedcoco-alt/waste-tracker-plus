@@ -307,7 +307,7 @@ const ApiManagement = () => {
                         <div className="flex items-center gap-4 text-muted-foreground">
                           <span>{log.response_time_ms}ms</span>
                           <span>
-                            {format(new Date(log.created_at), 'HH:mm:ss', { locale: ar })}
+                            {format(new Date(log.created_at), 'hh:mm:ss a', { locale: ar })}
                           </span>
                         </div>
                       </div>

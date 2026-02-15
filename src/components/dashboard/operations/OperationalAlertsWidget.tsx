@@ -688,7 +688,7 @@ const OperationalAlertsWidget = () => {
 
                           {/* Timestamp */}
                           <p className="text-[11px] text-muted-foreground text-right">
-                            {alert.timestamp && `📅 ${format(alert.timestamp, 'dd/MM/yyyy HH:mm', { locale: ar })} — ${formatDistanceToNow(alert.timestamp, { locale: ar, addSuffix: true })}`}
+                            {alert.timestamp && `📅 ${format(alert.timestamp, 'dd/MM/yyyy hh:mm a', { locale: ar })} — ${formatDistanceToNow(alert.timestamp, { locale: ar, addSuffix: true })}`}
                           </p>
 
                           {/* Action Buttons */}

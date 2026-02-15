@@ -252,7 +252,7 @@ const TransporterDeliveryApproval = () => {
                         {receipt.waste_type && <span>النوع: {receipt.waste_type}</span>}
                         {receipt.actual_weight && <span>الكمية: {receipt.actual_weight} كجم</span>}
                         <span>
-                          التاريخ: {format(new Date(receipt.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                          التاريخ: {format(new Date(receipt.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                         </span>
                       </div>
 

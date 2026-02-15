@@ -318,7 +318,7 @@ const ActivityLogPage = () => {
                             <TableCell className="font-mono text-sm whitespace-nowrap">
                               <div className="flex items-center gap-2">
                                 <Clock className="h-3 w-3 text-muted-foreground" />
-                                {format(new Date(log.created_at), 'yyyy/MM/dd HH:mm:ss', { locale: dateLocale })}
+                                {format(new Date(log.created_at), 'yyyy/MM/dd hh:mm:ss a', { locale: dateLocale })}
                               </div>
                             </TableCell>
                             <TableCell>

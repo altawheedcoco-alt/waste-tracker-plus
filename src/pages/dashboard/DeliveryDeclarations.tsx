@@ -165,8 +165,8 @@ const DeliveryDeclarations = () => {
                       {declaration.transporter_name && <span>الناقل: {declaration.transporter_name}</span>}
                       <span>
                         التاريخ: {declaration.declared_at
-                          ? format(new Date(declaration.declared_at), 'dd/MM/yyyy HH:mm', { locale: ar })
-                          : format(new Date(declaration.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                          ? format(new Date(declaration.declared_at), 'dd/MM/yyyy hh:mm a', { locale: ar })
+                          : format(new Date(declaration.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                       </span>
                     </div>
                   </div>

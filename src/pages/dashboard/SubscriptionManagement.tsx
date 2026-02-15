@@ -221,7 +221,7 @@ const SubscriptionManagement = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">{tx.payment_method === 'card' ? 'بطاقة' : tx.payment_method === 'wallet' ? 'محفظة' : tx.payment_method}</p>
-                      <p className="text-xs text-muted-foreground">{format(new Date(tx.created_at), 'dd MMM yyyy HH:mm', { locale: ar })}</p>
+                      <p className="text-xs text-muted-foreground">{format(new Date(tx.created_at), 'dd MMM yyyy hh:mm a', { locale: ar })}</p>
                     </div>
                   </div>
                 ))}

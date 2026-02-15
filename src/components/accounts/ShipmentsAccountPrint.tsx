@@ -65,7 +65,7 @@ const ShipmentsAccountPrint = forwardRef<HTMLDivElement, ShipmentsAccountPrintPr
     const totalQuantity = activeShipments.reduce((sum, s) => sum + (Number(s.quantity) || 0), 0);
     const totalValue = activeShipments.reduce((sum, s) => sum + (s.calculatedTotal || 0), 0);
 
-    const currentDate = printDate || format(new Date(), 'dd/MM/yyyy - HH:mm', { locale: ar });
+    const currentDate = printDate || format(new Date(), 'dd/MM/yyyy - hh:mm a', { locale: ar });
 
     return (
       <div 

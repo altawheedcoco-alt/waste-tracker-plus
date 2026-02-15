@@ -338,7 +338,7 @@ const ChatView = ({
                       <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                     </div>
                     <p className={`text-xs text-muted-foreground mt-1 ${isOwn ? 'text-left' : 'text-right'}`}>
-                      {format(new Date(message.created_at), 'HH:mm', { locale: ar })}
+                      {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                     </p>
                   </div>
                 </div>

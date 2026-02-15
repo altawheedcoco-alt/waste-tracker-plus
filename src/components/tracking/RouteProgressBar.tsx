@@ -193,7 +193,7 @@ const RouteProgressBar = ({
           {estimatedArrival && !deliveredAt && (
             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              متوقع: {format(estimatedArrival, 'HH:mm', { locale: ar })}
+              متوقع: {format(estimatedArrival, 'hh:mm a', { locale: ar })}
             </p>
           )}
         </div>

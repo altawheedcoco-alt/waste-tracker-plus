@@ -141,7 +141,7 @@ export default function DocumentPreviewDialog({
 
               <div className="flex justify-between">
                 <span className="text-muted-foreground">تاريخ الرفع</span>
-                <span>{format(new Date(doc.created_at), 'dd/MM/yyyy HH:mm')}</span>
+                <span>{format(new Date(doc.created_at), 'dd/MM/yyyy hh:mm a')}</span>
               </div>
 
               {doc.uploader && (

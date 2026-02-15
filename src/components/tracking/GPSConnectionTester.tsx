@@ -256,7 +256,7 @@ const GPSConnectionTester: React.FC = () => {
                         <span className="font-medium">{result.message}</span>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {format(result.timestamp, 'HH:mm:ss', { locale: ar })}
+                        {format(result.timestamp, 'hh:mm:ss a', { locale: ar })}
                       </span>
                     </div>
 

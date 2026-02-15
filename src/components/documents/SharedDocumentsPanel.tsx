@@ -197,7 +197,7 @@ const SharedDocumentsPanel = () => {
             </span>
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {format(new Date(doc.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+              {format(new Date(doc.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
             </span>
           </div>
           {doc.message && (
@@ -264,7 +264,7 @@ const SharedDocumentsPanel = () => {
                 موقّع بواسطة: {doc.signer_name}
               </span>
               <span className="text-emerald-600 dark:text-emerald-400 mr-2">
-                — {format(new Date(doc.signed_at), 'dd/MM/yyyy HH:mm')}
+                — {format(new Date(doc.signed_at), 'dd/MM/yyyy hh:mm a')}
               </span>
             </div>
           </div>

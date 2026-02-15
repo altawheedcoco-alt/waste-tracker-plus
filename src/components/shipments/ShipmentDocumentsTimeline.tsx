@@ -378,7 +378,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
               </td>
               <td style={{ padding: '10px', fontSize: '12px' }}>{step.signedBy || '—'}</td>
               <td style={{ padding: '10px', fontSize: '12px', textAlign: 'left' }}>
-                {step.signedAt ? format(new Date(step.signedAt), 'dd/MM/yyyy HH:mm', { locale: ar }) : '—'}
+                {step.signedAt ? format(new Date(step.signedAt), 'dd/MM/yyyy hh:mm a', { locale: ar }) : '—'}
               </td>
             </tr>
           ))}
@@ -410,7 +410,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
                 {decl.generator_name && <div>🏭 المولّد: {decl.generator_name}</div>}
                 {decl.transporter_name && <div>🚚 الناقل: {decl.transporter_name}</div>}
                 {decl.recycler_name && <div>♻️ المدوّر: {decl.recycler_name}</div>}
-                <div>📅 التاريخ: {format(new Date(decl.declared_at), 'dd/MM/yyyy HH:mm:ss', { locale: ar })}</div>
+                <div>📅 التاريخ: {format(new Date(decl.declared_at), 'dd/MM/yyyy hh:mm:ss a', { locale: ar })}</div>
                 {decl.auto_generated && <div>🤖 تم الإنشاء تلقائياً بواسطة النظام</div>}
               </div>
               {decl.declaration_text && (
@@ -443,7 +443,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
               </div>
               {rcp.notes && <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>{rcp.notes}</div>}
               <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
-                📅 {format(new Date(rcp.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                📅 {format(new Date(rcp.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
               </div>
             </div>
           ))}
@@ -452,7 +452,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
 
       {/* Footer */}
       <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#94a3b8' }}>
-        <div>تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy HH:mm', { locale: ar })}</div>
+        <div>تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}</div>
         <div>منصة إدارة النفايات — سلسلة الحيازة الرقمية</div>
         <div>الشحنة: {shipment.shipment_number}</div>
       </div>
@@ -583,7 +583,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
                           <div className="text-muted-foreground">
                             {step.signedBy && <>بواسطة: <strong>{step.signedBy}</strong></>}
                             {step.signedAt && (
-                              <> — {format(new Date(step.signedAt), 'dd/MM/yyyy HH:mm', { locale: ar })}</>
+                              <> — {format(new Date(step.signedAt), 'dd/MM/yyyy hh:mm a', { locale: ar })}</>
                             )}
                           </div>
                           <div className="flex items-center gap-1">

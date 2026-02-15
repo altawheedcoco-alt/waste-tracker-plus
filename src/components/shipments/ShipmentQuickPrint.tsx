@@ -300,7 +300,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
   const formatDateTime = (date: string | null) => {
     if (!date) return '-';
-    return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ar });
+    return format(new Date(date), 'dd/MM/yyyy hh:mm a', { locale: ar });
   };
 
   if (loading || !shipment) {

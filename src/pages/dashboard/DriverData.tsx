@@ -314,7 +314,7 @@ const DriverData = () => {
                     <p className="text-sm font-medium">{t('driverData.lastLocationUpdate')}</p>
                     <p className="text-xs text-muted-foreground">
                       {stats.lastLocationUpdate 
-                        ? format(new Date(stats.lastLocationUpdate), 'dd MMM yyyy - HH:mm', { locale: dateLocale })
+                        ? format(new Date(stats.lastLocationUpdate), 'dd MMM yyyy - hh:mm a', { locale: dateLocale })
                         : t('driverData.noLocation')}
                     </p>
                   </div>
@@ -530,7 +530,7 @@ const DriverData = () => {
                     <p className="text-sm font-medium">{language === 'ar' ? 'آخر تحديث للبيانات' : 'Last Data Update'}</p>
                     <p className="text-sm text-muted-foreground">
                       {driverInfo?.updated_at 
-                        ? format(new Date(driverInfo.updated_at), 'dd MMMM yyyy - HH:mm', { locale: dateLocale })
+                        ? format(new Date(driverInfo.updated_at), 'dd MMMM yyyy - hh:mm a', { locale: dateLocale })
                         : '-'}
                     </p>
                   </div>

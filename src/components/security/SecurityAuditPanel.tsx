@@ -305,7 +305,7 @@ export const SecurityAuditPanel = memo(function SecurityAuditPanel() {
                     {getStatusIcon(audit.status)}
                     <div>
                       <p className="text-sm font-medium">
-                        {format(new Date(audit.created_at), 'yyyy/MM/dd HH:mm', { locale: ar })}
+                        {format(new Date(audit.created_at), 'yyyy/MM/dd hh:mm a', { locale: ar })}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {audit.checks_passed} ناجح • {audit.checks_warning} تحذير • {audit.checks_failed} فشل

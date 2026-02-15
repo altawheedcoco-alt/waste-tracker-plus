@@ -179,7 +179,7 @@ const WorkOrderDetailDialog = ({ open, onOpenChange, workOrder }: WorkOrderDetai
                       {getStatusBadge(r.status)}
                       {r.responded_at && (
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(r.responded_at), 'dd/MM HH:mm', { locale: dateLocale })}
+                          {format(new Date(r.responded_at), 'dd/MM hh:mm a', { locale: dateLocale })}
                         </span>
                       )}
                     </div>
@@ -216,7 +216,7 @@ const WorkOrderDetailDialog = ({ open, onOpenChange, workOrder }: WorkOrderDetai
                 {activity.map((a: any) => (
                   <div key={a.id} className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Clock className="w-3 h-3" />
-                    <span>{format(new Date(a.created_at), 'dd/MM HH:mm', { locale: dateLocale })}</span>
+                    <span>{format(new Date(a.created_at), 'dd/MM hh:mm a', { locale: dateLocale })}</span>
                     <span>—</span>
                     <span className="font-medium text-foreground">{getActionLabel(a.action)}</span>
                   </div>

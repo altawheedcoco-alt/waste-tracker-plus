@@ -139,8 +139,8 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
                 ['طريقة التخلص', methodLabels[data.disposal_method] || data.disposal_method],
                 ...(data.disposal_method === 'incineration' && data.incineration_temperature ? [['درجة حرارة المحرقة', `${data.incineration_temperature}°C`]] : []),
                 ...(data.disposal_method === 'landfill' && data.landfill_cell_id ? [['رقم خلية الدفن', data.landfill_cell_id]] : []),
-                ['تاريخ بدء المعالجة', data.processing_started_at ? format(new Date(data.processing_started_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : '-'],
-                ['تاريخ إتمام المعالجة', data.processing_completed_at ? format(new Date(data.processing_completed_at), 'dd/MM/yyyy HH:mm', { locale: ar }) : '-'],
+                ['تاريخ بدء المعالجة', data.processing_started_at ? format(new Date(data.processing_started_at), 'dd/MM/yyyy hh:mm a', { locale: ar }) : '-'],
+                ['تاريخ إتمام المعالجة', data.processing_completed_at ? format(new Date(data.processing_completed_at), 'dd/MM/yyyy hh:mm a', { locale: ar }) : '-'],
                 ['المسؤول المستلم', data.receiving_officer || '-'],
               ].map(([label, value], i) => (
                 <tr key={i} style={{ backgroundColor: i % 2 === 0 ? '#f9fafb' : '#ffffff' }}>

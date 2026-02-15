@@ -134,7 +134,7 @@ const ShipmentTimeline = ({ shipment, compact = false }: ShipmentTimelineProps) 
               </p>
               {step.date && (
                 <p className="text-xs text-muted-foreground">
-                  {format(new Date(step.date), 'dd MMM yyyy - HH:mm', { locale: ar })}
+                  {format(new Date(step.date), 'dd MMM yyyy - hh:mm a', { locale: ar })}
                 </p>
               )}
             </div>

@@ -458,14 +458,14 @@ const RegulatoryUpdates = () => {
                   <div>
                     <label className="text-sm text-muted-foreground">تاريخ الإرسال</label>
                     <p className="font-medium">
-                      {format(new Date(selectedRequest.created_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
+                      {format(new Date(selectedRequest.created_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
                     </p>
                   </div>
                   {selectedRequest.reviewed_at && (
                     <div>
                       <label className="text-sm text-muted-foreground">تاريخ المراجعة</label>
                       <p className="font-medium">
-                        {format(new Date(selectedRequest.reviewed_at), 'dd MMMM yyyy - HH:mm', { locale: ar })}
+                        {format(new Date(selectedRequest.reviewed_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
                       </p>
                     </div>
                   )}

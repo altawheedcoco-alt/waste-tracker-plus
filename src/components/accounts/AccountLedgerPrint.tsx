@@ -56,7 +56,7 @@ const AccountLedgerPrint = forwardRef<HTMLDivElement, AccountLedgerPrintProps>(
     const totalCredit = entries.reduce((sum, e) => sum + e.credit, 0);
     const finalBalance = previousBalance + totalDebit - totalCredit;
 
-    const currentDate = printDate || format(new Date(), 'dd/MM/yyyy - HH:mm', { locale: ar });
+    const currentDate = printDate || format(new Date(), 'dd/MM/yyyy - hh:mm a', { locale: ar });
 
     return (
       <div 

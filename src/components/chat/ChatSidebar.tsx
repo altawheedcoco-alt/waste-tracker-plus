@@ -135,7 +135,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
   const formatMessageTime = (timeStr: string) => {
     const date = new Date(timeStr);
     if (isToday(date)) {
-      return format(date, 'HH:mm', { locale: ar });
+      return format(date, 'hh:mm a', { locale: ar });
     } else if (isYesterday(date)) {
       return 'أمس';
     } else if (differenceInDays(new Date(), date) < 7) {

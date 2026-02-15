@@ -239,7 +239,7 @@ const GeneratorCommandCenter = () => {
               <RefreshCw className={cn("w-3.5 h-3.5 text-muted-foreground", isFetching && "animate-spin")} />
             </button>
             <span className="text-[10px] text-muted-foreground hidden sm:inline">
-              آخر تحديث: {format(lastUpdated, 'HH:mm:ss')}
+              آخر تحديث: {format(lastUpdated, 'hh:mm:ss a')}
             </span>
           </div>
 

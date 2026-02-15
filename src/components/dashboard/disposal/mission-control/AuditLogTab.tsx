@@ -102,12 +102,12 @@ const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
                         <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> {t('missionControl.verifiedBy')}: {op.verified_by}</span>
                       )}
                       {op.processing_started_at && (
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.processingStarted')}: {format(new Date(op.processing_started_at), 'dd/MM HH:mm', { locale: dateLocale })}</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.processingStarted')}: {format(new Date(op.processing_started_at), 'dd/MM hh:mm a', { locale: dateLocale })}</span>
                       )}
                       {op.processing_completed_at && (
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.processingEnded')}: {format(new Date(op.processing_completed_at), 'dd/MM HH:mm', { locale: dateLocale })}</span>
+                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.processingEnded')}: {format(new Date(op.processing_completed_at), 'dd/MM hh:mm a', { locale: dateLocale })}</span>
                       )}
-                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.lastUpdate')}: {format(new Date(op.updated_at), 'dd/MM/yyyy HH:mm', { locale: dateLocale })}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {t('missionControl.lastUpdate')}: {format(new Date(op.updated_at), 'dd/MM/yyyy hh:mm a', { locale: dateLocale })}</span>
                     </div>
                   </div>
                 </div>
@@ -124,7 +124,7 @@ const AuditLogTab = ({ organizationId }: AuditLogTabProps) => {
                       <span className="text-sm">{log.action}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {log.resource_type} • {format(new Date(log.created_at), 'dd/MM/yyyy HH:mm:ss', { locale: dateLocale })}
+                      {log.resource_type} • {format(new Date(log.created_at), 'dd/MM/yyyy hh:mm:ss a', { locale: dateLocale })}
                     </p>
                   </div>
                 </div>

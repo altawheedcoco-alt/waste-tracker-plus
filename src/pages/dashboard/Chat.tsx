@@ -342,7 +342,7 @@ const Chat = () => {
                               </h4>
                               {partner.lastMessageTime && (
                                 <span className="text-[10px] text-muted-foreground shrink-0">
-                                  {format(new Date(partner.lastMessageTime), 'HH:mm', { locale: ar })}
+                                  {format(new Date(partner.lastMessageTime), 'hh:mm a', { locale: ar })}
                                 </span>
                               )}
                             </div>

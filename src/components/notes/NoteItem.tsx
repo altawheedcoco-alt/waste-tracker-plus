@@ -126,7 +126,7 @@ const NoteItem = ({ note, resourceType, resourceId, isReply = false }: NoteItemP
           <div className="text-right">
             <p className="text-sm font-medium">{note.author?.full_name || 'مستخدم'}</p>
             <p className="text-xs text-muted-foreground">
-              {format(new Date(note.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+              {format(new Date(note.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
               {note.is_edited && ' (معدّل)'}
             </p>
           </div>

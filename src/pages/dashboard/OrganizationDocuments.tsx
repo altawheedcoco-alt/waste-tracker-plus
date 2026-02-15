@@ -820,7 +820,7 @@ const OrganizationDocuments = () => {
                         </TableCell>
                         <TableCell>
                           <span className="text-sm">
-                            {format(new Date(log.created_at), 'dd MMM yyyy - HH:mm', { locale: ar })}
+                            {format(new Date(log.created_at), 'dd MMM yyyy - hh:mm a', { locale: ar })}
                           </span>
                         </TableCell>
                       </TableRow>

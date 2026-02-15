@@ -340,7 +340,7 @@ const DocumentReviewDialog = ({
                       <div key={h.id} className="p-3 rounded-lg border text-sm">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-muted-foreground">
-                            {format(new Date(h.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                            {format(new Date(h.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                           </span>
                           <Badge variant="outline">
                             {h.verification_type === 'auto' ? 'تلقائي' : 

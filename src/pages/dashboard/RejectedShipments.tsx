@@ -284,7 +284,7 @@ const RejectedShipments = () => {
                       )}
                       <span className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
-                        {format(new Date(rejection.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                        {format(new Date(rejection.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                       </span>
                     </div>
                   </div>

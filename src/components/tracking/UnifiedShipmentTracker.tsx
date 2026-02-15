@@ -338,7 +338,7 @@ const UnifiedShipmentTracker = ({
                 {lastUpdate && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {format(lastUpdate, 'HH:mm:ss', { locale: ar })}
+                    {format(lastUpdate, 'hh:mm:ss a', { locale: ar })}
                   </span>
                 )}
               </div>

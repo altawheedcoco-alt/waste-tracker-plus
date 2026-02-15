@@ -206,7 +206,7 @@ const IncidentReportManager = () => {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {format(new Date(inc.incident_at), 'dd/MM/yyyy HH:mm', { locale: ar })}
+                      {format(new Date(inc.incident_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
                     </span>
                     {inc.latitude && (
                       <span className="flex items-center gap-1">

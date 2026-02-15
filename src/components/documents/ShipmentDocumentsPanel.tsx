@@ -267,7 +267,7 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
                                 <span className="font-medium text-xs">{sig.signer_title}</span>
                                 {isSigned && (
                                   <p className="text-[10px] text-muted-foreground">
-                                    {sig.signer_name} — {sig.signed_at && format(new Date(sig.signed_at), 'dd/MM HH:mm', { locale: ar })}
+                                    {sig.signer_name} — {sig.signed_at && format(new Date(sig.signed_at), 'dd/MM hh:mm a', { locale: ar })}
                                   </p>
                                 )}
                               </div>
