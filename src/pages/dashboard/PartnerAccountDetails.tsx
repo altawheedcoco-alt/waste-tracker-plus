@@ -18,6 +18,7 @@ import {
   Plus,
   CalendarRange,
   Link as LinkIcon,
+  FolderOpen,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,6 +36,7 @@ import DepositButton from '@/components/deposits/DepositButton';
 import CreateInvoiceDialog from '@/components/invoices/CreateInvoiceDialog';
 import AccountPeriodsManager from '@/components/accounts/AccountPeriodsManager';
 import LinkedPartiesTab from '@/components/partners/LinkedPartiesTab';
+import { EntityProfileArchive } from '@/components/archive';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
@@ -336,10 +338,14 @@ export default function PartnerAccountDetails() {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="grid w-full max-w-5xl grid-cols-7 mb-6">
+          <TabsList className="grid w-full max-w-5xl grid-cols-8 mb-6">
             <TabsTrigger value="overview" className="gap-2">
               <BookOpen className="h-4 w-4" />
               كشف الحساب
+            </TabsTrigger>
+            <TabsTrigger value="archive" className="gap-2">
+              <FolderOpen className="h-4 w-4" />
+              الأرشيف
             </TabsTrigger>
             <TabsTrigger value="linked" className="gap-2">
               <LinkIcon className="h-4 w-4" />
@@ -410,6 +416,14 @@ export default function PartnerAccountDetails() {
                 onDepositUpdated={refreshDeposits}
               />
             </div>
+          </TabsContent>
+
+          {/* Archive Tab */}
+          <TabsContent value="archive" className="mt-0">
+            <EntityProfileArchive
+              partnerId={partnerId}
+              partnerName={partner?.name || ''}
+            />
           </TabsContent>
 
           {/* Linked Parties Tab */}
