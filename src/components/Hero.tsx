@@ -21,8 +21,8 @@ const Hero = () => {
   return (
     <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-20 pb-8 sm:pt-20 sm:pb-0">
       <div className="absolute inset-0">
-        <img src={heroBg} alt={t('landing.recyclingFacilities')} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/85 to-background" />
+        <img src={heroBg} alt={t('landing.recyclingFacilities')} className="w-full h-full object-cover" loading="eager" fetchPriority="high" decoding="async" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/50 to-background/90" />
       </div>
 
       <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="absolute top-32 right-20 hidden lg:block">
