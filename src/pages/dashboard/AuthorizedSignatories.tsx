@@ -14,6 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Shield, Users, Loader2, Search } from 'lucide-react';
 import SignatoryCard from '@/components/signatories/SignatoryCard';
+import AutoSignatureSettings from '@/components/signatories/AutoSignatureSettings';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Zap } from 'lucide-react';
 
 interface Signatory {
   id: string;
@@ -230,6 +233,15 @@ const AuthorizedSignatories = () => {
               إدارة صلاحيات التوقيع على المستندات الرسمية مع باركود وكود QR لكل مفوض
             </p>
           </div>
+        </div>
+
+        <Tabs defaultValue="signatories" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="signatories" className="gap-2"><Shield className="w-4 h-4" />المفوضون</TabsTrigger>
+            <TabsTrigger value="auto-sign" className="gap-2"><Zap className="w-4 h-4" />التوقيع التلقائي</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="signatories" className="space-y-6 mt-4">
           <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) { setEditingId(null); setForm(emptyForm); } }}>
             <DialogTrigger asChild>
               <Button className="gap-2">
@@ -304,8 +316,7 @@ const AuthorizedSignatories = () => {
                 </Button>
               </div>
             </DialogContent>
-          </Dialog>
-        </div>
+           </Dialog>
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -366,6 +377,12 @@ const AuthorizedSignatories = () => {
             ))}
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value="auto-sign" className="mt-4">
+            <AutoSignatureSettings />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Delete Confirmation */}
