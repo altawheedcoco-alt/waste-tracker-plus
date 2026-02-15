@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,9 +12,11 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 import {
   Search, FileText, FileCheck, Receipt, Truck, Recycle, Factory,
-  Download, Eye, Clock, Building2, ArrowUpDown, Printer,
+  Download, Eye, Clock, Building2, ArrowUpDown, Printer, X,
   FolderOpen, Inbox, Send as SendIcon, FileArchive, Scale, Briefcase, Bell,
   Weight, Banknote, Image, Info, Tag, ExternalLink,
 } from 'lucide-react';
@@ -58,6 +60,8 @@ const DocumentArchive = () => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState(tabFromUrl || 'all');
   const [sortDesc, setSortDesc] = useState(true);
+  const [selectedDoc, setSelectedDoc] = useState<ArchiveDoc | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => { if (tabFromUrl) setActiveTab(tabFromUrl); }, [tabFromUrl]);
 
@@ -320,65 +324,40 @@ const DocumentArchive = () => {
     }
   };
 
-  const handleView = (doc: ArchiveDoc) => {
-    if (doc.fileUrl) { window.open(doc.fileUrl, '_blank'); return; }
-    
-    // Navigate to the document's source page based on type
+  const getDocSourceUrl = (doc: ArchiveDoc): string | null => {
     const docId = doc.referenceId;
     switch (doc.type) {
-      case 'shipment':
-        if (docId) navigate(`/dashboard/shipments/${docId}`);
-        else navigate('/dashboard/shipments');
-        break;
-      case 'invoice':
-        if (docId) navigate(`/dashboard/invoices?view=${docId}`);
-        else navigate('/dashboard/invoices');
-        break;
-      case 'contract':
-        if (docId) navigate(`/dashboard/contracts?view=${docId}`);
-        else navigate('/dashboard/contracts');
-        break;
-      case 'certificate':
-        if (docId) navigate(`/dashboard/shipments/${docId}?tab=certificate`);
-        else navigate('/dashboard/shipments');
-        break;
-      case 'award_letter':
-        navigate('/dashboard/award-letters');
-        break;
-      case 'deposit':
-        navigate('/dashboard/accounting');
-        break;
-      case 'statement':
-        navigate('/dashboard/accounting?tab=statements');
-        break;
-      case 'disposal':
-        if (docId) navigate(`/dashboard/shipments/${docId}`);
-        else navigate('/dashboard/disposal');
-        break;
-      case 'receipt':
-        if (docId) navigate(`/dashboard/shipments/${docId}`);
-        else navigate('/dashboard/shipments');
-        break;
-      case 'report':
-        navigate('/dashboard/reports');
-        break;
-      case 'entity_certificate':
-      case 'entity_document':
-        navigate('/dashboard/entity-profile');
-        break;
-      default:
-        if (docId) navigate(`/dashboard/verify?code=${docId}`);
-        else toast.info(t('archive.noPreviewAvailable'));
+      case 'shipment': return docId ? `/dashboard/shipments/${docId}` : '/dashboard/shipments';
+      case 'invoice': return docId ? `/dashboard/invoices?view=${docId}` : '/dashboard/invoices';
+      case 'contract': return docId ? `/dashboard/contracts?view=${docId}` : '/dashboard/contracts';
+      case 'certificate': return docId ? `/dashboard/shipments/${docId}?tab=certificate` : '/dashboard/shipments';
+      case 'award_letter': return '/dashboard/award-letters';
+      case 'deposit': return '/dashboard/accounting';
+      case 'statement': return '/dashboard/accounting?tab=statements';
+      case 'disposal': return docId ? `/dashboard/shipments/${docId}` : '/dashboard/disposal';
+      case 'receipt': return docId ? `/dashboard/shipments/${docId}` : '/dashboard/shipments';
+      case 'report': return '/dashboard/reports';
+      case 'entity_certificate': case 'entity_document': return '/dashboard/entity-profile';
+      default: return docId ? `/dashboard/verify?code=${docId}` : null;
     }
+  };
+
+  const handleView = (doc: ArchiveDoc) => {
+    setSelectedDoc(doc);
+  };
+
+  const handleNavigate = (doc: ArchiveDoc) => {
+    const url = getDocSourceUrl(doc);
+    if (url) navigate(url);
+    else toast.info(t('archive.noPreviewAvailable'));
   };
 
   const handleDownload = (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
       const a = document.createElement('a'); a.href = doc.fileUrl; a.download = doc.title || 'document'; a.target = '_blank'; a.click();
     } else {
-      // Navigate to source for PDF generation
-      handleView(doc);
-      toast.info(language === 'ar' ? 'افتح المستند ثم اضغط طباعة/تنزيل PDF' : 'Open the document then use print/download PDF');
+      handleNavigate(doc);
+      toast.info(language === 'ar' ? 'افتح المستند ثم اضغط تحميل PDF' : 'Open the document then download PDF');
     }
   };
 
@@ -389,10 +368,13 @@ const DocumentArchive = () => {
         printWindow.addEventListener('load', () => { printWindow.print(); });
       }
     } else {
-      handleView(doc);
+      handleNavigate(doc);
       toast.info(language === 'ar' ? 'افتح المستند ثم اضغط طباعة' : 'Open the document then print');
     }
   };
+
+  const isImageUrl = (url?: string) => url && /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url);
+  const isPdfUrl = (url?: string) => url && /\.pdf(\?|$)/i.test(url);
 
   return (
     <DashboardLayout>
@@ -556,6 +538,105 @@ const DocumentArchive = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* ─── Document Detail Drawer ─── */}
+      <Sheet open={!!selectedDoc} onOpenChange={open => { if (!open) setSelectedDoc(null); }}>
+        <SheetContent side="bottom" className="h-[85vh] p-0 rounded-t-2xl">
+          {selectedDoc && (() => {
+            const doc = selectedDoc;
+            const docDesc = getDocumentDescription(doc.type, language === 'ar' ? 'ar' : 'en');
+            const docCat = getDocumentCategory(doc.type);
+            const catLabel = CATEGORY_LABELS[docCat]?.[language === 'ar' ? 'ar' : 'en'] || docCat;
+            const config = DOC_TYPES[doc.type] || DOC_TYPES.other;
+            const DocIcon = config.icon;
+            
+            return (
+              <div className="flex flex-col h-full">
+                {/* Header with actions */}
+                <div className="p-4 border-b bg-muted/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handlePrint(doc)}>
+                        <Printer className="w-4 h-4" />
+                        {language === 'ar' ? 'طباعة' : 'Print'}
+                      </Button>
+                      <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleDownload(doc)}>
+                        <Download className="w-4 h-4" />
+                        {language === 'ar' ? 'تحميل' : 'Download'}
+                      </Button>
+                      {doc.fileUrl && (
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => window.open(doc.fileUrl, '_blank')}>
+                          <ExternalLink className="w-4 h-4" />
+                          {language === 'ar' ? 'فتح' : 'Open'}
+                        </Button>
+                      )}
+                      <Button size="sm" variant="default" className="gap-1.5" onClick={() => handleNavigate(doc)}>
+                        <Eye className="w-4 h-4" />
+                        {language === 'ar' ? 'الذهاب للمصدر' : 'Go to Source'}
+                      </Button>
+                    </div>
+                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => setSelectedDoc(null)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-3 justify-end">
+                    <div className="text-right flex-1">
+                      <h3 className="font-bold text-base">{doc.title}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">{doc.description || docDesc}</p>
+                    </div>
+                    <div className={`w-10 h-10 rounded-xl bg-muted flex items-center justify-center`}>
+                      <DocIcon className={`w-5 h-5 ${config.color}`} />
+                    </div>
+                  </div>
+                  {/* Meta info */}
+                  <div className="flex items-center gap-3 justify-end mt-2 flex-wrap text-xs text-muted-foreground">
+                    {getSourceBadge(doc.source)}
+                    <Badge variant="outline" className="text-[10px] gap-0.5"><Tag className="w-2.5 h-2.5" />{catLabel}</Badge>
+                    {doc.amount && <Badge variant="secondary" className="text-[10px]">{doc.amount} ج.م</Badge>}
+                    {doc.trackingCode && <span className="font-mono text-[10px] bg-muted px-1.5 py-0.5 rounded">{doc.trackingCode}</span>}
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{format(new Date(doc.date), 'dd/MM/yyyy HH:mm', { locale: dateLocale })}</span>
+                    {doc.senderName && <span><Building2 className="w-3 h-3 inline" /> {doc.senderName}</span>}
+                    {doc.recipientName && <span><Building2 className="w-3 h-3 inline" /> {doc.recipientName}</span>}
+                    {doc.issuedBy && <span>{language === 'ar' ? 'بواسطة' : 'By'}: {doc.issuedBy}</span>}
+                  </div>
+                  {doc.aiSummary && (
+                    <p className="text-xs text-muted-foreground/80 mt-2 p-2 bg-muted rounded-lg italic text-right">
+                      <Info className="w-3 h-3 inline ml-1" />
+                      {doc.aiSummary}
+                    </p>
+                  )}
+                </div>
+
+                {/* Preview area */}
+                <div className="flex-1 overflow-hidden bg-muted/10">
+                  {doc.fileUrl ? (
+                    isImageUrl(doc.fileUrl) ? (
+                      <div className="h-full flex items-center justify-center p-4">
+                        <img src={doc.fileUrl} alt={doc.title} className="max-h-full max-w-full object-contain rounded-lg shadow-md" />
+                      </div>
+                    ) : isPdfUrl(doc.fileUrl) ? (
+                      <iframe ref={iframeRef} src={doc.fileUrl} className="w-full h-full border-0" title={doc.title} />
+                    ) : (
+                      <iframe ref={iframeRef} src={doc.fileUrl} className="w-full h-full border-0" title={doc.title} />
+                    )
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground gap-4 p-8">
+                      <DocIcon className={`w-16 h-16 opacity-30 ${config.color}`} />
+                      <p className="text-sm text-center">
+                        {language === 'ar' ? 'لا يوجد ملف مرفق مباشر — اضغط "الذهاب للمصدر" لعرض المستند الأصلي' : 'No direct file — click "Go to Source" to view the original document'}
+                      </p>
+                      <Button onClick={() => handleNavigate(doc)} className="gap-2">
+                        <ExternalLink className="w-4 h-4" />
+                        {language === 'ar' ? 'الذهاب للمصدر' : 'Go to Source'}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </DashboardLayout>
   );
 };
