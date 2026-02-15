@@ -28,13 +28,13 @@ const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge }: Sidebar
       >
         <div className="relative">
           <Icon className="w-5 h-5 shrink-0" />
-          {badge && badge > 0 && (
+          {badge != null && badge > 0 && isCollapsed && (
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="absolute -top-1.5 -left-1.5 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center"
+              className="absolute -top-2 -left-2 min-w-[1.125rem] h-[1.125rem] px-0.5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm shadow-destructive/30"
             >
-              {badge > 9 ? '9+' : badge}
+              {badge > 99 ? '99+' : badge}
             </motion.span>
           )}
         </div>
@@ -45,12 +45,27 @@ const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge }: Sidebar
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: 'auto' }}
               exit={{ opacity: 0, width: 0 }}
-              className="overflow-hidden whitespace-nowrap font-medium text-sm"
+              className="overflow-hidden whitespace-nowrap font-medium text-sm flex-1"
             >
               {label}
             </motion.span>
           )}
         </AnimatePresence>
+
+        {/* Badge as pill next to label when sidebar is expanded */}
+        {badge != null && badge > 0 && !isCollapsed && (
+          <motion.span
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className={`min-w-[1.375rem] h-[1.375rem] px-1 rounded-full text-[11px] font-bold flex items-center justify-center shrink-0 ${
+              isActive
+                ? 'bg-primary-foreground/20 text-primary-foreground'
+                : 'bg-destructive text-destructive-foreground shadow-sm shadow-destructive/30'
+            }`}
+          >
+            {badge > 99 ? '99+' : badge}
+          </motion.span>
+        )}
 
         {isActive && (
           <motion.div
@@ -69,8 +84,8 @@ const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge }: Sidebar
         <TooltipTrigger asChild>{content}</TooltipTrigger>
         <TooltipContent side="left" className="font-medium">
           <p>{label}</p>
-          {badge && badge > 0 && (
-            <span className="mr-2 text-destructive">({badge})</span>
+          {badge != null && badge > 0 && (
+            <span className="mr-2 text-destructive font-bold">({badge})</span>
           )}
         </TooltipContent>
       </Tooltip>
