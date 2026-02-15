@@ -397,10 +397,65 @@ const UserGuidePage = () => {
       {/* Print Styles */}
       <style>{`
         @media print {
-          nav, header, [class*="sidebar"], [class*="Sidebar"], button, .print\\:hidden { display: none !important; }
-          body { font-size: 11px !important; }
-          .max-w-4xl { max-width: 100% !important; }
-          section { page-break-inside: avoid; }
+          /* Hide UI chrome */
+          nav, header, aside, [class*="sidebar"], [class*="Sidebar"], button, .print\\:hidden,
+          [data-sidebar], [role="navigation"], footer:not(.print-footer) { display: none !important; }
+          
+          /* Reset page */
+          @page { size: A4; margin: 8mm 10mm; }
+          html, body { margin: 0 !important; padding: 0 !important; background: white !important; }
+          body { font-size: 9px !important; line-height: 1.35 !important; font-family: 'Cairo', 'Segoe UI', sans-serif !important; direction: rtl !important; }
+          
+          /* Layout reset */
+          .max-w-4xl { max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+          main, [class*="main"], [role="main"] { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+          
+          /* Compact sections */
+          section { page-break-inside: avoid; margin-bottom: 4px !important; }
+          .space-y-2 > * + * { margin-top: 2px !important; }
+          .mb-8 { margin-bottom: 4px !important; }
+          .mb-4 { margin-bottom: 2px !important; }
+          .mb-2 { margin-bottom: 1px !important; }
+          .mr-4 { margin-right: 8px !important; }
+          .mr-6 { margin-right: 12px !important; }
+          .space-y-3 > * + * { margin-top: 2px !important; }
+          .space-y-2 > * + * { margin-top: 1px !important; }
+          .pb-2 { padding-bottom: 1px !important; }
+          .pt-6 { padding-top: 4px !important; }
+          .mt-8 { margin-top: 4px !important; }
+          
+          /* Typography */
+          h1 { font-size: 14px !important; margin: 0 !important; }
+          h2 { font-size: 11px !important; margin: 0 !important; }
+          h3 { font-size: 9.5px !important; margin: 0 0 1px 0 !important; }
+          p { font-size: 8.5px !important; margin: 1px 0 !important; line-height: 1.3 !important; }
+          
+          /* Badges */
+          .rounded-full { padding: 1px 4px !important; font-size: 7px !important; }
+          .rounded-full .w-2 { width: 5px !important; height: 5px !important; }
+          
+          /* Section header */
+          .border-b-2 { border-bottom-width: 1px !important; padding-bottom: 1px !important; margin-bottom: 2px !important; }
+          .p-2 { padding: 2px !important; }
+          .w-5 { width: 12px !important; height: 12px !important; }
+          .gap-3 { gap: 4px !important; }
+          .gap-2 { gap: 3px !important; }
+          .gap-1\\.5 { gap: 2px !important; }
+          
+          /* Status badges container */
+          .bg-muted\\/50 { padding: 3px 6px !important; margin: 2px 0 !important; }
+          .flex-wrap { gap: 2px !important; }
+          
+          /* Icons in subsections */
+          .w-4 { width: 10px !important; height: 10px !important; }
+          
+          /* Print header */
+          .border-t-2 { border-top-width: 1px !important; padding-top: 3px !important; margin-top: 4px !important; }
+          .text-xs { font-size: 7px !important; }
+          .mt-2 { margin-top: 2px !important; }
+          
+          /* Color adjustments */
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
         }
       `}</style>
     </DashboardLayout>
