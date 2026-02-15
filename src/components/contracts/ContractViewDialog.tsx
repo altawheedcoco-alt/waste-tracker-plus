@@ -10,6 +10,8 @@ import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import { Download, Printer, PenTool, Building2, UserPlus } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
+import AddNoteButton from '@/components/notes/AddNoteButton';
+import NotesPanel from '@/components/notes/NotesPanel';
 
 interface ContractViewDialogProps {
   open: boolean;
@@ -190,8 +192,18 @@ const ContractViewDialog = ({
           )}
         </div>
 
+        {/* Notes Section */}
+        <NotesPanel
+          resourceType="contract"
+          resourceId={contract.id}
+          title="ملاحظات العقد"
+          maxHeight={250}
+          compact
+        />
+
         {/* Action Buttons */}
         <DialogFooter className="flex-row gap-2 flex-wrap">
+          <AddNoteButton resourceType="contract" resourceId={contract.id} />
           {signingMethod === 'digital' && !contract.party_one_signature_url && (
             <SignDocumentButton
               documentId={contract.id}

@@ -161,6 +161,7 @@ const VerifySignatory = lazy(() => import("./pages/VerifySignatory"));
 const Permits = lazy(() => import("./pages/dashboard/Permits"));
 const EnvironmentalConsultants = lazy(() => import("./pages/dashboard/EnvironmentalConsultants"));
 const SigningInbox = lazy(() => import("./pages/dashboard/SigningInbox"));
+const AllNotes = lazy(() => import("./pages/dashboard/AllNotes"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -369,7 +370,8 @@ const AppRoutes = memo(() => (
          <Route path="/dashboard/authorized-signatories" element={<AuthorizedSignatories />} />
          <Route path="/dashboard/permits" element={<Permits />} />
          <Route path="/dashboard/environmental-consultants" element={<EnvironmentalConsultants />} />
-         <Route path="/dashboard/signing-inbox" element={<SigningInbox />} />
+          <Route path="/dashboard/signing-inbox" element={<SigningInbox />} />
+          <Route path="/dashboard/notes" element={<AllNotes />} />
          <Route path="/verify-signatory/:code" element={<VerifySignatory />} />
         <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
