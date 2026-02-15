@@ -15902,6 +15902,150 @@ export type Database = {
           },
         ]
       }
+      signing_requests: {
+        Row: {
+          created_at: string
+          deadline: string | null
+          document_description: string | null
+          document_id: string | null
+          document_title: string
+          document_type: string
+          document_url: string | null
+          id: string
+          message: string | null
+          priority: string
+          recipient_organization_id: string
+          recipient_profile_id: string | null
+          recipient_user_id: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          related_shipment_id: string | null
+          requires_stamp: boolean | null
+          sender_organization_id: string
+          sender_profile_id: string | null
+          sender_user_id: string
+          signature_id: string | null
+          signed_at: string | null
+          signed_document_url: string | null
+          status: string
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          deadline?: string | null
+          document_description?: string | null
+          document_id?: string | null
+          document_title: string
+          document_type?: string
+          document_url?: string | null
+          id?: string
+          message?: string | null
+          priority?: string
+          recipient_organization_id: string
+          recipient_profile_id?: string | null
+          recipient_user_id?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          related_shipment_id?: string | null
+          requires_stamp?: boolean | null
+          sender_organization_id: string
+          sender_profile_id?: string | null
+          sender_user_id: string
+          signature_id?: string | null
+          signed_at?: string | null
+          signed_document_url?: string | null
+          status?: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          deadline?: string | null
+          document_description?: string | null
+          document_id?: string | null
+          document_title?: string
+          document_type?: string
+          document_url?: string | null
+          id?: string
+          message?: string | null
+          priority?: string
+          recipient_organization_id?: string
+          recipient_profile_id?: string | null
+          recipient_user_id?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          related_shipment_id?: string | null
+          requires_stamp?: boolean | null
+          sender_organization_id?: string
+          sender_profile_id?: string | null
+          sender_user_id?: string
+          signature_id?: string | null
+          signed_at?: string | null
+          signed_document_url?: string | null
+          status?: string
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signing_requests_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "signing_requests_recipient_organization_id_fkey"
+            columns: ["recipient_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_requests_recipient_profile_id_fkey"
+            columns: ["recipient_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_requests_related_shipment_id_fkey"
+            columns: ["related_shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_requests_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "signing_requests_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_requests_sender_profile_id_fkey"
+            columns: ["sender_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_requests_signature_id_fkey"
+            columns: ["signature_id"]
+            isOneToOne: false
+            referencedRelation: "document_signatures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       slot_bookings: {
         Row: {
           booked_by_organization_id: string
