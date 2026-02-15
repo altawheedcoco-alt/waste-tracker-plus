@@ -88,12 +88,13 @@ const DocumentArchive = () => {
       if (!orgId) return [];
       const { data, error } = await supabase.from('document_print_log').select('*').eq('organization_id', orgId).order('created_at', { ascending: false }).limit(500);
       if (error) throw error;
-      return (data || []).map((d): ArchiveDoc => {
+      return (data || []).map((d: any): ArchiveDoc => {
         const isAuto = d.action_type === 'auto_created';
         return {
           id: d.id, title: d.document_number || d.print_tracking_code || t('archive.issuedDoc'), type: d.document_type || 'other', date: d.created_at,
           source: isAuto ? 'auto' : 'issued',
           issuedBy: d.printed_by_name || t('archive.system'), trackingCode: d.print_tracking_code, referenceId: d.document_id,
+          fileUrl: d.file_url || undefined,
           description: d.description || undefined, aiSummary: d.ai_summary || undefined, actionType: d.action_type || undefined,
           dedupKey: `print-${d.document_id || d.id}`,
         };
@@ -494,6 +495,11 @@ const DocumentArchive = () => {
                         </div>
                         <div className="flex-1 text-right min-w-0">
                           <div className="flex items-center gap-2 justify-end flex-wrap">
+                            {doc.fileUrl ? (
+                              <Badge className="text-[10px] bg-primary/10 text-primary gap-0.5"><FileText className="w-2.5 h-2.5" />{language === 'ar' ? 'ملف متاح' : 'File'}</Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-[10px] text-muted-foreground gap-0.5">{language === 'ar' ? 'بدون ملف' : 'No file'}</Badge>
+                            )}
                             {getSourceBadge(doc.source)}
                             {doc.signed && <Badge className="text-[10px] bg-emerald-500/10 text-emerald-600">{t('archive.signed')}</Badge>}
                             {doc.status === 'pending' && <Badge variant="outline" className="text-[10px] text-amber-600">{t('archive.pendingReview')}</Badge>}
