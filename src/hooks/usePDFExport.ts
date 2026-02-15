@@ -23,14 +23,14 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       scale = 2,
     } = options;
 
-    // A4 margins in mm
-    const marginMM = 10;
+    // A4 margins in mm - minimal for more content space
+    const marginMM = 8;
 
     // Temporarily apply A4-like width constraint for accurate capture
     const originalStyle = element.style.cssText;
     element.style.width = '794px'; // A4 at 96dpi
     element.style.maxWidth = '794px';
-    element.style.padding = '32px';
+    element.style.padding = '24px';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
 
@@ -177,10 +177,10 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
 
     const defaultPrintStyles = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-      @page { size: A4; margin: 10mm 12mm; }
+      @page { size: A4; margin: 8mm 10mm; }
       * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; box-sizing: border-box; }
       body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; direction: rtl; }
-      .print-container { width: 186mm; max-width: 186mm; margin: 0 auto; padding: 2mm; box-sizing: border-box; overflow: visible !important; }
+      .print-container { width: 190mm; max-width: 190mm; margin: 0 auto; padding: 2mm; box-sizing: border-box; overflow: visible !important; }
       .no-print { display: none !important; }
       img { max-width: 100%; height: auto; max-height: 60mm; object-fit: contain; }
       table { width: 100%; border-collapse: collapse; page-break-inside: auto; }

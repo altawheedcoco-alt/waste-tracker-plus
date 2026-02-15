@@ -110,7 +110,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .page {
           max-width: 210mm;
           margin: 0 auto;
-          padding: 15mm 20mm;
+          padding: 10mm 12mm;
           background: white;
           min-height: 297mm;
           position: relative;
@@ -572,7 +572,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         
         @media print {
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .page { padding: 10mm 15mm; min-height: auto; }
+          .page { padding: 8mm 10mm; min-height: auto; }
           .footer { position: relative; bottom: auto; left: auto; right: auto; margin-top: 30px; }
         }
       </style>
