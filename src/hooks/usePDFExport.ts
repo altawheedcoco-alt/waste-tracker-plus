@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { generateThemeCSS, getThemeById, type PrintThemeId } from '@/lib/printThemes';
 
 interface UsePDFExportOptions {
@@ -286,11 +287,60 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     printContent(element, themeCSS);
   }, [printContent]);
 
+  /** Export PDF and upload to storage, returning the public URL */
+  const exportAndUpload = useCallback(async (
+    element: HTMLElement | null,
+    opts: { orgId: string; docType: string; docId: string; customFilename?: string }
+  ): Promise<string | null> => {
+    if (!element) return null;
+
+    try {
+      const pdf = await generatePDF(element);
+      if (!pdf) return null;
+
+      const blob = pdf.output('blob');
+      const { orgId, docType, docId, customFilename } = opts;
+      const dateStr = new Date().toISOString().split('T')[0];
+      const fileName = `${orgId}/${docType}/${docId}-${dateStr}.pdf`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('document-archive')
+        .upload(fileName, blob, { contentType: 'application/pdf', upsert: true });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        return null;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('document-archive')
+        .getPublicUrl(fileName);
+
+      const publicUrl = urlData?.publicUrl || null;
+
+      // Update print log with file URL if docId exists
+      if (publicUrl && docId) {
+        await supabase
+          .from('document_print_log')
+          .update({ file_url: publicUrl })
+          .eq('document_id', docId)
+          .eq('organization_id', orgId);
+      }
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      return null;
+    }
+  }, [generatePDF]);
+
   return { 
     exportToPDF, 
+    exportAndUpload,
     previewPDF, 
     printContent,
     printWithTheme,
+    generatePDF,
     isExporting 
   };
 };

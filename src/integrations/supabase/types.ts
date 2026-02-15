@@ -4870,6 +4870,7 @@ export type Database = {
           document_id: string | null
           document_number: string | null
           document_type: string
+          file_url: string | null
           id: string
           metadata: Json | null
           organization_id: string
@@ -4889,6 +4890,7 @@ export type Database = {
           document_id?: string | null
           document_number?: string | null
           document_type: string
+          file_url?: string | null
           id?: string
           metadata?: Json | null
           organization_id: string
@@ -4908,6 +4910,7 @@ export type Database = {
           document_id?: string | null
           document_number?: string | null
           document_type?: string
+          file_url?: string | null
           id?: string
           metadata?: Json | null
           organization_id?: string
