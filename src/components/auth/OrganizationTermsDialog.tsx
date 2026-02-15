@@ -403,6 +403,16 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       
       setUploadingImages(false);
 
+      // Fetch user's IP address
+      let userIpAddress: string | null = null;
+      try {
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipRes.json();
+        userIpAddress = ipData.ip || null;
+      } catch (ipErr) {
+        console.warn('Could not fetch IP address:', ipErr);
+      }
+
       const { data: insertedData, error } = await supabase.from('terms_acceptances').insert({
         user_id: user.id, 
         organization_id: organization.id, 
@@ -410,7 +420,8 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
         organization_name: organization.name, 
         full_name: signerName || profile.full_name, 
         terms_version: currentTermsVersion,
-        user_agent: navigator.userAgent, 
+        user_agent: navigator.userAgent,
+        ip_address: userIpAddress,
         signer_national_id: nationalId, 
         signer_phone: signerPhone,
         signer_position: signerPosition, 
