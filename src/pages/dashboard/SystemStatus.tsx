@@ -50,6 +50,7 @@ import { ModuleOverviewCard, StrengthsList, getStatusInfo, getPriorityVariant } 
 import { LiveStatsGrid, OverallProgressCard } from '@/components/system-status/StatsComponents';
 import { IntegrationCard, IntegrationDetailView, IntegrationStatsGrid } from '@/components/system-status/IntegrationsComponents';
 import { OrganizationsHealthTab } from '@/components/system-status/OrganizationsHealthTab';
+import { SchemaArchiveTab } from '@/components/system-status/SchemaArchiveTab';
 import { triggerAIChat } from '@/lib/aiChatBus';
 import { toast } from 'sonner';
 
@@ -143,7 +144,7 @@ const SystemStatus = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
-        <TabsList className="grid grid-cols-9 w-full">
+        <TabsList className="grid grid-cols-10 w-full">
           <TabsTrigger value="live-monitor" className="flex items-center gap-2">
             <Radio className="w-4 h-4" />
             <span className="hidden sm:inline">مراقبة مباشرة</span>
@@ -151,6 +152,10 @@ const SystemStatus = () => {
           <TabsTrigger value="org-health" className="flex items-center gap-2">
             <Building2 className="w-4 h-4" />
             <span className="hidden sm:inline">حالة الجهات</span>
+          </TabsTrigger>
+          <TabsTrigger value="schema-archive" className="flex items-center gap-2">
+            <Lock className="w-4 h-4" />
+            <span className="hidden sm:inline">أرشيف البيانات</span>
           </TabsTrigger>
           <TabsTrigger value="engineer-vision" className="flex items-center gap-2">
             <Brain className="w-4 h-4" />
@@ -190,6 +195,11 @@ const SystemStatus = () => {
         {/* Organizations Health Tab */}
         <TabsContent value="org-health" className="mt-6">
           <OrganizationsHealthTab />
+        </TabsContent>
+
+        {/* Schema Archive Tab */}
+        <TabsContent value="schema-archive" className="mt-6">
+          <SchemaArchiveTab />
         </TabsContent>
 
         {/* Engineer Vision Tab */}
