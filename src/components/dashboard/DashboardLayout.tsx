@@ -430,6 +430,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Banknote, label: t('sidebar.cogs'), path: '/dashboard/erp/cogs', key: 'erp-cogs' },
       { icon: GitCompareArrows, label: t('sidebar.financialComparisons'), path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons' },
     ]},
+    // Signatories & Authorization
+    { icon: Shield, label: language === 'ar' ? '🛡️ المفوضون المعتمدون' : 'Authorized Signatories', path: '/dashboard/authorized-signatories', key: 'authorized-signatories' },
     // Learning Center
     { icon: GraduationCap, label: language === 'ar' ? 'المركز التعليمي' : 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
     { icon: BookOpen, label: language === 'ar' ? '📖 دليل المستخدم' : 'User Guide', path: '/dashboard/user-guide', key: 'user-guide' },
