@@ -177,8 +177,9 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
                       onClick={() => {
                         if (!isActive) {
                           switchOrganization(org.organization_id);
-                          setOpen(false);
+                          navigate('/dashboard');
                         }
+                        setOpen(false);
                       }}
                       disabled={switchingOrganization}
                     >
