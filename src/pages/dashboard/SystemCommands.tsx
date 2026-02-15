@@ -269,7 +269,7 @@ const buildTestCategories = (): TestCategory[] => [
     description: 'فحص الدوال المخزنة في قاعدة البيانات',
     tests: [
       { id: 'rpc-admin-stats', name: 'إحصائيات الإدارة', run: () => rpcTest('get_admin_dashboard_stats') },
-      { id: 'rpc-search', name: 'البحث الشامل', run: () => rpcTest('global_search', { search_query: 'test', result_limit: 1 }) },
+      { id: 'rpc-search', name: 'البحث الشامل', run: () => rpcTest('global_search', { p_query: 'test', p_org_id: '00000000-0000-0000-0000-000000000000', p_limit: 1 }) },
       { id: 'rpc-org-summary', name: 'ملخص الجهات', run: () => rpcTest('get_organization_summary') },
       { id: 'rpc-security', name: 'ملخص الأمان', run: () => rpcTest('get_security_summary') },
       { id: 'rpc-waste-analytics', name: 'تحليلات النفايات', run: () => rpcTest('get_waste_type_analytics') },
