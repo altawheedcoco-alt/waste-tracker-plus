@@ -126,12 +126,12 @@ const DocumentArchive = () => {
     queryKey: ['doc-archive-invoices', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase.from('invoices').select('id, invoice_number, created_at, status, total_amount, pdf_url, provider_organization_id, client_organization_id')
-        .or(`provider_organization_id.eq.${orgId},client_organization_id.eq.${orgId}`).order('created_at', { ascending: false }).limit(300);
+      const { data, error } = await supabase.from('invoices').select('id, invoice_number, created_at, status, total_amount, organization_id, partner_organization_id')
+        .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`).order('created_at', { ascending: false }).limit(300);
       if (error) throw error;
       return (data || []).map((d: any): ArchiveDoc => ({
         id: d.id, title: `${t('archive.invoice')} ${d.invoice_number || ''}`.trim(), type: 'invoice', date: d.created_at,
-        source: d.provider_organization_id === orgId ? 'issued' : 'received', amount: d.total_amount, status: d.status, fileUrl: d.pdf_url, dedupKey: `invoice-${d.id}`,
+        source: d.organization_id === orgId ? 'issued' : 'received', amount: d.total_amount, status: d.status, dedupKey: `invoice-${d.id}`,
       }));
     },
     enabled: !!orgId,
@@ -174,12 +174,12 @@ const DocumentArchive = () => {
     queryKey: ['doc-archive-contracts', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase.from('contracts').select('id, contract_number, title, created_at, document_url, status, organization_id, partner_organization_id')
+      const { data, error } = await supabase.from('contracts').select('id, contract_number, title, created_at, attachment_url, status, organization_id, partner_organization_id')
         .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`).order('created_at', { ascending: false }).limit(200);
       if (error) throw error;
       return (data || []).map((d: any): ArchiveDoc => ({
         id: d.id, title: `${t('archive.contract')} ${d.contract_number || ''} - ${d.title || ''}`.trim(), type: 'contract', date: d.created_at,
-        source: d.organization_id === orgId ? 'issued' : 'received', status: d.status, fileUrl: d.document_url, dedupKey: `contract-${d.id}`,
+        source: d.organization_id === orgId ? 'issued' : 'received', status: d.status, fileUrl: d.attachment_url, dedupKey: `contract-${d.id}`,
       }));
     },
     enabled: !!orgId,
@@ -232,16 +232,13 @@ const DocumentArchive = () => {
     queryKey: ['doc-archive-weighbridge', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase.from('shipments').select('id, shipment_number, pickup_weighbridge_photo_url, delivery_weighbridge_photo_url, created_at, generator_id, recycler_id, transporter_id')
-        .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`).not('pickup_weighbridge_photo_url', 'is', null).order('created_at', { ascending: false }).limit(300);
+      const { data, error } = await supabase.from('shipments').select('id, shipment_number, weighbridge_photo_url, created_at, generator_id, recycler_id, transporter_id')
+        .or(`generator_id.eq.${orgId},recycler_id.eq.${orgId},transporter_id.eq.${orgId}`).not('weighbridge_photo_url', 'is', null).order('created_at', { ascending: false }).limit(300);
       if (error) throw error;
       const docs: ArchiveDoc[] = [];
       (data || []).forEach((d: any) => {
-        if (d.pickup_weighbridge_photo_url) {
-          docs.push({ id: `${d.id}-pickup`, title: `${t('archive.pickupWeighbridge')} ${d.shipment_number || ''}`.trim(), type: 'weighbridge_photo', date: d.created_at, source: 'system', fileUrl: d.pickup_weighbridge_photo_url, referenceId: d.id, dedupKey: `wb-pickup-${d.id}` });
-        }
-        if (d.delivery_weighbridge_photo_url) {
-          docs.push({ id: `${d.id}-delivery`, title: `${t('archive.deliveryWeighbridge')} ${d.shipment_number || ''}`.trim(), type: 'weighbridge_photo', date: d.created_at, source: 'system', fileUrl: d.delivery_weighbridge_photo_url, referenceId: d.id, dedupKey: `wb-delivery-${d.id}` });
+        if (d.weighbridge_photo_url) {
+          docs.push({ id: `${d.id}-wb`, title: `${t('archive.pickupWeighbridge')} ${d.shipment_number || ''}`.trim(), type: 'weighbridge_photo', date: d.created_at, source: 'system', fileUrl: d.weighbridge_photo_url, referenceId: d.id, dedupKey: `wb-${d.id}` });
         }
       });
       return docs;
