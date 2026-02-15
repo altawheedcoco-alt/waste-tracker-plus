@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Building2, 
@@ -65,6 +65,8 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
     roles
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isOnSystemOverview = location.pathname === '/dashboard/system-overview';
   
   const [open, setOpen] = useState(false);
   const isAdmin = roles.includes('admin');
@@ -198,24 +200,32 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
               <>
                 <div className="my-2 border-t" />
                 <button
-                  className="w-full flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted/80 transition-colors text-right"
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors text-right",
+                    isOnSystemOverview
+                      ? "bg-destructive/10 border border-destructive/20"
+                      : "hover:bg-muted/80 border border-transparent"
+                  )}
                   onClick={() => {
                     navigate('/dashboard/system-overview');
                     setOpen(false);
                   }}
                 >
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-red-500/10 text-red-600 shrink-0">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-destructive/10 text-destructive shrink-0">
                     <Shield className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-sm">مدير النظام</p>
-                      <Badge variant="outline" className="text-[10px] h-4 px-1 border-red-200 text-red-600">
+                      <Badge variant="outline" className="text-[10px] h-4 px-1 border-destructive/30 text-destructive">
                         Admin
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة الشاملة</p>
                   </div>
+                  {isOnSystemOverview && (
+                    <Check className="w-4 h-4 text-destructive shrink-0" />
+                  )}
                 </button>
               </>
             )}
