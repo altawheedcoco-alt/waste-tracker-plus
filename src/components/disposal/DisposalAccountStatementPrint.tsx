@@ -155,7 +155,7 @@ const DisposalAccountStatementPrint = ({
         </table>
       </div>
 
-      {/* Signature */}
+      {/* Signature with QR */}
       <div className="pt-3" style={{ borderTop: '2px solid #7c3aed' }}>
         <div className="grid grid-cols-2 gap-8">
           <div className="text-center">
@@ -169,12 +169,20 @@ const DisposalAccountStatementPrint = ({
                 <img src={signature_url} alt="توقيع" style={{ width: '80px', height: '40px', objectFit: 'contain' }} crossOrigin="anonymous" />
               )}
             </div>
+            <div className="mt-2 flex justify-center">
+              <QRCodeSVG value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(facilityLicense || facilityName)}&doc=${encodeURIComponent(statementNumber)}`} size={30} level="L" />
+            </div>
+            <p style={{ fontSize: '5pt', color: '#9ca3af', marginTop: '2px' }}>QR الموقع</p>
           </div>
           <div className="text-center">
             <p style={{ fontWeight: 'bold', fontSize: '9pt', marginBottom: '8px' }}>العميل</p>
             <p style={{ fontSize: '8pt', color: '#666', marginBottom: '12px' }}>{clientName}</p>
             <div style={{ borderBottom: '1px dotted #999', width: '150px', margin: '30px auto 0' }} />
             <p style={{ fontSize: '6pt', color: '#9ca3af', marginTop: '4px' }}>التوقيع</p>
+            <div className="mt-2 flex justify-center">
+              <QRCodeSVG value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(clientName || 'client')}&doc=${encodeURIComponent(statementNumber)}`} size={30} level="L" />
+            </div>
+            <p style={{ fontSize: '5pt', color: '#9ca3af', marginTop: '2px' }}>QR الموقع</p>
           </div>
         </div>
         <p className="text-center" style={{ fontSize: '7pt', color: '#9ca3af', marginTop: '12px' }}>

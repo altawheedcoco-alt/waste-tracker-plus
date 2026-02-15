@@ -286,6 +286,7 @@ export const PrintPartyCard = ({
 
 export const PrintSignatureSection = ({
   signatures,
+  documentRef,
 }: {
   signatures: {
     title: string;
@@ -293,34 +294,75 @@ export const PrintSignatureSection = ({
     stampUrl?: string | null;
     signatureUrl?: string | null;
     date?: string;
+    sealNumber?: string;
+    nationalId?: string;
+    signatoryCode?: string;
   }[];
+  documentRef?: string;
 }) => (
-  <div className="print-signatures grid gap-6 mt-8 pt-6 border-t-2 border-gray-300" style={{ gridTemplateColumns: `repeat(${signatures.length}, 1fr)` }}>
-    {signatures.map((sig, index) => (
-      <div key={index} className="print-signature-box text-center">
-        <p className="font-bold text-gray-800 mb-1 text-sm">{sig.title}</p>
-        {sig.name && <p className="text-xs text-gray-600 mb-3">{sig.name}</p>}
-        <div className="flex justify-center gap-4 mt-3">
-          <div className="text-center">
-            {sig.signatureUrl ? (
-              <img src={sig.signatureUrl} alt="التوقيع" className="h-12 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
-            ) : (
-              <div className="print-signature-line w-24 mx-auto" />
-            )}
-            <p className="text-[8pt] text-gray-500">التوقيع</p>
+  <div className="print-signatures mt-8 pt-6 border-t-2 border-gray-300">
+    <p className="text-center text-[8pt] text-gray-500 mb-4 flex items-center justify-center gap-1">
+      <Shield className="w-3 h-3" />
+      منطقة التوقيعات والأختام المعتمدة
+    </p>
+    <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${signatures.length}, 1fr)` }}>
+      {signatures.map((sig, index) => {
+        const sigVerifyUrl = sig.sealNumber || sig.signatoryCode
+          ? `${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=signer&code=${encodeURIComponent(sig.sealNumber || sig.signatoryCode || '')}&doc=${encodeURIComponent(documentRef || '')}`
+          : '';
+
+        return (
+          <div key={index} className="print-signature-box text-center border border-gray-200 rounded-lg p-3">
+            <p className="font-bold text-gray-800 mb-1 text-sm">{sig.title}</p>
+            {sig.name && <p className="text-xs text-gray-600 mb-2">{sig.name}</p>}
+
+            <div className="flex justify-center gap-4 mt-2">
+              {/* Signature */}
+              <div className="text-center">
+                {sig.signatureUrl ? (
+                  <img src={sig.signatureUrl} alt="التوقيع" className="h-12 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
+                ) : (
+                  <div className="print-signature-line w-24 mx-auto" />
+                )}
+                <p className="text-[7pt] text-gray-500">التوقيع</p>
+              </div>
+              {/* Stamp */}
+              <div className="text-center">
+                {sig.stampUrl ? (
+                  <img src={sig.stampUrl} alt="الختم" className="h-14 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
+                ) : (
+                  <div className="print-stamp-placeholder" />
+                )}
+                <p className="text-[7pt] text-gray-500">الختم</p>
+              </div>
+            </div>
+
+            {/* Signer QR + Seal info */}
+            <div className="mt-3 pt-2 border-t border-dashed border-gray-200 flex items-center justify-center gap-3">
+              {sigVerifyUrl && (
+                <QRCodeSVG value={sigVerifyUrl} size={35} level="L" />
+              )}
+              <div className="text-right">
+                {sig.sealNumber && (
+                  <p className="text-[7pt] font-mono text-gray-600">
+                    <Hash className="w-2.5 h-2.5 inline-block ml-0.5" />
+                    رقم الختم: {sig.sealNumber}
+                  </p>
+                )}
+                {sig.signatoryCode && (
+                  <p className="text-[7pt] font-mono text-gray-600">كود المفوض: {sig.signatoryCode}</p>
+                )}
+                {sig.nationalId && (
+                  <p className="text-[7pt] text-gray-500">هوية: ***{sig.nationalId.slice(-4)}</p>
+                )}
+              </div>
+            </div>
+
+            {sig.date && <p className="text-[7pt] text-gray-500 mt-2">التاريخ: {sig.date}</p>}
           </div>
-          <div className="text-center">
-            {sig.stampUrl ? (
-              <img src={sig.stampUrl} alt="الختم" className="h-14 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
-            ) : (
-              <div className="print-stamp-placeholder" />
-            )}
-            <p className="text-[8pt] text-gray-500">الختم</p>
-          </div>
-        </div>
-        {sig.date && <p className="text-xs text-gray-500 mt-2">التاريخ: {sig.date}</p>}
-      </div>
-    ))}
+        );
+      })}
+    </div>
   </div>
 );
 
