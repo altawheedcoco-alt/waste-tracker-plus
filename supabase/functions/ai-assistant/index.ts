@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 // --- Input Validation ---
-const VALID_TYPES = ['chat', 'generate_text', 'classify_waste', 'extract_weight', 'optimize_route', 'generate_report', 'waste_state'] as const;
+const VALID_TYPES = ['chat', 'generate_text', 'classify_waste', 'extract_weight', 'optimize_route', 'generate_report', 'waste_state', 'ping'] as const;
 
 function validateRequest(body: any): string | null {
   if (!body || typeof body !== 'object') return 'Invalid request body';
@@ -62,6 +62,13 @@ serve(async (req) => {
     } catch {
       return new Response(JSON.stringify({ error: "Invalid JSON" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Handle ping
+    if (body.type === 'ping') {
+      return new Response(JSON.stringify({ success: true, message: 'AI Assistant service is running', timestamp: new Date().toISOString() }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
