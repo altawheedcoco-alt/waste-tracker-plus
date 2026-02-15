@@ -100,29 +100,6 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
       >
         {/* Header */}
         <div className="text-center border-b-2 border-gray-300 pb-4 mb-4">
-          <div className="flex justify-center items-center gap-4 mb-3">
-            {/* Organization Logo */}
-            {acceptance.organization_logo_url && (
-              <img 
-                src={acceptance.organization_logo_url} 
-                alt={acceptance.organization_name || 'Logo'} 
-                className="h-10 w-auto object-contain"
-                crossOrigin="anonymous"
-                style={{ maxWidth: '80px' }}
-              />
-            )}
-            {/* Separator */}
-            {acceptance.organization_logo_url && (
-              <div className="h-8 w-px bg-gray-300" />
-            )}
-            {/* Platform Logo */}
-            <img 
-              src="/lovable-uploads/d3dbed14-6b0a-4a5a-90b3-de9dbfc586e3.png" 
-              alt="I-Recycle Logo" 
-              className="h-10 w-auto object-contain"
-              style={{ maxWidth: '80px' }}
-            />
-          </div>
           <h1 className="text-xl font-bold text-gray-800 mb-1">
             وثيقة الموافقة على الشروط والأحكام
           </h1>
@@ -134,81 +111,30 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
           </div>
         </div>
 
-        {/* Acceptance Info */}
-        <div className="bg-gray-50 rounded-lg p-4 mb-6 border">
-          <h2 className="font-bold text-lg mb-3 text-gray-800">بيانات الموقّع القانونية</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">اسم الموقّع:</span>
-              <span className="font-medium mr-2">{acceptance.full_name || 'غير محدد'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">الرقم القومي:</span>
-              <span className="font-medium mr-2 font-mono">{acceptance.signer_national_id || 'غير محدد'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">المسمى الوظيفي:</span>
-              <span className="font-medium mr-2">{acceptance.signer_position || 'غير محدد'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">رقم الهاتف:</span>
-              <span className="font-medium mr-2">{acceptance.signer_phone || 'غير محدد'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">اسم الجهة:</span>
-              <span className="font-medium mr-2">{acceptance.organization_name || 'غير محدد'}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">نوع الجهة:</span>
-              <span className="font-medium mr-2">{getOrgTypeLabel(acceptance.organization_type)}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">إصدار الشروط:</span>
-              <span className="font-medium mr-2">{acceptance.terms_version}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">تاريخ الموافقة:</span>
-              <span className="font-medium mr-2">
-                {format(new Date(acceptance.accepted_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500">رقم الوثيقة:</span>
-              <span className="font-medium mr-2 font-mono text-xs">
-                TA-{acceptance.id.slice(0, 8).toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-500">حالة التحقق:</span>
-              <span className={`font-medium mr-2 ${acceptance.verified_match ? 'text-green-600' : 'text-amber-600'}`}>
-                {acceptance.verified_match ? '✓ تم التحقق' : '⚠ قيد المراجعة'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* ID Card Images */}
+        {/* ID Card Images - Side by Side */}
         {(acceptance.signer_id_front_url || acceptance.signer_id_back_url) && (
-          <div className="bg-blue-50 rounded-lg p-4 mb-6 border border-blue-200">
-            <h2 className="font-bold text-lg mb-3 text-gray-800">صور إثبات الهوية</h2>
-            <div className="grid grid-cols-2 gap-4">
+          <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
+            <h2 className="font-bold text-sm mb-3 text-gray-800 text-center">صور إثبات الهوية</h2>
+            <div className="flex items-center justify-center gap-4">
               {acceptance.signer_id_front_url && (
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">وجه البطاقة الشخصية</p>
+                <div className="text-center flex-1 max-w-[45%]">
+                  <p className="text-[10px] text-gray-600 mb-1">وجه البطاقة</p>
                   <img 
                     src={acceptance.signer_id_front_url} 
                     alt="وجه البطاقة" 
-                    className="max-h-40 mx-auto rounded border border-gray-300"
+                    className="w-full h-32 object-contain rounded border border-gray-300 bg-white"
+                    crossOrigin="anonymous"
                   />
                 </div>
               )}
               {acceptance.signer_id_back_url && (
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-2">ظهر البطاقة الشخصية</p>
+                <div className="text-center flex-1 max-w-[45%]">
+                  <p className="text-[10px] text-gray-600 mb-1">ظهر البطاقة</p>
                   <img 
                     src={acceptance.signer_id_back_url} 
                     alt="ظهر البطاقة" 
-                    className="max-h-40 mx-auto rounded border border-gray-300"
+                    className="w-full h-32 object-contain rounded border border-gray-300 bg-white"
+                    crossOrigin="anonymous"
                   />
                 </div>
               )}
