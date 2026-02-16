@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3 } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -40,6 +40,10 @@ const QualityInspectorPanel = lazy(() => import('@/components/recycler/QualityIn
 const ProductionDashboardPanel = lazy(() => import('@/components/recycler/ProductionDashboardPanel'));
 const RecycledProductCertificate = lazy(() => import('@/components/recycler/RecycledProductCertificate'));
 const MaterialMarketPanel = lazy(() => import('@/components/recycler/MaterialMarketPanel'));
+const EquipmentManagerPanel = lazy(() => import('@/components/recycler/EquipmentManagerPanel'));
+const UtilitiesTrackerPanel = lazy(() => import('@/components/recycler/UtilitiesTrackerPanel'));
+const WorkOrdersPanel = lazy(() => import('@/components/recycler/WorkOrdersPanel'));
+const ProductionCostPanel = lazy(() => import('@/components/recycler/ProductionCostPanel'));
 
 interface RecentShipment {
   id: string;
@@ -229,8 +233,12 @@ const RecyclerDashboard = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <TabsList className="w-full overflow-x-auto flex justify-start gap-1 bg-muted/50 p-1 h-auto flex-wrap">
           <TabsTrigger value="overview" className="gap-1 text-xs"><Recycle className="w-3.5 h-3.5" />نظرة عامة</TabsTrigger>
+          <TabsTrigger value="equipment" className="gap-1 text-xs"><Cog className="w-3.5 h-3.5" />المعدات</TabsTrigger>
           <TabsTrigger value="quality" className="gap-1 text-xs"><Beaker className="w-3.5 h-3.5" />فحص الجودة</TabsTrigger>
+          <TabsTrigger value="workorders" className="gap-1 text-xs"><ClipboardList className="w-3.5 h-3.5" />أوامر التشغيل</TabsTrigger>
           <TabsTrigger value="production" className="gap-1 text-xs"><Factory className="w-3.5 h-3.5" />الإنتاج</TabsTrigger>
+          <TabsTrigger value="utilities" className="gap-1 text-xs"><Zap className="w-3.5 h-3.5" />المرافق</TabsTrigger>
+          <TabsTrigger value="cost" className="gap-1 text-xs"><Calculator className="w-3.5 h-3.5" />التكلفة</TabsTrigger>
           <TabsTrigger value="certificates" className="gap-1 text-xs"><Award className="w-3.5 h-3.5" />الشهادات</TabsTrigger>
           <TabsTrigger value="market" className="gap-1 text-xs"><BarChart3 className="w-3.5 h-3.5" />البورصة</TabsTrigger>
         </TabsList>
@@ -319,15 +327,39 @@ const RecyclerDashboard = () => {
           <IncidentReportManager />
         </TabsContent>
 
+        <TabsContent value="equipment" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <EquipmentManagerPanel />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="quality" className="mt-4">
           <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
             <QualityInspectorPanel />
           </Suspense>
         </TabsContent>
 
+        <TabsContent value="workorders" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <WorkOrdersPanel />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="production" className="mt-4">
           <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
             <ProductionDashboardPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="utilities" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <UtilitiesTrackerPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="cost" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <ProductionCostPanel />
           </Suspense>
         </TabsContent>
 

@@ -161,3 +161,6 @@ verify_jwt = false
 
 [functions.recycler-quality-inspect]
 verify_jwt = false
+
+[functions.recognize-equipment]
+verify_jwt = false
