@@ -158,3 +158,6 @@ verify_jwt = false
 
 [functions.classify-waste-photo]
 verify_jwt = false
+
+[functions.recycler-quality-inspect]
+verify_jwt = false
