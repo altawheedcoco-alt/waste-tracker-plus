@@ -132,9 +132,9 @@ const TransporterCommandCenter = () => {
           <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         </div>
 
-        <CardContent className="p-4 sm:p-6 relative z-10">
+        <CardContent className="p-3 sm:p-6 relative z-10">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div className="flex items-center gap-3">
               {/* Live pulse indicator */}
               <div className="relative">
@@ -189,7 +189,7 @@ const TransporterCommandCenter = () => {
           </div>
 
           {/* Metrics Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
             {metrics.map((m, index) => (
               <motion.div
                 key={m.label}
@@ -197,7 +197,7 @@ const TransporterCommandCenter = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 0.15 + index * 0.1, duration: 0.5, type: 'spring', stiffness: 180 }}
                 whileHover={{ y: -6, scale: 1.03 }}
-                className={`relative group rounded-2xl border border-border/30 ${m.bg} backdrop-blur-md p-4 ring-1 ${m.ring} transition-all duration-300 hover:shadow-xl ${m.glow} cursor-default overflow-hidden`}
+                className={`relative group rounded-xl sm:rounded-2xl border border-border/30 ${m.bg} backdrop-blur-md p-3 sm:p-4 ring-1 ${m.ring} transition-all duration-300 hover:shadow-xl ${m.glow} cursor-default overflow-hidden`}
               >
                 {/* Subtle shine effect on hover */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -225,10 +225,10 @@ const TransporterCommandCenter = () => {
 
                 {/* Animated value */}
                 <div className="text-right relative z-10">
-                  <p className="text-3xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">
+                  <p className="text-2xl sm:text-4xl font-black text-foreground tracking-tight tabular-nums">
                     {m.value}
                   </p>
-                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 font-medium">{m.label}</p>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 font-medium">{m.label}</p>
                 </div>
 
                 {/* Background glow */}
