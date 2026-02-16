@@ -23,7 +23,7 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl border border-border/50 bg-card p-4 sm:p-6"
+        className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-border/50 bg-card p-3 sm:p-6"
       >
         {/* Animated mesh background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -41,7 +41,7 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
           <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
         </div>
 
-        <div className="relative z-10 flex flex-col gap-4">
+        <div className="relative z-10 flex flex-col gap-3 sm:gap-4">
           {/* Title Row */}
           <div className="flex items-center justify-between">
             <motion.div
@@ -85,33 +85,33 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:flex-wrap w-full">
             <AutomationSettingsDialog />
             <SmartRequestDialog buttonText={t('transporter.requestReports')} buttonVariant="outline" />
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowSmartWeightUpload(true)}
-              className="bg-muted/30 border-border/50 text-foreground hover:bg-muted/50 text-xs sm:text-sm"
+              className="bg-muted/30 border-border/50 text-foreground hover:bg-muted/50 text-[10px] sm:text-sm truncate"
             >
-              <Sparkles className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-              {t('transporter.smartWeightUpload')}
+              <Sparkles className="ml-1 h-3 w-3 text-primary shrink-0" />
+              <span className="truncate">{t('transporter.smartWeightUpload')}</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigate('/dashboard/transporter-shipments')}
-              className="bg-muted/30 border-border/50 text-foreground hover:bg-muted/50 text-xs sm:text-sm"
+              className="bg-muted/30 border-border/50 text-foreground hover:bg-muted/50 text-[10px] sm:text-sm truncate"
             >
-              <FileText className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
-              {t('transporter.viewCompanyShipments')}
+              <FileText className="ml-1 h-3 w-3 shrink-0" />
+              <span className="truncate">{t('transporter.viewCompanyShipments')}</span>
             </Button>
             <Button
               size="sm"
               onClick={() => navigate('/dashboard/shipments/new')}
-              className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground border-0 shadow-lg shadow-primary/20 text-xs sm:text-sm"
+              className="col-span-2 sm:col-span-1 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground border-0 shadow-lg shadow-primary/20 text-[10px] sm:text-sm"
             >
-              <Plus className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <Plus className="ml-1 h-3 w-3 shrink-0" />
               {t('transporter.createShipment')}
             </Button>
           </div>
