@@ -12,7 +12,7 @@ import { generateDocumentQRValue } from '@/lib/documentQR';
 
 const LMSCertificatePrintable = ({ cert }: { cert: any }) => {
   const course = cert.lms_courses as any;
-  const qrValue = generateDocumentQRValue('certificate', cert.certificate_number);
+  const qrValue = generateDocumentQRValue('lms_certificate', cert.certificate_number);
 
   return (
     <div className="p-8 bg-white text-black min-h-[600px] flex flex-col items-center justify-center text-center space-y-4 border-8 border-double border-amber-400" dir="rtl">
