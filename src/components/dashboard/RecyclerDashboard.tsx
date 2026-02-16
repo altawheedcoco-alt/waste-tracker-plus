@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
@@ -34,6 +35,11 @@ import DriverComplianceManager from '@/components/compliance/DriverComplianceMan
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import RecyclerCommandCenter from './recycler/RecyclerCommandCenter';
+
+const QualityInspectorPanel = lazy(() => import('@/components/recycler/QualityInspectorPanel'));
+const ProductionDashboardPanel = lazy(() => import('@/components/recycler/ProductionDashboardPanel'));
+const RecycledProductCertificate = lazy(() => import('@/components/recycler/RecycledProductCertificate'));
+const MaterialMarketPanel = lazy(() => import('@/components/recycler/MaterialMarketPanel'));
 
 interface RecentShipment {
   id: string;
@@ -200,6 +206,8 @@ const RecyclerDashboard = () => {
     queryClient.invalidateQueries({ queryKey: ['recycler-facility'] });
   };
 
+  const [activeTab, setActiveTab] = useState('overview');
+
   return (
     <div className="space-y-6">
       <StoryCircles />
@@ -215,96 +223,126 @@ const RecyclerDashboard = () => {
         onRefresh={handleRefresh}
       />
 
-      {/* Facility Capacity - from disposal */}
       {facility && <FacilityCapacityCard facility={facility} />}
 
-      <RecyclerCommandCenter />
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
+        <TabsList className="w-full overflow-x-auto flex justify-start gap-1 bg-muted/50 p-1 h-auto flex-wrap">
+          <TabsTrigger value="overview" className="gap-1 text-xs"><Recycle className="w-3.5 h-3.5" />نظرة عامة</TabsTrigger>
+          <TabsTrigger value="quality" className="gap-1 text-xs"><Beaker className="w-3.5 h-3.5" />فحص الجودة</TabsTrigger>
+          <TabsTrigger value="production" className="gap-1 text-xs"><Factory className="w-3.5 h-3.5" />الإنتاج</TabsTrigger>
+          <TabsTrigger value="certificates" className="gap-1 text-xs"><Award className="w-3.5 h-3.5" />الشهادات</TabsTrigger>
+          <TabsTrigger value="market" className="gap-1 text-xs"><BarChart3 className="w-3.5 h-3.5" />البورصة</TabsTrigger>
+        </TabsList>
 
-      <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
+        <TabsContent value="overview" className="space-y-6 mt-4">
+          <RecyclerCommandCenter />
+          <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
+          <AutomationSettingsDialog organizationType="recycler" />
+          <DailyOperationsSummary />
+          <OperationalAlertsWidget />
+          <UnifiedDocumentSearch />
+          <DriverCodeLookup />
+          <RecyclerIncomingPanel />
+          <PendingApprovalsWidget />
 
-      {/* Automation Toggle - from disposal */}
-      <AutomationSettingsDialog organizationType="recycler" />
+          <QuickActionsGrid
+            actions={useQuickActions({ type: 'recycler', handlers: {
+              openDepositDialog: () => setShowDepositDialog(true),
+              openSmartWeightUpload: () => setShowSmartWeightUpload(true),
+            }})}
+            title="الإجراءات السريعة"
+            subtitle="وظائف التدوير المستخدمة بكثرة"
+          />
 
-      <DailyOperationsSummary />
-      <OperationalAlertsWidget />
-      <UnifiedDocumentSearch />
-      <DriverCodeLookup />
-      <RecyclerIncomingPanel />
-      <PendingApprovalsWidget />
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <BulkCertificateButton
+                    shipments={recentShipments.map(s => ({
+                      id: s.id, shipment_number: s.shipment_number, status: s.status,
+                      created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
+                      unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
+                      has_report: s.has_report,
+                      generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
+                      transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
+                      recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
+                    }))}
+                    type="certificate"
+                    onSuccess={handleRefresh}
+                  />
+                  <RecyclerBulkStatusDropdown
+                    shipments={recentShipments.map(s => ({ id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type }))}
+                    onStatusChange={handleRefresh}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
+                    <Eye className="ml-2 h-4 w-4" />
+                    عرض الكل
+                  </Button>
+                </div>
+                <div className="text-right">
+                  <CardTitle className="flex items-center gap-2 justify-end">
+                    <Recycle className="w-5 h-5" />
+                    الشحنات الواردة للتدوير
+                  </CardTitle>
+                  <CardDescription>آخر 10 شحنات واردة إلى منشأة التدوير</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {shipmentsLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="animate-pulse h-24 bg-muted rounded-lg" />
+                  ))}
+                </div>
+              ) : recentShipments.length === 0 ? (
+                <div className="text-center py-8">
+                  <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
+                  <CreateShipmentButton className="mt-4" onSuccess={handleRefresh} />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentShipments.map((shipment) => (
+                    <ShipmentCard key={shipment.id} shipment={shipment} onStatusChange={handleRefresh} />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
-      <QuickActionsGrid
-        actions={useQuickActions({ type: 'recycler', handlers: {
-          openDepositDialog: () => setShowDepositDialog(true),
-          openSmartWeightUpload: () => setShowSmartWeightUpload(true),
-        }})}
-        title="الإجراءات السريعة"
-        subtitle="وظائف التدوير المستخدمة بكثرة"
-      />
+          <LegalComplianceWidget />
+          <VehicleComplianceManager />
+          <DriverComplianceManager />
+          <IncidentReportManager />
+        </TabsContent>
 
-      {/* Recent shipments */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-wrap">
-              <BulkCertificateButton
-                shipments={recentShipments.map(s => ({
-                  id: s.id, shipment_number: s.shipment_number, status: s.status,
-                  created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
-                  unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
-                  has_report: s.has_report,
-                  generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
-                  transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
-                  recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
-                }))}
-                type="certificate"
-                onSuccess={handleRefresh}
-              />
-              <RecyclerBulkStatusDropdown
-                shipments={recentShipments.map(s => ({ id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type }))}
-                onStatusChange={handleRefresh}
-              />
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
-                <Eye className="ml-2 h-4 w-4" />
-                عرض الكل
-              </Button>
-            </div>
-            <div className="text-right">
-              <CardTitle className="flex items-center gap-2 justify-end">
-                <Recycle className="w-5 h-5" />
-                الشحنات الواردة للتدوير
-              </CardTitle>
-              <CardDescription>آخر 10 شحنات واردة إلى منشأة التدوير</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {shipmentsLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="animate-pulse h-24 bg-muted rounded-lg" />
-              ))}
-            </div>
-          ) : recentShipments.length === 0 ? (
-            <div className="text-center py-8">
-              <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
-              <CreateShipmentButton className="mt-4" onSuccess={handleRefresh} />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentShipments.map((shipment) => (
-                <ShipmentCard key={shipment.id} shipment={shipment} onStatusChange={handleRefresh} />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        <TabsContent value="quality" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <QualityInspectorPanel />
+          </Suspense>
+        </TabsContent>
 
-      {/* Legal Compliance */}
-      <LegalComplianceWidget />
-      <VehicleComplianceManager />
-      <DriverComplianceManager />
-      <IncidentReportManager />
+        <TabsContent value="production" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <ProductionDashboardPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="certificates" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <RecycledProductCertificate />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="market" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <MaterialMarketPanel />
+          </Suspense>
+        </TabsContent>
+      </Tabs>
 
       {/* Dialogs */}
       <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
