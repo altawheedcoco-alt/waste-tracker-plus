@@ -1,11 +1,11 @@
-import { motion } from "framer-motion";
+import { memo } from "react";
 import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog, Car, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const Hero = () => {
+const Hero = memo(() => {
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -25,19 +25,17 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/50 to-background/90" />
       </div>
 
-      <motion.div animate={{ y: [0, -20, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="absolute top-32 right-20 hidden lg:block">
-        <div className="w-16 h-16 rounded-2xl gradient-eco flex items-center justify-center shadow-eco-lg"><Leaf className="w-8 h-8 text-primary-foreground" /></div>
-      </motion.div>
-      <motion.div animate={{ y: [0, 15, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute bottom-40 left-20 hidden lg:block">
-        <div className="w-14 h-14 rounded-2xl bg-card shadow-eco-md flex items-center justify-center"><Truck className="w-7 h-7 text-primary" /></div>
-      </motion.div>
-      <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} className="absolute top-60 left-32 hidden lg:block">
-        <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center"><Globe className="w-6 h-6 text-accent" /></div>
-      </motion.div>
+      {/* Static decorative icons - no animation overhead */}
+      <div className="absolute top-32 right-20 hidden lg:block">
+        <div className="w-16 h-16 rounded-2xl gradient-eco flex items-center justify-center shadow-eco-lg animate-bounce" style={{ animationDuration: '4s' }}><Leaf className="w-8 h-8 text-primary-foreground" /></div>
+      </div>
+      <div className="absolute bottom-40 left-20 hidden lg:block">
+        <div className="w-14 h-14 rounded-2xl bg-card shadow-eco-md flex items-center justify-center animate-bounce" style={{ animationDuration: '5s', animationDelay: '1s' }}><Truck className="w-7 h-7 text-primary" /></div>
+      </div>
 
       <div className="container relative z-10 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="mb-3 sm:mb-6">
+          <div className="mb-3 sm:mb-6 animate-fade-in">
             <div className="flex flex-col items-center gap-1.5 sm:gap-3">
               <h2 className="text-base sm:text-2xl md:text-3xl font-bold text-primary">{t('landing.systemName')}</h2>
               <h3 className="text-sm sm:text-xl md:text-2xl font-semibold text-foreground/80">{t('landing.systemNameAr')}</h3>
@@ -45,19 +43,19 @@ const Hero = () => {
                 <Globe className="w-3 h-3 sm:w-4 sm:h-4" />{t('landing.tagline')}
               </span>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="text-xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold mb-3 sm:mb-6 leading-snug px-2">
+          <h1 className="text-xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold mb-3 sm:mb-6 leading-snug px-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
             {t('landing.heroTitle1')}{" "}
             <span className="text-gradient-eco">{t('landing.heroTitle2')}</span>
             <br />{t('landing.heroTitle3')}
-          </motion.h1>
+          </h1>
 
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="text-xs sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-5 sm:mb-10 px-4 leading-relaxed">
+          <p className="text-xs sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-5 sm:mb-10 px-4 leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
             {t('landing.heroDesc')}
-          </motion.p>
+          </p>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 px-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 px-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <Button variant="hero" size="lg" className="group text-sm sm:text-lg px-5 sm:px-8 py-3 sm:py-6 w-full sm:w-auto" onClick={() => navigate('/auth?mode=register')}>
               {t('landing.registerCompany')}
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
@@ -65,34 +63,36 @@ const Hero = () => {
             <Button variant="heroOutline" size="lg" className="text-sm sm:text-lg px-5 sm:px-8 py-3 sm:py-6 w-full sm:w-auto" onClick={() => navigate('/auth?mode=login')}>
               {t('nav.login')}
             </Button>
-          </motion.div>
+          </div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.5 }} className="mt-6 sm:mt-12">
+          <div className="mt-6 sm:mt-12 animate-fade-in" style={{ animationDelay: '0.5s' }}>
             <p className="text-[10px] sm:text-sm text-muted-foreground mb-2.5 sm:mb-4">{t('landing.quickAccess')}</p>
             <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-4 px-4">
-              {quickAccessItems.map((item, i) => (
-                <motion.button key={item.label} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 + i * 0.05 }} whileHover={{ scale: 1.1, y: -4 }} whileTap={{ scale: 0.95 }}
+              {quickAccessItems.map((item) => (
+                <button key={item.label}
                   onClick={() => navigate(item.type ? `/auth?mode=${item.mode}&type=${item.type}` : `/auth?mode=${item.mode}`)}
-                  className="flex flex-col items-center gap-1 sm:gap-1.5 group cursor-pointer"
+                  className="flex flex-col items-center gap-1 sm:gap-1.5 group cursor-pointer hover:scale-110 hover:-translate-y-1 active:scale-95 transition-transform duration-200"
                 >
                   <div className={`w-9 h-9 sm:w-14 sm:h-14 rounded-lg sm:rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-md group-hover:shadow-xl transition-shadow`}>
                     <item.icon className="w-4 h-4 sm:w-7 sm:h-7 text-white" />
                   </div>
                   <span className="text-[9px] sm:text-sm font-medium text-foreground/80 group-hover:text-primary transition-colors leading-tight max-w-[70px] sm:max-w-none">{item.label}</span>
                   <span className="text-[10px] text-muted-foreground hidden sm:block">{item.desc}</span>
-                </motion.button>
+                </button>
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6, delay: 0.8 }} className="mt-3 sm:mt-6 text-[10px] sm:text-sm text-muted-foreground">
+          <p className="mt-3 sm:mt-6 text-[10px] sm:text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.8s' }}>
             {t('landing.joinUs')}
-          </motion.p>
+          </p>
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
-};
+});
+
+Hero.displayName = 'Hero';
 
 export default Hero;

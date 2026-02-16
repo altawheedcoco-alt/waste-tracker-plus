@@ -7,8 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { FocusMusicProvider } from "@/contexts/FocusMusicContext";
-import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 
 // Offline components (lightweight, keep global)
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
@@ -183,35 +181,27 @@ const lazyRetry = (importFn: () => Promise<any>, retries = 2): Promise<any> =>
 import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
 
-// Memoized providers wrapper for performance
 const Providers = memo(() => (
   <QueryClientProvider client={queryClient}>
-    <GoogleMapsProvider>
-      <ThemeSettingsProvider>
-
-        <LanguageProvider>
-          <FocusMusicProvider>
-            <TooltipProvider delayDuration={300}>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AuthProvider>
-                  <Suspense fallback={null}>
-                    <AppRoutes />
-                  </Suspense>
-                  <Suspense fallback={null}>
-                    <OfflineBanner />
-                    <ScrollToTopButton />
-                  </Suspense>
-
-
-                </AuthProvider>
-              </BrowserRouter>
-            </TooltipProvider>
-          </FocusMusicProvider>
-        </LanguageProvider>
-      </ThemeSettingsProvider>
-    </GoogleMapsProvider>
+    <ThemeSettingsProvider>
+      <LanguageProvider>
+        <TooltipProvider delayDuration={300}>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <Suspense fallback={null}>
+                <AppRoutes />
+              </Suspense>
+              <Suspense fallback={null}>
+                <OfflineBanner />
+                <ScrollToTopButton />
+              </Suspense>
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </ThemeSettingsProvider>
   </QueryClientProvider>
 ));
 Providers.displayName = 'Providers';
