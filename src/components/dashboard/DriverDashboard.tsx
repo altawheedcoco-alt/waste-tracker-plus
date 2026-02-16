@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Package, Truck, Mail, Phone, Settings, CheckCircle2,
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
-  Trophy, BarChart3,
+  Trophy, BarChart3, Wallet, Camera, FileText,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -33,6 +33,11 @@ import { motion } from 'framer-motion';
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 const FullNavigationView = lazy(() => import('@/components/driver/FullNavigationView'));
 const DriverRewardsPanel = lazy(() => import('@/components/driver/DriverRewardsPanel'));
+const DriverWalletPanel = lazy(() => import('@/components/driver/DriverWalletPanel'));
+const DriverLeaderboard = lazy(() => import('@/components/driver/DriverLeaderboard'));
+const DriverSmartCamera = lazy(() => import('@/components/driver/DriverSmartCamera'));
+const DriverAutoReport = lazy(() => import('@/components/driver/DriverAutoReport'));
+const DriverSOSButton = lazy(() => import('@/components/driver/DriverSOSButton'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -43,6 +48,7 @@ const TabFallback = () => (
 
 interface DriverInfo {
   id: string;
+  organization_id: string;
   license_number: string;
   vehicle_type: string | null;
   vehicle_plate: string | null;
@@ -79,7 +85,9 @@ interface Shipment {
 const tabItems = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
-  { value: 'rewards', label: 'المكافآت', icon: Trophy },
+  { value: 'wallet', label: 'المحفظة', icon: Wallet },
+  { value: 'camera', label: 'الكاميرا', icon: Camera },
+  { value: 'report', label: 'التقرير', icon: FileText },
   { value: 'profile', label: 'الملف', icon: BarChart3 },
 ];
 
@@ -140,7 +148,7 @@ const DriverDashboard = () => {
     try {
       const { data: driver } = await supabase
         .from('drivers')
-        .select(`id, license_number, vehicle_type, vehicle_plate, is_available, organization:organizations(name, phone)`)
+        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, organization:organizations(name, phone)`)
         .eq('profile_id', profile?.id)
         .single();
 
@@ -353,10 +361,36 @@ const DriverDashboard = () => {
             </Tabs>
           </TabsContent>
 
-          {/* Rewards Tab */}
-          <TabsContent value="rewards" className="mt-4">
+          {/* Wallet Tab */}
+          <TabsContent value="wallet" className="mt-4">
             <Suspense fallback={<TabFallback />}>
-              <DriverRewardsPanel />
+              <DriverWalletPanel />
+              <div className="mt-4">
+                <DriverRewardsPanel />
+              </div>
+              <div className="mt-4">
+                <DriverLeaderboard />
+              </div>
+            </Suspense>
+          </TabsContent>
+
+          {/* Smart Camera Tab */}
+          <TabsContent value="camera" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && (
+                <div className="space-y-4">
+                  <DriverSmartCamera driverId={driverInfo.id} type="load" />
+                  <DriverSmartCamera driverId={driverInfo.id} type="scale" />
+                  <DriverSmartCamera driverId={driverInfo.id} type="delivery" />
+                </div>
+              )}
+            </Suspense>
+          </TabsContent>
+
+          {/* Auto Report Tab */}
+          <TabsContent value="report" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              <DriverAutoReport />
             </Suspense>
           </TabsContent>
 
@@ -465,11 +499,19 @@ const DriverDashboard = () => {
 
       {/* Floating Quick Location */}
       {driverInfo && (
-        <QuickLocationButton 
-          driverId={driverInfo.id} 
-          variant="fab"
-          onSuccess={handleLocationSuccess}
-        />
+        <>
+          <QuickLocationButton 
+            driverId={driverInfo.id} 
+            variant="fab"
+            onSuccess={handleLocationSuccess}
+          />
+          <Suspense fallback={null}>
+            <DriverSOSButton 
+              driverId={driverInfo.id} 
+              organizationId={driverInfo.organization_id}
+            />
+          </Suspense>
+        </>
       )}
     </div>
   );
