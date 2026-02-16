@@ -110,9 +110,27 @@ export default function ShipmentApprovalDialog({
           message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}`,
           type: 'shipment_approved',
           shipment_id: shipment.id,
-          organization_id: null, // Will be fetched from transporter
+          organization_id: null,
         },
       });
+
+      // Notify all admins
+      const { data: adminUsers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+      
+      if (adminUsers && adminUsers.length > 0) {
+        const adminNotifs = adminUsers.map(a => ({
+          user_id: a.user_id,
+          title: '✅ موافقة على شحنة',
+          message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}`,
+          type: 'shipment_approved',
+          shipment_id: shipment.id,
+          is_read: false,
+        }));
+        await supabase.from('notifications').insert(adminNotifs);
+      }
 
       toast.success('تمت الموافقة على الشحنة بنجاح');
       onApprovalComplete?.();
@@ -158,6 +176,24 @@ export default function ShipmentApprovalDialog({
         },
       });
 
+      // Notify all admins about rejection
+      const { data: adminUsers } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'admin');
+      
+      if (adminUsers && adminUsers.length > 0) {
+        const adminNotifs = adminUsers.map(a => ({
+          user_id: a.user_id,
+          title: '❌ رفض شحنة',
+          message: `الشحنة ${shipment.shipment_number} تم رفضها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}. السبب: ${rejectionReason}`,
+          type: 'shipment_rejected',
+          shipment_id: shipment.id,
+          is_read: false,
+        }));
+        await supabase.from('notifications').insert(adminNotifs);
+      }
+
       toast.success('تم رفض الشحنة');
       onApprovalComplete?.();
       onClose();
@@ -170,7 +206,7 @@ export default function ShipmentApprovalDialog({
   };
 
   const progressPercentage = deadline
-    ? Math.max(0, Math.min(100, (timeRemaining / 360) * 100))
+    ? Math.max(0, Math.min(100, (timeRemaining / 15) * 100))
     : 0;
 
   return (
@@ -199,12 +235,12 @@ export default function ShipmentApprovalDialog({
                     الموافقة التلقائية بعد
                   </span>
                   <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300">
-                    {Math.floor(timeRemaining / 60)} ساعة و {timeRemaining % 60} دقيقة
+                    {timeRemaining} دقيقة متبقية
                   </Badge>
                 </div>
                 <Progress value={progressPercentage} className="h-2 bg-amber-200" />
                 <p className="text-xs text-amber-600 mt-1 text-right">
-                  إذا لم يتم الرد خلال 6 ساعات، سيتم الموافقة تلقائياً
+                  إذا لم يتم الرد خلال 15 دقيقة، سيتم الموافقة تلقائياً
                 </p>
               </CardContent>
             </Card>

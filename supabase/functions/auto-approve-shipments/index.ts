@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
 
     console.log('[Auto-Approve] Running auto-approval check...')
 
-    // Auto-approve generator pending shipments after 6 hours
+    // Auto-approve generator pending shipments after 15 minutes
     const { data: generatorApproved, error: generatorError } = await supabase
       .from('shipments')
       .update({
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
           const notifications = (profiles || []).map(p => ({
             user_id: p.user_id,
             title: '✅ موافقة تلقائية على الشحنة',
-            message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها تلقائياً من المولد (انقضاء 6 ساعات)`,
+            message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها تلقائياً من المولد (انقضاء 15 دقيقة)`,
             type: 'shipment_auto_approved',
             shipment_id: shipment.id,
             is_read: false
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Auto-approve recycler pending shipments after 6 hours
+    // Auto-approve recycler pending shipments after 15 minutes
     const { data: recyclerApproved, error: recyclerError } = await supabase
       .from('shipments')
       .update({
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
           const notifications = (profiles || []).map(p => ({
             user_id: p.user_id,
             title: '✅ موافقة تلقائية على الشحنة',
-            message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها تلقائياً من المدور (انقضاء 6 ساعات)`,
+            message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها تلقائياً من المدور (انقضاء 15 دقيقة)`,
             type: 'shipment_auto_approved',
             shipment_id: shipment.id,
             is_read: false
