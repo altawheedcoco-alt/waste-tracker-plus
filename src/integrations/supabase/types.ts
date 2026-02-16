@@ -1624,6 +1624,103 @@ export type Database = {
           },
         ]
       }
+      carbon_credits: {
+        Row: {
+          carbon_tons: number
+          certificate_number: string | null
+          certificate_url: string | null
+          created_at: string
+          credit_type: string
+          credit_value_sar: number | null
+          credit_value_usd: number | null
+          expiry_date: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          source_description: string | null
+          source_shipment_id: string | null
+          status: string | null
+          tradeable: boolean | null
+          traded_at: string | null
+          traded_price: number | null
+          traded_to: string | null
+          updated_at: string
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          carbon_tons?: number
+          certificate_number?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          credit_type?: string
+          credit_value_sar?: number | null
+          credit_value_usd?: number | null
+          expiry_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          source_description?: string | null
+          source_shipment_id?: string | null
+          status?: string | null
+          tradeable?: boolean | null
+          traded_at?: string | null
+          traded_price?: number | null
+          traded_to?: string | null
+          updated_at?: string
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          carbon_tons?: number
+          certificate_number?: string | null
+          certificate_url?: string | null
+          created_at?: string
+          credit_type?: string
+          credit_value_sar?: number | null
+          credit_value_usd?: number | null
+          expiry_date?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          source_description?: string | null
+          source_shipment_id?: string | null
+          status?: string | null
+          tradeable?: boolean | null
+          traded_at?: string | null
+          traded_price?: number | null
+          traded_to?: string | null
+          updated_at?: string
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carbon_credits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "carbon_credits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "carbon_credits_source_shipment_id_fkey"
+            columns: ["source_shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       carbon_emission_factors: {
         Row: {
           category: string
@@ -1951,6 +2048,100 @@ export type Database = {
             columns: ["trigger_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chain_of_custody: {
+        Row: {
+          actor_id: string | null
+          actor_name: string | null
+          actor_role: string | null
+          block_number: number | null
+          created_at: string
+          custody_hash: string
+          event_description: string | null
+          event_type: string
+          evidence_urls: Json | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          location_name: string | null
+          metadata: Json | null
+          organization_id: string
+          previous_hash: string | null
+          shipment_id: string | null
+          verified: boolean | null
+          verified_by: string | null
+          waste_type: string | null
+          weight_at_event: number | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          block_number?: number | null
+          created_at?: string
+          custody_hash: string
+          event_description?: string | null
+          event_type: string
+          evidence_urls?: Json | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          metadata?: Json | null
+          organization_id: string
+          previous_hash?: string | null
+          shipment_id?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+          waste_type?: string | null
+          weight_at_event?: number | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: string | null
+          block_number?: number | null
+          created_at?: string
+          custody_hash?: string
+          event_description?: string | null
+          event_type?: string
+          evidence_urls?: Json | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          metadata?: Json | null
+          organization_id?: string
+          previous_hash?: string | null
+          shipment_id?: string | null
+          verified?: boolean | null
+          verified_by?: string | null
+          waste_type?: string | null
+          weight_at_event?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chain_of_custody_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chain_of_custody_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chain_of_custody_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -9038,6 +9229,87 @@ export type Database = {
         }
         Relationships: []
       }
+      government_reports: {
+        Row: {
+          compliance_score: number | null
+          created_at: string
+          file_url: string | null
+          generated_by: string | null
+          id: string
+          issues_found: Json | null
+          notes: string | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          report_data: Json | null
+          report_period: string
+          report_type: string
+          status: string | null
+          submission_date: string | null
+          submission_reference: string | null
+          submitted_by: string | null
+          summary: Json | null
+          updated_at: string
+        }
+        Insert: {
+          compliance_score?: number | null
+          created_at?: string
+          file_url?: string | null
+          generated_by?: string | null
+          id?: string
+          issues_found?: Json | null
+          notes?: string | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          report_data?: Json | null
+          report_period: string
+          report_type: string
+          status?: string | null
+          submission_date?: string | null
+          submission_reference?: string | null
+          submitted_by?: string | null
+          summary?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          compliance_score?: number | null
+          created_at?: string
+          file_url?: string | null
+          generated_by?: string | null
+          id?: string
+          issues_found?: Json | null
+          notes?: string | null
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          report_data?: Json | null
+          report_period?: string
+          report_type?: string
+          status?: string | null
+          submission_date?: string | null
+          submission_reference?: string | null
+          submitted_by?: string | null
+          summary?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "government_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "government_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gps_device_types: {
         Row: {
           config_schema: Json
@@ -13351,6 +13623,114 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_risk_scores: {
+        Row: {
+          avg_payment_days: number | null
+          calculated_at: string | null
+          compliance_score: number | null
+          created_at: string
+          delayed_shipments: number | null
+          delivery_score: number | null
+          disputed_shipments: number | null
+          external_partner_id: string | null
+          id: string
+          last_incident_date: string | null
+          organization_id: string
+          partner_name: string
+          partner_organization_id: string | null
+          payment_score: number | null
+          recommendations: Json | null
+          reliability_score: number | null
+          risk_factors: Json | null
+          risk_level: string | null
+          risk_score: number | null
+          total_shipments: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_payment_days?: number | null
+          calculated_at?: string | null
+          compliance_score?: number | null
+          created_at?: string
+          delayed_shipments?: number | null
+          delivery_score?: number | null
+          disputed_shipments?: number | null
+          external_partner_id?: string | null
+          id?: string
+          last_incident_date?: string | null
+          organization_id: string
+          partner_name: string
+          partner_organization_id?: string | null
+          payment_score?: number | null
+          recommendations?: Json | null
+          reliability_score?: number | null
+          risk_factors?: Json | null
+          risk_level?: string | null
+          risk_score?: number | null
+          total_shipments?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_payment_days?: number | null
+          calculated_at?: string | null
+          compliance_score?: number | null
+          created_at?: string
+          delayed_shipments?: number | null
+          delivery_score?: number | null
+          disputed_shipments?: number | null
+          external_partner_id?: string | null
+          id?: string
+          last_incident_date?: string | null
+          organization_id?: string
+          partner_name?: string
+          partner_organization_id?: string | null
+          payment_score?: number | null
+          recommendations?: Json | null
+          reliability_score?: number | null
+          risk_factors?: Json | null
+          risk_level?: string | null
+          risk_score?: number | null
+          total_shipments?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_risk_scores_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_risk_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_risk_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_risk_scores_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_risk_scores_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]

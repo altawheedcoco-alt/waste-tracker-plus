@@ -42,7 +42,7 @@ import TransporterCommandCenter from './transporter/TransporterCommandCenter';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi } from 'lucide-react';
 
 // Lazy load heavy tab content
 const DriverPerformancePanel = lazy(() => import('./transporter/DriverPerformancePanel'));
@@ -74,6 +74,11 @@ const DriverCopilot = lazy(() => import('./transporter/DriverCopilot'));
 const PredictiveFleetMaintenance = lazy(() => import('./transporter/PredictiveFleetMaintenance'));
 const FraudDetectionPanel = lazy(() => import('./transporter/FraudDetectionPanel'));
 const WasteMarketplace = lazy(() => import('@/components/marketplace/WasteMarketplace'));
+const PartnerRiskPanel = lazy(() => import('./transporter/PartnerRiskPanel'));
+const ChainOfCustodyPanel = lazy(() => import('./transporter/ChainOfCustodyPanel'));
+const GovernmentReportingPanel = lazy(() => import('./transporter/GovernmentReportingPanel'));
+const CarbonCreditsPanel = lazy(() => import('./transporter/CarbonCreditsPanel'));
+const IoTMonitoringPanel = lazy(() => import('./transporter/IoTMonitoringPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -91,6 +96,11 @@ const tabItems = [
   { value: 'marketplace', label: 'السوق', icon: Store },
   { value: 'fleet', label: 'صيانة الأسطول', icon: Wrench },
   { value: 'fraud', label: 'كشف الاحتيال', icon: AlertTriangle },
+  { value: 'risk', label: 'مخاطر الشركاء', icon: ShieldAlert },
+  { value: 'custody', label: 'سلسلة الحفظ', icon: Link2 },
+  { value: 'government', label: 'البوابة الحكومية', icon: Building2 },
+  { value: 'carbon', label: 'أرصدة الكربون', icon: Leaf },
+  { value: 'iot', label: 'IoT', icon: Wifi },
   { value: 'calendar', label: 'التقويم', icon: CalendarDays },
   { value: 'intelligence', label: 'الأتمتة', icon: Cpu },
   { value: 'partners', label: 'الشركاء', icon: Handshake },
@@ -295,6 +305,46 @@ const TransporterDashboard = () => {
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال">
                 <FraudDetectionPanel />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="risk" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في تحليل المخاطر">
+                <PartnerRiskPanel />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="custody" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في سلسلة الحفظ">
+                <ChainOfCustodyPanel />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="government" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في البوابة الحكومية">
+                <GovernmentReportingPanel />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="carbon" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
+                <CarbonCreditsPanel />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="iot" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في IoT">
+                <IoTMonitoringPanel />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
