@@ -5369,6 +5369,91 @@ export type Database = {
           },
         ]
       }
+      driver_performance_scores: {
+        Row: {
+          badges: Json | null
+          compliance_score: number | null
+          created_at: string
+          customer_rating_score: number | null
+          driver_id: string
+          efficiency_score: number | null
+          id: string
+          incidents_count: number | null
+          notes: string | null
+          on_time_score: number | null
+          organization_id: string
+          overall_score: number | null
+          period_date: string
+          safety_score: number | null
+          total_distance_km: number | null
+          total_trips: number | null
+          trips_on_time: number | null
+          updated_at: string
+        }
+        Insert: {
+          badges?: Json | null
+          compliance_score?: number | null
+          created_at?: string
+          customer_rating_score?: number | null
+          driver_id: string
+          efficiency_score?: number | null
+          id?: string
+          incidents_count?: number | null
+          notes?: string | null
+          on_time_score?: number | null
+          organization_id: string
+          overall_score?: number | null
+          period_date?: string
+          safety_score?: number | null
+          total_distance_km?: number | null
+          total_trips?: number | null
+          trips_on_time?: number | null
+          updated_at?: string
+        }
+        Update: {
+          badges?: Json | null
+          compliance_score?: number | null
+          created_at?: string
+          customer_rating_score?: number | null
+          driver_id?: string
+          efficiency_score?: number | null
+          id?: string
+          incidents_count?: number | null
+          notes?: string | null
+          on_time_score?: number | null
+          organization_id?: string
+          overall_score?: number | null
+          period_date?: string
+          safety_score?: number | null
+          total_distance_km?: number | null
+          total_trips?: number | null
+          trips_on_time?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_performance_scores_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_performance_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_performance_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_permits: {
         Row: {
           conditions: string | null
@@ -5714,6 +5799,83 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_smart_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          driver_id: string | null
+          expires_at: string | null
+          id: string
+          is_dismissed: boolean | null
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          organization_id: string
+          severity: string
+          shipment_id: string | null
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          driver_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          organization_id: string
+          severity?: string
+          shipment_id?: string | null
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          driver_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_dismissed?: boolean | null
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          organization_id?: string
+          severity?: string
+          shipment_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_smart_alerts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_smart_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_smart_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_smart_alerts_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -16809,6 +16971,104 @@ export type Database = {
             columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sustainability_reports: {
+        Row: {
+          carbon_saved_kg: number | null
+          created_at: string
+          driving_km_equivalent: number | null
+          generated_at: string | null
+          id: string
+          organization_id: string
+          partner_organization_id: string | null
+          recycling_rate: number | null
+          report_data: Json | null
+          report_period: string
+          report_type: string
+          sent_at: string | null
+          shipments_count: number | null
+          status: string
+          total_landfilled_tons: number | null
+          total_recycled_tons: number | null
+          total_waste_collected_tons: number | null
+          trees_equivalent: number | null
+          updated_at: string
+          water_saved_liters: number | null
+        }
+        Insert: {
+          carbon_saved_kg?: number | null
+          created_at?: string
+          driving_km_equivalent?: number | null
+          generated_at?: string | null
+          id?: string
+          organization_id: string
+          partner_organization_id?: string | null
+          recycling_rate?: number | null
+          report_data?: Json | null
+          report_period: string
+          report_type?: string
+          sent_at?: string | null
+          shipments_count?: number | null
+          status?: string
+          total_landfilled_tons?: number | null
+          total_recycled_tons?: number | null
+          total_waste_collected_tons?: number | null
+          trees_equivalent?: number | null
+          updated_at?: string
+          water_saved_liters?: number | null
+        }
+        Update: {
+          carbon_saved_kg?: number | null
+          created_at?: string
+          driving_km_equivalent?: number | null
+          generated_at?: string | null
+          id?: string
+          organization_id?: string
+          partner_organization_id?: string | null
+          recycling_rate?: number | null
+          report_data?: Json | null
+          report_period?: string
+          report_type?: string
+          sent_at?: string | null
+          shipments_count?: number | null
+          status?: string
+          total_landfilled_tons?: number | null
+          total_recycled_tons?: number | null
+          total_waste_collected_tons?: number | null
+          trees_equivalent?: number | null
+          updated_at?: string
+          water_saved_liters?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sustainability_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "sustainability_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sustainability_reports_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "sustainability_reports_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
