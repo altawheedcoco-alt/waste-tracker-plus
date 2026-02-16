@@ -11,6 +11,7 @@ import {
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
   Trophy, BarChart3, Wallet, Camera, FileText,
   ClipboardCheck, Activity, PenTool, DollarSign,
+  Radiation, QrCode, GraduationCap, Route,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -43,6 +44,10 @@ const DriverPreTripChecklist = lazy(() => import('@/components/driver/DriverPreT
 const DriverFatigueMonitor = lazy(() => import('@/components/driver/DriverFatigueMonitor'));
 const DriverDeliverySignature = lazy(() => import('@/components/driver/DriverDeliverySignature'));
 const DriverEarningsDashboard = lazy(() => import('@/components/driver/DriverEarningsDashboard'));
+const WasteClassifierCamera = lazy(() => import('@/components/driver/WasteClassifierCamera'));
+const DigitalManifest = lazy(() => import('@/components/driver/DigitalManifest'));
+const DriverAcademy = lazy(() => import('@/components/driver/DriverAcademy'));
+const SmartRouteOptimizer = lazy(() => import('@/components/driver/SmartRouteOptimizer'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -91,6 +96,10 @@ const tabItems = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'checklist', label: 'الفحص', icon: ClipboardCheck },
   { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'classify', label: 'التصنيف', icon: Radiation },
+  { value: 'manifest', label: 'المانيفست', icon: QrCode },
+  { value: 'academy', label: 'الأكاديمية', icon: GraduationCap },
+  { value: 'routes', label: 'المسارات', icon: Route },
   { value: 'wallet', label: 'المحفظة', icon: Wallet },
   { value: 'earnings', label: 'الأرباح', icon: DollarSign },
   { value: 'safety', label: 'السلامة', icon: Shield },
@@ -375,6 +384,34 @@ const DriverDashboard = () => {
                 </div>
               </TabsContent>
             </Tabs>
+          </TabsContent>
+
+          {/* AI Waste Classifier Tab */}
+          <TabsContent value="classify" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <WasteClassifierCamera driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
+          {/* Digital Manifest Tab */}
+          <TabsContent value="manifest" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DigitalManifest driverId={driverInfo.id} shipment={activeShipments[0] as any} />}
+            </Suspense>
+          </TabsContent>
+
+          {/* Driver Academy Tab */}
+          <TabsContent value="academy" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverAcademy driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
+          {/* Smart Route Optimizer Tab */}
+          <TabsContent value="routes" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              <SmartRouteOptimizer shipments={shipments as any} />
+            </Suspense>
           </TabsContent>
 
           {/* Wallet Tab */}
