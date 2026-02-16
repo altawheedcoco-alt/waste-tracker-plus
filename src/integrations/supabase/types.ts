@@ -5249,6 +5249,80 @@ export type Database = {
           },
         ]
       }
+      driver_assignment_logs: {
+        Row: {
+          assigned_at: string | null
+          assignment_type: string
+          created_at: string
+          distance_km: number | null
+          driver_id: string | null
+          id: string
+          organization_id: string | null
+          reason: string | null
+          responded_at: string | null
+          score: number | null
+          shipment_id: string | null
+          status: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assignment_type?: string
+          created_at?: string
+          distance_km?: number | null
+          driver_id?: string | null
+          id?: string
+          organization_id?: string | null
+          reason?: string | null
+          responded_at?: string | null
+          score?: number | null
+          shipment_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assignment_type?: string
+          created_at?: string
+          distance_km?: number | null
+          driver_id?: string | null
+          id?: string
+          organization_id?: string | null
+          reason?: string | null
+          responded_at?: string | null
+          score?: number | null
+          shipment_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_assignment_logs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_assignment_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_assignment_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_assignment_logs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_compliance_docs: {
         Row: {
           created_at: string
@@ -8833,6 +8907,80 @@ export type Database = {
           },
         ]
       }
+      fraud_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string
+          evidence: Json | null
+          id: string
+          organization_id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          shipment_id: string | null
+          status: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description: string
+          evidence?: Json | null
+          id?: string
+          organization_id: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          shipment_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string
+          evidence?: Json | null
+          id?: string
+          organization_id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          shipment_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fraud_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "fraud_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fraud_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fraud_alerts_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geo_concentration_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -10337,6 +10485,186 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lms_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_bids: {
+        Row: {
+          bidder_organization_id: string
+          created_at: string
+          estimated_pickup_date: string | null
+          id: string
+          listing_id: string
+          notes: string | null
+          price: number
+          status: string | null
+          updated_at: string
+          vehicle_type: string | null
+        }
+        Insert: {
+          bidder_organization_id: string
+          created_at?: string
+          estimated_pickup_date?: string | null
+          id?: string
+          listing_id: string
+          notes?: string | null
+          price: number
+          status?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+        }
+        Update: {
+          bidder_organization_id?: string
+          created_at?: string
+          estimated_pickup_date?: string | null
+          id?: string
+          listing_id?: string
+          notes?: string | null
+          price?: number
+          status?: string | null
+          updated_at?: string
+          vehicle_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_bids_bidder_organization_id_fkey"
+            columns: ["bidder_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "marketplace_bids_bidder_organization_id_fkey"
+            columns: ["bidder_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_bids_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_listings: {
+        Row: {
+          awarded_to: string | null
+          bids_count: number | null
+          created_at: string
+          deadline: string | null
+          expires_at: string | null
+          hazardous: boolean | null
+          id: string
+          images: string[] | null
+          listing_number: string
+          listing_type: string | null
+          max_price: number | null
+          min_price: number | null
+          organization_id: string
+          pickup_address: string | null
+          pickup_city: string | null
+          pickup_latitude: number | null
+          pickup_longitude: number | null
+          preferred_date: string | null
+          quantity: number
+          special_requirements: string | null
+          status: string | null
+          title: string
+          unit: string | null
+          updated_at: string
+          views_count: number | null
+          waste_description: string | null
+          waste_type: string
+        }
+        Insert: {
+          awarded_to?: string | null
+          bids_count?: number | null
+          created_at?: string
+          deadline?: string | null
+          expires_at?: string | null
+          hazardous?: boolean | null
+          id?: string
+          images?: string[] | null
+          listing_number?: string
+          listing_type?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          organization_id: string
+          pickup_address?: string | null
+          pickup_city?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          preferred_date?: string | null
+          quantity: number
+          special_requirements?: string | null
+          status?: string | null
+          title: string
+          unit?: string | null
+          updated_at?: string
+          views_count?: number | null
+          waste_description?: string | null
+          waste_type: string
+        }
+        Update: {
+          awarded_to?: string | null
+          bids_count?: number | null
+          created_at?: string
+          deadline?: string | null
+          expires_at?: string | null
+          hazardous?: boolean | null
+          id?: string
+          images?: string[] | null
+          listing_number?: string
+          listing_type?: string | null
+          max_price?: number | null
+          min_price?: number | null
+          organization_id?: string
+          pickup_address?: string | null
+          pickup_city?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          preferred_date?: string | null
+          quantity?: number
+          special_requirements?: string | null
+          status?: string | null
+          title?: string
+          unit?: string | null
+          updated_at?: string
+          views_count?: number | null
+          waste_description?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_listings_awarded_to_fkey"
+            columns: ["awarded_to"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "marketplace_listings_awarded_to_fkey"
+            columns: ["awarded_to"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "marketplace_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -18780,6 +19108,82 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_telemetry: {
+        Row: {
+          alerts: Json | null
+          avg_fuel_consumption: number | null
+          created_at: string
+          driver_id: string | null
+          health_score: number | null
+          id: string
+          last_maintenance_date: string | null
+          last_maintenance_km: number | null
+          organization_id: string
+          risk_level: string | null
+          total_km: number | null
+          total_load_tons: number | null
+          total_trips: number | null
+          updated_at: string
+          vehicle_plate: string
+        }
+        Insert: {
+          alerts?: Json | null
+          avg_fuel_consumption?: number | null
+          created_at?: string
+          driver_id?: string | null
+          health_score?: number | null
+          id?: string
+          last_maintenance_date?: string | null
+          last_maintenance_km?: number | null
+          organization_id: string
+          risk_level?: string | null
+          total_km?: number | null
+          total_load_tons?: number | null
+          total_trips?: number | null
+          updated_at?: string
+          vehicle_plate: string
+        }
+        Update: {
+          alerts?: Json | null
+          avg_fuel_consumption?: number | null
+          created_at?: string
+          driver_id?: string | null
+          health_score?: number | null
+          id?: string
+          last_maintenance_date?: string | null
+          last_maintenance_km?: number | null
+          organization_id?: string
+          risk_level?: string | null
+          total_km?: number | null
+          total_load_tons?: number | null
+          total_trips?: number | null
+          updated_at?: string
+          vehicle_plate?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_telemetry_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_telemetry_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vehicle_telemetry_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
