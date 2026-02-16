@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Search, QrCode, FileCheck, FileX, Loader2, Shield, Camera, Package, FileText, Receipt, Scale, Award, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -59,12 +58,7 @@ const DocumentVerification = () => {
   return (
     <section className="py-10 sm:py-16 bg-muted/30">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
+        <div className="text-center mb-10 animate-fade-in">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
             <Shield className="w-5 h-5" />
             <span className="font-medium">{t('docVerify.sectionBadge')}</span>
@@ -73,15 +67,9 @@ const DocumentVerification = () => {
           <p className="text-xs sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
             {t('docVerify.subtitle')}
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.1 }}
-          className="max-w-2xl mx-auto"
-        >
+        <div className="max-w-2xl mx-auto animate-fade-in">
           <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -134,26 +122,18 @@ const DocumentVerification = () => {
                 <TabsContent value="qr" className="space-y-4">
                   <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/50">
                     <QrCode className="w-16 h-16 mx-auto text-primary mb-4" />
-                    <p className="text-muted-foreground mb-4">
-                      {t('docVerify.qrPrompt')}
-                    </p>
+                    <p className="text-muted-foreground mb-4">{t('docVerify.qrPrompt')}</p>
                     <Button size="lg" onClick={() => navigate('/scan')} className="gap-2">
                       <Camera className="w-5 h-5" />
                       {t('docVerify.openScanner')}
                     </Button>
-                    <p className="text-xs text-muted-foreground mt-4">
-                      {t('docVerify.qrSupported')}
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-4">{t('docVerify.qrSupported')}</p>
                   </div>
                 </TabsContent>
               </Tabs>
 
               {result && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mt-6"
-                >
+                <div className="mt-6 animate-fade-in">
                   {result.isValid ? (
                     <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-6">
                       <div className="flex items-center gap-3 mb-4">
@@ -161,28 +141,22 @@ const DocumentVerification = () => {
                           <FileCheck className="w-6 h-6 text-green-600 dark:text-green-400" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-green-700 dark:text-green-300">
-                            {t('docVerify.validDoc')}
-                          </h3>
+                          <h3 className="font-bold text-green-700 dark:text-green-300">{t('docVerify.validDoc')}</h3>
                           <div className="flex items-center gap-2">
                             <Badge variant="outline" className="gap-1 text-green-600 border-green-300">
                               {docTypeIcons[result.type] || <FileText className="w-3 h-3" />}
                               {typeLabel}
                             </Badge>
-                            <span className="text-sm text-green-600 dark:text-green-400 font-mono">
-                              {result.reference}
-                            </span>
+                            <span className="text-sm text-green-600 dark:text-green-400 font-mono">{result.reference}</span>
                           </div>
                         </div>
                       </div>
-
                       {result.status && (
                         <div className="mb-3">
                           <span className="text-muted-foreground text-sm">{t('docVerify.statusLabel')}: </span>
                           <Badge variant="secondary">{statusLabels[result.status] || result.status}</Badge>
                         </div>
                       )}
-
                       {result.data && (
                         <div className="grid grid-cols-2 gap-3 text-sm">
                           {Object.entries(result.data as Record<string, any>)
@@ -197,7 +171,6 @@ const DocumentVerification = () => {
                           }
                         </div>
                       )}
-
                       {result.verifiedAt && (
                         <p className="text-xs text-green-500 mt-3">
                           {t('docVerify.verifiedAt')}: {new Date(result.verifiedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
@@ -212,18 +185,16 @@ const DocumentVerification = () => {
                         </div>
                         <div>
                           <h3 className="font-bold text-red-700 dark:text-red-300">{t('docVerify.invalidDoc')}</h3>
-                          <p className="text-sm text-red-600 dark:text-red-400">
-                            {result.message || t('docVerify.invalidMsg')}
-                          </p>
+                          <p className="text-sm text-red-600 dark:text-red-400">{result.message || t('docVerify.invalidMsg')}</p>
                         </div>
                       </div>
                     </div>
                   )}
-                </motion.div>
+                </div>
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -22,10 +22,10 @@ const Hero = memo(() => {
     <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-20 pb-8 sm:pt-20 sm:pb-0">
       <div className="absolute inset-0">
         <img src={heroBg} alt={t('landing.recyclingFacilities')} className="w-full h-full object-cover" loading="eager" fetchPriority="high" decoding="async" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/50 to-background/90" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-background/95" />
       </div>
 
-      {/* Static decorative icons - no animation overhead */}
+      {/* Static decorative icons - desktop only */}
       <div className="absolute top-32 right-20 hidden lg:block">
         <div className="w-16 h-16 rounded-2xl gradient-eco flex items-center justify-center shadow-eco-lg animate-bounce" style={{ animationDuration: '4s' }}><Leaf className="w-8 h-8 text-primary-foreground" /></div>
       </div>
@@ -35,55 +35,54 @@ const Hero = memo(() => {
 
       <div className="container relative z-10 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="mb-3 sm:mb-6 animate-fade-in">
-            <div className="flex flex-col items-center gap-1.5 sm:gap-3">
-              <h2 className="text-base sm:text-2xl md:text-3xl font-bold text-primary">{t('landing.systemName')}</h2>
-              <h3 className="text-sm sm:text-xl md:text-2xl font-semibold text-foreground/80">{t('landing.systemNameAr')}</h3>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 sm:py-2 rounded-full bg-primary/10 text-primary font-medium text-[11px] sm:text-sm">
-                <Globe className="w-3 h-3 sm:w-4 sm:h-4" />{t('landing.tagline')}
-              </span>
-            </div>
+          {/* Tagline badge */}
+          <div className="mb-4 sm:mb-6 animate-fade-in">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-full bg-white/15 backdrop-blur-sm text-white font-medium text-[11px] sm:text-sm border border-white/20">
+              <Globe className="w-3 h-3 sm:w-4 sm:h-4" />{t('landing.tagline')}
+            </span>
           </div>
 
-          <h1 className="text-xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold mb-3 sm:mb-6 leading-snug px-2 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          {/* Main heading - clean, no duplication */}
+          <h1 className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-extrabold mb-3 sm:mb-6 leading-snug px-2 animate-fade-in text-white drop-shadow-lg" style={{ animationDelay: '0.1s' }}>
             {t('landing.heroTitle1')}{" "}
             <span className="text-gradient-eco">{t('landing.heroTitle2')}</span>
-            <br />{t('landing.heroTitle3')}
+            <br /><span className="text-white">{t('landing.heroTitle3')}</span>
           </h1>
 
-          <p className="text-xs sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-5 sm:mb-10 px-4 leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="text-sm sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-6 sm:mb-10 px-4 leading-relaxed animate-fade-in drop-shadow-md" style={{ animationDelay: '0.2s' }}>
             {t('landing.heroDesc')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-4 px-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-            <Button variant="hero" size="lg" className="group text-sm sm:text-lg px-5 sm:px-8 py-3 sm:py-6 w-full sm:w-auto" onClick={() => navigate('/auth?mode=register')}>
+            <Button variant="hero" size="lg" className="group text-sm sm:text-lg px-5 sm:px-8 py-3 sm:py-6 w-full sm:w-auto shadow-xl" onClick={() => navigate('/auth?mode=register')}>
               {t('landing.registerCompany')}
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
             </Button>
-            <Button variant="heroOutline" size="lg" className="text-sm sm:text-lg px-5 sm:px-8 py-3 sm:py-6 w-full sm:w-auto" onClick={() => navigate('/auth?mode=login')}>
+            <Button variant="heroOutline" size="lg" className="text-sm sm:text-lg px-5 sm:px-8 py-3 sm:py-6 w-full sm:w-auto border-white/40 text-white hover:bg-white/10" onClick={() => navigate('/auth?mode=login')}>
               {t('nav.login')}
             </Button>
           </div>
 
+          {/* Quick access grid */}
           <div className="mt-6 sm:mt-12 animate-fade-in" style={{ animationDelay: '0.5s' }}>
-            <p className="text-[10px] sm:text-sm text-muted-foreground mb-2.5 sm:mb-4">{t('landing.quickAccess')}</p>
+            <p className="text-[10px] sm:text-sm text-white/60 mb-2.5 sm:mb-4">{t('landing.quickAccess')}</p>
             <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center justify-center gap-x-4 gap-y-3 sm:gap-4 px-4">
               {quickAccessItems.map((item) => (
                 <button key={item.label}
                   onClick={() => navigate(item.type ? `/auth?mode=${item.mode}&type=${item.type}` : `/auth?mode=${item.mode}`)}
                   className="flex flex-col items-center gap-1 sm:gap-1.5 group cursor-pointer hover:scale-110 hover:-translate-y-1 active:scale-95 transition-transform duration-200"
                 >
-                  <div className={`w-9 h-9 sm:w-14 sm:h-14 rounded-lg sm:rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-md group-hover:shadow-xl transition-shadow`}>
-                    <item.icon className="w-4 h-4 sm:w-7 sm:h-7 text-white" />
+                  <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow ring-2 ring-white/20`}>
+                    <item.icon className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
                   </div>
-                  <span className="text-[9px] sm:text-sm font-medium text-foreground/80 group-hover:text-primary transition-colors leading-tight max-w-[70px] sm:max-w-none">{item.label}</span>
-                  <span className="text-[10px] text-muted-foreground hidden sm:block">{item.desc}</span>
+                  <span className="text-[10px] sm:text-sm font-semibold text-white/90 group-hover:text-white transition-colors leading-tight max-w-[80px] sm:max-w-none drop-shadow-md">{item.label}</span>
+                  <span className="text-[10px] text-white/60 hidden sm:block">{item.desc}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <p className="mt-3 sm:mt-6 text-[10px] sm:text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: '0.8s' }}>
+          <p className="mt-3 sm:mt-6 text-[10px] sm:text-sm text-white/50 animate-fade-in" style={{ animationDelay: '0.8s' }}>
             {t('landing.joinUs')}
           </p>
         </div>

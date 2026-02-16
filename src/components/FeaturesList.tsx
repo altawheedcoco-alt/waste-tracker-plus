@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -22,14 +21,10 @@ const FeaturesList = () => {
     <section className="py-10 sm:py-16 bg-background">
       <div className="container px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {systemCapabilities.map((capability, index) => (
-            <motion.div
+          {systemCapabilities.map((capability) => (
+            <div
               key={capability.title}
-              initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.08 }}
-              className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-muted/50 transition-colors border-b border-border/30"
+              className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-muted/50 transition-colors border-b border-border/30 animate-fade-in"
             >
               <div className="flex-shrink-0 mt-0.5"><CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary" /></div>
               <div className="text-right flex-1">
@@ -38,7 +33,7 @@ const FeaturesList = () => {
                   {capability.description && <span className="font-normal text-muted-foreground text-xs sm:text-base">: "{capability.description}"</span>}
                 </h3>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

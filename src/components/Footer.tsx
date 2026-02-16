@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -56,13 +55,13 @@ const Footer = () => {
 };
 
 const SocialIcon = ({ icon: Icon }: { icon: typeof Facebook }) => (
-  <motion.a href="#" whileHover={{ scale: 1.1, y: -2 }} className="w-10 h-10 rounded-full bg-background/10 hover:bg-primary flex items-center justify-center transition-colors">
+  <a href="#" className="w-10 h-10 rounded-full bg-background/10 hover:bg-primary hover:scale-110 hover:-translate-y-0.5 flex items-center justify-center transition-all duration-200">
     <Icon className="w-5 h-5" />
-  </motion.a>
+  </a>
 );
 
 const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <li><motion.a href={href} whileHover={{ x: -4 }} className="text-background/70 hover:text-primary transition-colors inline-block">{children}</motion.a></li>
+  <li><a href={href} className="text-background/70 hover:text-primary hover:translate-x-[-4px] transition-all inline-block">{children}</a></li>
 );
 
 export default Footer;
