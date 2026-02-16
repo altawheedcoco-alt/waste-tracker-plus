@@ -155,3 +155,6 @@ verify_jwt = false
 
 [functions.analyze-driver-photo]
 verify_jwt = false
+
+[functions.classify-waste-photo]
+verify_jwt = false
