@@ -1,16 +1,21 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
-import { Building2, Plus, Search, Upload, FileDown } from 'lucide-react';
+import { Building2, Plus, Search, Upload, Eye, Pencil, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import CompanyDetailsDialog from '@/components/regulated-companies/CompanyDetailsDialog';
+import EditCompanyDialog from '@/components/regulated-companies/EditCompanyDialog';
+import ExpiryAlerts from '@/components/regulated-companies/ExpiryAlerts';
+import ExportButtons from '@/components/regulated-companies/ExportButtons';
 
 const LICENSE_TYPES = [
   { value: 'medical', label: 'نفايات طبية' },
@@ -28,6 +33,10 @@ const RegulatedCompanies = () => {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [showAdd, setShowAdd] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [form, setForm] = useState({
     company_name: '', company_name_ar: '', license_type: 'solid', license_number: '',
     license_expiry_date: '', governorate: 'القاهرة', city: '', address: '',
@@ -60,13 +69,25 @@ const RegulatedCompanies = () => {
     onError: (err: any) => toast.error(err.message),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('regulated_companies').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('تم حذف الشركة');
+      queryClient.invalidateQueries({ queryKey: ['regulated-companies'] });
+      setDeleteTarget(null);
+    },
+    onError: (err: any) => toast.error(err.message),
+  });
+
   const handleCSVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const text = await file.text();
     const lines = text.split('\n').filter(l => l.trim());
     if (lines.length < 2) { toast.error('ملف فارغ'); return; }
-
     const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
     const rows = lines.slice(1).map(line => {
       const vals = line.split(',').map(v => v.trim());
@@ -84,10 +105,9 @@ const RegulatedCompanies = () => {
         contact_email: obj.contact_email || obj.email || '',
       };
     }).filter(r => r.company_name);
-
     const { error } = await supabase.from('regulated_companies').insert(rows as any);
     if (error) { toast.error('خطأ في الاستيراد: ' + error.message); }
-    else { toast.success(`تم استيراد ${rows.length} شركة بنجاح`); queryClient.invalidateQueries({ queryKey: ['regulated-companies'] }); }
+    else { toast.success(`تم استيراد ${rows.length} شركة`); queryClient.invalidateQueries({ queryKey: ['regulated-companies'] }); }
   };
 
   const statusColor = (status: string) => {
@@ -102,6 +122,7 @@ const RegulatedCompanies = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 sm:p-6">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Building2 className="w-7 h-7 text-primary" />
@@ -111,13 +132,14 @@ const RegulatedCompanies = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            <ExportButtons companies={companies} />
             <label className="cursor-pointer">
               <input type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
-              <Button variant="outline" size="sm" asChild><span><Upload className="w-4 h-4 ml-1" />استيراد CSV</span></Button>
+              <Button variant="outline" size="sm" asChild><span><Upload className="w-4 h-4 ml-1" />CSV</span></Button>
             </label>
             <Dialog open={showAdd} onOpenChange={setShowAdd}>
               <DialogTrigger asChild>
-                <Button size="sm"><Plus className="w-4 h-4 ml-1" />إضافة شركة</Button>
+                <Button size="sm"><Plus className="w-4 h-4 ml-1" />إضافة</Button>
               </DialogTrigger>
               <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
                 <DialogHeader><DialogTitle>إضافة شركة جديدة</DialogTitle></DialogHeader>
@@ -151,6 +173,9 @@ const RegulatedCompanies = () => {
           </div>
         </div>
 
+        {/* Expiry Alerts */}
+        <ExpiryAlerts companies={companies} />
+
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -166,7 +191,7 @@ const RegulatedCompanies = () => {
           </Select>
         </div>
 
-        {/* Companies Table */}
+        {/* Table */}
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
@@ -179,13 +204,14 @@ const RegulatedCompanies = () => {
                     <th className="text-right p-3">المحافظة</th>
                     <th className="text-right p-3">تاريخ الانتهاء</th>
                     <th className="text-right p-3">الحالة</th>
+                    <th className="text-right p-3">إجراءات</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
-                    <tr><td colSpan={6} className="text-center p-8 text-muted-foreground">جاري التحميل...</td></tr>
+                    <tr><td colSpan={7} className="text-center p-8 text-muted-foreground">جاري التحميل...</td></tr>
                   ) : companies.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center p-8 text-muted-foreground">لا توجد شركات مسجلة بعد</td></tr>
+                    <tr><td colSpan={7} className="text-center p-8 text-muted-foreground">لا توجد شركات مسجلة بعد</td></tr>
                   ) : (
                     companies.map((c: any) => (
                       <tr key={c.id} className="border-b hover:bg-muted/30">
@@ -195,6 +221,13 @@ const RegulatedCompanies = () => {
                         <td className="p-3">{c.governorate}</td>
                         <td className="p-3">{c.license_expiry_date || '-'}</td>
                         <td className="p-3"><Badge variant={statusColor(c.license_status)}>{c.license_status === 'active' ? 'ساري' : c.license_status === 'expired' ? 'منتهي' : c.license_status}</Badge></td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSelectedCompany(c); setShowDetails(true); }}><Eye className="w-3.5 h-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setSelectedCompany(c); setShowEdit(true); }}><Pencil className="w-3.5 h-3.5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setDeleteTarget(c)}><Trash2 className="w-3.5 h-3.5" /></Button>
+                          </div>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -204,6 +237,22 @@ const RegulatedCompanies = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialogs */}
+      <CompanyDetailsDialog company={selectedCompany} open={showDetails} onOpenChange={setShowDetails} />
+      <EditCompanyDialog company={selectedCompany} open={showEdit} onOpenChange={setShowEdit} />
+      <AlertDialog open={!!deleteTarget} onOpenChange={v => !v && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+            <AlertDialogDescription>هل أنت متأكد من حذف "{deleteTarget?.company_name_ar || deleteTarget?.company_name}"؟ لا يمكن التراجع.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)} className="bg-destructive text-destructive-foreground">حذف</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
