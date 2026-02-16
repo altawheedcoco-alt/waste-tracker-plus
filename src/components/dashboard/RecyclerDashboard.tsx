@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -44,6 +44,10 @@ const EquipmentManagerPanel = lazy(() => import('@/components/recycler/Equipment
 const UtilitiesTrackerPanel = lazy(() => import('@/components/recycler/UtilitiesTrackerPanel'));
 const WorkOrdersPanel = lazy(() => import('@/components/recycler/WorkOrdersPanel'));
 const ProductionCostPanel = lazy(() => import('@/components/recycler/ProductionCostPanel'));
+const FactoryDigitalTwinPanel = lazy(() => import('@/components/recycler/FactoryDigitalTwinPanel'));
+const PredictiveMaintenancePanel = lazy(() => import('@/components/recycler/PredictiveMaintenancePanel'));
+const SmartProductionOptimizer = lazy(() => import('@/components/recycler/SmartProductionOptimizer'));
+const BatchTraceabilityPanel = lazy(() => import('@/components/recycler/BatchTraceabilityPanel'));
 
 interface RecentShipment {
   id: string;
@@ -233,10 +237,14 @@ const RecyclerDashboard = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <TabsList className="w-full overflow-x-auto flex justify-start gap-1 bg-muted/50 p-1 h-auto flex-wrap">
           <TabsTrigger value="overview" className="gap-1 text-xs"><Recycle className="w-3.5 h-3.5" />نظرة عامة</TabsTrigger>
+          <TabsTrigger value="twin" className="gap-1 text-xs"><Cpu className="w-3.5 h-3.5" />التوأم الرقمي</TabsTrigger>
           <TabsTrigger value="equipment" className="gap-1 text-xs"><Cog className="w-3.5 h-3.5" />المعدات</TabsTrigger>
+          <TabsTrigger value="predictive" className="gap-1 text-xs"><Wrench className="w-3.5 h-3.5" />صيانة تنبؤية</TabsTrigger>
           <TabsTrigger value="quality" className="gap-1 text-xs"><Beaker className="w-3.5 h-3.5" />فحص الجودة</TabsTrigger>
           <TabsTrigger value="workorders" className="gap-1 text-xs"><ClipboardList className="w-3.5 h-3.5" />أوامر التشغيل</TabsTrigger>
           <TabsTrigger value="production" className="gap-1 text-xs"><Factory className="w-3.5 h-3.5" />الإنتاج</TabsTrigger>
+          <TabsTrigger value="optimizer" className="gap-1 text-xs"><Lightbulb className="w-3.5 h-3.5" />مُحسّن ذكي</TabsTrigger>
+          <TabsTrigger value="traceability" className="gap-1 text-xs"><Link2 className="w-3.5 h-3.5" />تتبع الدُفعات</TabsTrigger>
           <TabsTrigger value="utilities" className="gap-1 text-xs"><Zap className="w-3.5 h-3.5" />المرافق</TabsTrigger>
           <TabsTrigger value="cost" className="gap-1 text-xs"><Calculator className="w-3.5 h-3.5" />التكلفة</TabsTrigger>
           <TabsTrigger value="certificates" className="gap-1 text-xs"><Award className="w-3.5 h-3.5" />الشهادات</TabsTrigger>
@@ -327,9 +335,21 @@ const RecyclerDashboard = () => {
           <IncidentReportManager />
         </TabsContent>
 
+        <TabsContent value="twin" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <FactoryDigitalTwinPanel />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="equipment" className="mt-4">
           <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
             <EquipmentManagerPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="predictive" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <PredictiveMaintenancePanel />
           </Suspense>
         </TabsContent>
 
@@ -348,6 +368,18 @@ const RecyclerDashboard = () => {
         <TabsContent value="production" className="mt-4">
           <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
             <ProductionDashboardPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="optimizer" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <SmartProductionOptimizer />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="traceability" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <BatchTraceabilityPanel />
           </Suspense>
         </TabsContent>
 
