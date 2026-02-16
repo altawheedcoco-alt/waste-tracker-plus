@@ -5325,6 +5325,104 @@ export type Database = {
           },
         ]
       }
+      driver_copilot_tasks: {
+        Row: {
+          actual_arrival: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          driver_id: string
+          estimated_arrival: string | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          location_name: string | null
+          notes: string | null
+          organization_id: string
+          photo_proof_url: string | null
+          shipment_id: string | null
+          status: string
+          task_order: number | null
+          task_type: string
+          title: string
+          updated_at: string
+          voice_note_url: string | null
+        }
+        Insert: {
+          actual_arrival?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          driver_id: string
+          estimated_arrival?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          notes?: string | null
+          organization_id: string
+          photo_proof_url?: string | null
+          shipment_id?: string | null
+          status?: string
+          task_order?: number | null
+          task_type?: string
+          title: string
+          updated_at?: string
+          voice_note_url?: string | null
+        }
+        Update: {
+          actual_arrival?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          driver_id?: string
+          estimated_arrival?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          notes?: string | null
+          organization_id?: string
+          photo_proof_url?: string | null
+          shipment_id?: string | null
+          status?: string
+          task_order?: number | null
+          task_type?: string
+          title?: string
+          updated_at?: string
+          voice_note_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_copilot_tasks_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_copilot_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_copilot_tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_copilot_tasks_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_location_logs: {
         Row: {
           accuracy: number | null
@@ -5937,6 +6035,75 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dynamic_pricing_rules: {
+        Row: {
+          base_price: number
+          created_at: string
+          distance_multiplier: number | null
+          id: string
+          is_active: boolean | null
+          low_demand_discount: number | null
+          max_price: number | null
+          min_price: number | null
+          organization_id: string
+          peak_hour_surcharge: number | null
+          updated_at: string
+          urgent_surcharge: number | null
+          waste_type: string
+          weekend_surcharge: number | null
+          weight_multiplier: number | null
+        }
+        Insert: {
+          base_price?: number
+          created_at?: string
+          distance_multiplier?: number | null
+          id?: string
+          is_active?: boolean | null
+          low_demand_discount?: number | null
+          max_price?: number | null
+          min_price?: number | null
+          organization_id: string
+          peak_hour_surcharge?: number | null
+          updated_at?: string
+          urgent_surcharge?: number | null
+          waste_type: string
+          weekend_surcharge?: number | null
+          weight_multiplier?: number | null
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          distance_multiplier?: number | null
+          id?: string
+          is_active?: boolean | null
+          low_demand_discount?: number | null
+          max_price?: number | null
+          min_price?: number | null
+          organization_id?: string
+          peak_hour_surcharge?: number | null
+          updated_at?: string
+          urgent_surcharge?: number | null
+          waste_type?: string
+          weekend_surcharge?: number | null
+          weight_multiplier?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dynamic_pricing_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "dynamic_pricing_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -14094,6 +14261,61 @@ export type Database = {
           },
         ]
       }
+      pricing_calculations: {
+        Row: {
+          base_price: number
+          calculated_at: string
+          factors: Json | null
+          final_price: number
+          id: string
+          organization_id: string
+          shipment_id: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          base_price: number
+          calculated_at?: string
+          factors?: Json | null
+          final_price: number
+          id?: string
+          organization_id: string
+          shipment_id?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          base_price?: number
+          calculated_at?: string
+          factors?: Json | null
+          final_price?: number
+          id?: string
+          organization_id?: string
+          shipment_id?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_calculations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "pricing_calculations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pricing_calculations_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pride_certificates: {
         Row: {
           certificate_number: string
@@ -17553,6 +17775,64 @@ export type Database = {
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracking_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          last_viewed_at: string | null
+          organization_id: string
+          shipment_id: string
+          token: string
+          views_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_viewed_at?: string | null
+          organization_id: string
+          shipment_id: string
+          token: string
+          views_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_viewed_at?: string | null
+          organization_id?: string
+          shipment_id?: string
+          token?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracking_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "tracking_tokens_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracking_tokens_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]

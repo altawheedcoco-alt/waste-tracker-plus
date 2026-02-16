@@ -78,6 +78,7 @@ const PrideCertificates = lazy(() => import("./pages/dashboard/PrideCertificates
 const ReportsGuide = lazy(() => import("./pages/dashboard/ReportsGuide"));
 const AboutPlatform = lazy(() => import("./pages/dashboard/AboutPlatform"));
 const OfflineMode = lazy(() => import("./pages/dashboard/OfflineMode"));
+const PublicTrackingPage = lazy(() => import("./pages/PublicTracking"));
 const DriverProfile = lazy(() => import("./pages/dashboard/DriverProfile"));
 const DriverData = lazy(() => import("./pages/dashboard/DriverData"));
 const ExternalRecords = lazy(() => import("./pages/dashboard/ExternalRecords"));
@@ -218,7 +219,8 @@ const AppRoutes = memo(() => (
     <Route path="/verify" element={<Verify />} />
     <Route path="/qr-verify" element={<QRVerify />} />
     <Route path="/scan" element={<QRVerify />} />
-    <Route path="/auth" element={<Auth />} />
+     <Route path="/track" element={<PublicTrackingPage />} />
+     <Route path="/auth" element={<Auth />} />
     <Route path="/auth/google-setup" element={<GoogleSetup />} />
     {/* Guide Routes */}
     <Route path="/guide/generator" element={<GeneratorGuide />} />
