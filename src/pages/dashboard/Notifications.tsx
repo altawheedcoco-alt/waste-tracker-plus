@@ -211,6 +211,9 @@ const Notifications = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [soundEnabled, setSoundEnabled] = useState(true);
 
+  // Use display mode for responsive layout - MUST be before any early returns
+  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
+
   // Get unique shipment IDs from notifications
   const shipmentIds = useMemo(() => {
     return notifications
@@ -333,9 +336,6 @@ const Notifications = () => {
       </DashboardLayout>
     );
   }
-
-  // Use display mode for responsive layout
-  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
   // Get responsive grid columns for categories
   const iconSize = getResponsiveClass({
