@@ -143,3 +143,12 @@ verify_jwt = false
 
 [functions.subscription-cron]
 verify_jwt = false
+
+[functions.partner-risk-analyzer]
+verify_jwt = false
+
+[functions.chain-of-custody]
+verify_jwt = false
+
+[functions.government-reporting]
+verify_jwt = false
