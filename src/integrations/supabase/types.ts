@@ -1300,6 +1300,309 @@ export type Database = {
           },
         ]
       }
+      broker_deals: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deal_name: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          other_costs: number | null
+          purchase_price_per_ton: number
+          purchase_quantity_tons: number
+          purchase_total: number | null
+          purchase_transaction_id: string | null
+          sale_price_per_ton: number
+          sale_quantity_tons: number
+          sale_total: number | null
+          sale_transaction_id: string | null
+          status: string
+          transport_cost: number | null
+          updated_at: string
+          waste_type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deal_name?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          other_costs?: number | null
+          purchase_price_per_ton?: number
+          purchase_quantity_tons?: number
+          purchase_total?: number | null
+          purchase_transaction_id?: string | null
+          sale_price_per_ton?: number
+          sale_quantity_tons?: number
+          sale_total?: number | null
+          sale_transaction_id?: string | null
+          status?: string
+          transport_cost?: number | null
+          updated_at?: string
+          waste_type: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deal_name?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          other_costs?: number | null
+          purchase_price_per_ton?: number
+          purchase_quantity_tons?: number
+          purchase_total?: number | null
+          purchase_transaction_id?: string | null
+          sale_price_per_ton?: number
+          sale_quantity_tons?: number
+          sale_total?: number | null
+          sale_transaction_id?: string | null
+          status?: string
+          transport_cost?: number | null
+          updated_at?: string
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_deals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_deals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "broker_deals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_deals_purchase_transaction_id_fkey"
+            columns: ["purchase_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "broker_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_deals_sale_transaction_id_fkey"
+            columns: ["sale_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "broker_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broker_performance: {
+        Row: {
+          avg_margin_percent: number | null
+          created_at: string
+          deal_count: number | null
+          id: string
+          organization_id: string
+          period_month: string
+          top_waste_type: string | null
+          total_profit: number | null
+          total_purchases: number | null
+          total_sales: number | null
+          total_volume_tons: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_margin_percent?: number | null
+          created_at?: string
+          deal_count?: number | null
+          id?: string
+          organization_id: string
+          period_month: string
+          top_waste_type?: string | null
+          total_profit?: number | null
+          total_purchases?: number | null
+          total_sales?: number | null
+          total_volume_tons?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_margin_percent?: number | null
+          created_at?: string
+          deal_count?: number | null
+          id?: string
+          organization_id?: string
+          period_month?: string
+          top_waste_type?: string | null
+          total_profit?: number | null
+          total_purchases?: number | null
+          total_sales?: number | null
+          total_volume_tons?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_performance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "broker_performance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broker_transactions: {
+        Row: {
+          actual_quantity_tons: number | null
+          counterparty_external_id: string | null
+          counterparty_name: string | null
+          counterparty_organization_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          delivery_address: string | null
+          exchange_listing_id: string | null
+          id: string
+          invoice_id: string | null
+          location_governorate: string | null
+          notes: string | null
+          organization_id: string
+          pickup_address: string | null
+          price_per_ton: number
+          quality_grade: string | null
+          quantity_tons: number
+          shipment_id: string | null
+          status: string
+          total_amount: number | null
+          transaction_type: string
+          updated_at: string
+          waste_description: string | null
+          waste_type: string
+        }
+        Insert: {
+          actual_quantity_tons?: number | null
+          counterparty_external_id?: string | null
+          counterparty_name?: string | null
+          counterparty_organization_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          delivery_address?: string | null
+          exchange_listing_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          location_governorate?: string | null
+          notes?: string | null
+          organization_id: string
+          pickup_address?: string | null
+          price_per_ton?: number
+          quality_grade?: string | null
+          quantity_tons?: number
+          shipment_id?: string | null
+          status?: string
+          total_amount?: number | null
+          transaction_type: string
+          updated_at?: string
+          waste_description?: string | null
+          waste_type: string
+        }
+        Update: {
+          actual_quantity_tons?: number | null
+          counterparty_external_id?: string | null
+          counterparty_name?: string | null
+          counterparty_organization_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          delivery_address?: string | null
+          exchange_listing_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          location_governorate?: string | null
+          notes?: string | null
+          organization_id?: string
+          pickup_address?: string | null
+          price_per_ton?: number
+          quality_grade?: string | null
+          quantity_tons?: number
+          shipment_id?: string | null
+          status?: string
+          total_amount?: number | null
+          transaction_type?: string
+          updated_at?: string
+          waste_description?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broker_transactions_counterparty_external_id_fkey"
+            columns: ["counterparty_external_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_transactions_counterparty_organization_id_fkey"
+            columns: ["counterparty_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "broker_transactions_counterparty_organization_id_fkey"
+            columns: ["counterparty_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_transactions_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "broker_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broker_transactions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_analysis: {
         Row: {
           action_items: Json | null
