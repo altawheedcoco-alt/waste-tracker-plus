@@ -9,7 +9,7 @@ import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Loader2 } from 'lucide-react';
 import { LazyGoogleMapsProvider } from '@/components/maps/GoogleMapsProvider';
-import { FocusMusicProvider } from '@/contexts/FocusMusicContext';
+
 
 // Lazy load heavy dashboard components - only one renders per user role
 const GeneratorDashboard = lazy(() => import('@/components/dashboard/GeneratorDashboard'));
@@ -94,8 +94,7 @@ const Dashboard = () => {
   };
 
   return (
-    <FocusMusicProvider>
-      <LazyGoogleMapsProvider>
+    <LazyGoogleMapsProvider>
         <PinVerificationGate>
           <>
             <DashboardLayout>
@@ -123,8 +122,7 @@ const Dashboard = () => {
             </Suspense>
           </>
         </PinVerificationGate>
-      </LazyGoogleMapsProvider>
-    </FocusMusicProvider>
+    </LazyGoogleMapsProvider>
   );
 };
 

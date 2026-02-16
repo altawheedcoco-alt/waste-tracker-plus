@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback, memo, startTransition } from
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { FocusMusicProvider } from '@/contexts/FocusMusicContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -520,6 +521,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   });
 
   return (
+    <FocusMusicProvider>
     <TooltipProvider>
       <div className="min-h-screen bg-background flex flex-row-reverse" dir="rtl">
         <LiveEventToast />
@@ -1013,6 +1015,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         </div>
       </div>
     </TooltipProvider>
+    </FocusMusicProvider>
   );
 });
 
