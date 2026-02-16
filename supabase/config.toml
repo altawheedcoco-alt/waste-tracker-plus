@@ -152,3 +152,6 @@ verify_jwt = false
 
 [functions.government-reporting]
 verify_jwt = false
+
+[functions.analyze-driver-photo]
+verify_jwt = false

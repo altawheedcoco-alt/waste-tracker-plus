@@ -5688,6 +5688,145 @@ export type Database = {
           },
         ]
       }
+      driver_daily_reports: {
+        Row: {
+          avg_delivery_time_min: number | null
+          created_at: string | null
+          driver_id: string
+          fuel_efficiency_score: number | null
+          id: string
+          on_time_deliveries: number | null
+          performance_score: number | null
+          points_earned: number | null
+          report_date: string
+          summary_text: string | null
+          total_deliveries: number | null
+          total_distance_km: number | null
+          total_weight: number | null
+        }
+        Insert: {
+          avg_delivery_time_min?: number | null
+          created_at?: string | null
+          driver_id: string
+          fuel_efficiency_score?: number | null
+          id?: string
+          on_time_deliveries?: number | null
+          performance_score?: number | null
+          points_earned?: number | null
+          report_date: string
+          summary_text?: string | null
+          total_deliveries?: number | null
+          total_distance_km?: number | null
+          total_weight?: number | null
+        }
+        Update: {
+          avg_delivery_time_min?: number | null
+          created_at?: string | null
+          driver_id?: string
+          fuel_efficiency_score?: number | null
+          id?: string
+          on_time_deliveries?: number | null
+          performance_score?: number | null
+          points_earned?: number | null
+          report_date?: string
+          summary_text?: string | null
+          total_deliveries?: number | null
+          total_distance_km?: number | null
+          total_weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_daily_reports_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_emergencies: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          driver_id: string
+          emergency_type: string
+          id: string
+          latitude: number | null
+          location_address: string | null
+          longitude: number | null
+          organization_id: string
+          photos: string[] | null
+          resolved_at: string | null
+          resolved_by: string | null
+          shipment_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          driver_id: string
+          emergency_type: string
+          id?: string
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          organization_id: string
+          photos?: string[] | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          shipment_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          driver_id?: string
+          emergency_type?: string
+          id?: string
+          latitude?: number | null
+          location_address?: string | null
+          longitude?: number | null
+          organization_id?: string
+          photos?: string[] | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          shipment_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_emergencies_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_emergencies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_emergencies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_emergencies_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_location_logs: {
         Row: {
           accuracy: number | null
@@ -6236,6 +6375,98 @@ export type Database = {
           },
           {
             foreignKeyName: "driver_smart_alerts_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_wallet: {
+        Row: {
+          created_at: string | null
+          driver_id: string
+          id: string
+          last_activity_date: string | null
+          level: string | null
+          redeemed_points: number | null
+          streak_days: number | null
+          total_points: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          driver_id: string
+          id?: string
+          last_activity_date?: string | null
+          level?: string | null
+          redeemed_points?: number | null
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          driver_id?: string
+          id?: string
+          last_activity_date?: string | null
+          level?: string | null
+          redeemed_points?: number | null
+          streak_days?: number | null
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_wallet_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: true
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_wallet_transactions: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          driver_id: string
+          id: string
+          points: number
+          shipment_id: string | null
+          source: string
+          transaction_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          driver_id: string
+          id?: string
+          points: number
+          shipment_id?: string | null
+          source: string
+          transaction_type: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          driver_id?: string
+          id?: string
+          points?: number
+          shipment_id?: string | null
+          source?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_wallet_transactions_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_wallet_transactions_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
