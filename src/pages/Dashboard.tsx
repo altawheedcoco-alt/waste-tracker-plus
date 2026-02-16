@@ -8,6 +8,7 @@ import PinVerificationGate from '@/components/security/PinVerificationGate';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Loader2 } from 'lucide-react';
+import { LazyGoogleMapsProvider } from '@/components/maps/GoogleMapsProvider';
 
 // Lazy load heavy dashboard components - only one renders per user role
 const GeneratorDashboard = lazy(() => import('@/components/dashboard/GeneratorDashboard'));
@@ -18,6 +19,17 @@ const DriverDashboard = lazy(() => import('@/components/dashboard/DriverDashboar
 const DisposalDashboard = lazy(() => import('@/components/dashboard/DisposalDashboard'));
 const CallLogWidget = lazy(() => import('@/components/calls/CallLogWidget'));
 const AIOperationsAssistant = lazy(() => import('@/components/ai/AIOperationsAssistant'));
+
+// Global widgets - only loaded in dashboard context
+const AIChatbot = lazy(() => import('@/components/ai/AIChatbot'));
+const EnhancedChatWidget = lazy(() => import('@/components/chat/EnhancedChatWidget'));
+const UnifiedSupportWidget = lazy(() => import('@/components/ai/UnifiedSupportWidget'));
+const BetaBanner = lazy(() => import('@/components/BetaBanner'));
+const AccessibilityPanel = lazy(() => import('@/components/accessibility/AccessibilityPanel').then(m => ({ default: m.AccessibilityPanel })));
+const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
+const MobileOptimizations = lazy(() => import('@/components/mobile/MobileOptimizations'));
+const PWAShortcuts = lazy(() => import('@/components/mobile/PWAShortcuts'));
+const TouchOptimizations = lazy(() => import('@/components/mobile/TouchOptimizations'));
 
 const DashboardLoader = () => (
   <div className="flex items-center justify-center py-20">
@@ -81,22 +93,35 @@ const Dashboard = () => {
   };
 
   return (
-    <PinVerificationGate>
-      <>
-        <DashboardLayout>
-          <PagePasswordGate>
-            <Suspense fallback={<DashboardLoader />}>
-              {renderDashboard()}
-            </Suspense>
-          </PagePasswordGate>
-        </DashboardLayout>
-        
-        <Suspense fallback={null}>
-          <CallLogWidget />
-          {showAIAssistant && <AIOperationsAssistant />}
-        </Suspense>
-      </>
-    </PinVerificationGate>
+    <LazyGoogleMapsProvider>
+      <PinVerificationGate>
+        <>
+          <DashboardLayout>
+            <PagePasswordGate>
+              <Suspense fallback={<DashboardLoader />}>
+                {renderDashboard()}
+              </Suspense>
+            </PagePasswordGate>
+          </DashboardLayout>
+          
+          <Suspense fallback={null}>
+            <CallLogWidget />
+            {showAIAssistant && <AIOperationsAssistant />}
+            <AIChatbot />
+            <EnhancedChatWidget />
+            <UnifiedSupportWidget />
+            <UnifiedFloatingMenu />
+            <BetaBanner />
+            <AccessibilityPanel />
+          </Suspense>
+          <Suspense fallback={null}>
+            <MobileOptimizations>{null}</MobileOptimizations>
+            <PWAShortcuts />
+            <TouchOptimizations />
+          </Suspense>
+        </>
+      </PinVerificationGate>
+    </LazyGoogleMapsProvider>
   );
 };
 
