@@ -7,17 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Package,
-  Truck,
-  Mail,
-  Phone,
-  Settings,
-  CheckCircle2,
-  Clock,
-  Loader2,
-  Shield,
-  Map,
-  Navigation,
+  Package, Truck, Mail, Phone, Settings, CheckCircle2,
+  Clock, Loader2, Shield, Map, Navigation, ListTodo,
+  Trophy, BarChart3,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -32,10 +24,22 @@ import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
 import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
+import DriverDailyTasks from '@/components/driver/DriverDailyTasks';
+import DriverDailySummary from '@/components/driver/DriverDailySummary';
+import { Skeleton } from '@/components/ui/skeleton';
+import { motion } from 'framer-motion';
 
-// Lazy load components for better performance
+// Lazy load heavy components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 const FullNavigationView = lazy(() => import('@/components/driver/FullNavigationView'));
+const DriverRewardsPanel = lazy(() => import('@/components/driver/DriverRewardsPanel'));
+
+const TabFallback = () => (
+  <div className="space-y-4 mt-6">
+    <Skeleton className="h-32 w-full rounded-xl" />
+    <Skeleton className="h-48 w-full rounded-xl" />
+  </div>
+);
 
 interface DriverInfo {
   id: string;
@@ -72,6 +76,13 @@ interface Shipment {
   transporter: { name: string } | null;
 }
 
+const tabItems = [
+  { value: 'tasks', label: 'المهام', icon: ListTodo },
+  { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'rewards', label: 'المكافآت', icon: Trophy },
+  { value: 'profile', label: 'الملف', icon: BarChart3 },
+];
+
 const DriverDashboard = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -107,6 +118,18 @@ const DriverDashboard = () => {
     setShowLiveMapDialog(true);
   };
 
+  const handleNavigateToShipment = (shipment: Shipment) => {
+    // Open Google Maps with the delivery address
+    const address = shipment.status === 'approved' ? shipment.pickup_address : shipment.delivery_address;
+    if (address) {
+      const encoded = encodeURIComponent(address);
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encoded}`, '_blank');
+    } else {
+      setSelectedShipmentForNav(shipment);
+      setShowNavigationView(true);
+    }
+  };
+
   useEffect(() => {
     if (profile?.id) {
       fetchDriverData();
@@ -115,53 +138,22 @@ const DriverDashboard = () => {
 
   const fetchDriverData = async () => {
     try {
-      // Fetch driver info
       const { data: driver } = await supabase
         .from('drivers')
-        .select(`
-          id,
-          license_number,
-          vehicle_type,
-          vehicle_plate,
-          is_available,
-          organization:organizations(name, phone)
-        `)
+        .select(`id, license_number, vehicle_type, vehicle_plate, is_available, organization:organizations(name, phone)`)
         .eq('profile_id', profile?.id)
         .single();
 
       if (driver) {
         setDriverInfo(driver as unknown as DriverInfo);
 
-        // Fetch shipments with simplified query
         const { data: shipmentsData } = await supabase
           .from('shipments')
-          .select(`
-            id,
-            shipment_number,
-            waste_type,
-            quantity,
-            unit,
-            status,
-            created_at,
-            pickup_address,
-            delivery_address,
-            driver_id,
-            expected_delivery_date,
-            approved_at,
-            collection_started_at,
-            in_transit_at,
-            delivered_at,
-            confirmed_at,
-            recycler_notes,
-            generator_id,
-            recycler_id,
-            transporter_id
-          `)
+          .select(`id, shipment_number, waste_type, quantity, unit, status, created_at, pickup_address, delivery_address, driver_id, expected_delivery_date, approved_at, collection_started_at, in_transit_at, delivered_at, confirmed_at, recycler_notes, generator_id, recycler_id, transporter_id`)
           .eq('driver_id', driver.id)
           .order('created_at', { ascending: false });
 
         if (shipmentsData) {
-          // Fetch organizations for enrichment
           const orgIds: string[] = [];
           shipmentsData.forEach(s => {
             if (s.generator_id) orgIds.push(s.generator_id);
@@ -169,23 +161,17 @@ const DriverDashboard = () => {
             if (s.transporter_id) orgIds.push(s.transporter_id);
           });
           const uniqueOrgIds = [...new Set(orgIds)];
-
           const orgsMap: Record<string, { name: string }> = {};
           if (uniqueOrgIds.length > 0) {
-            const { data: orgsData } = await supabase
-              .from('organizations')
-              .select('id, name')
-              .in('id', uniqueOrgIds);
+            const { data: orgsData } = await supabase.from('organizations').select('id, name').in('id', uniqueOrgIds);
             orgsData?.forEach(o => { orgsMap[o.id] = { name: o.name }; });
           }
-
           const enriched = shipmentsData.map(s => ({
             ...s,
             generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
             recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
             transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
           }));
-
           setShipments(enriched as unknown as Shipment[]);
         }
       }
@@ -208,41 +194,35 @@ const DriverDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="text-right">
-          <h1 className="text-2xl font-bold">لوحة تحكم السائق</h1>
-          <p className="text-primary">
-            مرحباً، {profile?.full_name}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Driver Status Indicators */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/50 border">
-            {/* Tracking Status */}
-            <LiveLocationIndicator
-              isTracking={!!lastLocationUpdate}
-              lastUpdate={lastLocationUpdate}
-              signalStrength={lastLocationUpdate ? 'good' : 'offline'}
-            />
-            
-            {/* Availability Status */}
-            <div className="flex items-center gap-1.5 border-r pr-2 mr-1">
+    <div className="space-y-4">
+      {/* Compact Header with Status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={profile?.avatar_url || ''} />
+            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+              {profile?.full_name?.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${driverInfo?.is_available ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'}`} />
-              <span className="text-xs font-medium">
-                {driverInfo?.is_available ? 'نشط' : 'غير نشط'}
+              <span className="text-xs text-muted-foreground">
+                {driverInfo?.is_available ? 'متاح' : 'غير متاح'}
               </span>
             </div>
           </div>
+        </div>
 
-          {/* Watcher Indicator - Shows if someone is tracking this driver */}
-          {driverInfo && (
-            <TrackingWatcherIndicator driverId={driverInfo.id} />
-          )}
-
+        <div className="flex items-center gap-1.5">
           {driverInfo && (
             <>
+              <LiveLocationIndicator
+                isTracking={!!lastLocationUpdate}
+                lastUpdate={lastLocationUpdate}
+                signalStrength={lastLocationUpdate ? 'good' : 'offline'}
+              />
+              <TrackingWatcherIndicator driverId={driverInfo.id} />
               <QuickLocationButton 
                 driverId={driverInfo.id} 
                 variant="icon"
@@ -250,208 +230,197 @@ const DriverDashboard = () => {
               />
               <Button
                 variant="outline"
-                size="sm"
+                size="icon"
+                className="h-8 w-8"
                 onClick={() => handleOpenLiveMap()}
-                className="gap-2 bg-primary/5 hover:bg-primary/10 border-primary/20"
               >
-                <Map className="h-4 w-4 text-primary" />
-                <span className="hidden sm:inline">عرض موقعي</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate('/dashboard/navigation-demo')}
-                className="gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30"
-              >
-                <Navigation className="h-4 w-4 text-emerald-600" />
-                <span className="hidden sm:inline">عرض توضيحي</span>
+                <Map className="h-4 w-4" />
               </Button>
             </>
           )}
-          <CreateShipmentButton 
-            variant="eco" 
-            onSuccess={fetchDriverData}
-          />
           <Button 
             variant="outline" 
+            size="icon"
+            className="h-8 w-8"
             onClick={() => setShowSettingsDialog(true)}
-            className="flex items-center gap-2"
           >
             <Settings className="h-4 w-4" />
-            إعدادات الحساب
           </Button>
         </div>
       </div>
 
-      {/* Profile Card */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                {profile?.full_name?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold">{profile?.full_name}</h2>
-                  {driverInfo?.organization && (
-                    <p className="text-muted-foreground">{driverInfo.organization.name}</p>
-                  )}
-                </div>
-                <Badge variant={driverInfo?.is_available ? 'default' : 'secondary'} className="w-fit">
-                  {driverInfo?.is_available ? 'متاح' : 'غير متاح'}
-                </Badge>
-              </div>
+      {/* Driver Assignment Alert */}
+      <DriverAssignmentAlert />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="truncate">{profile?.email}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span dir="ltr">{profile?.phone || '-'}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  <span>رخصة: {driverInfo?.license_number}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Truck className="h-4 w-4 text-muted-foreground" />
-                  <span>{driverInfo?.vehicle_plate || '-'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Driver Linking Code */}
-      <DriverOwnLinkingCode />
-
-      {/* My Shipments Quick Access Card */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-full bg-primary/10">
-                <Package className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold">شحناتي</h3>
-                <p className="text-sm text-muted-foreground">إدارة ومتابعة الشحنات المسندة إليك</p>
-              </div>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => navigate('/dashboard/transporter-shipments')}
-              className="flex items-center gap-2"
-            >
-              عرض الكل
-              <Truck className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-3 rounded-lg bg-background/50 border">
-              <div className="text-2xl font-bold text-primary">{shipments.length}</div>
-              <p className="text-xs text-muted-foreground">إجمالي الشحنات</p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-background/50 border">
-              <div className="text-2xl font-bold text-blue-500">{activeShipments.length}</div>
-              <p className="text-xs text-muted-foreground">شحنات نشطة</p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-background/50 border">
-              <div className="text-2xl font-bold text-green-500">{completedShipments.length}</div>
-              <p className="text-xs text-muted-foreground">شحنات مكتملة</p>
-            </div>
-            <div className="text-center p-3 rounded-lg bg-background/50 border">
-              <div className="text-2xl font-bold text-amber-500">{driverInfo?.vehicle_type || '-'}</div>
-              <p className="text-xs text-muted-foreground">نوع المركبة</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions Grid */}
-      <QuickActionsGrid
-        actions={quickActions}
-        title="الإجراءات السريعة"
-        subtitle="الوظائف المستخدمة بكثرة"
+      {/* Daily Summary */}
+      <DriverDailySummary 
+        shipments={shipments as any} 
+        driverName={profile?.full_name || 'السائق'} 
       />
 
-      {/* Destination Picker Card */}
-      {driverInfo && (
-        <EnhancedDestinationPicker 
-          driverId={driverInfo.id} 
-          onDestinationAdded={fetchDriverData}
-        />
-      )}
-
-      {/* Shipments Tabs - Using ShipmentCard like Transporter Dashboard */}
-      <Tabs defaultValue="active" className="w-full" dir="rtl">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="active" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            نشطة ({activeShipments.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4" />
-            مكتملة ({completedShipments.length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="active" className="mt-4">
-          <div className="space-y-3">
-            {activeShipments.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <Package className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p>لا توجد شحنات نشطة حالياً</p>
-                </CardContent>
-              </Card>
-            ) : (
-              activeShipments.map((shipment) => (
-                <ShipmentCard
-                  key={shipment.id}
-                  shipment={shipment}
-                  onStatusChange={fetchDriverData}
-                  variant="full"
-                />
-              ))
-            )}
+      {/* Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <Tabs defaultValue="tasks" className="w-full" dir="rtl">
+          <div className="relative overflow-hidden rounded-xl border border-border/50 bg-card p-1">
+            <TabsList className="w-full justify-start bg-transparent gap-1 h-auto p-0">
+              {tabItems.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="flex-1 text-xs sm:text-sm gap-1.5 px-3 py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all"
+                >
+                  <tab.icon className="w-4 h-4" />
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-        </TabsContent>
 
-        <TabsContent value="completed" className="mt-4">
-          <div className="space-y-3">
-            {completedShipments.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center text-muted-foreground">
-                  <CheckCircle2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p>لا توجد شحنات مكتملة</p>
-                </CardContent>
-              </Card>
-            ) : (
-              completedShipments.map((shipment) => (
-                <ShipmentCard
-                  key={shipment.id}
-                  shipment={shipment}
-                  onStatusChange={fetchDriverData}
-                  variant="full"
-                />
-              ))
+          {/* Tasks Tab */}
+          <TabsContent value="tasks" className="mt-4">
+            <DriverDailyTasks
+              shipments={shipments}
+              onNavigate={handleNavigateToShipment}
+              onViewDetails={(s) => navigate(`/dashboard/shipment/${s.id}`)}
+            />
+          </TabsContent>
+
+          {/* Shipments Tab */}
+          <TabsContent value="shipments" className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <CreateShipmentButton variant="eco" onSuccess={fetchDriverData} />
+            </div>
+
+            <Tabs defaultValue="active" className="w-full" dir="rtl">
+              <TabsList className="grid w-full max-w-xs grid-cols-2">
+                <TabsTrigger value="active" className="gap-1 text-xs">
+                  <Clock className="h-3 w-3" />
+                  نشطة ({activeShipments.length})
+                </TabsTrigger>
+                <TabsTrigger value="completed" className="gap-1 text-xs">
+                  <CheckCircle2 className="h-3 w-3" />
+                  مكتملة ({completedShipments.length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="active" className="mt-3">
+                <div className="space-y-3">
+                  {activeShipments.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center text-muted-foreground">
+                        <Package className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>لا توجد شحنات نشطة حالياً</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    activeShipments.map((shipment) => (
+                      <ShipmentCard
+                        key={shipment.id}
+                        shipment={shipment}
+                        onStatusChange={fetchDriverData}
+                        variant="full"
+                      />
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="completed" className="mt-3">
+                <div className="space-y-3">
+                  {completedShipments.length === 0 ? (
+                    <Card>
+                      <CardContent className="p-8 text-center text-muted-foreground">
+                        <CheckCircle2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                        <p>لا توجد شحنات مكتملة</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    completedShipments.slice(0, 10).map((shipment) => (
+                      <ShipmentCard
+                        key={shipment.id}
+                        shipment={shipment}
+                        onStatusChange={fetchDriverData}
+                        variant="full"
+                      />
+                    ))
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* Rewards Tab */}
+          <TabsContent value="rewards" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              <DriverRewardsPanel />
+            </Suspense>
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="mt-4 space-y-4">
+            {/* Profile Card */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={profile?.avatar_url || ''} />
+                    <AvatarFallback className="text-xl bg-primary/10 text-primary">
+                      {profile?.full_name?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 space-y-3">
+                    <div>
+                      <h2 className="text-lg font-bold">{profile?.full_name}</h2>
+                      {driverInfo?.organization && (
+                        <p className="text-sm text-muted-foreground">{driverInfo.organization.name}</p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="truncate text-xs">{profile?.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span dir="ltr" className="text-xs">{profile?.phone || '-'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs">رخصة: {driverInfo?.license_number}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-xs">{driverInfo?.vehicle_plate || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <DriverOwnLinkingCode />
+
+            {driverInfo && (
+              <EnhancedDestinationPicker 
+                driverId={driverInfo.id} 
+                onDestinationAdded={fetchDriverData}
+              />
             )}
-          </div>
-        </TabsContent>
-      </Tabs>
 
-      {/* Settings Dialog */}
+            <QuickActionsGrid
+              actions={quickActions}
+              title="الإجراءات السريعة"
+              subtitle="الوظائف المستخدمة بكثرة"
+            />
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+
+      {/* Dialogs */}
       <DriverSettingsDialog
         open={showSettingsDialog}
         onOpenChange={setShowSettingsDialog}
@@ -459,7 +428,6 @@ const DriverDashboard = () => {
         onUpdate={fetchDriverData}
       />
 
-      {/* Live Tracking Map Dialog */}
       {showLiveMapDialog && driverInfo && (
         <Suspense fallback={
           <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
@@ -478,7 +446,6 @@ const DriverDashboard = () => {
         </Suspense>
       )}
 
-      {/* Full Navigation View */}
       {showNavigationView && driverInfo && selectedShipmentForNav && (
         <Suspense fallback={
           <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
@@ -496,7 +463,7 @@ const DriverDashboard = () => {
         </Suspense>
       )}
 
-      {/* Floating Action Button for Quick Location */}
+      {/* Floating Quick Location */}
       {driverInfo && (
         <QuickLocationButton 
           driverId={driverInfo.id} 
@@ -504,9 +471,6 @@ const DriverDashboard = () => {
           onSuccess={handleLocationSuccess}
         />
       )}
-
-      {/* Driver Assignment Priority Alert */}
-      <DriverAssignmentAlert />
     </div>
   );
 };
