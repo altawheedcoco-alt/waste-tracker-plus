@@ -10,6 +10,7 @@ import {
   Package, Truck, Mail, Phone, Settings, CheckCircle2,
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
   Trophy, BarChart3, Wallet, Camera, FileText,
+  ClipboardCheck, Activity, PenTool, DollarSign,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -38,6 +39,10 @@ const DriverLeaderboard = lazy(() => import('@/components/driver/DriverLeaderboa
 const DriverSmartCamera = lazy(() => import('@/components/driver/DriverSmartCamera'));
 const DriverAutoReport = lazy(() => import('@/components/driver/DriverAutoReport'));
 const DriverSOSButton = lazy(() => import('@/components/driver/DriverSOSButton'));
+const DriverPreTripChecklist = lazy(() => import('@/components/driver/DriverPreTripChecklist'));
+const DriverFatigueMonitor = lazy(() => import('@/components/driver/DriverFatigueMonitor'));
+const DriverDeliverySignature = lazy(() => import('@/components/driver/DriverDeliverySignature'));
+const DriverEarningsDashboard = lazy(() => import('@/components/driver/DriverEarningsDashboard'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -84,9 +89,13 @@ interface Shipment {
 
 const tabItems = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
+  { value: 'checklist', label: 'الفحص', icon: ClipboardCheck },
   { value: 'shipments', label: 'الشحنات', icon: Package },
   { value: 'wallet', label: 'المحفظة', icon: Wallet },
+  { value: 'earnings', label: 'الأرباح', icon: DollarSign },
+  { value: 'safety', label: 'السلامة', icon: Shield },
   { value: 'camera', label: 'الكاميرا', icon: Camera },
+  { value: 'signature', label: 'التوقيع', icon: PenTool },
   { value: 'report', label: 'التقرير', icon: FileText },
   { value: 'profile', label: 'الملف', icon: BarChart3 },
 ];
@@ -273,13 +282,13 @@ const DriverDashboard = () => {
         transition={{ delay: 0.2 }}
       >
         <Tabs defaultValue="tasks" className="w-full" dir="rtl">
-          <div className="relative overflow-hidden rounded-xl border border-border/50 bg-card p-1">
-            <TabsList className="w-full justify-start bg-transparent gap-1 h-auto p-0">
+          <div className="relative overflow-x-auto rounded-xl border border-border/50 bg-card p-1 scrollbar-hide">
+            <TabsList className="w-max min-w-full justify-start bg-transparent gap-1 h-auto p-0 flex-nowrap">
               {tabItems.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="flex-1 text-xs sm:text-sm gap-1.5 px-3 py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all"
+                  className="whitespace-nowrap text-xs gap-1.5 px-3 py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all"
                 >
                   <tab.icon className="w-4 h-4" />
                   {tab.label}
@@ -295,6 +304,13 @@ const DriverDashboard = () => {
               onNavigate={handleNavigateToShipment}
               onViewDetails={(s) => navigate(`/dashboard/shipment/${s.id}`)}
             />
+          </TabsContent>
+
+          {/* Pre-Trip Checklist Tab */}
+          <TabsContent value="checklist" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverPreTripChecklist driverId={driverInfo.id} />}
+            </Suspense>
           </TabsContent>
 
           {/* Shipments Tab */}
@@ -374,6 +390,20 @@ const DriverDashboard = () => {
             </Suspense>
           </TabsContent>
 
+          {/* Earnings Tab */}
+          <TabsContent value="earnings" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              <DriverEarningsDashboard />
+            </Suspense>
+          </TabsContent>
+
+          {/* Safety Tab (Fatigue Monitor) */}
+          <TabsContent value="safety" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverFatigueMonitor driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
           {/* Smart Camera Tab */}
           <TabsContent value="camera" className="mt-4">
             <Suspense fallback={<TabFallback />}>
@@ -384,6 +414,13 @@ const DriverDashboard = () => {
                   <DriverSmartCamera driverId={driverInfo.id} type="delivery" />
                 </div>
               )}
+            </Suspense>
+          </TabsContent>
+
+          {/* Signature Tab */}
+          <TabsContent value="signature" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverDeliverySignature driverId={driverInfo.id} />}
             </Suspense>
           </TabsContent>
 
