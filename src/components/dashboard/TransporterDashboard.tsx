@@ -42,7 +42,7 @@ import TransporterCommandCenter from './transporter/TransporterCommandCenter';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation } from 'lucide-react';
 
 // Lazy load heavy tab content
 const DriverPerformancePanel = lazy(() => import('./transporter/DriverPerformancePanel'));
@@ -69,6 +69,8 @@ const TransporterDeliveryApproval = lazy(() => import('@/components/receipts/Tra
 const SmartDriverNotifications = lazy(() => import('./transporter/SmartDriverNotifications'));
 const SustainabilityReportGenerator = lazy(() => import('./transporter/SustainabilityReportGenerator'));
 const EnhancedDriverPerformance = lazy(() => import('./transporter/EnhancedDriverPerformance'));
+const DynamicPricingEngine = lazy(() => import('./transporter/DynamicPricingEngine'));
+const DriverCopilot = lazy(() => import('./transporter/DriverCopilot'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -81,6 +83,8 @@ const tabItems = [
   { value: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
   { value: 'ai', label: 'الذكاء الاصطناعي', icon: Brain },
   { value: 'performance', label: 'الأداء والتكاليف', icon: BarChart3 },
+  { value: 'copilot', label: 'مساعد السائق', icon: Navigation },
+  { value: 'pricing', label: 'التسعير الذكي', icon: DollarSign },
   { value: 'calendar', label: 'التقويم', icon: CalendarDays },
   { value: 'intelligence', label: 'الأتمتة', icon: Cpu },
   { value: 'partners', label: 'الشركاء', icon: Handshake },
@@ -245,6 +249,22 @@ const TransporterDashboard = () => {
                 <TripCostManagement />
                 <SmartDriverNotifications />
                 <MaintenanceScheduler />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="copilot" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في مساعد السائق">
+                <DriverCopilot />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="pricing" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
+                <DynamicPricingEngine />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
