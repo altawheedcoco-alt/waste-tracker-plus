@@ -162,6 +162,11 @@ const AllNotes = lazy(() => import("./pages/dashboard/AllNotes"));
 const SystemCommands = lazy(() => import("./pages/dashboard/SystemCommands"));
 const RegulatorDashboard = lazy(() => import("./pages/dashboard/RegulatorDashboard"));
 const RegulatedCompanies = lazy(() => import("./pages/dashboard/RegulatedCompanies"));
+const CollectionRequests = lazy(() => import("./pages/dashboard/CollectionRequests"));
+const SmartInsurance = lazy(() => import("./pages/dashboard/SmartInsurance"));
+const FuturesMarket = lazy(() => import("./pages/dashboard/FuturesMarket"));
+const DigitalWallet = lazy(() => import("./pages/dashboard/DigitalWallet"));
+const DriverAcademy = lazy(() => import("./pages/dashboard/DriverAcademy"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -356,6 +361,11 @@ const AppRoutes = memo(() => (
          <Route path="/verify-signatory/:code" element={<VerifySignatory />} />
          <Route path="/dashboard/regulator" element={<RegulatorDashboard />} />
          <Route path="/dashboard/regulated-companies" element={<RegulatedCompanies />} />
+         <Route path="/dashboard/collection-requests" element={<CollectionRequests />} />
+         <Route path="/dashboard/smart-insurance" element={<SmartInsurance />} />
+         <Route path="/dashboard/futures-market" element={<FuturesMarket />} />
+         <Route path="/dashboard/digital-wallet" element={<DigitalWallet />} />
+         <Route path="/dashboard/driver-academy" element={<DriverAcademy />} />
          <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />

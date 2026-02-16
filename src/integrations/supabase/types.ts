@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_courses: {
+        Row: {
+          category: string
+          certificate_type: string | null
+          certificate_validity_months: number | null
+          content: Json | null
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          difficulty_level: string
+          duration_minutes: number
+          id: string
+          is_active: boolean | null
+          is_mandatory: boolean | null
+          passing_score: number
+          thumbnail_url: string | null
+          title: string
+          title_ar: string
+          total_lessons: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          certificate_type?: string | null
+          certificate_validity_months?: number | null
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          difficulty_level?: string
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          is_mandatory?: boolean | null
+          passing_score?: number
+          thumbnail_url?: string | null
+          title: string
+          title_ar: string
+          total_lessons?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          certificate_type?: string | null
+          certificate_validity_months?: number | null
+          content?: Json | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          difficulty_level?: string
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean | null
+          is_mandatory?: boolean | null
+          passing_score?: number
+          thumbnail_url?: string | null
+          title?: string
+          title_ar?: string
+          total_lessons?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       account_periods: {
         Row: {
           carry_over_balance: boolean | null
@@ -2554,6 +2617,168 @@ export type Database = {
           },
         ]
       }
+      collection_requests: {
+        Row: {
+          accepted_at: string | null
+          assigned_at: string | null
+          assigned_driver_id: string | null
+          assigned_vehicle: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string
+          currency: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          driver_latitude: number | null
+          driver_longitude: number | null
+          estimated_price: number | null
+          estimated_weight_kg: number | null
+          eta_minutes: number | null
+          final_price: number | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          organization_id: string
+          picked_up_at: string | null
+          pickup_address: string
+          pickup_latitude: number | null
+          pickup_longitude: number | null
+          portal_token_id: string | null
+          preferred_date: string | null
+          preferred_time_slot: string | null
+          rating: number | null
+          rating_comment: string | null
+          request_type: string
+          schedule_day_of_week: number | null
+          schedule_frequency: string | null
+          shipment_id: string | null
+          status: string
+          updated_at: string
+          waste_description: string | null
+          waste_type: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          assigned_at?: string | null
+          assigned_driver_id?: string | null
+          assigned_vehicle?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          driver_latitude?: number | null
+          driver_longitude?: number | null
+          estimated_price?: number | null
+          estimated_weight_kg?: number | null
+          eta_minutes?: number | null
+          final_price?: number | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          organization_id: string
+          picked_up_at?: string | null
+          pickup_address: string
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          portal_token_id?: string | null
+          preferred_date?: string | null
+          preferred_time_slot?: string | null
+          rating?: number | null
+          rating_comment?: string | null
+          request_type?: string
+          schedule_day_of_week?: number | null
+          schedule_frequency?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string
+          waste_description?: string | null
+          waste_type: string
+        }
+        Update: {
+          accepted_at?: string | null
+          assigned_at?: string | null
+          assigned_driver_id?: string | null
+          assigned_vehicle?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          driver_latitude?: number | null
+          driver_longitude?: number | null
+          estimated_price?: number | null
+          estimated_weight_kg?: number | null
+          eta_minutes?: number | null
+          final_price?: number | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          organization_id?: string
+          picked_up_at?: string | null
+          pickup_address?: string
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          portal_token_id?: string | null
+          preferred_date?: string | null
+          preferred_time_slot?: string | null
+          rating?: number | null
+          rating_comment?: string | null
+          request_type?: string
+          schedule_day_of_week?: number | null
+          schedule_frequency?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string
+          waste_description?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_requests_assigned_driver_id_fkey"
+            columns: ["assigned_driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "collection_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_requests_portal_token_id_fkey"
+            columns: ["portal_token_id"]
+            isOneToOne: false
+            referencedRelation: "portal_access_tokens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_requests_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commodity_market_prices: {
         Row: {
           commodity_name: string
@@ -3963,6 +4188,75 @@ export type Database = {
             foreignKeyName: "deposits_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      digital_wallets: {
+        Row: {
+          auto_pay_enabled: boolean | null
+          auto_pay_threshold: number | null
+          balance: number
+          created_at: string
+          credit_limit: number | null
+          currency: string
+          id: string
+          is_active: boolean
+          last_transaction_at: string | null
+          organization_id: string
+          total_deposited: number | null
+          total_earned: number | null
+          total_spent: number | null
+          total_withdrawn: number | null
+          updated_at: string
+        }
+        Insert: {
+          auto_pay_enabled?: boolean | null
+          auto_pay_threshold?: number | null
+          balance?: number
+          created_at?: string
+          credit_limit?: number | null
+          currency?: string
+          id?: string
+          is_active?: boolean
+          last_transaction_at?: string | null
+          organization_id: string
+          total_deposited?: number | null
+          total_earned?: number | null
+          total_spent?: number | null
+          total_withdrawn?: number | null
+          updated_at?: string
+        }
+        Update: {
+          auto_pay_enabled?: boolean | null
+          auto_pay_threshold?: number | null
+          balance?: number
+          created_at?: string
+          credit_limit?: number | null
+          currency?: string
+          id?: string
+          is_active?: boolean
+          last_transaction_at?: string | null
+          organization_id?: string
+          total_deposited?: number | null
+          total_earned?: number | null
+          total_spent?: number | null
+          total_withdrawn?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_wallets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "digital_wallets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -6126,6 +6420,92 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_enrollments: {
+        Row: {
+          certificate_expiry: string | null
+          certificate_issued: boolean | null
+          certificate_number: string | null
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          current_lesson: number | null
+          driver_id: string
+          id: string
+          organization_id: string
+          progress_pct: number
+          quiz_attempts: number | null
+          quiz_score: number | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_expiry?: string | null
+          certificate_issued?: boolean | null
+          certificate_number?: string | null
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          current_lesson?: number | null
+          driver_id: string
+          id?: string
+          organization_id: string
+          progress_pct?: number
+          quiz_attempts?: number | null
+          quiz_score?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_expiry?: string | null
+          certificate_issued?: boolean | null
+          certificate_number?: string | null
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          current_lesson?: number | null
+          driver_id?: string
+          id?: string
+          organization_id?: string
+          progress_pct?: number
+          quiz_attempts?: number | null
+          quiz_score?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academy_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_enrollments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_enrollments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_enrollments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -16997,6 +17377,112 @@ export type Database = {
           },
         ]
       }
+      shipment_insurance: {
+        Row: {
+          claim_amount: number | null
+          claim_description: string | null
+          claim_filed_at: string | null
+          claim_status: string | null
+          coverage_amount: number
+          coverage_type: string
+          created_at: string
+          currency: string | null
+          deductible_amount: number | null
+          distance_km: number | null
+          driver_risk_score: number | null
+          id: string
+          insurance_provider: string
+          organization_id: string
+          policy_number: string
+          premium_amount: number
+          shipment_id: string | null
+          shipment_value: number | null
+          shipment_weight_kg: number | null
+          status: string
+          updated_at: string
+          valid_from: string
+          valid_until: string
+          waste_hazard_level: string | null
+          waste_type: string
+        }
+        Insert: {
+          claim_amount?: number | null
+          claim_description?: string | null
+          claim_filed_at?: string | null
+          claim_status?: string | null
+          coverage_amount: number
+          coverage_type?: string
+          created_at?: string
+          currency?: string | null
+          deductible_amount?: number | null
+          distance_km?: number | null
+          driver_risk_score?: number | null
+          id?: string
+          insurance_provider?: string
+          organization_id: string
+          policy_number: string
+          premium_amount: number
+          shipment_id?: string | null
+          shipment_value?: number | null
+          shipment_weight_kg?: number | null
+          status?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+          waste_hazard_level?: string | null
+          waste_type: string
+        }
+        Update: {
+          claim_amount?: number | null
+          claim_description?: string | null
+          claim_filed_at?: string | null
+          claim_status?: string | null
+          coverage_amount?: number
+          coverage_type?: string
+          created_at?: string
+          currency?: string | null
+          deductible_amount?: number | null
+          distance_km?: number | null
+          driver_risk_score?: number | null
+          id?: string
+          insurance_provider?: string
+          organization_id?: string
+          policy_number?: string
+          premium_amount?: number
+          shipment_id?: string | null
+          shipment_value?: number | null
+          shipment_weight_kg?: number | null
+          status?: string
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string
+          waste_hazard_level?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_insurance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_insurance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_insurance_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_logs: {
         Row: {
           changed_by: string | null
@@ -19196,6 +19682,146 @@ export type Database = {
           },
         ]
       }
+      transport_futures: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          auto_renew: boolean | null
+          contract_duration_months: number
+          contract_number: string
+          counterparty_external_id: string | null
+          counterparty_id: string | null
+          counterparty_name: string | null
+          created_at: string
+          created_by: string | null
+          current_market_price: number | null
+          distance_km: number | null
+          end_date: string
+          fixed_price_per_ton: number
+          fuel_surcharge_cap: number | null
+          id: string
+          organization_id: string
+          penalty_clause: string | null
+          price_difference: number | null
+          route_from: string | null
+          route_to: string | null
+          start_date: string
+          status: string
+          total_contract_value: number | null
+          updated_at: string
+          volume_tons_per_month: number
+          waste_type: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_renew?: boolean | null
+          contract_duration_months?: number
+          contract_number: string
+          counterparty_external_id?: string | null
+          counterparty_id?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_market_price?: number | null
+          distance_km?: number | null
+          end_date: string
+          fixed_price_per_ton: number
+          fuel_surcharge_cap?: number | null
+          id?: string
+          organization_id: string
+          penalty_clause?: string | null
+          price_difference?: number | null
+          route_from?: string | null
+          route_to?: string | null
+          start_date: string
+          status?: string
+          total_contract_value?: number | null
+          updated_at?: string
+          volume_tons_per_month: number
+          waste_type: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_renew?: boolean | null
+          contract_duration_months?: number
+          contract_number?: string
+          counterparty_external_id?: string | null
+          counterparty_id?: string | null
+          counterparty_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_market_price?: number | null
+          distance_km?: number | null
+          end_date?: string
+          fixed_price_per_ton?: number
+          fuel_surcharge_cap?: number | null
+          id?: string
+          organization_id?: string
+          penalty_clause?: string | null
+          price_difference?: number | null
+          route_from?: string | null
+          route_to?: string | null
+          start_date?: string
+          status?: string
+          total_contract_value?: number | null
+          updated_at?: string
+          volume_tons_per_month?: number
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_futures_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_futures_counterparty_external_id_fkey"
+            columns: ["counterparty_external_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_futures_counterparty_id_fkey"
+            columns: ["counterparty_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transport_futures_counterparty_id_fkey"
+            columns: ["counterparty_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_futures_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transport_futures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transport_futures_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_incidents: {
         Row: {
           authority_notified: boolean | null
@@ -20163,6 +20789,118 @@ export type Database = {
             columns: ["requester_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          balance_before: number
+          counterparty_name: string | null
+          counterparty_org_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          early_payment_discount_pct: number | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          payment_method: string | null
+          payment_proof_url: string | null
+          reference_id: string | null
+          reference_type: string | null
+          status: string
+          transaction_type: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number
+          balance_before?: number
+          counterparty_name?: string | null
+          counterparty_org_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          early_payment_discount_pct?: number | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          transaction_type: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          balance_before?: number
+          counterparty_name?: string | null
+          counterparty_org_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          early_payment_discount_pct?: number | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          payment_method?: string | null
+          payment_proof_url?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          status?: string
+          transaction_type?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_counterparty_org_id_fkey"
+            columns: ["counterparty_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_counterparty_org_id_fkey"
+            columns: ["counterparty_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "digital_wallets"
             referencedColumns: ["id"]
           },
         ]
