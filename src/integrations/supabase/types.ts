@@ -11719,6 +11719,60 @@ export type Database = {
           },
         ]
       }
+      organization_pricing_settings: {
+        Row: {
+          created_at: string
+          default_disposal_cost_per_ton: number | null
+          default_driver_fee_per_km: number | null
+          default_margin_fixed: number | null
+          default_margin_percent: number | null
+          default_pricing_mode: string
+          id: string
+          notes: string | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_disposal_cost_per_ton?: number | null
+          default_driver_fee_per_km?: number | null
+          default_margin_fixed?: number | null
+          default_margin_percent?: number | null
+          default_pricing_mode?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_disposal_cost_per_ton?: number | null
+          default_driver_fee_per_km?: number | null
+          default_margin_fixed?: number | null
+          default_margin_percent?: number | null
+          default_pricing_mode?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_pricing_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_pricing_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_shipment_links: {
         Row: {
           allow_date_edit: boolean | null
@@ -16129,6 +16183,7 @@ export type Database = {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          client_total: number | null
           collection_started_at: string | null
           compliance_verified: boolean | null
           confirmed_at: string | null
@@ -16143,11 +16198,13 @@ export type Database = {
           delivery_latitude: number | null
           delivery_longitude: number | null
           disposal_certificate_url: string | null
+          disposal_cost: number | null
           disposal_facility_id: string | null
           disposal_method: string | null
           disposal_type: string | null
           disposed_at: string | null
           driver_earnings: number | null
+          driver_fee: number | null
           driver_id: string | null
           escrow_held_at: string | null
           escrow_released_at: string | null
@@ -16191,6 +16248,7 @@ export type Database = {
           plate_verified: boolean | null
           price_per_unit: number | null
           price_source: string | null
+          pricing_mode: string | null
           quantity: number | null
           recycler_approval_at: string | null
           recycler_approval_status: string | null
@@ -16209,6 +16267,8 @@ export type Database = {
           total_value: number | null
           transporter_delivery_qr: string | null
           transporter_id: string
+          transporter_margin_fixed: number | null
+          transporter_margin_percent: number | null
           transporter_pickup_qr: string | null
           unit: string | null
           updated_at: string | null
@@ -16236,6 +16296,7 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          client_total?: number | null
           collection_started_at?: string | null
           compliance_verified?: boolean | null
           confirmed_at?: string | null
@@ -16250,11 +16311,13 @@ export type Database = {
           delivery_latitude?: number | null
           delivery_longitude?: number | null
           disposal_certificate_url?: string | null
+          disposal_cost?: number | null
           disposal_facility_id?: string | null
           disposal_method?: string | null
           disposal_type?: string | null
           disposed_at?: string | null
           driver_earnings?: number | null
+          driver_fee?: number | null
           driver_id?: string | null
           escrow_held_at?: string | null
           escrow_released_at?: string | null
@@ -16298,6 +16361,7 @@ export type Database = {
           plate_verified?: boolean | null
           price_per_unit?: number | null
           price_source?: string | null
+          pricing_mode?: string | null
           quantity?: number | null
           recycler_approval_at?: string | null
           recycler_approval_status?: string | null
@@ -16316,6 +16380,8 @@ export type Database = {
           total_value?: number | null
           transporter_delivery_qr?: string | null
           transporter_id: string
+          transporter_margin_fixed?: number | null
+          transporter_margin_percent?: number | null
           transporter_pickup_qr?: string | null
           unit?: string | null
           updated_at?: string | null
@@ -16343,6 +16409,7 @@ export type Database = {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          client_total?: number | null
           collection_started_at?: string | null
           compliance_verified?: boolean | null
           confirmed_at?: string | null
@@ -16357,11 +16424,13 @@ export type Database = {
           delivery_latitude?: number | null
           delivery_longitude?: number | null
           disposal_certificate_url?: string | null
+          disposal_cost?: number | null
           disposal_facility_id?: string | null
           disposal_method?: string | null
           disposal_type?: string | null
           disposed_at?: string | null
           driver_earnings?: number | null
+          driver_fee?: number | null
           driver_id?: string | null
           escrow_held_at?: string | null
           escrow_released_at?: string | null
@@ -16405,6 +16474,7 @@ export type Database = {
           plate_verified?: boolean | null
           price_per_unit?: number | null
           price_source?: string | null
+          pricing_mode?: string | null
           quantity?: number | null
           recycler_approval_at?: string | null
           recycler_approval_status?: string | null
@@ -16423,6 +16493,8 @@ export type Database = {
           total_value?: number | null
           transporter_delivery_qr?: string | null
           transporter_id?: string
+          transporter_margin_fixed?: number | null
+          transporter_margin_percent?: number | null
           transporter_pickup_qr?: string | null
           unit?: string | null
           updated_at?: string | null

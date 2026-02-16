@@ -10,7 +10,8 @@ import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls'
 import EnhancedLocationPicker from '@/components/shipments/EnhancedLocationPicker';
 import LocationPicker from '@/components/maps/LocationPicker';
 import RouteEstimation from '@/components/shipments/RouteEstimation';
-import { 
+import PricingModeSelector from '@/components/shipments/PricingModeSelector';
+import {
   useCreateShipment, 
   shipmentTypes, 
   disposalMethods, 
@@ -638,6 +639,11 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
           </SelectContent>
         </Select>
       </div>
+
+      {/* Pricing Mode */}
+      {(organization?.organization_type === 'transporter' || isAdmin) && (
+        <PricingModeSelector formData={formData} setFormData={setFormData} />
+      )}
 
       {/* Submit Buttons */}
       <div className="flex justify-start gap-4 pt-4">

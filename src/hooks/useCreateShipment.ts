@@ -29,6 +29,18 @@ export interface Driver {
 
 export type DestinationType = 'recycling' | 'disposal';
 
+export type PricingMode = 'auto' | 'driver_fee_plus_margin' | 'transport_only' | 'transport_and_disposal' | 'externally_agreed' | 'generator_pays' | 'manual';
+
+export const pricingModes: { value: PricingMode; label: string; description: string }[] = [
+  { value: 'auto', label: '⚡ تلقائي', description: 'يتم احتساب السعر تلقائياً حسب القواعد والمسافة' },
+  { value: 'driver_fee_plus_margin', label: '🚛 أجرة السائق + ربح الناقل', description: 'أجرة السائق + نسبة أو مبلغ ثابت للجهة الناقلة' },
+  { value: 'transport_only', label: '📦 ثمن النقل فقط', description: 'سعر النقل بدون تكلفة التخلص' },
+  { value: 'transport_and_disposal', label: '♻️ نقل + تخلص', description: 'سعر النقل مضافاً إليه تكلفة التخلص' },
+  { value: 'externally_agreed', label: '🤝 متفق عليه خارجياً', description: 'تم الاتفاق على السعر خارج النظام' },
+  { value: 'generator_pays', label: '💰 المولّد يدفع للناقل', description: 'الجهة المولدة تدفع مقابل تحميل المخلفات - لا حاجة لتحديد سعر' },
+  { value: 'manual', label: '✏️ يدوي', description: 'إدخال السعر يدوياً' },
+];
+
 export interface ShipmentFormData {
   destination_type: DestinationType;
   generator_id: string;
@@ -52,6 +64,12 @@ export interface ShipmentFormData {
   packaging_method: string;
   hazard_level: string;
   waste_state: string;
+  pricing_mode: PricingMode;
+  driver_fee: string;
+  transporter_margin_percent: string;
+  transporter_margin_fixed: string;
+  disposal_cost: string;
+  manual_price: string;
 }
 
 export const shipmentTypes = [
@@ -147,6 +165,8 @@ export const useCreateShipment = () => {
     prefilledTicketNumber ? `رقم التذكرة: ${prefilledTicketNumber}` : '',
   ].filter(Boolean).join(' | ');
 
+  const [orgPricingSettings, setOrgPricingSettings] = useState<any>(null);
+
   const [formData, setFormData] = useState<ShipmentFormData>({
     destination_type: 'recycling',
     generator_id: '',
@@ -170,6 +190,12 @@ export const useCreateShipment = () => {
     packaging_method: '',
     hazard_level: '',
     waste_state: 'solid',
+    pricing_mode: 'auto',
+    driver_fee: '',
+    transporter_margin_percent: '15',
+    transporter_margin_fixed: '0',
+    disposal_cost: '',
+    manual_price: '',
   });
 
   // If prefilled vehicle plate, switch to manual driver input
@@ -230,11 +256,32 @@ export const useCreateShipment = () => {
 
   useEffect(() => {
     fetchOrganizationsAndDrivers();
+    fetchOrgPricingSettings();
     if (isDriver) {
       fetchDriverOrganization();
       fetchDriverCurrentLocation();
     }
   }, [isDriver]);
+
+  // Fetch org-level default pricing settings
+  const fetchOrgPricingSettings = async () => {
+    const orgId = organization?.id;
+    if (!orgId) return;
+    const { data } = await supabase
+      .from('organization_pricing_settings')
+      .select('*')
+      .eq('organization_id', orgId)
+      .maybeSingle();
+    if (data) {
+      setOrgPricingSettings(data);
+      setFormData(prev => ({
+        ...prev,
+        pricing_mode: (data.default_pricing_mode || 'auto') as PricingMode,
+        transporter_margin_percent: String(data.default_margin_percent || 15),
+        transporter_margin_fixed: String(data.default_margin_fixed || 0),
+      }));
+    }
+  };
 
   // Function to get current location and reverse geocode
   const fetchDriverCurrentLocation = async () => {
@@ -631,6 +678,13 @@ export const useCreateShipment = () => {
         waste_state: formData.waste_state?.startsWith('manual:') 
           ? formData.waste_state.replace('manual:', '') 
           : (formData.waste_state || 'solid'),
+        pricing_mode: formData.pricing_mode,
+        driver_fee: formData.driver_fee ? parseFloat(formData.driver_fee) : 0,
+        transporter_margin_percent: formData.transporter_margin_percent ? parseFloat(formData.transporter_margin_percent) : 0,
+        transporter_margin_fixed: formData.transporter_margin_fixed ? parseFloat(formData.transporter_margin_fixed) : 0,
+        disposal_cost: formData.disposal_cost ? parseFloat(formData.disposal_cost) : 0,
+        price_per_unit: formData.pricing_mode === 'manual' && formData.manual_price ? parseFloat(formData.manual_price) : null,
+        price_source: formData.pricing_mode === 'manual' ? 'manual' : (formData.pricing_mode === 'generator_pays' ? 'generator_pays' : null),
       }).select().single();
 
       if (error) throw error;

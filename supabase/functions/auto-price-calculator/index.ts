@@ -38,11 +38,30 @@ serve(async (req) => {
     // 1. Fetch shipment
     const { data: shipment, error: shipErr } = await supabase
       .from('shipments')
-      .select('id, waste_type, quantity, unit, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, award_letter_id, transporter_id, price_per_unit, price_source')
+      .select('id, waste_type, quantity, unit, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, award_letter_id, transporter_id, price_per_unit, price_source, pricing_mode, driver_fee, transporter_margin_percent, transporter_margin_fixed, disposal_cost')
       .eq('id', shipmentId)
       .single();
 
     if (shipErr || !shipment) throw new Error("Shipment not found");
+
+    // Skip pricing for modes that don't need calculation
+    const skipModes = ['manual', 'generator_pays', 'externally_agreed'];
+    if (skipModes.includes(shipment.pricing_mode)) {
+      // For externally_agreed, keep existing price_per_unit if set
+      if (shipment.pricing_mode === 'generator_pays') {
+        await supabase.from('shipments').update({
+          price_source: 'generator_pays',
+          total_value: 0,
+          price_per_unit: 0,
+        }).eq('id', shipmentId);
+      }
+      return new Response(JSON.stringify({
+        success: true,
+        shipmentId,
+        priceSource: shipment.pricing_mode,
+        message: `Pricing mode '${shipment.pricing_mode}' - skipped auto calculation`,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const quantity = shipment.quantity || 1;
     const wasteType = shipment.waste_type || 'general';
@@ -59,7 +78,88 @@ serve(async (req) => {
     let pricePerUnit = 0;
     let totalPrice = 0;
     let priceSource = 'dynamic_rules';
-    const factors: Record<string, any> = { distance_km: Math.round(distanceKm * 10) / 10, quantity, waste_type: wasteType };
+    const factors: Record<string, any> = { distance_km: Math.round(distanceKm * 10) / 10, quantity, waste_type: wasteType, pricing_mode: shipment.pricing_mode };
+
+    // Handle driver_fee_plus_margin mode
+    if (shipment.pricing_mode === 'driver_fee_plus_margin') {
+      const driverFee = shipment.driver_fee || 0;
+      const marginPercent = shipment.transporter_margin_percent || 0;
+      const marginFixed = shipment.transporter_margin_fixed || 0;
+      totalPrice = Math.round((driverFee * (1 + marginPercent / 100) + marginFixed) * 100) / 100;
+      pricePerUnit = Math.round((totalPrice / quantity) * 100) / 100;
+      priceSource = 'driver_fee_plus_margin';
+      factors.driver_fee = driverFee;
+      factors.margin_percent = marginPercent;
+      factors.margin_fixed = marginFixed;
+
+      const { error: updateErr } = await supabase.from('shipments').update({
+        price_per_unit: pricePerUnit,
+        total_value: totalPrice,
+        client_total: totalPrice,
+        price_source: priceSource,
+      }).eq('id', shipmentId);
+      if (updateErr) console.error("Update error:", updateErr);
+
+      await supabase.from('pricing_calculations').insert({
+        organization_id: shipment.transporter_id,
+        shipment_id: shipmentId,
+        waste_type: wasteType,
+        base_price: driverFee,
+        final_price: totalPrice,
+        factors,
+      });
+
+      return new Response(JSON.stringify({ success: true, shipmentId, pricePerUnit, totalPrice, priceSource, factors }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Handle transport_and_disposal mode
+    if (shipment.pricing_mode === 'transport_and_disposal') {
+      const transportCost = shipment.driver_fee || 0;
+      const disposalCost = shipment.disposal_cost || 0;
+      totalPrice = Math.round((transportCost + disposalCost) * 100) / 100;
+      pricePerUnit = Math.round((totalPrice / quantity) * 100) / 100;
+      priceSource = 'transport_and_disposal';
+      factors.transport_cost = transportCost;
+      factors.disposal_cost = disposalCost;
+
+      const { error: updateErr } = await supabase.from('shipments').update({
+        price_per_unit: pricePerUnit,
+        total_value: totalPrice,
+        client_total: totalPrice,
+        price_source: priceSource,
+      }).eq('id', shipmentId);
+      if (updateErr) console.error("Update error:", updateErr);
+
+      await supabase.from('pricing_calculations').insert({
+        organization_id: shipment.transporter_id,
+        shipment_id: shipmentId,
+        waste_type: wasteType,
+        base_price: transportCost,
+        final_price: totalPrice,
+        factors,
+      });
+
+      return new Response(JSON.stringify({ success: true, shipmentId, pricePerUnit, totalPrice, priceSource, factors }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // Handle transport_only mode
+    if (shipment.pricing_mode === 'transport_only') {
+      totalPrice = shipment.price_per_unit ? shipment.price_per_unit * quantity : 0;
+      pricePerUnit = shipment.price_per_unit || 0;
+      priceSource = 'transport_only';
+
+      const { error: updateErr } = await supabase.from('shipments').update({
+        total_value: totalPrice,
+        client_total: totalPrice,
+        price_source: priceSource,
+      }).eq('id', shipmentId);
+      if (updateErr) console.error("Update error:", updateErr);
+
+      return new Response(JSON.stringify({ success: true, shipmentId, pricePerUnit, totalPrice, priceSource, factors }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     // 2. Try Award Letter pricing first (highest priority)
     if (shipment.award_letter_id) {
