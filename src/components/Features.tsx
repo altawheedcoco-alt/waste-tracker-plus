@@ -1,16 +1,16 @@
-import { Package, Truck, Recycle, BarChart3, Users, Shield } from "lucide-react";
+import { Trash2, Truck, Recycle, BarChart3, Users, ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Features = () => {
   const { t } = useLanguage();
 
   const features = [
-    { icon: Package, title: t('features.shipmentMgmt'), description: t('features.shipmentMgmtDesc'), color: "from-primary to-accent" },
+    { icon: Trash2, title: t('features.shipmentMgmt'), description: t('features.shipmentMgmtDesc'), color: "from-primary to-accent" },
     { icon: Truck, title: t('features.transportTracking'), description: t('features.transportTrackingDesc'), color: "from-accent to-eco-teal" },
     { icon: Recycle, title: t('features.recycling'), description: t('features.recyclingDesc'), color: "from-eco-teal to-primary" },
     { icon: BarChart3, title: t('features.reports'), description: t('features.reportsDesc'), color: "from-primary to-eco-green-light" },
     { icon: Users, title: t('features.userMgmt'), description: t('features.userMgmtDesc'), color: "from-eco-green-light to-accent" },
-    { icon: Shield, title: t('features.securityFeature'), description: t('features.securityDesc'), color: "from-accent to-primary" },
+    { icon: ShieldCheck, title: t('features.securityFeature'), description: t('features.securityDesc'), color: "from-accent to-primary" },
   ];
 
   return (

@@ -14377,6 +14377,99 @@ export type Database = {
           },
         ]
       }
+      regulated_companies: {
+        Row: {
+          activity_description: string | null
+          address: string | null
+          city: string | null
+          commercial_register: string | null
+          company_name: string
+          company_name_ar: string | null
+          contact_email: string | null
+          contact_person: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          governorate: string
+          id: string
+          is_compliant: boolean | null
+          last_inspection_date: string | null
+          license_expiry_date: string | null
+          license_number: string | null
+          license_status: string
+          license_type: string
+          notes: string | null
+          organization_id: string | null
+          tax_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          activity_description?: string | null
+          address?: string | null
+          city?: string | null
+          commercial_register?: string | null
+          company_name: string
+          company_name_ar?: string | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          governorate: string
+          id?: string
+          is_compliant?: boolean | null
+          last_inspection_date?: string | null
+          license_expiry_date?: string | null
+          license_number?: string | null
+          license_status?: string
+          license_type: string
+          notes?: string | null
+          organization_id?: string | null
+          tax_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activity_description?: string | null
+          address?: string | null
+          city?: string | null
+          commercial_register?: string | null
+          company_name?: string
+          company_name_ar?: string | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          governorate?: string
+          id?: string
+          is_compliant?: boolean | null
+          last_inspection_date?: string | null
+          license_expiry_date?: string | null
+          license_number?: string | null
+          license_status?: string
+          license_type?: string
+          notes?: string | null
+          organization_id?: string | null
+          tax_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulated_companies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulated_companies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_requests: {
         Row: {
           admin_notes: string | null

@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Menu, X, LogIn, UserPlus, Globe } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, Recycle } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -23,12 +23,15 @@ const Header = memo(() => {
             className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:scale-105 transition-transform"
             onClick={() => navigate('/')}
           >
-            <img src={logo} alt={t('landing.systemNameAr')} className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
+            <div className="flex items-center gap-1.5">
+              <Recycle className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
+              <img src={logo} alt="I RECYCLE" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+            </div>
             <div className="flex flex-col">
               <span className="text-sm sm:text-base lg:text-lg font-bold text-primary tracking-wide">
                 {t('landing.systemName')}
               </span>
-              <span className="text-xs sm:text-sm lg:text-base font-semibold text-foreground/80">
+              <span className="text-[10px] sm:text-xs lg:text-sm font-semibold text-muted-foreground">
                 {t('landing.systemNameAr')}
               </span>
             </div>

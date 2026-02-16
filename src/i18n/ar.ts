@@ -214,8 +214,8 @@ export const ar = {
 
   // Landing / Hero
   landing: {
-    systemName: 'iRecycle Waste Management System',
-    systemNameAr: 'نظام آي ريسايكل لإدارة المخلفات',
+    systemName: 'I RECYCLE ♻️',
+    systemNameAr: 'نظام إدارة المخلفات',
     tagline: 'حلول ذكية لبيئة نظيفة',
     heroTitle1: 'نظام متكامل',
     heroTitle2: 'لإدارة النفايات',
@@ -343,13 +343,13 @@ export const ar = {
 
   // Footer
   footer: {
-    brandName: 'آي ريسايكل',
+    brandName: 'I RECYCLE ♻️',
     brandDesc: 'نظام متكامل لإدارة النفايات والحفاظ على البيئة. نقدم حلولاً ذكية لبيئة نظيفة ومستدامة.',
     quickLinks: 'روابط سريعة',
     ourServices: 'خدماتنا',
     contactUs: 'تواصل معنا',
     address: 'القاهرة، جمهورية مصر العربية',
-    allRightsReserved: 'آي ريسايكل. جميع الحقوق محفوظة.',
+    allRightsReserved: 'I RECYCLE ♻️ Waste Management System. جميع الحقوق محفوظة.',
     shipmentMgmt: 'إدارة الشحنات',
     transportTracking: 'تتبع النقل',
     recyclingService: 'إعادة التدوير',
