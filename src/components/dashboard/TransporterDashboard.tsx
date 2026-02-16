@@ -66,6 +66,9 @@ const TransporterAIInsights = lazy(() => import('@/components/ai/TransporterAIIn
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertificateButton'));
 const TransporterDeliveryApproval = lazy(() => import('@/components/receipts/TransporterDeliveryApproval'));
+const SmartDriverNotifications = lazy(() => import('./transporter/SmartDriverNotifications'));
+const SustainabilityReportGenerator = lazy(() => import('./transporter/SustainabilityReportGenerator'));
+const EnhancedDriverPerformance = lazy(() => import('./transporter/EnhancedDriverPerformance'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -237,8 +240,10 @@ const TransporterDashboard = () => {
           <TabsContent value="performance" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
+                <EnhancedDriverPerformance />
                 <DriverPerformancePanel />
                 <TripCostManagement />
+                <SmartDriverNotifications />
                 <MaintenanceScheduler />
               </ErrorBoundary>
             </Suspense>
@@ -260,6 +265,7 @@ const TransporterDashboard = () => {
 
           <TabsContent value="partners" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
+              <SustainabilityReportGenerator />
               <PartnerRatingsWidget />
               <PartnersView />
             </Suspense>
