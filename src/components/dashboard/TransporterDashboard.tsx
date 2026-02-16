@@ -42,7 +42,7 @@ import TransporterCommandCenter from './transporter/TransporterCommandCenter';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle } from 'lucide-react';
 
 // Lazy load heavy tab content
 const DriverPerformancePanel = lazy(() => import('./transporter/DriverPerformancePanel'));
@@ -71,6 +71,9 @@ const SustainabilityReportGenerator = lazy(() => import('./transporter/Sustainab
 const EnhancedDriverPerformance = lazy(() => import('./transporter/EnhancedDriverPerformance'));
 const DynamicPricingEngine = lazy(() => import('./transporter/DynamicPricingEngine'));
 const DriverCopilot = lazy(() => import('./transporter/DriverCopilot'));
+const PredictiveFleetMaintenance = lazy(() => import('./transporter/PredictiveFleetMaintenance'));
+const FraudDetectionPanel = lazy(() => import('./transporter/FraudDetectionPanel'));
+const WasteMarketplace = lazy(() => import('@/components/marketplace/WasteMarketplace'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -85,6 +88,9 @@ const tabItems = [
   { value: 'performance', label: 'الأداء والتكاليف', icon: BarChart3 },
   { value: 'copilot', label: 'مساعد السائق', icon: Navigation },
   { value: 'pricing', label: 'التسعير الذكي', icon: DollarSign },
+  { value: 'marketplace', label: 'السوق', icon: Store },
+  { value: 'fleet', label: 'صيانة الأسطول', icon: Wrench },
+  { value: 'fraud', label: 'كشف الاحتيال', icon: AlertTriangle },
   { value: 'calendar', label: 'التقويم', icon: CalendarDays },
   { value: 'intelligence', label: 'الأتمتة', icon: Cpu },
   { value: 'partners', label: 'الشركاء', icon: Handshake },
@@ -265,6 +271,30 @@ const TransporterDashboard = () => {
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
                 <DynamicPricingEngine />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="marketplace" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في السوق">
+                <WasteMarketplace />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="fleet" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
+                <PredictiveFleetMaintenance />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="fraud" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال">
+                <FraudDetectionPanel />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
