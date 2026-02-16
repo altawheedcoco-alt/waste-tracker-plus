@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Store, Search, ShoppingCart, Tag, BarChart3, Heart, 
-  Loader2, ShieldCheck, Filter
+  Loader2, ShieldCheck, Filter, Briefcase
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
@@ -21,6 +21,7 @@ import { ExchangePriceIndex } from '@/components/waste-exchange/ExchangePriceInd
 import { MyListingsTab } from '@/components/waste-exchange/MyListingsTab';
 import { MyBidsTab } from '@/components/waste-exchange/MyBidsTab';
 import { AdminExchangePanel } from '@/components/waste-exchange/AdminExchangePanel';
+import { BrokerDashboard } from '@/components/waste-exchange/BrokerDashboard';
 
 const WasteExchange = () => {
   const { language } = useLanguage();
@@ -244,8 +245,12 @@ const WasteExchange = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full max-w-lg">
+        <TabsList className="grid grid-cols-5 w-full max-w-2xl">
           <TabsTrigger value="marketplace">{isRTL ? 'السوق' : 'Market'}</TabsTrigger>
+          <TabsTrigger value="broker" className="gap-1">
+            <Briefcase className="w-3 h-3" />
+            {isRTL ? 'الوسيط' : 'Broker'}
+          </TabsTrigger>
           <TabsTrigger value="my-listings">{isRTL ? 'عروضي' : 'My Listings'}</TabsTrigger>
           <TabsTrigger value="my-bids">{isRTL ? 'عروض أسعاري' : 'My Bids'}</TabsTrigger>
           <TabsTrigger value="price-index">{isRTL ? 'مؤشر الأسعار' : 'Price Index'}</TabsTrigger>
@@ -310,6 +315,11 @@ const WasteExchange = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Broker Dashboard */}
+        <TabsContent value="broker">
+          <BrokerDashboard isRTL={isRTL} />
         </TabsContent>
 
         {/* My Listings */}
