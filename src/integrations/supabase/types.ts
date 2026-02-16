@@ -12351,6 +12351,234 @@ export type Database = {
           },
         ]
       }
+      ohs_checklist_items: {
+        Row: {
+          category: string
+          corrective_action: string | null
+          created_at: string
+          deadline: string | null
+          id: string
+          inspection_id: string
+          item_name: string
+          item_name_ar: string
+          notes: string | null
+          photo_url: string | null
+          responsible_person: string | null
+          severity: string | null
+          sort_order: number | null
+          status: string | null
+        }
+        Insert: {
+          category: string
+          corrective_action?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          inspection_id: string
+          item_name: string
+          item_name_ar: string
+          notes?: string | null
+          photo_url?: string | null
+          responsible_person?: string | null
+          severity?: string | null
+          sort_order?: number | null
+          status?: string | null
+        }
+        Update: {
+          category?: string
+          corrective_action?: string | null
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          inspection_id?: string
+          item_name?: string
+          item_name_ar?: string
+          notes?: string | null
+          photo_url?: string | null
+          responsible_person?: string | null
+          severity?: string | null
+          sort_order?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ohs_checklist_items_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "ohs_inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ohs_corrective_actions: {
+        Row: {
+          action_description: string
+          assigned_to: string | null
+          checklist_item_id: string | null
+          completed_date: string | null
+          completion_notes: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          inspection_id: string
+          priority: string | null
+          status: string | null
+          updated_at: string
+          verification_photo_url: string | null
+        }
+        Insert: {
+          action_description: string
+          assigned_to?: string | null
+          checklist_item_id?: string | null
+          completed_date?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          inspection_id: string
+          priority?: string | null
+          status?: string | null
+          updated_at?: string
+          verification_photo_url?: string | null
+        }
+        Update: {
+          action_description?: string
+          assigned_to?: string | null
+          checklist_item_id?: string | null
+          completed_date?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          inspection_id?: string
+          priority?: string | null
+          status?: string | null
+          updated_at?: string
+          verification_photo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ohs_corrective_actions_checklist_item_id_fkey"
+            columns: ["checklist_item_id"]
+            isOneToOne: false
+            referencedRelation: "ohs_checklist_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ohs_corrective_actions_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "ohs_inspections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ohs_inspections: {
+        Row: {
+          consultant_id: string | null
+          created_at: string
+          created_by: string | null
+          employees_present: number | null
+          facility_address: string | null
+          facility_name: string
+          facility_type: string | null
+          id: string
+          inspection_date: string
+          inspection_type: string | null
+          inspector_name: string
+          inspector_title: string | null
+          next_inspection_date: string | null
+          organization_id: string
+          overall_risk_level: string | null
+          overall_score: number | null
+          photos_urls: string[] | null
+          recommendations: string | null
+          report_number: string
+          signature_date: string | null
+          signed_by_consultant: boolean | null
+          status: string | null
+          summary: string | null
+          updated_at: string
+          weather_conditions: string | null
+        }
+        Insert: {
+          consultant_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          employees_present?: number | null
+          facility_address?: string | null
+          facility_name: string
+          facility_type?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_type?: string | null
+          inspector_name: string
+          inspector_title?: string | null
+          next_inspection_date?: string | null
+          organization_id: string
+          overall_risk_level?: string | null
+          overall_score?: number | null
+          photos_urls?: string[] | null
+          recommendations?: string | null
+          report_number: string
+          signature_date?: string | null
+          signed_by_consultant?: boolean | null
+          status?: string | null
+          summary?: string | null
+          updated_at?: string
+          weather_conditions?: string | null
+        }
+        Update: {
+          consultant_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          employees_present?: number | null
+          facility_address?: string | null
+          facility_name?: string
+          facility_type?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_type?: string | null
+          inspector_name?: string
+          inspector_title?: string | null
+          next_inspection_date?: string | null
+          organization_id?: string
+          overall_risk_level?: string | null
+          overall_score?: number | null
+          photos_urls?: string[] | null
+          recommendations?: string | null
+          report_number?: string
+          signature_date?: string | null
+          signed_by_consultant?: boolean | null
+          status?: string | null
+          summary?: string | null
+          updated_at?: string
+          weather_conditions?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ohs_inspections_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ohs_inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ohs_inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operational_plans: {
         Row: {
           admin_notes: string | null
