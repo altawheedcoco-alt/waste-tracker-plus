@@ -10,13 +10,9 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { FocusMusicProvider } from "@/contexts/FocusMusicContext";
 import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
 
-// Offline & Performance components
-const OfflineIndicator = lazy(() => import("./components/offline/OfflineIndicator"));
+// Offline components (lightweight, keep global)
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
 const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
-const MobileOptimizations = lazy(() => import("./components/mobile/MobileOptimizations"));
-const PWAShortcuts = lazy(() => import("./components/mobile/PWAShortcuts"));
-const TouchOptimizations = lazy(() => import("./components/mobile/TouchOptimizations"));
 
 // Minimal loading component - optimized for speed
 const PageLoader = memo(() => (
@@ -28,10 +24,12 @@ PageLoader.displayName = 'PageLoader';
 
 // Eagerly loaded pages (critical path only)
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import GoogleSetup from "./pages/GoogleSetup";
-import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
+
+// Lazy loaded auth & dashboard pages
+const Auth = lazy(() => import("./pages/Auth"));
+const GoogleSetup = lazy(() => import("./pages/GoogleSetup"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Lazy loaded pages - Dashboard (with prefetch hints)
 const Drivers = lazy(() => import("./pages/Drivers"));
@@ -180,12 +178,7 @@ const lazyRetry = (importFn: () => Promise<any>, retries = 2): Promise<any> =>
     return { default: () => null };
   });
 
-const AIChatbot = lazy(() => lazyRetry(() => import("./components/ai/AIChatbot")));
-const EnhancedChatWidget = lazy(() => lazyRetry(() => import("./components/chat/EnhancedChatWidget")));
-const UnifiedSupportWidget = lazy(() => lazyRetry(() => import("./components/ai/UnifiedSupportWidget")));
-const BetaBanner = lazy(() => lazyRetry(() => import("./components/BetaBanner")));
-const AccessibilityPanel = lazy(() => lazyRetry(() => import("./components/accessibility/AccessibilityPanel").then(m => ({ default: m.AccessibilityPanel }))));
-const UnifiedFloatingMenu = lazy(() => lazyRetry(() => import("./components/layout/UnifiedFloatingMenu")));
+// Smart QueryClient with adaptive caching per data category
 // Smart QueryClient with adaptive caching per data category
 import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
@@ -195,6 +188,7 @@ const Providers = memo(() => (
   <QueryClientProvider client={queryClient}>
     <GoogleMapsProvider>
       <ThemeSettingsProvider>
+
         <LanguageProvider>
           <FocusMusicProvider>
             <TooltipProvider delayDuration={300}>
@@ -202,24 +196,15 @@ const Providers = memo(() => (
               <Sonner />
               <BrowserRouter>
                 <AuthProvider>
-                  <Suspense fallback={<PageLoader />}>
+                  <Suspense fallback={null}>
                     <AppRoutes />
                   </Suspense>
                   <Suspense fallback={null}>
-                    <AIChatbot />
-                    <EnhancedChatWidget />
-                    <UnifiedSupportWidget />
-                    <UnifiedFloatingMenu />
-                    <BetaBanner />
-                    <AccessibilityPanel />
                     <OfflineBanner />
                     <ScrollToTopButton />
                   </Suspense>
-                  <Suspense fallback={null}>
-                    <MobileOptimizations>{null}</MobileOptimizations>
-                    <PWAShortcuts />
-                    <TouchOptimizations />
-                  </Suspense>
+
+
                 </AuthProvider>
               </BrowserRouter>
             </TooltipProvider>

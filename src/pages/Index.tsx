@@ -1,13 +1,22 @@
+import { lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import Features from "@/components/Features";
-import Stats from "@/components/Stats";
-import Services from "@/components/Services";
-import FeaturesList from "@/components/FeaturesList";
-import CTA from "@/components/CTA";
-import Footer from "@/components/Footer";
-import DocumentVerification from "@/components/DocumentVerification";
 import LandingWrapper from "@/components/LandingWrapper";
+
+// Lazy load below-fold sections
+const Stats = lazy(() => import("@/components/Stats"));
+const FeaturesList = lazy(() => import("@/components/FeaturesList"));
+const Features = lazy(() => import("@/components/Features"));
+const Services = lazy(() => import("@/components/Services"));
+const CTA = lazy(() => import("@/components/CTA"));
+const Footer = lazy(() => import("@/components/Footer"));
+const DocumentVerification = lazy(() => import("@/components/DocumentVerification"));
+
+const SectionFallback = () => (
+  <div className="h-32 flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const Index = () => {
   return (
@@ -16,14 +25,18 @@ const Index = () => {
         <Header />
         <main>
           <Hero />
-          <DocumentVerification />
-          <Stats />
-          <FeaturesList />
-          <Features />
-          <Services />
-          <CTA />
+          <Suspense fallback={<SectionFallback />}>
+            <DocumentVerification />
+            <Stats />
+            <FeaturesList />
+            <Features />
+            <Services />
+            <CTA />
+          </Suspense>
         </main>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </LandingWrapper>
   );
