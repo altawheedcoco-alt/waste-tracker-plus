@@ -27,7 +27,7 @@ import {
 export type VerificationDocType = 
   | 'shipment' | 'certificate' | 'contract' | 'receipt' 
   | 'report' | 'invoice' | 'disposal' | 'statement' 
-  | 'award_letter' | 'entity_certificate' | 'unknown';
+  | 'award_letter' | 'entity_certificate' | 'lms_certificate' | 'unknown';
 
 export interface VerificationData {
   isValid: boolean;

@@ -67,6 +67,9 @@ export const useQRVerification = () => {
     if (upperCode.startsWith('AWL-') || upperCode.startsWith('AL-')) {
       return { type: 'award_letter', reference: upperCode };
     }
+    if (upperCode.startsWith('LMS-CERT-')) {
+      return { type: 'lms_certificate', reference: upperCode };
+    }
 
     return { type: 'unknown', reference: code };
   };
@@ -379,6 +382,44 @@ export const useQRVerification = () => {
     };
   };
 
+  // التحقق من شهادة الدورة التدريبية (LMS)
+  const verifyLMSCertificate = async (reference: string): Promise<VerificationData> => {
+    const { data: cert, error } = await supabase
+      .from('lms_certificates')
+      .select('*, lms_courses(title, title_ar)')
+      .eq('certificate_number', reference)
+      .maybeSingle();
+
+    if (error || !cert) {
+      await logScan('lms_certificate', reference, 'invalid');
+      return {
+        isValid: false,
+        type: 'lms_certificate',
+        reference,
+        message: 'لم يتم العثور على شهادة الدورة التدريبية في النظام',
+      };
+    }
+
+    await logScan('lms_certificate', reference, 'valid', cert.id, cert);
+    const course = cert.lms_courses as any;
+
+    return {
+      isValid: true,
+      type: 'lms_certificate',
+      reference,
+      status: cert.is_valid ? 'valid' : 'expired',
+      data: {
+        certificate_number: cert.certificate_number,
+        course_title: course?.title_ar || course?.title || 'دورة تدريبية',
+        score: cert.score,
+        issued_at: cert.issued_at,
+        is_valid: cert.is_valid,
+      },
+      message: `شهادة إتمام دورة "${course?.title_ar || 'تدريبية'}" - النتيجة: ${cert.score}%`,
+      verifiedAt: new Date().toISOString(),
+    };
+  };
+
   // التحقق الرئيسي
   const verify = useCallback(async (scannedData: string) => {
     setLoading(true);
@@ -440,6 +481,9 @@ export const useQRVerification = () => {
             message: 'شهادة الجهة صادرة رسمياً من النظام ومعتمدة',
             verifiedAt: new Date().toISOString(),
           };
+          break;
+        case 'lms_certificate':
+          verificationResult = await verifyLMSCertificate(reference);
           break;
         default:
           // محاولة البحث في جميع الجداول
