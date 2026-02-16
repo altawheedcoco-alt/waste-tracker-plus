@@ -14316,6 +14316,51 @@ export type Database = {
           },
         ]
       }
+      pricing_rule_templates: {
+        Row: {
+          base_price: number
+          created_at: string
+          description: string | null
+          distance_multiplier: number | null
+          id: string
+          max_price: number | null
+          min_price: number | null
+          peak_hour_surcharge: number | null
+          urgent_surcharge: number | null
+          waste_type: string
+          weekend_surcharge: number | null
+          weight_multiplier: number | null
+        }
+        Insert: {
+          base_price?: number
+          created_at?: string
+          description?: string | null
+          distance_multiplier?: number | null
+          id?: string
+          max_price?: number | null
+          min_price?: number | null
+          peak_hour_surcharge?: number | null
+          urgent_surcharge?: number | null
+          waste_type: string
+          weekend_surcharge?: number | null
+          weight_multiplier?: number | null
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          description?: string | null
+          distance_multiplier?: number | null
+          id?: string
+          max_price?: number | null
+          min_price?: number | null
+          peak_hour_surcharge?: number | null
+          urgent_surcharge?: number | null
+          waste_type?: string
+          weekend_surcharge?: number | null
+          weight_multiplier?: number | null
+        }
+        Relationships: []
+      }
       pride_certificates: {
         Row: {
           certificate_number: string

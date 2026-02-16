@@ -94,6 +94,38 @@ const DynamicPricingEngine = () => {
     fetchRules();
   };
 
+  const importTemplates = async () => {
+    const { data: templates } = await supabase
+      .from('pricing_rule_templates')
+      .select('*');
+    if (!templates || templates.length === 0) {
+      toast.error('لا توجد قوالب متاحة');
+      return;
+    }
+    let imported = 0;
+    for (const t of templates) {
+      const exists = rules.find(r => r.waste_type === t.waste_type);
+      if (!exists) {
+        await supabase.from('dynamic_pricing_rules').insert({
+          organization_id: organization!.id,
+          waste_type: t.waste_type,
+          base_price: t.base_price,
+          distance_multiplier: t.distance_multiplier,
+          weight_multiplier: t.weight_multiplier,
+          peak_hour_surcharge: t.peak_hour_surcharge,
+          weekend_surcharge: t.weekend_surcharge,
+          urgent_surcharge: t.urgent_surcharge,
+          min_price: t.min_price,
+          max_price: t.max_price,
+          is_active: true,
+        });
+        imported++;
+      }
+    }
+    toast.success(`تم استيراد ${imported} قاعدة تسعير`);
+    fetchRules();
+  };
+
   const deleteRule = async (id: string) => {
     const { error } = await supabase
       .from('dynamic_pricing_rules')
@@ -150,17 +182,52 @@ const DynamicPricingEngine = () => {
                   </p>
                 </div>
               </div>
-              <Button
-                onClick={() => setEditingRule(newRule())}
-                className="gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
-              >
-                <Plus className="w-4 h-4" />
-                قاعدة جديدة
-              </Button>
+              <div className="flex gap-2 flex-wrap">
+                {rules.length === 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={importTemplates}
+                    className="gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    استيراد القوالب الافتراضية
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setEditingRule(newRule())}
+                  className="gap-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  قاعدة جديدة
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Auto-pricing info banner */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="pt-4">
+          <div className="flex items-start gap-3">
+            <Zap className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+            <div className="text-sm space-y-1">
+              <p className="font-medium text-primary">التسعير التلقائي مُفعّل</p>
+              <p className="text-muted-foreground">
+                يتم احتساب سعر كل شحنة تلقائياً عند إنشائها أو تحديثها بناءً على الأولوية التالية:
+              </p>
+              <ol className="text-muted-foreground list-decimal list-inside space-y-0.5 text-xs">
+                <li><strong>خطاب الترسية</strong> — إن وُجد عقد مرتبط بالشحنة، يُستخدم سعره أولاً</li>
+                <li><strong>قواعد التسعير الديناميكي</strong> — تُطبّق القاعدة المطابقة لنوع النفايات مع عوامل المسافة والوزن والوقت</li>
+                <li><strong>التسعير الأساسي</strong> — 5 ر.س/كم/طن كاحتياطي في حال عدم وجود قواعد</li>
+              </ol>
+              <p className="text-xs text-muted-foreground mt-1">
+                💡 لتجاوز التسعير التلقائي، حدد مصدر السعر كـ "يدوي" في الشحنة.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Price Simulator */}
       <Card>
