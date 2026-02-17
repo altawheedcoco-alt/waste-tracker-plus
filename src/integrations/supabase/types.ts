@@ -16569,6 +16569,190 @@ export type Database = {
         }
         Relationships: []
       }
+      recycler_facility_carbon: {
+        Row: {
+          certificate_issued: boolean | null
+          certificate_number: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          period_type: string
+          recycling_rate: number
+          shipments_count: number
+          sustainability_score: number
+          total_cars_equivalent: number
+          total_emissions: number
+          total_input_tons: number
+          total_net_impact: number
+          total_output_tons: number
+          total_processing_emissions: number
+          total_recycling_savings: number
+          total_transport_emissions: number
+          total_trees_equivalent: number
+          updated_at: string
+        }
+        Insert: {
+          certificate_issued?: boolean | null
+          certificate_number?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          period_end: string
+          period_start: string
+          period_type?: string
+          recycling_rate?: number
+          shipments_count?: number
+          sustainability_score?: number
+          total_cars_equivalent?: number
+          total_emissions?: number
+          total_input_tons?: number
+          total_net_impact?: number
+          total_output_tons?: number
+          total_processing_emissions?: number
+          total_recycling_savings?: number
+          total_transport_emissions?: number
+          total_trees_equivalent?: number
+          updated_at?: string
+        }
+        Update: {
+          certificate_issued?: boolean | null
+          certificate_number?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          recycling_rate?: number
+          shipments_count?: number
+          sustainability_score?: number
+          total_cars_equivalent?: number
+          total_emissions?: number
+          total_input_tons?: number
+          total_net_impact?: number
+          total_output_tons?: number
+          total_processing_emissions?: number
+          total_recycling_savings?: number
+          total_transport_emissions?: number
+          total_trees_equivalent?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recycler_facility_carbon_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "recycler_facility_carbon_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recycler_product_carbon: {
+        Row: {
+          calculation_date: string
+          cars_equivalent: number
+          certificate_issued: boolean | null
+          certificate_issued_at: string | null
+          certificate_number: string | null
+          created_at: string
+          distance_km: number
+          id: string
+          input_weight_tons: number
+          net_impact: number
+          organization_id: string
+          output_weight_tons: number
+          processing_emissions: number
+          product_name: string
+          recycling_rate: number
+          recycling_savings: number
+          shipment_id: string | null
+          total_emissions: number
+          transport_emissions: number
+          trees_equivalent: number
+          updated_at: string
+          waste_type: string
+        }
+        Insert: {
+          calculation_date?: string
+          cars_equivalent?: number
+          certificate_issued?: boolean | null
+          certificate_issued_at?: string | null
+          certificate_number?: string | null
+          created_at?: string
+          distance_km?: number
+          id?: string
+          input_weight_tons?: number
+          net_impact?: number
+          organization_id: string
+          output_weight_tons?: number
+          processing_emissions?: number
+          product_name?: string
+          recycling_rate?: number
+          recycling_savings?: number
+          shipment_id?: string | null
+          total_emissions?: number
+          transport_emissions?: number
+          trees_equivalent?: number
+          updated_at?: string
+          waste_type?: string
+        }
+        Update: {
+          calculation_date?: string
+          cars_equivalent?: number
+          certificate_issued?: boolean | null
+          certificate_issued_at?: string | null
+          certificate_number?: string | null
+          created_at?: string
+          distance_km?: number
+          id?: string
+          input_weight_tons?: number
+          net_impact?: number
+          organization_id?: string
+          output_weight_tons?: number
+          processing_emissions?: number
+          product_name?: string
+          recycling_rate?: number
+          recycling_savings?: number
+          shipment_id?: string | null
+          total_emissions?: number
+          transport_emissions?: number
+          trees_equivalent?: number
+          updated_at?: string
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recycler_product_carbon_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "recycler_product_carbon_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recycler_product_carbon_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recycler_timeslots: {
         Row: {
           created_at: string
