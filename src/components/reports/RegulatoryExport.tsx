@@ -11,7 +11,7 @@ import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import * as XLSX from 'xlsx';
+import { createWorkbook, jsonToSheet, writeFile as writeExcel } from '@/lib/excelExport';
 import jsPDF from 'jspdf';
 import {
   Download,
@@ -122,17 +122,12 @@ const RegulatoryExport = () => {
         }));
       }
 
-      const ws = XLSX.utils.json_to_sheet(rows);
-      
-      // Set RTL and column widths
-      ws['!cols'] = Object.keys(rows[0] || {}).map(() => ({ wch: 20 }));
-
-      const wb = XLSX.utils.book_new();
+      const wb = createWorkbook();
       const sheetName = reportTypes.find(r => r.value === reportType)?.label || 'تقرير';
-      XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
+      jsonToSheet(wb, rows, sheetName);
 
       const dateStr = new Date().toISOString().split('T')[0];
-      XLSX.writeFile(wb, `${sheetName}_${dateStr}.xlsx`);
+      await writeExcel(wb, `${sheetName}_${dateStr}.xlsx`);
       toast.success(`✅ تم تصدير ${rows.length} سجل بنجاح`);
     } catch (err: any) {
       console.error('Export error:', err);

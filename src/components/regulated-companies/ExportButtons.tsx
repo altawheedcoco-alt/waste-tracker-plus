@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { FileDown, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
+import { createWorkbook, jsonToSheet, writeFile } from '@/lib/excelExport';
 
 const LICENSE_LABELS: Record<string, string> = {
   medical: 'طبية', solid: 'صلبة', electronic: 'إلكترونية',
@@ -52,7 +52,7 @@ const ExportButtons = ({ companies }: Props) => {
     }
   };
 
-  const exportExcel = () => {
+  const exportExcel = async () => {
     try {
       const data = companies.map((c, i) => ({
         '#': i + 1,
@@ -68,10 +68,9 @@ const ExportButtons = ({ companies }: Props) => {
         'Phone': c.contact_phone || '',
         'Email': c.contact_email || '',
       }));
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Companies');
-      XLSX.writeFile(wb, 'regulated-companies.xlsx');
+      const wb = createWorkbook();
+      jsonToSheet(wb, data, 'Companies');
+      await writeFile(wb, 'regulated-companies.xlsx');
       toast.success('تم تصدير التقرير Excel');
     } catch {
       toast.error('خطأ في تصدير Excel');

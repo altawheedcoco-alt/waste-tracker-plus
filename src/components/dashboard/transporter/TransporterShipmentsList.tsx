@@ -11,7 +11,7 @@ import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import * as XLSX from 'xlsx';
+import { createWorkbook, jsonToSheet, writeFile } from '@/lib/excelExport';
 import CompleteShipmentDocButton from '@/components/shipments/CompleteShipmentDocButton';
 
 interface TransporterShipmentsListProps {
@@ -100,7 +100,7 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilte
     setTimeout(() => setIsRefreshing(false), 1000);
   }, [onRefresh]);
 
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     if (filteredShipments.length === 0) {
       toast.error('لا توجد بيانات للتصدير');
       return;
@@ -122,10 +122,9 @@ const TransporterShipmentsList = ({ shipments, isLoading, onRefresh, statusFilte
       'تاريخ التسليم': s.delivered_at ? new Date(s.delivered_at).toLocaleDateString('ar-EG') : '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'الشحنات');
-    XLSX.writeFile(wb, `شحنات_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const wb = createWorkbook();
+    jsonToSheet(wb, exportData, 'الشحنات');
+    await writeFile(wb, `شحنات_${new Date().toISOString().split('T')[0]}.xlsx`);
     toast.success(`تم تصدير ${filteredShipments.length} شحنة بنجاح`);
   }, [filteredShipments]);
 
