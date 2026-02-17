@@ -3253,6 +3253,108 @@ export type Database = {
           },
         ]
       }
+      consultant_reviews: {
+        Row: {
+          consultant_id: string
+          created_at: string | null
+          id: string
+          is_verified: boolean | null
+          rating: number
+          review_text: string | null
+          reviewer_organization_id: string | null
+          reviewer_user_id: string | null
+        }
+        Insert: {
+          consultant_id: string
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          rating: number
+          review_text?: string | null
+          reviewer_organization_id?: string | null
+          reviewer_user_id?: string | null
+        }
+        Update: {
+          consultant_id?: string
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          rating?: number
+          review_text?: string | null
+          reviewer_organization_id?: string | null
+          reviewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_reviews_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_reviews_reviewer_organization_id_fkey"
+            columns: ["reviewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_reviews_reviewer_organization_id_fkey"
+            columns: ["reviewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_service_catalog: {
+        Row: {
+          consultant_id: string
+          created_at: string | null
+          description: string | null
+          duration_estimate: string | null
+          id: string
+          is_active: boolean | null
+          price_range: string | null
+          service_category: string
+          service_name: string
+          service_name_en: string | null
+        }
+        Insert: {
+          consultant_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: string | null
+          id?: string
+          is_active?: boolean | null
+          price_range?: string | null
+          service_category?: string
+          service_name: string
+          service_name_en?: string | null
+        }
+        Update: {
+          consultant_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_estimate?: string | null
+          id?: string
+          is_active?: boolean | null
+          price_range?: string | null
+          service_category?: string
+          service_name?: string
+          service_name_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_service_catalog_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_custom_versions: {
         Row: {
           created_at: string
@@ -8239,72 +8341,144 @@ export type Database = {
       }
       environmental_consultants: {
         Row: {
+          accreditation_body: string | null
+          accreditation_expiry: string | null
+          accreditation_number: string | null
+          address: string | null
           bio: string | null
+          city: string | null
+          commercial_register: string | null
+          company_logo_url: string | null
+          company_name: string | null
+          company_name_en: string | null
           consultant_code: string | null
           created_at: string | null
           email: string | null
+          entity_type: string
           full_name: string
           full_name_en: string | null
           id: string
           is_active: boolean | null
+          is_verified: boolean | null
+          iso_standards_offered: string[] | null
+          lab_equipment_list: Json | null
           license_expiry: string | null
           license_issuer: string | null
           license_number: string | null
           national_id: string | null
           phone: string | null
+          portfolio_url: string | null
           profile_photo_url: string | null
           qualification: string | null
+          rating: number | null
+          region: string | null
+          sectors_served: string[] | null
+          services: string[] | null
           signature_url: string | null
           specialization: string | null
           stamp_url: string | null
+          tax_id: string | null
+          total_reviews: number | null
+          training_programs_offered: string[] | null
           updated_at: string | null
           user_id: string
+          verified_at: string | null
+          verified_by: string | null
+          website: string | null
           years_of_experience: number | null
         }
         Insert: {
+          accreditation_body?: string | null
+          accreditation_expiry?: string | null
+          accreditation_number?: string | null
+          address?: string | null
           bio?: string | null
+          city?: string | null
+          commercial_register?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_name_en?: string | null
           consultant_code?: string | null
           created_at?: string | null
           email?: string | null
+          entity_type?: string
           full_name: string
           full_name_en?: string | null
           id?: string
           is_active?: boolean | null
+          is_verified?: boolean | null
+          iso_standards_offered?: string[] | null
+          lab_equipment_list?: Json | null
           license_expiry?: string | null
           license_issuer?: string | null
           license_number?: string | null
           national_id?: string | null
           phone?: string | null
+          portfolio_url?: string | null
           profile_photo_url?: string | null
           qualification?: string | null
+          rating?: number | null
+          region?: string | null
+          sectors_served?: string[] | null
+          services?: string[] | null
           signature_url?: string | null
           specialization?: string | null
           stamp_url?: string | null
+          tax_id?: string | null
+          total_reviews?: number | null
+          training_programs_offered?: string[] | null
           updated_at?: string | null
           user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
           years_of_experience?: number | null
         }
         Update: {
+          accreditation_body?: string | null
+          accreditation_expiry?: string | null
+          accreditation_number?: string | null
+          address?: string | null
           bio?: string | null
+          city?: string | null
+          commercial_register?: string | null
+          company_logo_url?: string | null
+          company_name?: string | null
+          company_name_en?: string | null
           consultant_code?: string | null
           created_at?: string | null
           email?: string | null
+          entity_type?: string
           full_name?: string
           full_name_en?: string | null
           id?: string
           is_active?: boolean | null
+          is_verified?: boolean | null
+          iso_standards_offered?: string[] | null
+          lab_equipment_list?: Json | null
           license_expiry?: string | null
           license_issuer?: string | null
           license_number?: string | null
           national_id?: string | null
           phone?: string | null
+          portfolio_url?: string | null
           profile_photo_url?: string | null
           qualification?: string | null
+          rating?: number | null
+          region?: string | null
+          sectors_served?: string[] | null
+          services?: string[] | null
           signature_url?: string | null
           specialization?: string | null
           stamp_url?: string | null
+          tax_id?: string | null
+          total_reviews?: number | null
+          training_programs_offered?: string[] | null
           updated_at?: string | null
           user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          website?: string | null
           years_of_experience?: number | null
         }
         Relationships: []
