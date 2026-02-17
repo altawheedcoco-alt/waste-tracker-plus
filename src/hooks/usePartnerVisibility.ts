@@ -19,6 +19,7 @@ export interface PartnerVisibilitySetting {
   can_receive_notifications: boolean;
   can_view_reports: boolean;
   can_view_recycler_info: boolean;
+  can_view_generator_info: boolean;
   created_at: string;
   updated_at: string;
   created_by: string | null;
@@ -43,6 +44,7 @@ export interface UpdateVisibilityInput {
   can_receive_notifications?: boolean;
   can_view_reports?: boolean;
   can_view_recycler_info?: boolean;
+  can_view_generator_info?: boolean;
 }
 
 export const usePartnerVisibility = () => {
@@ -124,6 +126,7 @@ export const usePartnerVisibility = () => {
             can_receive_notifications: true,
             can_view_reports: true,
             can_view_recycler_info: true,
+            can_view_generator_info: true,
           },
           hasCustomSettings: !!existingSetting,
         };
@@ -161,8 +164,9 @@ export const usePartnerVisibility = () => {
             can_receive_notifications: input.can_receive_notifications,
             can_view_reports: input.can_view_reports,
             can_view_recycler_info: input.can_view_recycler_info,
+            can_view_generator_info: input.can_view_generator_info,
             updated_at: new Date().toISOString(),
-          })
+          } as any)
           .eq('id', existing.id);
 
         if (error) throw error;
@@ -184,8 +188,9 @@ export const usePartnerVisibility = () => {
             can_receive_notifications: input.can_receive_notifications ?? true,
             can_view_reports: input.can_view_reports ?? true,
             can_view_recycler_info: input.can_view_recycler_info ?? true,
+            can_view_generator_info: input.can_view_generator_info ?? true,
             created_by: profile.id,
-          });
+          } as any);
 
         if (error) throw error;
       }
