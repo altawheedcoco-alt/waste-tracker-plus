@@ -1148,6 +1148,67 @@ export type Database = {
         }
         Relationships: []
       }
+      auction_bids: {
+        Row: {
+          amount: number
+          auction_id: string
+          bidder_organization_id: string
+          bidder_user_id: string
+          can_transport: boolean | null
+          created_at: string
+          id: string
+          notes: string | null
+          proposed_pickup_date: string | null
+          status: string | null
+        }
+        Insert: {
+          amount: number
+          auction_id: string
+          bidder_organization_id: string
+          bidder_user_id: string
+          can_transport?: boolean | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposed_pickup_date?: string | null
+          status?: string | null
+        }
+        Update: {
+          amount?: number
+          auction_id?: string
+          bidder_organization_id?: string
+          bidder_user_id?: string
+          can_transport?: boolean | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          proposed_pickup_date?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auction_bids_auction_id_fkey"
+            columns: ["auction_id"]
+            isOneToOne: false
+            referencedRelation: "waste_auctions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auction_bids_bidder_organization_id_fkey"
+            columns: ["bidder_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "auction_bids_bidder_organization_id_fkey"
+            columns: ["bidder_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_checklist_items: {
         Row: {
           audit_session_id: string
@@ -3122,6 +3183,72 @@ export type Database = {
           },
           {
             foreignKeyName: "circularity_kpis_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_portals: {
+        Row: {
+          created_at: string
+          features: Json | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          organization_id: string
+          plan_tier: string | null
+          portal_name: string
+          portal_slug: string
+          primary_color: string | null
+          requires_auth: boolean | null
+          secondary_color: string | null
+          updated_at: string
+          welcome_message: string | null
+        }
+        Insert: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          organization_id: string
+          plan_tier?: string | null
+          portal_name: string
+          portal_slug: string
+          primary_color?: string | null
+          requires_auth?: boolean | null
+          secondary_color?: string | null
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Update: {
+          created_at?: string
+          features?: Json | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          organization_id?: string
+          plan_tier?: string | null
+          portal_name?: string
+          portal_slug?: string
+          primary_color?: string | null
+          requires_auth?: boolean | null
+          secondary_color?: string | null
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_portals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "client_portals_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -9076,6 +9203,172 @@ export type Database = {
           years_of_experience?: number | null
         }
         Relationships: []
+      }
+      equipment_inquiries: {
+        Row: {
+          contact_phone: string | null
+          created_at: string
+          id: string
+          inquirer_organization_id: string
+          inquirer_user_id: string
+          listing_id: string
+          message: string
+          offer_amount: number | null
+          replied_at: string | null
+          seller_reply: string | null
+          status: string | null
+        }
+        Insert: {
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          inquirer_organization_id: string
+          inquirer_user_id: string
+          listing_id: string
+          message: string
+          offer_amount?: number | null
+          replied_at?: string | null
+          seller_reply?: string | null
+          status?: string | null
+        }
+        Update: {
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          inquirer_organization_id?: string
+          inquirer_user_id?: string
+          listing_id?: string
+          message?: string
+          offer_amount?: number | null
+          replied_at?: string | null
+          seller_reply?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_inquiries_inquirer_organization_id_fkey"
+            columns: ["inquirer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "equipment_inquiries_inquirer_organization_id_fkey"
+            columns: ["inquirer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipment_inquiries_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "equipment_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipment_listings: {
+        Row: {
+          admin_notes: string | null
+          approved_at: string | null
+          brand: string | null
+          category: string
+          condition: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          featured: boolean | null
+          featured_until: string | null
+          id: string
+          images: string[] | null
+          inquiries_count: number | null
+          is_negotiable: boolean | null
+          location_text: string | null
+          model: string | null
+          organization_id: string
+          platform_commission_rate: number | null
+          price: number
+          seller_user_id: string
+          status: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+          views_count: number | null
+          year_manufactured: number | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          brand?: string | null
+          category: string
+          condition?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          featured?: boolean | null
+          featured_until?: string | null
+          id?: string
+          images?: string[] | null
+          inquiries_count?: number | null
+          is_negotiable?: boolean | null
+          location_text?: string | null
+          model?: string | null
+          organization_id: string
+          platform_commission_rate?: number | null
+          price: number
+          seller_user_id: string
+          status?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+          views_count?: number | null
+          year_manufactured?: number | null
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          brand?: string | null
+          category?: string
+          condition?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          featured?: boolean | null
+          featured_until?: string | null
+          id?: string
+          images?: string[] | null
+          inquiries_count?: number | null
+          is_negotiable?: boolean | null
+          location_text?: string | null
+          model?: string | null
+          organization_id?: string
+          platform_commission_rate?: number | null
+          price?: number
+          seller_user_id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+          views_count?: number | null
+          year_manufactured?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "equipment_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       erp_attendance: {
         Row: {
@@ -15860,6 +16153,102 @@ export type Database = {
           },
         ]
       }
+      partner_reviews: {
+        Row: {
+          communication_rating: number | null
+          compliance_rating: number | null
+          created_at: string
+          id: string
+          is_anonymous: boolean | null
+          overall_rating: number
+          punctuality_rating: number | null
+          quality_rating: number | null
+          response_at: string | null
+          response_text: string | null
+          review_text: string | null
+          reviewed_organization_id: string
+          reviewer_organization_id: string
+          reviewer_user_id: string
+          shipment_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          communication_rating?: number | null
+          compliance_rating?: number | null
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          overall_rating: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          response_at?: string | null
+          response_text?: string | null
+          review_text?: string | null
+          reviewed_organization_id: string
+          reviewer_organization_id: string
+          reviewer_user_id: string
+          shipment_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          communication_rating?: number | null
+          compliance_rating?: number | null
+          created_at?: string
+          id?: string
+          is_anonymous?: boolean | null
+          overall_rating?: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          response_at?: string | null
+          response_text?: string | null
+          review_text?: string | null
+          reviewed_organization_id?: string
+          reviewer_organization_id?: string
+          reviewer_user_id?: string
+          shipment_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_reviews_reviewed_organization_id_fkey"
+            columns: ["reviewed_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_reviews_reviewed_organization_id_fkey"
+            columns: ["reviewed_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_reviews_reviewer_organization_id_fkey"
+            columns: ["reviewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_reviews_reviewer_organization_id_fkey"
+            columns: ["reviewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_reviews_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_risk_scores: {
         Row: {
           avg_payment_days: number | null
@@ -17058,6 +17447,53 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_clients: {
+        Row: {
+          access_code: string
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_login_at: string | null
+          organization_id: string
+          portal_id: string
+        }
+        Insert: {
+          access_code: string
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_id: string
+          portal_id: string
+        }
+        Update: {
+          access_code?: string
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          organization_id?: string
+          portal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_clients_portal_id_fkey"
+            columns: ["portal_id"]
+            isOneToOne: false
+            referencedRelation: "client_portals"
             referencedColumns: ["id"]
           },
         ]
@@ -23097,6 +23533,114 @@ export type Database = {
             columns: ["wallet_id"]
             isOneToOne: false
             referencedRelation: "digital_wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      waste_auctions: {
+        Row: {
+          admin_notes: string | null
+          approved_at: string | null
+          approved_by: string | null
+          auction_type: string | null
+          buy_now_price: number | null
+          created_at: string
+          created_by: string
+          current_highest_bid: number | null
+          description: string | null
+          ends_at: string
+          estimated_quantity: number
+          id: string
+          images: string[] | null
+          location_text: string | null
+          minimum_price: number | null
+          organization_id: string
+          pickup_deadline: string | null
+          platform_commission_rate: number | null
+          quality_grade: string | null
+          requires_transport: boolean | null
+          starts_at: string | null
+          status: string | null
+          title: string
+          unit: string | null
+          updated_at: string
+          waste_subtype: string | null
+          waste_type: string
+          winner_bid_id: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          auction_type?: string | null
+          buy_now_price?: number | null
+          created_at?: string
+          created_by: string
+          current_highest_bid?: number | null
+          description?: string | null
+          ends_at: string
+          estimated_quantity?: number
+          id?: string
+          images?: string[] | null
+          location_text?: string | null
+          minimum_price?: number | null
+          organization_id: string
+          pickup_deadline?: string | null
+          platform_commission_rate?: number | null
+          quality_grade?: string | null
+          requires_transport?: boolean | null
+          starts_at?: string | null
+          status?: string | null
+          title: string
+          unit?: string | null
+          updated_at?: string
+          waste_subtype?: string | null
+          waste_type: string
+          winner_bid_id?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          auction_type?: string | null
+          buy_now_price?: number | null
+          created_at?: string
+          created_by?: string
+          current_highest_bid?: number | null
+          description?: string | null
+          ends_at?: string
+          estimated_quantity?: number
+          id?: string
+          images?: string[] | null
+          location_text?: string | null
+          minimum_price?: number | null
+          organization_id?: string
+          pickup_deadline?: string | null
+          platform_commission_rate?: number | null
+          quality_grade?: string | null
+          requires_transport?: boolean | null
+          starts_at?: string | null
+          status?: string | null
+          title?: string
+          unit?: string | null
+          updated_at?: string
+          waste_subtype?: string | null
+          waste_type?: string
+          winner_bid_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_auctions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "waste_auctions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]

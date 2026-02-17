@@ -176,6 +176,10 @@ const AdvertiserDashboard = lazy(() => import("./pages/dashboard/AdvertiserDashb
 const AdPlans = lazy(() => import("./pages/dashboard/AdPlans"));
 const StationeryTemplates = lazy(() => import("./pages/dashboard/StationeryTemplates"));
 const StationeryPlans = lazy(() => import("./pages/dashboard/StationeryPlans"));
+const WasteAuctions = lazy(() => import("./pages/dashboard/WasteAuctions"));
+const PartnerReviews = lazy(() => import("./pages/dashboard/PartnerReviews"));
+const EquipmentMarketplace = lazy(() => import("./pages/dashboard/EquipmentMarketplace"));
+const WhiteLabelPortal = lazy(() => import("./pages/dashboard/WhiteLabelPortal"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -384,6 +388,10 @@ const AppRoutes = memo(() => (
           <Route path="/dashboard/ad-plans" element={<AdPlans />} />
           <Route path="/dashboard/stationery" element={<StationeryTemplates />} />
           <Route path="/dashboard/stationery-plans" element={<StationeryPlans />} />
+          <Route path="/dashboard/waste-auctions" element={<WasteAuctions />} />
+          <Route path="/dashboard/partner-reviews" element={<PartnerReviews />} />
+          <Route path="/dashboard/equipment-marketplace" element={<EquipmentMarketplace />} />
+          <Route path="/dashboard/white-label-portal" element={<WhiteLabelPortal />} />
          <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
