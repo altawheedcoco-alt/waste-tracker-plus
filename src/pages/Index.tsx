@@ -25,6 +25,7 @@ const Index = () => {
       <div className="min-h-screen bg-[hsl(140,20%,98%)]">
         <Header />
         <NewsTicker />
+        <Hero />
         <main>
           <Suspense fallback={<SectionFallback />}>
             <DocumentVerification />
