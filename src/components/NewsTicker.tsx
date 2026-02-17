@@ -59,12 +59,12 @@ const NewsTicker = memo(() => {
         <div className="overflow-hidden flex-1 py-2.5">
           <motion.div
             className="whitespace-nowrap flex items-center gap-1 text-sm font-medium text-white/95"
-            animate={{ x: ['-50%', '0%'] }}
+            animate={{ x: ['0%', '50%'] }}
             transition={{
               x: {
                 repeat: Infinity,
                 repeatType: 'loop',
-                duration: 15,
+                duration: 180,
                 ease: 'linear',
               },
             }}
