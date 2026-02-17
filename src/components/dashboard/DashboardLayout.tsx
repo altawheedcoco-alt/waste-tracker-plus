@@ -450,8 +450,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Activity, label: language === 'ar' ? 'خريطة تدفق النفايات' : 'Waste Flow Heatmap', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap' },
     ]},
 
-    // ═══════════════ أرشيف الوثائق ═══════════════
-    { icon: FolderOpen, label: t('sidebar.docArchive'), path: '#', key: 'doc-archive-group', children: [
+    // ═══════════════ الأعمال اليدوية والأرشيف ═══════════════
+    { icon: FolderOpen, label: language === 'ar' ? 'الأعمال اليدوية والأرشيف' : 'Manual Ops & Archive', path: '#', key: 'doc-archive-group', children: [
+      { icon: FileCheck, label: language === 'ar' ? 'الأعمال اليدوية' : 'Manual Operations', path: '/dashboard/manual-operations', key: 'manual-operations' },
       { icon: FolderOpen, label: t('sidebar.allDocs'), path: '/dashboard/document-archive', key: 'doc-archive-all' },
       { icon: Inbox, label: t('sidebar.receivedDocs'), path: '/dashboard/document-archive?tab=received', key: 'doc-archive-received' },
       { icon: Send, label: t('sidebar.sentDocs'), path: '/dashboard/document-archive?tab=sent', key: 'doc-archive-sent' },
