@@ -21,7 +21,7 @@ const NewsTicker = memo(() => {
   const totalText = repeatedItems.join('   ◆   ');
 
   return (
-    <div className="w-full bg-primary/95 text-primary-foreground overflow-hidden relative" dir="rtl">
+    <div className="w-full bg-emerald-800 text-white overflow-hidden relative z-50" dir="rtl">
       <div className="flex items-center">
         {/* Label */}
         <div className="flex items-center gap-1.5 px-3 py-2 bg-primary shrink-0 z-10 border-l border-primary-foreground/20">
