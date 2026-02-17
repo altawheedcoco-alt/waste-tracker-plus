@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -43,6 +44,7 @@ import {
   ScrollText,
   Send,
   ClipboardCheck,
+  EyeOff,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -846,6 +848,36 @@ const ShipmentCard = ({
                         </Button>
                       }
                     />
+                    {/* Per-shipment recycler hiding toggle - Transporter only */}
+                    {isTransporter && shipment.generator_id && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1.5 text-xs text-muted-foreground"
+                        title={
+                          (shipment as any).hide_recycler_from_generator
+                            ? 'المدوّر مخفي عن المولّد - اضغط للإظهار'
+                            : 'إخفاء المدوّر عن المولّد'
+                        }
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const newVal = !(shipment as any).hide_recycler_from_generator;
+                          const { error } = await supabase
+                            .from('shipments')
+                            .update({ hide_recycler_from_generator: newVal } as any)
+                            .eq('id', shipment.id);
+                          if (error) {
+                            toast.error('فشل تحديث الإعداد');
+                          } else {
+                            toast.success(newVal ? 'تم إخفاء المدوّر عن المولّد' : 'تم إظهار المدوّر للمولّد');
+                            onStatusChange?.();
+                          }
+                        }}
+                      >
+                        <EyeOff className={cn("w-3.5 h-3.5", (shipment as any).hide_recycler_from_generator && "text-amber-600")} />
+                        {(shipment as any).hide_recycler_from_generator ? 'مخفي' : 'إخفاء'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

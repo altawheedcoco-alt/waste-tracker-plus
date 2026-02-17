@@ -72,7 +72,7 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
 
       const { data: shipment, error: shipmentError } = await supabase
         .from('shipments')
-        .select('transporter_id, generator_id, recycler_id')
+        .select('transporter_id, generator_id, recycler_id, hide_recycler_from_generator')
         .eq('id', shipmentId)
         .single();
 
@@ -100,8 +100,20 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
         .eq('partner_organization_id', organization.id)
         .single();
 
+      // Determine recycler visibility: per-shipment flag overrides global setting
+      const isGenerator = shipment.generator_id === organization.id;
+      const perShipmentHidden = isGenerator && (shipment as any).hide_recycler_from_generator === true;
+      const globalHidden = settings ? !(settings.can_view_recycler_info ?? true) : false;
+      const canViewRecycler = isGenerator ? (!perShipmentHidden && !globalHidden) : true;
+
       if (settingsError || !settings) {
-        return { permissions: DEFAULT_PERMISSIONS, isOwner: false };
+        return {
+          permissions: {
+            ...DEFAULT_PERMISSIONS,
+            canViewRecyclerInfo: isGenerator ? !perShipmentHidden : true,
+          },
+          isOwner: false,
+        };
       }
 
       return {
@@ -116,7 +128,7 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
           canViewEstimatedArrival: settings.can_view_estimated_arrival ?? true,
           canReceiveNotifications: settings.can_receive_notifications ?? true,
           canViewReports: settings.can_view_reports ?? true,
-          canViewRecyclerInfo: settings.can_view_recycler_info ?? true,
+          canViewRecyclerInfo: canViewRecycler,
         },
         isOwner: false,
       };
