@@ -169,6 +169,7 @@ const DigitalWallet = lazy(() => import("./pages/dashboard/DigitalWallet"));
 const DriverAcademy = lazy(() => import("./pages/dashboard/DriverAcademy"));
 const OHSReports = lazy(() => import("./pages/dashboard/OHSReports"));
 const AuditPortalPage = lazy(() => import("./pages/AuditPortal"));
+const ManualOperations = lazy(() => import("./pages/dashboard/ManualOperations"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -348,6 +349,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/erp/financial-comparisons" element={<ERPFinancialComparisons />} />
         <Route path="/dashboard/subscription" element={<SubscriptionManagement />} />
         <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
+        <Route path="/dashboard/manual-operations" element={<ManualOperations />} />
         <Route path="/dashboard/commodity-exchange" element={<GlobalCommodityExchange />} />
         <Route path="/dashboard/waste-exchange" element={<WasteExchange />} />
         <Route path="/dashboard/waste-flow-heatmap" element={<WasteFlowHeatmap />} />
