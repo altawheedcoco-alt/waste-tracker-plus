@@ -68,14 +68,21 @@ const AuditPortal = () => {
 
       // Fetch data counts for evidence linking
       const counts: Record<string, number> = {};
-      const countTables = ['shipments', 'organization_documents', 'legal_licenses', 'risk_register', 'corrective_actions'];
-      for (const table of countTables) {
+      const tables = [
+        { name: 'shipments', col: 'organization_id' },
+        { name: 'organization_documents', col: 'organization_id' },
+        { name: 'legal_licenses', col: 'organization_id' },
+        { name: 'risk_register', col: 'organization_id' },
+        { name: 'corrective_actions', col: 'organization_id' },
+        { name: 'lms_certificates', col: null },
+      ];
+      for (const t of tables) {
         try {
-          const { count } = await (supabase.from(table as any) as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', sess.organization_id);
-          counts[table] = count || 0;
-        } catch { counts[table] = 0; }
+          let q = (supabase.from(t.name as any) as any).select('*', { count: 'exact', head: true });
+          if (t.col) q = q.eq(t.col, sess.organization_id);
+          const { count } = await q;
+          counts[t.name] = count || 0;
+        } catch { counts[t.name] = 0; }
       }
       setDataCounts(counts);
     } catch { setError('خطأ في تحميل البيانات'); }
@@ -273,6 +280,7 @@ const AuditPortal = () => {
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pb-8 space-y-1">
           <p>هذه البوابة للعرض فقط (View-Only) - جميع البيانات مقروءة مباشرة من سجلات المنصة</p>
+          <p>Immutable Audit Trail - كل تغيير في هذه البوابة مسجل ولا يمكن حذفه</p>
           <p>iRecycle Digital Compliance Platform © {new Date().getFullYear()}</p>
         </div>
       </div>

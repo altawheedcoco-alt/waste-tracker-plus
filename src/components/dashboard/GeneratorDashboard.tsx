@@ -46,6 +46,8 @@ const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertifica
 const WorkOrderInbox = lazy(() => import('@/components/work-orders/WorkOrderInbox'));
 const CreateWorkOrderDialog = lazy(() => import('@/components/work-orders/CreateWorkOrderDialog'));
 const ComplianceCertificateWidget = lazy(() => import('@/components/compliance/ComplianceCertificateWidget'));
+const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
+const ComplianceAlertsWidget = lazy(() => import('@/components/compliance/ComplianceAlertsWidget'));
 const RiskMatrixWidget = lazy(() => import('@/components/compliance/RiskMatrixWidget'));
 const CorrectiveActionsWidget = lazy(() => import('@/components/compliance/CorrectiveActionsWidget'));
 const AuditPortalWidget = lazy(() => import('@/components/compliance/AuditPortalWidget'));
@@ -394,6 +396,8 @@ const GeneratorDashboard = () => {
         {/* ── الامتثال القانوني ── */}
         <TabsContent value="compliance" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
+            <ComplianceAlertsWidget />
+            <ConsultantKPIsWidget />
             <ComplianceCertificateWidget />
             <RiskMatrixWidget />
             <CorrectiveActionsWidget />
