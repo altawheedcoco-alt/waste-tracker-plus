@@ -157,6 +157,7 @@ const AuthorizedSignatories = lazy(() => import("./pages/dashboard/AuthorizedSig
 const VerifySignatory = lazy(() => import("./pages/VerifySignatory"));
 const Permits = lazy(() => import("./pages/dashboard/Permits"));
 const EnvironmentalConsultants = lazy(() => import("./pages/dashboard/EnvironmentalConsultants"));
+const ConsultantPortal = lazy(() => import("./pages/ConsultantPortal"));
 const SigningInbox = lazy(() => import("./pages/dashboard/SigningInbox"));
 const AllNotes = lazy(() => import("./pages/dashboard/AllNotes"));
 const SystemCommands = lazy(() => import("./pages/dashboard/SystemCommands"));
@@ -364,6 +365,7 @@ const AppRoutes = memo(() => (
           <Route path="/dashboard/signing-inbox" element={<SigningInbox />} />
           <Route path="/dashboard/notes" element={<AllNotes />} />
          <Route path="/verify-signatory/:code" element={<VerifySignatory />} />
+         <Route path="/consultant-portal" element={<ConsultantPortal />} />
          <Route path="/dashboard/regulator" element={<RegulatorDashboard />} />
          <Route path="/dashboard/regulated-companies" element={<RegulatedCompanies />} />
          <Route path="/dashboard/collection-requests" element={<CollectionRequests />} />
