@@ -18762,6 +18762,7 @@ export type Database = {
           gps_pickup_lng: number | null
           gps_signal_lost_at: string | null
           hazard_level: string | null
+          hide_recycler_from_generator: boolean
           id: string
           in_transit_at: string | null
           is_public_submission: boolean | null
@@ -18875,6 +18876,7 @@ export type Database = {
           gps_pickup_lng?: number | null
           gps_signal_lost_at?: string | null
           hazard_level?: string | null
+          hide_recycler_from_generator?: boolean
           id?: string
           in_transit_at?: string | null
           is_public_submission?: boolean | null
@@ -18988,6 +18990,7 @@ export type Database = {
           gps_pickup_lng?: number | null
           gps_signal_lost_at?: string | null
           hazard_level?: string | null
+          hide_recycler_from_generator?: boolean
           id?: string
           in_transit_at?: string | null
           is_public_submission?: boolean | null

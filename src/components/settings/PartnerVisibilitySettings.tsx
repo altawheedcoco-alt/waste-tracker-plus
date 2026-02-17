@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EyeOff } from 'lucide-react';
 import { 
   Map, 
   Navigation, 
@@ -27,9 +28,13 @@ import {
   Bell,
   BarChart3
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import { usePartnerVisibility } from '@/hooks/usePartnerVisibility';
 
 const PartnerVisibilitySettings = () => {
+  const { organization } = useAuth();
   const { 
     partnersWithSettings, 
     isLoading, 
@@ -37,6 +42,7 @@ const PartnerVisibilitySettings = () => {
     isUpdating,
     refetch 
   } = usePartnerVisibility();
+  const [bulkUpdating, setBulkUpdating] = useState(false);
 
   const [localSettings, setLocalSettings] = useState<Record<string, any>>({});
 
@@ -364,6 +370,68 @@ const PartnerVisibilitySettings = () => {
                           onCheckedChange={() => handleToggle(partner.id, 'can_view_recycler_info', getSettingValue(partner, 'can_view_recycler_info'))}
                           disabled={isUpdating}
                         />
+                      </div>
+                    )}
+
+                    {/* Bulk hide recycler from all shipments for this generator */}
+                    {partner.organization_type === 'generator' && (
+                      <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors border-2 border-dashed border-amber-400/40 col-span-2 sm:col-span-1">
+                        <div className="p-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-400">
+                          <EyeOff className="w-4 h-4" />
+                        </div>
+                        <Label className="text-xs text-center">إخفاء المدوّر من كل الشحنات</Label>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs gap-1"
+                          disabled={bulkUpdating || isUpdating}
+                          onClick={async () => {
+                            if (!organization?.id) return;
+                            setBulkUpdating(true);
+                            try {
+                              const { error } = await supabase
+                                .from('shipments')
+                                .update({ hide_recycler_from_generator: true } as any)
+                                .eq('transporter_id', organization.id)
+                                .eq('generator_id', partner.id);
+                              if (error) throw error;
+                              toast.success(`تم إخفاء المدوّر من جميع شحنات ${partner.name}`);
+                            } catch {
+                              toast.error('فشل التحديث الجماعي');
+                            } finally {
+                              setBulkUpdating(false);
+                            }
+                          }}
+                        >
+                          <Lock className="w-3 h-3" />
+                          إخفاء الكل
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs gap-1 text-green-600"
+                          disabled={bulkUpdating || isUpdating}
+                          onClick={async () => {
+                            if (!organization?.id) return;
+                            setBulkUpdating(true);
+                            try {
+                              const { error } = await supabase
+                                .from('shipments')
+                                .update({ hide_recycler_from_generator: false } as any)
+                                .eq('transporter_id', organization.id)
+                                .eq('generator_id', partner.id);
+                              if (error) throw error;
+                              toast.success(`تم إظهار المدوّر في جميع شحنات ${partner.name}`);
+                            } catch {
+                              toast.error('فشل التحديث الجماعي');
+                            } finally {
+                              setBulkUpdating(false);
+                            }
+                          }}
+                        >
+                          <Unlock className="w-3 h-3" />
+                          إظهار الكل
+                        </Button>
                       </div>
                     )}
                   </div>
