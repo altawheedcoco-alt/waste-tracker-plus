@@ -2760,6 +2760,99 @@ export type Database = {
           },
         ]
       }
+      circularity_kpis: {
+        Row: {
+          carbon_avoided_tons: number | null
+          cost_savings_egp: number | null
+          created_at: string
+          energy_saved_mwh: number | null
+          id: string
+          material_value_recovered_egp: number | null
+          mci_score: number | null
+          organization_id: string
+          period_month: string
+          recovery_rate: number | null
+          recycled_input_tons: number | null
+          recycled_output_tons: number | null
+          recycling_rate: number | null
+          revenue_from_secondary_materials_egp: number | null
+          symbiosis_connections: number | null
+          symbiosis_volume_tons: number | null
+          total_input_tons: number | null
+          total_output_tons: number | null
+          updated_at: string
+          virgin_input_tons: number | null
+          waste_diversion_rate: number | null
+          waste_output_tons: number | null
+          water_saved_m3: number | null
+        }
+        Insert: {
+          carbon_avoided_tons?: number | null
+          cost_savings_egp?: number | null
+          created_at?: string
+          energy_saved_mwh?: number | null
+          id?: string
+          material_value_recovered_egp?: number | null
+          mci_score?: number | null
+          organization_id: string
+          period_month: string
+          recovery_rate?: number | null
+          recycled_input_tons?: number | null
+          recycled_output_tons?: number | null
+          recycling_rate?: number | null
+          revenue_from_secondary_materials_egp?: number | null
+          symbiosis_connections?: number | null
+          symbiosis_volume_tons?: number | null
+          total_input_tons?: number | null
+          total_output_tons?: number | null
+          updated_at?: string
+          virgin_input_tons?: number | null
+          waste_diversion_rate?: number | null
+          waste_output_tons?: number | null
+          water_saved_m3?: number | null
+        }
+        Update: {
+          carbon_avoided_tons?: number | null
+          cost_savings_egp?: number | null
+          created_at?: string
+          energy_saved_mwh?: number | null
+          id?: string
+          material_value_recovered_egp?: number | null
+          mci_score?: number | null
+          organization_id?: string
+          period_month?: string
+          recovery_rate?: number | null
+          recycled_input_tons?: number | null
+          recycled_output_tons?: number | null
+          recycling_rate?: number | null
+          revenue_from_secondary_materials_egp?: number | null
+          symbiosis_connections?: number | null
+          symbiosis_volume_tons?: number | null
+          total_input_tons?: number | null
+          total_output_tons?: number | null
+          updated_at?: string
+          virgin_input_tons?: number | null
+          waste_diversion_rate?: number | null
+          waste_output_tons?: number | null
+          water_saved_m3?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "circularity_kpis_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "circularity_kpis_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_requests: {
         Row: {
           accepted_at: string | null
@@ -4618,6 +4711,164 @@ export type Database = {
           },
         ]
       }
+      digital_product_passports: {
+        Row: {
+          basel_code: string | null
+          batch_number: string | null
+          carbon_footprint_kg: number | null
+          carbon_saved_kg: number | null
+          created_at: string
+          created_by: string | null
+          current_lifecycle: number | null
+          energy_saved_kwh: number | null
+          eu_dpp_compliant: boolean | null
+          eu_regulation_ref: string | null
+          expected_lifecycles: number | null
+          hazard_class: string | null
+          id: string
+          is_verified: boolean | null
+          iso_certifications: string[] | null
+          landfill_diverted_kg: number | null
+          mci_score: number | null
+          organization_id: string
+          passport_number: string
+          product_category: string
+          product_description: string | null
+          product_name: string
+          product_name_en: string | null
+          production_date: string
+          qr_code_hash: string | null
+          quality_grade: string | null
+          recyclability_score: number | null
+          recycled_content_percent: number | null
+          source_generator_ids: string[] | null
+          source_regions: string[] | null
+          source_shipment_ids: string[] | null
+          source_waste_type: string
+          status: string | null
+          updated_at: string
+          valid_until: string | null
+          verification_url: string | null
+          verified_at: string | null
+          verified_by: string | null
+          virgin_content_percent: number | null
+          water_saved_liters: number | null
+        }
+        Insert: {
+          basel_code?: string | null
+          batch_number?: string | null
+          carbon_footprint_kg?: number | null
+          carbon_saved_kg?: number | null
+          created_at?: string
+          created_by?: string | null
+          current_lifecycle?: number | null
+          energy_saved_kwh?: number | null
+          eu_dpp_compliant?: boolean | null
+          eu_regulation_ref?: string | null
+          expected_lifecycles?: number | null
+          hazard_class?: string | null
+          id?: string
+          is_verified?: boolean | null
+          iso_certifications?: string[] | null
+          landfill_diverted_kg?: number | null
+          mci_score?: number | null
+          organization_id: string
+          passport_number: string
+          product_category: string
+          product_description?: string | null
+          product_name: string
+          product_name_en?: string | null
+          production_date?: string
+          qr_code_hash?: string | null
+          quality_grade?: string | null
+          recyclability_score?: number | null
+          recycled_content_percent?: number | null
+          source_generator_ids?: string[] | null
+          source_regions?: string[] | null
+          source_shipment_ids?: string[] | null
+          source_waste_type: string
+          status?: string | null
+          updated_at?: string
+          valid_until?: string | null
+          verification_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          virgin_content_percent?: number | null
+          water_saved_liters?: number | null
+        }
+        Update: {
+          basel_code?: string | null
+          batch_number?: string | null
+          carbon_footprint_kg?: number | null
+          carbon_saved_kg?: number | null
+          created_at?: string
+          created_by?: string | null
+          current_lifecycle?: number | null
+          energy_saved_kwh?: number | null
+          eu_dpp_compliant?: boolean | null
+          eu_regulation_ref?: string | null
+          expected_lifecycles?: number | null
+          hazard_class?: string | null
+          id?: string
+          is_verified?: boolean | null
+          iso_certifications?: string[] | null
+          landfill_diverted_kg?: number | null
+          mci_score?: number | null
+          organization_id?: string
+          passport_number?: string
+          product_category?: string
+          product_description?: string | null
+          product_name?: string
+          product_name_en?: string | null
+          production_date?: string
+          qr_code_hash?: string | null
+          quality_grade?: string | null
+          recyclability_score?: number | null
+          recycled_content_percent?: number | null
+          source_generator_ids?: string[] | null
+          source_regions?: string[] | null
+          source_shipment_ids?: string[] | null
+          source_waste_type?: string
+          status?: string | null
+          updated_at?: string
+          valid_until?: string | null
+          verification_url?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+          virgin_content_percent?: number | null
+          water_saved_liters?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_product_passports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "digital_product_passports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "digital_product_passports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "digital_product_passports_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       digital_wallets: {
         Row: {
           auto_pay_enabled: boolean | null
@@ -6458,6 +6709,73 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dpp_lifecycle_events: {
+        Row: {
+          actor_name: string | null
+          actor_organization_id: string | null
+          created_at: string
+          details: Json | null
+          event_date: string
+          event_type: string
+          evidence_url: string | null
+          id: string
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          passport_id: string
+        }
+        Insert: {
+          actor_name?: string | null
+          actor_organization_id?: string | null
+          created_at?: string
+          details?: Json | null
+          event_date?: string
+          event_type: string
+          evidence_url?: string | null
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          passport_id: string
+        }
+        Update: {
+          actor_name?: string | null
+          actor_organization_id?: string | null
+          created_at?: string
+          details?: Json | null
+          event_date?: string
+          event_type?: string
+          evidence_url?: string | null
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          passport_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dpp_lifecycle_events_actor_organization_id_fkey"
+            columns: ["actor_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "dpp_lifecycle_events_actor_organization_id_fkey"
+            columns: ["actor_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dpp_lifecycle_events_passport_id_fkey"
+            columns: ["passport_id"]
+            isOneToOne: false
+            referencedRelation: "digital_product_passports"
             referencedColumns: ["id"]
           },
         ]
@@ -20127,6 +20445,194 @@ export type Database = {
           {
             foreignKeyName: "sustainability_reports_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      symbiosis_listings: {
+        Row: {
+          available_from: string | null
+          available_until: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          id: string
+          is_active: boolean | null
+          listing_type: string
+          location_governorate: string | null
+          location_lat: number | null
+          location_lng: number | null
+          matched_count: number | null
+          material_description: string | null
+          material_type: string
+          organization_id: string
+          price_per_ton: number | null
+          quality_specs: Json | null
+          quantity_tons_per_month: number | null
+          updated_at: string
+        }
+        Insert: {
+          available_from?: string | null
+          available_until?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          id?: string
+          is_active?: boolean | null
+          listing_type: string
+          location_governorate?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          matched_count?: number | null
+          material_description?: string | null
+          material_type: string
+          organization_id: string
+          price_per_ton?: number | null
+          quality_specs?: Json | null
+          quantity_tons_per_month?: number | null
+          updated_at?: string
+        }
+        Update: {
+          available_from?: string | null
+          available_until?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          id?: string
+          is_active?: boolean | null
+          listing_type?: string
+          location_governorate?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          matched_count?: number | null
+          material_description?: string | null
+          material_type?: string
+          organization_id?: string
+          price_per_ton?: number | null
+          quality_specs?: Json | null
+          quantity_tons_per_month?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbiosis_listings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbiosis_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "symbiosis_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      symbiosis_matches: {
+        Row: {
+          accepted_at: string | null
+          carbon_saved_kg: number | null
+          created_at: string
+          distance_km: number | null
+          estimated_savings_egp: number | null
+          id: string
+          input_listing_id: string
+          input_org_id: string
+          match_reason: string | null
+          match_score: number | null
+          matched_quantity_tons: number | null
+          material_type: string
+          output_listing_id: string
+          output_org_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          carbon_saved_kg?: number | null
+          created_at?: string
+          distance_km?: number | null
+          estimated_savings_egp?: number | null
+          id?: string
+          input_listing_id: string
+          input_org_id: string
+          match_reason?: string | null
+          match_score?: number | null
+          matched_quantity_tons?: number | null
+          material_type: string
+          output_listing_id: string
+          output_org_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          carbon_saved_kg?: number | null
+          created_at?: string
+          distance_km?: number | null
+          estimated_savings_egp?: number | null
+          id?: string
+          input_listing_id?: string
+          input_org_id?: string
+          match_reason?: string | null
+          match_score?: number | null
+          matched_quantity_tons?: number | null
+          material_type?: string
+          output_listing_id?: string
+          output_org_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symbiosis_matches_input_listing_id_fkey"
+            columns: ["input_listing_id"]
+            isOneToOne: false
+            referencedRelation: "symbiosis_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbiosis_matches_input_org_id_fkey"
+            columns: ["input_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "symbiosis_matches_input_org_id_fkey"
+            columns: ["input_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbiosis_matches_output_listing_id_fkey"
+            columns: ["output_listing_id"]
+            isOneToOne: false
+            referencedRelation: "symbiosis_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symbiosis_matches_output_org_id_fkey"
+            columns: ["output_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "symbiosis_matches_output_org_id_fkey"
+            columns: ["output_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
