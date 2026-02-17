@@ -385,6 +385,282 @@ export type Database = {
           },
         ]
       }
+      ad_analytics: {
+        Row: {
+          advertisement_id: string
+          created_at: string | null
+          event_type: string
+          id: string
+          page_location: string | null
+          viewer_device: string | null
+          viewer_ip: string | null
+          viewer_user_id: string | null
+        }
+        Insert: {
+          advertisement_id: string
+          created_at?: string | null
+          event_type: string
+          id?: string
+          page_location?: string | null
+          viewer_device?: string | null
+          viewer_ip?: string | null
+          viewer_user_id?: string | null
+        }
+        Update: {
+          advertisement_id?: string
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          page_location?: string | null
+          viewer_device?: string | null
+          viewer_ip?: string | null
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_analytics_advertisement_id_fkey"
+            columns: ["advertisement_id"]
+            isOneToOne: false
+            referencedRelation: "advertisements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ad_coupons: {
+        Row: {
+          code: string
+          created_at: string | null
+          current_uses: number | null
+          discount_amount: number | null
+          discount_percent: number | null
+          id: string
+          is_active: boolean | null
+          max_uses: number | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          current_uses?: number | null
+          discount_amount?: number | null
+          discount_percent?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          current_uses?: number | null
+          discount_amount?: number | null
+          discount_percent?: number | null
+          id?: string
+          is_active?: boolean | null
+          max_uses?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      ad_plans: {
+        Row: {
+          allows_links: boolean | null
+          allows_video: boolean | null
+          created_at: string | null
+          description_ar: string | null
+          description_en: string | null
+          duration_days: number
+          features: Json | null
+          homepage_placement: boolean | null
+          id: string
+          impressions_limit: number | null
+          is_active: boolean | null
+          max_media_count: number
+          name_ar: string
+          name_en: string | null
+          plan_type: string
+          price_egp: number
+          priority_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          allows_links?: boolean | null
+          allows_video?: boolean | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration_days?: number
+          features?: Json | null
+          homepage_placement?: boolean | null
+          id?: string
+          impressions_limit?: number | null
+          is_active?: boolean | null
+          max_media_count?: number
+          name_ar: string
+          name_en?: string | null
+          plan_type?: string
+          price_egp?: number
+          priority_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          allows_links?: boolean | null
+          allows_video?: boolean | null
+          created_at?: string | null
+          description_ar?: string | null
+          description_en?: string | null
+          duration_days?: number
+          features?: Json | null
+          homepage_placement?: boolean | null
+          id?: string
+          impressions_limit?: number | null
+          is_active?: boolean | null
+          max_media_count?: number
+          name_ar?: string
+          name_en?: string | null
+          plan_type?: string
+          price_egp?: number
+          priority_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      advertisements: {
+        Row: {
+          ad_plan_id: string | null
+          admin_notes: string | null
+          advertiser_organization_id: string | null
+          advertiser_user_id: string | null
+          amount_paid: number | null
+          background_color: string | null
+          badge_text: string | null
+          category: string | null
+          clicks_count: number | null
+          created_at: string | null
+          cta_link: string | null
+          cta_text: string | null
+          description: string | null
+          ends_at: string | null
+          external_link: string | null
+          id: string
+          impressions_count: number | null
+          is_featured: boolean | null
+          media_types: string[] | null
+          media_urls: string[] | null
+          payment_status: string | null
+          payment_transaction_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          starts_at: string | null
+          status: string
+          subtitle: string | null
+          tags: string[] | null
+          target_audience: string[] | null
+          text_color: string | null
+          title: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          ad_plan_id?: string | null
+          admin_notes?: string | null
+          advertiser_organization_id?: string | null
+          advertiser_user_id?: string | null
+          amount_paid?: number | null
+          background_color?: string | null
+          badge_text?: string | null
+          category?: string | null
+          clicks_count?: number | null
+          created_at?: string | null
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          ends_at?: string | null
+          external_link?: string | null
+          id?: string
+          impressions_count?: number | null
+          is_featured?: boolean | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          payment_status?: string | null
+          payment_transaction_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_at?: string | null
+          status?: string
+          subtitle?: string | null
+          tags?: string[] | null
+          target_audience?: string[] | null
+          text_color?: string | null
+          title: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          ad_plan_id?: string | null
+          admin_notes?: string | null
+          advertiser_organization_id?: string | null
+          advertiser_user_id?: string | null
+          amount_paid?: number | null
+          background_color?: string | null
+          badge_text?: string | null
+          category?: string | null
+          clicks_count?: number | null
+          created_at?: string | null
+          cta_link?: string | null
+          cta_text?: string | null
+          description?: string | null
+          ends_at?: string | null
+          external_link?: string | null
+          id?: string
+          impressions_count?: number | null
+          is_featured?: boolean | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          payment_status?: string | null
+          payment_transaction_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_at?: string | null
+          status?: string
+          subtitle?: string | null
+          tags?: string[] | null
+          target_audience?: string[] | null
+          text_color?: string | null
+          title?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advertisements_ad_plan_id_fkey"
+            columns: ["ad_plan_id"]
+            isOneToOne: false
+            referencedRelation: "ad_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advertisements_advertiser_organization_id_fkey"
+            columns: ["advertiser_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "advertisements_advertiser_organization_id_fkey"
+            columns: ["advertiser_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_performance: {
         Row: {
           agent_id: string
@@ -17964,6 +18240,115 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      revenue_service_subscriptions: {
+        Row: {
+          amount_paid: number | null
+          created_at: string | null
+          ends_at: string | null
+          id: string
+          organization_id: string
+          payment_status: string | null
+          service_id: string
+          starts_at: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount_paid?: number | null
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string
+          organization_id: string
+          payment_status?: string | null
+          service_id: string
+          starts_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string
+          organization_id?: string
+          payment_status?: string | null
+          service_id?: string
+          starts_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenue_service_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "revenue_service_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "revenue_service_subscriptions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "revenue_services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      revenue_services: {
+        Row: {
+          created_at: string | null
+          description_ar: string | null
+          duration_days: number | null
+          features: Json | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          price_egp: number
+          service_name_ar: string
+          service_name_en: string | null
+          service_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description_ar?: string | null
+          duration_days?: number | null
+          features?: Json | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          price_egp?: number
+          service_name_ar: string
+          service_name_en?: string | null
+          service_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description_ar?: string | null
+          duration_days?: number | null
+          features?: Json | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          price_egp?: number
+          service_name_ar?: string
+          service_name_en?: string | null
+          service_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       risk_register: {
         Row: {
