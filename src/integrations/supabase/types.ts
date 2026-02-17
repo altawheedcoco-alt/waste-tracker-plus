@@ -20343,6 +20343,318 @@ export type Database = {
           },
         ]
       }
+      stationery_plans: {
+        Row: {
+          created_at: string
+          currency: string | null
+          custom_templates_limit: number | null
+          description: string | null
+          features: Json | null
+          guilloche_enabled: boolean | null
+          id: string
+          is_active: boolean | null
+          monthly_prints_limit: number | null
+          name: string
+          name_en: string | null
+          plan_tier: string
+          price_monthly: number
+          price_yearly: number | null
+          priority_support: boolean | null
+          sha256_enabled: boolean | null
+          sort_order: number | null
+          templates_access: string | null
+          watermark_customization: boolean | null
+          white_label: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          custom_templates_limit?: number | null
+          description?: string | null
+          features?: Json | null
+          guilloche_enabled?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          monthly_prints_limit?: number | null
+          name: string
+          name_en?: string | null
+          plan_tier?: string
+          price_monthly?: number
+          price_yearly?: number | null
+          priority_support?: boolean | null
+          sha256_enabled?: boolean | null
+          sort_order?: number | null
+          templates_access?: string | null
+          watermark_customization?: boolean | null
+          white_label?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          custom_templates_limit?: number | null
+          description?: string | null
+          features?: Json | null
+          guilloche_enabled?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          monthly_prints_limit?: number | null
+          name?: string
+          name_en?: string | null
+          plan_tier?: string
+          price_monthly?: number
+          price_yearly?: number | null
+          priority_support?: boolean | null
+          sha256_enabled?: boolean | null
+          sort_order?: number | null
+          templates_access?: string | null
+          watermark_customization?: boolean | null
+          white_label?: boolean | null
+        }
+        Relationships: []
+      }
+      stationery_print_log: {
+        Row: {
+          action_type: string | null
+          created_at: string
+          document_title: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          serial_number: string
+          sha256_hash: string | null
+          subscription_id: string | null
+          template_id: string | null
+          user_id: string
+          verification_code: string
+        }
+        Insert: {
+          action_type?: string | null
+          created_at?: string
+          document_title?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          serial_number: string
+          sha256_hash?: string | null
+          subscription_id?: string | null
+          template_id?: string | null
+          user_id: string
+          verification_code: string
+        }
+        Update: {
+          action_type?: string | null
+          created_at?: string
+          document_title?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          serial_number?: string
+          sha256_hash?: string | null
+          subscription_id?: string | null
+          template_id?: string | null
+          user_id?: string
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stationery_print_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "stationery_print_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stationery_print_log_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "stationery_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stationery_print_log_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "stationery_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stationery_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          month_reset_at: string | null
+          organization_id: string
+          payment_reference: string | null
+          plan_id: string
+          prints_used_this_month: number | null
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          month_reset_at?: string | null
+          organization_id: string
+          payment_reference?: string | null
+          plan_id: string
+          prints_used_this_month?: number | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          month_reset_at?: string | null
+          organization_id?: string
+          payment_reference?: string | null
+          plan_id?: string
+          prints_used_this_month?: number | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stationery_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "stationery_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stationery_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "stationery_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stationery_templates: {
+        Row: {
+          accent_color: string | null
+          border_style: string | null
+          category: string
+          created_at: string
+          description: string | null
+          footer_fields: Json | null
+          footer_layout: string | null
+          guilloche_color: string | null
+          header_fields: Json | null
+          header_layout: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_en: string | null
+          organization_id: string | null
+          preview_image_url: string | null
+          show_barcode: boolean | null
+          show_guilloche: boolean | null
+          show_qr: boolean | null
+          show_serial_number: boolean | null
+          show_sha256: boolean | null
+          sort_order: number | null
+          template_type: string
+          theme_id: string | null
+          updated_at: string
+          watermark_opacity: number | null
+          watermark_text: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          border_style?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          footer_fields?: Json | null
+          footer_layout?: string | null
+          guilloche_color?: string | null
+          header_fields?: Json | null
+          header_layout?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_en?: string | null
+          organization_id?: string | null
+          preview_image_url?: string | null
+          show_barcode?: boolean | null
+          show_guilloche?: boolean | null
+          show_qr?: boolean | null
+          show_serial_number?: boolean | null
+          show_sha256?: boolean | null
+          sort_order?: number | null
+          template_type?: string
+          theme_id?: string | null
+          updated_at?: string
+          watermark_opacity?: number | null
+          watermark_text?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          border_style?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          footer_fields?: Json | null
+          footer_layout?: string | null
+          guilloche_color?: string | null
+          header_fields?: Json | null
+          header_layout?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_en?: string | null
+          organization_id?: string | null
+          preview_image_url?: string | null
+          show_barcode?: boolean | null
+          show_guilloche?: boolean | null
+          show_qr?: boolean | null
+          show_serial_number?: boolean | null
+          show_sha256?: boolean | null
+          sort_order?: number | null
+          template_type?: string
+          theme_id?: string | null
+          updated_at?: string
+          watermark_opacity?: number | null
+          watermark_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stationery_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "stationery_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stories: {
         Row: {
           background_color: string | null
