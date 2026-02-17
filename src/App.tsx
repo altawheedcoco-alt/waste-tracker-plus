@@ -174,6 +174,8 @@ const ManualOperations = lazy(() => import("./pages/dashboard/ManualOperations")
 const CircularEconomy = lazy(() => import("./pages/dashboard/CircularEconomy"));
 const AdvertiserDashboard = lazy(() => import("./pages/dashboard/AdvertiserDashboard"));
 const AdPlans = lazy(() => import("./pages/dashboard/AdPlans"));
+const StationeryTemplates = lazy(() => import("./pages/dashboard/StationeryTemplates"));
+const StationeryPlans = lazy(() => import("./pages/dashboard/StationeryPlans"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -379,7 +381,9 @@ const AppRoutes = memo(() => (
          <Route path="/dashboard/ohs-reports" element={<OHSReports />} />
          <Route path="/dashboard/circular-economy" element={<CircularEconomy />} />
          <Route path="/dashboard/my-ads" element={<AdvertiserDashboard />} />
-         <Route path="/dashboard/ad-plans" element={<AdPlans />} />
+          <Route path="/dashboard/ad-plans" element={<AdPlans />} />
+          <Route path="/dashboard/stationery" element={<StationeryTemplates />} />
+          <Route path="/dashboard/stationery-plans" element={<StationeryPlans />} />
          <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
