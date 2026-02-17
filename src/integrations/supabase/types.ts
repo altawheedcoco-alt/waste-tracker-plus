@@ -2842,6 +2842,93 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_certificates: {
+        Row: {
+          certificate_level: string
+          certificate_number: string
+          created_at: string
+          documentation_score: number | null
+          expires_at: string
+          id: string
+          is_valid: boolean
+          iso_standards: string[] | null
+          issued_at: string
+          issued_by: string | null
+          licenses_score: number | null
+          operations_score: number | null
+          organization_id: string
+          overall_score: number
+          revocation_reason: string | null
+          revoked_at: string | null
+          safety_environment_score: number | null
+          score_details: Json | null
+          training_score: number | null
+          updated_at: string
+          verification_code: string
+        }
+        Insert: {
+          certificate_level: string
+          certificate_number: string
+          created_at?: string
+          documentation_score?: number | null
+          expires_at?: string
+          id?: string
+          is_valid?: boolean
+          iso_standards?: string[] | null
+          issued_at?: string
+          issued_by?: string | null
+          licenses_score?: number | null
+          operations_score?: number | null
+          organization_id: string
+          overall_score: number
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          safety_environment_score?: number | null
+          score_details?: Json | null
+          training_score?: number | null
+          updated_at?: string
+          verification_code: string
+        }
+        Update: {
+          certificate_level?: string
+          certificate_number?: string
+          created_at?: string
+          documentation_score?: number | null
+          expires_at?: string
+          id?: string
+          is_valid?: boolean
+          iso_standards?: string[] | null
+          issued_at?: string
+          issued_by?: string | null
+          licenses_score?: number | null
+          operations_score?: number | null
+          organization_id?: string
+          overall_score?: number
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          safety_environment_score?: number | null
+          score_details?: Json | null
+          training_score?: number | null
+          updated_at?: string
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "compliance_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_credentials: {
         Row: {
           consultant_id: string
@@ -22673,6 +22760,7 @@ export type Database = {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
       }
+      generate_compliance_cert_number: { Args: never; Returns: string }
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
       generate_permit_number: { Args: { org_id: string }; Returns: string }
