@@ -20,7 +20,7 @@ import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import BackButton from '@/components/ui/back-button';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import * as XLSX from 'xlsx';
+import { createWorkbook, jsonToSheet, writeFile as writeExcel } from '@/lib/excelExport';
 import {
   Search,
   CalendarIcon,
@@ -292,7 +292,7 @@ const HazardousWasteRegister = () => {
   const CHART_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6'];
 
   // Excel export
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!filteredShipments || filteredShipments.length === 0) {
       toast.error('لا توجد بيانات للتصدير');
       return;
@@ -316,10 +316,9 @@ const HazardousWasteRegister = () => {
       'عنوان الاستلام': s.pickup_address || '-',
       'عنوان التسليم': s.delivery_address || '-',
     }));
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'سجل المخلفات الخطرة');
-    XLSX.writeFile(wb, `سجل-المخلفات-الخطرة-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    const wb = createWorkbook();
+    jsonToSheet(wb, rows, 'سجل المخلفات الخطرة');
+    await writeExcel(wb, `سجل-المخلفات-الخطرة-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
     toast.success('تم تصدير الملف بنجاح');
   };
 

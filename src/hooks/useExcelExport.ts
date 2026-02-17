@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import * as XLSX from 'xlsx';
+import { createWorkbook, aoaToSheet, writeFile } from '@/lib/excelExport';
 import { toast } from 'sonner';
 
 interface ExcelColumn {
@@ -38,11 +38,9 @@ export const useExcelExport = (options: UseExcelExportOptions = {}) => {
       const rows = data.map(item => 
         columns.map(col => {
           const value = item[col.key];
-          // Handle dates
           if (value instanceof Date) {
             return value.toLocaleDateString('ar-EG');
           }
-          // Handle null/undefined
           if (value === null || value === undefined) {
             return '';
           }
@@ -50,27 +48,16 @@ export const useExcelExport = (options: UseExcelExportOptions = {}) => {
         })
       );
 
-      // Create worksheet
-      const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+      const colWidths = columns.map(col => col.width || 15);
 
-      // Set column widths
-      worksheet['!cols'] = columns.map(col => ({
-        wch: col.width || 15
-      }));
-
-      // Set RTL direction
-      worksheet['!dir'] = 'rtl';
-
-      // Create workbook
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+      const workbook = createWorkbook();
+      aoaToSheet(workbook, [headers, ...rows], sheetName, colWidths);
 
       // Generate filename with date
       const dateStr = new Date().toISOString().split('T')[0];
       const fullFilename = `${finalFilename}-${dateStr}.xlsx`;
 
-      // Export file
-      XLSX.writeFile(workbook, fullFilename);
+      await writeFile(workbook, fullFilename);
 
       toast.dismiss(toastId);
       toast.success('تم تحميل ملف Excel بنجاح');
@@ -103,10 +90,8 @@ export const useExcelExport = (options: UseExcelExportOptions = {}) => {
       const { filename = 'export' } = options;
       const finalFilename = customFilename || filename;
 
-      // Create workbook
-      const workbook = XLSX.utils.book_new();
+      const workbook = createWorkbook();
 
-      // Add each sheet
       sheets.forEach(sheet => {
         const headers = sheet.columns.map(col => col.header);
         const rows = sheet.data.map(item =>
@@ -122,21 +107,14 @@ export const useExcelExport = (options: UseExcelExportOptions = {}) => {
           })
         );
 
-        const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-        worksheet['!cols'] = sheet.columns.map(col => ({
-          wch: col.width || 15
-        }));
-        worksheet['!dir'] = 'rtl';
-
-        XLSX.utils.book_append_sheet(workbook, worksheet, sheet.name);
+        const colWidths = sheet.columns.map(col => col.width || 15);
+        aoaToSheet(workbook, [headers, ...rows], sheet.name, colWidths);
       });
 
-      // Generate filename with date
       const dateStr = new Date().toISOString().split('T')[0];
       const fullFilename = `${finalFilename}-${dateStr}.xlsx`;
 
-      // Export file
-      XLSX.writeFile(workbook, fullFilename);
+      await writeFile(workbook, fullFilename);
 
       toast.dismiss(toastId);
       toast.success('تم تحميل ملف Excel بنجاح');
