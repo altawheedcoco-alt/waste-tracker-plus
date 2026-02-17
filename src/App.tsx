@@ -168,6 +168,7 @@ const FuturesMarket = lazy(() => import("./pages/dashboard/FuturesMarket"));
 const DigitalWallet = lazy(() => import("./pages/dashboard/DigitalWallet"));
 const DriverAcademy = lazy(() => import("./pages/dashboard/DriverAcademy"));
 const OHSReports = lazy(() => import("./pages/dashboard/OHSReports"));
+const AuditPortalPage = lazy(() => import("./pages/AuditPortal"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -226,6 +227,7 @@ const AppRoutes = memo(() => (
     <Route path="/qr-verify" element={<QRVerify />} />
     <Route path="/scan" element={<QRVerify />} />
      <Route path="/track" element={<PublicTrackingPage />} />
+     <Route path="/audit-portal" element={<AuditPortalPage />} />
      <Route path="/auth" element={<Auth />} />
     <Route path="/auth/google-setup" element={<GoogleSetup />} />
     {/* Guide Routes */}
