@@ -45,7 +45,7 @@ const NewsTicker = memo(() => {
               x: {
                 repeat: Infinity,
                 repeatType: 'loop',
-                duration: 50,
+                duration: 25,
                 ease: 'linear',
               },
             }}
