@@ -549,7 +549,7 @@ const ShipmentCard = ({
                 <div className="flex-1 text-right order-1 sm:order-2">
                   <div className="flex items-center gap-2 justify-end flex-wrap">
                     {/* Generator Approval Badge */}
-                    {shipment.generator_id && (
+                    {shipment.generator_id && visibility.canViewGeneratorInfo && (
                       <ShipmentApprovalBadge
                         status={shipment.generator_approval_status}
                         approvalAt={shipment.generator_approval_at}
@@ -608,10 +608,18 @@ const ShipmentCard = ({
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-sm">
-                    <div className="flex items-center gap-1 justify-end text-muted-foreground">
-                      <span>{shipment.generator?.name || '-'}</span>
-                      <Building2 className="w-4 h-4" />
-                    </div>
+                    {visibility.canViewGeneratorInfo && (
+                      <div className="flex items-center gap-1 justify-end text-muted-foreground">
+                        <span>{shipment.generator?.name || '-'}</span>
+                        <Building2 className="w-4 h-4" />
+                      </div>
+                    )}
+                    {!visibility.canViewGeneratorInfo && !visibility.isOwner && (
+                      <div className="flex items-center gap-1 justify-end text-muted-foreground/50">
+                        <span>محجوب</span>
+                        <Lock className="w-3 h-3" />
+                      </div>
+                    )}
                     <div className="flex items-center gap-1 justify-end text-muted-foreground">
                       <span>{shipment.transporter?.name || '-'}</span>
                       <Truck className="w-4 h-4" />
@@ -624,7 +632,7 @@ const ShipmentCard = ({
                     )}
                     {!visibility.canViewRecyclerInfo && !visibility.isOwner && (
                       <div className="flex items-center gap-1 justify-end text-muted-foreground/50">
-                        <span>مخفي</span>
+                        <span>محجوب</span>
                         <Lock className="w-3 h-3" />
                       </div>
                     )}
@@ -876,6 +884,36 @@ const ShipmentCard = ({
                       >
                         <EyeOff className={cn("w-3.5 h-3.5", (shipment as any).hide_recycler_from_generator && "text-amber-600")} />
                         {(shipment as any).hide_recycler_from_generator ? 'مخفي' : 'إخفاء'}
+                      </Button>
+                    )}
+                    {/* Per-shipment generator hiding toggle - Transporter only */}
+                    {isTransporter && shipment.recycler_id && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="gap-1.5 text-xs text-muted-foreground"
+                        title={
+                          (shipment as any).hide_generator_from_recycler
+                            ? 'المولّد مخفي عن المدوّر - اضغط للإظهار'
+                            : 'إخفاء المولّد عن المدوّر'
+                        }
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const newVal = !(shipment as any).hide_generator_from_recycler;
+                          const { error } = await supabase
+                            .from('shipments')
+                            .update({ hide_generator_from_recycler: newVal } as any)
+                            .eq('id', shipment.id);
+                          if (error) {
+                            toast.error('فشل تحديث الإعداد');
+                          } else {
+                            toast.success(newVal ? 'تم إخفاء المولّد عن المدوّر' : 'تم إظهار المولّد للمدوّر');
+                            onStatusChange?.();
+                          }
+                        }}
+                      >
+                        <EyeOff className={cn("w-3.5 h-3.5", (shipment as any).hide_generator_from_recycler && "text-amber-600")} />
+                        {(shipment as any).hide_generator_from_recycler ? 'مولّد مخفي' : 'إخفاء مولّد'}
                       </Button>
                     )}
                   </div>

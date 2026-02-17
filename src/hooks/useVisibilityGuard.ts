@@ -24,6 +24,7 @@ export interface VisibilityPermissions {
   canReceiveNotifications: boolean;
   canViewReports: boolean;
   canViewRecyclerInfo: boolean;
+  canViewGeneratorInfo: boolean;
   isLoading: boolean;
   isOwner: boolean;
 }
@@ -40,6 +41,7 @@ const DEFAULT_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> 
   canReceiveNotifications: true,
   canViewReports: true,
   canViewRecyclerInfo: true,
+  canViewGeneratorInfo: true,
 };
 
 const BLOCKED_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> = {
@@ -54,6 +56,7 @@ const BLOCKED_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> 
   canReceiveNotifications: false,
   canViewReports: false,
   canViewRecyclerInfo: false,
+  canViewGeneratorInfo: false,
 };
 
 /**
@@ -72,7 +75,7 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
 
       const { data: shipment, error: shipmentError } = await supabase
         .from('shipments')
-        .select('transporter_id, generator_id, recycler_id, hide_recycler_from_generator')
+        .select('transporter_id, generator_id, recycler_id, hide_recycler_from_generator, hide_generator_from_recycler')
         .eq('id', shipmentId)
         .single();
 
@@ -102,15 +105,22 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
 
       // Determine recycler visibility: per-shipment flag overrides global setting
       const isGenerator = shipment.generator_id === organization.id;
-      const perShipmentHidden = isGenerator && (shipment as any).hide_recycler_from_generator === true;
-      const globalHidden = settings ? !(settings.can_view_recycler_info ?? true) : false;
-      const canViewRecycler = isGenerator ? (!perShipmentHidden && !globalHidden) : true;
+      const isRecycler = shipment.recycler_id === organization.id;
+      const perShipmentRecyclerHidden = isGenerator && (shipment as any).hide_recycler_from_generator === true;
+      const globalRecyclerHidden = settings ? !(settings.can_view_recycler_info ?? true) : false;
+      const canViewRecycler = isGenerator ? (!perShipmentRecyclerHidden && !globalRecyclerHidden) : true;
+
+      // Determine generator visibility: per-shipment flag overrides global setting
+      const perShipmentGeneratorHidden = isRecycler && (shipment as any).hide_generator_from_recycler === true;
+      const globalGeneratorHidden = settings ? !((settings as any).can_view_generator_info ?? true) : false;
+      const canViewGenerator = isRecycler ? (!perShipmentGeneratorHidden && !globalGeneratorHidden) : true;
 
       if (settingsError || !settings) {
         return {
           permissions: {
             ...DEFAULT_PERMISSIONS,
-            canViewRecyclerInfo: isGenerator ? !perShipmentHidden : true,
+            canViewRecyclerInfo: isGenerator ? !perShipmentRecyclerHidden : true,
+            canViewGeneratorInfo: isRecycler ? !perShipmentGeneratorHidden : true,
           },
           isOwner: false,
         };
@@ -129,6 +139,7 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
           canReceiveNotifications: settings.can_receive_notifications ?? true,
           canViewReports: settings.can_view_reports ?? true,
           canViewRecyclerInfo: canViewRecycler,
+          canViewGeneratorInfo: canViewGenerator,
         },
         isOwner: false,
       };
@@ -194,6 +205,7 @@ export function useTransporterVisibility(transporterId: string | undefined): Vis
           canReceiveNotifications: settings.can_receive_notifications ?? true,
           canViewReports: settings.can_view_reports ?? true,
           canViewRecyclerInfo: settings.can_view_recycler_info ?? true,
+          canViewGeneratorInfo: (settings as any).can_view_generator_info ?? true,
         },
         isOwner: false,
       };
@@ -265,5 +277,6 @@ export async function checkVisibility(
     canReceiveNotifications: settings.can_receive_notifications ?? true,
     canViewReports: settings.can_view_reports ?? true,
     canViewRecyclerInfo: settings.can_view_recycler_info ?? true,
+    canViewGeneratorInfo: (settings as any).can_view_generator_info ?? true,
   };
 }

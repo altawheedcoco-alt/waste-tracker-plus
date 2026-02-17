@@ -48,7 +48,7 @@ const PartnerVisibilitySettings = () => {
 
   const handleToggle = (
     partnerId: string, 
-    field: 'can_view_maps' | 'can_view_tracking' | 'can_view_routes' | 'can_view_driver_location' | 'can_view_shipment_details' | 'can_view_driver_info' | 'can_view_vehicle_info' | 'can_view_estimated_arrival' | 'can_receive_notifications' | 'can_view_reports' | 'can_view_recycler_info',
+    field: 'can_view_maps' | 'can_view_tracking' | 'can_view_routes' | 'can_view_driver_location' | 'can_view_shipment_details' | 'can_view_driver_info' | 'can_view_vehicle_info' | 'can_view_estimated_arrival' | 'can_receive_notifications' | 'can_view_reports' | 'can_view_recycler_info' | 'can_view_generator_info',
     currentValue: boolean
   ) => {
     const newValue = !currentValue;
@@ -91,6 +91,7 @@ const PartnerVisibilitySettings = () => {
         can_receive_notifications: enable,
         can_view_reports: enable,
         can_view_recycler_info: enable,
+        can_view_generator_info: enable,
       }
     }));
 
@@ -107,6 +108,7 @@ const PartnerVisibilitySettings = () => {
       can_receive_notifications: enable,
       can_view_reports: enable,
       can_view_recycler_info: enable,
+      can_view_generator_info: enable,
     });
   };
 
@@ -422,6 +424,83 @@ const PartnerVisibilitySettings = () => {
                                 .eq('generator_id', partner.id);
                               if (error) throw error;
                               toast.success(`تم إظهار المدوّر في جميع شحنات ${partner.name}`);
+                            } catch {
+                              toast.error('فشل التحديث الجماعي');
+                            } finally {
+                              setBulkUpdating(false);
+                            }
+                          }}
+                        >
+                          <Unlock className="w-3 h-3" />
+                          إظهار الكل
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Generator Info - only show for recycler partners */}
+                    {partner.organization_type === 'recycler' && (
+                      <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border-2 border-dashed border-primary/20">
+                        <div className={`p-2 rounded-full ${getSettingValue(partner, 'can_view_generator_info') ? 'bg-green-100 text-green-600' : 'bg-destructive/10 text-destructive'}`}>
+                          <Building2 className="w-4 h-4" />
+                        </div>
+                        <Label className="text-xs text-center">رؤية جهة التوليد</Label>
+                        <Switch
+                          checked={getSettingValue(partner, 'can_view_generator_info')}
+                          onCheckedChange={() => handleToggle(partner.id, 'can_view_generator_info', getSettingValue(partner, 'can_view_generator_info'))}
+                          disabled={isUpdating}
+                        />
+                      </div>
+                    )}
+
+                    {/* Bulk hide generator from all shipments for this recycler */}
+                    {partner.organization_type === 'recycler' && (
+                      <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors border-2 border-dashed border-amber-400/40 col-span-2 sm:col-span-1">
+                        <div className="p-2 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-400">
+                          <EyeOff className="w-4 h-4" />
+                        </div>
+                        <Label className="text-xs text-center">إخفاء المولّد من كل الشحنات</Label>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs gap-1"
+                          disabled={bulkUpdating || isUpdating}
+                          onClick={async () => {
+                            if (!organization?.id) return;
+                            setBulkUpdating(true);
+                            try {
+                              const { error } = await supabase
+                                .from('shipments')
+                                .update({ hide_generator_from_recycler: true } as any)
+                                .eq('transporter_id', organization.id)
+                                .eq('recycler_id', partner.id);
+                              if (error) throw error;
+                              toast.success(`تم إخفاء المولّد من جميع شحنات ${partner.name}`);
+                            } catch {
+                              toast.error('فشل التحديث الجماعي');
+                            } finally {
+                              setBulkUpdating(false);
+                            }
+                          }}
+                        >
+                          <Lock className="w-3 h-3" />
+                          إخفاء الكل
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs gap-1 text-green-600"
+                          disabled={bulkUpdating || isUpdating}
+                          onClick={async () => {
+                            if (!organization?.id) return;
+                            setBulkUpdating(true);
+                            try {
+                              const { error } = await supabase
+                                .from('shipments')
+                                .update({ hide_generator_from_recycler: false } as any)
+                                .eq('transporter_id', organization.id)
+                                .eq('recycler_id', partner.id);
+                              if (error) throw error;
+                              toast.success(`تم إظهار المولّد في جميع شحنات ${partner.name}`);
                             } catch {
                               toast.error('فشل التحديث الجماعي');
                             } finally {

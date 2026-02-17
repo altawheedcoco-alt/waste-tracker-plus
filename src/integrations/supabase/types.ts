@@ -15206,6 +15206,7 @@ export type Database = {
           can_view_driver_info: boolean
           can_view_driver_location: boolean
           can_view_estimated_arrival: boolean
+          can_view_generator_info: boolean
           can_view_maps: boolean
           can_view_recycler_info: boolean
           can_view_reports: boolean
@@ -15225,6 +15226,7 @@ export type Database = {
           can_view_driver_info?: boolean
           can_view_driver_location?: boolean
           can_view_estimated_arrival?: boolean
+          can_view_generator_info?: boolean
           can_view_maps?: boolean
           can_view_recycler_info?: boolean
           can_view_reports?: boolean
@@ -15244,6 +15246,7 @@ export type Database = {
           can_view_driver_info?: boolean
           can_view_driver_location?: boolean
           can_view_estimated_arrival?: boolean
+          can_view_generator_info?: boolean
           can_view_maps?: boolean
           can_view_recycler_info?: boolean
           can_view_reports?: boolean
@@ -18762,6 +18765,7 @@ export type Database = {
           gps_pickup_lng: number | null
           gps_signal_lost_at: string | null
           hazard_level: string | null
+          hide_generator_from_recycler: boolean
           hide_recycler_from_generator: boolean
           id: string
           in_transit_at: string | null
@@ -18876,6 +18880,7 @@ export type Database = {
           gps_pickup_lng?: number | null
           gps_signal_lost_at?: string | null
           hazard_level?: string | null
+          hide_generator_from_recycler?: boolean
           hide_recycler_from_generator?: boolean
           id?: string
           in_transit_at?: string | null
@@ -18990,6 +18995,7 @@ export type Database = {
           gps_pickup_lng?: number | null
           gps_signal_lost_at?: string | null
           hazard_level?: string | null
+          hide_generator_from_recycler?: boolean
           hide_recycler_from_generator?: boolean
           id?: string
           in_transit_at?: string | null
