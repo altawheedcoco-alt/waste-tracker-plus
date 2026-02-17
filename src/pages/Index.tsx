@@ -26,7 +26,6 @@ const Index = () => {
         <Header />
         <NewsTicker />
         <main>
-          <Hero />
           <Suspense fallback={<SectionFallback />}>
             <DocumentVerification />
             <Stats />
