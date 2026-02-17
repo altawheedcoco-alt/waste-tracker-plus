@@ -67,6 +67,20 @@ import {
   TreePine,
   Store,
   GraduationCap,
+  Award,
+  Receipt,
+  Leaf,
+  TrendingUp,
+  Lock,
+  Database,
+  Trophy,
+  Globe,
+  Bot,
+  Gauge,
+  Eye,
+  Umbrella,
+  PenTool,
+  Network,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -306,22 +320,29 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Full menu items for organizations and admins - with unique keys (GROUPED)
   const fullMenuItems: SidebarMenuItem[] = [
     { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard', key: 'dashboard' },
+    
+    // ═══════════════ المنظمة والهيكل ═══════════════
     { icon: Building2, label: t('sidebar.orgGroup'), path: '#', key: 'org-group', badge: sectionBadges['org-group'], children: [
       { icon: Building2, label: t('sidebar.orgProfile'), path: '/dashboard/organization-profile', key: 'org-profile' },
+      { icon: Network, label: language === 'ar' ? 'الهيكل التنظيمي' : 'Org Structure', path: '/dashboard/org-structure', key: 'org-structure' },
+      { icon: Users, label: language === 'ar' ? 'إدارة الموظفين' : 'Employees', path: '/dashboard/employees', key: 'employees' },
+      { icon: Users, label: t('sidebar.teamData'), path: '/dashboard/team-credentials', key: 'other-team' },
       { icon: Newspaper, label: t('sidebar.posts'), path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
       { icon: Rss, label: t('sidebar.partnersTimeline'), path: '/dashboard/partners-timeline', badge: sectionBadges['partners-timeline'], key: 'partners-timeline' },
       { icon: Handshake, label: t('sidebar.partners'), path: '/dashboard/partners', badge: (partnersCount || 0) + (sectionBadges['partners'] || 0), key: 'partners' },
-      { icon: Users, label: t('sidebar.teamData'), path: '/dashboard/team-credentials', key: 'other-team' },
     ]},
-    // Shipments & Certificates group - varies by org type
+
+    // ═══════════════ العمليات حسب نوع الجهة ═══════════════
     ...((organization?.organization_type as string) === 'transporter'
       ? [{
           icon: Package, label: t('sidebar.shipmentsOps'), path: '#', key: 'transporter-ops-group', badge: sectionBadges['transporter-ops-group'], children: [
             { icon: Package, label: t('sidebar.shipments'), path: '/dashboard/transporter-shipments', badge: sectionBadges['transporter-shipments'], key: 'transporter-shipments' },
+            { icon: AlertTriangle, label: language === 'ar' ? 'الشحنات المرفوضة' : 'Rejected Shipments', path: '/dashboard/rejected-shipments', key: 'transporter-rejected' },
             { icon: FileText, label: t('sidebar.receiptCerts'), path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
             { icon: FileCheck, label: t('sidebar.deliveryDeclarations'), path: '/dashboard/delivery-declarations', key: 'transporter-declarations' },
             { icon: FolderCheck, label: t('sidebar.recyclingCerts'), path: '/dashboard/recycling-certificates', badge: sectionBadges['transporter-certs'], key: 'transporter-certs' },
             { icon: Fingerprint, label: t('sidebar.guilloche'), path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
+            { icon: Inbox, label: language === 'ar' ? 'طلبات الجمع' : 'Collection Requests', path: '/dashboard/collection-requests', key: 'collection-requests' },
           ]
         } as SidebarMenuItem,
         {
@@ -329,12 +350,21 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Users, label: t('sidebar.driversGroup'), path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
             { icon: MapPin, label: t('sidebar.driverTracking'), path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
             { icon: Shield, label: language === 'ar' ? 'تصاريح السائقين' : 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits' },
+            { icon: GraduationCap, label: language === 'ar' ? 'أكاديمية السائقين' : 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy' },
+          ]
+        } as SidebarMenuItem,
+        {
+          icon: Wallet, label: language === 'ar' ? 'الأدوات المالية' : 'Financial Tools', path: '#', key: 'transporter-finance-group', children: [
+            { icon: Umbrella, label: language === 'ar' ? 'التأمين الذكي' : 'Smart Insurance', path: '/dashboard/smart-insurance', key: 'smart-insurance' },
+            { icon: TrendingUp, label: language === 'ar' ? 'العقود الآجلة' : 'Futures Market', path: '/dashboard/futures-market', key: 'futures-market' },
+            { icon: Wallet, label: language === 'ar' ? 'المحفظة الرقمية' : 'Digital Wallet', path: '/dashboard/digital-wallet', key: 'digital-wallet' },
           ]
         } as SidebarMenuItem]
       : (organization?.organization_type as string) === 'recycler'
       ? [{
           icon: Package, label: t('sidebar.shipmentsCerts'), path: '#', key: 'recycler-ops-group', badge: sectionBadges['recycler-ops-group'], children: [
             { icon: Package, label: t('sidebar.shipments'), path: '/dashboard/shipments', badge: sectionBadges['recycler-shipments'], key: 'recycler-shipments' },
+            { icon: AlertTriangle, label: language === 'ar' ? 'الشحنات المرفوضة' : 'Rejected Shipments', path: '/dashboard/rejected-shipments', key: 'recycler-rejected' },
             { icon: FileCheck, label: t('sidebar.deliveryDeclarations'), path: '/dashboard/delivery-declarations', key: 'recycler-declarations' },
             { icon: FolderCheck, label: t('sidebar.issueRecyclingCerts'), path: '/dashboard/issue-recycling-certificates', badge: sectionBadges['issue-certs'], key: 'issue-certs' },
           ]
@@ -346,23 +376,48 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Package, label: t('sidebar.incomingRequests'), path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming' },
             { icon: FolderCheck, label: t('sidebar.disposalCerts'), path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
             { icon: BarChart3, label: t('sidebar.disposalReports'), path: '/dashboard/disposal/reports', key: 'disposal-reports' },
+            { icon: Factory, label: language === 'ar' ? 'مرافق التخلص' : 'Disposal Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities' },
           ]
         } as SidebarMenuItem]
       : [{
           icon: Package, label: t('sidebar.shipmentsCerts'), path: '#', key: 'generator-ops-group', badge: sectionBadges['generator-ops-group'], children: [
             { icon: Package, label: t('sidebar.shipments'), path: '/dashboard/shipments', badge: sectionBadges['generator-shipments'], key: 'generator-shipments' },
+            { icon: AlertTriangle, label: language === 'ar' ? 'الشحنات المرفوضة' : 'Rejected Shipments', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
             { icon: FileText, label: t('sidebar.receiptCerts'), path: '/dashboard/generator-receipts', key: 'generator-receipts' },
             { icon: FolderCheck, label: t('sidebar.recyclingCerts'), path: '/dashboard/recycling-certificates', badge: sectionBadges['generator-certs'], key: 'generator-certs' },
           ]
         } as SidebarMenuItem]),
-    // Admin-specific
+
+    // ═══════════════ العمليات والسجلات ═══════════════
+    { icon: Activity, label: language === 'ar' ? 'العمليات والأنشطة' : 'Operations & Activity', path: '#', key: 'operations-group', children: [
+      { icon: Gauge, label: language === 'ar' ? 'لوحة العمليات' : 'Operations Dashboard', path: '/dashboard/operations', key: 'operations' },
+      { icon: ClipboardList, label: language === 'ar' ? 'سجل الأنشطة' : 'Activity Log', path: '/dashboard/activity-log', key: 'activity-log' },
+      { icon: FileText, label: language === 'ar' ? 'السجلات الخارجية' : 'External Records', path: '/dashboard/external-records', key: 'external-records' },
+      { icon: MapPin, label: language === 'ar' ? 'إعدادات GPS' : 'GPS Settings', path: '/dashboard/gps-settings', key: 'gps-settings' },
+      { icon: Zap, label: language === 'ar' ? 'إعدادات IoT' : 'IoT Settings', path: '/dashboard/iot-settings', key: 'iot-settings' },
+    ]},
+
+    // ═══════════════ العقود والقانونية ═══════════════
+    { icon: FileText, label: language === 'ar' ? 'العقود والقانونية' : 'Contracts & Legal', path: '#', key: 'contracts-group', children: [
+      { icon: FileText, label: language === 'ar' ? 'العقود' : 'Contracts', path: '/dashboard/contracts', key: 'contracts' },
+      { icon: FileText, label: language === 'ar' ? 'قوالب العقود' : 'Contract Templates', path: '/dashboard/contract-templates', key: 'contract-templates' },
+      { icon: Award, label: language === 'ar' ? 'خطابات الترسية' : 'Award Letters', path: '/dashboard/award-letters', key: 'award-letters' },
+      { icon: FileCheck, label: language === 'ar' ? 'قبول الشروط' : 'Terms Acceptances', path: '/dashboard/terms-acceptances', key: 'terms-acceptances' },
+      { icon: Receipt, label: language === 'ar' ? 'الفاتورة الإلكترونية' : 'E-Invoice', path: '/dashboard/e-invoice', key: 'e-invoice' },
+      { icon: Eye, label: language === 'ar' ? 'التحقق من الوثائق' : 'Document Verification', path: '/dashboard/document-verification', key: 'document-verification' },
+    ]},
+
+    // ═══════════════ لوحة الإدارة ═══════════════
     ...(isAdmin
       ? [{
           icon: Shield, label: t('sidebar.adminGroup'), path: '#', key: 'admin-group', badge: sectionBadges['admin-group'], children: [
             { icon: Brain, label: t('sidebar.smartEye'), path: '/dashboard/smart-insights', key: 'smart-insights' },
             { icon: Shield, label: t('sidebar.smartOnboarding'), path: '/dashboard/onboarding-review', key: 'onboarding-review' },
             { icon: Activity, label: t('sidebar.systemStatus'), path: '/dashboard/system-status', key: 'system-status' },
+            { icon: Activity, label: language === 'ar' ? 'نظرة عامة على النظام' : 'System Overview', path: '/dashboard/system-overview', key: 'system-overview' },
+            { icon: Settings, label: language === 'ar' ? 'أوامر النظام' : 'System Commands', path: '/dashboard/system-commands', key: 'system-commands' },
             { icon: CheckSquare, label: t('sidebar.companyApprovals'), path: '/dashboard/company-approvals', badge: sectionBadges['company-approvals'], key: 'company-approvals' },
+            { icon: Building2, label: language === 'ar' ? 'إدارة الشركات' : 'Company Management', path: '/dashboard/company-management', key: 'company-management' },
             { icon: UserPlus, label: t('sidebar.driverApprovals'), path: '/dashboard/driver-approvals', badge: sectionBadges['driver-approvals'], key: 'driver-approvals' },
             { icon: FileText, label: t('sidebar.orgDocuments'), path: '/dashboard/organization-documents', badge: sectionBadges['org-docs'], key: 'org-docs' },
             { icon: MapPin, label: t('sidebar.driverTracking'), path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
@@ -370,57 +425,91 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: FolderCheck, label: t('sidebar.recyclingCerts'), path: '/dashboard/recycling-certificates', badge: sectionBadges['admin-certs'], key: 'admin-certs' },
             { icon: Video, label: t('sidebar.videoGen'), path: '/dashboard/video-generator', key: 'video-gen' },
             { icon: TreePine, label: t('sidebar.woodMarket'), path: '/dashboard/wood-market', key: 'wood-market' },
+            { icon: Scale, label: language === 'ar' ? 'لوحة الرقابة' : 'Regulator Dashboard', path: '/dashboard/regulator', key: 'regulator' },
+            { icon: Building2, label: language === 'ar' ? 'الشركات المنظمة' : 'Regulated Companies', path: '/dashboard/regulated-companies', key: 'regulated-companies' },
+            { icon: LinkIcon, label: language === 'ar' ? 'إدارة API' : 'API Management', path: '/dashboard/api', key: 'api-management' },
+            { icon: Shield, label: language === 'ar' ? 'اختبار الأمان' : 'Security Testing', path: '/dashboard/security-testing', key: 'security-testing' },
+            { icon: Database, label: language === 'ar' ? 'تحسين قاعدة البيانات' : 'DB Optimization', path: '/dashboard/db-optimization', key: 'db-optimization' },
+            { icon: BarChart3, label: language === 'ar' ? 'تحليلات متقدمة' : 'Advanced Analytics', path: '/dashboard/advanced-analytics', key: 'advanced-analytics' },
+            { icon: Lock, label: language === 'ar' ? 'امتثال GDPR' : 'GDPR Compliance', path: '/dashboard/gdpr-compliance', key: 'gdpr-compliance' },
           ]
         } as SidebarMenuItem]
       : []),
-    // Reports group
+
+    // ═══════════════ التقارير والتحليلات ═══════════════
     { icon: BarChart3, label: t('sidebar.reportsGroup'), path: '#', key: 'reports-group', badge: sectionBadges['reports-group'], children: [
       { icon: BarChart3, label: t('sidebar.reportsGroup'), path: '/dashboard/reports', key: 'reports' },
       { icon: FileText, label: t('sidebar.shipmentReports'), path: '/dashboard/shipment-reports', key: 'shipment-reports' },
       { icon: ClipboardList, label: t('sidebar.aggregateReport'), path: '/dashboard/aggregate-report', key: 'aggregate-report' },
       { icon: BookOpen, label: t('sidebar.reportsGuide'), path: '/dashboard/reports-guide', key: 'reports-guide' },
+      { icon: Leaf, label: language === 'ar' ? 'البصمة الكربونية' : 'Carbon Footprint', path: '/dashboard/carbon-footprint', key: 'carbon-footprint' },
+      { icon: TreePine, label: language === 'ar' ? 'الاستدامة البيئية' : 'Environmental Sustainability', path: '/dashboard/environmental-sustainability', key: 'environmental-sustainability' },
+      { icon: Leaf, label: language === 'ar' ? 'تقارير ESG' : 'ESG Reports', path: '/dashboard/esg-reports', key: 'esg-reports' },
+      { icon: Shield, label: language === 'ar' ? 'تقارير السلامة المهنية' : 'OHS Reports', path: '/dashboard/ohs-reports', key: 'ohs-reports' },
+      { icon: BarChart3, label: language === 'ar' ? 'تحليل النفايات التفصيلي' : 'Detailed Waste Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis' },
+      { icon: Activity, label: language === 'ar' ? 'خريطة تدفق النفايات' : 'Waste Flow Heatmap', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap' },
     ]},
-    // Document Archive
+
+    // ═══════════════ أرشيف الوثائق ═══════════════
     { icon: FolderOpen, label: t('sidebar.docArchive'), path: '#', key: 'doc-archive-group', children: [
       { icon: FolderOpen, label: t('sidebar.allDocs'), path: '/dashboard/document-archive', key: 'doc-archive-all' },
       { icon: Inbox, label: t('sidebar.receivedDocs'), path: '/dashboard/document-archive?tab=received', key: 'doc-archive-received' },
       { icon: Send, label: t('sidebar.sentDocs'), path: '/dashboard/document-archive?tab=sent', key: 'doc-archive-sent' },
       { icon: FileText, label: t('sidebar.issuedDocs'), path: '/dashboard/document-archive?tab=issued', key: 'doc-archive-issued' },
     ]},
-    // Waste registers group
+
+    // ═══════════════ سجلات المخلفات ═══════════════
     { icon: FileSpreadsheet, label: t('sidebar.wasteRegisters'), path: '#', key: 'waste-group', children: [
       { icon: FileSpreadsheet, label: t('sidebar.nonHazardous'), path: '/dashboard/non-hazardous-register', key: 'non-hazardous' },
       { icon: AlertTriangle, label: t('sidebar.hazardous'), path: '/dashboard/hazardous-register', key: 'hazardous' },
       { icon: Layers, label: t('sidebar.wasteClassification'), path: '/dashboard/waste-types', key: 'waste-types' },
     ]},
-    // Waste Exchange - only for transporter, recycler, admin
+
+    // ═══════════════ بورصة المخلفات والتجارة ═══════════════
     ...((organization?.organization_type === 'transporter' || organization?.organization_type === 'recycler' || isAdmin)
-      ? [{ icon: Store, label: language === 'ar' ? 'بورصة المخلفات' : 'Waste Exchange', path: '/dashboard/waste-exchange', key: 'waste-exchange' } as SidebarMenuItem]
+      ? [{ 
+          icon: Store, label: language === 'ar' ? 'البورصة والتجارة' : 'Exchange & Trade', path: '#', key: 'exchange-group', children: [
+            { icon: Store, label: language === 'ar' ? 'بورصة المخلفات' : 'Waste Exchange', path: '/dashboard/waste-exchange', key: 'waste-exchange' },
+            { icon: Globe, label: language === 'ar' ? 'بورصة السلع العالمية' : 'Global Commodity Exchange', path: '/dashboard/commodity-exchange', key: 'commodity-exchange' },
+          ]
+        } as SidebarMenuItem]
       : []),
-    // Location group
+
+    // ═══════════════ أدوات الذكاء الاصطناعي ═══════════════
+    { icon: Brain, label: language === 'ar' ? 'أدوات الذكاء الاصطناعي' : 'AI Tools', path: 
+      (organization?.organization_type === 'transporter' ? '/dashboard/transporter-ai-tools' :
+       organization?.organization_type === 'recycler' ? '/dashboard/recycler-ai-tools' :
+       '/dashboard/ai-tools'), key: 'ai-tools' },
+
+    // ═══════════════ الخرائط والمواقع ═══════════════
     { icon: MapPin, label: t('sidebar.locationMaps'), path: '#', key: 'location-group', children: [
       { icon: Search, label: t('sidebar.map'), path: '/dashboard/map-explorer', key: 'map-explorer' },
       { icon: Bookmark, label: t('sidebar.savedLocations'), path: '/dashboard/saved-locations', key: 'saved-locations' },
     ]},
-    // Quick links group
+
+    // ═══════════════ الروابط السريعة ═══════════════
     { icon: Zap, label: t('sidebar.quickLinks'), path: '#', key: 'quick-links-group', children: [
       { icon: LinkIcon, label: t('sidebar.quickDepositLinks'), path: '/dashboard/quick-deposit-links', key: 'quick-deposit-links' },
       { icon: Zap, label: t('sidebar.quickShipmentLinks'), path: '/dashboard/quick-shipment-links', key: 'quick-shipment-links' },
       { icon: Truck, label: t('sidebar.quickDriverLinks'), path: '/dashboard/quick-driver-links', key: 'quick-driver-links' },
     ]},
-    // Communication
+
+    // ═══════════════ التواصل ═══════════════
     { icon: MessageCircle, label: t('sidebar.communication'), path: '#', key: 'comm-group', badge: sectionBadges['comm-group'], children: [
       { icon: MessageCircle, label: t('sidebar.chatMessages'), path: '/dashboard/chat', badge: sectionBadges['chat'], key: 'chat' },
       { icon: CircleDot, label: t('sidebar.statuses'), path: '/dashboard/stories', key: 'stories' },
+      { icon: Users, label: language === 'ar' ? 'بوابة العملاء' : 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal' },
     ]},
-    // Requests & Regulatory group
+
+    // ═══════════════ الطلبات والتنظيمية ═══════════════
     { icon: Send, label: t('sidebar.requestsReg'), path: '#', key: 'requests-reg-group', badge: sectionBadges['requests-reg-group'], children: [
       { icon: Send, label: t('sidebar.myRequests'), path: '/dashboard/my-requests', badge: sectionBadges['my-requests'], key: 'my-requests' },
       { icon: Scale, label: t('sidebar.regulatoryLog'), path: '/dashboard/regulatory-updates', key: 'regulatory' },
       { icon: ClipboardList, label: t('sidebar.operationalPlans'), path: '/dashboard/operational-plans', key: 'operational-plans' },
       { icon: Users, label: t('sidebar.partnerAccounts'), path: '/dashboard/partner-accounts', badge: sectionBadges['partner-accounts'], key: 'partner-accounts' },
     ]},
-    // ERP System group
+
+    // ═══════════════ نظام ERP ═══════════════
     { icon: Boxes, label: t('sidebar.erpSystem'), path: '#', key: 'erp-group', children: [
       { icon: Calculator, label: t('sidebar.accounting'), path: '/dashboard/erp/accounting', key: 'erp-accounting' },
       { icon: Package, label: t('sidebar.inventory'), path: '/dashboard/erp/inventory', key: 'erp-inventory' },
@@ -431,20 +520,36 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Banknote, label: t('sidebar.cogs'), path: '/dashboard/erp/cogs', key: 'erp-cogs' },
       { icon: GitCompareArrows, label: t('sidebar.financialComparisons'), path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons' },
     ]},
-    // Signatories & Authorization
-    { icon: Shield, label: language === 'ar' ? '🛡️ المفوضون المعتمدون' : 'Authorized Signatories', path: '/dashboard/authorized-signatories', key: 'authorized-signatories' },
-    { icon: FileText, label: language === 'ar' ? '📋 التصاريح والأذونات' : 'Permits', path: '/dashboard/permits', key: 'permits' },
-    { icon: Shield, label: language === 'ar' ? '🌿 الاستشاريون البيئيون' : 'Env. Consultants', path: '/dashboard/environmental-consultants', key: 'env-consultants' },
-    { icon: FileText, label: language === 'ar' ? '📨 صندوق التوقيعات' : 'Signing Inbox', path: '/dashboard/signing-inbox', key: 'signing-inbox' },
-    { icon: FileText, label: language === 'ar' ? '📝 مركز الملاحظات' : 'Notes Center', path: '/dashboard/notes', key: 'notes-center' },
-    // Learning Center
-    { icon: GraduationCap, label: language === 'ar' ? 'المركز التعليمي' : 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
-    { icon: BookOpen, label: language === 'ar' ? '📖 دليل المستخدم' : 'User Guide', path: '/dashboard/user-guide', key: 'user-guide' },
-    // System & Support group
+
+    // ═══════════════ المفوضون والتوقيعات ═══════════════
+    { icon: PenTool, label: language === 'ar' ? 'التوقيعات والتفويض' : 'Signatures & Auth', path: '#', key: 'signatures-group', children: [
+      { icon: Shield, label: language === 'ar' ? 'المفوضون المعتمدون' : 'Authorized Signatories', path: '/dashboard/authorized-signatories', key: 'authorized-signatories' },
+      { icon: FileText, label: language === 'ar' ? 'التصاريح والأذونات' : 'Permits', path: '/dashboard/permits', key: 'permits' },
+      { icon: Shield, label: language === 'ar' ? 'الاستشاريون البيئيون' : 'Env. Consultants', path: '/dashboard/environmental-consultants', key: 'env-consultants' },
+      { icon: FileText, label: language === 'ar' ? 'صندوق التوقيعات' : 'Signing Inbox', path: '/dashboard/signing-inbox', key: 'signing-inbox' },
+    ]},
+
+    // ═══════════════ الإنجازات والتقدير ═══════════════
+    { icon: Trophy, label: language === 'ar' ? 'الإنجازات والتقدير' : 'Achievements', path: '#', key: 'achievements-group', children: [
+      { icon: Trophy, label: language === 'ar' ? 'نظام الإنجازات' : 'Gamification', path: '/dashboard/gamification', key: 'gamification' },
+      { icon: Award, label: language === 'ar' ? 'شهادات التميز' : 'Pride Certificates', path: '/dashboard/pride-certificates', key: 'pride-certificates' },
+    ]},
+
+    // ═══════════════ الملاحظات ═══════════════
+    { icon: FileText, label: language === 'ar' ? 'مركز الملاحظات' : 'Notes Center', path: '/dashboard/notes', key: 'notes-center' },
+
+    // ═══════════════ التعلم والتطوير ═══════════════
+    { icon: GraduationCap, label: language === 'ar' ? 'التعلم والتطوير' : 'Learning & Dev', path: '#', key: 'learning-group', children: [
+      { icon: GraduationCap, label: language === 'ar' ? 'المركز التعليمي' : 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
+      { icon: BookOpen, label: language === 'ar' ? 'دليل المستخدم' : 'User Guide', path: '/dashboard/user-guide', key: 'user-guide' },
+    ]},
+
+    // ═══════════════ النظام والدعم ═══════════════
     { icon: Settings, label: t('sidebar.systemSupport'), path: '#', key: 'system-support-group', badge: notificationCount, children: [
       { icon: Headphones, label: t('sidebar.techSupport'), path: '/dashboard/support', key: 'support' },
       { icon: Bell, label: t('nav.notifications'), path: '/dashboard/notifications', badge: notificationCount, key: 'notifications' },
       { icon: Activity, label: t('sidebar.yourSystemStatus'), path: '/dashboard/system-status', key: 'all-system-status' },
+      { icon: Wallet, label: language === 'ar' ? 'إدارة الاشتراك' : 'Subscription', path: '/dashboard/subscription', key: 'subscription' },
       { icon: WifiOff, label: t('sidebar.offlineMode'), path: '/dashboard/offline-mode', key: 'offline-mode' },
       { icon: Info, label: t('sidebar.aboutPlatform'), path: '/dashboard/about-platform', key: 'about-platform' },
       { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'settings' },
