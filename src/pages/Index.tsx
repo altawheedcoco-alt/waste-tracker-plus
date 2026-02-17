@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import LandingWrapper from "@/components/LandingWrapper";
+import NewsTicker from "@/components/NewsTicker";
 
 // Lazy load below-fold sections
 const Stats = lazy(() => import("@/components/Stats"));
@@ -23,6 +24,7 @@ const Index = () => {
     <LandingWrapper>
       <div className="min-h-screen bg-[hsl(140,20%,98%)]">
         <Header />
+        <NewsTicker />
         <main>
           <Hero />
           <Suspense fallback={<SectionFallback />}>
