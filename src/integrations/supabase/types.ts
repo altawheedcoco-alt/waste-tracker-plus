@@ -872,6 +872,149 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_checklist_items: {
+        Row: {
+          audit_session_id: string
+          auditor_comment: string | null
+          clause_title: string
+          clause_title_ar: string
+          created_at: string
+          data_source_query: string | null
+          data_source_table: string | null
+          description: string | null
+          evidence_link: string | null
+          evidence_type: string | null
+          id: string
+          iso_clause: string
+          sort_order: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          audit_session_id: string
+          auditor_comment?: string | null
+          clause_title: string
+          clause_title_ar: string
+          created_at?: string
+          data_source_query?: string | null
+          data_source_table?: string | null
+          description?: string | null
+          evidence_link?: string | null
+          evidence_type?: string | null
+          id?: string
+          iso_clause: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          audit_session_id?: string
+          auditor_comment?: string | null
+          clause_title?: string
+          clause_title_ar?: string
+          created_at?: string
+          data_source_query?: string | null
+          data_source_table?: string | null
+          description?: string | null
+          evidence_link?: string | null
+          evidence_type?: string | null
+          id?: string
+          iso_clause?: string
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_checklist_items_audit_session_id_fkey"
+            columns: ["audit_session_id"]
+            isOneToOne: false
+            referencedRelation: "audit_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_sessions: {
+        Row: {
+          access_expires_at: string
+          access_token: string
+          audit_date: string
+          audit_type: string
+          auditor_email: string | null
+          auditor_name: string
+          auditor_notes: string | null
+          auditor_organization: string | null
+          auditor_signature_url: string | null
+          auditor_stamp_url: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          organization_id: string
+          overall_result: string | null
+          scope_description: string | null
+          signed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          access_expires_at: string
+          access_token: string
+          audit_date: string
+          audit_type?: string
+          auditor_email?: string | null
+          auditor_name: string
+          auditor_notes?: string | null
+          auditor_organization?: string | null
+          auditor_signature_url?: string | null
+          auditor_stamp_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id: string
+          overall_result?: string | null
+          scope_description?: string | null
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          access_expires_at?: string
+          access_token?: string
+          audit_date?: string
+          audit_type?: string
+          auditor_email?: string | null
+          auditor_name?: string
+          auditor_notes?: string | null
+          auditor_organization?: string | null
+          auditor_signature_url?: string | null
+          auditor_stamp_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          organization_id?: string
+          overall_result?: string | null
+          scope_description?: string | null
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "audit_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       authorized_signatories: {
         Row: {
           activated_at: string | null
@@ -3529,6 +3672,99 @@ export type Database = {
           {
             foreignKeyName: "contracts_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corrective_actions: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          corrective_action: string | null
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          description: string | null
+          evidence_notes: string | null
+          evidence_urls: string[] | null
+          id: string
+          iso_clause: string | null
+          organization_id: string
+          preventive_action: string | null
+          root_cause: string | null
+          severity: string
+          source: string
+          source_reference_id: string | null
+          status: string
+          ticket_number: string
+          title: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          corrective_action?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
+          evidence_notes?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          iso_clause?: string | null
+          organization_id: string
+          preventive_action?: string | null
+          root_cause?: string | null
+          severity?: string
+          source?: string
+          source_reference_id?: string | null
+          status?: string
+          ticket_number: string
+          title: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          corrective_action?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
+          evidence_notes?: string | null
+          evidence_urls?: string[] | null
+          id?: string
+          iso_clause?: string | null
+          organization_id?: string
+          preventive_action?: string | null
+          root_cause?: string | null
+          severity?: string
+          source?: string
+          source_reference_id?: string | null
+          status?: string
+          ticket_number?: string
+          title?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corrective_actions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "corrective_actions_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -17227,6 +17463,81 @@ export type Database = {
           },
           {
             foreignKeyName: "report_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_register: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          impact: number
+          iso_clause: string | null
+          likelihood: number
+          organization_id: string
+          preventive_actions: string | null
+          responsible_user_id: string | null
+          review_date: string | null
+          risk_category: string
+          risk_description: string | null
+          risk_level: string | null
+          risk_score: number | null
+          risk_title: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact: number
+          iso_clause?: string | null
+          likelihood: number
+          organization_id: string
+          preventive_actions?: string | null
+          responsible_user_id?: string | null
+          review_date?: string | null
+          risk_category?: string
+          risk_description?: string | null
+          risk_level?: string | null
+          risk_score?: number | null
+          risk_title: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          impact?: number
+          iso_clause?: string | null
+          likelihood?: number
+          organization_id?: string
+          preventive_actions?: string | null
+          responsible_user_id?: string | null
+          review_date?: string | null
+          risk_category?: string
+          risk_description?: string | null
+          risk_level?: string | null
+          risk_score?: number | null
+          risk_title?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_register_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "risk_register_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
