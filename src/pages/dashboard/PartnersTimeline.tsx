@@ -167,8 +167,8 @@ const PartnersTimeline = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">تايم لاين الشركاء</h1>
-            <p className="text-muted-foreground">آخر منشورات شركائك في مكان واحد</p>
+            <h1 className="text-2xl font-bold">تايم لاين الجهات المرتبطة</h1>
+            <p className="text-muted-foreground">آخر منشورات جهاتك المرتبطة في مكان واحد</p>
           </div>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
             <RefreshCw className="w-4 h-4 ml-2" />

@@ -69,7 +69,7 @@ const PartnerRiskPanel = () => {
         .limit(20);
 
       if (!partners?.length) {
-        toast.info('لا يوجد شركاء لتحليلهم');
+        toast.info('لا يوجد جهات مرتبطة لتحليلها');
         return;
       }
 
@@ -92,7 +92,7 @@ const PartnerRiskPanel = () => {
       toast.success(`تم تحليل ${partners.length} شريك`);
       refetch();
     } catch (err) {
-      toast.error('فشل في تحليل الشركاء');
+      toast.error('فشل في تحليل الجهات المرتبطة');
     } finally {
       setIsAnalyzing(false);
     }
@@ -114,18 +114,18 @@ const PartnerRiskPanel = () => {
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <ShieldAlert className="w-5 h-5 text-primary" />
-            تحليل مخاطر الشركاء
+            تحليل مخاطر الجهات المرتبطة
           </CardTitle>
           <Button onClick={analyzeAllPartners} disabled={isAnalyzing} size="sm">
             {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin ml-2" /> : <Users className="w-4 h-4 ml-2" />}
-            تحليل الشركاء
+            تحليل الجهات المرتبطة
           </Button>
         </CardHeader>
         <CardContent>
           {riskScores.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ShieldAlert className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>اضغط "تحليل الشركاء" لبدء تقييم المخاطر</p>
+              <p>اضغط "تحليل الجهات المرتبطة" لبدء تقييم المخاطر</p>
             </div>
           ) : (
             <div className="space-y-4">

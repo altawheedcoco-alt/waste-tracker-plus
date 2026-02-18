@@ -342,7 +342,7 @@ const AdminDashboard = () => {
             <Recycle className="h-3 w-3" />
             المعالجين ({stats.recyclerCount})
           </TabsTrigger>
-          <TabsTrigger value="partners">الشركاء</TabsTrigger>
+          <TabsTrigger value="partners">الجهات المرتبطة</TabsTrigger>
           <TabsTrigger value="tracking">تتبع السائقين</TabsTrigger>
         </TabsList>
 

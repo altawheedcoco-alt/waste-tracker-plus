@@ -27,10 +27,10 @@ const AdminPartnersTab = ({
             onClick={() => navigate('/dashboard/partners')}
           >
             <Eye className="w-4 h-4" />
-            عرض صفحة الشركاء الكاملة
+            عرض صفحة الجهات المرتبطة
           </Button>
           <div>
-            <CardTitle>جميع الجهات والشركاء</CardTitle>
+            <CardTitle>جميع الجهات المرتبطة</CardTitle>
             <CardDescription>عرض سريع لجميع الجهات المسجلة في النظام</CardDescription>
           </div>
         </div>
@@ -88,11 +88,11 @@ const AdminPartnersTab = ({
         </div>
         <div className="text-center py-4">
           <p className="text-muted-foreground mb-4">
-            للاطلاع على كافة بيانات الجهات وإدارتها، انتقل إلى صفحة الشركاء
+            للاطلاع على كافة بيانات الجهات وإدارتها، انتقل إلى صفحة الجهات المرتبطة
           </p>
           <Button onClick={() => navigate('/dashboard/partners')} className="gap-2">
             <Building2 className="w-4 h-4" />
-            عرض جميع الشركاء
+            عرض جميع الجهات المرتبطة
           </Button>
         </div>
       </CardContent>

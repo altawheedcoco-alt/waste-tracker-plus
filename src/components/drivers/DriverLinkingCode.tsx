@@ -69,7 +69,7 @@ const DriverLinkingCode = () => {
           أكواد ربط السائقين
         </CardTitle>
         <CardDescription>
-          كل سائق يحصل على كود فريد يمكن استخدامه لربطه بالشحنات أو مشاركته مع الشركاء
+          كل سائق يحصل على كود فريد يمكن استخدامه لربطه بالشحنات أو مشاركته مع الجهات المرتبطة
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

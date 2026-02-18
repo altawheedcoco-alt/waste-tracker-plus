@@ -57,7 +57,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
       content: (
         <div className="space-y-2 text-right text-sm text-muted-foreground">
           <p>المبلغ المعلق: <span className="font-bold text-foreground">{(financials?.pendingPayments || 0).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}</span></p>
-          <p>هذه المدفوعات تحتاج متابعة وتحصيل من الشركاء.</p>
+          <p>هذه المدفوعات تحتاج متابعة وتحصيل من الجهات المرتبطة.</p>
         </div>
       ),
       link: '/dashboard/accounting',

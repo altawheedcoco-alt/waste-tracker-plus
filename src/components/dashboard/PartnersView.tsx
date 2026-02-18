@@ -209,9 +209,9 @@ const PartnersView = () => {
         <div className="bg-muted/50 border rounded-lg p-4 flex items-start gap-3">
           <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
           <div className="text-right">
-            <p className="font-medium">لا يوجد شركاء بعد</p>
+            <p className="font-medium">لا يوجد جهات مرتبطة بعد</p>
             <p className="text-sm text-muted-foreground">
-              يمكنك ربط شركاء باستخدام كود التحقق أعلاه.
+              يمكنك ربط جهات جديدة باستخدام كود التحقق أعلاه.
             </p>
           </div>
         </div>

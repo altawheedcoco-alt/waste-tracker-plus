@@ -26,7 +26,7 @@ const routeLabels: Record<string, string> = {
   settings: 'الإعدادات',
   new: 'إنشاء جديد',
   edit: 'تعديل',
-  partners: 'الشركاء',
+  partners: 'الجهات المرتبطة',
   'ai-tools': 'أدوات الذكاء الاصطناعي',
   'carbon-footprint': 'البصمة الكربونية',
   'employee-management': 'إدارة الموظفين',

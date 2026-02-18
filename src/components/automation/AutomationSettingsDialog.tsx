@@ -77,7 +77,7 @@ const categories: AutomationCategory[] = [
   { id: 'reports', title: 'التقارير', description: 'توليد التقارير آلياً', icon: FileText, color: 'from-purple-500 to-violet-500' },
   { id: 'finance', title: 'المالية', description: 'العمليات المالية التلقائية', icon: Wallet, color: 'from-emerald-500 to-teal-500' },
   { id: 'tracking', title: 'التتبع', description: 'تتبع ومراقبة تلقائية', icon: MapPin, color: 'from-red-500 to-pink-500' },
-  { id: 'partners', title: 'الشركاء', description: 'التواصل مع الشركاء', icon: Building2, color: 'from-indigo-500 to-blue-500' },
+  { id: 'partners', title: 'الجهات المرتبطة', description: 'التواصل مع الجهات المرتبطة', icon: Building2, color: 'from-indigo-500 to-blue-500' },
   { id: 'security', title: 'الأمان', description: 'إجراءات أمنية تلقائية', icon: Shield, color: 'from-slate-500 to-gray-500' },
   { id: 'ai', title: 'الذكاء الاصطناعي', description: 'ميزات AI المتقدمة', icon: Sparkles, color: 'from-pink-500 to-rose-500' },
   { id: 'integration', title: 'التكامل', description: 'ربط الأنظمة الخارجية', icon: Link, color: 'from-cyan-500 to-blue-500' },
@@ -86,7 +86,7 @@ const categories: AutomationCategory[] = [
 
 const allAutomationSettings: AutomationSetting[] = [
   // الشحنات (25 إجراء)
-  { id: '1', key: 'auto_accept_shipments', title: 'قبول الشحنات تلقائياً', description: 'قبول طلبات الشحن الجديدة من الشركاء الموثوقين تلقائياً', icon: CheckCircle2, category: 'shipments', enabled: false },
+  { id: '1', key: 'auto_accept_shipments', title: 'قبول الشحنات تلقائياً', description: 'قبول طلبات الشحن الجديدة من الجهات المرتبطة الموثوقة تلقائياً', icon: CheckCircle2, category: 'shipments', enabled: false },
   { id: '2', key: 'auto_assign_driver', title: 'تعيين السائق تلقائياً', description: 'اختيار أقرب سائق متاح للشحنة الجديدة', icon: Users, category: 'shipments', enabled: false, premium: true },
   { id: '3', key: 'auto_route_optimization', title: 'تحسين المسارات تلقائياً', description: 'حساب أفضل مسار للسائق بناءً على المواقع', icon: Route, category: 'shipments', enabled: false, premium: true },
   { id: '4', key: 'auto_status_update', title: 'تحديث الحالة من GPS', description: 'تحديث حالة الشحنة بناءً على موقع السائق', icon: MapPin, category: 'shipments', enabled: false },

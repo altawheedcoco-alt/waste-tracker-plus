@@ -355,7 +355,7 @@ const RecyclerDetailedAnalytics = () => {
       [specializationStats[1].name]: overallStats ? (specializationStats[1].totalReceived / overallStats.totalReceived) * 100 : 0,
     },
     { 
-      metric: 'الشركاء', 
+      metric: 'الجهات المرتبطة', 
       [specializationStats[0].name]: Math.min(100, specializationStats[0].uniqueGenerators * 10),
       [specializationStats[1].name]: Math.min(100, specializationStats[1].uniqueGenerators * 10),
     },
@@ -724,7 +724,7 @@ const RecyclerDetailedAnalytics = () => {
                 <TableHead className="text-center">النمو الشهري</TableHead>
                 <TableHead className="text-center">وقت المعالجة</TableHead>
                 <TableHead className="text-center">الكفاءة</TableHead>
-                <TableHead className="text-center">الشركاء</TableHead>
+                <TableHead className="text-center">الجهات المرتبطة</TableHead>
                 <TableHead className="text-center">الشحنات</TableHead>
                 <TableHead className="text-center">المستلم (طن)</TableHead>
                 <TableHead className="text-center">الكود</TableHead>

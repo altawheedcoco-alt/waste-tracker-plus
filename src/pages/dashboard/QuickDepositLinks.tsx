@@ -8,7 +8,7 @@ const QuickDepositLinks = () => {
         <div>
           <h1 className="text-2xl font-bold">روابط الإيداع السريع</h1>
           <p className="text-muted-foreground">
-            أنشئ وأدر روابط مخصصة للشركاء لإرسال الإيداعات بسهولة
+            أنشئ وأدر روابط مخصصة للجهات المرتبطة لإرسال الإيداعات بسهولة
           </p>
         </div>
         <DepositLinksManager />

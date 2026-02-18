@@ -144,7 +144,7 @@ const PartnerPerformanceChart = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            أداء الشركاء
+            أداء الجهات المرتبطة
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -203,7 +203,7 @@ const PartnerPerformanceChart = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
-            تصنيف الشركاء
+            تصنيف الجهات المرتبطة
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -241,7 +241,7 @@ const PartnerPerformanceChart = ({
             })}
             {(!performanceData || performanceData.length === 0) && (
               <p className="text-center text-muted-foreground py-8">
-                لا توجد بيانات شركاء للفترة المحددة
+                لا توجد بيانات جهات مرتبطة للفترة المحددة
               </p>
             )}
           </div>

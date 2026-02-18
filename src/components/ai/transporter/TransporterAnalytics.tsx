@@ -414,7 +414,7 @@ const TransporterAnalytics = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 justify-end">
               <Building2 className="w-5 h-5 text-primary" />
-              أهم الشركاء
+              أهم الجهات المرتبطة
             </CardTitle>
           </CardHeader>
           <CardContent>
