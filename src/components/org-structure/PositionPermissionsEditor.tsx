@@ -52,10 +52,10 @@ const permissionGroups = [
     ],
   },
   {
-    title: 'الشركاء والمستندات',
+    title: 'الجهات المرتبطة والمستندات',
     permissions: [
-      { key: 'can_manage_partners', label: 'إدارة الشركاء' },
-      { key: 'can_view_partner_data', label: 'عرض بيانات الشركاء' },
+      { key: 'can_manage_partners', label: 'إدارة الجهات المرتبطة' },
+      { key: 'can_view_partner_data', label: 'عرض بيانات الجهات المرتبطة' },
       { key: 'can_sign_documents', label: 'توقيع المستندات' },
       { key: 'can_issue_certificates', label: 'إصدار شهادات' },
       { key: 'can_manage_templates', label: 'إدارة القوالب' },

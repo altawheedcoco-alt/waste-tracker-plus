@@ -294,7 +294,7 @@ ${partner.representative_national_id ? `الرقم القومي للممثل: ${
             {isEditing ? 'تعديل قالب العقد' : 'إنشاء قالب عقد جديد'}
           </DialogTitle>
           <DialogDescription className="text-center">
-            أنشئ صيغة عقد جديدة لاستخدامها مع الشركاء
+            أنشئ صيغة عقد جديدة لاستخدامها مع الجهات المرتبطة
           </DialogDescription>
         </DialogHeader>
 

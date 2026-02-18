@@ -203,9 +203,9 @@ const SustainabilityReportGenerator = () => {
             </SelectContent>
           </Select>
           <Select value={selectedPartner} onValueChange={setSelectedPartner}>
-            <SelectTrigger className="sm:w-[200px]"><SelectValue placeholder="كل الشركاء" /></SelectTrigger>
+            <SelectTrigger className="sm:w-[200px]"><SelectValue placeholder="كل الجهات المرتبطة" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الشركاء</SelectItem>
+              <SelectItem value="all">كل الجهات المرتبطة</SelectItem>
               {partners.map((p: any) => (
                 <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
               ))}
@@ -256,7 +256,7 @@ const SustainabilityReportGenerator = () => {
                         <div className="flex-1 text-right space-y-2">
                           <div className="flex items-center gap-2 justify-end flex-wrap">
                             <Badge variant="outline" className="text-xs">{report.report_period}</Badge>
-                            <span className="font-medium text-sm">{partnerName || 'كل الشركاء'}</span>
+                            <span className="font-medium text-sm">{partnerName || 'كل الجهات المرتبطة'}</span>
                           </div>
 
                           {/* Environmental impact cards */}

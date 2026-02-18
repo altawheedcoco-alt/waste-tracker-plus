@@ -312,7 +312,7 @@ const DriverLocationTracker = ({ driverId, autoStart = true, showMap = true }: D
           </Badge>
         </div>
         <CardDescription>
-          موقعك الحالي يظهر للنظام والشركاء
+          موقعك الحالي يظهر للنظام والجهات المرتبطة
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

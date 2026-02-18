@@ -273,9 +273,9 @@ const InviteEmployeeDialog = ({ open, onOpenChange }: InviteEmployeeDialogProps)
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 rounded-lg border">
                     <div>
-                      <p className="font-medium text-sm">الوصول لجميع الشركاء</p>
+                      <p className="font-medium text-sm">الوصول لجميع الجهات المرتبطة</p>
                       <p className="text-xs text-muted-foreground">
-                        يمكن للموظف الوصول لبيانات جميع الشركاء
+                        يمكن للموظف الوصول لبيانات جميع الجهات المرتبطة
                       </p>
                     </div>
                     <Checkbox

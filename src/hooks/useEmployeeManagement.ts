@@ -66,11 +66,11 @@ export const PERMISSION_CATEGORIES = {
     ],
   },
   partners: {
-    label: 'الشركاء',
+    label: 'الجهات المرتبطة',
     permissions: [
-      { value: 'view_partners', label: 'عرض الشركاء' },
-      { value: 'manage_partners', label: 'إدارة الشركاء' },
-      { value: 'create_external_partners', label: 'إضافة شركاء خارجيين' },
+      { value: 'view_partners', label: 'عرض الجهات المرتبطة' },
+      { value: 'manage_partners', label: 'إدارة الجهات المرتبطة' },
+      { value: 'create_external_partners', label: 'إضافة جهات خارجية' },
     ],
   },
   reports: {

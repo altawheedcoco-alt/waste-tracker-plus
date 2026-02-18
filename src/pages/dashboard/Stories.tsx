@@ -34,7 +34,7 @@ const Stories = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />
-              حالات الشركاء
+              حالات الجهات المرتبطة
             </CardTitle>
           </CardHeader>
           <CardContent>

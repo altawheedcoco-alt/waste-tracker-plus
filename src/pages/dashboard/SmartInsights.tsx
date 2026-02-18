@@ -548,7 +548,7 @@ export default function SmartInsights() {
                 <Building2 className="h-8 w-8 text-purple-600" />
                 <span className="text-2xl font-bold text-purple-700">{stats.totalOrganizations}</span>
               </div>
-              <p className="text-sm text-purple-600 mt-2">الشركاء</p>
+              <p className="text-sm text-purple-600 mt-2">الجهات المرتبطة</p>
             </CardContent>
           </Card>
 
@@ -595,7 +595,7 @@ export default function SmartInsights() {
             </TabsTrigger>
             <TabsTrigger value="behavior" className="gap-2">
               <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">سلوك الشركاء</span>
+              <span className="hidden sm:inline">سلوك الجهات المرتبطة</span>
             </TabsTrigger>
             <TabsTrigger value="issues" className="gap-2">
               <AlertTriangle className="h-4 w-4" />
@@ -714,10 +714,10 @@ export default function SmartInsights() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-purple-500" />
-                  تحليل سلوك الشركاء
+                  تحليل سلوك الجهات المرتبطة
                 </CardTitle>
                 <CardDescription>
-                  مراقبة نشاط وموثوقية الشركاء
+                  مراقبة نشاط وموثوقية الجهات المرتبطة
                 </CardDescription>
               </CardHeader>
               <CardContent>

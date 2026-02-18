@@ -313,10 +313,10 @@ export default function CreateEmployeeDialog({ trigger }: CreateEmployeeDialogPr
                       <div>
                         <h4 className="font-medium flex items-center gap-2">
                           <Building2 className="h-4 w-4" />
-                          الوصول للشركاء
+                          الوصول للجهات المرتبطة
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          تحديد الشركاء الذين يمكن للموظف رؤيتهم
+                          تحديد الجهات المرتبطة التي يمكن للموظف رؤيتها
                         </p>
                       </div>
                       <Switch
@@ -327,7 +327,7 @@ export default function CreateEmployeeDialog({ trigger }: CreateEmployeeDialogPr
 
                     {!accessAllPartners && (
                       <div className="space-y-3 mr-6">
-                        <p className="text-sm font-medium">الشركاء المسجلين:</p>
+                        <p className="text-sm font-medium">الجهات المرتبطة المسجلة:</p>
                         <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
                           {partners.map((partner) => (
                             <div key={partner.id} className="flex items-center gap-2">
@@ -352,7 +352,7 @@ export default function CreateEmployeeDialog({ trigger }: CreateEmployeeDialogPr
                         {externalPartners && externalPartners.length > 0 && (
                           <>
                             <Separator />
-                            <p className="text-sm font-medium">الشركاء الخارجيين:</p>
+                            <p className="text-sm font-medium">الجهات الخارجية:</p>
                             <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
                               {externalPartners.map((partner) => (
                                 <div key={partner.id} className="flex items-center gap-2">

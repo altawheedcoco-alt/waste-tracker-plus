@@ -57,7 +57,7 @@ const sections = [
   },
   {
     id: "partners",
-    title: "إدارة الشركاء",
+    title: "إدارة الجهات المرتبطة",
     icon: Users,
     content: `كيفية التعامل مع شركاء العمل:
 

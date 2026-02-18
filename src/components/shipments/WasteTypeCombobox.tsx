@@ -363,7 +363,7 @@ const WasteTypeCombobox = ({ value, onChange }: WasteTypeComboboxProps) => {
     onChange('other', 'non_hazardous', wasteLabel);
 
     toast.success('تم إضافة نوع المخلف إلى القائمة', {
-      description: 'يمكنك استخدامه مع جميع الشركاء والشحنات',
+      description: 'يمكنك استخدامه مع جميع الجهات المرتبطة والشحنات',
     });
 
     // Reset

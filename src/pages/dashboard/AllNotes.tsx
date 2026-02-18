@@ -119,7 +119,7 @@ const AllNotesPage = () => {
           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setTab('partner')}>
             <CardContent className="p-4 text-center">
               <p className="text-3xl font-bold text-blue-600">{stats.partner}</p>
-              <p className="text-sm text-muted-foreground">مشتركة مع الشركاء</p>
+              <p className="text-sm text-muted-foreground">مشتركة مع الجهات المرتبطة</p>
             </CardContent>
           </Card>
           <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setTab('unresolved')}>
