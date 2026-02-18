@@ -13,7 +13,7 @@ import logo from '@/assets/logo.png';
 import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import CompanyRegistrationForm, { CompanyFormData } from '@/components/auth/CompanyRegistrationForm';
-import DemoQuickLogin from '@/components/auth/DemoQuickLogin';
+
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -873,11 +873,6 @@ const Auth = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Demo Quick Login */}
-            {authMode === 'login' && (
-              <DemoQuickLogin />
-            )}
 
             {/* Toggle login/signup */}
             <div className="mt-6 text-center">
