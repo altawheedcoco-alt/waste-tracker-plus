@@ -24899,6 +24899,10 @@ export type Database = {
         Args: { _org_id_1: string; _org_id_2: string }
         Returns: boolean
       }
+      are_verified_partners: {
+        Args: { _org1: string; _org2: string }
+        Returns: boolean
+      }
       auto_approve_delivery_certificates: { Args: never; Returns: undefined }
       auto_approve_expired_shipments: { Args: never; Returns: undefined }
       auto_generate_permits_for_shipments: {
@@ -25016,6 +25020,14 @@ export type Database = {
           minutes_offline: number
           organization_id: string
         }[]
+      }
+      check_partner_visibility: {
+        Args: {
+          _owner_org_id: string
+          _permission: string
+          _viewer_org_id: string
+        }
+        Returns: boolean
       }
       check_position_permission: {
         Args: { _org_id: string; _permission: string; _user_id: string }
