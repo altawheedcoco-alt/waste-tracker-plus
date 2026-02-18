@@ -190,15 +190,35 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
     category: 'non_hazardous',
     legalReference: 'قانون 202/2020 - الباب الثالث',
     subcategories: [
+      // ===== PET =====
       { name: 'PET - بولي إيثيلين تريفثالات', code: 'PL-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['زجاجات مياه', 'زجاجات مشروبات غازية', 'عبوات زيت طعام بلاستيك', 'زجاجات عصير', 'قوارير بلاستيك شفافة', 'PET فلينات'] },
+      { name: 'PET كسر ومطحون', code: 'PL-01A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر PET', 'رقائق PET (فليكس)', 'PET مطحون', 'حبيبات PET معاد تدوير', 'بالات PET مضغوطة'] },
+      // ===== HDPE =====
       { name: 'HDPE - بولي إيثيلين عالي الكثافة', code: 'PL-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جرادل بلاستيك', 'خزانات مياه', 'عبوات شامبو', 'عبوات منظفات', 'ماسورة HDPE', 'صفائح بلاستيك سميكة', 'عبوات لبن', 'طبالي بلاستيك'] },
-      { name: 'PVC - بولي فينيل كلوريد', code: 'PL-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مواسير PVC', 'بروفيل شبابيك', 'كابلات PVC', 'أرضيات فينيل', 'خراطيم حدائق', 'أنابيب صرف'] },
-      { name: 'LDPE - بولي إيثيلين منخفض الكثافة', code: 'PL-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أكياس بلاستيك (شنط)', 'أكياس سوبر ماركت', 'بلاستيك تغليف (ستريتش)', 'نايلون زراعي', 'أكياس زبالة', 'بلاستيك فقاعات (ببل راب)', 'غطاء صوب'] },
-      { name: 'PP - بولي بروبيلين', code: 'PL-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['علب طعام بلاستيك', 'أغطية زجاجات', 'عبوات زبادي', 'شنط منسوجة (خيش بلاستيك)', 'أنابيب PP', 'حبال بلاستيك', 'كراسي بلاستيك'] },
-      { name: 'PS - بوليسترين (فوم)', code: 'PL-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['فوم تغليف (ستايروفوم)', 'أطباق فوم أكل', 'كوبايات فوم', 'عبوات حماية أجهزة', 'فوم عزل حراري', 'صواني لحوم فوم'] },
+      { name: 'HDPE مطحون ومعاد تدوير', code: 'PL-02A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['HDPE مطحون', 'حبيبات HDPE', 'HDPE كسر', 'خرطوم HDPE كسر', 'جرادل HDPE كسر'] },
+      // ===== PVC =====
+      { name: 'PVC - بولي فينيل كلوريد', code: 'PL-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مواسير PVC', 'بروفيل شبابيك PVC', 'كابلات PVC', 'أرضيات فينيل', 'خراطيم حدائق', 'أنابيب صرف PVC'] },
+      { name: 'PVC كسر ومواسير', code: 'PL-03A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر مواسير PVC', 'PVC مطحون', 'بروفيل PVC كسر', 'قطع PVC', 'PVC رجيع'] },
+      // ===== LDPE =====
+      { name: 'LDPE - أكياس وأغشية', code: 'PL-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أكياس بلاستيك (شنط)', 'أكياس سوبر ماركت', 'بلاستيك تغليف (ستريتش)', 'أكياس زبالة', 'بلاستيك فقاعات (ببل راب)'] },
+      { name: 'نايلون زراعي وصوب', code: 'PL-04A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['نايلون زراعي', 'غطاء صوب', 'ملش زراعي', 'نايلون ري', 'نايلون تغطية أرض', 'أغشية بيوت محمية'] },
+      { name: 'ستريتش وأغلفة صناعية', code: 'PL-04B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ستريتش فيلم', 'شرنك', 'أغلفة بالتات', 'نايلون تغليف صناعي', 'أكياس شحن كبيرة', 'بيج باج (أكياس طن)'] },
+      // ===== PP =====
+      { name: 'PP - بولي بروبيلين', code: 'PL-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['علب طعام بلاستيك', 'أغطية زجاجات', 'عبوات زبادي', 'أنابيب PP', 'كراسي بلاستيك'] },
+      { name: 'شنط وخيش بلاستيك (PP منسوج)', code: 'PL-05A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['شنط منسوجة (خيش بلاستيك)', 'شوالات', 'أكياس سكر', 'أكياس أسمنت بلاستيك', 'أكياس أعلاف', 'أكياس أرز PP', 'حبال بلاستيك PP'] },
+      // ===== PS / فوم =====
+      { name: 'PS - بوليسترين (فوم)', code: 'PL-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['فوم تغليف (ستايروفوم)', 'أطباق فوم أكل', 'كوبايات فوم', 'عبوات حماية أجهزة', 'صواني لحوم فوم'] },
+      { name: 'فوم عزل (XPS/EPS)', code: 'PL-06A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['فوم عزل حراري', 'ألواح فوم أسقف', 'فوم أرضيات', 'EPS عزل', 'XPS ألواح', 'فوم بلوكات بناء'] },
+      // ===== بلاستيك مختلط =====
       { name: 'بلاستيك مختلط وأغشية تغليف', code: 'PL-07', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['بلاستيك مخلوط', 'أغلفة شيبسي', 'أكياس متعددة الطبقات', 'بلاستيك ألومنيوم (تتراباك)', 'أغشية تغليف ملونة'] },
-      { name: 'مطاط وإطارات مستعملة', code: 'PL-08', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كاوتش عربيات', 'كاوتش نقل', 'كاوتش موتوسيكل', 'جوانات مطاط', 'سيور مطاط', 'خراطيم مطاط', 'كاوتش فوركليفت', 'نعال أحذية'] },
+      { name: 'عبوات بلاستيك كبيرة (IBC/براميل)', code: 'PL-07A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['تنك بلاستيك IBC', 'برميل بلاستيك 200 لتر', 'جركن بلاستيك 20 لتر', 'عبوات كيماوية فارغة نظيفة', 'خزان IBC مستعمل'] },
+      // ===== مطاط =====
+      { name: 'إطارات سيارات ونقل', code: 'PL-08', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كاوتش عربيات', 'كاوتش نقل', 'كاوتش موتوسيكل', 'كاوتش فوركليفت', 'كاوتش لودر', 'إطارات مستعملة'] },
+      { name: 'مطاط صناعي وسيور وجوانات', code: 'PL-08A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جوانات مطاط', 'سيور مطاط', 'خراطيم مطاط', 'مطاط إسفنجي', 'سيور ناقلة مطاط', 'حشوات مطاط', 'مطاط كسر', 'نعال أحذية مطاط'] },
+      { name: 'مطاط مطحون وحبيبات', code: 'PL-08B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['حبيبات كاوتش', 'مطاط مطحون (كرمب رابر)', 'بودرة كاوتش', 'ملاعب مطاط', 'أرضيات مطاطية كسر'] },
+      // ===== بلاستيك هندسي =====
       { name: 'بلاستيك صناعي وهندسي', code: 'PL-09', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['نايلون هندسي (PA)', 'بولي كربونيت (PC)', 'أكريليك (PMMA)', 'تفلون (PTFE)', 'POM', 'ABS', 'فيبر جلاس (غير خطر)'] },
+      { name: 'أكريليك وبولي كربونيت ألواح', code: 'PL-09A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ألواح أكريليك كسر', 'بولي كربونيت كسر', 'لوحات إعلانية أكريليك', 'حروف مضيئة أكريليك', 'ألواح شفافة PC'] },
     ],
   },
   {
@@ -208,14 +228,27 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
     wasteState: 'solid',
     category: 'non_hazardous',
     subcategories: [
+      // ===== ورق أبيض =====
       { name: 'ورق مكتبي أبيض', code: 'PA-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ورق A4', 'ورق A3', 'ورق طابعة', 'ورق فوتوكوبي', 'ورق فلوسكاب', 'ورق أبيض نظيف'] },
-      { name: 'صحف ومجلات ومطبوعات', code: 'PA-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جرايد', 'مجلات', 'كتالوجات', 'فلايرز', 'بروشورات', 'ورق جرايد'] },
+      { name: 'ورق مكتبي ملون ومختلط', code: 'PA-01A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ورق ملون', 'ورق مكتبي مخلوط', 'ورق ملاحظات', 'ورق مسودات', 'ورق فاكسات'] },
+      // ===== صحف ومطبوعات =====
+      { name: 'صحف ومجلات', code: 'PA-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جرايد', 'مجلات', 'ورق جرايد', 'جرائد قديمة'] },
+      { name: 'مطبوعات تجارية ودعائية', code: 'PA-02A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كتالوجات', 'فلايرز', 'بروشورات', 'ملصقات دعائية', 'منيوهات مطاعم', 'كروت بزنس'] },
+      // ===== كرتون =====
       { name: 'كرتون مموج (صناديق شحن)', code: 'PA-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كراتين شحن', 'كراتين نقل', 'صناديق كرتون', 'كرتون دوبلكس', 'كرتون تريبلكس', 'كراتين أجهزة'] },
       { name: 'كرتون مضغوط وعلب', code: 'PA-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['علب كرتون (سريال/أحذية)', 'كرتون مضغوط', 'كرتون رمادي', 'أنابيب كرتون (رول)', 'كور كرتون'] },
-      { name: 'أكياس ورقية وورق تغليف', code: 'PA-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أكياس ورق بني (كرافت)', 'شنط ورقية', 'ورق تغليف هدايا', 'ورق لف سندوتشات', 'ورق كرافت'] },
+      { name: 'كرتون بالات مضغوطة', code: 'PA-04A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['بالات كرتون', 'كرتون مضغوط بالات', 'كرتون مكبوس', 'رجيع كرتون'] },
+      // ===== أكياس ورقية =====
+      { name: 'أكياس ورقية وورق كرافت', code: 'PA-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أكياس ورق بني (كرافت)', 'شنط ورقية', 'ورق تغليف هدايا', 'ورق لف سندوتشات', 'ورق كرافت', 'أكياس أسمنت ورقية', 'أكياس دقيق ورقية'] },
+      // ===== ورق غير قابل للتدوير =====
       { name: 'ورق مشمع أو مغلف (غير قابل للتدوير)', code: 'PA-06', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['ورق مشمع', 'ورق حراري (فواتير)', 'ورق لامع مغلف', 'ورق كربون', 'ورق فاكس', 'ورق استيكرز'] },
+      { name: 'تتراباك وعبوات مركبة', code: 'PA-06A', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['علب لبن تتراباك', 'علب عصير تتراباك', 'عبوات كرتون مبطنة ألومنيوم', 'عبوات UHT'] },
+      // ===== كتب ومستندات =====
       { name: 'كتب ومستندات ووثائق قديمة', code: 'PA-07', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كتب مدرسية', 'كراسات', 'ملفات مكتبية', 'أرشيف ورقي', 'سجلات قديمة', 'دفاتر'] },
+      { name: 'مستندات سرية للإتلاف', code: 'PA-07A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أوراق سرية', 'مستندات بنكية', 'شيكات ملغاة', 'عقود قديمة', 'سجلات محاسبية', 'فواتير قديمة'] },
+      // ===== ورق مقوى =====
       { name: 'ورق مقوى وأطباق ورقية', code: 'PA-08', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أطباق ورقية', 'كوبايات ورقية', 'أطباق كيك ورق', 'ورق مقوى', 'ورق بريستول'] },
+      { name: 'ورق تيشوز ومناديل (غير قابل للتدوير)', code: 'PA-08A', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['مناديل ورقية مستعملة', 'ورق تواليت', 'فوط مطبخ ورقية', 'تيشوز'] },
     ],
   },
   {
@@ -225,14 +258,36 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
     wasteState: 'solid',
     category: 'non_hazardous',
     subcategories: [
-      { name: 'حديد وصلب (خردة حديد)', code: 'MT-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['حديد سكراب', 'قطع حديد', 'صاج حديد', 'حديد تسليح (سيخ)', 'مواسير حديد', 'زوايا حديد', 'كمر حديد', 'براميل حديد نظيفة', 'سلك رباط', 'مسامير'] },
-      { name: 'ألومنيوم', code: 'MT-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['علب كانز (مشروبات)', 'ألومنيوم بروفيل (شبابيك)', 'ورق ألومنيوم (فويل)', 'أواني ألومنيوم', 'ألومنيوم مشغول', 'ألمنيوم سلك'] },
-      { name: 'نحاس ونحاس أصفر', code: 'MT-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['نحاس أحمر', 'نحاس أصفر (brass)', 'سلك نحاس', 'مواسير نحاس تكييف', 'حنفيات نحاس', 'موتور نحاس', 'نحاس خردة'] },
-      { name: 'ستانلس ستيل (فولاذ مقاوم للصدأ)', code: 'MT-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ستانلس 304', 'ستانلس 316', 'أواني ستانلس', 'درابزين ستانلس', 'حوض ستانلس', 'ستانلس طبي'] },
-      { name: 'خردة معدنية مختلطة', code: 'MT-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['سكراب مخلوط', 'خردة مختلطة', 'معادن متنوعة', 'قطع غيار معدنية تالفة'] },
+      // ===== حديد وصلب =====
+      { name: 'حديد تسليح (سيخ حديد)', code: 'MT-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['سيخ حديد', 'حديد تسليح', 'حديد 10 مم', 'حديد 12 مم', 'حديد 16 مم', 'كانات حديد', 'حديد تسليح مستعمل', 'سيخ 8'] },
+      { name: 'صاج حديد (ألواح)', code: 'MT-01A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['صاج حديد', 'صاج أسود', 'صاج مجلفن', 'صاج ملفوف', 'صاج 2 مم', 'صاج رقيق', 'صاج سميك', 'قصاقيص صاج'] },
+      { name: 'حديد سكراب مختلط', code: 'MT-01B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['حديد سكراب', 'خردة حديد', 'قطع حديد', 'حديد هالك', 'حديد رجيع', 'مسامير', 'سلك رباط', 'رايش حديد'] },
+      { name: 'مواسير وزوايا وكمرات حديد', code: 'MT-01C', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مواسير حديد', 'زوايا حديد', 'كمر حديد', 'مجرى حديد (C)', 'حديد مربع', 'مواسير ملحومة', 'مواسير سيملس'] },
+      { name: 'حديد زهر (فونت/كاست)', code: 'MT-01D', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['حديد زهر', 'فونت', 'كاست أيرون', 'محركات حديد زهر', 'أغطية بيارات حديد', 'مواسير فونت'] },
+      // ===== ألومنيوم =====
+      { name: 'ألومنيوم بروفيل (شبابيك)', code: 'MT-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ألومنيوم بروفيل', 'شبابيك ألومنيوم', 'أبواب ألومنيوم', 'واجهات ألومنيوم', 'قطاعات ألومنيوم'] },
+      { name: 'ألومنيوم كانز وعبوات', code: 'MT-02A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['علب كانز (مشروبات)', 'علب بيبسي', 'علب بيرة ألومنيوم', 'كانز مضغوطة', 'بالات كانز'] },
+      { name: 'ألومنيوم أواني ومشغولات', code: 'MT-02B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أواني ألومنيوم', 'حلل ألومنيوم', 'صواني ألومنيوم', 'ورق ألومنيوم (فويل)', 'ألومنيوم مشغول', 'ألمنيوم سلك'] },
+      // ===== نحاس =====
+      { name: 'نحاس أحمر (نقي)', code: 'MT-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['نحاس أحمر', 'سلك نحاس أحمر', 'مواسير نحاس تكييف', 'موتور نحاس', 'نحاس نمرة 1'] },
+      { name: 'نحاس أصفر (brass)', code: 'MT-03A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['نحاس أصفر', 'brass', 'حنفيات نحاس', 'محابس نحاس', 'نحاس ديكور', 'نحاس قديم', 'شمعدانات نحاس'] },
+      { name: 'نحاس خردة ومخلوط', code: 'MT-03B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['نحاس خردة', 'نحاس مخلوط', 'كابلات نحاس معزولة', 'رادياتير نحاس', 'نحاس محروق'] },
+      // ===== ستانلس =====
+      { name: 'ستانلس ستيل 304', code: 'MT-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ستانلس 304', 'أواني ستانلس', 'حوض ستانلس', 'درابزين ستانلس 304', 'ستانلس مطابخ'] },
+      { name: 'ستانلس ستيل 316 (مقاوم)', code: 'MT-04A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ستانلس 316', 'ستانلس بحري', 'ستانلس طبي', 'ستانلس مصانع أغذية', 'ستانلس مقاوم كيماويات'] },
+      // ===== خردة مختلطة =====
+      { name: 'خردة معدنية مختلطة', code: 'MT-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['سكراب مخلوط', 'خردة مختلطة', 'معادن متنوعة', 'قطع غيار معدنية تالفة', 'خردة ورش'] },
+      { name: 'أجهزة منزلية معدنية (بدون إلكترونيات)', code: 'MT-05A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['بوتاجاز خردة', 'فرن معدني', 'دفاية خردة', 'سخان شمسي خردة', 'موقد غاز تالف'] },
+      // ===== براميل =====
       { name: 'براميل وحاويات معدنية نظيفة', code: 'MT-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['برميل حديد نظيف', 'جراكن معدنية نظيفة', 'علب صفيح (تنك)', 'عبوات معدنية فارغة نظيفة'] },
-      { name: 'أنابيب وهياكل معدنية', code: 'MT-07', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مواسير صلب', 'مواسير جلفنة', 'هياكل معدنية', 'تريلا خردة', 'هيكل عربية', 'شاسيه'] },
-      { name: 'زنك وقصدير ورصاص (غير ملوث)', code: 'MT-08', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['صاج مجلفن (زنك)', 'قصدير لحام', 'رصاص خردة', 'ألواح زنك', 'صفيح معلبات'] },
+      { name: 'علب صفيح ومعلبات', code: 'MT-06A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['علب تونة فارغة', 'علب فول فارغة', 'معلبات صفيح', 'علب سمن صفيح', 'علب زيت صفيح فارغة نظيفة'] },
+      // ===== هياكل =====
+      { name: 'هياكل سيارات ومعدات كبيرة', code: 'MT-07', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['هيكل عربية', 'شاسيه', 'تريلا خردة', 'هيكل أتوبيس', 'معدات ثقيلة خردة', 'لودر خردة'] },
+      { name: 'مواسير صلب وجلفنة', code: 'MT-07A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مواسير صلب', 'مواسير جلفنة', 'مواسير بترولية', 'مواسير ضغط عالي', 'أنابيب غاز'] },
+      // ===== زنك وقصدير =====
+      { name: 'زنك وصاج مجلفن', code: 'MT-08', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['صاج مجلفن (زنك)', 'ألواح زنك', 'صاج أبيض', 'ماسورة مجلفنة كسر'] },
+      { name: 'قصدير لحام وصفيح', code: 'MT-08A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['قصدير لحام', 'صفيح معلبات', 'قصدير خردة', 'سلك لحام قصدير'] },
+      { name: 'رصاص (غير ملوث)', code: 'MT-08B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['رصاص خردة', 'رصاص كابلات', 'رصاص أنابيب', 'رصاص طلقات', 'ألواح رصاص'] },
     ],
   },
   {
@@ -242,11 +297,21 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
     wasteState: 'solid',
     category: 'non_hazardous',
     subcategories: [
+      // ===== زجاج عبوات =====
       { name: 'زجاج شفاف (عبوات وقوارير)', code: 'GL-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['قوارير مياه زجاج', 'برطمانات', 'زجاجات عصير', 'عبوات عطور', 'زجاج شفاف نظيف'] },
-      { name: 'زجاج ملون (أخضر/بني/أزرق)', code: 'GL-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['زجاجات بيرة', 'زجاجات دواء بني', 'زجاج أخضر', 'زجاج كوبالت أزرق'] },
-      { name: 'زجاج مسطح (نوافذ ومرايا)', code: 'GL-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['زجاج شبابيك', 'مرايا مكسورة', 'زجاج سيكوريت', 'زجاج واجهات', 'زجاج سيارات', 'دبل جلاس'] },
-      { name: 'زجاج مختلط', code: 'GL-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر زجاج (ازاز)', 'زجاج مخلوط', 'كسر كريستال', 'أواني زجاجية مكسورة', 'ثريات زجاج'] },
+      { name: 'زجاج أخضر', code: 'GL-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['زجاجات بيرة خضراء', 'زجاجات مشروبات خضراء', 'زجاج أخضر كسر'] },
+      { name: 'زجاج بني/عنبري', code: 'GL-02A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['زجاجات دواء بني', 'زجاجات بيرة بني', 'عبوات كيميائية زجاج بني'] },
+      { name: 'زجاج أزرق/كوبالت', code: 'GL-02B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['زجاج كوبالت أزرق', 'عبوات عطور أزرق', 'زجاج ديكور أزرق'] },
+      // ===== زجاج مسطح =====
+      { name: 'زجاج نوافذ عادي', code: 'GL-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['زجاج شبابيك', 'زجاج أبواب', 'زجاج واجهات', 'زجاج 4 مم', 'زجاج 6 مم'] },
+      { name: 'زجاج سيكوريت ولاميناتد', code: 'GL-03A', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['زجاج سيكوريت', 'زجاج مقسى', 'زجاج سيارات', 'زجاج لاميناتد', 'باراوان زجاج', 'دبل جلاس'] },
+      { name: 'مرايا', code: 'GL-03B', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['مرايا مكسورة', 'مرايا حمامات', 'مرايا دواليب', 'مرايا كبيرة', 'مرايا ديكور'] },
+      // ===== كسر زجاج =====
+      { name: 'كسر زجاج مختلط', code: 'GL-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر زجاج (ازاز)', 'زجاج مخلوط', 'كسر كريستال', 'أواني زجاجية مكسورة', 'ثريات زجاج'] },
+      { name: 'كسر زجاج مصانع (كوليت)', code: 'GL-04A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كوليت زجاج', 'كسر مصنع زجاج', 'رجيع زجاج', 'زجاج معاد طحنه', 'بودرة زجاج'] },
+      // ===== زجاج تقني =====
       { name: 'زجاج تقني ومقاوم للحرارة', code: 'GL-05', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['بايركس', 'زجاج مختبرات', 'زجاج فرن', 'زجاج بوروسيليكات', 'أنابيب اختبار زجاج'] },
+      { name: 'فايبر جلاس وزجاج ليفي', code: 'GL-05A', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['فايبر جلاس كسر', 'ألياف زجاجية', 'خزانات فايبر جلاس', 'قوارب فايبر', 'صاج فايبر'] },
     ],
   },
   {
@@ -334,13 +399,31 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
     category: 'non_hazardous',
     legalReference: 'قانون 202/2020 - المادة 24',
     subcategories: [
-      { name: 'خرسانة وطوب وبلوكات', code: 'CN-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر خرسانة', 'طوب أحمر مكسور', 'بلوكات أسمنت', 'طوب طفلي', 'طوب أسمنتي', 'خرسانة مسلحة'] },
-      { name: 'أخشاب إنشائية وقوالب', code: 'CN-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خشب عمل (فورم ورك)', 'قوالب خشب خرسانة', 'عروق خشب', 'ألواح لتزانيلو إنشائية', 'شدات خشبية', 'سقالات خشب'] },
-      { name: 'بلاط وسيراميك ورخام', code: 'CN-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر سيراميك', 'كسر بورسلين', 'كسر رخام', 'كسر جرانيت', 'موزاييك مكسور', 'تيرازو', 'بلاط أسمنتي قديم'] },
+      // ===== خرسانة =====
+      { name: 'كسر خرسانة عادية', code: 'CN-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر خرسانة', 'خرسانة عادية مكسورة', 'دبش خرسانة', 'قطع خرسانة'] },
+      { name: 'خرسانة مسلحة', code: 'CN-01A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خرسانة مسلحة', 'خرسانة بحديد', 'أعمدة خرسانة مهدمة', 'كمرات خرسانة', 'سقف خرسانة مهدم'] },
+      { name: 'طوب أحمر وطفلي', code: 'CN-01B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['طوب أحمر مكسور', 'طوب طفلي', 'طوب أحمر نظيف', 'كسر طوب', 'طوب حراري مستعمل'] },
+      { name: 'بلوكات أسمنتية', code: 'CN-01C', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['بلوكات أسمنت', 'طوب أسمنتي', 'بلوكات مفرغة', 'بلوكات بيانو'] },
+      // ===== أخشاب إنشائية =====
+      { name: 'أخشاب إنشائية وشدات', code: 'CN-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خشب عمل (فورم ورك)', 'قوالب خشب خرسانة', 'عروق خشب', 'ألواح لتزانيلو إنشائية', 'شدات خشبية', 'سقالات خشب'] },
+      // ===== بلاط وسيراميك =====
+      { name: 'كسر سيراميك وبورسلين', code: 'CN-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر سيراميك', 'كسر بورسلين', 'سيراميك أرضيات', 'سيراميك حوائط', 'بورسلين مكسور'] },
+      { name: 'كسر رخام وجرانيت', code: 'CN-03A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['كسر رخام', 'كسر جرانيت', 'رخام سلالم', 'رخام مطابخ كسر', 'جرانيت أرضيات كسر', 'بودرة رخام'] },
+      { name: 'موزاييك وتيرازو وبلاط أسمنتي', code: 'CN-03B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['موزاييك مكسور', 'تيرازو', 'بلاط أسمنتي قديم', 'بلاط بلدي', 'أرضيات قديمة'] },
+      // ===== حديد إنشائي =====
       { name: 'حديد تسليح ومعادن إنشائية', code: 'CN-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['سيخ حديد تسليح', 'حديد تسليح مستعمل', 'كانات حديد', 'شبك حديد', 'حديد زهر'] },
-      { name: 'ردم وأتربة ورمال', code: 'CN-05', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['ردم حفر', 'أتربة ناعمة', 'رمل مستعمل', 'زلط مستعمل', 'تربة حفريات', 'طمي'] },
-      { name: 'أنابيب ومواسير', code: 'CN-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مواسير PVC صرف', 'مواسير حديد', 'مواسير PPR', 'مواسير فخار', 'مجاري صرف', 'بالوعات'] },
-      { name: 'مواد عزل وأسقف', code: 'CN-07', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['عزل فوم', 'رولات بيتومين', 'عزل مائي', 'صوف صخري', 'ألواح جبس بورد', 'أسقف معلقة تالفة', 'ألواح ساندوتش بانل'] },
+      // ===== ردم =====
+      { name: 'ردم وأتربة', code: 'CN-05', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['ردم حفر', 'أتربة ناعمة', 'تربة حفريات', 'طمي'] },
+      { name: 'رمل وزلط مستعمل', code: 'CN-05A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['رمل مستعمل', 'زلط مستعمل', 'حصى', 'سن مستعمل', 'رمل بناء رجيع'] },
+      // ===== مواسير =====
+      { name: 'مواسير وأنابيب إنشائية', code: 'CN-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مواسير PVC صرف', 'مواسير حديد', 'مواسير PPR', 'مواسير فخار', 'مجاري صرف', 'بالوعات'] },
+      // ===== عزل =====
+      { name: 'عزل مائي وبيتومين', code: 'CN-07', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['رولات بيتومين', 'عزل مائي', 'ممبرين', 'عزل أسطح', 'بيتومين مستعمل'] },
+      { name: 'عزل حراري وصوتي', code: 'CN-07A', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['عزل فوم', 'صوف صخري', 'فوم بولي يوريثان عزل', 'عزل صوتي', 'ألواح عزل XPS'] },
+      { name: 'جبس بورد وأسقف معلقة', code: 'CN-07B', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['ألواح جبس بورد', 'أسقف معلقة تالفة', 'جبس بورد كسر', 'تيل سقف', 'ألواح ساندوتش بانل', 'كلادينج كسر'] },
+      // ===== أسمنت وجبس =====
+      { name: 'أسمنت وجبس رجيع', code: 'CN-08', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['أسمنت متصلب', 'أكياس أسمنت فارغة', 'جبس رجيع', 'محارة مكشوطة', 'بقايا مونة', 'لياسة قديمة'] },
+      { name: 'دهانات جافة وبقايا تشطيب', code: 'CN-08A', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['بوية جافة', 'بقايا معجون', 'ورق حائط قديم', 'بلاستيك حوائط جاف', 'بقايا سيراميك لاصق'] },
     ],
   },
   {
@@ -350,12 +433,25 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
     wasteState: 'solid',
     category: 'non_hazardous',
     subcategories: [
-      { name: 'ملابس وأقمشة مستعملة', code: 'TX-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['هدوم مستعملة', 'ملابس بالة', 'أقمشة مستعملة', 'ستائر قديمة', 'مفارش', 'بطانيات', 'مناشف', 'فوط'] },
-      { name: 'قصاصات وبقايا تصنيع نسيج', code: 'TX-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['دوبارة', 'تريكو', 'قصاصات قماش', 'بقايا تفصيل', 'خرق قماش', 'قصاقيص', 'رقع قماش'] },
-      { name: 'جلود طبيعية وصناعية (غير ملوثة)', code: 'TX-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جلد طبيعي مستعمل', 'جلد صناعي (سكاي)', 'بقايا ورش جزم', 'قصاصات جلد', 'أحزمة جلد تالفة', 'شنط جلد تالفة'] },
-      { name: 'سجاد وموكيت وبطانيات', code: 'TX-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['سجاد قديم', 'موكيت مستعمل', 'بطاطين قديمة', 'كليم', 'حصير', 'سجاد حائط'] },
-      { name: 'خيوط وحبال ومنسوجات صناعية', code: 'TX-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خيوط نسيج', 'حبال نايلون', 'شباك صيد', 'أشرطة نسيج', 'أحزمة ناقلة نسيج', 'شنط منسوجة (شوالات)'] },
-      { name: 'أحذية وحقائب تالفة', code: 'TX-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جزم تالفة', 'شباشب', 'صنادل', 'شنط مدرسة', 'شنط سفر تالفة', 'محافظ تالفة'] },
+      // ===== ملابس =====
+      { name: 'ملابس مستعملة (بالة)', code: 'TX-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['هدوم مستعملة', 'ملابس بالة', 'ملابس ماركات مستعملة', 'ملابس أطفال مستعملة', 'ملابس رجالي مستعمل', 'ملابس حريمي مستعمل'] },
+      { name: 'ستائر ومفارش ومنسوجات منزلية', code: 'TX-01A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['ستائر قديمة', 'مفارش', 'ملايات', 'مناشف', 'فوط', 'أغطية سرير', 'وسائد', 'بطانيات خفيفة'] },
+      // ===== قماش صناعي =====
+      { name: 'أقمشة قطنية وطبيعية', code: 'TX-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['قماش قطن', 'قماش كتان', 'قماش صوف', 'قماش حرير', 'قصاصات قطن', 'بقايا تفصيل قطن'] },
+      { name: 'أقمشة صناعية (بوليستر/نايلون)', code: 'TX-02A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['قماش بوليستر', 'قماش نايلون', 'قماش ليكرا', 'شيفون', 'ساتان صناعي', 'قصاقيص صناعية'] },
+      { name: 'دوبارة وتريكو وخرق', code: 'TX-02B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['دوبارة', 'تريكو', 'خرق قماش', 'قصاقيص', 'رقع قماش', 'بقايا مصانع ملابس', 'خرق تنظيف'] },
+      // ===== جلود =====
+      { name: 'جلود طبيعية', code: 'TX-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جلد طبيعي مستعمل', 'جلد بقري', 'جلد جاموسي', 'جلد ماعز', 'قصاصات جلد طبيعي', 'بقايا ورش جزم جلد'] },
+      { name: 'جلود صناعية (سكاي/PU)', code: 'TX-03A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جلد صناعي (سكاي)', 'جلد PU', 'جلد PVC', 'كنب جلد صناعي تالف', 'أحزمة جلد صناعي', 'شنط جلد صناعي تالفة'] },
+      // ===== سجاد =====
+      { name: 'سجاد يدوي وشرقي', code: 'TX-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['سجاد يدوي', 'كليم يدوي', 'سجاد صوف', 'سجاد حرير', 'سجاد شرقي قديم'] },
+      { name: 'موكيت وسجاد صناعي', code: 'TX-04A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['موكيت مستعمل', 'سجاد ماكينة', 'بطاطين قديمة', 'حصير', 'سجاد حائط', 'موكيت مكاتب'] },
+      // ===== خيوط وحبال =====
+      { name: 'خيوط نسيج وغزل', code: 'TX-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خيوط نسيج', 'خيوط قطن', 'خيوط بوليستر', 'بكر خيط', 'غزل قطني', 'غزل صناعي'] },
+      { name: 'حبال وشباك', code: 'TX-05A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['حبال نايلون', 'شباك صيد', 'حبال قطنية', 'أشرطة نسيج', 'أحزمة ناقلة نسيج', 'شنط منسوجة (شوالات)'] },
+      // ===== أحذية وحقائب =====
+      { name: 'أحذية رياضية وكاجوال', code: 'TX-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جزم رياضية تالفة', 'كوتشي تالف', 'شباشب', 'صنادل', 'أحذية أطفال تالفة'] },
+      { name: 'أحذية جلدية وحقائب', code: 'TX-06A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جزم جلد تالفة', 'بوت جلد', 'شنط مدرسة', 'شنط سفر تالفة', 'محافظ تالفة', 'شنط يد تالفة'] },
     ],
   },
 ];
