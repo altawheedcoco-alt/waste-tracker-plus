@@ -620,11 +620,19 @@ const Auth = () => {
                       type="button"
                       variant="outline"
                       className="w-full gap-2"
-                      onClick={() => {
-                        toast({
-                          title: t('auth.comingSoon'),
-                          description: t('auth.appleLoginSoon'),
+                      onClick={async () => {
+                        setLoading(true);
+                        const { error } = await lovable.auth.signInWithOAuth('apple', {
+                          redirect_uri: window.location.origin,
                         });
+                        if (error) {
+                          toast({
+                            title: t('auth.loginError'),
+                            description: error.message,
+                            variant: 'destructive',
+                          });
+                        }
+                        setLoading(false);
                       }}
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
