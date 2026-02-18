@@ -16,7 +16,7 @@ const Header = memo(() => {
   const handleEmployeeLogin = () => navigate('/auth?mode=employee');
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-eco animate-fade-in">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-card/80 backdrop-blur-xl border-b border-border/30 animate-fade-in shadow-sm" style={{ WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-16 sm:h-20">
           <div
