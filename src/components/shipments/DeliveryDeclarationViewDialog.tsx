@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Printer, Download, X, FileCheck } from 'lucide-react';
+import MemberNameLink from '@/components/org-structure/MemberNameLink';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -107,7 +108,7 @@ const DeliveryDeclarationViewDialog = ({
               <div><span style={{ color: '#6b7280' }}>تاريخ الإقرار: </span><strong>{declaredDate}</strong></div>
               <div><span style={{ color: '#6b7280' }}>نوع النفايات: </span><strong>{declaration.waste_type}</strong></div>
               <div><span style={{ color: '#6b7280' }}>الكمية: </span><strong>{declaration.quantity} {declaration.unit || 'طن'}</strong></div>
-              {declaration.driver_name && <div><span style={{ color: '#6b7280' }}>اسم السائق/المسلّم: </span><strong>{declaration.driver_name}</strong></div>}
+              {declaration.driver_name && <div><span style={{ color: '#6b7280' }}>اسم السائق/المسلّم: </span><strong><MemberNameLink name={declaration.driver_name} /></strong></div>}
               {declaration.driver_national_id && <div><span style={{ color: '#6b7280' }}>رقم الهوية: </span><strong>{declaration.driver_national_id}</strong></div>}
               {declaration.generator_name && <div><span style={{ color: '#6b7280' }}>المولد: </span><strong>{declaration.generator_name}</strong></div>}
               {declaration.transporter_name && <div><span style={{ color: '#6b7280' }}>الناقل: </span><strong>{declaration.transporter_name}</strong></div>}

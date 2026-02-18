@@ -261,7 +261,7 @@ export default function OrgMembersPanel() {
                     <div className="text-right flex-1">
                       <div className="flex items-center gap-2 justify-end">
                         <Badge className={sc.color} variant="secondary">{sc.label}</Badge>
-                        <p className="font-medium">{member.profile?.full_name || member.invitation_email || 'عضو'}</p>
+                        <p className="font-medium cursor-pointer hover:text-primary transition-colors" onClick={() => setSelectedMember(member)}>{member.profile?.full_name || member.invitation_email || 'عضو'}</p>
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 justify-end flex-wrap">
                         {member.department?.name_ar && (
