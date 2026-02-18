@@ -274,8 +274,8 @@ const PartnersList = ({
         {partners.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             <MessageCircle className="mx-auto mb-2 opacity-50" size={32} />
-            <p className="text-sm">لا يوجد شركاء للتواصل</p>
-            <p className="text-xs">الشركاء يظهرون عند إنشاء شحنات مشتركة</p>
+            <p className="text-sm">لا توجد جهات مرتبطة للتواصل</p>
+            <p className="text-xs">الجهات المرتبطة تظهر عند إنشاء شحنات مشتركة</p>
           </div>
         )}
       </div>

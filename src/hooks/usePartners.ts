@@ -141,7 +141,7 @@ export const usePartners = (): UsePartnersResult => {
       }
     } catch (err: any) {
       console.error('Error fetching partners:', err);
-      setError(err?.message || 'فشل في تحميل بيانات الشركاء');
+      setError(err?.message || 'فشل في تحميل بيانات الجهات المرتبطة');
     } finally {
       setLoading(false);
     }

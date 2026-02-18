@@ -230,7 +230,7 @@ const OperationalChart = ({ organizationId, dateRange }: OperationalChartProps) 
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-[320px] text-muted-foreground text-sm">
-                لا توجد بيانات كافية عن الشركاء
+                لا توجد بيانات كافية عن الجهات المرتبطة
               </div>
             )}
           </CardContent>

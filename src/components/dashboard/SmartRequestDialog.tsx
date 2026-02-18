@@ -117,7 +117,7 @@ const REQUEST_TYPES = [
   { value: 'vehicle_management', label: 'إدارة المركبات', icon: Truck, category: 'drivers' },
   { value: 'driver_assignment', label: 'تعيين سائق لشحنة', icon: Car, category: 'drivers' },
   
-  // الشركاء
+  // الجهات المرتبطة
   { value: 'add_partner', label: 'إضافة شريك جديد', icon: UserPlus, category: 'partners' },
   { value: 'partner_approval', label: 'اعتماد شريك', icon: Shield, category: 'partners' },
   { value: 'partner_notes', label: 'ملاحظات للشريك', icon: MessageSquare, category: 'partners' },

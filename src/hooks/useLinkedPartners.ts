@@ -41,12 +41,12 @@ export const useLinkedPartners = (filterType?: 'generator' | 'transporter' | 're
         return [];
       }
 
-      // استخراج معرفات الشركاء
+      // استخراج معرفات الجهات المرتبطة
       const partnerIds = partnerships.map(p => 
         p.requester_org_id === organization.id ? p.partner_org_id : p.requester_org_id
       );
 
-      // جلب بيانات الشركاء
+      // جلب بيانات الجهات المرتبطة
       let query = supabase
         .from('organizations')
         .select('id, name, organization_type, email, phone, city, logo_url, partner_code')

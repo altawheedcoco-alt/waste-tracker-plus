@@ -73,7 +73,7 @@ const PartnerRatingsWidget = () => {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader><CardTitle>تقييمات الشركاء</CardTitle></CardHeader>
+        <CardHeader><CardTitle>تقييمات الجهات المرتبطة</CardTitle></CardHeader>
         <CardContent><Skeleton className="h-20 w-full" /></CardContent>
       </Card>
     );
@@ -95,7 +95,7 @@ const PartnerRatingsWidget = () => {
           </div>
           <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
             <Star className="w-5 h-5 text-amber-500" />
-            تقييماتنا من الشركاء
+            تقييماتنا من الجهات المرتبطة
           </CardTitle>
         </div>
         <CardDescription className="text-right">متوسط التقييمات التي حصلت عليها منظمتك</CardDescription>

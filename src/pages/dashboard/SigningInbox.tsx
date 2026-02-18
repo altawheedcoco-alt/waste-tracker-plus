@@ -319,7 +319,7 @@ export default function SigningInbox() {
             صندوق التوقيعات
             <FileSignature className="w-7 h-7 text-primary" />
           </h1>
-          <p className="text-muted-foreground text-sm">إرسال واستقبال المستندات للتوقيع بين الجهات الشريكة</p>
+          <p className="text-muted-foreground text-sm">إرسال واستقبال المستندات للتوقيع بين الجهات المرتبطة</p>
         </div>
       </div>
 
