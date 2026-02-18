@@ -48,7 +48,12 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
   });
 
   const hasActiveSubscription = !!subscription;
-  const isExempt = isSystemAdmin;
+  
+  // In preview/development, bypass subscription check for testing
+  const isPreviewMode = window.location.hostname.includes('lovableproject.com') || 
+                        window.location.hostname.includes('lovable.app') ||
+                        window.location.hostname === 'localhost';
+  const isExempt = isSystemAdmin || isPreviewMode;
 
   return {
     hasActiveSubscription,
