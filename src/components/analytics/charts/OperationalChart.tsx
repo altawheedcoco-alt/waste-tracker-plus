@@ -96,7 +96,7 @@ const OperationalChart = ({ organizationId, dateRange }: OperationalChartProps) 
       const radarData = [
         { metric: 'معدل الإنجاز', value: completionRate, fullMark: 100 },
         { metric: 'الالتزام بالمواعيد', value: onTimeRate, fullMark: 100 },
-        { metric: 'رضا الشركاء', value: Math.min(100, completionRate + 5), fullMark: 100 },
+        { metric: 'رضا الجهات المرتبطة', value: Math.min(100, completionRate + 5), fullMark: 100 },
         { metric: 'كفاءة المسارات', value: Math.min(100, 100 - cancellationRate), fullMark: 100 },
         { metric: 'جودة المعالجة', value: Math.min(100, completionRate + 10), fullMark: 100 },
         { metric: 'سرعة المعالجة', value: Math.min(100, avgProcessingHours < 48 ? 85 : 50), fullMark: 100 },
@@ -212,9 +212,9 @@ const OperationalChart = ({ organizationId, dateRange }: OperationalChartProps) 
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              أداء الشركاء
+              أداء الجهات المرتبطة
             </CardTitle>
-            <CardDescription>أكثر الشركاء نشاطاً في الفترة المحددة</CardDescription>
+            <CardDescription>أكثر الجهات المرتبطة نشاطاً في الفترة المحددة</CardDescription>
           </CardHeader>
           <CardContent>
             {data.topPartners.length > 0 ? (

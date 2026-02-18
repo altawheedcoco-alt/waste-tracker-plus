@@ -369,7 +369,7 @@ export const AIInsightsPanel: React.FC<AIInsightsPanelProps> = ({
       "فريق العمل متعاون ومحترف",
       "التأخير في بعض الشحنات أثر على عملياتنا"
     ];
-    const result = await analyzeSentiment(demoTexts, "تقييم رضا العملاء والشركاء");
+    const result = await analyzeSentiment(demoTexts, "تقييم رضا العملاء والجهات المرتبطة");
     if (result) setSentimentResult(result);
   };
 

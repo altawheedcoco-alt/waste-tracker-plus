@@ -179,16 +179,16 @@ const buildTestCategories = (): TestCategory[] => [
   },
   {
     id: 'partners',
-    name: 'الشركاء والعملاء',
+    name: 'الجهات المرتبطة والعملاء',
     icon: Building2,
-    description: 'فحص إدارة الشركاء والعلاقات',
+    description: 'فحص إدارة الجهات المرتبطة والعلاقات',
     tests: [
       { id: 'part-orgs', name: 'المنظمات', run: () => queryTest('organizations', 'المنظمات') },
-      { id: 'part-external', name: 'الشركاء الخارجيين', run: () => queryTest('external_partners', 'الشركاء') },
+      { id: 'part-external', name: 'الجهات الخارجية', run: () => queryTest('external_partners', 'الجهات الخارجية') },
       { id: 'part-customers', name: 'العملاء', run: () => queryTest('customers', 'العملاء') },
       { id: 'part-contracts', name: 'العقود', run: () => queryTest('contracts', 'العقود') },
       { id: 'part-awards', name: 'خطابات الترسية', run: () => queryTest('award_letters', 'خطابات الترسية') },
-      { id: 'part-partner-notes', name: 'ملاحظات الشركاء', run: () => queryTest('partner_notes', 'الملاحظات') },
+      { id: 'part-partner-notes', name: 'ملاحظات الجهات المرتبطة', run: () => queryTest('partner_notes', 'الملاحظات') },
     ],
   },
   {

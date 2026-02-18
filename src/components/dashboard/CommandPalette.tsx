@@ -46,7 +46,7 @@ interface CategoryConfig {
 const CATEGORIES: CategoryConfig[] = [
   { key: 'all', label: 'الكل', icon: Filter, emoji: '🔍', color: 'bg-primary/10 text-primary' },
   { key: 'shipments', label: 'شحنات', icon: Package, emoji: '📦', color: 'bg-blue-500/10 text-blue-600' },
-  { key: 'organizations', label: 'شركاء', icon: Building2, emoji: '🏢', color: 'bg-purple-500/10 text-purple-600' },
+  { key: 'organizations', label: 'جهات مرتبطة', icon: Building2, emoji: '🏢', color: 'bg-purple-500/10 text-purple-600' },
   { key: 'contracts', label: 'عقود', icon: ScrollText, emoji: '📜', color: 'bg-amber-500/10 text-amber-600' },
   { key: 'invoices', label: 'فواتير', icon: Receipt, emoji: '🧾', color: 'bg-emerald-500/10 text-emerald-600' },
   { key: 'drivers', label: 'سائقين', icon: Truck, emoji: '🚛', color: 'bg-green-500/10 text-green-600' },
@@ -332,7 +332,7 @@ const CommandPalette = () => {
               {shouldShowSection('organizations') && results.organizations.length > 0 && (
                 <>
                   <CommandSeparator />
-                  <CommandGroup heading={`🏢 الشركاء (${results.organizations.length})`}>
+                  <CommandGroup heading={`🏢 الجهات المرتبطة (${results.organizations.length})`}>
                     {results.organizations.map((o) =>
                       renderResultItem(o.id, Building2, 'text-purple-600', 'bg-purple-500/10',
                         o.name,
@@ -348,7 +348,7 @@ const CommandPalette = () => {
               {shouldShowSection('external_partners') && results.external_partners.length > 0 && (
                 <>
                   <CommandSeparator />
-                  <CommandGroup heading={`🤝 شركاء خارجيون (${results.external_partners.length})`}>
+                  <CommandGroup heading={`🤝 جهات خارجية (${results.external_partners.length})`}>
                     {results.external_partners.map((ep) =>
                       renderResultItem(ep.id, Handshake, 'text-orange-600', 'bg-orange-500/10',
                         ep.name,

@@ -338,7 +338,7 @@ const OrganizationPortfolio = ({
           بورتفوليو الشركة
         </CardTitle>
         <CardDescription>
-          أضف معلومات عن شركتك ليراها الشركاء. يمكنك استخدام الذكاء الاصطناعي لتوليد المحتوى تلقائياً.
+          أضف معلومات عن شركتك ليراها الجهات المرتبطة. يمكنك استخدام الذكاء الاصطناعي لتوليد المحتوى تلقائياً.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

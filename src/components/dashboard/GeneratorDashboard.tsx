@@ -254,7 +254,7 @@ const GeneratorDashboard = () => {
           <TabsTrigger value="shipments" className="text-xs sm:text-sm whitespace-nowrap">الشحنات</TabsTrigger>
           <TabsTrigger value="operations" className="text-xs sm:text-sm whitespace-nowrap">العمليات</TabsTrigger>
           <TabsTrigger value="work-orders" className="text-xs sm:text-sm whitespace-nowrap">أوامر الشغل</TabsTrigger>
-          <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الشركاء</TabsTrigger>
+          <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الجهات المرتبطة</TabsTrigger>
           <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap">الامتثال القانوني</TabsTrigger>
         </TabsList>
 
@@ -386,7 +386,7 @@ const GeneratorDashboard = () => {
           </Suspense>
         </TabsContent>
 
-        {/* ── الشركاء ── */}
+        {/* ── الجهات المرتبطة ── */}
         <TabsContent value="partners" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
             <PartnerRatingsWidget />

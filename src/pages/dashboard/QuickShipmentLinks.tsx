@@ -8,7 +8,7 @@ const QuickShipmentLinks = () => {
         <div>
           <h1 className="text-2xl font-bold">روابط الشحنات السريعة</h1>
           <p className="text-muted-foreground">
-            أنشئ وأدر روابط مخصصة للشركاء لتسجيل الشحنات بسهولة
+            أنشئ وأدر روابط مخصصة للجهات المرتبطة لتسجيل الشحنات بسهولة
           </p>
         </div>
         <ShipmentLinksManager />

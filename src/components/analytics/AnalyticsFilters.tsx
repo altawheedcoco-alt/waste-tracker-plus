@@ -170,7 +170,7 @@ const AnalyticsFilters = ({
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" className="gap-2">
             <Filter className="h-4 w-4" />
-            الشركاء
+            الجهات المرتبطة
             {selectedPartners.length > 0 && (
               <Badge variant="secondary" className="mr-1">
                 {selectedPartners.length}
@@ -180,9 +180,9 @@ const AnalyticsFilters = ({
         </PopoverTrigger>
         <PopoverContent className="w-64 p-0" align="start">
           <div className="p-3 border-b">
-            <h4 className="font-medium text-sm">الشركاء</h4>
+            <h4 className="font-medium text-sm">الجهات المرتبطة</h4>
             <p className="text-xs text-muted-foreground">
-              اختر الشركاء لتصفية البيانات
+              اختر الجهات المرتبطة لتصفية البيانات
             </p>
           </div>
           <ScrollArea className="h-64">
@@ -202,7 +202,7 @@ const AnalyticsFilters = ({
               ))}
               {partners.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  لا يوجد شركاء
+                  لا يوجد جهات مرتبطة
                 </p>
               )}
             </div>

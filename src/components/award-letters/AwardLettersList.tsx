@@ -149,7 +149,7 @@ export default function AwardLettersList() {
             خطابات الترسية
           </h1>
           <p className="text-muted-foreground">
-            إدارة خطابات الترسية والأسعار المعتمدة مع الشركاء
+            إدارة خطابات الترسية والأسعار المعتمدة مع الجهات المرتبطة
           </p>
         </div>
 
@@ -196,7 +196,7 @@ export default function AwardLettersList() {
             <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">لا توجد خطابات ترسية</h3>
             <p className="text-muted-foreground mb-4">
-              قم بإنشاء أول خطاب ترسية لتحديد أسعار المخلفات مع الشركاء
+              قم بإنشاء أول خطاب ترسية لتحديد أسعار المخلفات مع الجهات المرتبطة
             </p>
             <Button onClick={() => setIsFormOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />

@@ -277,7 +277,7 @@ export default function SmartInsights() {
           id: 'behav-1',
           type: 'behavior',
           severity: 'success',
-          title: 'شركاء نشطون',
+          title: 'جهات مرتبطة نشطة',
           description: `${activePartners.length} شريك يُظهر نشاطاً عالياً: ${activePartners.slice(0, 3).map(p => p.name).join('، ')}`,
           confidence: 92,
           icon: Flame,
@@ -290,11 +290,11 @@ export default function SmartInsights() {
           id: 'behav-2',
           type: 'behavior',
           severity: 'warning',
-          title: 'شركاء غير نشطين',
-          description: `${inactivePartners.length} شريك بنشاط منخفض - قد يحتاجون متابعة`,
+          title: 'جهات مرتبطة غير نشطة',
+          description: `${inactivePartners.length} جهة بنشاط منخفض - قد تحتاج متابعة`,
           confidence: 88,
           icon: Snowflake,
-          actionable: 'تواصل مع هؤلاء الشركاء لفهم احتياجاتهم',
+          actionable: 'تواصل مع هذه الجهات لفهم احتياجاتهم',
           data: inactivePartners,
         });
       }
@@ -310,7 +310,7 @@ export default function SmartInsights() {
           description: `${unreliablePartners.length} شريك لديهم تأخيرات متكررة أو مشاكل في التسليم`,
           confidence: 80,
           icon: Shield,
-          actionable: 'راجع أداء هؤلاء الشركاء واتخذ إجراءات تحسينية',
+          actionable: 'راجع أداء هذه الجهات واتخذ إجراءات تحسينية',
         });
       }
 
@@ -378,11 +378,11 @@ export default function SmartInsights() {
           id: 'rec-2',
           type: 'recommendation',
           severity: 'info',
-          title: 'توسيع شبكة الشركاء',
-          description: 'عدد الشركاء المسجلين محدود - فكر في جذب شركاء جدد',
+          title: 'توسيع شبكة الجهات المرتبطة',
+          description: 'عدد الجهات المرتبطة محدود - فكر في جذب جهات جديدة',
           confidence: 75,
           icon: Users,
-          actionable: 'أطلق حملة لجذب شركاء جدد للمنصة',
+          actionable: 'أطلق حملة لجذب جهات جديدة للمنصة',
         });
       }
 

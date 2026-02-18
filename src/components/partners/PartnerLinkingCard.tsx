@@ -321,7 +321,7 @@ const PartnerLinkingCard = () => {
       <Card>
         <CardHeader className="text-right">
           <CardTitle className="flex items-center gap-2 justify-end">
-            ربط الشركاء بكود التحقق
+            ربط الجهات بكود التحقق
             <Link2 className="w-5 h-5 text-primary" />
           </CardTitle>
           <CardDescription>
@@ -384,10 +384,10 @@ const PartnerLinkingCard = () => {
           <div className="flex items-center justify-between">
             <Button onClick={() => setShowLinkDialog(true)} className="gap-2">
               <Link2 className="w-4 h-4" />
-              ربط شريك جديد
+              ربط جهة جديدة
             </Button>
             <h3 className="font-medium flex items-center gap-2">
-              ربط شريك بالكود
+              ربط جهة بالكود
               <Users className="w-4 h-4 text-muted-foreground" />
             </h3>
           </div>
@@ -397,7 +397,7 @@ const PartnerLinkingCard = () => {
           {/* Verified Partners List */}
           <div className="space-y-3">
             <h3 className="font-medium text-right flex items-center gap-2 justify-end">
-              الشركاء المرتبطون ({partnerships.length})
+              الجهات المرتبطة ({partnerships.length})
               <Link2 className="w-4 h-4 text-green-600" />
             </h3>
             
@@ -408,8 +408,8 @@ const PartnerLinkingCard = () => {
             ) : partnerships.length === 0 ? (
               <div className="text-center py-6 text-muted-foreground">
                 <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>لا يوجد شركاء مرتبطون بعد</p>
-                <p className="text-sm">اربط شركاء جدد باستخدام كود التحقق</p>
+                <p>لا يوجد جهات مرتبطة بعد</p>
+                <p className="text-sm">اربط جهات جديدة باستخدام كود التحقق</p>
               </div>
             ) : (
               <div className="grid gap-3">

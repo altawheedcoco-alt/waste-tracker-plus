@@ -115,7 +115,7 @@ const PartnerProfitabilityPanel = () => {
   if (isLoading) {
     return (
       <Card>
-        <CardHeader><CardTitle>تحليل ربحية الشركاء</CardTitle></CardHeader>
+        <CardHeader><CardTitle>تحليل ربحية الجهات المرتبطة</CardTitle></CardHeader>
         <CardContent><Skeleton className="h-32 w-full" /></CardContent>
       </Card>
     );
@@ -138,7 +138,7 @@ const PartnerProfitabilityPanel = () => {
           </div>
           <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
             <BarChart3 className="w-5 h-5 text-primary" />
-            تحليل ربحية الشركاء
+            تحليل ربحية الجهات المرتبطة
           </CardTitle>
         </div>
         <CardDescription className="text-right">تحليل الإيرادات والتكاليف لكل شريك</CardDescription>

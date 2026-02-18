@@ -301,7 +301,7 @@ export default function PartnerAccountDetails() {
             onClick={() => navigate('/dashboard/partner-accounts')}
           >
             <ArrowRight className="h-4 w-4" />
-            العودة لقائمة الشركاء
+            العودة لقائمة الجهات المرتبطة
           </Button>
         </div>
       </DashboardLayout>

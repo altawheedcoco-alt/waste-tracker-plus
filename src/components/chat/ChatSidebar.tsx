@@ -326,7 +326,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
               <Users className="mx-auto mb-3 opacity-30" size={48} />
               <p className="text-sm font-medium">لا توجد محادثات</p>
               <p className="text-xs mt-1">
-                {searchQuery ? 'لا توجد نتائج للبحث' : 'ستظهر المحادثات عند التعامل مع شركاء'}
+                {searchQuery ? 'لا توجد نتائج للبحث' : 'ستظهر المحادثات عند التعامل مع جهات مرتبطة'}
               </p>
             </div>
           )}

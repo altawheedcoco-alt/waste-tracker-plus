@@ -56,7 +56,7 @@ const TransporterStatsGrid = ({ stats, isLoading, onStatClick }: TransporterStat
       },
       {
         id: 'partners',
-        title: 'الشركاء',
+        title: 'الجهات المرتبطة',
         icon: Building2,
         badge: stats?.partnerCompanies || 0,
         link: '/dashboard/partners',

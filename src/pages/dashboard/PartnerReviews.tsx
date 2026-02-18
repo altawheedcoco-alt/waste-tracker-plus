@@ -145,7 +145,7 @@ const PartnerReviews = () => {
             <Star className="w-7 h-7 text-amber-500" />
             التقييمات والمراجعات
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">قيّم شركاءك وابنِ سمعة رقمية موثوقة</p>
+          <p className="text-sm text-muted-foreground mt-1">قيّم جهاتك المرتبطة وابنِ سمعة رقمية موثوقة</p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild><Button className="gap-2"><Plus className="w-4 h-4" />تقييم شريك</Button></DialogTrigger>

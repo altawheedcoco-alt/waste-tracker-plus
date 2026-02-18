@@ -131,7 +131,7 @@ const DisposalIncomingPanel = ({ facilityId }: DisposalIncomingPanelProps) => {
                 طلبات تخلص واردة
               </CardTitle>
             </div>
-            <CardDescription className="text-right">طلبات جديدة من الشركاء تنتظر الموافقة</CardDescription>
+            <CardDescription className="text-right">طلبات جديدة من الجهات المرتبطة تنتظر الموافقة</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {pendingRequests.map((request: any) => (

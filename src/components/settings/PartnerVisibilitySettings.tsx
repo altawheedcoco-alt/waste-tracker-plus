@@ -137,7 +137,7 @@ const PartnerVisibilitySettings = () => {
               <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">التحكم في رؤية الشركاء</CardTitle>
+              <CardTitle className="text-lg">التحكم في رؤية الجهات المرتبطة</CardTitle>
               <CardDescription>
                 إدارة صلاحيات رؤية الخرائط والتتبع للجهات المولدة والمدورة
               </CardDescription>
@@ -158,8 +158,8 @@ const PartnerVisibilitySettings = () => {
         {partnersWithSettings.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Eye className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p>لا يوجد شركاء حتى الآن</p>
-            <p className="text-sm mt-1">سيظهر الشركاء هنا بعد إنشاء شحنات معهم</p>
+            <p>لا يوجد جهات مرتبطة حتى الآن</p>
+            <p className="text-sm mt-1">ستظهر الجهات المرتبطة هنا بعد إنشاء شحنات معهم</p>
           </div>
         ) : (
           partnersWithSettings.map((partner, index) => (

@@ -68,7 +68,7 @@ const REQUEST_CATEGORIES = [
   { id: 'certificates', label: 'الشهادات والاعتمادات', icon: Award },
   { id: 'organization', label: 'المؤسسة والموظفين', icon: Building2 },
   { id: 'drivers', label: 'السائقين والمركبات', icon: Car },
-  { id: 'partners', label: 'الشركاء', icon: Users },
+  { id: 'partners', label: 'الجهات المرتبطة', icon: Users },
   { id: 'support', label: 'الدعم والمساعدة', icon: HelpCircle },
 ];
 

@@ -108,7 +108,7 @@ const TransporterPartnerSummary = () => {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>ملخص الشركاء المالي</CardTitle>
+          <CardTitle>ملخص الجهات المرتبطة المالي</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -134,9 +134,9 @@ const TransporterPartnerSummary = () => {
           <div className="text-right">
             <CardTitle className="flex items-center gap-2 justify-end text-sm sm:text-base">
               <Building2 className="w-5 h-5 text-primary" />
-              ملخص الشركاء المالي
+              ملخص الجهات المرتبطة المالي
             </CardTitle>
-            <CardDescription>أرصدة وعمليات أبرز الشركاء</CardDescription>
+            <CardDescription>أرصدة وعمليات أبرز الجهات المرتبطة</CardDescription>
           </div>
         </div>
       </CardHeader>
