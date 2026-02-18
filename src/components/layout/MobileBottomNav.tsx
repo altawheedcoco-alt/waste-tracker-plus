@@ -77,10 +77,10 @@ const MobileBottomNav = memo(() => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border/60 pb-[env(safe-area-inset-bottom)]"
-      style={{ WebkitBackdropFilter: 'blur(16px)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]"
+      style={{ WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}
     >
-      <div className="flex items-center justify-around h-14 px-1">
+      <div className="flex items-center justify-around h-16 px-2">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           const Icon = tab.icon;
@@ -90,33 +90,51 @@ const MobileBottomNav = memo(() => {
               key={tab.id}
               onClick={() => navigate(tab.path)}
               className={cn(
-                'flex flex-col items-center justify-center gap-0.5 flex-1 h-full relative',
-                'touch-manipulation transition-colors duration-200',
-                active ? 'text-primary' : 'text-muted-foreground'
+                'flex flex-col items-center justify-center gap-1 flex-1 h-full relative',
+                'touch-manipulation spring-press',
+                active ? 'text-primary' : 'text-muted-foreground/70'
               )}
             >
-              {/* Active indicator */}
+              {/* Active background glow */}
               {active && (
                 <motion.div
-                  layoutId="bottomNavIndicator"
-                  className="absolute -top-px left-1/4 right-1/4 h-0.5 bg-primary rounded-full"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  layoutId="bottomNavBg"
+                  className="absolute inset-x-2 inset-y-1 rounded-2xl bg-primary/10"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
 
-              <div className="relative">
-                <Icon className={cn('w-5 h-5', active && 'stroke-[2.5]')} />
+              {/* Active top indicator */}
+              {active && (
+                <motion.div
+                  layoutId="bottomNavIndicator"
+                  className="absolute -top-px left-1/4 right-1/4 h-[3px] bg-primary rounded-full"
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
+
+              <div className="relative z-10">
+                <motion.div
+                  animate={active ? { scale: 1.15 } : { scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  <Icon className={cn('w-5 h-5', active && 'stroke-[2.5]')} />
+                </motion.div>
                 
                 {/* Badge */}
                 {tab.badge && tab.badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center">
+                  <motion.span 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center shadow-sm"
+                  >
                     {tab.badge > 99 ? '99+' : tab.badge}
-                  </span>
+                  </motion.span>
                 )}
               </div>
 
               <span className={cn(
-                'text-[10px] leading-tight',
+                'text-[10px] leading-tight relative z-10',
                 active ? 'font-bold' : 'font-medium'
               )}>
                 {tab.label}
