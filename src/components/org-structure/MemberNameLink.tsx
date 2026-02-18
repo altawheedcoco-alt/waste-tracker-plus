@@ -69,7 +69,7 @@ export default function MemberNameLink({
       // Enrich with profile, position, department
       const [profileRes, posRes, deptRes] = await Promise.all([
         m.profile_id
-          ? supabase.from('profiles').select('full_name, email, phone, avatar_url, national_id').eq('id', m.profile_id).single()
+          ? supabase.from('profiles').select('full_name, email, phone, avatar_url').eq('id', m.profile_id).single()
           : { data: null },
         m.position_id
           ? supabase.from('organization_positions' as any).select('title_ar, title, level').eq('id', m.position_id).single()

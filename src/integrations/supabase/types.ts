@@ -18265,6 +18265,36 @@ export type Database = {
           },
         ]
       }
+      profile_sensitive_data: {
+        Row: {
+          created_at: string
+          id: string
+          id_card_back_url: string | null
+          id_card_front_url: string | null
+          national_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          id_card_back_url?: string | null
+          id_card_front_url?: string | null
+          national_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          id_card_back_url?: string | null
+          id_card_front_url?: string | null
+          national_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           access_all_partners: boolean | null
@@ -18279,12 +18309,9 @@ export type Database = {
           employee_type: string | null
           full_name: string
           id: string
-          id_card_back_url: string | null
-          id_card_front_url: string | null
           invitation_date: string | null
           invited_by: string | null
           is_active: boolean | null
-          national_id: string | null
           organization_id: string | null
           phone: string | null
           position: string | null
@@ -18307,12 +18334,9 @@ export type Database = {
           employee_type?: string | null
           full_name: string
           id?: string
-          id_card_back_url?: string | null
-          id_card_front_url?: string | null
           invitation_date?: string | null
           invited_by?: string | null
           is_active?: boolean | null
-          national_id?: string | null
           organization_id?: string | null
           phone?: string | null
           position?: string | null
@@ -18335,12 +18359,9 @@ export type Database = {
           employee_type?: string | null
           full_name?: string
           id?: string
-          id_card_back_url?: string | null
-          id_card_front_url?: string | null
           invitation_date?: string | null
           invited_by?: string | null
           is_active?: boolean | null
-          national_id?: string | null
           organization_id?: string | null
           phone?: string | null
           position?: string | null
