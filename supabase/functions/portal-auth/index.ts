@@ -5,6 +5,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MAX_IP_ATTEMPTS = 10; // Max attempts per IP per 15 min
+const MAX_ACCOUNT_ATTEMPTS = 5; // Max failed attempts before lockout
+const LOCKOUT_MINUTES = 30;
+const RATE_WINDOW_MINUTES = 15;
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -12,8 +17,16 @@ Deno.serve(async (req) => {
 
   try {
     const { slug, access_code } = await req.json();
-    if (!slug || !access_code) {
-      return new Response(JSON.stringify({ error: 'Missing slug or access_code' }), {
+    if (!slug || !access_code || typeof slug !== 'string' || typeof access_code !== 'string') {
+      return new Response(JSON.stringify({ error: 'Missing or invalid slug/access_code' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Input validation
+    if (slug.length > 100 || access_code.length > 50) {
+      return new Response(JSON.stringify({ error: 'Invalid input' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -23,6 +36,35 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+
+    const ipAddress = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+
+    // === IP-based Rate Limiting ===
+    const windowStart = new Date(Date.now() - RATE_WINDOW_MINUTES * 60 * 1000).toISOString();
+    
+    const { count: ipAttempts } = await supabase
+      .from('portal_auth_attempts')
+      .select('*', { count: 'exact', head: true })
+      .eq('ip_address', ipAddress)
+      .eq('portal_slug', slug)
+      .gte('attempted_at', windowStart);
+
+    if ((ipAttempts ?? 0) >= MAX_IP_ATTEMPTS) {
+      return new Response(JSON.stringify({ 
+        error: 'عدد المحاولات كثير جداً. حاول مرة أخرى لاحقاً.',
+        error_en: 'Too many attempts. Please try again later.',
+        retry_after_minutes: RATE_WINDOW_MINUTES
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Log this attempt
+    await supabase.from('portal_auth_attempts').insert({
+      ip_address: ipAddress,
+      portal_slug: slug,
+    });
 
     // Find portal by slug
     const { data: portal, error: portalError } = await supabase
@@ -39,26 +81,49 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Find client by access code
+    // Find client by access code (check ALL matching clients for lockout)
     const { data: client, error: clientError } = await supabase
       .from('portal_clients')
-      .select('id, client_name, client_email, client_phone, is_active')
+      .select('id, client_name, client_email, client_phone, is_active, failed_login_attempts, locked_until')
       .eq('portal_id', portal.id)
       .eq('access_code', access_code.toUpperCase())
       .eq('is_active', true)
       .single();
 
     if (clientError || !client) {
-      return new Response(JSON.stringify({ error: 'Invalid access code' }), {
+      // Failed attempt - don't reveal if code exists or not
+      return new Response(JSON.stringify({ error: 'رمز الوصول غير صحيح', error_en: 'Invalid access code' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Update last login
+    // === Account Lockout Check ===
+    if (client.locked_until) {
+      const lockExpiry = new Date(client.locked_until);
+      if (lockExpiry > new Date()) {
+        const remainingMinutes = Math.ceil((lockExpiry.getTime() - Date.now()) / 60000);
+        return new Response(JSON.stringify({ 
+          error: `الحساب مقفل. حاول بعد ${remainingMinutes} دقيقة.`,
+          error_en: `Account locked. Try again in ${remainingMinutes} minutes.`,
+          locked: true,
+          retry_after_minutes: remainingMinutes
+        }), {
+          status: 423,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // === Successful login - reset failed attempts ===
     await supabase
       .from('portal_clients')
-      .update({ last_login_at: new Date().toISOString() })
+      .update({ 
+        last_login_at: new Date().toISOString(),
+        failed_login_attempts: 0,
+        locked_until: null,
+        last_failed_attempt: null,
+      })
       .eq('id', client.id);
 
     // Get portal settings (permissions)
