@@ -55,7 +55,7 @@ const DashboardBreadcrumb = () => {
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-4 flex items-center gap-3"
+      className="mb-2 sm:mb-4 flex items-center gap-2 sm:gap-3 max-sm:hidden"
     >
       {/* Back Button */}
       <Button

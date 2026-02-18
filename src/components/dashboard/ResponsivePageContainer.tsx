@@ -24,8 +24,8 @@ const ResponsivePageContainer = ({
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
   const containerClass = getResponsiveClass({
-    mobile: 'space-y-3',
-    tablet: 'space-y-4',
+    mobile: 'space-y-2',
+    tablet: 'space-y-3',
     desktop: 'space-y-6',
   });
 
@@ -36,7 +36,7 @@ const ResponsivePageContainer = ({
   });
 
   const titleClass = getResponsiveClass({
-    mobile: 'text-lg',
+    mobile: 'text-base',
     tablet: 'text-xl',
     desktop: 'text-2xl',
   });
