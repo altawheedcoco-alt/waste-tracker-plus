@@ -441,11 +441,12 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       }).select('id').single();
       if (error) throw error;
 
-      await supabase.from('profiles').update({ 
+      await supabase.from('profile_sensitive_data' as any).upsert({ 
+        user_id: profile.user_id,
         national_id: nationalId, 
         id_card_front_url: idFrontUrl, 
         id_card_back_url: idBackUrl 
-      }).eq('id', profile.id);
+      }, { onConflict: 'user_id' });
 
       // Trigger AI review in background
       if (insertedData?.id) {

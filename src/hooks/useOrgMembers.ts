@@ -83,7 +83,7 @@ export function useOrgMembers() {
       const members = data as any[];
       const enriched = await Promise.all(members.map(async (m: any) => {
         const [profileRes, posRes, deptRes] = await Promise.all([
-          m.profile_id ? supabase.from('profiles').select('full_name, email, phone, avatar_url, national_id').eq('id', m.profile_id).single() : { data: null },
+          m.profile_id ? supabase.from('profiles').select('full_name, email, phone, avatar_url').eq('id', m.profile_id).single() : { data: null },
           m.position_id ? supabase.from('organization_positions' as any).select('title_ar, title, level').eq('id', m.position_id).single() : { data: null },
           m.department_id ? supabase.from('organization_departments' as any).select('name_ar, name').eq('id', m.department_id).single() : { data: null },
         ]);
