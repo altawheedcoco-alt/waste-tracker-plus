@@ -39,6 +39,7 @@ import AutomationSettingsDialog from '@/components/automation/AutomationSettings
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import TransporterCommandCenter from './transporter/TransporterCommandCenter';
+import SmartDailyBrief from './shared/SmartDailyBrief';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
@@ -147,6 +148,15 @@ const TransporterDashboard = () => {
 
   return (
     <div className="space-y-3 sm:space-y-6">
+      <SmartDailyBrief
+        role="transporter"
+        stats={{
+          pending: shipments.filter(s => s.status === 'new').length,
+          active: shipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
+          completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
+          total: shipments.length,
+        }}
+      />
       <StoryCircles />
       <TransporterHeader organizationName={organization?.name || ''} />
 

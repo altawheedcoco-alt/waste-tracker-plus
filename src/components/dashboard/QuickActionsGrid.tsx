@@ -224,27 +224,29 @@ const QuickActionsGrid = ({
                           }
                         }}
                       >
-                        <Card className="h-full border hover:border-primary/50 hover:shadow-lg transition-all duration-300 bg-card group relative overflow-hidden">
-                          {/* Subtle gradient overlay on hover */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/3 group-hover:to-primary/8 transition-all duration-500 pointer-events-none" />
+                        <Card className="h-full border border-border/50 hover:border-primary/40 hover:shadow-xl transition-all duration-300 bg-card group relative overflow-hidden rounded-xl">
+                          {/* Gradient overlay on hover */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/[0.03] group-hover:to-primary/[0.08] transition-all duration-500 pointer-events-none" />
+                          {/* Top accent line */}
+                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/0 to-transparent group-hover:via-primary/40 transition-all duration-500" />
                           
                           <CardContent className={cn(isMobile ? 'p-3' : 'p-4', 'relative')}>
                             <div className="flex items-start justify-between gap-2">
                               <motion.div 
                                 className={cn(
                                   iconSize,
-                                  'rounded-xl flex items-center justify-center shrink-0 shadow-sm',
-                                  'group-hover:shadow-md group-hover:scale-110 transition-all duration-300',
+                                  'rounded-xl flex items-center justify-center shrink-0',
+                                  'shadow-sm group-hover:shadow-lg group-hover:scale-110 transition-all duration-300',
                                   action.iconBgClass || 'bg-primary/10'
                                 )}
                               >
                                 <action.icon className={cn(iconInnerSize, action.iconBgClass ? 'text-white' : 'text-primary')} />
                               </motion.div>
                               <div className="flex-1 text-right min-w-0">
-                                <h3 className={cn('font-semibold text-foreground group-hover:text-primary transition-colors truncate', titleClass)}>
+                                <h3 className={cn('font-semibold text-foreground group-hover:text-primary transition-colors truncate leading-tight', titleClass)}>
                                   {action.title}
                                 </h3>
-                                <p className={cn('text-muted-foreground mt-0.5 line-clamp-2', subtitleClass)}>
+                                <p className={cn('text-muted-foreground mt-0.5 line-clamp-2 leading-snug', subtitleClass)}>
                                   {action.subtitle}
                                 </p>
                               </div>

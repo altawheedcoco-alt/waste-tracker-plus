@@ -19,6 +19,7 @@ import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPr
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import GeneratorCommandCenter from './generator/GeneratorCommandCenter';
+import SmartDailyBrief from './shared/SmartDailyBrief';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
@@ -203,6 +204,15 @@ const GeneratorDashboard = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      <SmartDailyBrief
+        role="generator"
+        stats={{
+          pending: recentShipments.filter(s => s.status === 'new').length,
+          active: recentShipments.filter(s => ['approved', 'in_transit', 'collecting'].includes(s.status)).length,
+          completed: recentShipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
+          total: recentShipments.length,
+        }}
+      />
       <StoryCircles />
 
       {/* Header */}
