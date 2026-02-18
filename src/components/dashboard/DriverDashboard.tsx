@@ -27,6 +27,7 @@ import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
 import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
 import DriverDailyTasks from '@/components/driver/DriverDailyTasks';
+import SmartDailyBrief from './shared/SmartDailyBrief';
 import DriverDailySummary from '@/components/driver/DriverDailySummary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
@@ -221,22 +222,36 @@ const DriverDashboard = () => {
 
   return (
     <div className="space-y-4">
+      {/* Smart Daily Brief */}
+      <SmartDailyBrief
+        role="driver"
+        stats={{
+          pending: shipments.filter(s => s.status === 'new').length,
+          active: activeShipments.length,
+          completed: completedShipments.length,
+          total: shipments.length,
+        }}
+      />
+
       {/* Compact Header with Status */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={profile?.avatar_url || ''} />
-            <AvatarFallback className="bg-primary/10 text-primary font-bold">
-              {profile?.full_name?.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+              <AvatarImage src={profile?.avatar_url || ''} />
+              <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                {profile?.full_name?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${driverInfo?.is_available ? 'bg-emerald-500' : 'bg-muted-foreground/50'}`} />
+          </div>
           <div>
-            <div className="flex items-center gap-2">
-              <div className={`w-2.5 h-2.5 rounded-full ${driverInfo?.is_available ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'}`} />
-              <span className="text-xs text-muted-foreground">
-                {driverInfo?.is_available ? 'متاح' : 'غير متاح'}
-              </span>
-            </div>
+            <span className="text-xs font-medium">
+              {driverInfo?.is_available ? '🟢 متاح للمهام' : '⚫ غير متاح'}
+            </span>
+            {driverInfo?.vehicle_plate && (
+              <p className="text-[10px] text-muted-foreground">{driverInfo.vehicle_plate}</p>
+            )}
           </div>
         </div>
 

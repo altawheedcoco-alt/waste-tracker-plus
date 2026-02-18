@@ -59,19 +59,33 @@ const DriverDailyTasks = ({ shipments, onNavigate, onViewDetails }: DriverDailyT
 
   return (
     <div className="space-y-4">
-      {/* Daily Progress */}
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardContent className="pt-4 pb-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">تقدم اليوم</span>
-            <span className="text-sm text-muted-foreground">{completed}/{total} مهمة</span>
-          </div>
-          <Progress value={progress} className="h-2.5" />
-          <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-            <span>{todayTasks.length} مهمة متبقية</span>
-            <span>{Math.round(progress)}% مكتمل</span>
-          </div>
-        </CardContent>
+      {/* Daily Progress - Enhanced */}
+      <Card className="border-primary/20 overflow-hidden">
+        <div className="relative bg-gradient-to-l from-primary/10 via-primary/5 to-transparent">
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center justify-between mb-3">
+              <Badge variant="outline" className="text-xs gap-1 border-primary/30 text-primary">
+                <CheckCircle2 className="w-3 h-3" />
+                {completed}/{total}
+              </Badge>
+              <span className="text-sm font-bold">تقدم المهام</span>
+            </div>
+            <div className="relative">
+              <Progress value={progress} className="h-3 rounded-full" />
+              {progress > 0 && (
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  className="absolute top-0 left-0 h-3 rounded-full bg-gradient-to-l from-primary/20 to-transparent"
+                />
+              )}
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-[11px] text-muted-foreground">{todayTasks.length} مهمة متبقية</span>
+              <span className="text-sm font-bold text-primary tabular-nums">{Math.round(progress)}%</span>
+            </div>
+          </CardContent>
+        </div>
       </Card>
 
       {/* Task List */}
@@ -95,15 +109,17 @@ const DriverDailyTasks = ({ shipments, onNavigate, onViewDetails }: DriverDailyT
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
               >
-                <Card className="border overflow-hidden">
+                <Card className="border overflow-hidden hover:shadow-lg transition-shadow duration-300 hover:border-primary/30">
                   <CardContent className="p-0">
                     {/* Status Bar */}
-                    <div className={`px-4 py-2 flex items-center justify-between ${config.color} border-b`}>
+                    <div className={`px-4 py-2.5 flex items-center justify-between ${config.color} border-b`}>
                       <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4" />
-                        <span className="text-xs font-semibold">{config.label}</span>
+                        <motion.div animate={task.status === 'in_transit' ? { x: [0, 3, 0] } : {}} transition={{ repeat: Infinity, duration: 1.5 }}>
+                          <Icon className="w-4 h-4" />
+                        </motion.div>
+                        <span className="text-xs font-bold">{config.label}</span>
                       </div>
-                      <span className="text-xs font-mono">{task.shipment_number}</span>
+                      <Badge variant="outline" className="text-[10px] font-mono h-5 border-current/20">{task.shipment_number}</Badge>
                     </div>
 
                     <div className="p-4 space-y-3">
