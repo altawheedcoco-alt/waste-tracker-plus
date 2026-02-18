@@ -104,7 +104,7 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
             وثيقة الموافقة على الشروط والأحكام
           </h1>
           <p className="text-xs text-gray-600">
-            منصة I-Recycle لإدارة المخلفات الصناعية
+            منصة iRecycle لإدارة المخلفات الصناعية
           </p>
           <div className="mt-2 inline-block bg-amber-100 text-amber-800 px-3 py-0.5 rounded-full text-[10px] font-medium">
             🔒 هذه الوثيقة سرية ومؤمنة
@@ -237,7 +237,7 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
                 ⚖️ إقرار قانوني ملزم
               </p>
               <p className="text-[10px] text-red-700 text-center leading-relaxed">
-                يُعتبر تسجيل المستخدم على منصة I-Recycle وإتمام عملية التسجيل بمثابة موافقة صريحة وكاملة وغير مشروطة على جميع الشروط والأحكام والسياسات المنصوص عليها في هذه الوثيقة، ويُعد التوقيع الإلكتروني المثبت أعلاه بمثابة إقرار قانوني ملزم بقبول كافة البنود والالتزامات الواردة فيها، وذلك وفقاً لأحكام القانون المصري رقم 15 لسنة 2004 بشأن التوقيع الإلكتروني ولائحته التنفيذية.
+                يُعتبر تسجيل المستخدم على منصة iRecycle وإتمام عملية التسجيل بمثابة موافقة صريحة وكاملة وغير مشروطة على جميع الشروط والأحكام والسياسات المنصوص عليها في هذه الوثيقة، ويُعد التوقيع الإلكتروني المثبت أعلاه بمثابة إقرار قانوني ملزم بقبول كافة البنود والالتزامات الواردة فيها، وذلك وفقاً لأحكام القانون المصري رقم 15 لسنة 2004 بشأن التوقيع الإلكتروني ولائحته التنفيذية.
               </p>
             </div>
           </div>
@@ -284,9 +284,9 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
             <div className="text-center border rounded-lg p-4">
               <p className="text-sm text-gray-600 mb-2">ختم المنصة</p>
               <div className="border-2 border-dashed border-primary/30 h-16 mb-2 flex items-center justify-center bg-primary/5 rounded">
-                <span className="text-xs text-primary font-bold">✓ موثق إلكترونياً من I-Recycle</span>
+                <span className="text-xs text-primary font-bold">✓ موثق إلكترونياً من iRecycle</span>
               </div>
-              <p className="font-medium text-sm">منصة I-Recycle</p>
+              <p className="font-medium text-sm">منصة iRecycle</p>
               <p className="text-xs text-gray-500">لإدارة المخلفات الصناعية</p>
             </div>
           </div>
@@ -294,7 +294,7 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
 
         {/* Footer */}
         <div className="mt-8 pt-4 border-t text-center text-xs text-gray-500">
-          <p>تم إنشاء هذه الوثيقة إلكترونياً من منصة I-Recycle لإدارة المخلفات الصناعية</p>
+          <p>تم إنشاء هذه الوثيقة إلكترونياً من منصة iRecycle لإدارة المخلفات الصناعية</p>
           <p className="mt-1">
             رقم التحقق: EG-I-RECYCLE-TA-{acceptance.id.slice(0, 8).toUpperCase()}
           </p>
