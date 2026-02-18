@@ -58,7 +58,7 @@ export interface MainCategory {
 
 export const mainCategories: MainCategory[] = [
   // غير خطرة
-  { id: 'organic', name: 'أخشاب ومواد عضوية', nameShort: 'عضوي/خشب', code: 'WD', isHazardous: false, keywords: ['خشب', 'اخشاب', 'بالت', 'بالتات', 'كونتر', 'حبيبي', 'صندوق', 'mdf', 'عضوي', 'طعام', 'زراعي', 'موسكي', 'ابلكاش', 'خشب زان', 'خشب سويد', 'لتزانيلو', 'تيك', 'نشارة'] },
+  { id: 'organic', name: 'أخشاب ومواد عضوية', nameShort: 'عضوي/خشب', code: 'WD', isHazardous: false, keywords: ['خشب', 'اخشاب', 'بالت', 'بالتات', 'كونتر', 'حبيبي', 'صندوق', 'mdf', 'hdf', 'عضوي', 'طعام', 'زراعي', 'موسكي', 'ابلكاش', 'خشب زان', 'خشب سويد', 'لتزانيلو', 'تيك', 'نشارة', 'باركيه', 'فورميكا', 'لاتيه', 'كسر خشب', 'أثاث خشب', 'طبالي', 'خشب كسر', 'رايش'] },
   { id: 'plastic', name: 'بلاستيك ومطاط', nameShort: 'بلاستيك', code: 'PL', isHazardous: false, keywords: ['بلاستيك', 'plastic', 'pet', 'hdpe', 'pvc', 'نايلون', 'اكياس', 'عبوات', 'مطاط', 'كاوتش', 'إطار', 'شنطة', 'جردل', 'خرطوم', 'فيبر جلاس'] },
   { id: 'paper', name: 'ورق وكرتون', nameShort: 'ورق', code: 'PA', isHazardous: false, keywords: ['ورق', 'كرتون', 'paper', 'cardboard', 'كراتين', 'علب', 'دشت', 'رول', 'ورق فلوسكاب'] },
   { id: 'metal', name: 'معادن وخردة', nameShort: 'معادن', code: 'MT', isHazardous: false, keywords: ['معدن', 'حديد', 'ألومنيوم', 'نحاس', 'ستانلس', 'خردة', 'سكراب', 'زنك', 'رصاص', 'تنك', 'صاج', 'سلك', 'مسمار'] },
@@ -260,15 +260,65 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'مخلفات طعام (مطاعم وفنادق)', code: 'OR-01', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['بقايا أكل', 'فضلات مطبخ', 'بواقي طعام فنادق', 'زيت طعام مستعمل', 'بواقي خبز', 'تفل قهوة/شاي'] },
       { name: 'مخلفات أسواق وخضار وفاكهة', code: 'OR-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خضار تالف', 'فاكهة تالفة', 'قشر بطاطس', 'ورق خس', 'بقايا سوق', 'فاكهة مهروسة'] },
       { name: 'مخلفات حدائق وتقليم أشجار', code: 'OR-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['فروع أشجار', 'ورق شجر', 'نجيلة مقصوصة', 'تقليم نخيل', 'جريد نخل', 'سعف نخيل', 'أعشاب محشوشة'] },
-      { name: 'أخشاب نظيفة وبالتات', code: 'OR-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
-        'بالتات خشب (طبالي)', 'بالتات يوروبالت', 'صناديق خشب', 'خشب موسكي', 'خشب سويدي',
-        'خشب زان', 'خشب عزيزي', 'خشب أرو (بلوط)', 'خشب تيك', 'خشب جوز',
-        'خشب كونتر (ألواح حبيبية)', 'أبلكاش (خشب رقائقي)', 'MDF (ألياف متوسطة الكثافة)', 'HDF',
-        'خشب لاتيه', 'خشب لتزانيلو', 'فورميكا',
-        'نشارة خشب', 'رايش خشب', 'برادة خشب', 'قطع خشب متبقية (تريم)',
-        'أبواب خشب قديمة', 'شبابيك خشب', 'أثاث خشب تالف', 'دواليب خشب',
-        'سرير خشب', 'طاولات خشب', 'كراسي خشب', 'أرضيات باركيه',
-        'خشب أسقف', 'عوارض خشبية', 'ألواح خشب مستعملة'
+      // ===== بند الأخشاب - تفصيلي =====
+      { name: 'خشب كسر ومخلوط', code: 'OR-04', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'خشب كسر', 'كسر خشب', 'خشب مخلوط', 'بقايا خشب', 'خشب تالف', 'خشب هالك',
+        'قطع خشب متبقية (تريم)', 'رايش خشب', 'فضلات خشب', 'خشب رجيع'
+      ]},
+      { name: 'بالتات خشب (طبالي)', code: 'OR-04A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'بالتات خشب', 'طبالي خشب', 'بالتات يوروبالت', 'بالتة خشب', 'بالته', 'بالت',
+        'طبلية خشب', 'بالتات شحن', 'بالتات مستعملة', 'بالتات نظيفة'
+      ]},
+      { name: 'صناديق وأقفاص خشب', code: 'OR-04B', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'صناديق خشب', 'أقفاص خشب', 'صندوق فاكهة خشب', 'أقفاص عنب', 'صناديق شحن خشب'
+      ]},
+      { name: 'خشب موسكي وسويدي', code: 'OR-04C', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'خشب موسكي', 'خشب سويدي', 'خشب موسكي فنلندي', 'خشب صنوبر', 'لوح موسكي',
+        'تقطيع موسكي', 'عروق موسكي', 'مراين موسكي'
+      ]},
+      { name: 'خشب زان', code: 'OR-04D', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'خشب زان', 'زان أحمر', 'زان روماني', 'زان تركي', 'زان ألماني',
+        'ألواح زان', 'خشب زان مستعمل'
+      ]},
+      { name: 'أخشاب صلبة (أرو/تيك/جوز/عزيزي)', code: 'OR-04E', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'خشب أرو (بلوط)', 'خشب تيك', 'خشب جوز', 'خشب عزيزي', 'خشب ماهوجني',
+        'خشب ساج', 'خشب ابنوس', 'خشب ورد', 'أخشاب صلبة', 'أخشاب طبيعية فاخرة'
+      ]},
+      { name: 'خشب كونتر وحبيبي', code: 'OR-04F', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'خشب كونتر', 'كونتر حبيبي', 'ألواح حبيبية', 'شيب بورد', 'كونتر ملبس',
+        'كونتر عاري', 'كونتر مقاوم للرطوبة', 'أجلومري'
+      ]},
+      { name: 'أبلكاش ولاتيه (رقائقي)', code: 'OR-04G', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'أبلكاش', 'خشب رقائقي', 'بلاي وود', 'خشب لاتيه', 'أبلكاش بحري',
+        'أبلكاش فنلندي', 'أبلكاش صيني', 'ألواح أبلكاش'
+      ]},
+      { name: 'MDF و HDF (ألياف مضغوطة)', code: 'OR-04H', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'MDF', 'ألواح MDF', 'خشب MDF', 'HDF', 'ألواح HDF', 'أرضيات HDF',
+        'MDF ملبس', 'MDF مدهون', 'ألياف متوسطة الكثافة', 'ألياف عالية الكثافة'
+      ]},
+      { name: 'فورميكا وقشرة خشب', code: 'OR-04I', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: [
+        'فورميكا', 'قشرة خشب طبيعية', 'قشرة خشب صناعية', 'HPL', 'ألواح فورميكا',
+        'ورق ديكور', 'لامينيت', 'ميلامين'
+      ]},
+      { name: 'خشب لتزانيلو وعروق', code: 'OR-04J', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'خشب لتزانيلو', 'عروق خشب', 'مراين خشب', 'براويز خشب', 'ألواح لتزانيلو',
+        'خشب تجاليد', 'ربع دائرة خشب'
+      ]},
+      { name: 'نشارة وبرادة خشب', code: 'OR-04K', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'نشارة خشب', 'برادة خشب', 'نشارة ناعمة', 'نشارة خشنة', 'غبار خشب',
+        'نشارة مكابس', 'نشارة دائري'
+      ]},
+      { name: 'أثاث خشب تالف ومستعمل', code: 'OR-04L', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'أثاث خشب تالف', 'دواليب خشب', 'سرير خشب', 'طاولات خشب', 'كراسي خشب',
+        'مكاتب خشب', 'سفرة خشب', 'كنبة خشب', 'كومودينو', 'تسريحة', 'أثاث مطبخ خشب'
+      ]},
+      { name: 'أبواب وشبابيك خشب', code: 'OR-04M', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'أبواب خشب قديمة', 'شبابيك خشب', 'ضلف خشب', 'حلوق أبواب', 'أبواب حمامات خشب',
+        'شيش خشب', 'درابزين خشب'
+      ]},
+      { name: 'أرضيات باركيه وتجاليد خشب', code: 'OR-04N', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: [
+        'أرضيات باركيه', 'باركيه مستعمل', 'أرضيات خشب', 'تجاليد حوائط خشب',
+        'ديكورات خشب قديمة', 'سقف خشب', 'عوارض خشبية', 'كمرات خشب'
       ]},
       { name: 'مخلفات محاصيل زراعية', code: 'OR-05', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['قش أرز', 'حطب ذرة', 'حطب قطن', 'قش قمح', 'عروش بطاطس', 'بقايا قصب سكر (باجاس)', 'تبن', 'سيلاج تالف'] },
       { name: 'مخلفات تصنيع غذائي', code: 'OR-06', hazardLevel: 'low', wasteState: 'mixed', recyclable: true, commonNames: ['تفل بنجر', 'كسب بذور', 'مولاس', 'بقايا مذابح (ريش/أحشاء)', 'قشور بيض', 'بقايا مصانع أغذية', 'عظام حيوانات'] },
