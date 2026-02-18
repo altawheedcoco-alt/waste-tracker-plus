@@ -18381,6 +18381,7 @@ export type Database = {
           report_data: Json | null
           report_number: string
           shipment_id: string
+          status: string | null
           template_id: string | null
           updated_at: string
           waste_category: string
@@ -18398,6 +18399,7 @@ export type Database = {
           report_data?: Json | null
           report_number: string
           shipment_id: string
+          status?: string | null
           template_id?: string | null
           updated_at?: string
           waste_category?: string
@@ -18415,6 +18417,7 @@ export type Database = {
           report_data?: Json | null
           report_number?: string
           shipment_id?: string
+          status?: string | null
           template_id?: string | null
           updated_at?: string
           waste_category?: string
@@ -19799,6 +19802,7 @@ export type Database = {
           pickup_location: string | null
           pickup_photos: string[] | null
           receipt_number: string
+          receipt_type: string | null
           shipment_id: string
           status: string
           transporter_approval_deadline: string | null
@@ -19831,6 +19835,7 @@ export type Database = {
           pickup_location?: string | null
           pickup_photos?: string[] | null
           receipt_number?: string
+          receipt_type?: string | null
           shipment_id: string
           status?: string
           transporter_approval_deadline?: string | null
@@ -19863,6 +19868,7 @@ export type Database = {
           pickup_location?: string | null
           pickup_photos?: string[] | null
           receipt_number?: string
+          receipt_type?: string | null
           shipment_id?: string
           status?: string
           transporter_approval_deadline?: string | null
