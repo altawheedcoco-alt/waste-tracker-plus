@@ -45,7 +45,7 @@ const MobileFloatingContainer = memo(({ items, className }: MobileFloatingContai
     <div 
       className={cn(
         'fixed z-40',
-        'bottom-[calc(1rem+env(safe-area-inset-bottom))] left-3',
+        'bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-3',
         className
       )}
     >

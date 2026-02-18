@@ -113,6 +113,7 @@ import { getAvatarEmoji, getColorTheme } from '@/components/settings/ProfileCust
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
 import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import GlobalRefreshButton from './GlobalRefreshButton';
 import LiveEventToast from '@/components/notifications/LiveEventToast';
 import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomizer';
@@ -1106,17 +1107,25 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
           </AnimatePresence>
 
-          {/* Page content - Responsive padding with proper overflow handling and bottom spacing for FABs */}
-          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto pb-24 sm:pb-6`}>
+          {/* Page content - Responsive padding with proper overflow handling and bottom spacing for bottom nav */}
+          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-20' : 'pb-6'}`}>
             <DashboardBreadcrumb />
             <div className="w-full max-w-full">
               <OnboardingGuard>
-                {children}
+                <motion.div
+                  key={location.pathname}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                >
+                  {children}
+                </motion.div>
               </OnboardingGuard>
             </div>
           </main>
 
-
+          {/* Mobile Bottom Navigation */}
+          <MobileBottomNav />
 
         </div>
       </div>
