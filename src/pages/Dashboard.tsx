@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import PagePasswordGate from '@/components/security/PagePasswordGate';
 import PinVerificationGate from '@/components/security/PinVerificationGate';
+import SubscriptionGuard from '@/components/guards/SubscriptionGuard';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Loader2 } from 'lucide-react';
@@ -94,6 +95,7 @@ const Dashboard = () => {
   };
 
   return (
+    <SubscriptionGuard>
     <LazyGoogleMapsProvider>
         <PinVerificationGate>
           <>
@@ -123,6 +125,7 @@ const Dashboard = () => {
           </>
         </PinVerificationGate>
     </LazyGoogleMapsProvider>
+    </SubscriptionGuard>
   );
 };
 
