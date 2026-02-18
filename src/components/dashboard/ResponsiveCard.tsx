@@ -66,8 +66,8 @@ const ResponsiveCard = ({
   const cardContent = (
     <Card
       className={cn(
-        'transition-all duration-300',
-        interactive && 'cursor-pointer hover:shadow-md hover:border-primary/50',
+        'transition-all duration-300 glass-card-hover',
+        interactive && 'cursor-pointer',
         className
       )}
       onClick={onClick}
@@ -76,15 +76,17 @@ const ResponsiveCard = ({
         <CardHeader className={cn(paddingClass, 'pb-2')}>
           <div className="flex items-start justify-between gap-3">
             {Icon && (
-              <div
+              <motion.div
                 className={cn(
-                  'rounded-lg flex items-center justify-center shrink-0',
+                  'rounded-xl flex items-center justify-center shrink-0 shadow-sm',
                   iconSizeClass,
                   iconBgClass
                 )}
+                whileHover={{ rotate: [0, -5, 5, 0] }}
+                transition={{ duration: 0.3 }}
               >
                 <Icon className={cn(iconInnerClass, 'text-primary')} />
-              </div>
+              </motion.div>
             )}
             <div className="flex-1 text-right">
               {title && (
@@ -112,8 +114,9 @@ const ResponsiveCard = ({
   if (interactive) {
     return (
       <motion.div
-        whileHover={{ scale: 1.02, y: -2 }}
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: 1.02, y: -3 }}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       >
         {cardContent}
       </motion.div>
