@@ -3,7 +3,7 @@ export { default as useDeferredValue, useDebounce, useThrottle } from './useDefe
 export { default as useFileDownload } from './useFileDownload';
 export { default as useOptimizedPDF } from './useOptimizedPDF';
 export { default as useOptimizedQuery, useBatchPrefetch } from './useOptimizedQuery';
-export { default as useVirtualList } from './useVirtualList';
+
 export { usePrefetch, usePredictivePrefetch } from './usePrefetch';
 export { useVirtualScroll } from './useVirtualScroll';
 export { useWebWorker } from './useWebWorker';
