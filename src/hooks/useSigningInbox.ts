@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 
 export interface SigningRequest {
   id: string;
@@ -42,6 +43,7 @@ export function useSigningInbox() {
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
   const orgId = profile?.organization_id;
+  const { hasActiveSubscription, isExempt } = useSubscriptionStatus();
 
   // Realtime subscription
   useEffect(() => {
@@ -141,6 +143,10 @@ export function useSigningInbox() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, rejection_reason }: { id: string; status: string; rejection_reason?: string }) => {
+      // Block signing action if no active subscription
+      if (status === 'signed' && !isExempt && !hasActiveSubscription) {
+        throw new Error('يلزم اشتراك نشط للتوقيع على المستندات. يرجى تجديد اشتراكك أولاً.');
+      }
       const updates: any = { status };
       if (status === 'viewed') updates.viewed_at = new Date().toISOString();
       if (status === 'signed') updates.signed_at = new Date().toISOString();

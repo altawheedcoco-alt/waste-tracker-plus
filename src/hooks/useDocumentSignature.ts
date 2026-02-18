@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { BiometricSignatureData } from '@/components/signature/BiometricSignaturePad';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 
 interface SignDocumentParams {
   documentType: string;
@@ -38,6 +39,7 @@ interface DocumentSignature {
 
 export const useDocumentSignature = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { hasActiveSubscription, isExempt } = useSubscriptionStatus();
 
   // Get IP address (best effort)
   const getIpAddress = async (): Promise<string | null> => {
@@ -85,6 +87,12 @@ export const useDocumentSignature = () => {
 
   // Sign a document
   const signDocument = useCallback(async (params: SignDocumentParams): Promise<DocumentSignature | null> => {
+    // Subscription check - block signing without active subscription
+    if (!isExempt && !hasActiveSubscription) {
+      toast.error('يلزم اشتراك نشط للتوقيع على المستندات. يرجى تجديد اشتراكك أولاً.');
+      return null;
+    }
+
     setIsLoading(true);
 
     try {
@@ -147,7 +155,7 @@ export const useDocumentSignature = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isExempt, hasActiveSubscription]);
 
   // Get signatures for a document
   const getDocumentSignatures = useCallback(async (
