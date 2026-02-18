@@ -44,12 +44,12 @@ const FloatingActionsStack = memo(({
   const getPositionClasses = () => {
     if (position === 'bottom-right') {
       return isMobile 
-        ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))] right-3' 
+        ? 'bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3' 
         : 'bottom-6 right-6';
     }
     // bottom-left (default) - stacked above other widgets with more spacing
     return isMobile 
-      ? 'bottom-[calc(11rem+env(safe-area-inset-bottom))] left-3' // Higher on mobile to avoid FAB overlap
+      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] left-3' // Higher on mobile to avoid bottom nav overlap
       : isTablet 
         ? 'bottom-6 left-20' // Clear of sidebar
         : 'bottom-6 left-24'; // Desktop with sidebar

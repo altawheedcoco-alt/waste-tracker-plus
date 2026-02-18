@@ -415,6 +415,44 @@
   .icon-responsive-lg {
     @apply w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12;
   }
+
+  /* Enhanced touch targets for mobile */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] touch-manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .touch-target-sm {
+    @apply min-h-[36px] min-w-[36px] touch-manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth content transitions */
+  .page-transition {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Better container spacing on all devices */
+  .container-responsive {
+    @apply px-3 sm:px-4 lg:px-6 xl:px-8;
+    max-width: 100%;
+  }
+
+  /* Adaptive text that stays readable */
+  .text-adaptive {
+    @apply text-sm sm:text-base;
+    line-height: 1.6;
+  }
+
+  /* Cards that feel natural on all sizes */
+  .card-adaptive {
+    @apply rounded-xl sm:rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md transition-shadow duration-300;
+  }
+
+  /* Bottom nav safe spacing */
+  .bottom-nav-spacing {
+    @apply pb-20 sm:pb-6;
+  }
 }
 
 /* Leaflet Map Styles */

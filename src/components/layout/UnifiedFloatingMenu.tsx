@@ -100,7 +100,7 @@ const UnifiedFloatingMenu = memo(() => {
       className={cn(
         'fixed z-50',
         isMobile 
-          ? 'bottom-[calc(1rem+env(safe-area-inset-bottom))] right-3'
+          ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-3'
           : 'bottom-6 right-6'
       )}
     >

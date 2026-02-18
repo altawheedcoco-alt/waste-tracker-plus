@@ -11,7 +11,7 @@ const CallLogWidget = () => {
     <>
       {/* Floating Button - Responsive positioning to avoid overlap */}
       <motion.button
-        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:bottom-36 left-3 sm:left-6 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center touch-manipulation"
+        className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:bottom-36 left-3 sm:left-6 z-40 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center touch-manipulation"
         onClick={() => setShowDialog(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
