@@ -15849,6 +15849,35 @@ export type Database = {
           },
         ]
       }
+      page_password_hashes: {
+        Row: {
+          created_at: string
+          id: string
+          page_password_id: string
+          password_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          page_password_id: string
+          password_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          page_password_id?: string
+          password_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_password_hashes_page_password_id_fkey"
+            columns: ["page_password_id"]
+            isOneToOne: true
+            referencedRelation: "page_passwords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_password_recovery: {
         Row: {
           created_at: string | null
@@ -15896,7 +15925,6 @@ export type Database = {
           organization_id: string
           page_name: string
           page_path: string
-          password_hash: string
           updated_at: string | null
         }
         Insert: {
@@ -15907,7 +15935,6 @@ export type Database = {
           organization_id: string
           page_name: string
           page_path: string
-          password_hash: string
           updated_at?: string | null
         }
         Update: {
@@ -15918,7 +15945,6 @@ export type Database = {
           organization_id?: string
           page_name?: string
           page_path?: string
-          password_hash?: string
           updated_at?: string | null
         }
         Relationships: [

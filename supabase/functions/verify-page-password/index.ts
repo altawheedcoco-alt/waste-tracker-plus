@@ -58,11 +58,11 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Fetch hash server-side only
+      // Fetch hash from secure separate table (no client SELECT policy)
       const { data, error } = await supabase
-        .from("page_passwords")
+        .from("page_password_hashes")
         .select("password_hash")
-        .eq("id", page_password_id)
+        .eq("page_password_id", page_password_id)
         .single();
 
       if (error || !data) {
