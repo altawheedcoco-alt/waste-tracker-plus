@@ -24993,6 +24993,10 @@ export type Database = {
         Returns: number
       }
       cleanup_old_api_request_logs: { Args: never; Returns: number }
+      consultant_has_active_subscription: {
+        Args: { _consultant_user_id: string }
+        Returns: boolean
+      }
       count_recent_2fa_attempts: {
         Args: { _minutes?: number; _user_id: string }
         Returns: number
@@ -25214,6 +25218,7 @@ export type Database = {
         Args: { p_limit?: number; p_org_id: string; p_query: string }
         Returns: Json
       }
+      has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_employee_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean

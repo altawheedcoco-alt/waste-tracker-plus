@@ -14,11 +14,14 @@ import {
   Shield,
   CheckCircle2,
   FileCheck,
+  ShieldAlert,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import BiometricSignaturePad, { BiometricSignatureData } from './BiometricSignaturePad';
 import { useDocumentSignature } from '@/hooks/useDocumentSignature';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { toast } from 'sonner';
 
 interface SignDocumentButtonProps {
   documentType: 'certificate' | 'contract' | 'receipt' | 'report' | 'shipment';
@@ -53,8 +56,11 @@ const SignDocumentButton = ({
 }: SignDocumentButtonProps) => {
   const { user, profile, organization } = useAuth();
   const { signDocument, isLoading } = useDocumentSignature();
+  const { hasActiveSubscription, isExempt } = useSubscriptionStatus();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [signed, setSigned] = useState(false);
+
+  const canSign = isExempt || hasActiveSubscription;
 
   const handleSignComplete = async (data: BiometricSignatureData) => {
     if (!user?.id || !organization?.id || !profile?.full_name) {
@@ -95,7 +101,14 @@ const SignDocumentButton = ({
         <Button
           variant={signed ? 'default' : variant}
           size={size}
-          disabled={disabled || isLoading}
+          disabled={disabled || isLoading || !canSign}
+          title={!canSign ? 'يلزم اشتراك نشط للتوقيع' : undefined}
+          onClick={(e) => {
+            if (!canSign) {
+              e.preventDefault();
+              toast.error('يلزم اشتراك نشط للتوقيع على المستندات. يرجى تجديد اشتراكك أولاً.');
+            }
+          }}
           className={cn(
             'gap-2',
             signed && 'bg-emerald-600 hover:bg-emerald-700',
