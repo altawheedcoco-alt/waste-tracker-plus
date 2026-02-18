@@ -14294,6 +14294,75 @@ export type Database = {
           },
         ]
       }
+      org_public_profiles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_message: string | null
+          id: string
+          is_active: boolean
+          organization_id: string
+          share_code: string
+          show_basic_info: boolean
+          show_contact_info: boolean
+          show_licenses: boolean
+          show_statistics: boolean
+          show_team: boolean
+          show_team_details: boolean
+          show_team_documents: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_message?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          share_code?: string
+          show_basic_info?: boolean
+          show_contact_info?: boolean
+          show_licenses?: boolean
+          show_statistics?: boolean
+          show_team?: boolean
+          show_team_details?: boolean
+          show_team_documents?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_message?: string | null
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          share_code?: string
+          show_basic_info?: boolean
+          show_contact_info?: boolean
+          show_licenses?: boolean
+          show_statistics?: boolean
+          show_team?: boolean
+          show_team_details?: boolean
+          show_team_documents?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_public_profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "org_public_profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_approval_logs: {
         Row: {
           action: string

@@ -12,11 +12,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useOrgStructure, Department } from '@/hooks/useOrgStructure';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import OrgMembersPanel from '@/components/org-structure/OrgMembersPanel';
+import OrgPublicProfileSettings from '@/components/org-structure/OrgPublicProfileSettings';
 import {
   Crown, Settings, Truck, Users, Shield, Calculator, Headphones,
   Leaf, Package, FileText, DoorOpen, Factory, FlaskConical, Scale,
   Cog, Activity, FileCheck, Building2, Plus, User, ChevronDown, ChevronUp,
-  Network, ArrowRight,
+  Network, ArrowRight, Share2,
 } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
@@ -178,17 +179,24 @@ const OrgStructure = () => {
 
       {/* Tabs: Structure vs Members */}
       <Tabs defaultValue="structure" dir="rtl">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="structure">
             <Network className="w-4 h-4 ml-1" /> الهيكل التنظيمي
           </TabsTrigger>
           <TabsTrigger value="members">
             <Users className="w-4 h-4 ml-1" /> الأعضاء والصلاحيات
           </TabsTrigger>
+          <TabsTrigger value="sharing">
+            <Share2 className="w-4 h-4 ml-1" /> مشاركة الملف
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="members" className="mt-4">
           <OrgMembersPanel />
+        </TabsContent>
+
+        <TabsContent value="sharing" className="mt-4">
+          <OrgPublicProfileSettings />
         </TabsContent>
 
         <TabsContent value="structure" className="mt-4">

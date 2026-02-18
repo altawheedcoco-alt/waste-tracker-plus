@@ -180,6 +180,7 @@ const WasteAuctions = lazy(() => import("./pages/dashboard/WasteAuctions"));
 const PartnerReviews = lazy(() => import("./pages/dashboard/PartnerReviews"));
 const EquipmentMarketplace = lazy(() => import("./pages/dashboard/EquipmentMarketplace"));
 const WhiteLabelPortal = lazy(() => import("./pages/dashboard/WhiteLabelPortal"));
+const PublicOrgProfile = lazy(() => import("./pages/PublicOrgProfile"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -239,6 +240,7 @@ const AppRoutes = memo(() => (
     <Route path="/scan" element={<QRVerify />} />
      <Route path="/track" element={<PublicTrackingPage />} />
      <Route path="/audit-portal" element={<AuditPortalPage />} />
+     <Route path="/org-profile/:code" element={<PublicOrgProfile />} />
      <Route path="/auth" element={<Auth />} />
     <Route path="/auth/google-setup" element={<GoogleSetup />} />
     {/* Guide Routes */}
