@@ -156,27 +156,39 @@ function calculateAggregate(
   }
 }
 
-// دالة التحويل
+// Safe predefined transformers (no arbitrary code execution)
+const SAFE_TRANSFORMERS: Record<string, (item: Record<string, unknown>, index: number) => unknown> = {
+  identity: (item) => item,
+  pick_keys: (item) => item, // caller should pre-filter
+  stringify: (item) => JSON.stringify(item),
+  index_add: (item, index) => ({ ...item, _index: index }),
+};
+
+const SAFE_PREDICATES: Record<string, (item: Record<string, unknown>) => boolean> = {
+  truthy: (item) => !!item,
+  has_id: (item) => !!item.id,
+  is_active: (item) => item.is_active === true || item.status === 'active',
+  not_null: (item) => item !== null && item !== undefined,
+};
+
+// دالة التحويل - آمنة بدون تنفيذ كود عشوائي
 function transformData({ data, transformer }: TransformPayload): unknown[] {
-  try {
-    // إنشاء الدالة من النص
-    const fn = new Function('item', 'index', `return (${transformer})(item, index)`);
-    return data.map((item, index) => fn(item, index));
-  } catch (error) {
-    console.error('Transform error:', error);
+  const fn = SAFE_TRANSFORMERS[transformer];
+  if (!fn) {
+    console.warn('Unknown transformer:', transformer, '- returning data as-is');
     return data;
   }
+  return data.map((item, index) => fn(item as Record<string, unknown>, index));
 }
 
-// دالة الفلترة
+// دالة الفلترة - آمنة بدون تنفيذ كود عشوائي
 function filterData({ data, predicate }: FilterPayload): unknown[] {
-  try {
-    const fn = new Function('item', 'index', `return (${predicate})(item, index)`);
-    return data.filter((item, index) => fn(item, index));
-  } catch (error) {
-    console.error('Filter error:', error);
+  const fn = SAFE_PREDICATES[predicate];
+  if (!fn) {
+    console.warn('Unknown predicate:', predicate, '- returning all data');
     return data;
   }
+  return data.filter((item) => fn(item as Record<string, unknown>));
 }
 
 // معالجة الرسائل
