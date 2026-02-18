@@ -25,7 +25,7 @@ const Header = memo(() => {
           >
             <div className="flex items-center gap-1.5">
               <Recycle className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-              <img src={logo} alt="I RECYCLE" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+              <img src={logo} alt="iRecycle" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="text-sm sm:text-base lg:text-lg font-bold text-primary tracking-wide">

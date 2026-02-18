@@ -240,7 +240,7 @@ const AccountLedgerPrint = forwardRef<HTMLDivElement, AccountLedgerPrintProps>(
           borderTop: '1px solid #ddd', 
           paddingTop: '10px' 
         }}>
-          <p>هذا الكشف صادر من منصة I-Recycle لإدارة المخلفات</p>
+          <p>هذا الكشف صادر من منصة iRecycle لإدارة المخلفات</p>
           <p>جميع الحقوق محفوظة © {new Date().getFullYear()}</p>
         </div>
       </div>
