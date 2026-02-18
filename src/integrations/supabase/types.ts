@@ -8602,6 +8602,209 @@ export type Database = {
           },
         ]
       }
+      employee_documents: {
+        Row: {
+          created_at: string
+          document_name: string
+          document_name_ar: string | null
+          document_type: string
+          expiry_date: string | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          issue_date: string | null
+          member_id: string
+          notes: string | null
+          organization_id: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_name: string
+          document_name_ar?: string | null
+          document_type: string
+          expiry_date?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          issue_date?: string | null
+          member_id: string
+          notes?: string | null
+          organization_id: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_name?: string
+          document_name_ar?: string | null
+          document_type?: string
+          expiry_date?: string | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          issue_date?: string | null
+          member_id?: string
+          notes?: string | null
+          organization_id?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "employee_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_external_courses: {
+        Row: {
+          certificate_url: string | null
+          completion_date: string | null
+          course_name: string
+          course_name_ar: string | null
+          created_at: string
+          expiry_date: string | null
+          id: string
+          member_id: string
+          notes: string | null
+          organization_id: string
+          provider: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          certificate_url?: string | null
+          completion_date?: string | null
+          course_name: string
+          course_name_ar?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          member_id: string
+          notes?: string | null
+          organization_id: string
+          provider?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          certificate_url?: string | null
+          completion_date?: string | null
+          course_name?: string
+          course_name_ar?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          member_id?: string
+          notes?: string | null
+          organization_id?: string
+          provider?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_external_courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "employee_external_courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_external_courses_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_insurance: {
+        Row: {
+          created_at: string
+          document_url: string | null
+          end_date: string | null
+          id: string
+          insurance_number: string | null
+          insurance_type: string
+          member_id: string
+          notes: string | null
+          organization_id: string
+          provider: string | null
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_url?: string | null
+          end_date?: string | null
+          id?: string
+          insurance_number?: string | null
+          insurance_type: string
+          member_id: string
+          notes?: string | null
+          organization_id: string
+          provider?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_url?: string | null
+          end_date?: string | null
+          id?: string
+          insurance_number?: string | null
+          insurance_type?: string
+          member_id?: string
+          notes?: string | null
+          organization_id?: string
+          provider?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_insurance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "employee_insurance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_invitations: {
         Row: {
           accepted_at: string | null
