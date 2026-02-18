@@ -85,23 +85,30 @@ const InteractiveStatCard = ({
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay }}
-        whileHover={isClickable ? { scale: 1.02, y: -2 } : undefined}
-        whileTap={isClickable ? { scale: 0.98 } : undefined}
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ delay, type: 'spring', stiffness: 300, damping: 25 }}
+        whileHover={isClickable ? { scale: 1.03, y: -3 } : undefined}
+        whileTap={isClickable ? { scale: 0.97 } : undefined}
       >
         <Card
           className={cn(
-            'hover:shadow-md transition-all duration-300 group overflow-hidden relative',
-            isClickable && 'cursor-pointer hover:border-primary/40'
+            'glass-card-hover group overflow-hidden relative',
+            isClickable && 'cursor-pointer'
           )}
           onClick={handleClick}
         >
-          {/* Top accent */}
-          <div className={cn('absolute top-0 left-0 right-0 h-1 opacity-60', bgColor)} />
+          {/* Top gradient accent */}
+          <div className={cn(
+            'absolute top-0 left-0 right-0 h-1 transition-all duration-500',
+            gradient ? `bg-gradient-to-r ${gradient}` : bgColor,
+            'opacity-50 group-hover:opacity-100'
+          )} />
 
-          <CardContent className="pt-6 pb-5">
+          {/* Subtle shine effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/[0.02] group-hover:to-primary/[0.06] transition-all duration-500 pointer-events-none" />
+
+          <CardContent className="pt-6 pb-5 relative">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 {isClickable && (
@@ -120,12 +127,17 @@ const InteractiveStatCard = ({
                 )}
               </div>
               <div className="flex items-center gap-3 flex-row-reverse">
-                <div className={cn(
-                  'w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110',
-                  gradient ? `bg-gradient-to-br ${gradient} text-white` : bgColor
-                )}>
+                <motion.div 
+                  className={cn(
+                    'w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300',
+                    'group-hover:scale-110 group-hover:shadow-lg',
+                    gradient ? `bg-gradient-to-br ${gradient} text-white shadow-sm` : bgColor
+                  )}
+                  whileHover={{ rotate: [0, -5, 5, 0] }}
+                  transition={{ duration: 0.4 }}
+                >
                   <Icon className={cn('w-6 h-6', !gradient && color)} />
-                </div>
+                </motion.div>
                 <div className="min-w-0 text-right">
                   <p className="text-sm text-muted-foreground truncate">{title}</p>
                   <div className="flex items-baseline gap-1.5 mt-1 justify-end">
@@ -141,7 +153,7 @@ const InteractiveStatCard = ({
                     <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
                   )}
                   {trend && (
-                    <p className={cn('text-xs mt-1', trend.value >= 0 ? 'text-emerald-600' : 'text-red-600')}>
+                    <p className={cn('text-xs mt-1 font-medium', trend.value >= 0 ? 'text-emerald-600' : 'text-red-600')}>
                       {trend.value >= 0 ? '↑' : '↓'} {Math.abs(trend.value)}%
                       {trend.label && <span className="text-muted-foreground mr-1">{trend.label}</span>}
                     </p>

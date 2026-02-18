@@ -102,7 +102,7 @@ const QuickActionsGrid = ({
   });
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden glass-card border-border/30">
       {/* Header */}
       <CardHeader className="text-right pb-2">
         <div className="flex items-center justify-between gap-2">
