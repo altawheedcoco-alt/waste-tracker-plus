@@ -30,9 +30,11 @@ async function hashPassword(password: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  const computed = await hashPassword(password);
-  return computed === hash;
+// verifyPassword is now handled server-side via verify-page-password edge function
+// This export is kept for backward compatibility but should not be used for security
+export async function verifyPassword(_password: string, _hash: string): Promise<boolean> {
+  console.warn('Client-side password verification is deprecated. Use verify-page-password edge function.');
+  return false;
 }
 
 // Available pages for protection
@@ -74,7 +76,7 @@ export function usePagePasswords() {
     try {
       const { data, error } = await supabase
         .from('page_passwords')
-        .select('*')
+        .select('id, organization_id, page_path, page_name, is_active, created_at')
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: false });
 

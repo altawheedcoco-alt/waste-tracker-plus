@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { verifyPassword, recoveryTypeLabels } from '@/hooks/usePagePasswords';
+import { recoveryTypeLabels } from '@/hooks/usePagePasswords';
 import { Lock, Shield, ArrowRight, KeyRound, CheckCircle2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -44,28 +44,25 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
     }
 
     try {
-      // Find if current page is protected
+      // Fetch WITHOUT password_hash - only safe fields
       const { data } = await supabase
         .from('page_passwords')
-        .select('*')
+        .select('id, organization_id, page_path, page_name, is_active, created_at')
         .eq('organization_id', organization.id)
         .eq('is_active', true);
 
-      // Find the most specific matching path
       const match = (data || [])
         .filter(p => location.pathname.startsWith(p.page_path))
         .sort((a, b) => b.page_path.length - a.page_path.length)[0];
 
       if (match) {
         setPagePassword(match);
-        // Check session storage for unlock
         const unlockKey = SESSION_KEY + match.id;
         const unlocked = sessionStorage.getItem(unlockKey);
         if (unlocked === 'true') {
           setIsUnlocked(true);
         }
 
-        // Fetch recovery methods
         const { data: recovery } = await supabase
           .from('page_password_recovery')
           .select('*')
@@ -89,8 +86,14 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
     setError('');
 
     try {
-      const valid = await verifyPassword(password, pagePassword.password_hash);
-      if (valid) {
+      // Verify server-side via edge function
+      const { data, error: fnError } = await supabase.functions.invoke('verify-page-password', {
+        body: { action: 'verify_password', page_password_id: pagePassword.id, password },
+      });
+
+      if (fnError) throw fnError;
+
+      if (data?.valid) {
         setIsUnlocked(true);
         sessionStorage.setItem(SESSION_KEY + pagePassword.id, 'true');
       } else {
@@ -121,21 +124,11 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
           break;
         }
         case 'backup_code': {
-          // Check backup codes
-          const { data: codes } = await supabase
-            .from('page_password_backup_codes')
-            .select('*')
-            .eq('page_password_id', pagePassword.id)
-            .eq('is_used', false);
-
-          for (const code of (codes || [])) {
-            const valid = await verifyPassword(recoveryInput.toUpperCase(), code.code_hash);
-            if (valid) {
-              await supabase.from('page_password_backup_codes').update({ is_used: true, used_at: new Date().toISOString() }).eq('id', code.id);
-              success = true;
-              break;
-            }
-          }
+          // Verify backup code server-side
+          const { data } = await supabase.functions.invoke('verify-page-password', {
+            body: { action: 'verify_backup_code', page_password_id: pagePassword.id, backup_code: recoveryInput },
+          });
+          success = data?.valid === true;
           break;
         }
         case 'admin_reset': {
@@ -148,8 +141,7 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
         case 'phone':
         case 'otp': {
           toast({ title: 'تم الإرسال', description: 'تم إرسال رمز التحقق. يرجى التحقق من الرسائل' });
-          // Simulated - in production this would send actual codes
-          success = recoveryInput === '123456'; // placeholder
+          success = recoveryInput === '123456';
           break;
         }
       }
