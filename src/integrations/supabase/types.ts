@@ -3690,12 +3690,23 @@ export type Database = {
           can_sign_permits: boolean | null
           can_sign_reports: boolean | null
           can_sign_shipments: boolean | null
+          can_view_compliance: boolean
+          can_view_documents: boolean
+          can_view_drivers: boolean
+          can_view_incidents: boolean
+          can_view_partners: boolean
+          can_view_shipments: boolean
+          can_view_vehicles: boolean
+          can_view_waste_records: boolean
           consultant_id: string
+          hidden_data_notes: string | null
           id: string
           is_active: boolean | null
           notes: string | null
           organization_id: string
           role_title: string | null
+          visibility_updated_at: string | null
+          visibility_updated_by: string | null
         }
         Insert: {
           assigned_at?: string | null
@@ -3704,12 +3715,23 @@ export type Database = {
           can_sign_permits?: boolean | null
           can_sign_reports?: boolean | null
           can_sign_shipments?: boolean | null
+          can_view_compliance?: boolean
+          can_view_documents?: boolean
+          can_view_drivers?: boolean
+          can_view_incidents?: boolean
+          can_view_partners?: boolean
+          can_view_shipments?: boolean
+          can_view_vehicles?: boolean
+          can_view_waste_records?: boolean
           consultant_id: string
+          hidden_data_notes?: string | null
           id?: string
           is_active?: boolean | null
           notes?: string | null
           organization_id: string
           role_title?: string | null
+          visibility_updated_at?: string | null
+          visibility_updated_by?: string | null
         }
         Update: {
           assigned_at?: string | null
@@ -3718,12 +3740,23 @@ export type Database = {
           can_sign_permits?: boolean | null
           can_sign_reports?: boolean | null
           can_sign_shipments?: boolean | null
+          can_view_compliance?: boolean
+          can_view_documents?: boolean
+          can_view_drivers?: boolean
+          can_view_incidents?: boolean
+          can_view_partners?: boolean
+          can_view_shipments?: boolean
+          can_view_vehicles?: boolean
+          can_view_waste_records?: boolean
           consultant_id?: string
+          hidden_data_notes?: string | null
           id?: string
           is_active?: boolean | null
           notes?: string | null
           organization_id?: string
           role_title?: string | null
+          visibility_updated_at?: string | null
+          visibility_updated_by?: string | null
         }
         Relationships: [
           {

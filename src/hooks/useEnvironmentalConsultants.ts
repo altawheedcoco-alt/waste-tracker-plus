@@ -39,6 +39,17 @@ export interface ConsultantAssignment {
   can_sign_permits: boolean;
   can_sign_shipments: boolean;
   can_sign_reports: boolean;
+  // Data visibility controls
+  can_view_shipments: boolean;
+  can_view_partners: boolean;
+  can_view_vehicles: boolean;
+  can_view_drivers: boolean;
+  can_view_documents: boolean;
+  can_view_compliance: boolean;
+  can_view_waste_records: boolean;
+  can_view_incidents: boolean;
+  hidden_data_notes?: string | null;
+  visibility_updated_at?: string | null;
   notes?: string | null;
   consultant?: EnvironmentalConsultant;
 }
