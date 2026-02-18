@@ -25324,6 +25324,10 @@ export type Database = {
         Args: { _minutes?: number; _user_id: string }
         Returns: number
       }
+      dispatch_whatsapp_event: {
+        Args: { event_payload: Json }
+        Returns: undefined
+      }
       driver_belongs_to_user_org: {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean

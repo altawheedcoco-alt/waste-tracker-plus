@@ -173,3 +173,6 @@ verify_jwt = false
 
 [functions.portal-data]
 verify_jwt = false
+
+[functions.whatsapp-event]
+verify_jwt = false
