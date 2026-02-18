@@ -17782,6 +17782,27 @@ export type Database = {
           },
         ]
       }
+      portal_auth_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip_address: string
+          portal_slug: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip_address: string
+          portal_slug: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip_address?: string
+          portal_slug?: string
+        }
+        Relationships: []
+      }
       portal_clients: {
         Row: {
           access_code: string
@@ -17789,9 +17810,12 @@ export type Database = {
           client_name: string
           client_phone: string | null
           created_at: string
+          failed_login_attempts: number
           id: string
           is_active: boolean | null
+          last_failed_attempt: string | null
           last_login_at: string | null
+          locked_until: string | null
           organization_id: string
           portal_id: string
         }
@@ -17801,9 +17825,12 @@ export type Database = {
           client_name: string
           client_phone?: string | null
           created_at?: string
+          failed_login_attempts?: number
           id?: string
           is_active?: boolean | null
+          last_failed_attempt?: string | null
           last_login_at?: string | null
+          locked_until?: string | null
           organization_id: string
           portal_id: string
         }
@@ -17813,9 +17840,12 @@ export type Database = {
           client_name?: string
           client_phone?: string | null
           created_at?: string
+          failed_login_attempts?: number
           id?: string
           is_active?: boolean | null
+          last_failed_attempt?: string | null
           last_login_at?: string | null
+          locked_until?: string | null
           organization_id?: string
           portal_id?: string
         }
