@@ -106,15 +106,15 @@ const SubscriptionManagement = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6" dir="rtl">
+      <div className="space-y-6 px-1 sm:px-0 overflow-hidden" dir="rtl">
         <div className="flex items-center gap-3">
           <BackButton />
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <CreditCard className="w-6 h-6 text-primary" />
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
               إدارة الاشتراك والدفع
             </h1>
-            <p className="text-muted-foreground">إدارة خطتك الحالية ومعاملاتك المالية</p>
+            <p className="text-sm sm:text-base text-muted-foreground">إدارة خطتك الحالية ومعاملاتك المالية</p>
           </div>
         </div>
 
@@ -128,10 +128,10 @@ const SubscriptionManagement = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <p className="text-xl font-bold">{(currentSub as any).plan?.name_ar || 'خطة غير معروفة'}</p>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <p className="text-lg sm:text-xl font-bold truncate">{(currentSub as any).plan?.name_ar || 'خطة غير معروفة'}</p>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
                     {currentSub.start_date && (
                       <span>بدأ: {format(new Date(currentSub.start_date), 'dd MMM yyyy', { locale: ar })}</span>
                     )}
@@ -140,7 +140,7 @@ const SubscriptionManagement = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   {getStatusBadge(currentSub.status)}
                   {currentSub.auto_renew && (
                     <Badge variant="outline" className="gap-1"><Sparkles className="w-3 h-3" /> تجديد تلقائي</Badge>
@@ -168,9 +168,9 @@ const SubscriptionManagement = () => {
                     <CardDescription>{plan.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-primary">{plan.price_egp?.toLocaleString()}</span>
-                      <span className="text-muted-foreground">ج.م / {plan.duration_days === 30 ? 'شهر' : plan.duration_days === 365 ? 'سنة' : `${plan.duration_days} يوم`}</span>
+                    <div className="flex items-baseline gap-1 flex-wrap">
+                      <span className="text-2xl sm:text-3xl font-bold text-primary">{plan.price_egp?.toLocaleString()}</span>
+                      <span className="text-sm text-muted-foreground">ج.م / {plan.duration_days === 30 ? 'شهر' : plan.duration_days === 365 ? 'سنة' : `${plan.duration_days} يوم`}</span>
                     </div>
                     {features.length > 0 && (
                       <ul className="space-y-1.5">
