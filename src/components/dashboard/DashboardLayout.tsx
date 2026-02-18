@@ -622,7 +622,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   const sidebarWidth = isSidebarOpen ? (isMobile ? 260 : isTablet ? 270 : 280) : 80;
   const headerHeight = isMobile ? 'h-14' : 'h-16';
   const mainPadding = getResponsiveClass({
-    mobile: 'p-3',
+    mobile: 'px-2 pt-2 pb-0',
     tablet: 'p-4',
     desktop: 'p-6',
   });

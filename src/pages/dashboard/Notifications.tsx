@@ -351,10 +351,10 @@ const Notifications = () => {
 
   return (
     <DashboardLayout>
-      <div className="w-full max-w-full overflow-x-hidden px-1">
+      <div className="w-full max-w-full overflow-x-hidden">
         <ResponsivePageContainer
-          title={t('notifications.title')}
-          subtitle={t('notifications.subtitle')}
+          title={isMobile ? undefined : t('notifications.title')}
+          subtitle={isMobile ? undefined : t('notifications.subtitle')}
           actions={
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <Button
@@ -381,8 +381,8 @@ const Notifications = () => {
             </div>
           }
         >
-          {/* Back Button */}
-          <BackButton />
+          {/* Back Button - hidden on mobile since we have bottom nav */}
+          {!isMobile && <BackButton />}
 
           {/* Category Cards - Responsive Grid with horizontal scroll on mobile */}
           <div className={isMobile ? 'overflow-x-auto pb-2 -mx-1' : ''}>
@@ -456,13 +456,13 @@ const Notifications = () => {
           </CardHeader>
           <CardContent>
             {filteredNotifications.length === 0 ? (
-              <div className="py-12 text-center">
+              <div className="py-6 sm:py-12 text-center">
                 {(() => {
                   const activeCat = categories.find(c => c.id === activeCategory);
                   const EmptyIcon = activeCat?.icon || Bell;
                   return (
                     <>
-                      <EmptyIcon className={`w-16 h-16 mx-auto mb-4 ${activeCat?.color || 'text-muted-foreground/30'} opacity-30`} />
+                      <EmptyIcon className={`w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 ${activeCat?.color || 'text-muted-foreground/30'} opacity-30`} />
                       <h3 className="text-lg font-medium mb-2">{t('notifications.noNotifications')}</h3>
                       <p className="text-muted-foreground">
                         {activeCategory === 'all' 
