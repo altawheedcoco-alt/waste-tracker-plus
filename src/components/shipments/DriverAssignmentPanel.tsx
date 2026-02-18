@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { UserCheck, UserX, Clock, CheckCircle2, Truck, Loader2 } from 'lucide-react';
+import MemberNameLink from '@/components/org-structure/MemberNameLink';
 
 interface Driver {
   id: string;
@@ -166,7 +167,12 @@ export default function DriverAssignmentPanel({ shipmentId, shipmentStatus, curr
                       {config.label}
                     </Badge>
                     <div className="text-right">
-                      <p className="text-sm font-medium">{(a.driver as any)?.profiles?.full_name || 'سائق'}</p>
+                      <MemberNameLink
+                        name={(a.driver as any)?.profiles?.full_name || 'سائق'}
+                        profileId={(a.driver as any)?.profile_id}
+                        showIcon
+                        className="text-sm font-medium"
+                      />
                       <p className="text-xs text-muted-foreground">{(a.driver as any)?.vehicle_plate}</p>
                     </div>
                   </div>
