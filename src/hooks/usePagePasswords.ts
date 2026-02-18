@@ -122,13 +122,18 @@ export function usePagePasswords() {
           organization_id: organization.id,
           page_path: pagePath,
           page_name: pageName,
-          password_hash: hash,
           created_by: (await supabase.auth.getUser()).data.user?.id,
         })
         .select()
         .single();
 
       if (error) throw error;
+
+      // Store hash in separate secure table
+      await supabase.from('page_password_hashes').insert({
+        page_password_id: pagePass.id,
+        password_hash: hash,
+      });
 
       // Insert recovery methods
       const recoveryInserts = Object.entries(recoveryConfig).map(([type, config]) => ({
