@@ -1,0 +1,1 @@
+ALTER TYPE shipment_status ADD VALUE IF NOT EXISTS 'registered' AFTER 'new';
