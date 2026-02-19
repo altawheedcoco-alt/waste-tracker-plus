@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -202,6 +203,7 @@ export default function OperationsDashboard() {
 
   return (
     <DashboardLayout>
+      <BackButton />
       <div className="h-[calc(100vh-120px)]">
         <ResizablePanelGroup direction="horizontal" className="rounded-lg border">
           {/* Left Panel - Map Placeholder */}

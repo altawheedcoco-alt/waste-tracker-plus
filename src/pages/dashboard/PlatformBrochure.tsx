@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -355,6 +356,7 @@ export default function PlatformBrochure() {
   return (
     <DashboardLayout>
       <div className="space-y-4" dir="rtl">
+        <BackButton />
         {/* Header with print button */}
         <div className="flex items-center justify-between no-print">
           <div>

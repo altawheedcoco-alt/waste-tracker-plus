@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Recycle, FileCheck, Network, BarChart3, Brain } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import DPPManager from '@/components/circular-economy/DPPManager';
 import SymbiosisNetwork from '@/components/circular-economy/SymbiosisNetwork';
 import CircularityDashboard from '@/components/circular-economy/CircularityDashboard';
@@ -12,6 +13,7 @@ const CircularEconomy = () => {
   return (
     <div className="min-h-screen bg-background p-4 md:p-6" dir="rtl">
       <div className="max-w-7xl mx-auto space-y-6">
+        <BackButton />
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">

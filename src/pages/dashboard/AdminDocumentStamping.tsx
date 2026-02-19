@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Printer, FileCheck, BadgeCheck as Stamp, QrCode, BadgeCheck, Download, X, Eye } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { usePDFExport } from '@/hooks/usePDFExport';
@@ -91,6 +92,7 @@ const AdminDocumentStamping = () => {
 
   return (
     <div className="space-y-6 p-4 max-w-5xl mx-auto" dir="rtl">
+      <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
