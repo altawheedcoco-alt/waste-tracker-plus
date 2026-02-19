@@ -2992,35 +2992,161 @@ export type Database = {
           },
         ]
       }
+      chat_broadcast_lists: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string | null
+          target_organization_ids: string[] | null
+          target_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id?: string | null
+          target_organization_ids?: string[] | null
+          target_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string | null
+          target_organization_ids?: string[] | null
+          target_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_broadcast_lists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chat_broadcast_lists_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_message_reads: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           content: string
           created_at: string | null
+          file_mime_type: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string | null
           id: string
+          is_deleted: boolean | null
+          is_edited: boolean | null
+          is_forwarded: boolean | null
+          is_pinned: boolean | null
           message_type: string | null
+          metadata: Json | null
+          receiver_user_id: string | null
+          reply_to_id: string | null
           room_id: string
           sender_id: string
+          sender_organization_id: string | null
           updated_at: string | null
         }
         Insert: {
           content: string
           created_at?: string | null
+          file_mime_type?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
           id?: string
+          is_deleted?: boolean | null
+          is_edited?: boolean | null
+          is_forwarded?: boolean | null
+          is_pinned?: boolean | null
           message_type?: string | null
+          metadata?: Json | null
+          receiver_user_id?: string | null
+          reply_to_id?: string | null
           room_id: string
           sender_id: string
+          sender_organization_id?: string | null
           updated_at?: string | null
         }
         Update: {
           content?: string
           created_at?: string | null
+          file_mime_type?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
           id?: string
+          is_deleted?: boolean | null
+          is_edited?: boolean | null
+          is_forwarded?: boolean | null
+          is_pinned?: boolean | null
           message_type?: string | null
+          metadata?: Json | null
+          receiver_user_id?: string | null
+          reply_to_id?: string | null
           room_id?: string
           sender_id?: string
+          sender_organization_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_messages_room_id_fkey"
             columns: ["room_id"]
@@ -3028,31 +3154,134 @@ export type Database = {
             referencedRelation: "chat_rooms"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_messages_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chat_messages_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_org_settings: {
+        Row: {
+          allow_direct_messages: boolean | null
+          allow_group_invites: boolean | null
+          auto_reply_enabled: boolean | null
+          auto_reply_message: string | null
+          business_hours_end: string | null
+          business_hours_only: boolean | null
+          business_hours_start: string | null
+          created_at: string | null
+          id: string
+          organization_id: string
+          show_online_status: boolean | null
+          show_read_receipts: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          allow_direct_messages?: boolean | null
+          allow_group_invites?: boolean | null
+          auto_reply_enabled?: boolean | null
+          auto_reply_message?: string | null
+          business_hours_end?: string | null
+          business_hours_only?: boolean | null
+          business_hours_start?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          show_online_status?: boolean | null
+          show_read_receipts?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          allow_direct_messages?: boolean | null
+          allow_group_invites?: boolean | null
+          auto_reply_enabled?: boolean | null
+          auto_reply_message?: string | null
+          business_hours_end?: string | null
+          business_hours_only?: boolean | null
+          business_hours_start?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          show_online_status?: boolean | null
+          show_read_receipts?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_org_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chat_org_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_participants: {
         Row: {
           id: string
+          is_blocked: boolean | null
+          is_muted: boolean | null
           joined_at: string | null
           last_read_at: string | null
+          organization_id: string | null
+          role: string | null
           room_id: string
           user_id: string
         }
         Insert: {
           id?: string
+          is_blocked?: boolean | null
+          is_muted?: boolean | null
           joined_at?: string | null
           last_read_at?: string | null
+          organization_id?: string | null
+          role?: string | null
           room_id: string
           user_id: string
         }
         Update: {
           id?: string
+          is_blocked?: boolean | null
+          is_muted?: boolean | null
           joined_at?: string | null
           last_read_at?: string | null
+          organization_id?: string | null
+          role?: string | null
           room_id?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_participants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chat_participants_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_participants_room_id_fkey"
             columns: ["room_id"]
@@ -3064,30 +3293,68 @@ export type Database = {
       }
       chat_rooms: {
         Row: {
+          avatar_url: string | null
           created_at: string | null
+          created_by: string | null
+          description: string | null
           id: string
+          is_archived: boolean | null
+          last_message_at: string | null
+          last_message_preview: string | null
+          metadata: Json | null
           name: string | null
+          organization_id: string | null
           shipment_id: string | null
           type: string
           updated_at: string | null
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string | null
+          created_by?: string | null
+          description?: string | null
           id?: string
+          is_archived?: boolean | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          metadata?: Json | null
           name?: string | null
+          organization_id?: string | null
           shipment_id?: string | null
           type: string
           updated_at?: string | null
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string | null
+          created_by?: string | null
+          description?: string | null
           id?: string
+          is_archived?: boolean | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          metadata?: Json | null
           name?: string | null
+          organization_id?: string | null
           shipment_id?: string | null
           type?: string
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_rooms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chat_rooms_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_rooms_shipment_id_fkey"
             columns: ["shipment_id"]
