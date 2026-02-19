@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import logo from '@/assets/logo.png';
+import PlatformLogo from '@/components/common/PlatformLogo';
 
 interface InvitationData {
   email: string;
@@ -399,8 +399,7 @@ const InviteAccept = () => {
 
         {/* Footer */}
         <div className="mt-4 text-center flex items-center justify-center gap-2">
-          <img src={logo} alt="آي ريسايكل" className="h-6 w-6" />
-          <span className="text-sm text-muted-foreground">آي ريسايكل</span>
+          <PlatformLogo size="sm" showText />
         </div>
       </motion.div>
     </div>

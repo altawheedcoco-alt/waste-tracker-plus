@@ -56,7 +56,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { numberToArabicWords, formatEgyptianNumber } from '@/lib/arabicNumberWords';
-import logo from '@/assets/logo.png';
+import PlatformLogo from '@/components/common/PlatformLogo';
 
 const depositSchema = z.object({
   amount: z.string().min(1, 'يرجى إدخال المبلغ'),
@@ -676,7 +676,7 @@ const QuickDeposit = () => {
                 className="mt-6 p-5 rounded-xl bg-gradient-to-br from-primary/10 via-emerald-500/5 to-accent/10 border border-primary/20"
               >
                 <div className="flex justify-center mb-4">
-                  <img src={logo} alt="iRecycle" className="h-14 w-auto" />
+                  <PlatformLogo size="lg" showText />
                 </div>
                 <p className="text-lg font-bold text-foreground mb-2 text-center">
                   شكراً لاستخدامك منصة آي ريسايكل
@@ -755,7 +755,7 @@ const QuickDeposit = () => {
                 <Building2 className="h-7 w-7 text-primary" />
               </div>
             )}
-            <img src={logo} alt="iRecycle" className="h-10 w-10" />
+            <PlatformLogo size="md" />
           </div>
           <h1 className="text-xl font-bold text-foreground">
             {linkData?.title || 'إيداع سريع'}

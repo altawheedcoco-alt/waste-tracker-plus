@@ -29,7 +29,7 @@ import {
   Truck,
   Calendar,
 } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import PlatformLogo from '@/components/common/PlatformLogo';
 
 interface DriverLink {
   id: string;
@@ -275,10 +275,7 @@ const QuickDriver = () => {
               )}
               <div className="mt-8 pt-4 border-t">
                 <div className="flex items-center justify-center gap-2">
-                  <img src={logo} alt="iRecycle" className="h-6 w-6" />
-                  <span className="text-xs text-muted-foreground">
-                    مدعوم بواسطة iRecycle
-                  </span>
+                  <PlatformLogo size="xs" showText />
                 </div>
               </div>
             </CardContent>
@@ -441,10 +438,7 @@ const QuickDriver = () => {
           className="mt-6 text-center"
         >
           <div className="flex items-center justify-center gap-2">
-            <img src={logo} alt="iRecycle" className="h-6 w-6" />
-            <span className="text-xs text-muted-foreground">
-              نظام iRecycle لإدارة المخلفات
-            </span>
+            <PlatformLogo size="xs" showText />
           </div>
         </motion.div>
       </div>

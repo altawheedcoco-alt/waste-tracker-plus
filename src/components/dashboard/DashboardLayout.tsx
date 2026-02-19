@@ -107,7 +107,7 @@ import { useNotificationCounts } from '@/hooks/useNotificationCounts';
 import { initNotificationAudio, ensureSoundsEnabled } from '@/hooks/useNotificationSound';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import logo from '@/assets/logo.png';
+import PlatformLogo from '@/components/common/PlatformLogo';
 import DepositButton from '@/components/deposits/DepositButton';
 import { getAvatarEmoji, getColorTheme } from '@/components/settings/ProfileCustomization';
 import OfflineIndicator from '@/components/offline/OfflineIndicator';
@@ -653,30 +653,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <div className="p-4 border-b border-border">
                 <div className="flex items-center justify-between gap-2">
                   <Link to="/dashboard" className="flex items-center gap-3 flex-1">
-                    <motion.img 
-                      src={logo} 
-                      alt="آي ريسايكل" 
-                      className={`${isMobile ? 'h-8 w-8' : 'h-10 w-10'} object-contain`}
-                      whileHover={{ rotate: 10 }}
-                      transition={{ type: 'spring', stiffness: 300 }}
-                    />
-                    <AnimatePresence>
-                      {isSidebarOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: 'auto' }}
-                          exit={{ opacity: 0, width: 0 }}
-                          className="overflow-hidden flex flex-col"
-                        >
-                          <h1 className={`${isMobile ? 'text-xs' : 'text-sm'} font-bold text-primary whitespace-nowrap leading-tight`}>
-                            {t('landing.systemName')}
-                          </h1>
-                          <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} font-semibold text-foreground/70 whitespace-nowrap leading-tight`}>
-                            {t('landing.systemNameAr')}
-                          </span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <PlatformLogo size={isMobile ? 'sm' : 'md'} showText={isSidebarOpen} />
                   </Link>
                   
                   {/* Top Hide Button */}
@@ -905,10 +882,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                 </button>
               )}
               {isMobile && (
-                <div className="flex items-center gap-2">
-                  <img src={logo} alt="آي ريسايكل" className="h-7 w-7 object-contain" />
-                  <span className="font-bold text-gradient-eco text-sm">{t('footer.brandName')}</span>
-                </div>
+                <PlatformLogo size="sm" showText />
               )}
             </div>
 

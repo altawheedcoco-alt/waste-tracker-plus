@@ -1,10 +1,10 @@
 import { memo } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, Recycle } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
-import logo from "@/assets/logo.png";
+import PlatformLogo from "@/components/common/PlatformLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Header = memo(() => {
@@ -23,18 +23,7 @@ const Header = memo(() => {
             className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:scale-105 transition-transform"
             onClick={() => navigate('/')}
           >
-            <div className="flex items-center gap-1.5">
-              <Recycle className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />
-              <img src={logo} alt="iRecycle" className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm sm:text-base lg:text-lg font-bold text-primary tracking-wide">
-                {t('landing.systemName')}
-              </span>
-              <span className="text-[10px] sm:text-xs lg:text-sm font-semibold text-muted-foreground">
-                {t('landing.systemNameAr')}
-              </span>
-            </div>
+            <PlatformLogo size="md" showText />
           </div>
 
           <nav className="hidden md:flex items-center gap-4 lg:gap-8">

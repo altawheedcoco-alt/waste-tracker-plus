@@ -1,5 +1,5 @@
 import { Mail, Phone, MapPin, Facebook, Twitter, Linkedin, Instagram } from "lucide-react";
-import logo from "@/assets/logo.png";
+import PlatformLogo from "@/components/common/PlatformLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
@@ -11,8 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-12 mb-8 sm:mb-12">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
-              <img src={logo} alt={t('footer.brandName')} className="h-10 w-10 sm:h-12 sm:w-12 object-contain brightness-0 invert" />
-              <span className="text-lg sm:text-xl font-bold">{t('footer.brandName')}</span>
+              <PlatformLogo size="lg" showText inverted />
             </div>
             <p className="text-background/70 leading-relaxed mb-4 sm:mb-6 text-sm">{t('footer.brandDesc')}</p>
             <div className="flex gap-3 sm:gap-4">

@@ -21,6 +21,7 @@ import {
   Mail, FileSpreadsheet, Scan, QrCode, Boxes,
   Cog, Monitor, Cpu, Server, ShieldCheck,
 } from 'lucide-react';
+import PlatformLogo from '@/components/common/PlatformLogo';
 
 // ===== الأقسام البيئية والسلامة =====
 const environmentSections = [
@@ -372,8 +373,7 @@ export default function PlatformBrochure() {
           <Card className="overflow-hidden border-2 border-primary/20">
             <div className="bg-gradient-to-bl from-primary via-primary/90 to-primary/70 p-10 text-primary-foreground text-center">
               <div className="flex items-center justify-center gap-3 mb-4">
-                <Recycle className="w-14 h-14" />
-                <h1 className="text-5xl font-black tracking-tight">iRecycle</h1>
+                <PlatformLogo size="xl" showText inverted />
               </div>
               <p className="text-2xl font-bold mb-3">نظام التشغيل الصناعي لإدارة المخلفات والاستدامة البيئية</p>
               <p className="text-lg text-primary-foreground/80 max-w-3xl mx-auto mb-2">
@@ -558,8 +558,7 @@ export default function PlatformBrochure() {
           <Card className="overflow-hidden break-inside-avoid">
             <CardContent className="p-8 text-center space-y-4">
               <div className="flex items-center justify-center gap-3 text-primary">
-                <Recycle className="w-8 h-8" />
-                <span className="font-black text-2xl">iRecycle Platform</span>
+                <PlatformLogo size="lg" showText />
               </div>
               <p className="text-base text-muted-foreground max-w-2xl mx-auto">
                 نظام التشغيل الصناعي الأول من نوعه لقطاع إدارة المخلفات وإعادة التدوير في مصر والشرق الأوسط

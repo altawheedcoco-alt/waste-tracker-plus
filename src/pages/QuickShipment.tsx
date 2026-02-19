@@ -54,7 +54,7 @@ import {
   Wand2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import logo from '@/assets/logo.png';
+import PlatformLogo from '@/components/common/PlatformLogo';
 
 const shipmentSchema = z.object({
   weight: z.string().min(1, 'يرجى إدخال الوزن'),
@@ -521,7 +521,7 @@ const QuickShipment = () => {
                 <Truck className="h-7 w-7 text-primary" />
               </div>
             )}
-            <img src={logo} alt="iRecycle" className="h-10 w-10" />
+            <PlatformLogo size="md" />
           </div>
           <h1 className="text-xl font-bold text-foreground">
             {linkData?.title || 'تسجيل شحنة سريع'}
