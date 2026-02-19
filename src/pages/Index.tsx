@@ -15,6 +15,8 @@ const DocumentVerification = lazy(() => import("@/components/DocumentVerificatio
 const HomepageAds = lazy(() => import("@/components/ads/HomepageAds"));
 const FeaturedConsultants = lazy(() => import("@/components/landing/FeaturedConsultants"));
 const OmalunaSection = lazy(() => import("@/components/landing/OmalunaSection"));
+const WhatsNewSection = lazy(() => import("@/components/landing/WhatsNewSection"));
+const WhatsNewPopup = lazy(() => import("@/components/landing/WhatsNewPopup"));
 
 const SectionFallback = () => (
   <div className="h-32 flex items-center justify-center">
@@ -32,6 +34,7 @@ const Index = () => {
         <main>
           <Suspense fallback={<SectionFallback />}>
             <HomepageAds />
+            <WhatsNewSection />
             <DocumentVerification />
             <FeaturedConsultants />
             <OmalunaSection />
@@ -40,6 +43,9 @@ const Index = () => {
             <Features />
             <Services />
             <CTA />
+          </Suspense>
+          <Suspense fallback={null}>
+            <WhatsNewPopup />
           </Suspense>
         </main>
         <Suspense fallback={null}>
