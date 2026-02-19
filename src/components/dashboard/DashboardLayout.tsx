@@ -405,6 +405,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Award, label: language === 'ar' ? 'خطابات الترسية' : 'Award Letters', path: '/dashboard/award-letters', key: 'award-letters' },
       { icon: FileCheck, label: language === 'ar' ? 'قبول الشروط' : 'Terms Acceptances', path: '/dashboard/terms-acceptances', key: 'terms-acceptances' },
       { icon: Shield, label: language === 'ar' ? 'الاشتراطات والسياسات' : 'Terms & Policies', path: '/dashboard/platform-terms', key: 'platform-terms' },
+      { icon: BadgeCheck, label: language === 'ar' ? 'ختم المستندات' : 'Document Stamping', path: '/dashboard/admin-document-stamping', key: 'admin-document-stamping' },
       { icon: Receipt, label: language === 'ar' ? 'الفاتورة الإلكترونية' : 'E-Invoice', path: '/dashboard/e-invoice', key: 'e-invoice' },
       { icon: Eye, label: language === 'ar' ? 'التحقق من الوثائق' : 'Document Verification', path: '/dashboard/document-verification', key: 'document-verification' },
     ]},
