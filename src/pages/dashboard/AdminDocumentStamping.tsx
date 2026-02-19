@@ -193,9 +193,9 @@ const AdminDocumentStamping = () => {
             </Button>
           </div>
 
-          <div ref={printRef} className="bg-white border rounded-lg" style={{ direction: 'rtl', fontFamily: 'Cairo, sans-serif' }}>
+          <div ref={printRef} className="bg-white border rounded-lg" style={{ direction: 'rtl', fontFamily: 'Cairo, sans-serif', width: '210mm', margin: '0 auto' }}>
             {/* Page 1 — The Stamped Document */}
-            <div style={{ padding: '12mm 14mm', minHeight: '270mm', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '10mm 12mm', minHeight: '297mm', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
               {/* Header */}
               <div className="flex items-start justify-between pb-4 mb-6" style={{ borderBottom: '3px double hsl(var(--primary))' }}>
                 <div className="flex items-center gap-3">

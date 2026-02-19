@@ -562,7 +562,24 @@
   /* Page Setup - A4 Portrait with minimal margins */
   @page {
     size: A4 portrait;
-    margin: 8mm 10mm;
+    margin: 6mm 8mm;
+  }
+
+  /* A4 Page Container */
+  .print-a4-page {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 auto !important;
+    padding: 8mm 10mm !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #fff !important;
+    page-break-after: always !important;
+  }
+
+  .print-a4-page:last-child {
+    page-break-after: auto !important;
   }
 
   /* Force color printing */
@@ -960,6 +977,37 @@
 @media print {
   .print-only {
     display: block !important;
+  }
+
+  /* ===== Brochure Print Styles ===== */
+  .print-brochure {
+    width: 210mm !important;
+    margin: 0 auto !important;
+  }
+
+  .print-brochure .card,
+  .print-brochure [class*="Card"] {
+    border: 1px solid #d1d5db !important;
+    border-radius: 6px !important;
+    page-break-inside: avoid !important;
+    margin-bottom: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .print-brochure .grid {
+    display: grid !important;
+  }
+
+  /* ===== Unified A4 Document Print ===== */
+  .print-document-a4 {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+    padding: 8mm 10mm !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+    font-family: 'Cairo', sans-serif !important;
+    direction: rtl !important;
   }
 }
 
