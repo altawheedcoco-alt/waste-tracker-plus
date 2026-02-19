@@ -72,9 +72,18 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   return (
     <div
       ref={ref}
-      className={`print-container bg-white text-black p-6 ${isOfficial ? 'print-official' : ''} ${className}`}
+      className={`print-container bg-white text-black ${isOfficial ? 'print-official' : ''} ${className}`}
       dir="rtl"
-      style={{ maxWidth: '210mm', margin: '0 auto', boxSizing: 'border-box' }}
+      style={{ 
+        width: '210mm', 
+        minHeight: '297mm', 
+        margin: '0 auto', 
+        padding: '10mm 12mm',
+        boxSizing: 'border-box',
+        fontFamily: "'Cairo', sans-serif",
+        display: 'flex',
+        flexDirection: 'column',
+      }}
     >
       {/* Watermark */}
       {showWatermark && (
@@ -166,7 +175,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       )}
 
       {/* ===== MAIN CONTENT ===== */}
-      <main className="print-content">{children}</main>
+      <main className="print-content flex-1">{children}</main>
 
       {/* ===== SECURE FOOTER ===== */}
       {showFooter && (

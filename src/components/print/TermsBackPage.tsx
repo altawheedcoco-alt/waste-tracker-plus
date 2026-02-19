@@ -106,7 +106,7 @@ const TermsBackPage = () => {
 
   return (
     <div
-      className="bg-white text-foreground print:block"
+      className="bg-white text-foreground print:block print-a4-page"
       style={{
         direction: 'rtl',
         pageBreakBefore: 'always',
@@ -118,6 +118,7 @@ const TermsBackPage = () => {
         padding: '8mm 10mm',
         display: 'flex',
         flexDirection: 'column',
+        fontFamily: "'Cairo', sans-serif",
       }}
     >
       {/* Header */}

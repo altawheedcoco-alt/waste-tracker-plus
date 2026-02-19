@@ -368,7 +368,7 @@ export default function PlatformBrochure() {
         </div>
 
         {/* Printable content */}
-        <div ref={printRef} className="print-brochure space-y-5">
+        <div ref={printRef} className="print-brochure space-y-5" style={{ width: '210mm', margin: '0 auto' }}>
           {/* ===== Cover Page ===== */}
           <Card className="overflow-hidden border-2 border-primary/20">
             <div className="bg-gradient-to-bl from-primary via-primary/90 to-primary/70 p-10 text-primary-foreground text-center">
