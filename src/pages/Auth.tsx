@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award } from 'lucide-react';
+import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award, Briefcase } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import logo from '@/assets/logo.png';
 import { z } from 'zod';
@@ -48,7 +48,7 @@ const driverSignupSchema = z.object({
   vehiclePlate: z.string().min(3, 'لوحة المركبة مطلوبة'),
 });
 
-type RegistrationType = 'company' | 'driver' | 'consultant' | 'consulting_office' | 'iso_body' | null;
+type RegistrationType = 'company' | 'driver' | 'jobseeker' | 'consultant' | 'consulting_office' | 'iso_body' | null;
 type AuthMode = 'login' | 'register';
 
 const Auth = () => {
@@ -87,6 +87,14 @@ const Auth = () => {
     productionCapacity: '',
   });
 
+  // Job seeker form state
+  const [jobseekerData, setJobseekerData] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    phone: '',
+  });
+
   // Driver form state
   const [driverData, setDriverData] = useState({
     email: '',
@@ -113,6 +121,13 @@ const Auth = () => {
 
   const handleCompanyChange = (field: string, value: string) => {
     setCompanyData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleJobseekerChange = (field: string, value: string) => {
+    setJobseekerData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
@@ -368,6 +383,50 @@ const Auth = () => {
     }
   };
 
+  const handleJobseekerSignUp = async () => {
+    setLoading(true);
+    setErrors({});
+    try {
+      const newErrors: Record<string, string> = {};
+      if (!jobseekerData.fullName) newErrors.fullName = t('auth.nameRequired');
+      if (!jobseekerData.email) newErrors.email = t('auth.emailRequired');
+      if (!jobseekerData.password || jobseekerData.password.length < 6) newErrors.password = t('auth.passwordMinLength');
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
+
+      const response = await supabase.functions.invoke('register-jobseeker', {
+        body: {
+          email: jobseekerData.email,
+          password: jobseekerData.password,
+          full_name: jobseekerData.fullName,
+          phone: jobseekerData.phone || null,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.data?.error || response.error?.message || 'حدث خطأ');
+      }
+      if (!response.data?.success) {
+        throw new Error(response.data?.error || 'فشل التسجيل');
+      }
+
+      const { error: signInError } = await signIn(jobseekerData.email, jobseekerData.password);
+      if (signInError) {
+        toast({ title: t('auth.registerSuccess'), description: 'يمكنك تسجيل الدخول الآن' });
+        setAuthMode('login');
+      } else {
+        toast({ title: t('auth.registerSuccess'), description: 'مرحباً بك! يمكنك الآن تصفح الوظائف والتقديم عليها.' });
+        navigate('/dashboard/omaluna');
+      }
+    } catch (error: any) {
+      toast({ title: t('auth.registerError'), description: error?.message || t('common.error'), variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const nextStep = () => {
     if (registrationType === 'company' && validateCompanyStep(step)) {
       setStep(step + 1);
@@ -430,6 +489,13 @@ const Auth = () => {
   ];
 
   const registrationTypes = [
+    {
+      value: 'jobseeker',
+      label: 'باحث عن عمل',
+      description: 'سجل ببساطة وتصفح الوظائف وقدم عليها',
+      icon: Briefcase,
+      color: 'from-sky-500 to-blue-600',
+    },
     {
       value: 'company',
       label: t('auth.companyRegistration'),
@@ -517,9 +583,11 @@ const Auth = () => {
                 ? t('auth.login') 
                 : registrationType === null 
                   ? t('auth.newAccount')
-                  : registrationType === 'company'
-                    ? t('auth.registerCompany')
-                    : t('auth.driverStep').replace('{step}', String(step)).replace('{total}', String(getTotalSteps()))
+                  : registrationType === 'jobseeker'
+                    ? 'تسجيل باحث عن عمل'
+                    : registrationType === 'company'
+                      ? t('auth.registerCompany')
+                      : t('auth.driverStep').replace('{step}', String(step)).replace('{total}', String(getTotalSteps()))
               }
             </CardTitle>
             <CardDescription>
@@ -527,11 +595,13 @@ const Auth = () => {
                 ? t('auth.enterCredentials')
                 : registrationType === null
                   ? t('auth.chooseAccountType')
-                  : registrationType === 'company'
-                    ? t('auth.completeLegalData')
-                    : step === 1
-                      ? t('auth.personalData')
-                      : t('auth.licenseVehicleData')
+                  : registrationType === 'jobseeker'
+                    ? 'أدخل بياناتك الأساسية فقط'
+                    : registrationType === 'company'
+                      ? t('auth.completeLegalData')
+                      : step === 1
+                        ? t('auth.personalData')
+                        : t('auth.licenseVehicleData')
               }
             </CardDescription>
           </CardHeader>
@@ -728,6 +798,146 @@ const Auth = () => {
                     onBack={() => setRegistrationType(null)}
                     defaultOrgType={registrationType !== 'company' ? registrationType : undefined}
                   />
+                </motion.div>
+              )}
+
+              {/* Job Seeker Registration */}
+              {authMode === 'register' && registrationType === 'jobseeker' && (
+                <motion.div
+                  key="jobseeker-form"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="space-y-4"
+                >
+                  <div className="space-y-2">
+                    <Label>{t('auth.fullName')}</Label>
+                    <Input
+                      placeholder="أحمد محمد"
+                      value={jobseekerData.fullName}
+                      onChange={(e) => handleJobseekerChange('fullName', e.target.value)}
+                      className={errors.fullName ? 'border-destructive' : ''}
+                    />
+                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>{t('auth.email')}</Label>
+                    <Input
+                      type="email"
+                      placeholder="ahmed@example.com"
+                      value={jobseekerData.email}
+                      onChange={(e) => handleJobseekerChange('email', e.target.value)}
+                      className={errors.email ? 'border-destructive' : ''}
+                      dir="ltr"
+                    />
+                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>{t('auth.phone')} (اختياري)</Label>
+                    <Input
+                      placeholder="01234567890"
+                      value={jobseekerData.phone}
+                      onChange={(e) => handleJobseekerChange('phone', e.target.value)}
+                      dir="ltr"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>{t('auth.password')}</Label>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={jobseekerData.password}
+                        onChange={(e) => handleJobseekerChange('password', e.target.value)}
+                        className={errors.password ? 'border-destructive' : ''}
+                        dir="ltr"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                  </div>
+
+                  {/* Social Login for Job Seekers */}
+                  <div className="relative my-2">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">أو سجل عبر</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full gap-2"
+                      disabled={loading}
+                      onClick={async () => {
+                        setLoading(true);
+                        const { error } = await lovable.auth.signInWithOAuth('google', {
+                          redirect_uri: window.location.origin,
+                        });
+                        if (error) {
+                          toast({ title: t('common.error'), description: t('auth.googleLoginError'), variant: 'destructive' });
+                          setLoading(false);
+                        }
+                      }}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                      </svg>
+                      Google
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full gap-2"
+                      disabled={loading}
+                      onClick={async () => {
+                        setLoading(true);
+                        const { error } = await lovable.auth.signInWithOAuth('apple', {
+                          redirect_uri: window.location.origin,
+                        });
+                        if (error) {
+                          toast({ title: t('auth.loginError'), description: error.message, variant: 'destructive' });
+                        }
+                        setLoading(false);
+                      }}
+                    >
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                      </svg>
+                      Apple
+                    </Button>
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button type="button" variant="outline" onClick={() => setRegistrationType(null)} className="flex-1">
+                      <ArrowRight className="ml-2" size={18} />
+                      {t('common.previous')}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="eco"
+                      onClick={handleJobseekerSignUp}
+                      disabled={loading}
+                      className="flex-1"
+                    >
+                      {loading ? t('auth.creatingAccount') : 'إنشاء حساب'}
+                    </Button>
+                  </div>
                 </motion.div>
               )}
 
