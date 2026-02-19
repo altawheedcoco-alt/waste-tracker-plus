@@ -16,6 +16,9 @@ const demoAccounts = [
   { email: 'demo-driver@irecycle.test', label: 'سائق', desc: 'سائقي المركبات', icon: Car, color: 'from-rose-500 to-red-600' },
   { email: 'demo-employee@irecycle.test', label: 'موظف', desc: 'موظفي الشركات', icon: UserCog, color: 'from-slate-500 to-slate-700' },
   { email: 'demo-admin@irecycle.test', label: 'مدير النظام', desc: 'إدارة كاملة', icon: Shield, color: 'from-yellow-500 to-amber-700' },
+  { email: 'demo-consultant@irecycle.test', label: 'استشاري بيئي', desc: 'استشارات بيئية', icon: ShieldCheck, color: 'from-teal-500 to-teal-700' },
+  { email: 'demo-consulting-office@irecycle.test', label: 'مكتب استشاري', desc: 'مكاتب استشارية', icon: Recycle, color: 'from-indigo-500 to-indigo-700' },
+  { email: 'demo-iso-body@irecycle.test', label: 'جهة مانحة للأيزو', desc: 'شهادات الأيزو', icon: Shield, color: 'from-emerald-600 to-green-800' },
 ];
 
 interface DemoQuickLoginProps {

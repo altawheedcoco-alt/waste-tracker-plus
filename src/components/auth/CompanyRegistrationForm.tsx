@@ -23,10 +23,11 @@ import {
 interface CompanyRegistrationFormProps {
   onSubmit: (data: CompanyFormData) => Promise<{ error: Error | null }>;
   onBack: () => void;
+  defaultOrgType?: string;
 }
 
 export interface CompanyFormData {
-  organizationType: 'generator' | 'transporter' | 'recycler';
+  organizationType: string;
   organizationName: string;
   organizationNameEn: string;
   organizationEmail: string;
@@ -59,7 +60,7 @@ export interface CompanyFormData {
 }
 
 const initialFormData: CompanyFormData = {
-  organizationType: '' as 'generator' | 'transporter' | 'recycler',
+  organizationType: '',
   organizationName: '',
   organizationNameEn: '',
   organizationEmail: '',
@@ -95,10 +96,17 @@ const organizationTypes = [
   { value: 'generator', label: 'الجهة المولدة' },
   { value: 'recycler', label: 'الجهة المدورة' },
   { value: 'transporter', label: 'الجهة الناقلة' },
+  { value: 'disposal', label: 'جهة التخلص الآمن' },
+  { value: 'consultant', label: 'استشاري بيئي' },
+  { value: 'consulting_office', label: 'مكتب استشاري' },
+  { value: 'iso_body', label: 'جهة مانحة للأيزو' },
 ];
 
-export const CompanyRegistrationForm = ({ onSubmit, onBack }: CompanyRegistrationFormProps) => {
-  const [formData, setFormData] = useState<CompanyFormData>(initialFormData);
+export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: CompanyRegistrationFormProps) => {
+  const [formData, setFormData] = useState<CompanyFormData>({
+    ...initialFormData,
+    organizationType: defaultOrgType || '',
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
