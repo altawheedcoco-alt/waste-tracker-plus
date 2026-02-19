@@ -1,10 +1,10 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import ReactionBar from './ReactionBar';
 import CommentSection from './CommentSection';
 import ReportDialog from './ReportDialog';
 import { MessageCircle } from 'lucide-react';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useComments } from '@/hooks/useSocialInteractions';
 
@@ -21,10 +21,6 @@ interface SocialInteractionBarProps {
   className?: string;
 }
 
-/**
- * شريط التفاعل الاجتماعي الموحد
- * يجمع الإعجابات والتعليقات والإبلاغ في مكون واحد
- */
 const SocialInteractionBar = memo(({
   entityType,
   entityId,
@@ -40,7 +36,7 @@ const SocialInteractionBar = memo(({
   return (
     <div className={cn('space-y-2', className)}>
       {/* Action Bar */}
-      <div className="flex items-center gap-1 flex-wrap">
+      <div className="flex items-center gap-1 flex-wrap border-t border-border/50 pt-2.5">
         {showReactions && (
           <ReactionBar entityType={entityType} entityId={entityId} compact={compact} />
         )}
@@ -54,15 +50,19 @@ const SocialInteractionBar = memo(({
           />
         )}
 
+        <div className="flex-1" />
+
         {showReport && (
           <ReportDialog entityType={entityType} entityId={entityId} entityLabel={entityLabel} />
         )}
       </div>
 
       {/* Comments Section */}
-      {showComments && commentsOpen && (
-        <CommentSection entityType={entityType} entityId={entityId} />
-      )}
+      <AnimatePresence>
+        {showComments && commentsOpen && (
+          <CommentSection entityType={entityType} entityId={entityId} />
+        )}
+      </AnimatePresence>
     </div>
   );
 });
@@ -78,11 +78,24 @@ const CommentToggle = memo(({ entityType, entityId, isOpen, onToggle }: {
   const { rootComments } = useComments(entityType, entityId);
 
   return (
-    <Button variant="ghost" size="sm" onClick={onToggle} className="gap-1.5 h-8 px-2">
-      <MessageCircle className="h-4 w-4" />
-      <span className="text-xs">تعليق</span>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onToggle}
+      className={cn(
+        'gap-1.5 h-9 px-3 rounded-full transition-colors',
+        isOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'
+      )}
+    >
+      <MessageCircle className={cn('h-4 w-4', isOpen && 'fill-current')} />
+      <span className="text-xs font-medium">تعليق</span>
       {rootComments.length > 0 && (
-        <span className="text-xs text-muted-foreground">{rootComments.length}</span>
+        <span className={cn(
+          'text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full',
+          isOpen ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+        )}>
+          {rootComments.length}
+        </span>
       )}
     </Button>
   );
