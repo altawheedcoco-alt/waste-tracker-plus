@@ -3,6 +3,16 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+// Global error handlers to prevent white screen crashes
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  event.preventDefault();
+});
+
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
+});
+
 // Render first, then handle SW cleanup
 const rootElement = document.getElementById("root");
 if (rootElement) {

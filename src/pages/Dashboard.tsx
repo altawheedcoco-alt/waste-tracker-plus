@@ -1,4 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -99,24 +100,28 @@ const Dashboard = () => {
     <LazyGoogleMapsProvider>
         <PinVerificationGate>
           <>
-            <DashboardLayout>
-              <PagePasswordGate>
-                <Suspense fallback={<DashboardLoader />}>
-                  {renderDashboard()}
-                </Suspense>
-              </PagePasswordGate>
-            </DashboardLayout>
+            <ErrorBoundary fallbackTitle="حدث خطأ في لوحة التحكم">
+              <DashboardLayout>
+                <PagePasswordGate>
+                  <Suspense fallback={<DashboardLoader />}>
+                    {renderDashboard()}
+                  </Suspense>
+                </PagePasswordGate>
+              </DashboardLayout>
+            </ErrorBoundary>
             
-            <Suspense fallback={null}>
-              <CallLogWidget />
-              {showAIAssistant && <AIOperationsAssistant />}
-              <AIChatbot />
-              <EnhancedChatWidget />
-              <UnifiedSupportWidget />
-              <UnifiedFloatingMenu />
-              <BetaBanner />
-              <AccessibilityPanel />
-            </Suspense>
+            <ErrorBoundary fallbackTitle="خطأ في الأدوات المساعدة">
+              <Suspense fallback={null}>
+                <CallLogWidget />
+                {showAIAssistant && <AIOperationsAssistant />}
+                <AIChatbot />
+                <EnhancedChatWidget />
+                <UnifiedSupportWidget />
+                <UnifiedFloatingMenu />
+                <BetaBanner />
+                <AccessibilityPanel />
+              </Suspense>
+            </ErrorBoundary>
             <Suspense fallback={null}>
               <MobileOptimizations>{null}</MobileOptimizations>
               <PWAShortcuts />

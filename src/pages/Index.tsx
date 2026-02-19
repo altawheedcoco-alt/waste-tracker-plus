@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import LandingWrapper from "@/components/LandingWrapper";
 import NewsTicker from "@/components/NewsTicker";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 // Lazy load below-fold sections
 const Stats = lazy(() => import("@/components/Stats"));
@@ -52,22 +53,28 @@ const Index = () => {
   return (
     <LandingWrapper>
       <div className="min-h-screen bg-[hsl(140,20%,98%)]">
-        <Header />
-        <NewsTicker />
-        <Hero />
+        <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
+          <Header />
+          <NewsTicker />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في تحميل القسم الرئيسي">
+          <Hero />
+        </ErrorBoundary>
         <main>
-          <LazySection><HomepageAds /></LazySection>
-          <LazySection><WhatsNewSection /></LazySection>
-          <LazySection><DocumentVerification /></LazySection>
-          <LazySection><FeaturedConsultants /></LazySection>
-          <LazySection><OmalunaSection /></LazySection>
-          <LazySection><Stats /></LazySection>
-          <LazySection><FeaturesList /></LazySection>
-          <LazySection><Features /></LazySection>
-          <LazySection><VideoIntroSection /></LazySection>
-          <LazySection><TestimonialsSection /></LazySection>
-          <LazySection><Services /></LazySection>
-          <LazySection><CTA /></LazySection>
+          <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
+            <LazySection><HomepageAds /></LazySection>
+            <LazySection><WhatsNewSection /></LazySection>
+            <LazySection><DocumentVerification /></LazySection>
+            <LazySection><FeaturedConsultants /></LazySection>
+            <LazySection><OmalunaSection /></LazySection>
+            <LazySection><Stats /></LazySection>
+            <LazySection><FeaturesList /></LazySection>
+            <LazySection><Features /></LazySection>
+            <LazySection><VideoIntroSection /></LazySection>
+            <LazySection><TestimonialsSection /></LazySection>
+            <LazySection><Services /></LazySection>
+            <LazySection><CTA /></LazySection>
+          </ErrorBoundary>
           <Suspense fallback={null}>
             <WhatsNewPopup />
           </Suspense>
