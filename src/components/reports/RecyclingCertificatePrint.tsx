@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
+import TermsBackPage from '@/components/print/TermsBackPage';
 import {
   Building2,
   Truck,
@@ -644,6 +645,7 @@ const RecyclingCertificatePrint = ({
         </p>
       </footer>
     </div>
+    <TermsBackPage />
     </>
   );
 };

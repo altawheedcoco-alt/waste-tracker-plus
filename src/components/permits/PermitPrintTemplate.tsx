@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { QRCodeSVG } from 'qrcode.react';
+import TermsBackPage from '@/components/print/TermsBackPage';
 
 interface PermitPrintData {
   permitNumber: string;
@@ -157,6 +158,7 @@ const PermitPrintTemplate = ({ permit, onClose }: Props) => {
             </div>
           </div>
         </div>
+        <TermsBackPage />
       </div>
 
       {/* Actions */}
