@@ -149,7 +149,7 @@ const ShipmentCard = ({
         .select('id, receipt_number, status, receipt_type, created_at, actual_weight, unit')
         .eq('shipment_id', shipment.id)
         .order('created_at', { ascending: true });
-      if (error) { console.error(error); return []; }
+      if (error) { if (!error.message?.includes('AbortError')) console.error(error); return []; }
       return data || [];
     },
     enabled: !!shipment.id,

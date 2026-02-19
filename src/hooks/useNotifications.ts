@@ -110,8 +110,10 @@ export const useNotifications = () => {
 
       setNotifications(enrichedNotifications as Notification[]);
       setUnreadCount(enrichedNotifications?.filter((n: Notification) => !n.is_read).length || 0);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
+    } catch (error: any) {
+      if (!error?.message?.includes('AbortError') && error?.name !== 'AbortError') {
+        console.error('Error fetching notifications:', error);
+      }
     } finally {
       setLoading(false);
     }

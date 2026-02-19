@@ -46,14 +46,18 @@ export const useTermsAcceptance = () => {
           .maybeSingle();
 
         if (error) {
-          console.error('Error checking terms acceptance:', error);
+          if (!error.message?.includes('AbortError') && (error as any).name !== 'AbortError') {
+            console.error('Error checking terms acceptance:', error);
+          }
           setHasAcceptedTerms(true); // Don't block on error
         } else {
           setHasAcceptedTerms(!!data);
           setAcceptance(data);
         }
-      } catch (error) {
-        console.error('Error in checkTermsAcceptance:', error);
+      } catch (error: any) {
+        if (!error?.message?.includes('AbortError') && error?.name !== 'AbortError') {
+          console.error('Error in checkTermsAcceptance:', error);
+        }
         setHasAcceptedTerms(true);
       } finally {
         setLoading(false);

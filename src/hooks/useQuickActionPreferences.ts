@@ -44,8 +44,10 @@ export function useQuickActionPreferences() {
       } else {
         setPreferences({ action_order: [], hidden_actions: [] });
       }
-    } catch (error) {
-      console.error('Error fetching quick action preferences:', error);
+    } catch (error: any) {
+      if (!error?.message?.includes('AbortError') && error?.name !== 'AbortError') {
+        console.error('Error fetching quick action preferences:', error);
+      }
       setPreferences({ action_order: [], hidden_actions: [] });
     } finally {
       setLoading(false);
