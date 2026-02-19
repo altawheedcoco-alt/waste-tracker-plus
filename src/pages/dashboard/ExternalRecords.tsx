@@ -1,4 +1,5 @@
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import BackButton from '@/components/ui/back-button';
 import { useAuth } from "@/contexts/AuthContext";
 import ExternalWeightRecords from "@/components/records/ExternalWeightRecords";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +30,7 @@ export default function ExternalRecords() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        <BackButton />
         <div>
           <h1 className="text-2xl font-bold">سجل الكميات الخارجية</h1>
           <p className="text-muted-foreground">

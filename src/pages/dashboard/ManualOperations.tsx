@@ -5,6 +5,7 @@ import {
   FileText, Search, Printer, Download, Send, Eye, ExternalLink,
   ChevronLeft, ChevronRight, FolderOpen, RefreshCw,
 } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -151,6 +152,7 @@ const ManualOperations = () => {
 
   return (
     <div className="space-y-4" dir="rtl">
+      <BackButton />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

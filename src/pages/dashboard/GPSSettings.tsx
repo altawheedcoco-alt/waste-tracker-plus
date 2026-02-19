@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import GPSSettingsPage from '@/components/tracking/GPSSettingsPage';
 
 const GPSSettings: React.FC = () => {
@@ -21,7 +22,10 @@ const GPSSettings: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <GPSSettingsPage />
+      <div className="space-y-4">
+        <BackButton />
+        <GPSSettingsPage />
+      </div>
     </DashboardLayout>
   );
 };

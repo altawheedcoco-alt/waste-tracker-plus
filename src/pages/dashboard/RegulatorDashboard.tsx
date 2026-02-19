@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Recycle, Truck, AlertTriangle, CheckCircle, Building2, BarChart3 } from 'lucide-react';
@@ -54,6 +55,7 @@ const RegulatorDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6 p-4 sm:p-6">
+        <BackButton />
         <div className="flex items-center gap-3">
           <Recycle className="w-8 h-8 text-primary" />
           <div>
