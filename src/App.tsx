@@ -1,4 +1,5 @@
-import { Suspense, lazy, memo } from "react";
+import { Suspense, lazy, memo, useEffect } from "react";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -214,27 +215,31 @@ import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
 
 const Providers = memo(() => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeSettingsProvider>
-      <LanguageProvider>
-        <TooltipProvider delayDuration={300}>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <Suspense fallback={null}>
-                <AppRoutes />
-              </Suspense>
-              <Suspense fallback={null}>
-                <OfflineBanner />
-                <ScrollToTopButton />
-              </Suspense>
-            </AuthProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </LanguageProvider>
-    </ThemeSettingsProvider>
-  </QueryClientProvider>
+  <ErrorBoundary fallbackTitle="حدث خطأ غير متوقع في التطبيق">
+    <QueryClientProvider client={queryClient}>
+      <ThemeSettingsProvider>
+        <LanguageProvider>
+          <TooltipProvider delayDuration={300}>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthProvider>
+                <ErrorBoundary fallbackTitle="حدث خطأ في تحميل الصفحة">
+                  <Suspense fallback={null}>
+                    <AppRoutes />
+                  </Suspense>
+                </ErrorBoundary>
+                <Suspense fallback={null}>
+                  <OfflineBanner />
+                  <ScrollToTopButton />
+                </Suspense>
+              </AuthProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </LanguageProvider>
+      </ThemeSettingsProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 ));
 Providers.displayName = 'Providers';
 
