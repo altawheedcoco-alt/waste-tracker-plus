@@ -14,19 +14,19 @@ interface MaterialPrice {
   change: number;
   trend: 'up' | 'down' | 'stable';
   unit: string;
-  globalPriceUSD: number;
+  globalPriceEGP: number;
   demandLevel: 'high' | 'medium' | 'low';
 }
 
 const materialPrices: MaterialPrice[] = [
-  { name: 'بلاستيك PET', nameEn: 'PET', priceEGP: 12500, change: 3.2, trend: 'up', unit: 'طن', globalPriceUSD: 850, demandLevel: 'high' },
-  { name: 'بلاستيك HDPE', nameEn: 'HDPE', priceEGP: 14000, change: -1.5, trend: 'down', unit: 'طن', globalPriceUSD: 920, demandLevel: 'medium' },
-  { name: 'حديد خردة', nameEn: 'Scrap Iron', priceEGP: 18000, change: 5.1, trend: 'up', unit: 'طن', globalPriceUSD: 380, demandLevel: 'high' },
-  { name: 'ألمنيوم خردة', nameEn: 'Scrap Aluminum', priceEGP: 75000, change: 2.8, trend: 'up', unit: 'طن', globalPriceUSD: 2100, demandLevel: 'high' },
-  { name: 'نحاس خردة', nameEn: 'Scrap Copper', priceEGP: 320000, change: -0.5, trend: 'down', unit: 'طن', globalPriceUSD: 8500, demandLevel: 'medium' },
-  { name: 'ورق وكرتون', nameEn: 'Paper/Cardboard', priceEGP: 5500, change: 1.2, trend: 'up', unit: 'طن', globalPriceUSD: 150, demandLevel: 'low' },
-  { name: 'زجاج مكسور', nameEn: 'Cullet Glass', priceEGP: 1800, change: 0, trend: 'stable', unit: 'طن', globalPriceUSD: 45, demandLevel: 'low' },
-  { name: 'إطارات مستعملة', nameEn: 'Used Tires', priceEGP: 3000, change: 4.0, trend: 'up', unit: 'طن', globalPriceUSD: 80, demandLevel: 'medium' },
+  { name: 'بلاستيك PET', nameEn: 'PET', priceEGP: 12500, change: 3.2, trend: 'up', unit: 'طن', globalPriceEGP: 42500, demandLevel: 'high' },
+  { name: 'بلاستيك HDPE', nameEn: 'HDPE', priceEGP: 14000, change: -1.5, trend: 'down', unit: 'طن', globalPriceEGP: 46000, demandLevel: 'medium' },
+  { name: 'حديد خردة', nameEn: 'Scrap Iron', priceEGP: 18000, change: 5.1, trend: 'up', unit: 'طن', globalPriceEGP: 19000, demandLevel: 'high' },
+  { name: 'ألمنيوم خردة', nameEn: 'Scrap Aluminum', priceEGP: 75000, change: 2.8, trend: 'up', unit: 'طن', globalPriceEGP: 105000, demandLevel: 'high' },
+  { name: 'نحاس خردة', nameEn: 'Scrap Copper', priceEGP: 320000, change: -0.5, trend: 'down', unit: 'طن', globalPriceEGP: 425000, demandLevel: 'medium' },
+  { name: 'ورق وكرتون', nameEn: 'Paper/Cardboard', priceEGP: 5500, change: 1.2, trend: 'up', unit: 'طن', globalPriceEGP: 7500, demandLevel: 'low' },
+  { name: 'زجاج مكسور', nameEn: 'Cullet Glass', priceEGP: 1800, change: 0, trend: 'stable', unit: 'طن', globalPriceEGP: 2250, demandLevel: 'low' },
+  { name: 'إطارات مستعملة', nameEn: 'Used Tires', priceEGP: 3000, change: 4.0, trend: 'up', unit: 'طن', globalPriceEGP: 4000, demandLevel: 'medium' },
 ];
 
 const demandLabels: Record<string, { label: string; color: string }> = {
@@ -99,7 +99,7 @@ const MaterialMarketPanel = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                       <Globe className="w-3 h-3" />
-                      ${m.globalPriceUSD} USD
+                      {m.globalPriceEGP.toLocaleString()} ج.م (عالمي)
                     </div>
                     <div className="flex items-center gap-1">
                       <DollarSign className="w-4 h-4 text-emerald-500" />
