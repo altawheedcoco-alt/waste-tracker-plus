@@ -7,15 +7,15 @@ const corsHeaders = {
 
 const DEMO_PASSWORD = 'Demo@2026!';
 
-// Only the admin account is kept
-const ADMIN_ACCOUNT = {
-  email: 'demo-admin@irecycle.test',
-  fullName: 'مدير النظام',
-  orgType: 'admin',
-  role: 'admin',
-  phone: '01000000007',
-  icon: '🔑',
-};
+const DEMO_ACCOUNTS = [
+  { email: 'demo-generator@irecycle.test', fullName: 'مولد مخلفات', orgType: 'generator', role: 'generator', phone: '01000000001' },
+  { email: 'demo-recycler@irecycle.test', fullName: 'معيد تدوير', orgType: 'recycler', role: 'recycler', phone: '01000000002' },
+  { email: 'demo-transporter@irecycle.test', fullName: 'ناقل مخلفات', orgType: 'transporter', role: 'transporter', phone: '01000000003' },
+  { email: 'demo-disposal@irecycle.test', fullName: 'جهة تخلص آمن', orgType: 'disposal', role: 'disposal', phone: '01000000004' },
+  { email: 'demo-driver@irecycle.test', fullName: 'سائق', orgType: 'driver', role: 'driver', phone: '01000000005' },
+  { email: 'demo-employee@irecycle.test', fullName: 'موظف', orgType: 'employee', role: 'employee', phone: '01000000006' },
+  { email: 'demo-admin@irecycle.test', fullName: 'مدير النظام', orgType: 'admin', role: 'admin', phone: '01000000007' },
+];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -32,65 +32,63 @@ Deno.serve(async (req) => {
 
     if (body?.reset) {
       const { data: existingUsers } = await supabase.auth.admin.listUsers();
-      const demoUser = existingUsers?.users?.find(u => u.email === ADMIN_ACCOUNT.email);
-      if (demoUser) {
-        await supabase.auth.admin.deleteUser(demoUser.id);
+      let deleted = 0;
+      for (const account of DEMO_ACCOUNTS) {
+        const demoUser = existingUsers?.users?.find(u => u.email === account.email);
+        if (demoUser) {
+          await supabase.auth.admin.deleteUser(demoUser.id);
+          deleted++;
+        }
       }
       return new Response(
-        JSON.stringify({ success: true, message: 'تم حذف حساب الأدمن التجريبي' }),
+        JSON.stringify({ success: true, message: `تم حذف ${deleted} حسابات تجريبية` }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Check if admin user already exists
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const existingAdmin = existingUsers?.users?.find(u => u.email === ADMIN_ACCOUNT.email);
+    const results: any[] = [];
 
-    if (existingAdmin) {
-      return new Response(
-        JSON.stringify({ success: true, accounts: [{ email: ADMIN_ACCOUNT.email, status: 'exists' }] }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    for (const account of DEMO_ACCOUNTS) {
+      const existing = existingUsers?.users?.find(u => u.email === account.email);
+      if (existing) {
+        results.push({ email: account.email, label: account.fullName, status: 'exists' });
+        continue;
+      }
+
+      const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
+        email: account.email,
+        password: DEMO_PASSWORD,
+        email_confirm: true,
+        user_metadata: { full_name: account.fullName },
+      });
+
+      if (authErr) {
+        results.push({ email: account.email, label: account.fullName, status: 'error', error: authErr.message });
+        continue;
+      }
+
+      const userId = authData.user!.id;
+
+      await supabase.from('profiles').upsert({
+        id: userId,
+        user_id: userId,
+        full_name: account.fullName,
+        email: account.email,
+        phone: account.phone,
+        is_active: true,
+      }, { onConflict: 'id' });
+
+      await supabase.from('user_roles').insert({
+        user_id: userId,
+        role: account.role as any,
+      });
+
+      results.push({ email: account.email, label: account.fullName, status: 'created' });
     }
-
-    // Create admin auth user
-    const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
-      email: ADMIN_ACCOUNT.email,
-      password: DEMO_PASSWORD,
-      email_confirm: true,
-      user_metadata: { full_name: ADMIN_ACCOUNT.fullName },
-    });
-
-    if (authErr) {
-      return new Response(
-        JSON.stringify({ success: false, error: authErr.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const userId = authData.user!.id;
-
-    // Create profile
-    await supabase.from('profiles').upsert({
-      id: userId,
-      user_id: userId,
-      full_name: ADMIN_ACCOUNT.fullName,
-      email: ADMIN_ACCOUNT.email,
-      phone: ADMIN_ACCOUNT.phone,
-      is_active: true,
-    }, { onConflict: 'id' });
-
-    // Assign admin role
-    await supabase.from('user_roles').insert({
-      user_id: userId,
-      role: 'admin' as any,
-    });
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        accounts: [{ email: ADMIN_ACCOUNT.email, label: ADMIN_ACCOUNT.fullName, status: 'created' }],
-      }),
+      JSON.stringify({ success: true, accounts: results }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
