@@ -93,7 +93,7 @@ export async function saveDocumentSignature({
         signature_image_url: signatureImageUrl,
         signature_text: signatureData.signatureText || null,
         stamp_applied: signatureData.stampApplied,
-        stamp_image_url: signatureData.stampImageUrl || null,
+        stamp_image_url: signatureData.stampApplied ? (signatureData.stampImageUrl || null) : null,
         ip_address: null, // Will be set server-side if needed
         user_agent: userAgent,
         device_info: deviceInfo,
