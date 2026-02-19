@@ -173,6 +173,13 @@ const ShipmentCard = ({
   });
 
   const totalDocuments = linkedReceipts.length + linkedReports.length + allDeclarations.length;
+  
+  // Check if specific declaration types already exist
+  const hasGeneratorDeclaration = allDeclarations.some((d: any) => d.declaration_type === 'generator');
+  const hasRecyclerDeclaration = allDeclarations.some((d: any) => d.declaration_type === 'recycler');
+  const hasAnyReceipt = linkedReceipts.length > 0 || shipment.has_receipt;
+  const hasAnyReport = linkedReports.length > 0 || shipment.has_report;
+  
   const mappedStatus = mapLegacyStatus(shipment.status);
   const currentStatusConfig = getStatusConfig(mappedStatus);
   
@@ -338,16 +345,23 @@ const ShipmentCard = ({
                   )}
                   {/* Generator Delivery Certificate Button */}
                   {isGenerator && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => { e.stopPropagation(); setIsDeliveryCertOpen(true); }}
-                      className="gap-1 text-xs text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:hover:bg-emerald-900/30"
-                      title="إقرار تسليم الشحنة"
-                    >
-                      <FileCheck className="w-3 h-3" />
-                      إقرار تسليم
-                    </Button>
+                    hasGeneratorDeclaration ? (
+                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 gap-1 text-xs">
+                        <CheckCircle2 className="w-3 h-3" />
+                        تم إقرار التسليم
+                      </Badge>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => { e.stopPropagation(); setIsDeliveryCertOpen(true); }}
+                        className="gap-1 text-xs text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:hover:bg-emerald-900/30"
+                        title="إقرار تسليم الشحنة"
+                      >
+                        <FileCheck className="w-3 h-3" />
+                        إقرار تسليم
+                      </Button>
+                    )
                   )}
                   {/* Cancel Shipment Button */}
                   <CancelShipmentDialog
@@ -744,15 +758,27 @@ const ShipmentCard = ({
                     )}
                     {/* Generator Delivery Certificate Button */}
                     {isGenerator && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); setIsDeliveryCertOpen(true); }}
-                        className="gap-2 text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:hover:bg-emerald-900/30"
-                      >
-                        <FileCheck className="w-4 h-4" />
-                        إقرار تسليم
-                      </Button>
+                      hasGeneratorDeclaration ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setIsDeclarationViewOpen(true); }}
+                          className="gap-2 text-emerald-700 border-emerald-300 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:bg-emerald-900/30"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          تم إقرار التسليم ✓
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => { e.stopPropagation(); setIsDeliveryCertOpen(true); }}
+                          className="gap-2 text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:hover:bg-emerald-900/30"
+                        >
+                          <FileCheck className="w-4 h-4" />
+                          إقرار تسليم
+                        </Button>
+                      )
                     )}
                     {canChange && availableNextStatuses.length > 0 ? (
                       <DropdownMenu>
