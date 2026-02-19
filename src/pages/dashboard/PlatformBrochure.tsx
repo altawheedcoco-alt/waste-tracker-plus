@@ -340,24 +340,107 @@ export default function PlatformBrochure() {
       {/* Print styles */}
       <style>{`
         @media print {
+          /* Hide ALL non-content elements */
           .no-print, nav, header, aside, footer,
-          [data-sidebar], [data-radix-popper-content-wrapper] {
+          [data-sidebar], [data-radix-popper-content-wrapper],
+          [role="navigation"], [role="banner"],
+          button, .fixed, .sticky,
+          [class*="Sidebar"], [class*="sidebar"],
+          [class*="Toaster"], [class*="toast"] {
             display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
           }
-          body { background: white !important; }
+
+          /* Reset the entire page layout */
+          html, body {
+            background: white !important;
+            color: black !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            font-size: 11pt !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Force full-width layout, remove sidebar offset */
+          main, [role="main"], .flex, .flex-1,
+          [class*="SidebarInset"], [class*="dashboard"] {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 100% !important;
+            transform: none !important;
+            position: static !important;
+            display: block !important;
+          }
+
+          /* Brochure content styling */
           .print-brochure {
             padding: 0 !important;
             margin: 0 !important;
+            width: 100% !important;
           }
+
           .print-brochure > * {
             break-inside: avoid;
-            margin-bottom: 12px !important;
+            page-break-inside: avoid;
+            margin-bottom: 8px !important;
             box-shadow: none !important;
-            border: 1px solid #e5e7eb !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 6px !important;
           }
+
+          /* Force gradient colors to print */
+          .print-brochure [class*="bg-gradient"] {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          /* Two-column grid prints correctly */
+          .print-brochure .grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+          }
+
+          /* Stats row */
+          .print-brochure .grid-cols-2.sm\\:grid-cols-3.md\\:grid-cols-6 {
+            grid-template-columns: repeat(6, 1fr) !important;
+          }
+
+          /* Smaller text for density */
+          .print-brochure p.text-xs {
+            font-size: 9pt !important;
+            line-height: 1.3 !important;
+          }
+          .print-brochure p.text-sm {
+            font-size: 10pt !important;
+          }
+          .print-brochure h2 {
+            font-size: 13pt !important;
+          }
+
+          /* Page settings */
           @page {
-            size: A4;
-            margin: 15mm;
+            size: A4 portrait;
+            margin: 12mm 14mm;
+          }
+
+          /* First page cover section */
+          @page :first {
+            margin-top: 10mm;
+          }
+
+          /* Remove space between elements */
+          .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 8px !important;
+          }
+          .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 0 !important;
           }
         }
       `}</style>
