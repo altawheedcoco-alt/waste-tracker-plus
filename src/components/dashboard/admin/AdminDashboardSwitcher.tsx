@@ -30,7 +30,7 @@ import {
 interface Organization {
   id: string;
   name: string;
-  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
+  organization_type: string;
   city: string | null;
   is_verified: boolean;
   logo_url: string | null;

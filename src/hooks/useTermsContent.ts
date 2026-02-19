@@ -8,7 +8,7 @@ export interface TermsSection {
 
 export interface TermsContent {
   id: string;
-  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
+  organization_type: string;
   version: string;
   sections: TermsSection[];
   is_active: boolean;

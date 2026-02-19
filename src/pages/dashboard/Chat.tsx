@@ -36,7 +36,7 @@ import { ar } from 'date-fns/locale';
 interface Partner {
   id: string;
   name: string;
-  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
+  organization_type: string;
   city: string;
   email: string;
   logo_url: string | null;

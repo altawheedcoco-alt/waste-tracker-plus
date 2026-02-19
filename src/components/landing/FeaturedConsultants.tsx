@@ -1,0 +1,152 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { motion } from 'framer-motion';
+import { Building2, Award, ShieldCheck, Star, ArrowLeft, BadgeCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+
+interface FeaturedOrg {
+  id: string;
+  name: string;
+  organization_type: string;
+  logo_url: string | null;
+  bio: string | null;
+  city: string | null;
+  governorate: string | null;
+}
+
+const typeConfig: Record<string, { label: string; icon: typeof Building2; color: string }> = {
+  consultant: { label: 'استشاري بيئي', icon: ShieldCheck, color: 'bg-emerald-500/10 text-emerald-700 border-emerald-200' },
+  consulting_office: { label: 'مكتب استشاري', icon: Building2, color: 'bg-blue-500/10 text-blue-700 border-blue-200' },
+  iso_body: { label: 'جهة مانحة للأيزو', icon: Award, color: 'bg-amber-500/10 text-amber-700 border-amber-200' },
+};
+
+const FeaturedConsultants = () => {
+  const [orgs, setOrgs] = useState<FeaturedOrg[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        // Fetch organizations that are consultants/offices/iso bodies with active subscriptions
+        const { data, error } = await supabase
+          .from('organizations')
+          .select('id, name, organization_type, logo_url, bio, city, region')
+          .in('organization_type', ['consultant', 'consulting_office', 'iso_body'] as any[])
+          .eq('is_active', true)
+          .limit(6);
+
+        if (!error && data) {
+          setOrgs((data as any[]).map(d => ({ ...d, governorate: d.region })) as FeaturedOrg[]);
+        }
+      } catch {
+        // silent fail
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  if (loading || orgs.length === 0) return null;
+
+  return (
+    <section className="py-16 px-4 bg-gradient-to-b from-background to-muted/30">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
+            <BadgeCheck className="h-4 w-4" />
+            شركاء معتمدون
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+            دليل الاستشاريين والجهات المعتمدة
+          </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            استشاريون بيئيون ومكاتب استشارية وجهات مانحة لشهادات الأيزو مسجلة ومُتحقق من بياناتها
+          </p>
+        </motion.div>
+
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {orgs.map((org, i) => {
+            const config = typeConfig[org.organization_type] || typeConfig.consultant;
+            const Icon = config.icon;
+            return (
+              <motion.div
+                key={org.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group bg-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  {org.logo_url ? (
+                    <img src={org.logo_url} alt={org.name} className="w-12 h-12 rounded-lg object-cover border" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground truncate">{org.name}</h3>
+                    {(org.city || org.governorate) && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {[org.city, org.governorate].filter(Boolean).join('، ')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <Badge variant="outline" className={`text-[11px] mb-3 ${config.color}`}>
+                  <Icon className="h-3 w-3 ml-1" />
+                  {config.label}
+                </Badge>
+
+                {org.bio && (
+                  <p className="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
+                    {org.bio}
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <BadgeCheck className="h-3.5 w-3.5 text-primary" />
+                    مُتحقق
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mt-10"
+        >
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => navigate('/auth')}
+          >
+            سجل كاستشاري أو مكتب استشاري
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+export default FeaturedConsultants;

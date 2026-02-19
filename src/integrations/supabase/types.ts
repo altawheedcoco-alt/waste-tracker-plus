@@ -27034,7 +27034,14 @@ export type Database = {
         | "view_settings"
         | "manage_settings"
         | "full_access"
-      organization_type: "generator" | "transporter" | "recycler" | "disposal"
+      organization_type:
+        | "generator"
+        | "transporter"
+        | "recycler"
+        | "disposal"
+        | "consultant"
+        | "consulting_office"
+        | "iso_body"
       shipment_status:
         | "new"
         | "approved"
@@ -27240,7 +27247,15 @@ export const Constants = {
         "manage_settings",
         "full_access",
       ],
-      organization_type: ["generator", "transporter", "recycler", "disposal"],
+      organization_type: [
+        "generator",
+        "transporter",
+        "recycler",
+        "disposal",
+        "consultant",
+        "consulting_office",
+        "iso_body",
+      ],
       shipment_status: [
         "new",
         "approved",

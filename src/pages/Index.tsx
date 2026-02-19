@@ -13,6 +13,7 @@ const CTA = lazy(() => import("@/components/CTA"));
 const Footer = lazy(() => import("@/components/Footer"));
 const DocumentVerification = lazy(() => import("@/components/DocumentVerification"));
 const HomepageAds = lazy(() => import("@/components/ads/HomepageAds"));
+const FeaturedConsultants = lazy(() => import("@/components/landing/FeaturedConsultants"));
 
 const SectionFallback = () => (
   <div className="h-32 flex items-center justify-center">
@@ -31,6 +32,7 @@ const Index = () => {
           <Suspense fallback={<SectionFallback />}>
             <HomepageAds />
             <DocumentVerification />
+            <FeaturedConsultants />
             <Stats />
             <FeaturesList />
             <Features />
