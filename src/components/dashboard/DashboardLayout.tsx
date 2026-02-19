@@ -865,8 +865,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         <div 
           className="flex-1 flex flex-col transition-all duration-300 min-w-0"
           style={{ 
+            marginRight: !isMobile && isSidebarOpen ? `${sidebarWidth}px` : 0,
             width: !isMobile && isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
-            maxWidth: !isMobile && isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
           }}
         >
           {/* Top header - Responsive height */}
