@@ -94,10 +94,43 @@ const OmalunaJobDetails = () => {
 
   const applyMutation = useMutation({
     mutationFn: async () => {
-      if (!workerProfile?.id || !jobId) throw new Error('يجب إنشاء ملف شخصي أولاً');
+      if (!user?.id) throw new Error('يجب تسجيل الدخول أولاً');
+      
+      let workerId = workerProfile?.id;
+      
+      // Auto-create worker_profile if it doesn't exist
+      if (!workerId) {
+        // Get profile data to populate worker_profile
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('full_name, email, phone')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        const { data: newWorker, error: wpError } = await supabase
+          .from('worker_profiles')
+          .insert({
+            user_id: user.id,
+            full_name: profileData?.full_name || user.email?.split('@')[0] || 'مستخدم',
+            email: profileData?.email || user.email,
+            phone: profileData?.phone || null,
+            is_available: true,
+            is_verified: false,
+          })
+          .select('id')
+          .single();
+        
+        if (wpError) throw new Error('حدث خطأ أثناء إنشاء ملفك الشخصي كعامل');
+        workerId = newWorker.id;
+        // Refresh worker profile query
+        queryClient.invalidateQueries({ queryKey: ['worker-profile-check'] });
+      }
+      
+      if (!jobId) throw new Error('معرف الوظيفة غير موجود');
+      
       const { error } = await supabase.from('job_applications').insert({
         job_id: jobId,
-        worker_id: workerProfile.id,
+        worker_id: workerId,
         cover_letter: coverLetter || null,
       });
       if (error) throw error;
@@ -251,9 +284,9 @@ const OmalunaJobDetails = () => {
               <Dialog open={applyOpen} onOpenChange={setApplyOpen}>
                 <DialogTrigger asChild>
                   <Button className="flex-1 gap-2" onClick={() => {
-                    if (!workerProfile) {
-                      toast.error('يجب إنشاء ملف شخصي أولاً');
-                      navigate('/dashboard/omaluna/my-profile');
+                    if (!user) {
+                      toast.error('يجب تسجيل الدخول أولاً');
+                      navigate('/auth?mode=register');
                       return;
                     }
                     setApplyOpen(true);
