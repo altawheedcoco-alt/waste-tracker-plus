@@ -289,8 +289,8 @@ const CarbonTab = ({ report }: { report: EntitySustainabilityReport }) => {
               <p className="text-xs text-muted-foreground mt-1">القيمة التقديرية (ج.م)</p>
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 text-center">
-              <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">${Math.round(report.carbonCreditsEarned * 30)}</p>
-              <p className="text-xs text-muted-foreground mt-1">القيمة الدولية (USD)</p>
+              <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{(Math.round(report.carbonCreditsEarned * 30 * 50)).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-1">المكافئ بالجنيه المصري (ج.م)</p>
             </div>
             <div className="bg-violet-50 dark:bg-violet-950/30 rounded-lg p-4 text-center">
               <p className="text-lg font-mono font-bold text-violet-700 dark:text-violet-400">{report.certificateHash}</p>
