@@ -27112,6 +27112,7 @@ export type Database = {
         | "iso_body"
       shipment_status:
         | "new"
+        | "registered"
         | "approved"
         | "collecting"
         | "in_transit"
@@ -27327,6 +27328,7 @@ export const Constants = {
       ],
       shipment_status: [
         "new",
+        "registered",
         "approved",
         "collecting",
         "in_transit",
