@@ -40,6 +40,12 @@ import {
   Recycle,
   Phone,
   Car,
+  PenTool,
+  Wallet,
+  Handshake,
+  BarChart3,
+  Shield,
+  Stamp,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
@@ -49,71 +55,104 @@ import { normalizeRelation } from '@/lib/supabaseHelpers';
 
 const getNotificationIcon = (type: string | null) => {
   switch (type) {
-    case 'shipment_created':
-      return Package;
+    case 'shipment_created': return Package;
     case 'shipment_status':
-      return Truck;
+    case 'status_update':
+    case 'shipment_assigned': return Truck;
     case 'shipment_approved':
-    case 'shipment_delivered':
-      return CheckCircle;
-    case 'shipment_assigned':
-      return Truck;
-    case 'recycling_report':
-      return CheckCircle;
+    case 'shipment_delivered': return CheckCircle;
     case 'document_uploaded':
-      return FileText;
-    case 'warning':
-      return AlertCircle;
-    default:
-      return Info;
+    case 'signing_request': return FileText;
+    case 'signature_request':
+    case 'document_signed': return PenTool;
+    case 'stamp_applied': return Stamp;
+    case 'recycling_report':
+    case 'report':
+    case 'certificate': return BarChart3;
+    case 'partner_post':
+    case 'partner_note':
+    case 'partner_message':
+    case 'partner_linked': return Handshake;
+    case 'approval_request': return Inbox;
+    case 'invoice':
+    case 'payment':
+    case 'deposit':
+    case 'financial': return Wallet;
+    case 'warning': return AlertCircle;
+    case 'chat_message':
+    case 'message':
+    case 'broadcast': return MessageSquare;
+    case 'shipment': return Package;
+    default: return Info;
   }
 };
 
 const getNotificationColor = (type: string | null) => {
   switch (type) {
     case 'shipment_created':
-      return 'bg-blue-500/10 text-blue-500';
+    case 'shipment':
+    case 'shipment_assigned': return 'bg-blue-500/10 text-blue-500';
     case 'shipment_status':
-      return 'bg-amber-500/10 text-amber-500';
+    case 'status_update': return 'bg-amber-500/10 text-amber-500';
     case 'shipment_approved':
-    case 'shipment_delivered':
-      return 'bg-green-500/10 text-green-500';
-    case 'shipment_assigned':
-      return 'bg-purple-500/10 text-purple-500';
-    case 'recycling_report':
-      return 'bg-emerald-500/10 text-emerald-500';
+    case 'shipment_delivered': return 'bg-green-500/10 text-green-500';
     case 'document_uploaded':
-      return 'bg-indigo-500/10 text-indigo-500';
-    case 'warning':
-      return 'bg-red-500/10 text-red-500';
-    default:
-      return 'bg-muted text-muted-foreground';
+    case 'signing_request':
+    case 'signature_request':
+    case 'document_signed':
+    case 'stamp_applied': return 'bg-indigo-500/10 text-indigo-500';
+    case 'recycling_report':
+    case 'report':
+    case 'certificate': return 'bg-cyan-500/10 text-cyan-500';
+    case 'partner_post':
+    case 'partner_note':
+    case 'partner_message':
+    case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
+    case 'approval_request': return 'bg-amber-500/10 text-amber-500';
+    case 'invoice':
+    case 'payment':
+    case 'deposit':
+    case 'financial': return 'bg-emerald-500/10 text-emerald-500';
+    case 'warning': return 'bg-red-500/10 text-red-500';
+    case 'chat_message':
+    case 'message':
+    case 'broadcast': return 'bg-pink-500/10 text-pink-500';
+    default: return 'bg-muted text-muted-foreground';
   }
 };
 
 const getNotificationBadge = (type: string | null, t: (key: string) => string) => {
-  switch (type) {
-    case 'shipment_created':
-      return { label: t('notifications.shipmentCreated'), variant: 'default' as const };
-    case 'shipment_status':
-      return { label: t('notifications.statusUpdate'), variant: 'secondary' as const };
-    case 'shipment_approved':
-      return { label: t('notifications.approval'), variant: 'default' as const };
-    case 'shipment_delivered':
-      return { label: t('notifications.shipmentDelivered'), variant: 'default' as const };
-    case 'shipment_assigned':
-      return { label: t('notifications.shipmentAssigned'), variant: 'secondary' as const };
-    case 'recycling_report':
-      return { label: t('notifications.recyclingReport'), variant: 'default' as const };
-    case 'document_uploaded':
-      return { label: t('notifications.newDocument'), variant: 'secondary' as const };
-    case 'warning':
-      return { label: t('notifications.warning'), variant: 'destructive' as const };
-    case 'approval_request':
-      return { label: t('notifications.approvalRequest'), variant: 'secondary' as const };
-    default:
-      return { label: t('notifications.notification'), variant: 'outline' as const };
-  }
+  const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    shipment_created: { label: 'شحنة جديدة', variant: 'default' },
+    shipment_status: { label: 'تحديث حالة', variant: 'secondary' },
+    status_update: { label: 'تحديث حالة', variant: 'secondary' },
+    shipment_approved: { label: 'موافقة', variant: 'default' },
+    shipment_delivered: { label: 'تم التسليم', variant: 'default' },
+    shipment_assigned: { label: 'تعيين شحنة', variant: 'secondary' },
+    shipment: { label: 'شحنة', variant: 'default' },
+    document_uploaded: { label: 'مستند جديد', variant: 'secondary' },
+    signing_request: { label: 'طلب توقيع', variant: 'default' },
+    signature_request: { label: 'طلب توقيع', variant: 'default' },
+    document_signed: { label: 'تم التوقيع', variant: 'default' },
+    stamp_applied: { label: 'تم الختم', variant: 'default' },
+    recycling_report: { label: 'تقرير تدوير', variant: 'default' },
+    report: { label: 'تقرير', variant: 'secondary' },
+    certificate: { label: 'شهادة', variant: 'default' },
+    approval_request: { label: 'طلب موافقة', variant: 'secondary' },
+    partner_post: { label: 'منشور شريك', variant: 'secondary' },
+    partner_note: { label: 'ملاحظة شريك', variant: 'secondary' },
+    partner_message: { label: 'رسالة شريك', variant: 'secondary' },
+    partner_linked: { label: 'ربط شريك', variant: 'default' },
+    invoice: { label: 'فاتورة', variant: 'default' },
+    payment: { label: 'دفعة مالية', variant: 'default' },
+    deposit: { label: 'إيداع', variant: 'default' },
+    financial: { label: 'مالية', variant: 'secondary' },
+    warning: { label: 'تحذير', variant: 'destructive' },
+    chat_message: { label: 'رسالة', variant: 'secondary' },
+    message: { label: 'رسالة', variant: 'secondary' },
+    broadcast: { label: 'بث جماعي', variant: 'secondary' },
+  };
+  return badges[type || ''] || { label: 'إشعار', variant: 'outline' as const };
 };
 
 const getStatusLabel = (status: string | null, t: (key: string) => string) => {
@@ -129,24 +168,62 @@ const getStatusLabel = (status: string | null, t: (key: string) => string) => {
   return statusMap[status || ''] || { label: status || t('notificationDetails.notAssigned'), color: 'bg-muted text-muted-foreground' };
 };
 
-// Categorize notifications
+// Categorize notifications by nature/type
 const categorizeNotification = (type: string | null) => {
   switch (type) {
+    // Shipments category
     case 'shipment_created':
-      return 'new_shipments';
-    case 'shipment_delivered':
     case 'shipment_status':
+    case 'status_update':
     case 'shipment_assigned':
-      return 'delivered_shipments';
-    case 'approval_request':
-      return 'received_requests';
+    case 'shipment_delivered':
     case 'shipment_approved':
-      return 'sent_requests';
+    case 'shipment':
+      return 'shipments';
+    // Documents & Signatures category
+    case 'document_uploaded':
+    case 'signature_request':
+    case 'document_signed':
+    case 'stamp_applied':
+    case 'signing_request':
+      return 'documents';
+    // Finance category
+    case 'invoice':
+    case 'payment':
+    case 'deposit':
+    case 'financial':
+      return 'finance';
+    // Partners category
+    case 'partner_post':
+    case 'partner_note':
+    case 'partner_message':
+    case 'partner_request':
+    case 'partner_linked':
+      return 'partners';
+    // Approvals category
+    case 'approval_request':
+    case 'approval_granted':
+    case 'approval_rejected':
+      return 'approvals';
+    // Reports category
+    case 'recycling_report':
+    case 'report':
+    case 'certificate':
+    case 'compliance':
+      return 'reports';
+    // Messages category
     case 'chat_message':
     case 'message':
+    case 'broadcast':
       return 'messages';
+    // System category
+    case 'warning':
+    case 'system':
+    case 'security':
+    case 'info':
+      return 'system';
     default:
-      return 'all';
+      return 'other';
   }
 };
 
@@ -192,12 +269,16 @@ interface CategoryConfig {
 }
 
 const getCategories = (t: (key: string) => string): CategoryConfig[] => [
-  { id: 'all', label: t('notifications.all'), icon: Bell, color: 'text-primary', bgColor: 'bg-primary/10' },
-  { id: 'new_shipments', label: t('notifications.newShipments'), icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-  { id: 'received_requests', label: t('notifications.receivedRequests'), icon: Inbox, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
-  { id: 'sent_requests', label: t('notifications.sentRequests'), icon: Send, color: 'text-green-500', bgColor: 'bg-green-500/10' },
-  { id: 'delivered_shipments', label: t('notifications.deliveredShipments'), icon: PackageCheck, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
-  { id: 'messages', label: t('notifications.messages'), icon: MessageSquare, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10' },
+  { id: 'all', label: 'الكل', icon: Bell, color: 'text-primary', bgColor: 'bg-primary/10' },
+  { id: 'shipments', label: 'الشحنات', icon: Truck, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
+  { id: 'documents', label: 'المستندات والتوقيعات', icon: PenTool, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10' },
+  { id: 'approvals', label: 'الموافقات', icon: CheckCircle, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
+  { id: 'finance', label: 'المالية', icon: Wallet, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
+  { id: 'partners', label: 'الشركاء', icon: Handshake, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+  { id: 'reports', label: 'التقارير والشهادات', icon: BarChart3, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
+  { id: 'messages', label: 'الرسائل', icon: MessageSquare, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+  { id: 'system', label: 'النظام', icon: Shield, color: 'text-red-500', bgColor: 'bg-red-500/10' },
+  { id: 'other', label: 'أخرى', icon: Info, color: 'text-muted-foreground', bgColor: 'bg-muted' },
 ];
 
 const Notifications = () => {
