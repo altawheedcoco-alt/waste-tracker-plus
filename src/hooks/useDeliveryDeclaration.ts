@@ -15,6 +15,7 @@ export function useDeliveryDeclaration(shipmentId: string | undefined) {
         .maybeSingle();
 
       if (error) {
+        if (error.message?.includes('AbortError') || error.name === 'AbortError') return null;
         console.error('Error fetching delivery declaration:', error);
         return null;
       }
@@ -37,6 +38,7 @@ export function useShipmentDeclarations(shipmentId: string | undefined) {
         .order('created_at', { ascending: true });
 
       if (error) {
+        if (error.message?.includes('AbortError') || error.name === 'AbortError') return [];
         console.error('Error fetching shipment declarations:', error);
         return [];
       }
