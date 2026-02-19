@@ -13,6 +13,7 @@ import logo from '@/assets/logo.png';
 import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import CompanyRegistrationForm, { CompanyFormData } from '@/components/auth/CompanyRegistrationForm';
+import DemoQuickLogin from '@/components/auth/DemoQuickLogin';
 
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
@@ -641,6 +642,11 @@ const Auth = () => {
                       Apple
                     </Button>
                   </div>
+
+                  <DemoQuickLogin
+                    onLoginStart={() => setLoading(true)}
+                    onLoginEnd={() => setLoading(false)}
+                  />
 
                 </motion.form>
               )}
