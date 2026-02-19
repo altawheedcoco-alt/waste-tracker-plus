@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-type OrganizationType = "generator" | "transporter" | "recycler";
+type OrganizationType = "generator" | "transporter" | "recycler" | "disposal" | "consultant" | "consulting_office" | "iso_body";
 
 interface RegisterCompanyPayload {
   // auth

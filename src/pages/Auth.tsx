@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory } from 'lucide-react';
+import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import logo from '@/assets/logo.png';
 import { z } from 'zod';
@@ -30,7 +30,7 @@ const companySignupSchema = z.object({
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   fullName: z.string().min(2, 'الاسم يجب أن يكون حرفين على الأقل'),
   phone: z.string().min(10, 'رقم الهاتف غير صالح'),
-  organizationType: z.enum(['generator', 'transporter', 'recycler', 'disposal']),
+  organizationType: z.enum(['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office', 'iso_body']),
   organizationName: z.string().min(2, 'اسم المنشأة مطلوب'),
   organizationEmail: z.string().email('بريد المنشأة غير صالح'),
   organizationPhone: z.string().min(10, 'رقم هاتف المنشأة غير صالح'),
@@ -48,7 +48,7 @@ const driverSignupSchema = z.object({
   vehiclePlate: z.string().min(3, 'لوحة المركبة مطلوبة'),
 });
 
-type RegistrationType = 'company' | 'driver' | null;
+type RegistrationType = 'company' | 'driver' | 'consultant' | 'consulting_office' | 'iso_body' | null;
 type AuthMode = 'login' | 'register';
 
 const Auth = () => {
@@ -444,6 +444,27 @@ const Auth = () => {
       icon: User,
       color: 'from-amber-500 to-amber-600',
     },
+    {
+      value: 'consultant',
+      label: 'استشاري بيئي',
+      description: 'تسجيل كاستشاري بيئي مستقل',
+      icon: ClipboardCheck,
+      color: 'from-teal-500 to-teal-600',
+    },
+    {
+      value: 'consulting_office',
+      label: 'مكتب استشاري',
+      description: 'تسجيل مكتب استشارات بيئية',
+      icon: BookOpen,
+      color: 'from-indigo-500 to-indigo-600',
+    },
+    {
+      value: 'iso_body',
+      label: 'جهة مانحة للأيزو',
+      description: 'جهة اعتماد ومنح شهادات ISO',
+      icon: Award,
+      color: 'from-emerald-600 to-green-700',
+    },
   ];
 
   const getTotalSteps = () => {
@@ -694,8 +715,8 @@ const Auth = () => {
                 </motion.div>
               )}
 
-              {/* Company Registration - Use New Form Component */}
-              {authMode === 'register' && registrationType === 'company' && (
+              {/* Company / Consultant / ISO Body Registration */}
+              {authMode === 'register' && (registrationType === 'company' || registrationType === 'consultant' || registrationType === 'consulting_office' || registrationType === 'iso_body') && (
                 <motion.div
                   key="company-form"
                   initial={{ opacity: 0, x: 20 }}
@@ -705,6 +726,7 @@ const Auth = () => {
                   <CompanyRegistrationForm
                     onSubmit={handleCompanySignUp}
                     onBack={() => setRegistrationType(null)}
+                    defaultOrgType={registrationType !== 'company' ? registrationType : undefined}
                   />
                 </motion.div>
               )}

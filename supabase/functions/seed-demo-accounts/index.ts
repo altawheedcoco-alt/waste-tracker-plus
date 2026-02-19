@@ -15,6 +15,9 @@ const DEMO_ACCOUNTS = [
   { email: 'demo-driver@irecycle.test', fullName: 'سائق', orgType: 'driver', role: 'driver', phone: '01000000005' },
   { email: 'demo-employee@irecycle.test', fullName: 'موظف', orgType: 'employee', role: 'employee', phone: '01000000006' },
   { email: 'demo-admin@irecycle.test', fullName: 'مدير النظام', orgType: 'admin', role: 'admin', phone: '01000000007' },
+  { email: 'demo-consultant@irecycle.test', fullName: 'استشاري بيئي', orgType: 'consultant', role: 'consultant', phone: '01000000008' },
+  { email: 'demo-consulting-office@irecycle.test', fullName: 'مكتب استشاري', orgType: 'consulting_office', role: 'consultant', phone: '01000000009' },
+  { email: 'demo-iso-body@irecycle.test', fullName: 'جهة مانحة للأيزو', orgType: 'iso_body', role: 'consultant', phone: '01000000010' },
 ];
 
 Deno.serve(async (req) => {
