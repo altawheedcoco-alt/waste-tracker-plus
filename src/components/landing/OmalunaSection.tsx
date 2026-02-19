@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
-import { Users, Briefcase, MapPin, Star, ArrowLeft, TrendingUp } from 'lucide-react';
+import { Users, Briefcase, MapPin, ArrowLeft, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -83,13 +82,7 @@ const OmalunaSection = () => {
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-muted/20 to-background">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10"
-        >
+        <div className="text-center mb-10 animate-fade-up">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
             <Users className="h-4 w-4" />
             عُمالنا
@@ -100,15 +93,9 @@ const OmalunaSection = () => {
           <p className="text-muted-foreground max-w-xl mx-auto">
             اعثر على الوظيفة المناسبة أو الكفاءة المطلوبة — عرض وطلب في مكان واحد
           </p>
-        </motion.div>
+        </div>
 
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="flex justify-center gap-8 mb-10"
-        >
+        <div className="flex justify-center gap-8 mb-10 animate-fade-up" style={{ animationDelay: '0.1s' }}>
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{stats.totalJobs}</div>
             <div className="text-sm text-muted-foreground">وظيفة متاحة</div>
@@ -118,19 +105,15 @@ const OmalunaSection = () => {
             <div className="text-2xl font-bold text-primary">{stats.totalWorkers}</div>
             <div className="text-sm text-muted-foreground">عامل مسجل</div>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Jobs Grid */}
         {jobs.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             {jobs.map((job, i) => (
-              <motion.div
+              <div
                 key={job.id}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="bg-card border border-border rounded-xl p-5 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer"
+                className="bg-card border border-border rounded-xl p-5 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer animate-fade-up"
+                style={{ animationDelay: `${i * 0.08}s` }}
                 onClick={() => navigate(`/dashboard/omaluna/jobs/${job.id}`)}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -172,7 +155,7 @@ const OmalunaSection = () => {
                     </span>
                   )}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         ) : (
@@ -182,13 +165,7 @@ const OmalunaSection = () => {
           </div>
         )}
 
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-3"
-        >
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up" style={{ animationDelay: '0.3s' }}>
           <Button onClick={() => navigate('/dashboard/omaluna')} className="gap-2">
             <Users className="h-4 w-4" />
             تصفح جميع الوظائف
@@ -197,7 +174,7 @@ const OmalunaSection = () => {
             أنشر وظيفة
             <ArrowLeft className="h-4 w-4" />
           </Button>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
