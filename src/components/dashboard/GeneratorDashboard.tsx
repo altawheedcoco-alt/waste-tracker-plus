@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,6 +29,8 @@ import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import DashboardPrintReports from './shared/DashboardPrintReports';
+import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
+import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load heavy tab content
@@ -219,6 +221,7 @@ const GeneratorDashboard = () => {
       {/* Header */}
       <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
         <div className={`flex items-center gap-2 flex-wrap ${isMobile ? 'order-2' : ''}`}>
+          <DashboardWidgetCustomizer orgType="generator" />
           <DashboardPrintReports />
           <Button onClick={() => setShowWorkOrder(true)} variant="default" size={isMobile ? 'sm' : 'default'} className="gap-2">
             <ClipboardList className="w-4 h-4" />
