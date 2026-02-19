@@ -661,6 +661,48 @@ export type Database = {
           },
         ]
       }
+      agency_candidates: {
+        Row: {
+          agency_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          status: string | null
+          worker_id: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string | null
+          worker_id: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          status?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_candidates_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "recruitment_agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_candidates_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_performance: {
         Row: {
           agent_id: string
@@ -13000,6 +13042,195 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          cover_letter: string | null
+          created_at: string
+          id: string
+          interview_date: string | null
+          interview_notes: string | null
+          job_id: string
+          match_reasons: Json | null
+          match_score: number | null
+          resume_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string | null
+          updated_at: string
+          worker_id: string
+        }
+        Insert: {
+          cover_letter?: string | null
+          created_at?: string
+          id?: string
+          interview_date?: string | null
+          interview_notes?: string | null
+          job_id: string
+          match_reasons?: Json | null
+          match_score?: number | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string | null
+          updated_at?: string
+          worker_id: string
+        }
+        Update: {
+          cover_letter?: string | null
+          created_at?: string
+          id?: string
+          interview_date?: string | null
+          interview_notes?: string | null
+          job_id?: string
+          match_reasons?: Json | null
+          match_score?: number | null
+          resume_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string | null
+          updated_at?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_listings: {
+        Row: {
+          applications_count: number | null
+          benefits: string[] | null
+          category: string | null
+          certifications_required: string[] | null
+          city: string | null
+          created_at: string
+          description: string
+          education_required: string | null
+          experience_required: number | null
+          expires_at: string | null
+          governorate: string | null
+          id: string
+          is_featured: boolean | null
+          is_remote: boolean | null
+          is_urgent: boolean | null
+          job_type: string
+          location_details: string | null
+          organization_id: string | null
+          posted_by: string | null
+          published_at: string | null
+          requirements: string | null
+          responsibilities: string | null
+          salary_max: number | null
+          salary_min: number | null
+          salary_period: string | null
+          sector: string
+          skills_required: string[] | null
+          status: string | null
+          title: string
+          updated_at: string
+          vacancies_count: number | null
+          views_count: number | null
+        }
+        Insert: {
+          applications_count?: number | null
+          benefits?: string[] | null
+          category?: string | null
+          certifications_required?: string[] | null
+          city?: string | null
+          created_at?: string
+          description: string
+          education_required?: string | null
+          experience_required?: number | null
+          expires_at?: string | null
+          governorate?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_remote?: boolean | null
+          is_urgent?: boolean | null
+          job_type: string
+          location_details?: string | null
+          organization_id?: string | null
+          posted_by?: string | null
+          published_at?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_period?: string | null
+          sector: string
+          skills_required?: string[] | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          vacancies_count?: number | null
+          views_count?: number | null
+        }
+        Update: {
+          applications_count?: number | null
+          benefits?: string[] | null
+          category?: string | null
+          certifications_required?: string[] | null
+          city?: string | null
+          created_at?: string
+          description?: string
+          education_required?: string | null
+          experience_required?: number | null
+          expires_at?: string | null
+          governorate?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_remote?: boolean | null
+          is_urgent?: boolean | null
+          job_type?: string
+          location_details?: string | null
+          organization_id?: string | null
+          posted_by?: string | null
+          published_at?: string | null
+          requirements?: string | null
+          responsibilities?: string | null
+          salary_max?: number | null
+          salary_min?: number | null
+          salary_period?: string | null
+          sector?: string
+          skills_required?: string[] | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          vacancies_count?: number | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "job_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       landfill_cells: {
         Row: {
           cell_code: string
@@ -19163,6 +19394,84 @@ export type Database = {
         }
         Relationships: []
       }
+      recruitment_agencies: {
+        Row: {
+          agency_name: string
+          avg_rating: number | null
+          city: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          governorate: string | null
+          id: string
+          is_active: boolean | null
+          is_verified: boolean | null
+          license_number: string | null
+          logo_url: string | null
+          organization_id: string | null
+          specializations: string[] | null
+          total_placements: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          agency_name: string
+          avg_rating?: number | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          license_number?: string | null
+          logo_url?: string | null
+          organization_id?: string | null
+          specializations?: string[] | null
+          total_placements?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          agency_name?: string
+          avg_rating?: number | null
+          city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          governorate?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          license_number?: string | null
+          logo_url?: string | null
+          organization_id?: string | null
+          specializations?: string[] | null
+          total_placements?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recruitment_agencies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "recruitment_agencies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recycler_facility_carbon: {
         Row: {
           certificate_issued: boolean | null
@@ -19928,6 +20237,42 @@ export type Database = {
           },
         ]
       }
+      saved_jobs: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_jobs_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_locations: {
         Row: {
           address: string
@@ -20015,6 +20360,55 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_workers: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          saved_by: string
+          worker_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          saved_by: string
+          worker_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          saved_by?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_workers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "saved_workers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_workers_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -25732,6 +26126,203 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_profiles: {
+        Row: {
+          address: string | null
+          available_immediately: boolean | null
+          avg_rating: number | null
+          bio: string | null
+          certifications: string[] | null
+          city: string | null
+          created_at: string
+          cv_url: string | null
+          date_of_birth: string | null
+          documents: Json | null
+          education_level: string | null
+          email: string | null
+          full_name: string
+          gender: string | null
+          governorate: string | null
+          id: string
+          is_available: boolean | null
+          is_verified: boolean | null
+          job_title: string | null
+          languages: string[] | null
+          national_id: string | null
+          phone: string | null
+          photo_url: string | null
+          preferred_locations: string[] | null
+          preferred_salary_max: number | null
+          preferred_salary_min: number | null
+          preferred_sectors: string[] | null
+          preferred_work_type: string | null
+          profile_completion: number | null
+          skills: string[] | null
+          total_jobs_completed: number | null
+          total_ratings: number | null
+          updated_at: string
+          user_id: string | null
+          verification_date: string | null
+          willing_to_relocate: boolean | null
+          years_of_experience: number | null
+        }
+        Insert: {
+          address?: string | null
+          available_immediately?: boolean | null
+          avg_rating?: number | null
+          bio?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          created_at?: string
+          cv_url?: string | null
+          date_of_birth?: string | null
+          documents?: Json | null
+          education_level?: string | null
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          governorate?: string | null
+          id?: string
+          is_available?: boolean | null
+          is_verified?: boolean | null
+          job_title?: string | null
+          languages?: string[] | null
+          national_id?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          preferred_locations?: string[] | null
+          preferred_salary_max?: number | null
+          preferred_salary_min?: number | null
+          preferred_sectors?: string[] | null
+          preferred_work_type?: string | null
+          profile_completion?: number | null
+          skills?: string[] | null
+          total_jobs_completed?: number | null
+          total_ratings?: number | null
+          updated_at?: string
+          user_id?: string | null
+          verification_date?: string | null
+          willing_to_relocate?: boolean | null
+          years_of_experience?: number | null
+        }
+        Update: {
+          address?: string | null
+          available_immediately?: boolean | null
+          avg_rating?: number | null
+          bio?: string | null
+          certifications?: string[] | null
+          city?: string | null
+          created_at?: string
+          cv_url?: string | null
+          date_of_birth?: string | null
+          documents?: Json | null
+          education_level?: string | null
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          governorate?: string | null
+          id?: string
+          is_available?: boolean | null
+          is_verified?: boolean | null
+          job_title?: string | null
+          languages?: string[] | null
+          national_id?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          preferred_locations?: string[] | null
+          preferred_salary_max?: number | null
+          preferred_salary_min?: number | null
+          preferred_sectors?: string[] | null
+          preferred_work_type?: string | null
+          profile_completion?: number | null
+          skills?: string[] | null
+          total_jobs_completed?: number | null
+          total_ratings?: number | null
+          updated_at?: string
+          user_id?: string | null
+          verification_date?: string | null
+          willing_to_relocate?: boolean | null
+          years_of_experience?: number | null
+        }
+        Relationships: []
+      }
+      worker_ratings: {
+        Row: {
+          communication_rating: number | null
+          created_at: string
+          id: string
+          is_recommendation: boolean | null
+          job_id: string | null
+          organization_id: string
+          overall_rating: number
+          punctuality_rating: number | null
+          quality_rating: number | null
+          rated_by: string
+          review_text: string | null
+          teamwork_rating: number | null
+          worker_id: string
+        }
+        Insert: {
+          communication_rating?: number | null
+          created_at?: string
+          id?: string
+          is_recommendation?: boolean | null
+          job_id?: string | null
+          organization_id: string
+          overall_rating: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          rated_by: string
+          review_text?: string | null
+          teamwork_rating?: number | null
+          worker_id: string
+        }
+        Update: {
+          communication_rating?: number | null
+          created_at?: string
+          id?: string
+          is_recommendation?: boolean | null
+          job_id?: string | null
+          organization_id?: string
+          overall_rating?: number
+          punctuality_rating?: number | null
+          quality_rating?: number | null
+          rated_by?: string
+          review_text?: string | null
+          teamwork_rating?: number | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_ratings_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_ratings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "worker_ratings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_ratings_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "worker_profiles"
             referencedColumns: ["id"]
           },
         ]

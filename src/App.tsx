@@ -182,6 +182,13 @@ const EquipmentMarketplace = lazy(() => import("./pages/dashboard/EquipmentMarke
 const WhiteLabelPortal = lazy(() => import("./pages/dashboard/WhiteLabelPortal"));
 const PublicOrgProfile = lazy(() => import("./pages/PublicOrgProfile"));
 const PublicClientPortal = lazy(() => import("./pages/PublicClientPortal"));
+const Omaluna = lazy(() => import("./pages/dashboard/Omaluna"));
+const OmalunaPostJob = lazy(() => import("./pages/dashboard/OmalunaPostJob"));
+const OmalunaWorkerProfile = lazy(() => import("./pages/dashboard/OmalunaWorkerProfile"));
+const OmalunaJobDetails = lazy(() => import("./pages/dashboard/OmalunaJobDetails"));
+const OmalunaMyJobs = lazy(() => import("./pages/dashboard/OmalunaMyJobs"));
+const OmalunaMyApplications = lazy(() => import("./pages/dashboard/OmalunaMyApplications"));
+const OmalunaJobApplications = lazy(() => import("./pages/dashboard/OmalunaJobApplications"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -394,8 +401,15 @@ const AppRoutes = memo(() => (
           <Route path="/dashboard/stationery-plans" element={<StationeryPlans />} />
           <Route path="/dashboard/waste-auctions" element={<WasteAuctions />} />
           <Route path="/dashboard/partner-reviews" element={<PartnerReviews />} />
-          <Route path="/dashboard/equipment-marketplace" element={<EquipmentMarketplace />} />
-          <Route path="/dashboard/white-label-portal" element={<WhiteLabelPortal />} />
+           <Route path="/dashboard/equipment-marketplace" element={<EquipmentMarketplace />} />
+           <Route path="/dashboard/white-label-portal" element={<WhiteLabelPortal />} />
+           <Route path="/dashboard/omaluna" element={<Omaluna />} />
+           <Route path="/dashboard/omaluna/post-job" element={<OmalunaPostJob />} />
+           <Route path="/dashboard/omaluna/my-profile" element={<OmalunaWorkerProfile />} />
+           <Route path="/dashboard/omaluna/job/:jobId" element={<OmalunaJobDetails />} />
+           <Route path="/dashboard/omaluna/my-jobs" element={<OmalunaMyJobs />} />
+           <Route path="/dashboard/omaluna/my-applications" element={<OmalunaMyApplications />} />
+           <Route path="/dashboard/omaluna/job/:jobId/applications" element={<OmalunaJobApplications />} />
          <Route path="/invite/:token" element={<InviteAccept />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
