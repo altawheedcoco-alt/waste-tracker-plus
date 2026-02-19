@@ -18,6 +18,7 @@ import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
+import DashboardWidgetCustomizer from '@/components/dashboard/DashboardWidgetCustomizer';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';

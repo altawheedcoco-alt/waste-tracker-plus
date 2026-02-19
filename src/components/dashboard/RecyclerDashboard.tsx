@@ -14,6 +14,7 @@ import FacilityCapacityCard from './shared/FacilityCapacityCard';
 import StatsCardsGrid, { StatCardItem } from './shared/StatsCardsGrid';
 import { DetailSection } from './shared/InteractiveDetailDrawer';
 import QuickActionsGrid from './QuickActionsGrid';
+import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import CreateShipmentButton from './CreateShipmentButton';
 import ShipmentCard from '@/components/shipments/ShipmentCard';

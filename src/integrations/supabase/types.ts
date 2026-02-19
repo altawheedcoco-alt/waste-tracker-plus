@@ -5103,6 +5103,57 @@ export type Database = {
           },
         ]
       }
+      dashboard_widget_preferences: {
+        Row: {
+          created_at: string
+          hidden_widgets: string[] | null
+          id: string
+          is_org_default: boolean | null
+          organization_id: string | null
+          pinned_widgets: string[] | null
+          updated_at: string
+          user_id: string | null
+          widget_order: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          hidden_widgets?: string[] | null
+          id?: string
+          is_org_default?: boolean | null
+          organization_id?: string | null
+          pinned_widgets?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          widget_order?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          hidden_widgets?: string[] | null
+          id?: string
+          is_org_default?: boolean | null
+          organization_id?: string | null
+          pinned_widgets?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+          widget_order?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_widget_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "dashboard_widget_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       delivery_confirmations: {
         Row: {
           condition_notes: string | null

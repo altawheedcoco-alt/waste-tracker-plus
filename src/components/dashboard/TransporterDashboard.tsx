@@ -27,6 +27,7 @@ import TransporterPartnerSummary from './transporter/TransporterPartnerSummary';
 import TransporterShipmentsList from './transporter/TransporterShipmentsList';
 import TransporterAggregateReport from './transporter/TransporterAggregateReport';
 import QuickActionsGrid from './QuickActionsGrid';
+import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
@@ -159,6 +160,7 @@ const TransporterDashboard = () => {
       />
       <StoryCircles />
       <TransporterHeader organizationName={organization?.name || ''} />
+      <DashboardWidgetCustomizer orgType="transporter" />
 
       <TransporterCommandCenter />
 
