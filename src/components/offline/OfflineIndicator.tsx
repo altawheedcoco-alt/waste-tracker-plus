@@ -19,12 +19,7 @@ const OfflineIndicator = memo(({ className }: OfflineIndicatorProps) => {
   const isWeakConnection = !isOnline || isSlowConnection;
 
   return (
-    <div className={cn('flex items-center gap-3', className)}>
-      {/* اسم النظام باللغتين */}
-      <div className="hidden sm:flex border-l border-border/50 pl-3">
-        <PlatformLogo size="sm" showText />
-      </div>
-      
+    <div className={cn('flex items-center gap-2', className)}>
       {/* مؤشر حالة الاتصال */}
       <div className="flex items-center gap-2">
         <motion.div
