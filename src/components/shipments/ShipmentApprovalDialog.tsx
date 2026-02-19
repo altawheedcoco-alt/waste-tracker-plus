@@ -102,17 +102,28 @@ export default function ShipmentApprovalDialog({
 
       if (error) throw error;
 
+      // Fetch transporter_id to notify them
+      const { data: shipmentData } = await supabase
+        .from('shipments')
+        .select('transporter_id')
+        .eq('id', shipment.id)
+        .single();
+
+      const transporterOrgId = shipmentData?.transporter_id;
+
       // Send notification to transporter
-      await supabase.functions.invoke('smart-notifications', {
-        body: {
-          action: 'send',
-          title: '✅ تمت الموافقة على الشحنة',
-          message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}`,
-          type: 'shipment_approved',
-          shipment_id: shipment.id,
-          organization_id: null,
-        },
-      });
+      if (transporterOrgId) {
+        await supabase.functions.invoke('smart-notifications', {
+          body: {
+            action: 'send',
+            title: '✅ تمت الموافقة على الشحنة',
+            message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}`,
+            type: 'shipment_approved',
+            shipment_id: shipment.id,
+            organization_id: transporterOrgId,
+          },
+        });
+      }
 
       // Notify all admins
       const { data: adminUsers } = await supabase
@@ -164,17 +175,28 @@ export default function ShipmentApprovalDialog({
 
       if (error) throw error;
 
+      // Fetch transporter_id to notify them
+      const { data: shipmentData } = await supabase
+        .from('shipments')
+        .select('transporter_id')
+        .eq('id', shipment.id)
+        .single();
+
+      const transporterOrgId = shipmentData?.transporter_id;
+
       // Send notification to transporter about rejection
-      await supabase.functions.invoke('smart-notifications', {
-        body: {
-          action: 'send',
-          title: '❌ تم رفض الشحنة',
-          message: `الشحنة ${shipment.shipment_number} تم رفضها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}. السبب: ${rejectionReason}`,
-          type: 'shipment_rejected',
-          shipment_id: shipment.id,
-          organization_id: null,
-        },
-      });
+      if (transporterOrgId) {
+        await supabase.functions.invoke('smart-notifications', {
+          body: {
+            action: 'send',
+            title: '❌ تم رفض الشحنة',
+            message: `الشحنة ${shipment.shipment_number} تم رفضها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}. السبب: ${rejectionReason}`,
+            type: 'shipment_rejected',
+            shipment_id: shipment.id,
+            organization_id: transporterOrgId,
+          },
+        });
+      }
 
       // Notify all admins about rejection
       const { data: adminUsers } = await supabase
