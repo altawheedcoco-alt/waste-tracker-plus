@@ -631,7 +631,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   return (
     <FocusMusicProvider>
     <TooltipProvider>
-      <div className="min-h-screen bg-background flex flex-row-reverse" dir="rtl">
+      <div className="min-h-screen bg-background flex" dir="rtl">
         <LiveEventToast />
         {/* Desktop Sidebar - Hidden on mobile when using display mode */}
         <AnimatePresence>
