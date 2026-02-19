@@ -28,6 +28,7 @@ import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidge
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import DashboardPrintReports from './shared/DashboardPrintReports';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load heavy tab content
@@ -218,6 +219,7 @@ const GeneratorDashboard = () => {
       {/* Header */}
       <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
         <div className={`flex items-center gap-2 flex-wrap ${isMobile ? 'order-2' : ''}`}>
+          <DashboardPrintReports />
           <Button onClick={() => setShowWorkOrder(true)} variant="default" size={isMobile ? 'sm' : 'default'} className="gap-2">
             <ClipboardList className="w-4 h-4" />
             {!isMobile && t('workOrder.createNew')}

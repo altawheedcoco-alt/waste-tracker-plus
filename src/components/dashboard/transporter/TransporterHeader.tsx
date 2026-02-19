@@ -6,6 +6,7 @@ import AutomationSettingsDialog from '@/components/automation/AutomationSettings
 import SmartRequestDialog from '@/components/dashboard/SmartRequestDialog';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import { useLanguage } from '@/contexts/LanguageContext';
+import DashboardPrintReports from '@/components/dashboard/shared/DashboardPrintReports';
 import { motion } from 'framer-motion';
 
 interface TransporterHeaderProps {
@@ -86,6 +87,7 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
 
           {/* Action Buttons */}
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:flex-wrap w-full">
+            <DashboardPrintReports />
             <AutomationSettingsDialog />
             <SmartRequestDialog buttonText={t('transporter.requestReports')} buttonVariant="outline" />
             <Button
