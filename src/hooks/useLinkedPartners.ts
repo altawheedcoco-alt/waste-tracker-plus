@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface LinkedPartner {
   id: string;
   name: string;
-  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal';
+  organization_type: string;
   email: string;
   phone: string;
   city?: string;
