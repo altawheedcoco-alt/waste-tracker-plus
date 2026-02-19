@@ -9062,6 +9062,73 @@ export type Database = {
           },
         ]
       }
+      entity_comments: {
+        Row: {
+          content: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          hidden_reason: string | null
+          id: string
+          is_edited: boolean | null
+          is_hidden: boolean | null
+          organization_id: string
+          parent_comment_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          hidden_reason?: string | null
+          id?: string
+          is_edited?: boolean | null
+          is_hidden?: boolean | null
+          organization_id: string
+          parent_comment_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          hidden_reason?: string | null
+          id?: string
+          is_edited?: boolean | null
+          is_hidden?: boolean | null
+          organization_id?: string
+          parent_comment_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "entity_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "entity_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entity_documents: {
         Row: {
           award_letter_id: string | null
@@ -9290,6 +9357,117 @@ export type Database = {
           {
             foreignKeyName: "entity_print_preferences_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_reactions: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          organization_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          organization_id: string
+          reaction_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          organization_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_reactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "entity_reactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_reports: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          description: string | null
+          entity_id: string
+          entity_type: string
+          evidence_urls: string[] | null
+          id: string
+          report_category: string
+          reporter_organization_id: string
+          reporter_user_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          entity_id: string
+          entity_type: string
+          evidence_urls?: string[] | null
+          id?: string
+          report_category: string
+          reporter_organization_id: string
+          reporter_user_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          description?: string | null
+          entity_id?: string
+          entity_type?: string
+          evidence_urls?: string[] | null
+          id?: string
+          report_category?: string
+          reporter_organization_id?: string
+          reporter_user_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_reports_reporter_organization_id_fkey"
+            columns: ["reporter_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "entity_reports_reporter_organization_id_fkey"
+            columns: ["reporter_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -14405,6 +14583,62 @@ export type Database = {
           },
         ]
       }
+      organization_blocks: {
+        Row: {
+          blocked_by: string
+          blocked_organization_id: string
+          blocker_organization_id: string
+          created_at: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_by: string
+          blocked_organization_id: string
+          blocker_organization_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_by?: string
+          blocked_organization_id?: string
+          blocker_organization_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_blocks_blocked_organization_id_fkey"
+            columns: ["blocked_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_blocks_blocked_organization_id_fkey"
+            columns: ["blocked_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_blocks_blocker_organization_id_fkey"
+            columns: ["blocker_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_blocks_blocker_organization_id_fkey"
+            columns: ["blocker_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_departments: {
         Row: {
           color: string | null
@@ -14700,6 +14934,66 @@ export type Database = {
             foreignKeyName: "organization_documents_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_interaction_settings: {
+        Row: {
+          allow_comments: boolean | null
+          allow_reactions: boolean | null
+          allow_reviews: boolean | null
+          auto_hide_flagged_comments: boolean | null
+          comments_visibility: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          profile_visibility: string | null
+          require_comment_approval: boolean | null
+          show_reaction_count: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          allow_comments?: boolean | null
+          allow_reactions?: boolean | null
+          allow_reviews?: boolean | null
+          auto_hide_flagged_comments?: boolean | null
+          comments_visibility?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          profile_visibility?: string | null
+          require_comment_approval?: boolean | null
+          show_reaction_count?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          allow_comments?: boolean | null
+          allow_reactions?: boolean | null
+          allow_reviews?: boolean | null
+          auto_hide_flagged_comments?: boolean | null
+          comments_visibility?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          profile_visibility?: string | null
+          require_comment_approval?: boolean | null
+          show_reaction_count?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_interaction_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_interaction_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
@@ -15204,6 +15498,76 @@ export type Database = {
           },
         ]
       }
+      organization_sanctions: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          is_active: boolean | null
+          issued_by: string | null
+          notes: string | null
+          organization_id: string
+          reason: string
+          report_id: string | null
+          restrictions: Json | null
+          sanction_level: string
+          starts_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          issued_by?: string | null
+          notes?: string | null
+          organization_id: string
+          reason: string
+          report_id?: string | null
+          restrictions?: Json | null
+          sanction_level?: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          issued_by?: string | null
+          notes?: string | null
+          organization_id?: string
+          reason?: string
+          report_id?: string | null
+          restrictions?: Json | null
+          sanction_level?: string
+          starts_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_sanctions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_sanctions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_sanctions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "entity_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_shipment_links: {
         Row: {
           allow_date_edit: boolean | null
@@ -15558,6 +15922,57 @@ export type Database = {
           },
           {
             foreignKeyName: "organization_stamps_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_verifications: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          updated_at: string
+          verification_data: Json | null
+          verification_type: string
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          updated_at?: string
+          verification_data?: Json | null
+          verification_type: string
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          updated_at?: string
+          verification_data?: Json | null
+          verification_type?: string
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_verifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_verifications_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
