@@ -1,5 +1,6 @@
 import { Shield, CheckCircle2, Lock, Leaf, Truck, Recycle, Building2, Flame, FileCheck, Gavel, BadgeCheck, AlertTriangle, Users, Scale } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import PlatformLogo from '@/components/common/PlatformLogo';
 
 const POLICY_VERSION = '2.0.0';
 
@@ -190,8 +191,7 @@ const TermsBackPage = () => {
             <div className="border border-dashed border-primary/40 rounded-full flex items-center justify-center bg-primary/5"
               style={{ width: '75px', height: '75px' }}>
               <div className="text-center">
-                <BadgeCheck className="w-6 h-6 text-primary mx-auto" />
-                <span className="text-primary font-bold block" style={{ fontSize: '6pt' }}>iRecycle</span>
+                <PlatformLogo size="xs" className="justify-center mb-1" />
                 <span className="text-primary block" style={{ fontSize: '5pt' }}>مختوم رقمياً</span>
               </div>
             </div>

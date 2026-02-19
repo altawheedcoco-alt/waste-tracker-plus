@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { cn } from '@/lib/utils';
+import PlatformLogo from '@/components/common/PlatformLogo';
 
 interface OfflineIndicatorProps {
   className?: string;
@@ -20,13 +21,8 @@ const OfflineIndicator = memo(({ className }: OfflineIndicatorProps) => {
   return (
     <div className={cn('flex items-center gap-3', className)}>
       {/* اسم النظام باللغتين */}
-      <div className="hidden sm:flex flex-col items-end border-l border-border/50 pl-3">
-        <span className="text-xs sm:text-sm font-bold text-primary leading-tight">
-          iRecycle Waste Management System
-        </span>
-        <span className="text-[10px] sm:text-xs font-semibold text-foreground/70 leading-tight">
-          نظام آي ريسايكل لإدارة المخلفات
-        </span>
+      <div className="hidden sm:flex border-l border-border/50 pl-3">
+        <PlatformLogo size="sm" showText />
       </div>
       
       {/* مؤشر حالة الاتصال */}

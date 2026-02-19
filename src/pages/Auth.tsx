@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award, Briefcase } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import logo from '@/assets/logo.png';
+import PlatformLogo from '@/components/common/PlatformLogo';
 import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import CompanyRegistrationForm, { CompanyFormData } from '@/components/auth/CompanyRegistrationForm';
@@ -558,11 +558,7 @@ const Auth = () => {
             whileHover={{ scale: 1.05 }}
             className="inline-flex items-center gap-3 mb-4"
           >
-            <img src={logo} alt="آي ريسايكل" className="h-16 w-16 object-contain" />
-            <div className="text-right">
-              <h1 className="text-2xl font-bold text-gradient-eco">{t('footer.brandName')}</h1>
-              <p className="text-sm text-muted-foreground">{t('landing.tagline')}</p>
-            </div>
+            <PlatformLogo size="xl" showText />
           </motion.div>
         </div>
 

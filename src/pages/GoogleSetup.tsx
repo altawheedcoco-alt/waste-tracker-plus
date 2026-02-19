@@ -14,7 +14,7 @@ import {
   Shield, CheckCircle, AlertCircle, Globe, Phone, Mail, MapPin,
   User, Briefcase, Loader2
 } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import PlatformLogo from '@/components/common/PlatformLogo';
 import { supabase } from '@/integrations/supabase/client';
 
 type OrganizationType = 'generator' | 'transporter' | 'recycler' | 'disposal';
@@ -198,11 +198,7 @@ const GoogleSetup = () => {
         {/* Logo */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-3 mb-3">
-            <img src={logo} alt="آي ريسايكل" className="h-14 w-14 object-contain" />
-            <div className="text-right">
-              <h1 className="text-xl font-bold text-gradient-eco">آي ريسايكل</h1>
-              <p className="text-xs text-muted-foreground">إكمال التسجيل عبر Google</p>
-            </div>
+            <PlatformLogo size="lg" showText />
           </div>
         </div>
 
