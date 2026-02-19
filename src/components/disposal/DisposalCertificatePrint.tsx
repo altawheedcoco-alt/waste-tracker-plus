@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
+import TermsBackPage from '@/components/print/TermsBackPage';
 
 interface DisposalCertificateData {
   certificate_number: string;
@@ -227,6 +228,7 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
           )}
         </div>
       </div>
+      <TermsBackPage />
     </div>
   );
 };
