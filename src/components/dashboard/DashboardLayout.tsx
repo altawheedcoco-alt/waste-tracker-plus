@@ -882,36 +882,41 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           )}
         </AnimatePresence>
 
-        {/* Main content - Responsive margin */}
+        {/* Main content - Responsive width */}
         <div 
-          className="flex-1 flex flex-col transition-[margin] duration-300"
+          className="flex-1 flex flex-col transition-all duration-300 min-w-0"
           style={{ 
-            marginRight: !isMobile ? (isSidebarOpen ? sidebarWidth : 0) : 0 
+            width: !isMobile && isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
+            maxWidth: !isMobile && isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
           }}
         >
           {/* Top header - Responsive height */}
-          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/85 backdrop-blur-xl border-b border-border/40 flex items-center justify-between px-3 sm:px-4 lg:px-6 shadow-sm`} style={{ WebkitBackdropFilter: 'blur(20px) saturate(1.5)' }}>
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`${isMobile ? 'block' : 'hidden'} p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation`}
-              aria-label="فتح القائمة"
-            >
-              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
-
-            {/* Mobile logo - Only show on mobile */}
-            <div className={`${isMobile ? 'flex' : 'hidden'} items-center gap-2`}>
-              <img src={logo} alt="آي ريسايكل" className="h-7 w-7 object-contain" />
-              <span className="font-bold text-gradient-eco text-sm">{t('footer.brandName')}</span>
+          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/85 backdrop-blur-xl border-b border-border/40 flex items-center justify-between gap-2 px-3 sm:px-4 lg:px-6 shadow-sm`} style={{ WebkitBackdropFilter: 'blur(20px) saturate(1.5)' }}>
+            <div className="flex items-center gap-2 shrink-0">
+              {isMobile && (
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation"
+                  aria-label="فتح القائمة"
+                >
+                  {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+                </button>
+              )}
+              {isMobile && (
+                <div className="flex items-center gap-2">
+                  <img src={logo} alt="آي ريسايكل" className="h-7 w-7 object-contain" />
+                  <span className="font-bold text-gradient-eco text-sm">{t('footer.brandName')}</span>
+                </div>
+              )}
             </div>
 
             {/* Command Palette - Show on all devices */}
-            <div className={`flex-1 ${isMobile ? 'max-w-[40px]' : 'max-w-md mx-4'}`}>
+            <div className={`${isMobile ? 'max-w-[40px]' : 'flex-1 max-w-md min-w-0'}`}>
               <CommandPalette />
             </div>
 
             {/* Right side - Responsive spacing */}
-            <div className={`flex items-center ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
+            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
               {/* Global Refresh Button */}
               <GlobalRefreshButton />
 
