@@ -45,7 +45,32 @@ Deno.serve(async (req) => {
     const endorsements = endorsementsRes.data || [];
     const custody = custodyRes.data || [];
 
-    const html = generateCompleteDocHTML(shipment, logs, receipts, endorsements, custody);
+    // Collect all image URLs to convert to base64
+    const imageUrls: string[] = [];
+    if (shipment.weighbridge_photo_url) imageUrls.push(shipment.weighbridge_photo_url);
+    if (shipment.payment_proof_url) imageUrls.push(shipment.payment_proof_url);
+    for (const r of receipts) {
+      if (r.pickup_photos && Array.isArray(r.pickup_photos)) {
+        for (const p of r.pickup_photos) {
+          if (p) imageUrls.push(p);
+        }
+      }
+    }
+
+    // Download images and convert to data URLs
+    const imageMap = new Map<string, string>();
+    await Promise.all(
+      imageUrls.map(async (url) => {
+        try {
+          const dataUrl = await fetchImageAsDataUrl(url);
+          if (dataUrl) imageMap.set(url, dataUrl);
+        } catch (e) {
+          console.warn(`Failed to fetch image: ${url}`, e);
+        }
+      })
+    );
+
+    const html = generateCompleteDocHTML(shipment, logs, receipts, endorsements, custody, imageMap);
 
     return new Response(
       JSON.stringify({ success: true, html, shipmentNumber: shipment.shipment_number }),
@@ -60,9 +85,34 @@ Deno.serve(async (req) => {
   }
 });
 
-function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], endorsements: any[], custody: any[]) {
+/** Download an image URL and return as a base64 data URL */
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    const arrayBuffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(arrayBuffer);
+    // Convert to base64
+    let binary = "";
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    const base64 = btoa(binary);
+    return `data:${contentType};base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
+function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], endorsements: any[], custody: any[], imageMap: Map<string, string>) {
   const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString("ar-EG") : "—";
   const formatDateTime = (d: string | null) => d ? new Date(d).toLocaleString("ar-EG") : "—";
+
+  const getImg = (url: string | null) => {
+    if (!url) return null;
+    return imageMap.get(url) || url;
+  };
 
   const wasteLabels: Record<string, string> = {
     plastic: "بلاستيك", paper: "ورق وكرتون", metal: "معادن", glass: "زجاج",
@@ -144,6 +194,47 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
       <td style="font-size:7px;font-family:monospace">${c.qr_code_hash?.slice(0, 20) || "—"}...</td>
     </tr>`).join("");
 
+  // Build photos section
+  const weighbridgeImg = getImg(shipment.weighbridge_photo_url);
+  const paymentProofImg = getImg(shipment.payment_proof_url);
+  
+  // Collect all pickup photos from receipts
+  const allPickupPhotos: string[] = [];
+  for (const r of receipts) {
+    if (r.pickup_photos && Array.isArray(r.pickup_photos)) {
+      for (const p of r.pickup_photos) {
+        const resolved = getImg(p);
+        if (resolved) allPickupPhotos.push(resolved);
+      }
+    }
+  }
+
+  const hasPhotos = weighbridgeImg || paymentProofImg || allPickupPhotos.length > 0;
+
+  const photosSection = hasPhotos ? `
+  <div class="section">
+    <div class="sec-title">القسم السابع: التوثيق المرئي — صور الميزان والحمولة</div>
+    <div class="photos-grid">
+      ${weighbridgeImg ? `
+      <div class="photo-card">
+        <div class="photo-label">📷 تذكرة ميزان البسكول</div>
+        <img src="${weighbridgeImg}" class="doc-photo" />
+        <div class="photo-meta">رقم التذكرة: ${shipment.weighbridge_ticket_number || "—"}</div>
+      </div>` : ""}
+      ${paymentProofImg ? `
+      <div class="photo-card">
+        <div class="photo-label">💳 إثبات الدفع</div>
+        <img src="${paymentProofImg}" class="doc-photo" />
+        <div class="photo-meta">نوع الإثبات: ${shipment.payment_proof_type || "إيصال"}</div>
+      </div>` : ""}
+      ${allPickupPhotos.map((p, i) => `
+      <div class="photo-card">
+        <div class="photo-label">📦 صورة الحمولة ${allPickupPhotos.length > 1 ? `(${i + 1})` : ""}</div>
+        <img src="${p}" class="doc-photo" />
+      </div>`).join("")}
+    </div>
+  </div>` : "";
+
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -179,6 +270,11 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
   .stamp-box .date { font-size: 8px; color: #999; }
   .footer { border-top: 2px solid #0f766e; padding-top: 8px; margin-top: 15px; text-align: center; font-size: 8px; color: #6b7280; }
   .watermark { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 60px; color: rgba(15, 118, 110, 0.04); font-weight: bold; pointer-events: none; z-index: 0; }
+  .photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .photo-card { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px; text-align: center; }
+  .photo-label { font-weight: bold; font-size: 10px; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
+  .doc-photo { max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 4px; border: 1px solid #e5e7eb; }
+  .photo-meta { font-size: 8px; color: #6b7280; margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -228,8 +324,11 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
       </tr>
     </table>
     <table>
-      <tr><th>نقطة الاستلام</th><th>نقطة التسليم</th><th>المسافة</th></tr>
+      <tr><th>الوزن الإجمالي</th><th>وزن الفارغة</th><th>صافي الوزن</th><th>نقطة الاستلام</th><th>نقطة التسليم</th><th>المسافة</th></tr>
       <tr>
+        <td>${shipment.weighbridge_gross_weight || "—"}</td>
+        <td>${shipment.weighbridge_tare_weight || "—"}</td>
+        <td>${shipment.weighbridge_net_weight || "—"}</td>
         <td>${shipment.pickup_address || "—"}</td>
         <td>${shipment.delivery_address || "—"}</td>
         <td>${shipment.estimated_distance_km ? `${shipment.estimated_distance_km} كم` : "—"}</td>
@@ -306,7 +405,21 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
       <p class="date">التاريخ: ${formatDate(shipment.delivered_at || shipment.confirmed_at)}</p>
     </div>
   </div>
+</div>
 
+${hasPhotos ? `
+<!-- الصفحة 3: التوثيق المرئي -->
+<div class="page">
+  <div class="header" style="padding-bottom:5px;margin-bottom:8px">
+    <h1 style="font-size:16px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
+    <p class="sub">صفحة التوثيق المرئي — صور الميزان والحمولة وإثبات الدفع</p>
+  </div>
+  ${photosSection}
+</div>
+` : ""}
+
+<!-- الصفحة الأخيرة: التذييل -->
+<div class="page" style="page-break-after:auto">
   <div class="footer">
     <p><strong>مستند الشحنة الكامل</strong> — صادر إلكترونياً من نظام iRecycle لإدارة المخلفات</p>
     <p>رقم الشحنة: ${shipment.shipment_number} | الحالة: ${statusLabels[shipment.status] || shipment.status} | تاريخ الطباعة: ${new Date().toLocaleString("ar-EG")}</p>
