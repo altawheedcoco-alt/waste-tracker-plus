@@ -1,6 +1,4 @@
-import { motion } from 'framer-motion';
 import { Users, ShieldCheck, Megaphone, Award, ArrowLeft, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const features = [
@@ -44,13 +42,7 @@ const WhatsNewSection = () => {
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-background via-muted/30 to-background overflow-hidden">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12 animate-fade-up">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-700 px-5 py-2 rounded-full text-sm font-bold mb-4 border border-amber-300/30">
             <Sparkles className="h-4 w-4 animate-pulse" />
             ما الجديد في المنصة؟
@@ -61,29 +53,20 @@ const WhatsNewSection = () => {
           <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base">
             نطوّر باستمرار لنقدم لك أدوات أذكى وخدمات أشمل — اكتشف آخر الإضافات
           </p>
-        </motion.div>
+        </div>
 
-        {/* Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {features.map((f, i) => (
-            <motion.div
+            <div
               key={f.title}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              whileHover={{ y: -4, scale: 1.01 }}
-              className="relative group bg-card border border-border rounded-2xl p-6 hover:shadow-xl hover:border-primary/30 transition-all duration-300 cursor-pointer overflow-hidden"
+              className="relative group bg-card border border-border rounded-2xl p-6 hover:shadow-xl hover:border-primary/30 hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden animate-fade-up"
+              style={{ animationDelay: `${i * 0.1}s` }}
               onClick={() => navigate(f.link)}
             >
-              {/* Glow effect */}
               <div className={`absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-10 rounded-full blur-3xl transition-opacity duration-500`} />
-
-              {/* Badge */}
               <span className={`absolute top-4 left-4 text-[10px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-r ${f.color} text-white shadow-md`}>
                 {f.badge}
               </span>
-
               <div className="relative z-10">
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center shadow-lg mb-4`}>
                   <f.icon className="w-6 h-6 text-white" />
@@ -95,7 +78,7 @@ const WhatsNewSection = () => {
                   <ArrowLeft className="w-4 h-4" />
                 </span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

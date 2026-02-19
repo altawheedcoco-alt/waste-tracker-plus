@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
-import { Building2, Award, ShieldCheck, Star, ArrowLeft, BadgeCheck } from 'lucide-react';
+import { Building2, Award, ShieldCheck, ArrowLeft, BadgeCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -30,7 +29,6 @@ const FeaturedConsultants = () => {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        // Fetch organizations that are consultants/offices/iso bodies with active subscriptions
         const { data, error } = await supabase
           .from('organizations')
           .select('id, name, organization_type, logo_url, bio, city, region')
@@ -55,13 +53,7 @@ const FeaturedConsultants = () => {
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-background to-muted/30">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12 animate-fade-up">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
             <BadgeCheck className="h-4 w-4" />
             شركاء معتمدون
@@ -72,25 +64,21 @@ const FeaturedConsultants = () => {
           <p className="text-muted-foreground max-w-xl mx-auto">
             استشاريون بيئيون ومكاتب استشارية وجهات مانحة لشهادات الأيزو مسجلة ومُتحقق من بياناتها
           </p>
-        </motion.div>
+        </div>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {orgs.map((org, i) => {
             const config = typeConfig[org.organization_type] || typeConfig.consultant;
             const Icon = config.icon;
             return (
-              <motion.div
+              <div
                 key={org.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group bg-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300"
+                className="group bg-card border border-border rounded-xl p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-fade-up"
+                style={{ animationDelay: `${i * 0.1}s` }}
               >
                 <div className="flex items-start gap-3 mb-3">
                   {org.logo_url ? (
-                    <img src={org.logo_url} alt={org.name} className="w-12 h-12 rounded-lg object-cover border" />
+                    <img src={org.logo_url} alt={org.name} className="w-12 h-12 rounded-lg object-cover border" loading="lazy" />
                   ) : (
                     <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                       <Icon className="h-6 w-6 text-primary" />
@@ -123,18 +111,12 @@ const FeaturedConsultants = () => {
                     مُتحقق
                   </div>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-center mt-10"
-        >
+        <div className="text-center mt-10 animate-fade-up" style={{ animationDelay: '0.3s' }}>
           <Button
             variant="outline"
             className="gap-2"
@@ -143,7 +125,7 @@ const FeaturedConsultants = () => {
             سجل كاستشاري أو مكتب استشاري
             <ArrowLeft className="h-4 w-4" />
           </Button>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

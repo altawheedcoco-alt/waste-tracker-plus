@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
@@ -32,13 +31,7 @@ const TestimonialsSection = () => {
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-muted/30 via-background to-muted/20 overflow-hidden">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
+        <div className="text-center mb-12 animate-fade-up">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-bold mb-4 border border-primary/20">
             <Star className="h-4 w-4 fill-current" />
             ماذا يقول عملاؤنا؟
@@ -49,35 +42,24 @@ const TestimonialsSection = () => {
           <p className="text-muted-foreground max-w-xl mx-auto text-sm md:text-base">
             آراء حقيقية من شركات ومؤسسات تستخدم المنصة يومياً
           </p>
-        </motion.div>
+        </div>
 
-        {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((t, i) => (
-            <motion.div
+            <div
               key={t.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15, duration: 0.5 }}
-              className="relative bg-card border border-border rounded-2xl p-6 hover:shadow-xl hover:border-primary/20 transition-all duration-300 group"
+              className="relative bg-card border border-border rounded-2xl p-6 hover:shadow-xl hover:border-primary/20 transition-all duration-300 group animate-fade-up"
+              style={{ animationDelay: `${i * 0.15}s` }}
             >
-              {/* Quote icon */}
               <Quote className="absolute top-4 left-4 w-8 h-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
-
-              {/* Stars */}
               <div className="flex gap-1 mb-4">
                 {Array.from({ length: t.rating }).map((_, s) => (
                   <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-
-              {/* Text */}
               <p className="text-sm text-foreground/80 leading-relaxed mb-6 min-h-[60px]">
                 "{t.text}"
               </p>
-
-              {/* Author */}
               <div className="flex items-center gap-3 pt-4 border-t border-border">
                 <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
                   {t.avatar}
@@ -87,7 +69,7 @@ const TestimonialsSection = () => {
                   <p className="text-xs text-muted-foreground">{t.role}</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
