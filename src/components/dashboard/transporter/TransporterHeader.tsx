@@ -86,7 +86,7 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:flex-wrap w-full">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:flex-wrap w-full overflow-hidden">
             <DashboardPrintReports />
             <AutomationSettingsDialog />
             <SmartRequestDialog buttonText={t('transporter.requestReports')} buttonVariant="outline" />
