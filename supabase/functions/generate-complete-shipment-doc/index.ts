@@ -45,32 +45,8 @@ Deno.serve(async (req) => {
     const endorsements = endorsementsRes.data || [];
     const custody = custodyRes.data || [];
 
-    // Collect all image URLs to convert to base64
-    const imageUrls: string[] = [];
-    if (shipment.weighbridge_photo_url) imageUrls.push(shipment.weighbridge_photo_url);
-    if (shipment.payment_proof_url) imageUrls.push(shipment.payment_proof_url);
-    for (const r of receipts) {
-      if (r.pickup_photos && Array.isArray(r.pickup_photos)) {
-        for (const p of r.pickup_photos) {
-          if (p) imageUrls.push(p);
-        }
-      }
-    }
-
-    // Download images and convert to data URLs
-    const imageMap = new Map<string, string>();
-    await Promise.all(
-      imageUrls.map(async (url) => {
-        try {
-          const dataUrl = await fetchImageAsDataUrl(url);
-          if (dataUrl) imageMap.set(url, dataUrl);
-        } catch (e) {
-          console.warn(`Failed to fetch image: ${url}`, e);
-        }
-      })
-    );
-
-    const html = generateCompleteDocHTML(shipment, logs, receipts, endorsements, custody, imageMap);
+    // Use direct URLs for images instead of base64 to avoid freezing the browser
+    const html = generateCompleteDocHTML(shipment, logs, receipts, endorsements, custody);
 
     return new Response(
       JSON.stringify({ success: true, html, shipmentNumber: shipment.shipment_number }),
@@ -85,34 +61,11 @@ Deno.serve(async (req) => {
   }
 });
 
-/** Download an image URL and return as a base64 data URL */
-async function fetchImageAsDataUrl(url: string): Promise<string | null> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const contentType = response.headers.get("content-type") || "image/jpeg";
-    const arrayBuffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    // Convert to base64
-    let binary = "";
-    for (let i = 0; i < bytes.length; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    const base64 = btoa(binary);
-    return `data:${contentType};base64,${base64}`;
-  } catch {
-    return null;
-  }
-}
-
-function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], endorsements: any[], custody: any[], imageMap: Map<string, string>) {
+function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], endorsements: any[], custody: any[]) {
   const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString("ar-EG") : "—";
   const formatDateTime = (d: string | null) => d ? new Date(d).toLocaleString("ar-EG") : "—";
 
-  const getImg = (url: string | null) => {
-    if (!url) return null;
-    return imageMap.get(url) || url;
-  };
+  const getImg = (url: string | null) => url || null;
 
   const wasteLabels: Record<string, string> = {
     plastic: "بلاستيك", paper: "ورق وكرتون", metal: "معادن", glass: "زجاج",
@@ -273,7 +226,7 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
   .photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .photo-card { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px; text-align: center; }
   .photo-label { font-weight: bold; font-size: 10px; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
-  .doc-photo { max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 4px; border: 1px solid #e5e7eb; }
+  .doc-photo { max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px; border: 1px solid #e5e7eb; }
   .photo-meta { font-size: 8px; color: #6b7280; margin-top: 3px; }
 </style>
 </head>

@@ -56,7 +56,7 @@ const CompleteShipmentDocButton = ({
       iframeDoc.write(data.html);
       iframeDoc.close();
 
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Capture all pages
       const pages = iframeDoc.querySelectorAll('.page');
@@ -67,7 +67,7 @@ const CompleteShipmentDocButton = ({
       if (pages.length > 0) {
         for (let i = 0; i < pages.length; i++) {
           const canvas = await html2canvas(pages[i] as HTMLElement, {
-            scale: 2, useCORS: true, logging: false, width: 794, windowWidth: 794,
+            scale: 1.5, useCORS: true, allowTaint: true, logging: false, width: 794, windowWidth: 794,
           });
           const imgData = canvas.toDataURL('image/png');
           const imgHeight = (canvas.height * pageWidth) / canvas.width;
@@ -78,7 +78,7 @@ const CompleteShipmentDocButton = ({
       } else {
         // Fallback: single capture
         const canvas = await html2canvas(iframeDoc.body, {
-          scale: 2, useCORS: true, logging: false, width: 794, windowWidth: 794,
+          scale: 1.5, useCORS: true, allowTaint: true, logging: false, width: 794, windowWidth: 794,
         });
         const imgData = canvas.toDataURL('image/png');
         const imgWidth = pageWidth;
