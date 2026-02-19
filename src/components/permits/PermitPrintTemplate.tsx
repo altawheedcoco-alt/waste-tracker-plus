@@ -4,6 +4,7 @@ import { ar } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface PermitPrintData {
   permitNumber: string;
@@ -42,9 +43,20 @@ const PermitPrintTemplate = ({ permit, onClose }: Props) => {
       {/* Preview */}
       <div ref={printRef} className="bg-white border rounded-lg p-8 space-y-6 text-sm" dir="rtl">
         {/* Header */}
-        <div className="text-center border-b-2 border-double pb-4">
-          <h2 className="text-xl font-bold">تصريح دخول وتحميل بضائع (مرتجع)</h2>
-          <p className="text-xs text-muted-foreground">صادر من نظام إدارة النقل والمخلفات الإلكتروني</p>
+        <div className="flex items-start justify-between border-b-2 border-double pb-4">
+          <div className="flex flex-col items-center">
+            <QRCodeSVG 
+              value={`${window.location.origin}/qr-verify?type=permit&code=${encodeURIComponent(permit.permitNumber)}`} 
+              size={70} 
+              level="M" 
+            />
+            <span className="text-[8px] text-muted-foreground mt-1">امسح للتحقق</span>
+          </div>
+          <div className="text-center flex-1">
+            <h2 className="text-xl font-bold">تصريح دخول وتحميل بضائع (مرتجع)</h2>
+            <p className="text-xs text-muted-foreground">صادر من نظام إدارة النقل والمخلفات الإلكتروني</p>
+          </div>
+          <div className="w-[70px]" /> {/* Spacer for alignment */}
         </div>
 
         {/* Org Info */}
@@ -106,23 +118,43 @@ const PermitPrintTemplate = ({ permit, onClose }: Props) => {
           </div>
         )}
 
-        {/* Signatures */}
+        {/* Signatures with QR */}
         <div className="grid grid-cols-3 gap-8 mt-10 pt-6">
           <div className="text-center">
             <p className="font-bold mb-2">مدير اللوجيستيات</p>
             <div className="border-b h-12 mb-1" />
             <p className="text-xs text-muted-foreground">التوقيع</p>
+            {permit.logisticsManager && (
+              <div className="mt-2 flex justify-center">
+                <QRCodeSVG 
+                  value={`${window.location.origin}/qr-verify?type=permit-signer&role=logistics&permit=${encodeURIComponent(permit.permitNumber)}`} 
+                  size={32} level="L" 
+                />
+              </div>
+            )}
           </div>
           <div className="text-center">
             <p className="font-bold mb-2">ختم المنشأة</p>
             <div className="w-24 h-24 border-2 border-dashed rounded-full mx-auto flex items-center justify-center text-xs text-muted-foreground">
               ختم
             </div>
+            <div className="mt-2 flex justify-center">
+              <QRCodeSVG 
+                value={`${window.location.origin}/qr-verify?type=permit-org&org=${encodeURIComponent(permit.orgName)}&permit=${encodeURIComponent(permit.permitNumber)}`} 
+                size={32} level="L" 
+              />
+            </div>
           </div>
           <div className="text-center">
             <p className="font-bold mb-2">اعتماد الإدارة</p>
             <div className="border-b h-12 mb-1" />
             <p className="text-xs text-muted-foreground">التوقيع</p>
+            <div className="mt-2 flex justify-center">
+              <QRCodeSVG 
+                value={`${window.location.origin}/qr-verify?type=permit-approval&permit=${encodeURIComponent(permit.permitNumber)}`} 
+                size={32} level="L" 
+              />
+            </div>
           </div>
         </div>
       </div>

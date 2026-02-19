@@ -728,23 +728,32 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         </div>
         ` : ''}
         
-        <!-- Signatures -->
+        <!-- Signatures with QR -->
         <div class="signatures">
           <div class="signature-box">
             <div class="signature-line"></div>
             <div class="signature-label">توقيع المستلم (السائق)</div>
             <div class="signature-name">${receipt.driver?.profile?.full_name || ''}</div>
+            <div style="margin-top: 8px; display: flex; justify-content: center;">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=receipt-driver&receipt=${receipt.receipt_number}`)}" alt="QR" style="width: 32px; height: 32px;" />
+            </div>
           </div>
           <div class="signature-box">
             <div class="signature-line"></div>
             <div class="signature-label">توقيع المسلّم (الجهة المولدة)</div>
             <div class="signature-name"></div>
+            <div style="margin-top: 8px; display: flex; justify-content: center;">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=receipt-generator&receipt=${receipt.receipt_number}`)}" alt="QR" style="width: 32px; height: 32px;" />
+            </div>
           </div>
         </div>
         
         <!-- Stamp Area -->
         <div class="stamp-area">
           <p>🔏 الختم الرسمي</p>
+          <div style="margin-top: 8px; display: flex; justify-content: center;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=receipt-stamp&receipt=${receipt.receipt_number}`)}" alt="QR" style="width: 45px; height: 45px;" />
+          </div>
         </div>
         
         <!-- Platform Rights -->

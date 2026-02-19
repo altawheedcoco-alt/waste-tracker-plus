@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Printer, Download, Loader2, FileDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { QRCodeCanvas } from 'qrcode.react';
+import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { supabase } from '@/integrations/supabase/client';
 import { usePDFExport } from '@/hooks/usePDFExport';
@@ -556,7 +556,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                       <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '6px', paddingTop: '3px', fontSize: '6pt', color: '#6b7280' }}>التوقيع والختم</div>
                       {/* Signer QR */}
                       <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
-                        <QRCodeCanvas 
+                        <QRCodeSVG 
                           value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
                           size={28} 
                           level="L" 

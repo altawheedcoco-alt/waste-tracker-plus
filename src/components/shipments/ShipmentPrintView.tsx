@@ -8,7 +8,7 @@ import { saveDocumentSignature, getDocumentSignatures } from '@/components/signa
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { QRCodeCanvas } from 'qrcode.react';
+import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
@@ -522,7 +522,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                       <div style={{ borderTop: `1px dashed ${theme.colors.accent}`, marginTop: '6px', paddingTop: '3px', fontSize: '6pt', color: theme.colors.footerText }}>التوقيع والختم</div>
                       {/* Signer QR */}
                       <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
-                        <QRCodeCanvas 
+                        <QRCodeSVG 
                           value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
                           size={28} 
                           level="L" 
