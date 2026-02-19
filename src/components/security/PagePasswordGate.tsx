@@ -16,6 +16,32 @@ interface PagePasswordGateProps {
 }
 
 const SESSION_KEY = 'page_unlocked_';
+const SESSION_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
+
+function setUnlockSession(pageId: string) {
+  const payload = {
+    expiresAt: Date.now() + SESSION_EXPIRY_MS,
+    hash: btoa(`${pageId}:${Date.now()}`),
+  };
+  sessionStorage.setItem(SESSION_KEY + pageId, JSON.stringify(payload));
+}
+
+function isUnlockSessionValid(pageId: string): boolean {
+  const raw = sessionStorage.getItem(SESSION_KEY + pageId);
+  if (!raw) return false;
+  try {
+    const payload = JSON.parse(raw);
+    if (!payload.expiresAt || !payload.hash) return false;
+    if (Date.now() > payload.expiresAt) {
+      sessionStorage.removeItem(SESSION_KEY + pageId);
+      return false;
+    }
+    return true;
+  } catch {
+    sessionStorage.removeItem(SESSION_KEY + pageId);
+    return false;
+  }
+}
 
 const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
   const location = useLocation();
@@ -57,9 +83,7 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
 
       if (match) {
         setPagePassword(match);
-        const unlockKey = SESSION_KEY + match.id;
-        const unlocked = sessionStorage.getItem(unlockKey);
-        if (unlocked === 'true') {
+        if (isUnlockSessionValid(match.id)) {
           setIsUnlocked(true);
         }
 
@@ -95,7 +119,7 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
 
       if (data?.valid) {
         setIsUnlocked(true);
-        sessionStorage.setItem(SESSION_KEY + pagePassword.id, 'true');
+        setUnlockSession(pagePassword.id);
       } else {
         setError('كلمة المرور غير صحيحة');
       }
@@ -149,7 +173,7 @@ const PagePasswordGate = ({ children }: PagePasswordGateProps) => {
       if (success) {
         setRecoverySuccess(true);
         setIsUnlocked(true);
-        sessionStorage.setItem(SESSION_KEY + pagePassword.id, 'true');
+        setUnlockSession(pagePassword.id);
         toast({ title: 'تم فتح الصفحة', description: 'تم التحقق بنجاح' });
       } else {
         setError('الإجابة/الرمز غير صحيح');

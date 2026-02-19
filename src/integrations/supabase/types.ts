@@ -14594,6 +14594,7 @@ export type Database = {
           is_read: boolean | null
           message: string
           metadata: Json | null
+          organization_id: string | null
           pdf_url: string | null
           priority: string | null
           request_id: string | null
@@ -14608,6 +14609,7 @@ export type Database = {
           is_read?: boolean | null
           message: string
           metadata?: Json | null
+          organization_id?: string | null
           pdf_url?: string | null
           priority?: string | null
           request_id?: string | null
@@ -14622,6 +14624,7 @@ export type Database = {
           is_read?: boolean | null
           message?: string
           metadata?: Json | null
+          organization_id?: string | null
           pdf_url?: string | null
           priority?: string | null
           request_id?: string | null
@@ -14631,6 +14634,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notifications_request_id_fkey"
             columns: ["request_id"]
@@ -27049,6 +27066,7 @@ export type Database = {
         | "in_transit"
         | "delivered"
         | "confirmed"
+        | "cancelled"
       ticket_category:
         | "bug"
         | "feature_request"
@@ -27263,6 +27281,7 @@ export const Constants = {
         "in_transit",
         "delivered",
         "confirmed",
+        "cancelled",
       ],
       ticket_category: [
         "bug",
