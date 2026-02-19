@@ -17,6 +17,8 @@ const FeaturedConsultants = lazy(() => import("@/components/landing/FeaturedCons
 const OmalunaSection = lazy(() => import("@/components/landing/OmalunaSection"));
 const WhatsNewSection = lazy(() => import("@/components/landing/WhatsNewSection"));
 const WhatsNewPopup = lazy(() => import("@/components/landing/WhatsNewPopup"));
+const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
+const VideoIntroSection = lazy(() => import("@/components/landing/VideoIntroSection"));
 
 const SectionFallback = () => (
   <div className="h-32 flex items-center justify-center">
@@ -41,6 +43,8 @@ const Index = () => {
             <Stats />
             <FeaturesList />
             <Features />
+            <VideoIntroSection />
+            <TestimonialsSection />
             <Services />
             <CTA />
           </Suspense>
