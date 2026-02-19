@@ -366,48 +366,50 @@ const OrganizationProfile = () => {
         </Card>
 
         <Tabs defaultValue="portfolio" className="space-y-4" dir="rtl">
-          <TabsList className="flex flex-wrap w-full gap-1">
-            <TabsTrigger value="portfolio">
-              <Target className="w-4 h-4 ml-2" />
-              {t('orgProfile.portfolio')}
-            </TabsTrigger>
-            <TabsTrigger value="business">
-              <Briefcase className="w-4 h-4 ml-2" />
-              الملف التجاري
-            </TabsTrigger>
-            <TabsTrigger value="posts">
-              <PenSquare className="w-4 h-4 ml-2" />
-              {t('orgProfile.posts')}
-            </TabsTrigger>
-            <TabsTrigger value="location">
-              <MapPin className="w-4 h-4 ml-2" />
-              الموقع والصور
-            </TabsTrigger>
-            <TabsTrigger value="basic">
-              <Building2 className="w-4 h-4 ml-2" />
-              {t('orgProfile.basicData')}
-            </TabsTrigger>
-            <TabsTrigger value="representatives">
-              <Users className="w-4 h-4 ml-2" />
-              {t('orgProfile.representatives')}
-            </TabsTrigger>
-            <TabsTrigger value="stamps">
-              <Stamp className="w-4 h-4 ml-2" />
-              {t('orgProfile.stampSignature')}
-            </TabsTrigger>
-            <TabsTrigger value="documents">
-              <FileText className="w-4 h-4 ml-2" />
-              {t('orgProfile.documents')}
-            </TabsTrigger>
-            <TabsTrigger value="contact">
-              <Phone className="w-4 h-4 ml-2" />
-              {t('orgProfile.contactTab')}
-            </TabsTrigger>
-            <TabsTrigger value="certificates">
-              <Award className="w-4 h-4 ml-2" />
-              الشهادات
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-1 px-1 pb-2">
+            <TabsList className="inline-flex w-max min-w-full gap-1 h-auto p-1">
+              <TabsTrigger value="portfolio" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                {t('orgProfile.portfolio')}
+              </TabsTrigger>
+              <TabsTrigger value="business" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                الملف التجاري
+              </TabsTrigger>
+              <TabsTrigger value="posts" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <PenSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                {t('orgProfile.posts')}
+              </TabsTrigger>
+              <TabsTrigger value="location" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                الموقع والصور
+              </TabsTrigger>
+              <TabsTrigger value="basic" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                {t('orgProfile.basicData')}
+              </TabsTrigger>
+              <TabsTrigger value="representatives" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                {t('orgProfile.representatives')}
+              </TabsTrigger>
+              <TabsTrigger value="stamps" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Stamp className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                {t('orgProfile.stampSignature')}
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                {t('orgProfile.documents')}
+              </TabsTrigger>
+              <TabsTrigger value="contact" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                {t('orgProfile.contactTab')}
+              </TabsTrigger>
+              <TabsTrigger value="certificates" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                الشهادات
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Portfolio Tab */}
           <TabsContent value="portfolio">
