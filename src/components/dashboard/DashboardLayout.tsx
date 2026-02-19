@@ -433,6 +433,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Database, label: language === 'ar' ? 'تحسين قاعدة البيانات' : 'DB Optimization', path: '/dashboard/db-optimization', key: 'db-optimization' },
             { icon: BarChart3, label: language === 'ar' ? 'تحليلات متقدمة' : 'Advanced Analytics', path: '/dashboard/advanced-analytics', key: 'advanced-analytics' },
             { icon: Lock, label: language === 'ar' ? 'امتثال GDPR' : 'GDPR Compliance', path: '/dashboard/gdpr-compliance', key: 'gdpr-compliance' },
+            { icon: BookOpen, label: language === 'ar' ? 'بروشور المنصة' : 'Platform Brochure', path: '/dashboard/platform-brochure', key: 'platform-brochure' },
           ]
         } as SidebarMenuItem]
       : []),

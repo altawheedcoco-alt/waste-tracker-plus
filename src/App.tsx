@@ -189,6 +189,7 @@ const OmalunaJobDetails = lazy(() => import("./pages/dashboard/OmalunaJobDetails
 const OmalunaMyJobs = lazy(() => import("./pages/dashboard/OmalunaMyJobs"));
 const OmalunaMyApplications = lazy(() => import("./pages/dashboard/OmalunaMyApplications"));
 const OmalunaJobApplications = lazy(() => import("./pages/dashboard/OmalunaJobApplications"));
+const PlatformBrochure = lazy(() => import("./pages/dashboard/PlatformBrochure"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -328,6 +329,7 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/db-optimization" element={<DatabaseQueryOptimization />} />
         <Route path="/dashboard/advanced-analytics" element={<AdvancedAnalytics />} />
         <Route path="/dashboard/gdpr-compliance" element={<GDPRCompliance />} />
+        <Route path="/dashboard/platform-brochure" element={<PlatformBrochure />} />
         <Route path="/dashboard/saved-locations" element={<SavedLocationsPage />} />
         <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
         <Route path="/dashboard/quick-shipment-links" element={<QuickShipmentLinks />} />
