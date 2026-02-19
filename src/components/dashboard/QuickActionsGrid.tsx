@@ -213,7 +213,7 @@ const QuickActionsGrid = ({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ delay: index * 0.02, duration: 0.2 }}
-                        whileHover={{ scale: 1.03, y: -3 }}
+                        whileHover={{ scale: 1.04, y: -4 }}
                         whileTap={{ scale: 0.97 }}
                         className="cursor-pointer"
                         onClick={() => {
@@ -224,35 +224,40 @@ const QuickActionsGrid = ({
                           }
                         }}
                       >
-                        <Card className="h-full border border-border/50 hover:border-primary/40 hover:shadow-xl transition-all duration-300 bg-card group relative overflow-hidden rounded-xl">
-                          {/* Gradient overlay on hover */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/[0.03] group-hover:to-primary/[0.08] transition-all duration-500 pointer-events-none" />
-                          {/* Top accent line */}
-                          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/0 to-transparent group-hover:via-primary/40 transition-all duration-500" />
+                        <div className={cn(
+                          'h-full rounded-2xl relative overflow-hidden group',
+                          'shadow-md hover:shadow-2xl transition-all duration-500',
+                          action.iconBgClass || 'bg-gradient-to-br from-primary to-primary/80'
+                        )}>
+                          {/* Decorative background pattern */}
+                          <div className="absolute inset-0 opacity-10 pointer-events-none">
+                            <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full bg-white/30" />
+                            <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/20" />
+                          </div>
+                          {/* Shine effect on hover */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-br from-white/10 via-transparent to-transparent" />
                           
-                          <CardContent className={cn(isMobile ? 'p-3' : 'p-4', 'relative')}>
-                            <div className="flex items-start justify-between gap-2">
-                              <motion.div 
-                                className={cn(
-                                  iconSize,
-                                  'rounded-xl flex items-center justify-center shrink-0',
-                                  'shadow-sm group-hover:shadow-lg group-hover:scale-110 transition-all duration-300',
-                                  action.iconBgClass || 'bg-primary/10'
-                                )}
-                              >
-                                <action.icon className={cn(iconInnerSize, action.iconBgClass ? 'text-white' : 'text-primary')} />
-                              </motion.div>
-                              <div className="flex-1 text-right min-w-0">
-                                <h3 className={cn('font-semibold text-foreground group-hover:text-primary transition-colors truncate leading-tight', titleClass)}>
-                                  {action.title}
-                                </h3>
-                                <p className={cn('text-muted-foreground mt-0.5 line-clamp-2 leading-snug', subtitleClass)}>
-                                  {action.subtitle}
-                                </p>
-                              </div>
+                          <div className={cn(isMobile ? 'p-3' : 'p-4', 'relative flex flex-col items-end gap-3')}>
+                            {/* Icon */}
+                            <div className={cn(
+                              iconSize,
+                              'rounded-xl flex items-center justify-center shrink-0',
+                              'bg-white/20 backdrop-blur-sm shadow-inner',
+                              'group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300'
+                            )}>
+                              <action.icon className={cn(iconInnerSize, 'text-white drop-shadow-sm')} />
                             </div>
-                          </CardContent>
-                        </Card>
+                            {/* Text */}
+                            <div className="w-full text-right">
+                              <h3 className={cn('font-bold text-white truncate leading-tight drop-shadow-sm', titleClass)}>
+                                {action.title}
+                              </h3>
+                              <p className={cn('text-white/75 mt-0.5 line-clamp-2 leading-snug', subtitleClass)}>
+                                {action.subtitle}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
