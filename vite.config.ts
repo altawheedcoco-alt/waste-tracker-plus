@@ -196,6 +196,10 @@ export default defineConfig(({ mode }) => ({
       },
     }),
   ].filter(Boolean),
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
+    force: false,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
