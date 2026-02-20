@@ -96,7 +96,7 @@ const DeliveryDeclarationViewDialog = ({
         <ScrollArea className="max-h-[calc(90vh-80px)]">
           <div ref={printRef} dir="rtl" className="print-document" style={{ fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif" }}>
             {/* Page 1 — Main Document */}
-            <div style={{ padding: '6mm 8mm', maxWidth: '210mm', margin: '0 auto', minHeight: '297mm', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '16px', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column' }}>
               {/* Header */}
               <div style={{ textAlign: 'center', borderBottom: '3px double #16a34a', paddingBottom: '12px', marginBottom: '12px' }}>
                 <h1 style={{ color: '#16a34a', fontSize: '16px', margin: '0 0 2px', fontWeight: 'bold' }}>
