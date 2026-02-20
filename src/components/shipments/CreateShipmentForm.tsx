@@ -1,5 +1,6 @@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { SmartInput } from '@/components/ui/smart-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -247,9 +248,10 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
                 <Truck className="h-4 w-4" />
                 رقم المركبة
               </Label>
-              <Input
+              <SmartInput
+                fieldContext="vehicle_plate"
                 value={formData.manual_vehicle_plate}
-                onChange={(e) => setFormData(prev => ({ ...prev, manual_vehicle_plate: e.target.value }))}
+                onChange={(v) => setFormData(prev => ({ ...prev, manual_vehicle_plate: v }))}
                 placeholder="رقم مركبتك"
                 className="bg-background"
               />
@@ -341,17 +343,19 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
             <>
               <div>
                 <Label>اسم السائق</Label>
-                <Input
+                <SmartInput
+                  fieldContext="driver_name"
                   value={formData.manual_driver_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, manual_driver_name: e.target.value }))}
+                  onChange={(v) => setFormData(prev => ({ ...prev, manual_driver_name: v }))}
                   placeholder="أدخل اسم السائق"
                 />
               </div>
               <div>
                 <Label>رقم المركبة</Label>
-                <Input
+                <SmartInput
+                  fieldContext="vehicle_plate"
                   value={formData.manual_vehicle_plate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, manual_vehicle_plate: e.target.value }))}
+                  onChange={(v) => setFormData(prev => ({ ...prev, manual_vehicle_plate: v }))}
                   placeholder="أدخل رقم المركبة"
                 />
               </div>

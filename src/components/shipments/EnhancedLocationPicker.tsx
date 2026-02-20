@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SmartInput } from '@/components/ui/smart-input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -500,47 +501,15 @@ const EnhancedLocationPicker = ({
                 <MapPin className="w-4 h-4 text-primary" />
                 <span>إدخال العنوان يدوياً بسرعة</span>
               </div>
-              <div className="relative">
-                <Input
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  placeholder="اكتب العنوان... ستظهر اقتراحات من المواقع المحفوظة"
-                  dir="rtl"
-                />
-                {/* Autocomplete suggestions from saved locations */}
-                {value && value.length >= 2 && (() => {
-                  const suggestions = savedLocations.filter(loc =>
-                    loc.name.toLowerCase().includes(value.toLowerCase()) ||
-                    loc.address.toLowerCase().includes(value.toLowerCase()) ||
-                    loc.city?.toLowerCase().includes(value.toLowerCase()) ||
-                    loc.name_en?.toLowerCase().includes(value.toLowerCase())
-                  );
-                  if (suggestions.length === 0) return null;
-                  return (
-                    <div className="absolute z-50 top-full mt-1 w-full bg-popover border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {suggestions.slice(0, 6).map((loc) => (
-                        <button
-                          key={loc.id}
-                          type="button"
-                          className="w-full text-right px-3 py-2 hover:bg-accent transition-colors flex items-center gap-2 text-sm border-b last:border-b-0"
-                          onClick={() => {
-                            onChange(loc.address, { lat: loc.latitude, lng: loc.longitude });
-                            incrementUsage(loc.id);
-                          }}
-                        >
-                          <Bookmark className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <div className="min-w-0 flex-1">
-                            <p className="font-medium truncate">{loc.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{loc.address}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  );
-                })()}
-              </div>
+              <SmartInput
+                fieldContext={label.includes('استلام') ? 'pickup_address' : 'delivery_address'}
+                value={value}
+                onChange={(v) => onChange(v)}
+                placeholder="اكتب العنوان... ستظهر اقتراحات محفوظة"
+                dir="rtl"
+              />
               <p className="text-xs text-muted-foreground">
-                ✏️ اكتب العنوان — سيتم حفظه تلقائياً واقتراحه لاحقاً
+                ✏️ اكتب العنوان — يُحفظ تلقائياً ويُقترح لاحقاً
               </p>
             </CardContent>
           </Card>
