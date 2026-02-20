@@ -463,6 +463,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Send, label: t('sidebar.sentDocs'), path: '/dashboard/document-archive?tab=sent', key: 'doc-archive-sent' },
       { icon: FileText, label: t('sidebar.issuedDocs'), path: '/dashboard/document-archive?tab=issued', key: 'doc-archive-issued' },
       { icon: FileSignature, label: language === 'ar' ? 'طلبات التوقيع' : 'Signing Requests', path: '/dashboard/document-archive?tab=signing_request', key: 'doc-archive-signing' },
+      { icon: Building2, label: language === 'ar' ? 'حسب الجهة' : 'By Partner', path: '/dashboard/document-archive?view=partners', key: 'doc-archive-partners' },
     ]},
 
     // ═══════════════ سجلات المخلفات ═══════════════
