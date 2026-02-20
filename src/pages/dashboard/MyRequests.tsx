@@ -352,7 +352,7 @@ const MyRequests = () => {
         <Card>
           <CardHeader className="pb-0">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="flex w-full overflow-x-auto justify-start gap-1 h-auto flex-nowrap">
                 <TabsTrigger value="all" className="gap-2">
                   <ClipboardList className="h-4 w-4" />
                   الكل
