@@ -1046,14 +1046,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                 </div>
                 <nav className="p-3 sm:p-4 space-y-1 pb-safe">
                   {filteredMenuItems.length > 0 ? (
-                    filteredMenuItems.map((item: any) => (
-                      <div key={item.key || item.path} onClick={() => setIsMobileMenuOpen(false)}>
-                        <SidebarNavItem
-                          icon={item.icon}
-                          label={item.label}
-                          path={item.path}
+                    filteredMenuItems.map((item: SidebarMenuItem) => (
+                      <div key={item.key} onClick={(e) => {
+                        // Only close menu if a leaf link was clicked
+                        if ((e.target as HTMLElement).closest('a')) setIsMobileMenuOpen(false);
+                      }}>
+                        <SidebarNavGroup
+                          item={item}
                           isCollapsed={false}
-                          badge={item.badge}
                         />
                       </div>
                     ))
@@ -1087,6 +1087,18 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       </div>
                     </div>
                   )}
+
+                  {/* Logout Button - Mobile */}
+                  <div className="pt-4 mt-4 border-t border-border">
+                    <Button
+                      variant="ghost"
+                      onClick={() => { setIsMobileMenuOpen(false); handleSignOut(); }}
+                      className="w-full flex items-center justify-center gap-2 h-10 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span className="text-sm font-medium">{t('nav.logout')}</span>
+                    </Button>
+                  </div>
                 </nav>
               </motion.div>
             )}
