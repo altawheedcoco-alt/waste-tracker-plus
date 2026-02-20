@@ -4,17 +4,18 @@ import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, CheckCircle, Clock, AlertTriangle, Crown, Sparkles, Receipt } from 'lucide-react';
+import { CreditCard, CheckCircle, Clock, AlertTriangle, Crown, Sparkles, Receipt, Users, Building2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
 const SubscriptionManagement = () => {
-  const { user } = useAuth();
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const { user, organization } = useAuth();
+  const { requiredSeats, linkedOrgsCount, needsUpgrade } = useSubscriptionStatus();
 
   const { data: plans = [] } = useQuery({
     queryKey: ['subscription-plans'],
@@ -30,20 +31,34 @@ const SubscriptionManagement = () => {
   });
 
   const { data: currentSub } = useQuery({
-    queryKey: ['my-subscription', user?.id],
+    queryKey: ['my-subscription', organization?.id],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!organization?.id) return null;
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select('*, plan:subscription_plans(*)')
-        .eq('user_id', user.id)
+        .eq('organization_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
       if (error) throw error;
       return data;
     },
-    enabled: !!user?.id,
+    enabled: !!organization?.id,
+  });
+
+  const { data: linkedPartners = [] } = useQuery({
+    queryKey: ['linked-partners-for-sub', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data } = await supabase
+        .from('verified_partnerships')
+        .select('partner_org_id, partner:organizations!verified_partnerships_partner_org_id_fkey(name, organization_type)')
+        .eq('requester_org_id', organization.id)
+        .eq('status', 'active');
+      return data || [];
+    },
+    enabled: !!organization?.id,
   });
 
   const { data: transactions = [] } = useQuery({
@@ -63,13 +78,19 @@ const SubscriptionManagement = () => {
   });
 
   const handleSubscribe = async (planId: string) => {
-    if (!user?.id) {
+    if (!user?.id || !organization?.id) {
       toast.error('يجب تسجيل الدخول أولاً');
       return;
     }
     try {
       const { data, error } = await supabase.functions.invoke('paymob-checkout', {
-        body: { user_id: user.id, plan_id: planId, payment_method: 'card' },
+        body: { 
+          user_id: user.id, 
+          organization_id: organization.id,
+          plan_id: planId, 
+          payment_method: 'card',
+          seats: requiredSeats,
+        },
       });
       if (error) throw error;
       if (data?.payment_url) {
@@ -95,13 +116,9 @@ const SubscriptionManagement = () => {
     }
   };
 
-  const getPaymentStatusBadge = (status: string) => {
-    switch (status) {
-      case 'completed': return <Badge className="bg-green-500/10 text-green-600">مكتمل</Badge>;
-      case 'pending': return <Badge className="bg-amber-500/10 text-amber-600">قيد الانتظار</Badge>;
-      case 'failed': return <Badge variant="destructive">فشل</Badge>;
-      default: return <Badge variant="secondary">{status}</Badge>;
-    }
+  const getOrgTypeName = (type: string) => {
+    const map: Record<string, string> = { generator: 'مولّد', transporter: 'ناقل', recycler: 'مدوّر', disposal: 'تخلص' };
+    return map[type] || type;
   };
 
   return (
@@ -118,6 +135,47 @@ const SubscriptionManagement = () => {
           </div>
         </div>
 
+        {/* Seats Summary */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-lg">{requiredSeats} مقعد مطلوب</p>
+                  <p className="text-sm text-muted-foreground">جهتك + {linkedOrgsCount} جهة مرتبطة</p>
+                </div>
+              </div>
+              {needsUpgrade && (
+                <Badge variant="destructive" className="gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  يلزم ترقية الاشتراك
+                </Badge>
+              )}
+            </div>
+
+            {/* Linked Partners List */}
+            {linkedPartners.length > 0 && (
+              <div className="mt-4 space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">الجهات المرتبطة (أنت تدفع اشتراكها):</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {linkedPartners.map((p: any) => (
+                    <div key={p.partner_org_id} className="flex items-center gap-2 bg-background rounded-lg p-2 border">
+                      <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm truncate">{p.partner?.name || 'جهة غير معروفة'}</span>
+                      <Badge variant="outline" className="text-xs mr-auto shrink-0">
+                        {getOrgTypeName(p.partner?.organization_type || '')}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Current Subscription */}
         {currentSub && (
           <Card className="border-primary/30">
@@ -132,6 +190,7 @@ const SubscriptionManagement = () => {
                 <div className="space-y-1 min-w-0">
                   <p className="text-lg sm:text-xl font-bold truncate">{(currentSub as any).plan?.name_ar || 'خطة غير معروفة'}</p>
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
+                    <span>{currentSub.total_seats || 1} مقعد مدفوع</span>
                     {currentSub.start_date && (
                       <span>بدأ: {format(new Date(currentSub.start_date), 'dd MMM yyyy', { locale: ar })}</span>
                     )}
@@ -156,21 +215,27 @@ const SubscriptionManagement = () => {
           <h2 className="text-lg font-semibold mb-3">الخطط المتاحة</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {plans.map((plan: any) => {
-              const isCurrentPlan = currentSub?.plan_id === plan.id && currentSub?.status === 'active';
+              const isCurrentPlan = currentSub?.plan_id === plan.id && currentSub?.status === 'active' && !needsUpgrade;
               const features = Array.isArray(plan.features) ? plan.features : [];
+              const totalPrice = plan.price_egp * requiredSeats;
               return (
                 <Card key={plan.id} className={`relative overflow-hidden transition-all ${isCurrentPlan ? 'border-primary ring-1 ring-primary/20' : 'hover:border-primary/40'}`}>
-                  {isCurrentPlan && (
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />
-                  )}
+                  {isCurrentPlan && <div className="absolute top-0 left-0 right-0 h-1 bg-primary" />}
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">{plan.name_ar}</CardTitle>
                     <CardDescription>{plan.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-baseline gap-1 flex-wrap">
-                      <span className="text-2xl sm:text-3xl font-bold text-primary">{plan.price_egp?.toLocaleString()}</span>
-                      <span className="text-sm text-muted-foreground">ج.م / {plan.duration_days === 30 ? 'شهر' : plan.duration_days === 365 ? 'سنة' : `${plan.duration_days} يوم`}</span>
+                    <div className="space-y-1">
+                      <div className="flex items-baseline gap-1 flex-wrap">
+                        <span className="text-2xl sm:text-3xl font-bold text-primary">{totalPrice.toLocaleString()}</span>
+                        <span className="text-sm text-muted-foreground">ج.م / {plan.duration_days === 30 ? 'شهر' : plan.duration_days === 365 ? 'سنة' : `${plan.duration_days} يوم`}</span>
+                      </div>
+                      {requiredSeats > 1 && (
+                        <p className="text-xs text-muted-foreground">
+                          {plan.price_egp.toLocaleString()} ج.م × {requiredSeats} مقعد
+                        </p>
+                      )}
                     </div>
                     {features.length > 0 && (
                       <ul className="space-y-1.5">
@@ -188,7 +253,7 @@ const SubscriptionManagement = () => {
                       disabled={isCurrentPlan}
                       onClick={() => handleSubscribe(plan.id)}
                     >
-                      {isCurrentPlan ? 'خطتك الحالية' : 'اشترك الآن'}
+                      {isCurrentPlan ? 'خطتك الحالية' : needsUpgrade ? 'ترقية الاشتراك' : 'اشترك الآن'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -216,7 +281,9 @@ const SubscriptionManagement = () => {
                 {transactions.map((tx: any) => (
                   <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg border">
                     <div className="flex items-center gap-3">
-                      {getPaymentStatusBadge(tx.status)}
+                      <Badge className={tx.status === 'completed' ? 'bg-green-500/10 text-green-600' : tx.status === 'pending' ? 'bg-amber-500/10 text-amber-600' : 'bg-destructive/10 text-destructive'}>
+                        {tx.status === 'completed' ? 'مكتمل' : tx.status === 'pending' ? 'قيد الانتظار' : tx.status === 'failed' ? 'فشل' : tx.status}
+                      </Badge>
                       <span className="font-semibold">{tx.amount?.toLocaleString()} {tx.currency || 'EGP'}</span>
                     </div>
                     <div className="text-right">
