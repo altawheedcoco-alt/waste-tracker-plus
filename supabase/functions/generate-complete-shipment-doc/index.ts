@@ -195,41 +195,46 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { size: A4; margin: 12mm; }
+  @page { size: A4; margin: 0; }
   * { box-sizing: border-box; }
   body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 10px; color: #1a1a1a; direction: rtl; margin: 0; padding: 0; }
-  .page { page-break-after: always; padding: 10px; }
+  .page { width: 794px; min-height: 1123px; max-height: 1123px; overflow: hidden; padding: 20px 24px; page-break-after: always; position: relative; }
   .page:last-child { page-break-after: auto; }
-  .header { text-align: center; border-bottom: 3px double #0f766e; padding-bottom: 8px; margin-bottom: 12px; }
-  .header h1 { font-size: 20px; color: #0f766e; margin: 4px 0; }
-  .header h2 { font-size: 13px; color: #333; margin: 2px 0; }
-  .header .sub { font-size: 9px; color: #666; }
-  .badge { display: inline-block; padding: 3px 12px; border-radius: 12px; font-weight: bold; font-size: 11px; }
+  .header { text-align: center; border-bottom: 3px double #0f766e; padding-bottom: 6px; margin-bottom: 8px; }
+  .header h1 { font-size: 18px; color: #0f766e; margin: 3px 0; }
+  .header h2 { font-size: 12px; color: #333; margin: 2px 0; }
+  .header .sub { font-size: 8px; color: #666; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-weight: bold; font-size: 10px; }
   .badge-green { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
   .badge-blue { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-  .section { margin-bottom: 10px; }
-  .sec-title { background: linear-gradient(135deg, #f0fdfa, #e0f2fe); border-right: 4px solid #0f766e; padding: 5px 10px; font-weight: bold; font-size: 11px; margin-bottom: 6px; color: #0f766e; }
-  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .party-box { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 9px; }
-  .party-box h4 { font-size: 10px; color: #0f766e; margin: 0 0 4px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
+  .section { margin-bottom: 8px; }
+  .sec-title { background: linear-gradient(135deg, #f0fdfa, #e0f2fe); border-right: 4px solid #0f766e; padding: 4px 8px; font-weight: bold; font-size: 10px; margin-bottom: 5px; color: #0f766e; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .party-box { border: 1px solid #d1d5db; border-radius: 5px; padding: 5px 7px; font-size: 8px; }
+  .party-box h4 { font-size: 9px; color: #0f766e; margin: 0 0 3px; border-bottom: 1px solid #e5e7eb; padding-bottom: 2px; }
   .party-box p { margin: 1px 0; }
   .l { color: #6b7280; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 9px; }
-  td, th { border: 1px solid #d1d5db; padding: 3px 6px; text-align: right; }
-  th { background: #f0fdfa; font-weight: bold; color: #0f766e; font-size: 9px; }
-  .sig-cell { text-align: center; width: 60px; }
-  .sig-img { max-width: 50px; max-height: 30px; object-fit: contain; }
-  .stamp-area { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 15px; }
-  .stamp-box { border: 2px dashed #d1d5db; border-radius: 8px; padding: 10px; text-align: center; min-height: 90px; }
-  .stamp-box h5 { font-size: 10px; color: #0f766e; margin: 0 0 4px; }
-  .stamp-box .date { font-size: 8px; color: #999; }
-  .footer { border-top: 2px solid #0f766e; padding-top: 8px; margin-top: 15px; text-align: center; font-size: 8px; color: #6b7280; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 8px; table-layout: fixed; word-wrap: break-word; }
+  td, th { border: 1px solid #d1d5db; padding: 2px 4px; text-align: right; overflow: hidden; text-overflow: ellipsis; }
+  th { background: #f0fdfa; font-weight: bold; color: #0f766e; font-size: 8px; }
+  .sig-cell { text-align: center; width: 50px; }
+  .sig-img { max-width: 40px; max-height: 25px; object-fit: contain; }
+  .stamp-area { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .stamp-box { border: 2px dashed #d1d5db; border-radius: 6px; padding: 8px; text-align: center; min-height: 70px; }
+  .stamp-box h5 { font-size: 9px; color: #0f766e; margin: 0 0 3px; }
+  .stamp-box .date { font-size: 7px; color: #999; }
+  .footer { border-top: 2px solid #0f766e; padding-top: 6px; margin-top: 10px; text-align: center; font-size: 7px; color: #6b7280; }
   .watermark { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 60px; color: rgba(15, 118, 110, 0.04); font-weight: bold; pointer-events: none; z-index: 0; }
-  .photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .photo-card { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px; text-align: center; }
-  .photo-label { font-weight: bold; font-size: 10px; color: #0f766e; margin-bottom: 4px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
-  .doc-photo { max-width: 100%; max-height: 150px; object-fit: contain; border-radius: 4px; border: 1px solid #e5e7eb; }
-  .photo-meta { font-size: 8px; color: #6b7280; margin-top: 3px; }
+  .photos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .photo-card { border: 1px solid #d1d5db; border-radius: 5px; padding: 5px; text-align: center; }
+  .photo-label { font-weight: bold; font-size: 9px; color: #0f766e; margin-bottom: 3px; border-bottom: 1px solid #e5e7eb; padding-bottom: 2px; }
+  .doc-photo { max-width: 100%; max-height: 130px; object-fit: contain; border-radius: 4px; border: 1px solid #e5e7eb; }
+  .photo-meta { font-size: 7px; color: #6b7280; margin-top: 2px; }
+  .decl-card { border: 1px solid #d1d5db; border-radius: 5px; padding: 6px 8px; margin-bottom: 6px; font-size: 8px; }
+  .decl-card .decl-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
+  .decl-card .decl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 4px; }
+  .decl-card .decl-text { white-space: pre-wrap; font-size: 8px; line-height: 1.5; padding: 4px 6px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 3px; max-height: 120px; overflow: hidden; }
+  .page-num { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 7px; color: #999; }
 </style>
 </head>
 <body>
@@ -242,11 +247,11 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
     <h1>📋 مستند الشحنة الكامل</h1>
     <h2>COMPLETE SHIPMENT DOCUMENT</h2>
     <p class="sub">وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020</p>
-    <div style="margin-top:6px">
+    <div style="margin-top:4px">
       <span class="badge badge-green">رقم الشحنة: ${shipment.shipment_number}</span>
-      <span class="badge badge-blue" style="margin-right:8px">الحالة: ${statusLabels[shipment.status] || shipment.status}</span>
+      <span class="badge badge-blue" style="margin-right:6px">الحالة: ${statusLabels[shipment.status] || shipment.status}</span>
     </div>
-    <p class="sub" style="margin-top:4px">تاريخ الإصدار: ${formatDateTime(new Date().toISOString())}</p>
+    <p class="sub" style="margin-top:3px">تاريخ الإصدار: ${formatDateTime(new Date().toISOString())}</p>
   </div>
 
   <div class="section">
@@ -299,12 +304,13 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
       ${receiptRows}
     </table>
   </div>` : ""}
+  <div class="page-num">صفحة 1</div>
 </div>
 
 <!-- صفحة الإقرارات القانونية -->
 <div class="page">
-  <div class="header" style="padding-bottom:5px;margin-bottom:8px">
-    <h1 style="font-size:16px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
+  <div class="header" style="padding-bottom:4px;margin-bottom:6px">
+    <h1 style="font-size:14px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
     <p class="sub">صفحة الإقرارات القانونية للأطراف</p>
   </div>
 
@@ -318,51 +324,50 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
         transporter_delivery: '🚛 إقرار نقل — الناقل',
       };
       return `
-      <div style="border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;margin-bottom:8px;${d.status === 'rejected' ? 'background:#fef2f2;border-color:#fecaca' : 'background:#f0fdf4;border-color:#86efac'}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid #e5e7eb;padding-bottom:4px">
-          <strong style="font-size:11px;color:#0f766e">${typeLabels[d.declaration_type] || d.declaration_type || 'إقرار'} — (${i + 1})</strong>
-          <span style="font-size:9px;padding:2px 8px;border-radius:10px;${d.status === 'rejected' ? 'background:#fee2e2;color:#991b1b' : d.status === 'confirmed' ? 'background:#dcfce7;color:#166534' : 'background:#fef9c3;color:#854d0e'}">${d.status === 'confirmed' ? '✅ مؤكد' : d.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار'}</span>
+      <div class="decl-card" style="${d.status === 'rejected' ? 'background:#fef2f2;border-color:#fecaca' : 'background:#f0fdf4;border-color:#86efac'}">
+        <div class="decl-header">
+          <strong style="font-size:9px;color:#0f766e">${typeLabels[d.declaration_type] || d.declaration_type || 'إقرار'} — (${i + 1})</strong>
+          <span style="font-size:8px;padding:1px 6px;border-radius:8px;${d.status === 'rejected' ? 'background:#fee2e2;color:#991b1b' : d.status === 'confirmed' ? 'background:#dcfce7;color:#166534' : 'background:#fef9c3;color:#854d0e'}">${d.status === 'confirmed' ? '✅ مؤكد' : d.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار'}</span>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;margin-bottom:6px">
-          ${d.driver_name ? `<div><span class="l">السائق/المسلّم:</span> <strong>${d.driver_name}</strong></div>` : ''}
-          ${d.driver_national_id ? `<div><span class="l">رقم الهوية:</span> <strong>${d.driver_national_id}</strong></div>` : ''}
+        <div class="decl-grid">
+          ${d.driver_name ? `<div><span class="l">السائق:</span> <strong>${d.driver_name}</strong></div>` : ''}
+          ${d.driver_national_id ? `<div><span class="l">الهوية:</span> <strong>${d.driver_national_id}</strong></div>` : ''}
           ${d.generator_name ? `<div><span class="l">المولد:</span> <strong>${d.generator_name}</strong></div>` : ''}
           ${d.transporter_name ? `<div><span class="l">الناقل:</span> <strong>${d.transporter_name}</strong></div>` : ''}
           ${d.recycler_name ? `<div><span class="l">المدوّر:</span> <strong>${d.recycler_name}</strong></div>` : ''}
-          ${d.disposal_name ? `<div><span class="l">جهة التخلص:</span> <strong>${d.disposal_name}</strong></div>` : ''}
-          <div><span class="l">تاريخ الإقرار:</span> <strong>${formatDateTime(d.declared_at)}</strong></div>
+          <div><span class="l">التاريخ:</span> <strong>${formatDateTime(d.declared_at)}</strong></div>
           <div><span class="l">الكمية:</span> <strong>${d.quantity || '—'} ${d.unit || 'طن'}</strong></div>
         </div>
-        <div style="white-space:pre-wrap;font-size:9px;line-height:1.6;padding:6px 8px;background:#fffbeb;border:1px solid #fde68a;border-radius:4px">${d.declaration_text}</div>
-        ${d.status === 'rejected' ? `<div style="font-size:8px;color:#991b1b;margin-top:4px">❌ سبب الرفض: ${d.rejection_reason || '—'} | بواسطة: ${d.rejected_by || '—'} | ${formatDateTime(d.rejected_at)}</div>` : ''}
-        ${d.auto_generated ? `<div style="font-size:7px;color:#6b7280;margin-top:3px">🤖 تم إنشاء هذا الإقرار تلقائياً بواسطة النظام</div>` : ''}
+        <div class="decl-text">${d.declaration_text}</div>
+        ${d.auto_generated ? `<div style="font-size:7px;color:#6b7280;margin-top:2px">🤖 إقرار تلقائي</div>` : ''}
       </div>`;
     }).join('')}
   </div>` : `
   <div class="section">
     <div class="sec-title">الإقرارات والتصريحات القانونية</div>
-    <p style="text-align:center;color:#999;padding:10px">لا توجد إقرارات تسليم مسجلة بعد</p>
+    <p style="text-align:center;color:#999;padding:8px">لا توجد إقرارات تسليم مسجلة بعد</p>
   </div>`}
+  <div class="page-num">صفحة 2</div>
 </div>
 
-<!-- الصفحة 2: الإقرارات والتوقيعات -->
+<!-- صفحة التوقيعات والأختام -->
 <div class="page">
-  <div class="header" style="padding-bottom:5px;margin-bottom:8px">
-    <h1 style="font-size:16px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
-    <p class="sub">صفحة الإقرارات والتوقيعات والأختام</p>
+  <div class="header" style="padding-bottom:4px;margin-bottom:6px">
+    <h1 style="font-size:14px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
+    <p class="sub">صفحة التوقيعات والأختام وسلسلة الحيازة</p>
   </div>
 
   ${endorsements.length > 0 ? `
   <div class="section">
-    <div class="sec-title">القسم الرابع: إقرارات وتوقيعات الجهات (${endorsements.length})</div>
+    <div class="sec-title">القسم الرابع: توقيعات وأختام الجهات (${endorsements.length})</div>
     <table>
-      <tr><th>#</th><th>نوع المستند</th><th>نوع الاعتماد</th><th>رقم المستند</th><th>تاريخ التوقيع</th><th>كود التحقق</th><th>رقم الختم</th><th>التوقيع</th><th>الختم</th></tr>
+      <tr><th>#</th><th>نوع المستند</th><th>نوع الاعتماد</th><th>رقم المستند</th><th>التاريخ</th><th>كود التحقق</th><th>رقم الختم</th><th>التوقيع</th><th>الختم</th></tr>
       ${endorsementRows}
     </table>
   </div>` : `
   <div class="section">
-    <div class="sec-title">القسم الرابع: إقرارات وتوقيعات الجهات</div>
-    <p style="text-align:center;color:#999;padding:10px">لا توجد إقرارات مسجلة بعد</p>
+    <div class="sec-title">القسم الرابع: توقيعات وأختام الجهات</div>
+    <p style="text-align:center;color:#999;padding:8px">لا توجد توقيعات مسجلة بعد</p>
   </div>`}
 
   ${custody.length > 0 ? `
@@ -383,47 +388,48 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
     </table>
   </div>` : ""}
 
-  <!-- مساحة التوقيعات والأختام الرسمية -->
   <div class="stamp-area">
     <div class="stamp-box">
       <h5>🏭 توقيع وختم المولد</h5>
-      <div style="min-height:50px"></div>
+      <div style="min-height:40px"></div>
       <p class="date">${shipment.generator?.name || "—"}</p>
       <p class="date">التاريخ: ${formatDate(shipment.pickup_date)}</p>
     </div>
     <div class="stamp-box">
       <h5>🚛 توقيع وختم الناقل</h5>
-      <div style="min-height:50px"></div>
+      <div style="min-height:40px"></div>
       <p class="date">${shipment.transporter?.name || "—"}</p>
       <p class="date">التاريخ: ${formatDate(shipment.in_transit_at)}</p>
     </div>
     <div class="stamp-box">
       <h5>♻️ توقيع وختم المستلم</h5>
-      <div style="min-height:50px"></div>
+      <div style="min-height:40px"></div>
       <p class="date">${shipment.recycler?.name || "—"}</p>
       <p class="date">التاريخ: ${formatDate(shipment.delivered_at || shipment.confirmed_at)}</p>
     </div>
   </div>
+  <div class="page-num">صفحة 3</div>
 </div>
 
 ${hasPhotos ? `
-<!-- الصفحة 3: التوثيق المرئي -->
+<!-- صفحة التوثيق المرئي -->
 <div class="page">
-  <div class="header" style="padding-bottom:5px;margin-bottom:8px">
-    <h1 style="font-size:16px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
+  <div class="header" style="padding-bottom:4px;margin-bottom:6px">
+    <h1 style="font-size:14px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
     <p class="sub">صفحة التوثيق المرئي — صور الميزان والحمولة وإثبات الدفع</p>
   </div>
   ${photosSection}
+  <div class="page-num">صفحة 4</div>
 </div>
 ` : ""}
 
-<!-- الصفحة الأخيرة: التذييل -->
-<div class="page" style="page-break-after:auto">
+<!-- التذييل الرسمي -->
+<div class="page" style="page-break-after:auto;display:flex;flex-direction:column;justify-content:flex-end">
   <div class="footer">
     <p><strong>مستند الشحنة الكامل</strong> — صادر إلكترونياً من نظام iRecycle لإدارة المخلفات</p>
     <p>رقم الشحنة: ${shipment.shipment_number} | الحالة: ${statusLabels[shipment.status] || shipment.status} | تاريخ الطباعة: ${new Date().toLocaleString("ar-EG")}</p>
     <p>⚠️ هذا المستند إلكتروني رسمي ويمكن التحقق من صحته عبر بوابة التحقق الإلكتروني</p>
-    <p style="font-size:7px;margin-top:4px">وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 ولائحته التنفيذية — جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
+    <p style="font-size:6px;margin-top:3px">وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 ولائحته التنفيذية — جميع الحقوق محفوظة © ${new Date().getFullYear()}</p>
   </div>
 </div>
 

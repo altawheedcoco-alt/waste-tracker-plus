@@ -45,8 +45,10 @@ const CompleteShipmentDocButton = ({
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
       iframe.style.left = '-9999px';
+      iframe.style.top = '0';
       iframe.style.width = '794px';
-      iframe.style.height = '1123px';
+      iframe.style.height = '10000px';
+      iframe.style.border = 'none';
       document.body.appendChild(iframe);
 
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -56,45 +58,41 @@ const CompleteShipmentDocButton = ({
       iframeDoc.write(data.html);
       iframeDoc.close();
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Capture all pages
+      // Capture each .page as a separate PDF page
       const pages = iframeDoc.querySelectorAll('.page');
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
+      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+
+      const captureOptions = {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: 794,
+        height: 1123,
+        windowWidth: 794,
+      };
 
       if (pages.length > 0) {
         for (let i = 0; i < pages.length; i++) {
-          const canvas = await html2canvas(pages[i] as HTMLElement, {
-            scale: 1.5, useCORS: true, allowTaint: true, logging: false, width: 794, windowWidth: 794,
+          const pageEl = pages[i] as HTMLElement;
+          const canvas = await html2canvas(pageEl, {
+            ...captureOptions,
+            height: pageEl.scrollHeight > 1123 ? 1123 : pageEl.scrollHeight,
           });
-          const imgData = canvas.toDataURL('image/png');
-          const imgHeight = (canvas.height * pageWidth) / canvas.width;
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
 
           if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, Math.min(imgHeight, pageHeight));
+          pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
         }
       } else {
         // Fallback: single capture
-        const canvas = await html2canvas(iframeDoc.body, {
-          scale: 1.5, useCORS: true, allowTaint: true, logging: false, width: 794, windowWidth: 794,
-        });
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft > 0) {
-          position = -(imgHeight - heightLeft);
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
+        const canvas = await html2canvas(iframeDoc.body, captureOptions);
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, pageHeight);
       }
 
       document.body.removeChild(iframe);
