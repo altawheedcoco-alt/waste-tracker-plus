@@ -157,6 +157,7 @@ const DocumentArchive = () => {
         return {
           id: d.id, title: `${t('archive.invoice')} ${d.invoice_number || ''}`.trim(), type: 'invoice', date: d.created_at,
           source: isOwner ? 'issued' : 'received', amount: d.total_amount, status: d.status,
+          referenceId: d.id,
           partnerOrgId: pId || undefined, partnerOrgName: pName || '',
           dedupKey: `invoice-${d.id}`,
         };
@@ -196,6 +197,7 @@ const DocumentArchive = () => {
         return {
           id: d.id, title: `${t('archive.awardLetter')} ${d.letter_number || ''} - ${d.title || ''}`.trim(), type: 'award_letter', date: d.created_at,
           source: isOwner ? 'issued' : 'received', status: d.status, fileUrl: d.attachment_url,
+          referenceId: d.id,
           partnerOrgId: pId || undefined, partnerOrgName: pName || '',
           dedupKey: `award-${d.id}`,
         };
@@ -219,6 +221,7 @@ const DocumentArchive = () => {
         return {
           id: d.id, title: `${t('archive.contract')} ${d.contract_number || ''} - ${d.title || ''}`.trim(), type: 'contract', date: d.created_at,
           source: isOwner ? 'issued' : 'received', status: d.status, fileUrl: d.attachment_url,
+          referenceId: d.id,
           partnerOrgId: pId || undefined, partnerOrgName: pName || '',
           dedupKey: `contract-${d.id}`,
         };
@@ -305,8 +308,9 @@ const DocumentArchive = () => {
       (incoming || []).forEach((d: any) => {
         docs.push({
           id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع' : 'Signing Request'),
-          type: d.document_type || 'signing_request', date: d.created_at, source: 'received',
+          type: 'signing_request', date: d.created_at, source: 'received',
           status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
+          referenceId: d.id,
           senderName: (d.sender_org as any)?.name || '',
           partnerOrgId: d.sender_organization_id, partnerOrgName: (d.sender_org as any)?.name || '',
           dedupKey: `sign-in-${d.id}`,
@@ -315,8 +319,9 @@ const DocumentArchive = () => {
       (outgoing || []).forEach((d: any) => {
         docs.push({
           id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع مُرسل' : 'Sent Signing Request'),
-          type: d.document_type || 'signing_request', date: d.created_at, source: 'sent',
+          type: 'signing_request', date: d.created_at, source: 'sent',
           status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
+          referenceId: d.id,
           recipientName: (d.recipient_org as any)?.name || '',
           partnerOrgId: d.recipient_organization_id, partnerOrgName: (d.recipient_org as any)?.name || '',
           dedupKey: `sign-out-${d.id}`,
@@ -410,20 +415,22 @@ const DocumentArchive = () => {
   };
 
   const getDocSourceUrl = (doc: ArchiveDoc): string | null => {
-    const docId = doc.referenceId;
+    const docId = doc.referenceId || doc.id;
     switch (doc.type) {
-      case 'shipment': return docId ? `/dashboard/shipments/${docId}` : '/dashboard/shipments';
-      case 'invoice': return docId ? `/dashboard/invoices?view=${docId}` : '/dashboard/invoices';
-      case 'contract': return docId ? `/dashboard/contracts?view=${docId}` : '/dashboard/contracts';
-      case 'certificate': return docId ? `/dashboard/shipments/${docId}?tab=certificate` : '/dashboard/shipments';
-      case 'award_letter': return '/dashboard/award-letters';
+      case 'shipment': return `/dashboard/shipments/${docId}`;
+      case 'invoice': return `/dashboard/invoices?view=${docId}`;
+      case 'contract': return `/dashboard/contracts?view=${docId}`;
+      case 'certificate': return `/dashboard/shipments/${docId}?tab=certificate`;
+      case 'award_letter': return `/dashboard/award-letters?view=${docId}`;
       case 'deposit': return '/dashboard/accounting';
       case 'statement': return '/dashboard/accounting?tab=statements';
-      case 'disposal': return docId ? `/dashboard/shipments/${docId}` : '/dashboard/disposal';
-      case 'receipt': return docId ? `/dashboard/shipments/${docId}` : '/dashboard/shipments';
+      case 'disposal': return `/dashboard/shipments/${docId}`;
+      case 'receipt': return `/dashboard/shipments/${docId}`;
       case 'report': return '/dashboard/reports';
       case 'entity_certificate': case 'entity_document': return '/dashboard/entity-profile';
-      case 'signing_request': return '/dashboard/signing-inbox';
+      case 'signing_request': return `/dashboard/signing-inbox?view=${docId}`;
+      case 'weight_record': return '/dashboard/external-weights';
+      case 'weighbridge_photo': return `/dashboard/shipments/${doc.referenceId || docId}`;
       default: return docId ? `/dashboard/verify?code=${docId}` : null;
     }
   };
