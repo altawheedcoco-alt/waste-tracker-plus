@@ -1,4 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react';
+import { useDriverOffers } from '@/hooks/useDriverOffers';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -49,6 +50,7 @@ const WasteClassifierCamera = lazy(() => import('@/components/driver/WasteClassi
 const DigitalManifest = lazy(() => import('@/components/driver/DigitalManifest'));
 const DriverAcademy = lazy(() => import('@/components/driver/DriverAcademy'));
 const SmartRouteOptimizer = lazy(() => import('@/components/driver/SmartRouteOptimizer'));
+const DriverOfferPopup = lazy(() => import('@/components/driver/DriverOfferPopup'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -123,6 +125,8 @@ const DriverDashboard = () => {
   const [selectedShipmentForMap, setSelectedShipmentForMap] = useState<Shipment | null>(null);
   const [showNavigationView, setShowNavigationView] = useState(false);
   const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<Shipment | null>(null);
+
+  const { pendingOffer, acceptOffer, rejectOffer, counterOffer } = useDriverOffers();
 
   const quickActions = useQuickActions({
     type: 'driver',
@@ -601,6 +605,18 @@ const DriverDashboard = () => {
             />
           </Suspense>
         </>
+      )}
+
+      {/* DiDi-style popup for incoming offers */}
+      {pendingOffer && (
+        <Suspense fallback={null}>
+          <DriverOfferPopup
+            offer={pendingOffer}
+            onAccept={acceptOffer}
+            onReject={rejectOffer}
+            onCounter={counterOffer}
+          />
+        </Suspense>
       )}
     </div>
   );

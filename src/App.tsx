@@ -60,6 +60,7 @@ const NonHazardousWasteRegister = lazy(() => import("./pages/dashboard/NonHazard
 const HazardousWasteRegister = lazy(() => import("./pages/dashboard/HazardousWasteRegister"));
 const WasteTypesClassification = lazy(() => import("./pages/dashboard/WasteTypesClassification"));
 const MyRequests = lazy(() => import("./pages/dashboard/MyRequests"));
+const DriverOffers = lazy(() => import("./pages/dashboard/DriverOffers"));
 const RegulatoryUpdates = lazy(() => import("./pages/dashboard/RegulatoryUpdates"));
 const OperationalPlans = lazy(() => import("./pages/dashboard/OperationalPlans"));
 const Chat = lazy(() => import("./pages/dashboard/Chat"));
@@ -299,6 +300,7 @@ const AppRoutes = memo(() => (
     <Route path="/dashboard/hazardous-register" element={<HazardousWasteRegister />} />
     <Route path="/dashboard/waste-types" element={<WasteTypesClassification />} />
     <Route path="/dashboard/my-requests" element={<MyRequests />} />
+    <Route path="/dashboard/driver-offers" element={<DriverOffers />} />
     <Route path="/dashboard/regulatory-updates" element={<RegulatoryUpdates />} />
     <Route path="/dashboard/operational-plans" element={<OperationalPlans />} />
     <Route path="/dashboard/chat" element={<Chat />} />

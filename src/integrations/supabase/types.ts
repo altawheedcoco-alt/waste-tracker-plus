@@ -8454,6 +8454,102 @@ export type Database = {
           },
         ]
       }
+      driver_shipment_offers: {
+        Row: {
+          auto_accepted: boolean | null
+          counter_price: number | null
+          created_at: string
+          driver_id: string
+          driver_notes: string | null
+          expires_at: string
+          final_price: number | null
+          id: string
+          offered_by: string | null
+          offered_price: number | null
+          organization_id: string | null
+          rejection_reason: string | null
+          responded_at: string | null
+          shipment_id: string
+          status: string
+          system_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          auto_accepted?: boolean | null
+          counter_price?: number | null
+          created_at?: string
+          driver_id: string
+          driver_notes?: string | null
+          expires_at?: string
+          final_price?: number | null
+          id?: string
+          offered_by?: string | null
+          offered_price?: number | null
+          organization_id?: string | null
+          rejection_reason?: string | null
+          responded_at?: string | null
+          shipment_id: string
+          status?: string
+          system_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          auto_accepted?: boolean | null
+          counter_price?: number | null
+          created_at?: string
+          driver_id?: string
+          driver_notes?: string | null
+          expires_at?: string
+          final_price?: number | null
+          id?: string
+          offered_by?: string | null
+          offered_price?: number | null
+          organization_id?: string | null
+          rejection_reason?: string | null
+          responded_at?: string | null
+          shipment_id?: string
+          status?: string
+          system_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_shipment_offers_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_offers_offered_by_fkey"
+            columns: ["offered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_offers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_offers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_offers_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_signal_status: {
         Row: {
           battery_level: number | null

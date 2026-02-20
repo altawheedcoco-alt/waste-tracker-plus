@@ -307,6 +307,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Search, label: t('sidebar.map'), path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
     ]},
     { icon: Send, label: t('sidebar.requestsComm'), path: '#', key: 'driver-requests-comm-group', children: [
+      { icon: Truck, label: 'طلبات الشحنات', path: '/dashboard/driver-offers', key: 'driver-offers' },
       { icon: Send, label: t('sidebar.myRequests'), path: '/dashboard/my-requests', badge: sectionBadges['my-requests'], key: 'driver-requests' },
       { icon: MessageCircle, label: t('sidebar.chatMessages'), path: '/dashboard/chat', badge: sectionBadges['chat'], key: 'driver-chat' },
       { icon: CircleDot, label: t('sidebar.statuses'), path: '/dashboard/stories', key: 'driver-stories' },
