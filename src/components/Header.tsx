@@ -99,15 +99,53 @@ const Header = memo(() => {
 
 Header.displayName = 'Header';
 
-const NavLink = ({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) => (
-  <a
-    href={href}
-    className={`font-medium text-muted-foreground hover:text-primary hover:scale-105 transition-all touch-manipulation ${
-      mobile ? "text-base py-2" : "text-sm lg:text-base"
-    }`}
-  >
-    {children}
-  </a>
-);
+const NavLink = ({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const targetId = href.slice(1);
+      const headerOffset = 80;
+
+      const scrollToElement = () => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({
+            top: elementPosition - headerOffset,
+            behavior: 'smooth',
+          });
+          return true;
+        }
+        return false;
+      };
+
+      // If element exists, scroll directly
+      if (scrollToElement()) return;
+
+      // Otherwise, scroll down progressively to trigger lazy loading, then scroll to target
+      let attempts = 0;
+      const maxAttempts = 20;
+      const tryScroll = () => {
+        if (scrollToElement() || attempts >= maxAttempts) return;
+        attempts++;
+        window.scrollBy({ top: window.innerHeight, behavior: 'instant' });
+        requestAnimationFrame(() => setTimeout(tryScroll, 100));
+      };
+      tryScroll();
+    }
+  };
+
+  return (
+    <a
+      href={href}
+      onClick={handleClick}
+      className={`font-medium text-muted-foreground hover:text-primary hover:scale-105 transition-all touch-manipulation ${
+        mobile ? "text-base py-2" : "text-sm lg:text-base"
+      }`}
+    >
+      {children}
+    </a>
+  );
+};
 
 export default Header;
