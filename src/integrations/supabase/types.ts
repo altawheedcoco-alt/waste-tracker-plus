@@ -23409,6 +23409,66 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_arrears: {
+        Row: {
+          created_at: string
+          id: string
+          last_calculated_at: string
+          monthly_rate: number
+          months_overdue: number
+          organization_id: string
+          paid_at: string | null
+          penalty_amount: number
+          penalty_rate: number
+          subtotal: number
+          total_due: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_calculated_at?: string
+          monthly_rate?: number
+          months_overdue?: number
+          organization_id: string
+          paid_at?: string | null
+          penalty_amount?: number
+          penalty_rate?: number
+          subtotal?: number
+          total_due?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_calculated_at?: string
+          monthly_rate?: number
+          months_overdue?: number
+          organization_id?: string
+          paid_at?: string | null
+          penalty_amount?: number
+          penalty_rate?: number
+          subtotal?: number
+          total_due?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_arrears_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "subscription_arrears_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           created_at: string
@@ -27574,6 +27634,7 @@ export type Database = {
           shipments_processed: number
         }[]
       }
+      calculate_org_arrears: { Args: { org_id: string }; Returns: Json }
       calculate_org_required_seats: {
         Args: { org_id: string }
         Returns: number
@@ -27642,6 +27703,7 @@ export type Database = {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
       }
+      can_org_access_dashboard: { Args: { org_id: string }; Returns: boolean }
       can_org_operate: { Args: { org_id: string }; Returns: boolean }
       can_view_organization: { Args: { _org_id: string }; Returns: boolean }
       can_view_shipment: {

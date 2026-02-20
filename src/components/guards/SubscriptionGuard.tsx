@@ -3,7 +3,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, CreditCard, Crown, Loader2, Users, AlertTriangle } from 'lucide-react';
+import { ShieldAlert, CreditCard, Crown, Loader2, Users, AlertTriangle, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
@@ -15,7 +16,10 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { hasActiveSubscription, isExempt, isLoading, needsUpgrade, requiredSeats, linkedOrgsCount, planPrice } = useSubscriptionStatus();
+  const { 
+    hasActiveSubscription, isExempt, isLoading, needsUpgrade, 
+    requiredSeats, linkedOrgsCount, planPrice, hasArrears, arrears 
+  } = useSubscriptionStatus();
 
   const isExemptRoute = EXEMPT_ROUTES.some(r => location.pathname.startsWith(r));
 
@@ -31,6 +35,58 @@ const SubscriptionGuard = ({ children }: SubscriptionGuardProps) => {
 
   if (isExempt || hasActiveSubscription || isExemptRoute) {
     return <>{children}</>;
+  }
+
+  // Has arrears (overdue months with penalty)
+  if (hasArrears && arrears) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
+        <Card className="max-w-lg w-full border-destructive/30 shadow-xl">
+          <CardHeader className="text-center space-y-3">
+            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center">
+              <Clock className="w-8 h-8 text-destructive" />
+            </div>
+            <CardTitle className="text-xl">مستحقات متأخرة</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">
+              لديك اشتراكات متأخرة يجب سدادها لإعادة تفعيل حسابك.
+              <br />
+              <span className="text-xs">الشحنات والعمليات مع شركائك لا تتأثر.</span>
+            </p>
+            <div className="bg-muted/50 rounded-lg p-4 text-sm space-y-2 text-right">
+              <div className="flex justify-between">
+                <span>الأشهر المتأخرة:</span>
+                <strong className="text-destructive">{arrears.months_overdue} شهر</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>المقاعد:</span>
+                <strong>{arrears.seats || requiredSeats}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>المبلغ الأساسي:</span>
+                <strong>{arrears.subtotal?.toLocaleString()} ج.م</strong>
+              </div>
+              <div className="flex justify-between text-destructive">
+                <span>غرامة التأخير (2%):</span>
+                <strong>{arrears.penalty_amount?.toLocaleString()} ج.م</strong>
+              </div>
+              <div className="border-t pt-2 flex justify-between text-base font-bold">
+                <span>الإجمالي المستحق:</span>
+                <span className="text-destructive">{arrears.total_due?.toLocaleString()} ج.م</span>
+              </div>
+            </div>
+            <Button size="lg" className="w-full gap-2" onClick={() => navigate('/dashboard/subscription')}>
+              <CreditCard className="w-5 h-5" />
+              سداد المستحقات والاشتراك
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+              العودة للصفحة الرئيسية
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   // Needs upgrade - has subscription but not enough seats
