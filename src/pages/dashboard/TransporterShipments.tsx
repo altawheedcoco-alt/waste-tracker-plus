@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import {
@@ -34,11 +35,15 @@ import {
   FileCheck,
   Factory,
   Link as LinkIcon,
+  PenTool,
+  X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
+import BatchSignatureDialog from '@/components/signatures/BatchSignatureDialog';
+import type { BatchDocument } from '@/components/signatures/BatchSignatureDialog';
 
 interface LinkedPartner {
   id: string;
@@ -74,6 +79,8 @@ const TransporterShipments = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [partnerFilter, setPartnerFilter] = useState('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchSignOpen, setBatchSignOpen] = useState(false);
 
   const statusOptions = [
     { value: 'all', label: t('shipments.allStatuses') },
@@ -232,6 +239,33 @@ const TransporterShipments = () => {
     linkedPartners: linkedPartners.length,
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredShipments.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredShipments.map(s => s.id)));
+    }
+  };
+
+  const batchDocuments: BatchDocument[] = filteredShipments
+    .filter(s => selectedIds.has(s.id))
+    .map(s => ({
+      id: s.id,
+      documentType: 'shipment' as const,
+      title: s.shipment_number,
+      subtitle: `${s.generator?.name || ''} → ${s.recycler?.name || ''}`,
+    }));
+
+  const { user } = useAuth();
+
   return (
     <DashboardLayout>
     <div className="space-y-6">
@@ -388,9 +422,15 @@ const TransporterShipments = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table>
+               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-10 text-center">
+                      <Checkbox
+                        checked={filteredShipments.length > 0 && selectedIds.size === filteredShipments.length}
+                        onCheckedChange={toggleSelectAll}
+                      />
+                    </TableHead>
                     <TableHead className="text-right">{t('shipments.shipmentNumber')}</TableHead>
                     <TableHead className="text-right">{t('shipments.wasteType')}</TableHead>
                     <TableHead className="text-right">{t('shipments.quantity')}</TableHead>
@@ -409,8 +449,14 @@ const TransporterShipments = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="border-b hover:bg-muted/50"
+                      className={`border-b hover:bg-muted/50 ${selectedIds.has(shipment.id) ? 'bg-primary/5' : ''}`}
                     >
+                      <TableCell className="text-center">
+                        <Checkbox
+                          checked={selectedIds.has(shipment.id)}
+                          onCheckedChange={() => toggleSelect(shipment.id)}
+                        />
+                      </TableCell>
                       <TableCell className="font-medium">{shipment.shipment_number}</TableCell>
                       <TableCell>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</TableCell>
                       <TableCell>{shipment.quantity} {shipment.unit}</TableCell>
@@ -488,6 +534,42 @@ const TransporterShipments = () => {
         </CardContent>
       </Card>
     </div>
+
+    {/* Floating Batch Action Bar */}
+    <AnimatePresence>
+      {selectedIds.size > 0 && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 80, opacity: 0 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-card border shadow-lg rounded-xl px-5 py-3 flex items-center gap-4"
+          dir="rtl"
+        >
+          <Badge variant="secondary" className="text-sm px-3 py-1">
+            {selectedIds.size} محدد
+          </Badge>
+          <Button size="sm" className="gap-2" onClick={() => setBatchSignOpen(true)}>
+            <PenTool className="w-4 h-4" />
+            توقيع وختم جماعي
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
+            <X className="w-4 h-4" />
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
+    <BatchSignatureDialog
+      open={batchSignOpen}
+      onOpenChange={setBatchSignOpen}
+      documents={batchDocuments}
+      organizationId={organization?.id || ''}
+      userId={user?.id || ''}
+      onComplete={() => {
+        setSelectedIds(new Set());
+        fetchShipments();
+      }}
+    />
     </DashboardLayout>
   );
 };
