@@ -604,6 +604,288 @@ const WhyUsSection = memo(() => (
 WhyUsSection.displayName = "WhyUsSection";
 
 /* ─────────────────────────────────────────────
+   Section 10: نماذج الاستخدام الرئيسية
+   ───────────────────────────────────────────── */
+const UseCasesSection = memo(() => (
+  <div className="py-16 sm:py-24 bg-[hsl(var(--landing-muted))]">
+    <div className="container px-4">
+      <motion.div
+        className="text-center mb-16"
+        initial="hidden" whileInView="visible" viewport={{ once: true }}
+        variants={fadeIn}
+      >
+        <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(var(--eco-emerald))] mb-2">نماذج لاستخدامات المنصة</h2>
+        <p className="text-lg text-[hsl(var(--landing-muted-foreground))]">استخدامات المنصة الرئيسية</p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          {
+            title: "معالجة الفواتير",
+            desc: "أتمتة استخراج تفاصيل الفاتورة، وشروط الدفع، والتسوية مع أنظمة ERP.",
+            icon: FileText,
+            tags: ["تاريخ الفاتورة", "البنود", "الإجمالي"],
+            status: "success" as const,
+          },
+          {
+            title: "الخدمات اللوجستية وسلسلة الإمداد",
+            desc: "التحقق من مستندات الشحن، وفواتير الموردين، وكتالوجات المنتجات.",
+            icon: Truck,
+            tags: ["عنوان الاستلام", "عنوان التسليم", "حالة الدفع"],
+            status: "success" as const,
+          },
+          {
+            title: "التأمين وكشف الاحتيال",
+            desc: "تسريع معالجة الطلبات، كشف الاحتيال، ودعم إصدار الوثائق التأمينية.",
+            icon: Shield,
+            tags: ["رقم الهوية", "رقم التأمين"],
+            status: "error" as const,
+          },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            className="bg-white rounded-2xl overflow-hidden border border-[hsl(var(--landing-border))] shadow-sm"
+            custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
+            variants={fadeUp}
+          >
+            <div className="bg-[hsl(200,40%,96%)] p-6 text-right">
+              <div className="flex items-center gap-3 justify-end mb-3">
+                <h3 className="font-bold text-lg text-[hsl(var(--landing-foreground))]">{item.title}</h3>
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-[hsl(var(--eco-emerald))]" />
+                </div>
+              </div>
+              <p className="text-sm text-[hsl(var(--landing-muted-foreground))] leading-relaxed">{item.desc}</p>
+            </div>
+            <div className="p-5">
+              <div className="flex flex-wrap gap-2 justify-end">
+                {item.tags.map((tag, j) => (
+                  <span
+                    key={j}
+                    className={`text-xs px-3 py-1.5 rounded-full font-medium ${
+                      item.status === "error" && j === item.tags.length - 1
+                        ? "bg-red-50 text-red-600 border border-red-200"
+                        : "bg-[hsl(var(--eco-emerald))]/10 text-[hsl(var(--eco-emerald))] border border-[hsl(var(--eco-emerald))]/20"
+                    }`}
+                  >
+                    {item.status === "error" && j === item.tags.length - 1 ? "⚠ " : "✓ "}
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  </div>
+));
+UseCasesSection.displayName = "UseCasesSection";
+
+/* ─────────────────────────────────────────────
+   Section 11: الامتثال وإدارة المخاطر
+   ───────────────────────────────────────────── */
+const ComplianceSection = memo(() => (
+  <div className="py-16 sm:py-24">
+    <div className="container px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        {/* Right - Title */}
+        <motion.div
+          className="text-right order-1"
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(var(--landing-foreground))]">الامتثال</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(var(--eco-emerald))] mb-8">وإدارة المخاطر</h2>
+
+          <div className="space-y-4">
+            {[
+              {
+                title: "التحقق من الهوية القانونية للعملاء (KYC)",
+                desc: "استخراج والتحقق من هويات العملاء لتسريع إجراءات الانضمام.",
+                color: "bg-[hsl(200,40%,96%)]",
+              },
+              {
+                title: "الامتثال التنظيمي والتدقيق",
+                desc: "مراجعة المستندات المالية والتشغيلية للتأكد من مطابقتها للمعايير المعتمدة في الصناعة.",
+                color: "bg-[hsl(200,30%,95%)]",
+              },
+              {
+                title: "كشف الاحتيال",
+                desc: "رصد الشذوذ في العقود والمعاملات ومطالبات التأمين وتذاكر الوزن.",
+                color: "bg-[hsl(200,40%,96%)]",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                className={`${item.color} rounded-xl p-5 text-right border border-[hsl(200,30%,90%)]`}
+                custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
+                variants={fadeUp}
+              >
+                <h4 className="font-bold text-[hsl(var(--landing-foreground))] mb-1">{item.title}</h4>
+                <p className="text-sm text-[hsl(var(--landing-muted-foreground))]">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Left - Visual */}
+        <motion.div
+          className="order-2 flex flex-col items-center gap-6"
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <div className="bg-white rounded-2xl p-6 border border-[hsl(var(--landing-border))] shadow-sm text-center">
+              <FileSearch className="w-8 h-8 text-[hsl(var(--eco-emerald))] mx-auto mb-2" />
+              <p className="text-sm font-medium text-[hsl(var(--landing-foreground))]">التحقق من التوقيعات</p>
+            </div>
+            <div className="text-3xl text-[hsl(var(--landing-muted-foreground))]">←</div>
+            <div className="w-16 h-16 rounded-full bg-[hsl(var(--eco-emerald))]/10 flex items-center justify-center">
+              <CheckCircle2 className="w-8 h-8 text-[hsl(var(--eco-emerald))]" />
+            </div>
+          </div>
+          <p className="text-lg font-bold text-[hsl(var(--eco-emerald))]">موثوق ✓</p>
+          <div className="bg-[hsl(200,40%,96%)] rounded-xl p-4 text-center max-w-xs">
+            <p className="text-sm text-[hsl(var(--landing-muted-foreground))]">
+              نظام تحقق آلي متعدد المراحل يضمن صحة التوقيعات والأختام والبيانات القانونية مع بصمة رقمية SHA-256
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  </div>
+));
+ComplianceSection.displayName = "ComplianceSection";
+
+/* ─────────────────────────────────────────────
+   Section 12: رحلة التكامل
+   ───────────────────────────────────────────── */
+const IntegrationJourneySection = memo(() => {
+  const steps = [
+    { num: 1, title: "البحث وتقييم الاحتياجات", desc: "فهم سير عمل العميل ومتطلبات الامتثال الخاصة به", highlighted: true },
+    { num: 2, title: "الإعداد والتكامل", desc: "ربط المنصة بأنظمة ERP وCRM وأنظمة المستندات", highlighted: false },
+    { num: 3, title: "تدريب وتكوين الذكاء الاصطناعي", desc: "تخصيص النماذج بحسب القطاع وأنواع المستندات", highlighted: true },
+    { num: 4, title: "التحقق بمشاركة العنصر البشري", desc: "التأكد من الجودة عبر التجارب والاختبارات والتحقق", highlighted: false },
+    { num: 5, title: "النشر وتشغيل النظام", desc: "إطلاق المنصة بأقل قدر ممكن من المشكلات", highlighted: true },
+    { num: 6, title: "الدعم المستمر والتحسين", desc: "مراقبة مستمرة، تحديثات، وتوسيع نطاق الاستخدام", highlighted: true },
+  ];
+
+  return (
+    <div className="py-16 sm:py-24 bg-[hsl(var(--landing-muted))]">
+      <div className="container px-4">
+        <motion.div
+          className="text-right mb-16"
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(var(--landing-foreground))]">رحلة التكامل</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-[hsl(var(--eco-emerald))]">مع iRecycle</h2>
+        </motion.div>
+
+        <div className="space-y-4 max-w-3xl mr-auto">
+          {steps.map((step, i) => (
+            <motion.div
+              key={i}
+              className={`flex items-center gap-4 rounded-xl p-5 ${
+                step.highlighted
+                  ? "bg-[hsl(var(--eco-emerald))] text-white"
+                  : "bg-white border border-[hsl(var(--landing-border))]"
+              }`}
+              custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
+              variants={fadeUp}
+            >
+              <span className={`text-4xl font-bold flex-shrink-0 w-12 text-center ${
+                step.highlighted ? "text-white/30" : "text-[hsl(var(--landing-border))]"
+              }`}>
+                {step.num}
+              </span>
+              <div className="text-right flex-1">
+                <h4 className={`font-bold ${step.highlighted ? "" : "text-[hsl(var(--landing-foreground))]"}`}>
+                  {step.title}
+                </h4>
+                <p className={`text-sm ${step.highlighted ? "text-white/80" : "text-[hsl(var(--landing-muted-foreground))]"}`}>
+                  {step.desc}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+});
+IntegrationJourneySection.displayName = "IntegrationJourneySection";
+
+/* ─────────────────────────────────────────────
+   Section 13: OCR vs فهم المستندات
+   ───────────────────────────────────────────── */
+const OcrVsAiSection = memo(() => (
+  <div className="py-16 sm:py-24">
+    <div className="container px-4">
+      {/* Comparison */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mb-16 rounded-2xl overflow-hidden border border-[hsl(var(--landing-border))] shadow-sm">
+        <motion.div
+          className="bg-[hsl(0,0%,95%)] p-8 sm:p-12 text-center"
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <h3 className="text-3xl font-bold text-[hsl(var(--landing-foreground))] mb-4">OCR</h3>
+          <p className="text-[hsl(var(--landing-muted-foreground))] text-lg">يقرأ النص فقط</p>
+        </motion.div>
+        <motion.div
+          className="bg-[hsl(200,40%,96%)] p-8 sm:p-12 text-center"
+          initial="hidden" whileInView="visible" viewport={{ once: true }}
+          variants={fadeIn}
+        >
+          <h3 className="text-3xl font-bold text-[hsl(var(--eco-emerald))] mb-4">فهم المستندات</h3>
+          <p className="text-[hsl(var(--landing-foreground))] text-lg">
+            تفهم <span className="font-bold">السياق، والهدف، والعلاقات، والإجراءات</span> المرتبطة بها
+          </p>
+        </motion.div>
+      </div>
+
+      {/* VS badge */}
+      <div className="flex justify-center -mt-24 mb-8 relative z-10">
+        <div className="w-16 h-16 rounded-full bg-white border-4 border-[hsl(var(--landing-border))] flex items-center justify-center shadow-lg">
+          <span className="text-xl font-black text-[hsl(var(--landing-foreground))]">VS</span>
+        </div>
+      </div>
+
+      {/* Core Features */}
+      <motion.div
+        className="text-right mb-8"
+        initial="hidden" whileInView="visible" viewport={{ once: true }}
+        variants={fadeIn}
+      >
+        <h3 className="text-2xl font-bold text-[hsl(var(--landing-foreground))]">الميزات الأساسية</h3>
+      </motion.div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { title: "متعدد اللغات", desc: "العربية، الإنجليزية، الفرنسية، الألمانية، الإسبانية..." },
+          { title: "الاعتماد على API", desc: "هيكلية قابلة للتوسع للتكامل مع أي نظام" },
+          { title: "الصيغات المدعومة", desc: "PDF، Word، الصور الممسوحة ضوئياً، والمستندات المكتوبة يدوياً" },
+          { title: "المخرجات", desc: "JSON، XML، Excel، PDF" },
+          { title: "النشر الآمن", desc: "سحابي وعلى الخوادم المحلية (On-Premise)" },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            className="bg-white rounded-xl p-5 text-right border border-[hsl(var(--landing-border))] shadow-sm"
+            custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
+            variants={fadeUp}
+          >
+            <h4 className="font-bold text-[hsl(var(--eco-emerald))] mb-1">{item.title}</h4>
+            <p className="text-sm text-[hsl(var(--landing-muted-foreground))]">{item.desc}</p>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  </div>
+));
+OcrVsAiSection.displayName = "OcrVsAiSection";
+
+/* ─────────────────────────────────────────────
    Main Export
    ───────────────────────────────────────────── */
 const DocumentAIShowcase = memo(() => (
@@ -617,6 +899,10 @@ const DocumentAIShowcase = memo(() => (
     <IndustriesSection />
     <FeaturesSection />
     <WhyUsSection />
+    <UseCasesSection />
+    <ComplianceSection />
+    <IntegrationJourneySection />
+    <OcrVsAiSection />
   </section>
 ));
 DocumentAIShowcase.displayName = "DocumentAIShowcase";
