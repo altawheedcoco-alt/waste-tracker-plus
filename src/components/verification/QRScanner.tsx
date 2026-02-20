@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
-import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { QrCode, Keyboard, Camera, X, Loader2 } from 'lucide-react';
+import { QrCode, Keyboard, Camera, X, Loader2, SwitchCamera } from 'lucide-react';
 
 interface QRScannerProps {
   onScan: (data: string) => void;
@@ -15,63 +15,73 @@ interface QRScannerProps {
 const QRScanner = ({ onScan, onError, isScanning = false }: QRScannerProps) => {
   const [activeTab, setActiveTab] = useState<'camera' | 'manual'>('camera');
   const [manualCode, setManualCode] = useState('');
-  const [scannerReady, setScannerReady] = useState(false);
+  const [scannerState, setScannerState] = useState<'idle' | 'requesting' | 'scanning' | 'error'>('idle');
   const [cameraError, setCameraError] = useState<string | null>(null);
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (activeTab === 'camera' && containerRef.current) {
-      // تأخير قليل للتأكد من أن العنصر جاهز
-      const timer = setTimeout(() => {
-        try {
-          scannerRef.current = new Html5QrcodeScanner(
-            'qr-reader',
-            {
-              fps: 10,
-              qrbox: { width: 250, height: 250 },
-              supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-              rememberLastUsedCamera: true,
-              showTorchButtonIfSupported: true,
-            },
-            false
-          );
+  const startScanner = useCallback(async () => {
+    if (!containerRef.current) return;
+    
+    setScannerState('requesting');
+    setCameraError(null);
 
-          scannerRef.current.render(
-            (decodedText) => {
-              // تم المسح بنجاح
-              onScan(decodedText);
-              // إيقاف الماسح بعد المسح
-              if (scannerRef.current) {
-                scannerRef.current.clear().catch(console.error);
-              }
-            },
-            (error) => {
-              // تجاهل أخطاء المسح العادية (عندما لا يوجد QR في الإطار)
-              if (!error.includes('No MultiFormat Readers') && !error.includes('NotFoundException')) {
-                console.log('QR Scan error:', error);
-              }
-            }
-          );
+    try {
+      const scanner = new Html5Qrcode('qr-reader-custom');
+      scannerRef.current = scanner;
 
-          setScannerReady(true);
-          setCameraError(null);
-        } catch (err: any) {
-          console.error('Failed to initialize scanner:', err);
-          setCameraError('فشل في تهيئة الكاميرا');
-          onError?.('فشل في تهيئة الكاميرا');
+      await scanner.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        (decodedText) => {
+          onScan(decodedText);
+          scanner.stop().catch(console.error);
+        },
+        () => {
+          // Ignore frame-level scan failures
         }
-      }, 100);
+      );
 
+      setScannerState('scanning');
+    } catch (err: any) {
+      console.error('Camera error:', err);
+      const msg = err?.toString?.() || '';
+      if (msg.includes('NotAllowedError') || msg.includes('Permission')) {
+        setCameraError('تم رفض إذن الكاميرا. يرجى السماح بالوصول للكاميرا من إعدادات المتصفح.');
+      } else if (msg.includes('NotFoundError') || msg.includes('no camera')) {
+        setCameraError('لم يتم العثور على كاميرا في هذا الجهاز.');
+      } else {
+        setCameraError('فشل في تشغيل الكاميرا. تأكد من أن الكاميرا غير مستخدمة بتطبيق آخر.');
+      }
+      setScannerState('error');
+      onError?.(cameraError || 'فشل في تهيئة الكاميرا');
+    }
+  }, [onScan, onError]);
+
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+      } catch {}
+      scannerRef.current = null;
+    }
+    setScannerState('idle');
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'camera') {
+      const timer = setTimeout(() => startScanner(), 200);
       return () => {
         clearTimeout(timer);
-        if (scannerRef.current) {
-          scannerRef.current.clear().catch(console.error);
-          scannerRef.current = null;
-        }
+        stopScanner();
       };
+    } else {
+      stopScanner();
     }
-  }, [activeTab, onScan, onError]);
+  }, [activeTab, startScanner, stopScanner]);
 
   const handleManualSubmit = () => {
     if (manualCode.trim()) {
@@ -81,12 +91,6 @@ const QRScanner = ({ onScan, onError, isScanning = false }: QRScannerProps) => {
   };
 
   const handleTabChange = (value: string) => {
-    // تنظيف الماسح قبل التبديل
-    if (scannerRef.current) {
-      scannerRef.current.clear().catch(console.error);
-      scannerRef.current = null;
-    }
-    setScannerReady(false);
     setActiveTab(value as 'camera' | 'manual');
   };
 
@@ -113,33 +117,31 @@ const QRScanner = ({ onScan, onError, isScanning = false }: QRScannerProps) => {
 
           <TabsContent value="camera" className="mt-0">
             <div className="space-y-4">
-              {cameraError ? (
+              {scannerState === 'error' && cameraError ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <X className="w-12 h-12 mx-auto mb-2 text-destructive" />
-                  <p>{cameraError}</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-4"
-                    onClick={() => handleTabChange('camera')}
+                  <p className="text-sm mb-4">{cameraError}</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => startScanner()}
                   >
                     إعادة المحاولة
                   </Button>
                 </div>
               ) : (
                 <>
-                  <div 
-                    id="qr-reader" 
-                    ref={containerRef}
-                    className="rounded-lg overflow-hidden bg-muted"
-                    style={{ minHeight: '300px' }}
-                  />
-                  {!scannerReady && (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                      <span className="mr-2 text-muted-foreground">جاري تهيئة الكاميرا...</span>
-                    </div>
-                  )}
+                  <div className="relative rounded-lg overflow-hidden bg-black" style={{ minHeight: '300px' }}>
+                    <div id="qr-reader-custom" ref={containerRef} className="w-full" />
+                    
+                    {scannerState === 'requesting' && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/90 gap-3">
+                        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                        <p className="text-sm font-medium text-foreground">جاري طلب إذن الكاميرا...</p>
+                        <p className="text-xs text-muted-foreground">يرجى السماح بالوصول للكاميرا</p>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
               <p className="text-sm text-muted-foreground text-center">
@@ -161,8 +163,8 @@ const QRScanner = ({ onScan, onError, isScanning = false }: QRScannerProps) => {
                   dir="ltr"
                 />
               </div>
-              <Button 
-                onClick={handleManualSubmit} 
+              <Button
+                onClick={handleManualSubmit}
                 className="w-full gap-2"
                 disabled={!manualCode.trim() || isScanning}
               >
