@@ -12,6 +12,7 @@ interface FacilityDashboardHeaderProps {
   userName: string;
   orgName: string;
   orgLabel: string;
+  orgLogoUrl?: string | null;
   icon: LucideIcon;
   iconGradient: string;
   facility?: {
@@ -29,6 +30,7 @@ const FacilityDashboardHeader = ({
   userName,
   orgName,
   orgLabel,
+  orgLogoUrl,
   icon: Icon,
   iconGradient,
   facility,
@@ -101,9 +103,13 @@ const FacilityDashboardHeader = ({
               {orgName} - {orgLabel}
             </p>
           </div>
-          <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${iconGradient} flex items-center justify-center shadow-lg shrink-0`}>
-            <Icon className="w-7 h-7 text-white" />
-          </div>
+          {orgLogoUrl ? (
+            <img src={orgLogoUrl} alt={orgName} className="w-14 h-14 rounded-xl object-cover shadow-lg shrink-0" />
+          ) : (
+            <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${iconGradient} flex items-center justify-center shadow-lg shrink-0`}>
+              <Icon className="w-7 h-7 text-white" />
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
