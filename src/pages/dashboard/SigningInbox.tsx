@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import {
   Send, Inbox, FileSignature, Clock, CheckCircle2, XCircle, Eye,
   Loader2, AlertTriangle, Stamp, ArrowLeft, Building2, User, Calendar,
-  FileText, ExternalLink, PenTool, FolderOpen,
+  FileText, ExternalLink, PenTool, FolderOpen, Upload, Paperclip, X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -172,6 +172,8 @@ export default function SigningInbox() {
   const [rejectReason, setRejectReason] = useState('');
   const [signingRequest, setSigningRequest] = useState<SigningRequest | null>(null);
   const [signLoading, setSignLoading] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     recipient_organization_id: '',
     document_title: '',
@@ -234,14 +236,42 @@ export default function SigningInbox() {
     enabled: !!profile?.organization_id,
   });
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!form.recipient_organization_id || !form.document_title) {
       toast.error('اختر الجهة وعنوان المستند');
       return;
     }
-    sendRequest.mutate(form, {
+    
+    let documentUrl: string | undefined;
+    
+    // Upload file if selected
+    if (uploadFile && profile?.organization_id) {
+      setUploading(true);
+      try {
+        const ext = uploadFile.name.split('.').pop() || 'pdf';
+        const path = `${profile.organization_id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('signing-documents')
+          .upload(path, uploadFile);
+        if (uploadError) throw uploadError;
+        
+        // Get signed URL (valid for 1 year)
+        const { data: urlData } = await supabase.storage
+          .from('signing-documents')
+          .createSignedUrl(path, 365 * 24 * 3600);
+        documentUrl = urlData?.signedUrl || undefined;
+      } catch (err: any) {
+        toast.error('فشل في رفع الملف: ' + (err.message || ''));
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    }
+    
+    sendRequest.mutate({ ...form, document_url: documentUrl }, {
       onSuccess: () => {
         setSendOpen(false);
+        setUploadFile(null);
         setForm({ recipient_organization_id: '', document_title: '', document_description: '', message: '', priority: 'normal', requires_stamp: false, document_type: 'general' });
       },
     });
@@ -401,6 +431,39 @@ export default function SigningInbox() {
                 <Label>رسالة للمستلم</Label>
                 <Textarea value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} placeholder="أرجو التكرم بالتوقيع على..." className="text-right" rows={2} />
               </div>
+              <div>
+                <Label>إرفاق مستند (PDF / صورة)</Label>
+                {uploadFile ? (
+                  <div className="flex items-center gap-2 mt-1 p-2 rounded-lg border bg-muted/50">
+                    <Paperclip className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="text-sm truncate flex-1">{uploadFile.name}</span>
+                    <span className="text-xs text-muted-foreground">({(uploadFile.size / 1024).toFixed(0)} KB)</span>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => setUploadFile(null)} className="h-6 w-6 p-0">
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label className="flex items-center gap-2 mt-1 p-3 rounded-lg border-2 border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
+                    <Upload className="w-5 h-5 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">اضغط لاختيار ملف...</span>
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
+                      className="hidden"
+                      onChange={e => {
+                        const f = e.target.files?.[0];
+                        if (f) {
+                          if (f.size > 20 * 1024 * 1024) {
+                            toast.error('حجم الملف يجب أن يكون أقل من 20 ميجابايت');
+                            return;
+                          }
+                          setUploadFile(f);
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>الأولوية</Label>
@@ -427,9 +490,9 @@ export default function SigningInbox() {
                   </div>
                 </div>
               </div>
-              <Button onClick={handleSend} disabled={sendRequest.isPending} className="w-full gap-2">
-                {sendRequest.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                إرسال الطلب
+              <Button onClick={handleSend} disabled={sendRequest.isPending || uploading} className="w-full gap-2">
+                {(sendRequest.isPending || uploading) ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {uploading ? 'جارٍ رفع الملف...' : 'إرسال الطلب'}
               </Button>
             </div>
           </DialogContent>
