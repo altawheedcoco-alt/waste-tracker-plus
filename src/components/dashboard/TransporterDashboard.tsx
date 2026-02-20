@@ -44,7 +44,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat } from 'lucide-react';
 
 // Lazy load heavy tab content
 const DriverPerformancePanel = lazy(() => import('./transporter/DriverPerformancePanel'));
@@ -81,6 +81,7 @@ const ChainOfCustodyPanel = lazy(() => import('./transporter/ChainOfCustodyPanel
 const GovernmentReportingPanel = lazy(() => import('./transporter/GovernmentReportingPanel'));
 const CarbonCreditsPanel = lazy(() => import('./transporter/CarbonCreditsPanel'));
 const IoTMonitoringPanel = lazy(() => import('./transporter/IoTMonitoringPanel'));
+const OHSReportPanel = lazy(() => import('@/components/ohs/OHSReportPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -108,6 +109,7 @@ const tabItems = [
   { value: 'partners', label: 'الجهات المرتبطة', icon: Handshake },
   { value: 'tracking', label: 'تتبع السائقين', icon: MapPin },
   { value: 'compliance', label: 'الامتثال', icon: Shield },
+  { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
 ];
 
 const TransporterDashboard = () => {
@@ -398,6 +400,14 @@ const TransporterDashboard = () => {
               <VehicleComplianceManager />
               <DriverComplianceManager />
               <IncidentReportManager />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="ohs" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في تقارير السلامة المهنية">
+                <OHSReportPanel />
+              </ErrorBoundary>
             </Suspense>
           </TabsContent>
         </Tabs>
