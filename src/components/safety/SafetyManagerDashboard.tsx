@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { useSafetyStats } from '@/hooks/useSafetyManager';
 import {
   Shield, AlertTriangle, ClipboardCheck, FileWarning,
-  HardHat, Siren, Users, TrendingUp, Activity, Flame
+  HardHat, Siren, Users, TrendingUp, Activity, Flame, GraduationCap
 } from 'lucide-react';
 
 const EmergencyPlansPanel = lazy(() => import('./EmergencyPlansPanel'));
@@ -15,6 +15,7 @@ const EvacuationDrillsPanel = lazy(() => import('./EvacuationDrillsPanel'));
 const WorkPermitsPanel = lazy(() => import('./WorkPermitsPanel'));
 const OHSReportPanel = lazy(() => import('@/components/ohs/OHSReportPanel'));
 const IncidentReportManager = lazy(() => import('@/components/compliance/IncidentReportManager'));
+const SafetyTrainingPanel = lazy(() => import('./SafetyTrainingPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -40,6 +41,7 @@ const SafetyManagerDashboard = () => {
     { value: 'emergency', label: 'خطط الطوارئ', icon: Siren },
     { value: 'drills', label: 'تدريبات الإخلاء', icon: Flame },
     { value: 'permits', label: 'تصاريح العمل', icon: FileWarning },
+    { value: 'training', label: 'الدورات والكروت', icon: GraduationCap },
     { value: 'incidents', label: 'سجل الحوادث', icon: AlertTriangle },
     { value: 'ohs', label: 'تقارير OHS', icon: ClipboardCheck },
   ];
@@ -173,6 +175,12 @@ const SafetyManagerDashboard = () => {
         <TabsContent value="permits" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <WorkPermitsPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="training" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <SafetyTrainingPanel />
           </Suspense>
         </TabsContent>
 

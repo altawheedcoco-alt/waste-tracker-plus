@@ -20471,6 +20471,175 @@ export type Database = {
           },
         ]
       }
+      safety_training_courses: {
+        Row: {
+          certificate_validity_months: number | null
+          course_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duration_hours: number
+          id: string
+          instructor_name: string | null
+          instructor_qualification: string | null
+          is_active: boolean
+          max_participants: number | null
+          organization_id: string
+          passing_score: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_validity_months?: number | null
+          course_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_hours?: number
+          id?: string
+          instructor_name?: string | null
+          instructor_qualification?: string | null
+          is_active?: boolean
+          max_participants?: number | null
+          organization_id: string
+          passing_score?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_validity_months?: number | null
+          course_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duration_hours?: number
+          id?: string
+          instructor_name?: string | null
+          instructor_qualification?: string | null
+          is_active?: boolean
+          max_participants?: number | null
+          organization_id?: string
+          passing_score?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_training_courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_training_courses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safety_training_records: {
+        Row: {
+          attendance_status: string
+          card_expires_at: string | null
+          card_issued: boolean
+          card_issued_at: string | null
+          card_number: string | null
+          card_qr_data: string | null
+          course_id: string
+          created_at: string
+          id: string
+          issued_by: string | null
+          notes: string | null
+          organization_id: string
+          passed: boolean
+          score: number | null
+          trainee_department: string | null
+          trainee_email: string | null
+          trainee_job_title: string | null
+          trainee_name: string
+          trainee_national_id: string | null
+          trainee_phone: string | null
+          trainee_photo_url: string | null
+          training_date: string
+          updated_at: string
+        }
+        Insert: {
+          attendance_status?: string
+          card_expires_at?: string | null
+          card_issued?: boolean
+          card_issued_at?: string | null
+          card_number?: string | null
+          card_qr_data?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          notes?: string | null
+          organization_id: string
+          passed?: boolean
+          score?: number | null
+          trainee_department?: string | null
+          trainee_email?: string | null
+          trainee_job_title?: string | null
+          trainee_name: string
+          trainee_national_id?: string | null
+          trainee_phone?: string | null
+          trainee_photo_url?: string | null
+          training_date: string
+          updated_at?: string
+        }
+        Update: {
+          attendance_status?: string
+          card_expires_at?: string | null
+          card_issued?: boolean
+          card_issued_at?: string | null
+          card_number?: string | null
+          card_qr_data?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          notes?: string | null
+          organization_id?: string
+          passed?: boolean
+          score?: number | null
+          trainee_department?: string | null
+          trainee_email?: string | null
+          trainee_job_title?: string | null
+          trainee_name?: string
+          trainee_national_id?: string | null
+          trainee_phone?: string | null
+          trainee_photo_url?: string | null
+          training_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_training_records_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "safety_training_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_training_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_training_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_jobs: {
         Row: {
           created_at: string
