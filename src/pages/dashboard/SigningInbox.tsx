@@ -3,7 +3,7 @@ import BackButton from '@/components/ui/back-button';
 import { useSigningInbox, SigningRequest } from '@/hooks/useSigningInbox';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,9 +18,14 @@ import { toast } from 'sonner';
 import {
   Send, Inbox, FileSignature, Clock, CheckCircle2, XCircle, Eye,
   Loader2, AlertTriangle, Stamp, ArrowLeft, Building2, User, Calendar,
+  FileText, ExternalLink, PenTool,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import UniversalSignatureDialog from '@/components/signatures/UniversalSignatureDialog';
+import { saveDocumentSignature } from '@/components/signatures/signatureService';
+import type { SignatureData } from '@/components/signatures/UniversalSignatureDialog';
+import SignatureBadges from '@/components/signatures/SignatureBadges';
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   pending: { label: 'في الانتظار', icon: Clock, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
@@ -38,10 +43,37 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
   urgent: { label: 'طارئ', color: 'bg-red-100 text-red-800' },
 };
 
+function SignedDocumentView({ request }: { request: SigningRequest }) {
+  const { data: signatures, isLoading } = useQuery({
+    queryKey: ['signing-request-signatures', request.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('document_signatures')
+        .select('*')
+        .eq('document_id', request.id)
+        .order('created_at', { ascending: false });
+      return data || [];
+    },
+    enabled: request.status === 'signed',
+  });
+
+  if (request.status !== 'signed' || isLoading || !signatures?.length) return null;
+
+  return (
+    <div className="mt-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/20">
+      <div className="flex items-center gap-2 mb-2 text-sm font-medium text-green-800 dark:text-green-300">
+        <CheckCircle2 className="w-4 h-4" />
+        <span>تم التوقيع والختم</span>
+      </div>
+      <SignatureBadges signatures={signatures as any} compact />
+    </div>
+  );
+}
+
 function RequestCard({ request, type, onSign, onReject, onView }: {
   request: SigningRequest;
   type: 'incoming' | 'outgoing';
-  onSign: (id: string) => void;
+  onSign: (req: SigningRequest) => void;
   onReject: (id: string) => void;
   onView: (id: string) => void;
 }) {
@@ -57,19 +89,19 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex gap-2 flex-shrink-0">
-            {type === 'incoming' && request.status === 'pending' && (
+            {type === 'incoming' && (request.status === 'pending' || request.status === 'viewed') && (
               <>
-                <Button size="sm" onClick={() => onSign(request.id)} className="gap-1">
-                  <FileSignature className="w-3 h-3" /> وقّع
+                <Button size="sm" onClick={() => onSign(request)} className="gap-1">
+                  <PenTool className="w-3 h-3" /> وقّع وأختم
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => onReject(request.id)} className="gap-1 text-destructive">
                   <XCircle className="w-3 h-3" /> ارفض
                 </Button>
               </>
             )}
-            {type === 'incoming' && request.status === 'viewed' && (
-              <Button size="sm" onClick={() => onSign(request.id)} className="gap-1">
-                <FileSignature className="w-3 h-3" /> وقّع
+            {request.document_url && (
+              <Button size="sm" variant="ghost" onClick={() => window.open(request.document_url!, '_blank')} className="gap-1">
+                <FileText className="w-3 h-3" /> عرض المستند
               </Button>
             )}
           </div>
@@ -118,6 +150,9 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
                 </span>
               )}
             </div>
+
+            {/* Show signatures if signed */}
+            <SignedDocumentView request={request} />
           </div>
         </div>
       </CardContent>
@@ -128,9 +163,12 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
 export default function SigningInbox() {
   const { incoming, outgoing, isLoading, sendRequest, updateStatus } = useSigningInbox();
   const { profile } = useAuth();
+  const queryClient = useQueryClient();
   const [sendOpen, setSendOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [signingRequest, setSigningRequest] = useState<SigningRequest | null>(null);
+  const [signLoading, setSignLoading] = useState(false);
   const [form, setForm] = useState({
     recipient_organization_id: '',
     document_title: '',
@@ -139,6 +177,24 @@ export default function SigningInbox() {
     priority: 'normal',
     requires_stamp: false,
     document_type: 'general',
+  });
+
+  // Fetch org stamp
+  const { data: orgStamp } = useQuery({
+    queryKey: ['org-stamp', profile?.organization_id],
+    queryFn: async () => {
+      if (!profile?.organization_id) return null;
+      const { data } = await supabase
+        .from('organization_stamps')
+        .select('stamp_image_url')
+        .eq('organization_id', profile.organization_id)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data?.stamp_image_url || null;
+    },
+    enabled: !!profile?.organization_id,
   });
 
   // Fetch partner organizations
@@ -152,7 +208,6 @@ export default function SigningInbox() {
         .eq('organization_id', profile.organization_id)
         .eq('status', 'active');
       
-      // Also get reverse links
       const { data: reverseData } = await supabase
         .from('partner_links')
         .select('organization_id, organizations!partner_links_organization_id_fkey(id, name)')
@@ -189,10 +244,42 @@ export default function SigningInbox() {
     });
   };
 
-  const handleSign = (id: string) => {
-    updateStatus.mutate({ id, status: 'signed' }, {
-      onSuccess: () => toast.success('تم التوقيع بنجاح ✅'),
-    });
+  const handleOpenSignDialog = (req: SigningRequest) => {
+    // Mark as viewed first
+    if (req.status === 'pending') {
+      updateStatus.mutate({ id: req.id, status: 'viewed' });
+    }
+    setSigningRequest(req);
+  };
+
+  const handleSignComplete = async (signatureData: SignatureData) => {
+    if (!signingRequest || !profile) return;
+    setSignLoading(true);
+    try {
+      const result = await saveDocumentSignature({
+        signatureData,
+        documentType: (signingRequest.document_type as any) || 'other',
+        documentId: signingRequest.id,
+        organizationId: profile.organization_id!,
+        userId: profile.user_id,
+      });
+
+      if (result.success) {
+        // Update signing request status
+        await updateStatus.mutateAsync({
+          id: signingRequest.id,
+          status: 'signed',
+        });
+        // Invalidate signatures query
+        queryClient.invalidateQueries({ queryKey: ['signing-request-signatures', signingRequest.id] });
+        setSigningRequest(null);
+      }
+    } catch (err) {
+      console.error('Sign error:', err);
+      toast.error('فشل في إتمام التوقيع');
+    } finally {
+      setSignLoading(false);
+    }
   };
 
   const handleReject = () => {
@@ -204,14 +291,6 @@ export default function SigningInbox() {
         setRejectReason('');
       },
     });
-  };
-
-  // Mark as viewed when viewing incoming pending
-  const handleMarkViewed = (id: string) => {
-    const req = incoming.find(r => r.id === id);
-    if (req && req.status === 'pending') {
-      updateStatus.mutate({ id, status: 'viewed' });
-    }
   };
 
   const pendingCount = incoming.filter(r => r.status === 'pending' || r.status === 'viewed').length;
@@ -384,9 +463,9 @@ export default function SigningInbox() {
                 key={req.id}
                 request={req}
                 type="incoming"
-                onSign={handleSign}
+                onSign={handleOpenSignDialog}
                 onReject={id => setRejectOpen(id)}
-                onView={handleMarkViewed}
+                onView={() => {}}
               />
             ))
           )}
@@ -435,6 +514,25 @@ export default function SigningInbox() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Signature Dialog */}
+      {signingRequest && (
+        <UniversalSignatureDialog
+          open={!!signingRequest}
+          onOpenChange={(open) => { if (!open) setSigningRequest(null); }}
+          onSign={handleSignComplete}
+          documentType={(signingRequest.document_type as any) || 'other'}
+          documentId={signingRequest.id}
+          documentTitle={signingRequest.document_title}
+          organizationId={profile?.organization_id || ''}
+          organizationStampUrl={orgStamp || undefined}
+          signerDefaults={{
+            name: profile?.full_name || '',
+            title: '',
+          }}
+          loading={signLoading}
+        />
+      )}
     </div>
   );
 }

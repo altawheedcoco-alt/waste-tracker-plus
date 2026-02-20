@@ -836,6 +836,7 @@ const Notifications = () => {
           onNavigateToShipment={handleNavigateToShipment}
           onNavigateToRequest={handleNavigateToRequest}
           onNavigateToCarbonFootprint={handleNavigateToCarbonFootprint}
+          onNavigateToSigningInbox={() => navigate('/dashboard/signing-inbox')}
         />
       </ResponsivePageContainer>
       </div>

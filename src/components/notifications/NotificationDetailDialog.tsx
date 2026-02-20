@@ -66,6 +66,7 @@ interface NotificationDetailDialogProps {
   onNavigateToShipment: (shipmentId: string) => void;
   onNavigateToRequest: (requestId?: string) => void;
   onNavigateToCarbonFootprint: () => void;
+  onNavigateToSigningInbox?: () => void;
 }
 
 const getNotificationIcon = (type: string | null) => {
@@ -85,6 +86,8 @@ const getNotificationIcon = (type: string | null) => {
       return FileText;
     case 'warning':
       return AlertCircle;
+    case 'signing_request':
+      return FileText;
     default:
       return Info;
   }
@@ -107,6 +110,8 @@ const getNotificationColor = (type: string | null) => {
       return 'bg-indigo-500/10 text-indigo-500';
     case 'warning':
       return 'bg-red-500/10 text-red-500';
+    case 'signing_request':
+      return 'bg-indigo-500/10 text-indigo-500';
     default:
       return 'bg-muted text-muted-foreground';
   }
@@ -132,6 +137,8 @@ const getNotificationBadge = (type: string | null) => {
       return { label: 'تحذير', variant: 'destructive' as const };
     case 'approval_request':
       return { label: 'طلب موافقة', variant: 'secondary' as const };
+    case 'signing_request':
+      return { label: 'طلب توقيع', variant: 'default' as const };
     default:
       return { label: 'إشعار', variant: 'outline' as const };
   }
@@ -159,6 +166,7 @@ const NotificationDetailDialog = ({
   onNavigateToShipment,
   onNavigateToRequest,
   onNavigateToCarbonFootprint,
+  onNavigateToSigningInbox,
 }: NotificationDetailDialogProps) => {
   const { profile } = useAuth();
   const [senderReceiverInfo, setSenderReceiverInfo] = useState<SenderReceiverInfo | null>(null);
@@ -557,6 +565,21 @@ const NotificationDetailDialog = ({
               >
                 <FileText className="w-4 h-4" />
                 عرض تفاصيل الطلب
+                <ExternalLink className="w-3 h-3" />
+              </Button>
+            )}
+
+            {notification.type === 'signing_request' && onNavigateToSigningInbox && (
+              <Button
+                variant="default"
+                className="gap-2"
+                onClick={() => {
+                  onOpenChange(false);
+                  onNavigateToSigningInbox();
+                }}
+              >
+                <FileText className="w-4 h-4" />
+                فتح صندوق التوقيعات
                 <ExternalLink className="w-3 h-3" />
               </Button>
             )}
