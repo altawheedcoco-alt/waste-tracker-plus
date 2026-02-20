@@ -492,7 +492,7 @@ const EnhancedLocationPicker = ({
           </TabsList>
         </div>
 
-        {/* Manual Text Input Tab - Quick Entry */}
+        {/* Manual Text Input Tab - Quick Entry with Autocomplete */}
         <TabsContent value="manual" className="mt-3">
           <Card>
             <CardContent className="p-4 space-y-3">
@@ -500,14 +500,47 @@ const EnhancedLocationPicker = ({
                 <MapPin className="w-4 h-4 text-primary" />
                 <span>إدخال العنوان يدوياً بسرعة</span>
               </div>
-              <Input
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                placeholder="اكتب العنوان الكامل هنا... مثال: المنطقة الصناعية، المحلة الكبرى، الغربية"
-                dir="rtl"
-              />
+              <div className="relative">
+                <Input
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  placeholder="اكتب العنوان... ستظهر اقتراحات من المواقع المحفوظة"
+                  dir="rtl"
+                />
+                {/* Autocomplete suggestions from saved locations */}
+                {value && value.length >= 2 && (() => {
+                  const suggestions = savedLocations.filter(loc =>
+                    loc.name.toLowerCase().includes(value.toLowerCase()) ||
+                    loc.address.toLowerCase().includes(value.toLowerCase()) ||
+                    loc.city?.toLowerCase().includes(value.toLowerCase()) ||
+                    loc.name_en?.toLowerCase().includes(value.toLowerCase())
+                  );
+                  if (suggestions.length === 0) return null;
+                  return (
+                    <div className="absolute z-50 top-full mt-1 w-full bg-popover border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {suggestions.slice(0, 6).map((loc) => (
+                        <button
+                          key={loc.id}
+                          type="button"
+                          className="w-full text-right px-3 py-2 hover:bg-accent transition-colors flex items-center gap-2 text-sm border-b last:border-b-0"
+                          onClick={() => {
+                            onChange(loc.address, { lat: loc.latitude, lng: loc.longitude });
+                            incrementUsage(loc.id);
+                          }}
+                        >
+                          <Bookmark className="w-3.5 h-3.5 text-primary shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium truncate">{loc.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{loc.address}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
               <p className="text-xs text-muted-foreground">
-                ✏️ اكتب العنوان مباشرة لإنشاء الشحنة بسرعة — يمكن تعديله لاحقاً
+                ✏️ اكتب العنوان — سيتم حفظه تلقائياً واقتراحه لاحقاً
               </p>
             </CardContent>
           </Card>
