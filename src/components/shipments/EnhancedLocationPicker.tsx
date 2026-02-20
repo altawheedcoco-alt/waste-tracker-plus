@@ -122,7 +122,7 @@ const EnhancedLocationPicker = ({
     incrementUsage,
     searchLocations: searchSavedLocations 
   } = useSavedLocations();
-  const [activeTab, setActiveTab] = useState<string>('search');
+  const [activeTab, setActiveTab] = useState<string>('manual');
   
   // Current location state
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -463,7 +463,12 @@ const EnhancedLocationPicker = ({
       {/* Location Selection Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex items-center gap-2 mb-3">
-          <TabsList className="grid flex-1 grid-cols-4 h-auto">
+          <TabsList className="grid flex-1 grid-cols-5 h-auto">
+            <TabsTrigger value="manual" className="flex items-center gap-1 text-xs py-2">
+              <MapPin className="w-3 h-3" />
+              <span className="hidden sm:inline">كتابة</span>
+              <span className="sm:hidden">كتابة</span>
+            </TabsTrigger>
             <TabsTrigger value="search" className="flex items-center gap-1 text-xs py-2">
               <Search className="w-3 h-3" />
               <span className="hidden sm:inline">بحث</span>
@@ -486,6 +491,27 @@ const EnhancedLocationPicker = ({
             </TabsTrigger>
           </TabsList>
         </div>
+
+        {/* Manual Text Input Tab - Quick Entry */}
+        <TabsContent value="manual" className="mt-3">
+          <Card>
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="w-4 h-4 text-primary" />
+                <span>إدخال العنوان يدوياً بسرعة</span>
+              </div>
+              <Input
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder="اكتب العنوان الكامل هنا... مثال: المنطقة الصناعية، المحلة الكبرى، الغربية"
+                dir="rtl"
+              />
+              <p className="text-xs text-muted-foreground">
+                ✏️ اكتب العنوان مباشرة لإنشاء الشحنة بسرعة — يمكن تعديله لاحقاً
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Google Places Search Tab - Primary */}
         <TabsContent value="search" className="mt-3">
