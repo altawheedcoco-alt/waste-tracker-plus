@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { normalizeShipments } from '@/lib/supabaseHelpers';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
@@ -40,7 +40,13 @@ import BackButton from '@/components/ui/back-button';
 import ShipmentRouteMap from '@/components/shipments/ShipmentRouteMap';
 import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import BatchSignatureDialog from '@/components/signatures/BatchSignatureDialog';
+import type { BatchDocument } from '@/components/signatures/BatchSignatureDialog';
+import { PenTool, X } from 'lucide-react';
 
 
 interface Shipment {
@@ -117,6 +123,7 @@ interface Organization {
 
 const ShipmentManagement = () => {
   const { t } = useLanguage();
+  const { user, organization } = useAuth();
 
   const wasteTypes = [
     { value: 'plastic', label: t('shipmentMgmt.plastic') },
@@ -175,6 +182,8 @@ const ShipmentManagement = () => {
   const [expandedShipments, setExpandedShipments] = useState<Set<string>>(new Set());
   const [mapShipment, setMapShipment] = useState<Shipment | null>(null);
   const [printShipment, setPrintShipment] = useState<Shipment | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchSignOpen, setBatchSignOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -691,12 +700,41 @@ const ShipmentManagement = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredShipments.map((shipment) => (
-                  <ShipmentCard
-                    key={shipment.id}
-                    shipment={shipment}
-                    onStatusChange={fetchData}
+                {/* Select All */}
+                <div className="flex items-center gap-3 px-2">
+                  <Checkbox
+                    checked={filteredShipments.length > 0 && selectedIds.size === filteredShipments.length}
+                    onCheckedChange={() => {
+                      if (selectedIds.size === filteredShipments.length) {
+                        setSelectedIds(new Set());
+                      } else {
+                        setSelectedIds(new Set(filteredShipments.map(s => s.id)));
+                      }
+                    }}
                   />
+                  <span className="text-sm text-muted-foreground">تحديد الكل ({filteredShipments.length})</span>
+                </div>
+                {filteredShipments.map((shipment) => (
+                  <div key={shipment.id} className={`flex items-start gap-3 ${selectedIds.has(shipment.id) ? 'ring-1 ring-primary/30 rounded-lg' : ''}`}>
+                    <div className="pt-5 pr-2">
+                      <Checkbox
+                        checked={selectedIds.has(shipment.id)}
+                        onCheckedChange={() => {
+                          setSelectedIds(prev => {
+                            const next = new Set(prev);
+                            if (next.has(shipment.id)) next.delete(shipment.id); else next.add(shipment.id);
+                            return next;
+                          });
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <ShipmentCard
+                        shipment={shipment}
+                        onStatusChange={fetchData}
+                      />
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -718,6 +756,49 @@ const ShipmentManagement = () => {
         isOpen={!!printShipment}
         onClose={() => setPrintShipment(null)}
         shipment={printShipment}
+      />
+
+      {/* Floating Batch Action Bar */}
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-card border shadow-lg rounded-xl px-5 py-3 flex items-center gap-4"
+            dir="rtl"
+          >
+            <Badge variant="secondary" className="text-sm px-3 py-1">
+              {selectedIds.size} محدد
+            </Badge>
+            <Button size="sm" className="gap-2" onClick={() => setBatchSignOpen(true)}>
+              <PenTool className="w-4 h-4" />
+              توقيع وختم جماعي
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
+              <X className="w-4 h-4" />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <BatchSignatureDialog
+        open={batchSignOpen}
+        onOpenChange={setBatchSignOpen}
+        documents={filteredShipments
+          .filter(s => selectedIds.has(s.id))
+          .map(s => ({
+            id: s.id,
+            documentType: 'shipment' as const,
+            title: s.shipment_number,
+            subtitle: `${s.generator?.name || ''} → ${s.recycler?.name || ''}`,
+          }))}
+        organizationId={organization?.id || ''}
+        userId={user?.id || ''}
+        onComplete={() => {
+          setSelectedIds(new Set());
+          fetchData();
+        }}
       />
     </DashboardLayout>
   );
