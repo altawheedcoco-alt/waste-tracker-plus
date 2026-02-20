@@ -147,7 +147,19 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
+        // Force navigation requests to always go to network first
+        navigationPreload: true,
         runtimeCaching: [
+          {
+            // HTML pages - always network first to get latest version
+            urlPattern: /^https:\/\/.*\/?$/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "pages-cache",
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 },
+              networkTimeoutSeconds: 5,
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: "StaleWhileRevalidate",

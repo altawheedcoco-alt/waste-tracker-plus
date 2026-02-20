@@ -26,18 +26,21 @@ if (rootElement) {
 // Defer all service worker operations to after render
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Clean old caches in background
+    // Aggressively clean ALL old caches to prevent stale content
     if ('caches' in window) {
       caches.keys().then(names => {
         names.forEach(name => {
-          if (name.includes('precache') || name.includes('static-assets') || name.includes('images-cache')) {
+          // Clean all workbox/precache caches to force fresh content
+          if (name.includes('precache') || name.includes('static-assets') || 
+              name.includes('images-cache') || name.includes('pages-cache') ||
+              name.includes('workbox')) {
             caches.delete(name);
           }
         });
       });
     }
 
-    // Update SW
+    // Force SW update and activation
     navigator.serviceWorker.getRegistrations().then(registrations => {
       for (const reg of registrations) {
         reg.update();
@@ -45,6 +48,11 @@ if ('serviceWorker' in navigator) {
           reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
       }
+    });
+
+    // Listen for new SW and reload
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
     });
   });
 }
