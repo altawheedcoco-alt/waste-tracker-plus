@@ -23972,6 +23972,54 @@ export type Database = {
           },
         ]
       }
+      smart_inputs: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          field_context: string
+          id: string
+          input_value: string
+          last_used_at: string
+          organization_id: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          field_context: string
+          id?: string
+          input_value: string
+          last_used_at?: string
+          organization_id: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          field_context?: string
+          id?: string
+          input_value?: string
+          last_used_at?: string
+          organization_id?: string
+          usage_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "smart_inputs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "smart_inputs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stationery_plans: {
         Row: {
           created_at: string
@@ -29192,9 +29240,20 @@ export type Database = {
         Args: { p_org_id: string; p_org_type: string }
         Returns: undefined
       }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
         Returns: boolean
+      }
+      upsert_smart_input: {
+        Args: {
+          p_created_by: string
+          p_field_context: string
+          p_input_value: string
+          p_organization_id: string
+        }
+        Returns: undefined
       }
       user_belongs_to_org: {
         Args: { _org_id: string; _user_id: string }
