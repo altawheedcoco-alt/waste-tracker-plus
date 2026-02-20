@@ -29090,6 +29090,7 @@ export type Database = {
           is_active: boolean
           is_primary: boolean
           is_verified: boolean
+          logo_url: string
           organization_id: string
           organization_name: string
           organization_type: string

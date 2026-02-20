@@ -43,6 +43,7 @@ export interface UserOrganization {
   is_primary: boolean;
   is_active: boolean;
   is_verified: boolean;
+  logo_url: string | null;
 }
 
 interface UserRole {

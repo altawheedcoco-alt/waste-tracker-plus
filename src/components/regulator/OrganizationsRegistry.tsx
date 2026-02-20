@@ -94,7 +94,18 @@ const OrganizationsRegistry = () => {
               <tbody>
                 {filtered.map((org: any) => (
                   <tr key={org.id} className="border-b hover:bg-muted/50">
-                    <td className="p-2 font-medium">{org.name}</td>
+                    <td className="p-2 font-medium">
+                      <div className="flex items-center gap-2">
+                        {org.logo_url ? (
+                          <img src={org.logo_url} alt={org.name} className="w-7 h-7 rounded-md object-cover shrink-0" />
+                        ) : (
+                          <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0">
+                            <Building2 className="w-4 h-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        {org.name}
+                      </div>
+                    </td>
                     <td className="p-2">
                       <Badge variant="outline" className="text-[10px]">
                         {ORG_TYPE_MAP[org.organization_type] || org.organization_type}
