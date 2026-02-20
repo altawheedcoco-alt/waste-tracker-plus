@@ -6,7 +6,7 @@ import { useLanguage, Language } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
 
 const languageOptions: { value: Language; label: string; nativeLabel: string; flag: string; desc: string; descEn: string }[] = [
-  { value: 'ar', label: 'العربية', nativeLabel: 'Arabic', flag: '🇸🇦', desc: 'واجهة عربية كاملة مع دعم RTL', descEn: 'Full Arabic interface with RTL support' },
+  { value: 'ar', label: 'العربية', nativeLabel: 'Arabic', flag: '🇪🇬', desc: 'واجهة عربية كاملة مع دعم RTL', descEn: 'Full Arabic interface with RTL support' },
   { value: 'en', label: 'English', nativeLabel: 'الإنجليزية', flag: '🇺🇸', desc: 'Full English interface with LTR support', descEn: 'واجهة إنجليزية كاملة مع دعم LTR' },
 ];
 
