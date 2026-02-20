@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
+import TermsBackPage from '@/components/print/TermsBackPage';
 
 interface Shipment {
   id: string;
@@ -356,46 +357,48 @@ ${DECLARATION_TEXT}`;
 
             <div
               ref={printRef}
-              className="bg-white text-black p-6 rounded-lg border"
+              className="bg-white text-black rounded-lg border"
               dir="rtl"
-              style={{ fontFamily: 'Cairo, sans-serif', fontSize: '9pt' }}
+              style={{ fontFamily: 'Cairo, sans-serif' }}
             >
+              {/* Page 1 — Main Document */}
+              <div style={{ padding: '8mm 10mm', width: '210mm', minHeight: '297mm', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column', fontSize: '8pt' }}>
               {/* === PRINT HEADER === */}
-              <header className="flex items-start justify-between mb-3 pb-3" style={{ borderBottom: '3px double #1e40af' }}>
+              <header className="flex items-start justify-between mb-2 pb-2" style={{ borderBottom: '3px double #1e40af' }}>
                 <div className="text-center">
                   <QRCodeSVG
                     value={`${window.location.origin}/qr-verify?type=delivery-cert&code=${encodeURIComponent(certNumber)}`}
-                    size={55}
+                    size={45}
                     level="M"
                   />
-                  <p style={{ fontSize: '6pt', color: '#6b7280', marginTop: '2px' }}>امسح للتحقق</p>
+                  <p style={{ fontSize: '5pt', color: '#6b7280', marginTop: '1px' }}>امسح للتحقق</p>
                 </div>
-                <div className="text-center flex-1 px-4">
-                  <h1 style={{ fontSize: '15pt', fontWeight: 'bold', color: '#1e40af', margin: 0 }}>
+                <div className="text-center flex-1 px-3">
+                  <h1 style={{ fontSize: '13pt', fontWeight: 'bold', color: '#1e40af', margin: 0 }}>
                     شهادة تسليم مخلفات وإقرار قانوني
                   </h1>
-                  <p style={{ fontSize: '8pt', color: '#4b5563', margin: '2px 0' }}>Waste Delivery Certificate & Legal Declaration</p>
-                  <div className="flex items-center justify-center gap-3 mt-1">
-                    <div className="inline-block rounded px-2 py-0.5" style={{ backgroundColor: '#eff6ff', border: '1px solid #93c5fd' }}>
-                      <span style={{ fontSize: '7pt' }}>رقم الشهادة: </span>
-                      <span className="font-mono font-bold" style={{ color: '#1e40af', fontSize: '8pt' }}>{certNumber}</span>
+                  <p style={{ fontSize: '7pt', color: '#4b5563', margin: '1px 0' }}>Waste Delivery Certificate & Legal Declaration</p>
+                  <div className="flex items-center justify-center gap-2 mt-1">
+                    <div className="inline-block rounded px-1.5 py-0.5" style={{ backgroundColor: '#eff6ff', border: '1px solid #93c5fd' }}>
+                      <span style={{ fontSize: '6pt' }}>رقم الشهادة: </span>
+                      <span className="font-mono font-bold" style={{ color: '#1e40af', fontSize: '7pt' }}>{certNumber}</span>
                     </div>
-                    <div className="inline-block rounded px-2 py-0.5" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
-                      <span style={{ fontSize: '7pt' }}>رقم الشحنة: </span>
-                      <span className="font-mono font-bold" style={{ color: '#15803d', fontSize: '8pt' }}>{shipment.shipment_number}</span>
+                    <div className="inline-block rounded px-1.5 py-0.5" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
+                      <span style={{ fontSize: '6pt' }}>رقم الشحنة: </span>
+                      <span className="font-mono font-bold" style={{ color: '#15803d', fontSize: '7pt' }}>{shipment.shipment_number}</span>
                     </div>
                   </div>
                 </div>
                 <div className="text-center">
-                  <Barcode value={certNumber} width={0.9} height={28} fontSize={6} displayValue={false} />
-                  <p className="font-mono" style={{ fontSize: '6pt', color: '#374151', marginTop: '2px' }}>{certNumber}</p>
+                  <Barcode value={certNumber} width={0.8} height={22} fontSize={5} displayValue={false} />
+                  <p className="font-mono" style={{ fontSize: '5pt', color: '#374151', marginTop: '1px' }}>{certNumber}</p>
                 </div>
               </header>
 
               {/* === DATE & TIME === */}
-              <div className="flex justify-between items-center mb-3 text-center" style={{ fontSize: '8pt' }}>
+              <div className="flex justify-between items-center mb-2 text-center" style={{ fontSize: '7pt' }}>
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" style={{ color: '#6b7280' }} />
+                  <Calendar className="w-2.5 h-2.5" style={{ color: '#6b7280' }} />
                   <span style={{ color: '#6b7280' }}>تاريخ التسليم:</span>
                   <strong>{currentDate}</strong>
                 </div>
@@ -406,77 +409,75 @@ ${DECLARATION_TEXT}`;
               </div>
 
               {/* === PARTIES === */}
-              <div className="grid grid-cols-3 gap-2 mb-3">
-                <div className="rounded p-2" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
-                  <h4 className="font-bold flex items-center gap-1 mb-1" style={{ color: '#1e40af', fontSize: '8pt' }}>
-                    <Building2 className="w-3 h-3" /> الجهة المسلّمة (المولّد)
+              <div className="grid grid-cols-3 gap-1.5 mb-2">
+                <div className="rounded p-1.5" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
+                  <h4 className="font-bold flex items-center gap-1 mb-0.5" style={{ color: '#1e40af', fontSize: '7pt' }}>
+                    <Building2 className="w-2.5 h-2.5" /> الجهة المسلّمة (المولّد)
                   </h4>
-                  <p className="font-bold" style={{ fontSize: '9pt' }}>{organization?.name || shipment.generator?.name || '-'}</p>
-                  {shipment.generator?.city && <p style={{ fontSize: '7pt', color: '#6b7280' }}>📍 {shipment.generator.city}</p>}
-                  {profile?.full_name && <p style={{ fontSize: '7pt', color: '#6b7280' }}>👤 المفوّض: {profile.full_name}</p>}
+                  <p className="font-bold" style={{ fontSize: '8pt' }}>{organization?.name || shipment.generator?.name || '-'}</p>
+                  {shipment.generator?.city && <p style={{ fontSize: '6pt', color: '#6b7280' }}>📍 {shipment.generator.city}</p>}
+                  {profile?.full_name && <p style={{ fontSize: '6pt', color: '#6b7280' }}>👤 {profile.full_name}</p>}
                 </div>
-                <div className="rounded p-2" style={{ backgroundColor: '#fef3c7', border: '1px solid #fcd34d' }}>
-                  <h4 className="font-bold flex items-center gap-1 mb-1" style={{ color: '#92400e', fontSize: '8pt' }}>
-                    <Truck className="w-3 h-3" /> الجهة المستلمة (الناقل)
+                <div className="rounded p-1.5" style={{ backgroundColor: '#fef3c7', border: '1px solid #fcd34d' }}>
+                  <h4 className="font-bold flex items-center gap-1 mb-0.5" style={{ color: '#92400e', fontSize: '7pt' }}>
+                    <Truck className="w-2.5 h-2.5" /> الجهة المستلمة (الناقل)
                   </h4>
-                  <p className="font-bold" style={{ fontSize: '9pt' }}>{shipment.transporter?.name || '-'}</p>
-                  {shipment.transporter?.city && <p style={{ fontSize: '7pt', color: '#6b7280' }}>📍 {shipment.transporter.city}</p>}
-                  {driverName && <p style={{ fontSize: '7pt', color: '#6b7280' }}>🚛 السائق: {driverName}</p>}
-                  {vehiclePlate && <p style={{ fontSize: '7pt', color: '#6b7280' }}>🔢 المركبة: {vehiclePlate}</p>}
+                  <p className="font-bold" style={{ fontSize: '8pt' }}>{shipment.transporter?.name || '-'}</p>
+                  {driverName && <p style={{ fontSize: '6pt', color: '#6b7280' }}>🚛 {driverName}</p>}
+                  {vehiclePlate && <p style={{ fontSize: '6pt', color: '#6b7280' }}>🔢 {vehiclePlate}</p>}
                 </div>
-                <div className="rounded p-2" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
-                  <h4 className="font-bold flex items-center gap-1 mb-1" style={{ color: '#15803d', fontSize: '8pt' }}>
-                    <Recycle className="w-3 h-3" /> جهة التدوير/التخلص
+                <div className="rounded p-1.5" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
+                  <h4 className="font-bold flex items-center gap-1 mb-0.5" style={{ color: '#15803d', fontSize: '7pt' }}>
+                    <Recycle className="w-2.5 h-2.5" /> جهة التدوير/التخلص
                   </h4>
-                  <p className="font-bold" style={{ fontSize: '9pt' }}>{shipment.recycler?.name || '-'}</p>
-                  {shipment.recycler?.city && <p style={{ fontSize: '7pt', color: '#6b7280' }}>📍 {shipment.recycler.city}</p>}
+                  <p className="font-bold" style={{ fontSize: '8pt' }}>{shipment.recycler?.name || '-'}</p>
                 </div>
               </div>
 
               {/* === SHIPMENT DETAILS TABLE === */}
-              <div className="mb-3">
-                <h3 className="font-bold mb-1 flex items-center gap-1 p-1 rounded" style={{ backgroundColor: '#f3f4f6', color: '#1f2937', fontSize: '9pt' }}>
-                  <Scale className="w-3 h-3" style={{ color: '#2563eb' }} />
+              <div className="mb-2">
+                <h3 className="font-bold mb-1 flex items-center gap-1 p-0.5 rounded" style={{ backgroundColor: '#f3f4f6', color: '#1f2937', fontSize: '8pt' }}>
+                  <Scale className="w-2.5 h-2.5" style={{ color: '#2563eb' }} />
                   بيانات الشحنة التفصيلية
                 </h3>
-                <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '8pt' }}>
+                <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '7pt' }}>
                   <tbody>
                     <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb', width: '20%' }}>رقم الشحنة</td>
-                      <td className="p-1.5 font-mono font-bold">{shipment.shipment_number}</td>
-                      <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb', width: '20%' }}>تاريخ الإنشاء</td>
-                      <td className="p-1.5">{shipment.created_at ? format(new Date(shipment.created_at), 'PP', { locale: ar }) : '-'}</td>
+                      <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb', width: '20%' }}>رقم الشحنة</td>
+                      <td className="p-1 font-mono font-bold">{shipment.shipment_number}</td>
+                      <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb', width: '20%' }}>تاريخ الإنشاء</td>
+                      <td className="p-1">{shipment.created_at ? format(new Date(shipment.created_at), 'PP', { locale: ar }) : '-'}</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>نوع المخلفات</td>
-                      <td className="p-1.5 font-medium">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
-                      <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>درجة الخطورة</td>
-                      <td className="p-1.5 font-bold" style={{ color: hazard.color }}>{hazard.label}</td>
+                      <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>نوع المخلفات</td>
+                      <td className="p-1 font-medium">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
+                      <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>درجة الخطورة</td>
+                      <td className="p-1 font-bold" style={{ color: hazard.color }}>{hazard.label}</td>
                     </tr>
                     <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                      <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>الكمية المُصرّح بها</td>
-                      <td className="p-1.5 font-bold" style={{ color: '#2563eb' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
-                      <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>حالة المخلفات</td>
-                      <td className="p-1.5">{wasteCondition}</td>
+                      <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>الكمية المُصرّح بها</td>
+                      <td className="p-1 font-bold" style={{ color: '#2563eb' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
+                      <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>حالة المخلفات</td>
+                      <td className="p-1">{wasteCondition}</td>
                     </tr>
                     {shipment.pickup_address && (
                       <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                        <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>موقع التحميل</td>
-                        <td className="p-1.5" colSpan={3}>{shipment.pickup_address}</td>
+                        <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>موقع التحميل</td>
+                        <td className="p-1" colSpan={3}>{shipment.pickup_address}</td>
                       </tr>
                     )}
                     {shipment.delivery_address && (
                       <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                        <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>موقع التفريغ</td>
-                        <td className="p-1.5" colSpan={3}>{shipment.delivery_address}</td>
+                        <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>موقع التفريغ</td>
+                        <td className="p-1" colSpan={3}>{shipment.delivery_address}</td>
                       </tr>
                     )}
                     {driverName && (
                       <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
-                        <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>السائق المستلم</td>
-                        <td className="p-1.5">{driverName}</td>
-                        <td className="p-1.5 font-semibold" style={{ backgroundColor: '#f9fafb' }}>رقم المركبة</td>
-                        <td className="p-1.5 font-mono">{vehiclePlate || '-'}</td>
+                        <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>السائق المستلم</td>
+                        <td className="p-1">{driverName}</td>
+                        <td className="p-1 font-semibold" style={{ backgroundColor: '#f9fafb' }}>رقم المركبة</td>
+                        <td className="p-1 font-mono">{vehiclePlate || '-'}</td>
                       </tr>
                     )}
                   </tbody>
@@ -484,12 +485,12 @@ ${DECLARATION_TEXT}`;
               </div>
 
               {/* === LEGAL DECLARATION === */}
-              <div className="rounded p-3 mb-3" style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a' }}>
-                <h2 className="font-bold mb-2 flex items-center gap-1" style={{ color: '#92400e', fontSize: '9pt' }}>
-                  <ClipboardCheck className="w-4 h-4" />
+              <div className="rounded p-2 mb-2" style={{ backgroundColor: '#fefce8', border: '1px solid #fde68a', flex: 1 }}>
+                <h2 className="font-bold mb-1 flex items-center gap-1" style={{ color: '#92400e', fontSize: '8pt' }}>
+                  <ClipboardCheck className="w-3 h-3" />
                   الإقرار القانوني
                 </h2>
-                <p style={{ fontSize: '8pt', color: '#78350f', lineHeight: '1.5', margin: '0 0 6px 0' }}>
+                <p style={{ fontSize: '7pt', color: '#78350f', lineHeight: '1.4', margin: '0 0 4px 0' }}>
                   نُقر نحن <strong>{organization?.name || 'الجهة المولدة'}</strong> بتسليم الشحنة رقم{' '}
                   <strong className="font-mono">{shipment.shipment_number}</strong> بكامل محتوياتها (
                   <strong>{shipment.quantity} {shipment.unit || 'كجم'}</strong> من{' '}
@@ -499,63 +500,60 @@ ${DECLARATION_TEXT}`;
                   {driverName && <> بواسطة السائق <strong>{driverName}</strong></>}
                   {vehiclePlate && <> - مركبة رقم <strong>{vehiclePlate}</strong></>}.
                 </p>
-                <div style={{ fontSize: '7.5pt', color: '#92400e', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                <div style={{ fontSize: '6.5pt', color: '#92400e', lineHeight: '1.4', whiteSpace: 'pre-wrap' }}>
                   {DECLARATION_TEXT}
                 </div>
               </div>
 
               {/* === NOTES === */}
               {notes && (
-                <div className="rounded p-2 mb-3" style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}>
-                  <h4 className="font-bold mb-1" style={{ fontSize: '8pt', color: '#374151' }}>ملاحظات:</h4>
-                  <p style={{ fontSize: '7.5pt', color: '#4b5563' }}>{notes}</p>
+                <div className="rounded p-1.5 mb-2" style={{ backgroundColor: '#f9fafb', border: '1px solid #e5e7eb' }}>
+                  <h4 className="font-bold mb-0.5" style={{ fontSize: '7pt', color: '#374151' }}>ملاحظات:</h4>
+                  <p style={{ fontSize: '6.5pt', color: '#4b5563' }}>{notes}</p>
                 </div>
               )}
 
               {/* === CONFIRMATION BADGE === */}
-              <div className="rounded p-2 mb-3" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" style={{ color: '#16a34a' }} />
-                  <h3 className="font-bold" style={{ color: '#15803d', fontSize: '9pt' }}>تم التسليم والتوثيق بنجاح</h3>
+              <div className="rounded p-1.5 mb-2" style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac' }}>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3 h-3" style={{ color: '#16a34a' }} />
+                  <h3 className="font-bold" style={{ color: '#15803d', fontSize: '8pt' }}>تم التسليم والتوثيق بنجاح</h3>
                 </div>
-                <p style={{ fontSize: '7pt', color: '#14532d', lineHeight: '1.4', marginTop: '2px' }}>
-                  تم إصدار هذه الشهادة والإقرار القانوني إلكترونياً بتاريخ {currentDate} الساعة {currentTime}. المسؤول: {profile?.full_name || '-'}. هذا المستند يمثل بداية سلسلة الحيازة القانونية للشحنة.
+                <p style={{ fontSize: '6pt', color: '#14532d', lineHeight: '1.3', marginTop: '1px' }}>
+                  تم إصدار هذه الشهادة والإقرار القانوني إلكترونياً بتاريخ {currentDate} الساعة {currentTime}. المسؤول: {profile?.full_name || '-'}.
+                </p>
+              </div>
+
+              {/* === LEGAL DISCLAIMER === */}
+              <div className="rounded p-1.5 mb-2" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', fontSize: '6.5pt', color: '#991b1b', lineHeight: '1.4' }}>
+                <p style={{ margin: 0, fontWeight: 'bold' }}>⚖️ إخلاء مسؤولية وتحذير قانوني:</p>
+                <p style={{ margin: '2px 0 0 0' }}>
+                  هذه الوثيقة ملزمة قانونياً. أي مخالفة أو تلاعب يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون 202/2020 وقانون العقوبات المصري. يخضع لشروط وسياسات منصة iRecycle.
                 </p>
               </div>
 
               {/* === SIGNATURES === */}
-              <div className="pt-2 mt-2 grid grid-cols-2 gap-4" style={{ borderTop: '1px solid #d1d5db' }}>
+              <div className="pt-1.5 mt-1 grid grid-cols-2 gap-3" style={{ borderTop: '1px solid #d1d5db' }}>
                 <div className="text-center">
-                  <p className="font-bold mb-0.5" style={{ fontSize: '8pt' }}>توقيع وختم المسلّم (المولّد)</p>
-                  <p style={{ fontSize: '7pt', color: '#6b7280' }}>{organization?.name || shipment.generator?.name}</p>
-                  <div style={{ height: '35px', borderBottom: '1px solid #9ca3af', width: '80%', margin: '6px auto' }} />
-                  <p style={{ fontSize: '6.5pt', color: '#9ca3af' }}>الاسم: ................................. التاريخ: ...............</p>
+                  <p className="font-bold mb-0.5" style={{ fontSize: '7pt' }}>توقيع وختم المسلّم (المولّد)</p>
+                  <p style={{ fontSize: '6pt', color: '#6b7280' }}>{organization?.name || shipment.generator?.name}</p>
+                  <div style={{ height: '25px', borderBottom: '1px solid #9ca3af', width: '80%', margin: '4px auto' }} />
+                  <p style={{ fontSize: '5.5pt', color: '#9ca3af' }}>الاسم: ...................... التاريخ: ............</p>
                 </div>
                 <div className="text-center">
-                  <p className="font-bold mb-0.5" style={{ fontSize: '8pt' }}>توقيع وختم المستلم (الناقل)</p>
-                  <p style={{ fontSize: '7pt', color: '#6b7280' }}>{shipment.transporter?.name}</p>
-                  <div style={{ height: '35px', borderBottom: '1px solid #9ca3af', width: '80%', margin: '6px auto' }} />
-                  <p style={{ fontSize: '6.5pt', color: '#9ca3af' }}>الاسم: ................................. التاريخ: ...............</p>
+                  <p className="font-bold mb-0.5" style={{ fontSize: '7pt' }}>توقيع وختم المستلم (الناقل)</p>
+                  <p style={{ fontSize: '6pt', color: '#6b7280' }}>{shipment.transporter?.name}</p>
+                  <div style={{ height: '25px', borderBottom: '1px solid #9ca3af', width: '80%', margin: '4px auto' }} />
+                  <p style={{ fontSize: '5.5pt', color: '#9ca3af' }}>الاسم: ...................... التاريخ: ............</p>
                 </div>
-              </div>
-
-              {/* === LEGAL DISCLAIMER === */}
-              <div className="rounded p-2 mt-3" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', fontSize: '7pt', color: '#991b1b', lineHeight: '1.5' }}>
-                <p style={{ margin: 0, fontWeight: 'bold' }}>⚖️ إخلاء مسؤولية وتحذير قانوني:</p>
-                <p style={{ margin: '2px 0 0 0' }}>
-                  هذه الوثيقة ملزمة قانونياً لجميع الأطراف. أي مخالفة للبيانات المذكورة أو تلاعب بمحتويات الشحنة أو إخفاء معلومات جوهرية يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون تنظيم إدارة المخلفات 202/2020 وقانون العقوبات المصري. جميع الحقوق محفوظة لمنصة iRecycle وفقاً لشروط وسياسات الاستخدام المعتمدة.
-                </p>
               </div>
 
               {/* === FOOTER === */}
-              <footer className="mt-3 pt-2 text-center" style={{ borderTop: '2px solid #e5e7eb', fontSize: '6.5pt', color: '#6b7280' }}>
+              <footer className="mt-2 pt-1.5 text-center" style={{ borderTop: '2px solid #e5e7eb', fontSize: '6pt', color: '#6b7280' }}>
                 <p style={{ margin: 0 }}>
-                  وثيقة رسمية مؤمنة وذكية صادرة إلكترونياً | رقم المرجع: {certNumber} | الشحنة: {shipment.shipment_number} | {currentDate} | يخضع لقانون 202/2020
+                  وثيقة رسمية مؤمنة وذكية | {certNumber} | {shipment.shipment_number} | {currentDate} | قانون 202/2020
                 </p>
-                <p style={{ margin: '2px 0 0 0' }}>
-                  هذا المستند محمي ببصمة رقمية SHA-256 ولا يجوز تعديله أو تزويره — للتحقق امسح رمز QR
-                </p>
-                <p style={{ margin: '4px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '7pt' }}>
+                <p style={{ margin: '2px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '6.5pt' }}>
                   {[
                     'الإنتاج عليك.. والدائرة المقفولة علينا. خليك I RECYCLE.',
                     'إدارة مخلفات بمواصفات عالمية.. I RECYCLE سيستم مبيغلطش.',
@@ -564,6 +562,10 @@ ${DECLARATION_TEXT}`;
                   ][Math.floor(Date.now() / 86400000) % 4]}
                 </p>
               </footer>
+              </div>
+
+              {/* Page 2 — Terms Back Page */}
+              <TermsBackPage />
             </div>
           </div>
         )}
