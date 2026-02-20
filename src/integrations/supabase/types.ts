@@ -8962,6 +8962,84 @@ export type Database = {
           },
         ]
       }
+      emergency_plans: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          assembly_points: string[] | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          emergency_contacts: Json | null
+          equipment_list: string[] | null
+          id: string
+          last_drill_date: string | null
+          next_drill_date: string | null
+          organization_id: string
+          plan_type: string
+          procedures: Json | null
+          review_date: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          assembly_points?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          emergency_contacts?: Json | null
+          equipment_list?: string[] | null
+          id?: string
+          last_drill_date?: string | null
+          next_drill_date?: string | null
+          organization_id: string
+          plan_type?: string
+          procedures?: Json | null
+          review_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          assembly_points?: string[] | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          emergency_contacts?: Json | null
+          equipment_list?: string[] | null
+          id?: string
+          last_drill_date?: string | null
+          next_drill_date?: string | null
+          organization_id?: string
+          plan_type?: string
+          procedures?: Json | null
+          review_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emergency_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "emergency_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_documents: {
         Row: {
           created_at: string
@@ -11593,6 +11671,94 @@ export type Database = {
           },
           {
             foreignKeyName: "esg_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evacuation_drills: {
+        Row: {
+          conducted_by: string | null
+          corrective_actions: string[] | null
+          created_at: string
+          drill_date: string
+          drill_type: string
+          duration_minutes: number | null
+          emergency_plan_id: string | null
+          evacuation_time_seconds: number | null
+          id: string
+          issues_found: string[] | null
+          observations: string | null
+          organization_id: string
+          participants: Json | null
+          participants_count: number | null
+          photos: string[] | null
+          score: number | null
+          status: string
+          target_time_seconds: number | null
+          updated_at: string
+        }
+        Insert: {
+          conducted_by?: string | null
+          corrective_actions?: string[] | null
+          created_at?: string
+          drill_date: string
+          drill_type?: string
+          duration_minutes?: number | null
+          emergency_plan_id?: string | null
+          evacuation_time_seconds?: number | null
+          id?: string
+          issues_found?: string[] | null
+          observations?: string | null
+          organization_id: string
+          participants?: Json | null
+          participants_count?: number | null
+          photos?: string[] | null
+          score?: number | null
+          status?: string
+          target_time_seconds?: number | null
+          updated_at?: string
+        }
+        Update: {
+          conducted_by?: string | null
+          corrective_actions?: string[] | null
+          created_at?: string
+          drill_date?: string
+          drill_type?: string
+          duration_minutes?: number | null
+          emergency_plan_id?: string | null
+          evacuation_time_seconds?: number | null
+          id?: string
+          issues_found?: string[] | null
+          observations?: string | null
+          organization_id?: string
+          participants?: Json | null
+          participants_count?: number | null
+          photos?: string[] | null
+          score?: number | null
+          status?: string
+          target_time_seconds?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evacuation_drills_emergency_plan_id_fkey"
+            columns: ["emergency_plan_id"]
+            isOneToOne: false
+            referencedRelation: "emergency_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evacuation_drills_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "evacuation_drills_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -26191,6 +26357,102 @@ export type Database = {
           },
           {
             foreignKeyName: "work_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_permits: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          closed_at: string | null
+          closed_by: string | null
+          closure_notes: string | null
+          created_at: string
+          description: string | null
+          hazards_identified: string[] | null
+          id: string
+          location: string | null
+          organization_id: string
+          permit_number: string
+          permit_type: string
+          ppe_required: string[] | null
+          precautions: string[] | null
+          requested_by: string | null
+          status: string
+          supervisor_name: string | null
+          supervisor_phone: string | null
+          title: string
+          updated_at: string
+          work_end: string
+          work_start: string
+          workers: Json | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_notes?: string | null
+          created_at?: string
+          description?: string | null
+          hazards_identified?: string[] | null
+          id?: string
+          location?: string | null
+          organization_id: string
+          permit_number: string
+          permit_type?: string
+          ppe_required?: string[] | null
+          precautions?: string[] | null
+          requested_by?: string | null
+          status?: string
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          title: string
+          updated_at?: string
+          work_end: string
+          work_start: string
+          workers?: Json | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_notes?: string | null
+          created_at?: string
+          description?: string | null
+          hazards_identified?: string[] | null
+          id?: string
+          location?: string | null
+          organization_id?: string
+          permit_number?: string
+          permit_type?: string
+          ppe_required?: string[] | null
+          precautions?: string[] | null
+          requested_by?: string | null
+          status?: string
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          title?: string
+          updated_at?: string
+          work_end?: string
+          work_start?: string
+          workers?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_permits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "work_permits_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

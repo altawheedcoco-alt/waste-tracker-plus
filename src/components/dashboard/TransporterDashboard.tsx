@@ -81,7 +81,7 @@ const ChainOfCustodyPanel = lazy(() => import('./transporter/ChainOfCustodyPanel
 const GovernmentReportingPanel = lazy(() => import('./transporter/GovernmentReportingPanel'));
 const CarbonCreditsPanel = lazy(() => import('./transporter/CarbonCreditsPanel'));
 const IoTMonitoringPanel = lazy(() => import('./transporter/IoTMonitoringPanel'));
-const OHSReportPanel = lazy(() => import('@/components/ohs/OHSReportPanel'));
+const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -406,7 +406,7 @@ const TransporterDashboard = () => {
           <TabsContent value="ohs" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في تقارير السلامة المهنية">
-                <OHSReportPanel />
+                <SafetyManagerDashboard />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
