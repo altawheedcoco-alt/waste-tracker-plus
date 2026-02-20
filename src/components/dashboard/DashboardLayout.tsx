@@ -873,7 +873,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           }}
         >
           {/* Top header - Responsive height */}
-          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/85 backdrop-blur-xl border-b border-border/40 flex items-center justify-between gap-2 px-3 sm:px-4 lg:px-6 shadow-sm`} style={{ WebkitBackdropFilter: 'blur(20px) saturate(1.5)' }}>
+          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/85 backdrop-blur-xl border-b border-border/40 flex items-center justify-between gap-2 px-3 sm:px-4 lg:px-6 shadow-sm overflow-hidden`} style={{ WebkitBackdropFilter: 'blur(20px) saturate(1.5)' }}>
             <div className="flex items-center gap-2 shrink-0">
               {isMobile && (
                 <button
@@ -896,8 +896,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
             {/* Right side - Responsive spacing */}
             <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
-              {/* Global Refresh Button */}
-              <GlobalRefreshButton />
+              {/* Global Refresh Button - Hidden on mobile */}
+              {!isMobile && <GlobalRefreshButton />}
 
               {/* Network Status Indicator */}
               <OfflineIndicator />
@@ -905,8 +905,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {/* Focus Music Player - Hidden on mobile */}
               {!isMobile && <FocusMusicPlayer />}
 
-              {/* Theme Customizer */}
-              <ThemeCustomizer />
+              {/* Theme Customizer - Hidden on mobile */}
+              {!isMobile && <ThemeCustomizer />}
 
               {/* Notifications Dropdown */}
               <NotificationDropdown />
