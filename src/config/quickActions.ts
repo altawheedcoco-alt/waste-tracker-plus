@@ -131,89 +131,82 @@ export const adminQuickActions: QuickActionConfig[] = [
 ];
 
 // ============= GENERATOR QUICK ACTIONS =============
-// الجهة المولدة: التركيز على الشهادات والتقارير البيئية
+// الجهة المولدة: التركيز على طلب الجمع وتتبع الشحنات والشهادات البيئية
 export const generatorQuickActions: QuickActionConfig[] = [
-  // 1️⃣ العمليات الأساسية
-  { id: 'shipments', title: 'الشحنات', subtitle: 'عرض وتتبع جميع الشحنات', icon: Package, path: '/dashboard/shipments', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
-  { id: 'generator-receipts', title: 'شهادات التسليم والاستلام', subtitle: 'إصدار شهادات تسليم وعرض شهادات الاستلام', icon: FileCheck, path: '/dashboard/generator-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'primary' },
-  { id: 'recycling-certificates', title: 'شهادات إعادة التدوير', subtitle: 'تقارير من جهات التدوير', icon: FolderCheck, path: '/dashboard/recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
-  
-  // 2️⃣ المالية والعقود
+  // 1️⃣ حرج يومي - طلب جمع المخلفات وتتبعها
+  { id: 'shipments', title: 'شحناتي', subtitle: 'عرض وتتبع جميع الشحنات', icon: Package, path: '/dashboard/shipments', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
+  { id: 'collection-requests', title: 'طلب جمع مخلفات', subtitle: 'إرسال طلب جمع لجهة النقل', icon: Truck, path: '/dashboard/collection-requests', iconBgClass: 'bg-gradient-to-br from-orange-500 to-red-500', category: 'primary' },
+  { id: 'generator-receipts', title: 'شهادات التسليم', subtitle: 'إصدار وعرض شهادات التسليم والاستلام', icon: FileCheck, path: '/dashboard/generator-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'primary' },
+  { id: 'recycling-certificates', title: 'شهادات التدوير', subtitle: 'شهادات إعادة التدوير من المدوّرين', icon: FolderCheck, path: '/dashboard/recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
   { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'مسح والتحقق من المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
+
+  // 2️⃣ مهم أسبوعي - البيئة والعقود
   { id: 'contracts', title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
-  
-  // 3️⃣ التقارير البيئية
   { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل شامل للأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'secondary' },
   { id: 'carbon-footprint', title: 'البصمة الكربونية', subtitle: 'تقارير الانبعاثات والأثر البيئي', icon: Leaf, path: '/dashboard/carbon-footprint', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'secondary' },
-  { id: 'ai-tools', title: 'تحليل المخلفات بالذكاء الاصطناعي', subtitle: 'تحليلات وتوصيات ذكية', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'secondary' },
-  
-  // 4️⃣ إدارة الفريق والتقارير
-  { id: 'reports', title: 'التقارير', subtitle: 'تقارير الأداء والإحصائيات', icon: TrendingUp, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
+  { id: 'partners', title: 'الجهات المرتبطة', subtitle: 'الناقلون والمدوّرون', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'secondary' },
+  { id: 'reports', title: 'التقارير', subtitle: 'تقارير الأداء والإحصائيات', icon: TrendingUp, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'secondary' },
+  { id: 'ai-tools', title: 'تحليل بالذكاء الاصطناعي', subtitle: 'تحليلات وتوصيات ذكية', icon: Bot, path: '/dashboard/ai-tools', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'secondary' },
+
+  // 3️⃣ أدوات وإدارة
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'org-structure', title: 'الهيكل التنظيمي', subtitle: 'الأقسام والمناصب الوظيفية', icon: Network, path: '/dashboard/org-structure', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-violet-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
-  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
   { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
 // ============= RECYCLER QUICK ACTIONS =============
-// الجهة المدورة: التركيز على الاستلام وإصدار الشهادات
+// الجهة المدورة: التركيز على استلام المواد، الوزن، وإصدار الشهادات
 export const recyclerQuickActions: QuickActionConfig[] = [
-  // 1️⃣ العمليات الأساسية
+  // 1️⃣ حرج يومي - الاستلام والوزن والشهادات
   { id: 'shipments', title: 'الشحنات الواردة', subtitle: 'عرض وإدارة الشحنات المستلمة', icon: Package, path: '/dashboard/shipments', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
-  { id: 'issue-recycling-certificates', title: 'إصدار شهادات التدوير', subtitle: 'إصدار شهادات إعادة التدوير', icon: FolderCheck, path: '/dashboard/issue-recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
   { id: 'smart-weight-upload', title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: 'openSmartWeightUpload', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'primary' },
+  { id: 'issue-recycling-certificates', title: 'إصدار شهادات التدوير', subtitle: 'إصدار شهادات إعادة التدوير', icon: FolderCheck, path: '/dashboard/issue-recycling-certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
   { id: 'external-records', title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600', category: 'primary' },
-  
-  // 2️⃣ المالية والعقود
-  { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'secondary' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'مسح والتحقق من المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
+
+  // 2️⃣ مهم أسبوعي - التحليلات والعقود
   { id: 'contracts', title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
-  
-  // 3️⃣ التحليلات والتقارير
-  { id: 'recycler-ai-tools', title: 'تحليلات الذكاء الاصطناعي', subtitle: 'إحصائيات وتحليلات متقدمة', icon: Bot, path: '/dashboard/recycler-ai-tools', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'secondary' },
+  { id: 'partners', title: 'الجهات المرتبطة', subtitle: 'المولدون والناقلون', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'secondary' },
   { id: 'reports', title: 'التقارير', subtitle: 'تقارير التدوير والأداء', icon: BarChart3, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'secondary' },
-  { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'utility' },
-  
-  // 4️⃣ إدارة الفريق
+  { id: 'recycler-ai-tools', title: 'تحليلات الذكاء الاصطناعي', subtitle: 'إحصائيات وتحليلات متقدمة', icon: Bot, path: '/dashboard/recycler-ai-tools', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'secondary' },
+  { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'secondary' },
+
+  // 3️⃣ أدوات وإدارة
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'org-structure', title: 'الهيكل التنظيمي', subtitle: 'الأقسام والمناصب الوظيفية', icon: Network, path: '/dashboard/org-structure', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-violet-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
-  { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
-  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
   { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
 // ============= DISPOSAL QUICK ACTIONS =============
-// جهة التخلص النهائي: التركيز على استقبال ومعالجة المخلفات الخطرة
+// جهة التخلص النهائي: التركيز على استقبال ومعالجة المخلفات الخطرة والشهادات
 export const disposalQuickActions: QuickActionConfig[] = [
-  // 1️⃣ العمليات الأساسية
+  // 1️⃣ حرج يومي - الاستقبال والمعالجة
   { id: 'disposal-operations', title: 'عمليات التخلص', subtitle: 'عرض وإدارة جميع العمليات', icon: Package, path: '/dashboard/disposal/operations', iconBgClass: 'bg-gradient-to-br from-red-500 to-orange-600', category: 'primary' },
   { id: 'disposal-new-operation', title: 'تسجيل عملية جديدة', subtitle: 'تسجيل عملية تخلص جديدة', icon: Plus, path: '/dashboard/disposal/operations/new', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
   { id: 'disposal-incoming', title: 'الطلبات الواردة', subtitle: 'طلبات التخلص من الجهات المرتبطة', icon: Truck, path: '/dashboard/disposal/incoming-requests', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'primary' },
-  { id: 'disposal-certificates', title: 'شهادات التخلص', subtitle: 'إصدار وإدارة شهادات التخلص', icon: FileCheck, path: '/dashboard/disposal/certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
-
-  // 2️⃣ الأدوات الذكية
   { id: 'smart-weight-upload', title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: 'openSmartWeightUpload', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'primary' },
+  { id: 'disposal-certificates', title: 'شهادات التخلص', subtitle: 'إصدار وإدارة شهادات التخلص', icon: FileCheck, path: '/dashboard/disposal/certificates', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'مسح والتحقق من المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
+
+  // 2️⃣ مهم أسبوعي - التقارير والعقود
   { id: 'external-records', title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600', category: 'secondary' },
-
-  // 3️⃣ المالية والعقود
-  { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'secondary' },
   { id: 'contracts', title: 'العقود', subtitle: 'إدارة العقود والاتفاقيات', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
-
-  // 4️⃣ التقارير والتحليلات
+  { id: 'partners', title: 'الجهات المرتبطة', subtitle: 'المولدون والناقلون', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'secondary' },
   { id: 'disposal-reports', title: 'التقارير', subtitle: 'تقارير التخلص والأداء', icon: BarChart3, path: '/dashboard/disposal/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'secondary' },
-  { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'utility' },
+  { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'secondary' },
 
-  // 5️⃣ إدارة الفريق
+  // 3️⃣ أدوات وإدارة
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'org-structure', title: 'الهيكل التنظيمي', subtitle: 'الأقسام والمناصب الوظيفية', icon: Network, path: '/dashboard/org-structure', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-violet-600', category: 'utility' },
-  { id: 'partners', title: 'الجهات المرتبطة', subtitle: 'الجهات المولدة والناقلة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
-  { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات المنشأة', icon: Settings, path: '/dashboard/settings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
-  { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
   { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
 ];
 
