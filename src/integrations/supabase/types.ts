@@ -12695,6 +12695,116 @@ export type Database = {
           },
         ]
       }
+      field_inspections: {
+        Row: {
+          compliance_score: number | null
+          created_at: string
+          documents: string[] | null
+          findings: string | null
+          follow_up_date: string | null
+          follow_up_notes: string | null
+          follow_up_required: boolean | null
+          id: string
+          inspected_organization_id: string
+          inspected_signature_url: string | null
+          inspection_date: string
+          inspection_type: string
+          inspector_signature_url: string | null
+          inspector_user_id: string
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          overall_rating: string | null
+          photos: string[] | null
+          recommendations: string | null
+          regulator_organization_id: string
+          signed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          compliance_score?: number | null
+          created_at?: string
+          documents?: string[] | null
+          findings?: string | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          inspected_organization_id: string
+          inspected_signature_url?: string | null
+          inspection_date?: string
+          inspection_type?: string
+          inspector_signature_url?: string | null
+          inspector_user_id: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          overall_rating?: string | null
+          photos?: string[] | null
+          recommendations?: string | null
+          regulator_organization_id: string
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          compliance_score?: number | null
+          created_at?: string
+          documents?: string[] | null
+          findings?: string | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          id?: string
+          inspected_organization_id?: string
+          inspected_signature_url?: string | null
+          inspection_date?: string
+          inspection_type?: string
+          inspector_signature_url?: string | null
+          inspector_user_id?: string
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          overall_rating?: string | null
+          photos?: string[] | null
+          recommendations?: string | null
+          regulator_organization_id?: string
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "field_inspections_inspected_organization_id_fkey"
+            columns: ["inspected_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "field_inspections_inspected_organization_id_fkey"
+            columns: ["inspected_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "field_inspections_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "field_inspections_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_accounts: {
         Row: {
           account_name: string
@@ -13410,6 +13520,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      inspection_checklist_items: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          inspection_id: string
+          is_compliant: boolean | null
+          item_name_ar: string
+          item_name_en: string | null
+          notes: string | null
+          photo_url: string | null
+          severity: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          inspection_id: string
+          is_compliant?: boolean | null
+          item_name_ar: string
+          item_name_en?: string | null
+          notes?: string | null
+          photo_url?: string | null
+          severity?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          inspection_id?: string
+          is_compliant?: boolean | null
+          item_name_ar?: string
+          item_name_en?: string | null
+          notes?: string | null
+          photo_url?: string | null
+          severity?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inspection_checklist_items_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "field_inspections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       inspection_logs: {
         Row: {
@@ -20730,6 +20890,434 @@ export type Database = {
           {
             foreignKeyName: "regulated_companies_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regulator_activity_log: {
+        Row: {
+          action_type: string
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          regulator_organization_id: string
+          target_organization_id: string | null
+          target_resource_id: string | null
+          target_resource_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          regulator_organization_id: string
+          target_organization_id?: string | null
+          target_resource_id?: string | null
+          target_resource_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          regulator_organization_id?: string
+          target_organization_id?: string | null
+          target_resource_id?: string | null
+          target_resource_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulator_activity_log_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulator_activity_log_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulator_activity_log_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulator_activity_log_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regulator_configs: {
+        Row: {
+          authority_reference: string | null
+          created_at: string
+          governorate: string | null
+          id: string
+          jurisdiction_area: string[] | null
+          organization_id: string
+          regulator_level_code: string
+          updated_at: string
+        }
+        Insert: {
+          authority_reference?: string | null
+          created_at?: string
+          governorate?: string | null
+          id?: string
+          jurisdiction_area?: string[] | null
+          organization_id: string
+          regulator_level_code: string
+          updated_at?: string
+        }
+        Update: {
+          authority_reference?: string | null
+          created_at?: string
+          governorate?: string | null
+          id?: string
+          jurisdiction_area?: string[] | null
+          organization_id?: string
+          regulator_level_code?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulator_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulator_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulator_configs_regulator_level_code_fkey"
+            columns: ["regulator_level_code"]
+            isOneToOne: false
+            referencedRelation: "regulator_levels"
+            referencedColumns: ["level_code"]
+          },
+        ]
+      }
+      regulator_levels: {
+        Row: {
+          can_ban_organizations: boolean | null
+          can_field_inspect: boolean | null
+          can_issue_penalties: boolean | null
+          can_suspend_licenses: boolean | null
+          can_track_vehicles: boolean | null
+          can_view_all_shipments: boolean | null
+          created_at: string
+          description_ar: string | null
+          id: string
+          level_code: string
+          level_name_ar: string
+          level_name_en: string
+          parent_level_code: string | null
+          scope: string
+        }
+        Insert: {
+          can_ban_organizations?: boolean | null
+          can_field_inspect?: boolean | null
+          can_issue_penalties?: boolean | null
+          can_suspend_licenses?: boolean | null
+          can_track_vehicles?: boolean | null
+          can_view_all_shipments?: boolean | null
+          created_at?: string
+          description_ar?: string | null
+          id?: string
+          level_code: string
+          level_name_ar: string
+          level_name_en: string
+          parent_level_code?: string | null
+          scope?: string
+        }
+        Update: {
+          can_ban_organizations?: boolean | null
+          can_field_inspect?: boolean | null
+          can_issue_penalties?: boolean | null
+          can_suspend_licenses?: boolean | null
+          can_track_vehicles?: boolean | null
+          can_view_all_shipments?: boolean | null
+          created_at?: string
+          description_ar?: string | null
+          id?: string
+          level_code?: string
+          level_name_ar?: string
+          level_name_en?: string
+          parent_level_code?: string | null
+          scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulator_levels_parent_level_code_fkey"
+            columns: ["parent_level_code"]
+            isOneToOne: false
+            referencedRelation: "regulator_levels"
+            referencedColumns: ["level_code"]
+          },
+        ]
+      }
+      regulatory_penalties: {
+        Row: {
+          appeal_allowed: boolean | null
+          appeal_deadline: string | null
+          ban_reason: string | null
+          corrective_action_completed: boolean | null
+          corrective_action_deadline: string | null
+          corrective_action_required: string | null
+          corrective_action_verified_at: string | null
+          created_at: string
+          decision_document_url: string | null
+          fine_amount: number | null
+          fine_currency: string | null
+          fine_paid: boolean | null
+          fine_paid_at: string | null
+          fine_payment_reference: string | null
+          id: string
+          issued_by_user_id: string
+          notes: string | null
+          penalty_number: string
+          penalty_type: string
+          regulator_organization_id: string
+          status: string
+          suspension_end_date: string | null
+          suspension_start_date: string | null
+          target_organization_id: string
+          updated_at: string
+          violation_id: string
+        }
+        Insert: {
+          appeal_allowed?: boolean | null
+          appeal_deadline?: string | null
+          ban_reason?: string | null
+          corrective_action_completed?: boolean | null
+          corrective_action_deadline?: string | null
+          corrective_action_required?: string | null
+          corrective_action_verified_at?: string | null
+          created_at?: string
+          decision_document_url?: string | null
+          fine_amount?: number | null
+          fine_currency?: string | null
+          fine_paid?: boolean | null
+          fine_paid_at?: string | null
+          fine_payment_reference?: string | null
+          id?: string
+          issued_by_user_id: string
+          notes?: string | null
+          penalty_number?: string
+          penalty_type: string
+          regulator_organization_id: string
+          status?: string
+          suspension_end_date?: string | null
+          suspension_start_date?: string | null
+          target_organization_id: string
+          updated_at?: string
+          violation_id: string
+        }
+        Update: {
+          appeal_allowed?: boolean | null
+          appeal_deadline?: string | null
+          ban_reason?: string | null
+          corrective_action_completed?: boolean | null
+          corrective_action_deadline?: string | null
+          corrective_action_required?: string | null
+          corrective_action_verified_at?: string | null
+          created_at?: string
+          decision_document_url?: string | null
+          fine_amount?: number | null
+          fine_currency?: string | null
+          fine_paid?: boolean | null
+          fine_paid_at?: string | null
+          fine_payment_reference?: string | null
+          id?: string
+          issued_by_user_id?: string
+          notes?: string | null
+          penalty_number?: string
+          penalty_type?: string
+          regulator_organization_id?: string
+          status?: string
+          suspension_end_date?: string | null
+          suspension_start_date?: string | null
+          target_organization_id?: string
+          updated_at?: string
+          violation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_penalties_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulatory_penalties_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_penalties_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulatory_penalties_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_penalties_violation_id_fkey"
+            columns: ["violation_id"]
+            isOneToOne: false
+            referencedRelation: "regulatory_violations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      regulatory_violations: {
+        Row: {
+          created_at: string
+          description_ar: string
+          description_en: string | null
+          evidence_documents: string[] | null
+          evidence_photos: string[] | null
+          id: string
+          inspection_id: string | null
+          issued_by_user_id: string
+          legal_reference: string | null
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          organization_response: string | null
+          regulator_organization_id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          response_date: string | null
+          response_deadline: string | null
+          severity: string
+          status: string
+          updated_at: string
+          violating_organization_id: string
+          violation_date: string
+          violation_number: string
+          violation_type: string
+        }
+        Insert: {
+          created_at?: string
+          description_ar: string
+          description_en?: string | null
+          evidence_documents?: string[] | null
+          evidence_photos?: string[] | null
+          id?: string
+          inspection_id?: string | null
+          issued_by_user_id: string
+          legal_reference?: string | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          organization_response?: string | null
+          regulator_organization_id: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          response_date?: string | null
+          response_deadline?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          violating_organization_id: string
+          violation_date?: string
+          violation_number?: string
+          violation_type: string
+        }
+        Update: {
+          created_at?: string
+          description_ar?: string
+          description_en?: string | null
+          evidence_documents?: string[] | null
+          evidence_photos?: string[] | null
+          id?: string
+          inspection_id?: string | null
+          issued_by_user_id?: string
+          legal_reference?: string | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          organization_response?: string | null
+          regulator_organization_id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          response_date?: string | null
+          response_deadline?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          violating_organization_id?: string
+          violation_date?: string
+          violation_number?: string
+          violation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_violations_inspection_id_fkey"
+            columns: ["inspection_id"]
+            isOneToOne: false
+            referencedRelation: "field_inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_violations_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulatory_violations_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_violations_violating_organization_id_fkey"
+            columns: ["violating_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulatory_violations_violating_organization_id_fkey"
+            columns: ["violating_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -28464,6 +29052,7 @@ export type Database = {
           waste_category: string
         }[]
       }
+      get_regulator_org_id: { Args: { _user_id: string }; Returns: string }
       get_security_summary: {
         Args: { p_days?: number; p_organization_id?: string }
         Returns: {
@@ -28561,6 +29150,7 @@ export type Database = {
       }
       is_current_user_admin: { Args: never; Returns: boolean }
       is_org_subscription_valid: { Args: { org_id: string }; Returns: boolean }
+      is_regulator_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_driver: {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
@@ -28674,6 +29264,7 @@ export type Database = {
         | "consultant"
         | "consulting_office"
         | "iso_body"
+        | "regulator"
       shipment_status:
         | "new"
         | "registered"
@@ -28889,6 +29480,7 @@ export const Constants = {
         "consultant",
         "consulting_office",
         "iso_body",
+        "regulator",
       ],
       shipment_status: [
         "new",

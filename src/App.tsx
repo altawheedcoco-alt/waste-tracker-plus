@@ -164,7 +164,7 @@ const ConsultantPortal = lazy(() => import("./pages/ConsultantPortal"));
 const SigningInbox = lazy(() => import("./pages/dashboard/SigningInbox"));
 const AllNotes = lazy(() => import("./pages/dashboard/AllNotes"));
 const SystemCommands = lazy(() => import("./pages/dashboard/SystemCommands"));
-const RegulatorDashboard = lazy(() => import("./pages/dashboard/RegulatorDashboard"));
+const RegulatorDashboard = lazy(() => import("./pages/dashboard/RegulatorDashboardNew"));
 const RegulatedCompanies = lazy(() => import("./pages/dashboard/RegulatedCompanies"));
 const CollectionRequests = lazy(() => import("./pages/dashboard/CollectionRequests"));
 const SmartInsurance = lazy(() => import("./pages/dashboard/SmartInsurance"));
