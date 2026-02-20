@@ -82,6 +82,7 @@ import {
   PenTool,
   Network,
   FileSignature,
+  ClipboardCheck,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -232,6 +233,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         return Recycle;
       case 'disposal':
         return Factory;
+      case 'regulator':
+        return Shield;
       default:
         return Building2;
     }
@@ -250,6 +253,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         return 'الجهة المدورة';
       case 'disposal':
         return 'جهة التخلص النهائي';
+      case 'regulator':
+        return 'الجهة الرقابية';
       default:
         return 'جهة';
     }
@@ -271,6 +276,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         return 'الجهة المدورة';
       case 'disposal':
         return 'جهة التخلص النهائي';
+      case 'regulator':
+        return 'الجهة الرقابية';
       default:
         return 'الجهة';
     }
@@ -380,6 +387,18 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: FolderCheck, label: t('sidebar.disposalCerts'), path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
             { icon: BarChart3, label: t('sidebar.disposalReports'), path: '/dashboard/disposal/reports', key: 'disposal-reports' },
             { icon: Factory, label: language === 'ar' ? 'مرافق التخلص' : 'Disposal Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities' },
+          ]
+        } as SidebarMenuItem]
+      : (organization?.organization_type as string) === 'regulator'
+      ? [{
+          icon: Shield, label: language === 'ar' ? 'المنظومة الرقابية' : 'Regulatory System', path: '#', key: 'regulator-ops-group', children: [
+            { icon: BarChart3, label: language === 'ar' ? 'لوحة الرقابة' : 'Regulator Dashboard', path: '/dashboard/regulator', key: 'regulator-dashboard' },
+            { icon: Building2, label: language === 'ar' ? 'سجل المنظمات' : 'Organizations Registry', path: '/dashboard/regulator', key: 'regulator-orgs' },
+            { icon: ClipboardCheck, label: language === 'ar' ? 'التفتيش الميداني' : 'Field Inspections', path: '/dashboard/regulator', key: 'regulator-inspections' },
+            { icon: AlertTriangle, label: language === 'ar' ? 'المخالفات' : 'Violations', path: '/dashboard/regulator', key: 'regulator-violations' },
+            { icon: Scale, label: language === 'ar' ? 'القرارات والعقوبات' : 'Penalties', path: '/dashboard/regulator', key: 'regulator-penalties' },
+            { icon: Building2, label: language === 'ar' ? 'الشركات المنظمة' : 'Regulated Companies', path: '/dashboard/regulated-companies', key: 'regulated-companies' },
+            { icon: MapPin, label: language === 'ar' ? 'تتبع المركبات' : 'Vehicle Tracking', path: '/dashboard/driver-tracking', key: 'regulator-tracking' },
           ]
         } as SidebarMenuItem]
       : [{
