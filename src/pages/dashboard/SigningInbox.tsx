@@ -267,13 +267,48 @@ export default function SigningInbox() {
       });
 
       if (result.success) {
-        // Update signing request status
-        await updateStatus.mutateAsync({
-          id: signingRequest.id,
+        // Update signing request status + attach signature_id
+        const updatePayload: any = {
           status: 'signed',
-        });
-        // Invalidate signatures query
+          signed_at: new Date().toISOString(),
+          signature_id: result.signatureId || null,
+        };
+        const { error: updateErr } = await supabase
+          .from('signing_requests')
+          .update(updatePayload)
+          .eq('id', signingRequest.id);
+        if (updateErr) console.error('Update signing request error:', updateErr);
+
+        // Notify sender organization that document was signed
+        try {
+          const { data: senderMembers } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('organization_id', signingRequest.sender_organization_id);
+
+          if (senderMembers?.length) {
+            const orgName = profile.organization_id
+              ? (await supabase.from('organizations').select('name').eq('id', profile.organization_id).single()).data?.name
+              : '';
+            const notifications = senderMembers.map(m => ({
+              user_id: m.user_id,
+              title: `✅ تم توقيع المستند: ${signingRequest.document_title}`,
+              message: `قامت ${orgName || 'الجهة المستلمة'} بالتوقيع على "${signingRequest.document_title}" بنجاح. رقم الختم: ${result.sealNumber || '—'}`,
+              type: 'signing_request',
+              reference_id: signingRequest.id,
+              reference_type: 'signing_request',
+              is_read: false,
+            }));
+            await supabase.from('notifications').insert(notifications);
+          }
+        } catch (notifErr) {
+          console.error('Notification error (non-blocking):', notifErr);
+        }
+
+        // Invalidate queries to refresh UI
+        queryClient.invalidateQueries({ queryKey: ['signing-requests'] });
         queryClient.invalidateQueries({ queryKey: ['signing-request-signatures', signingRequest.id] });
+        toast.success('تم توقيع المستند وإرساله للجهة الطالبة بنجاح ✅');
         setSigningRequest(null);
       }
     } catch (err) {
