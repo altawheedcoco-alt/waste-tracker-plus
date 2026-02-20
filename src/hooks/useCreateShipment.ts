@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { fetchLinkedPartnerOrgs } from '@/hooks/useLinkedPartnerIds';
 import { useAutoChat } from '@/hooks/useAutoChat';
 import { usePinnedParties } from '@/hooks/usePinnedParties';
+import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import type { Database } from '@/integrations/supabase/types';
 
 export type WasteType = Database['public']['Enums']['waste_type'];
@@ -131,6 +132,7 @@ export const useCreateShipment = () => {
   const { profile, organization, roles } = useAuth();
   const { createShipmentChatRoom } = useAutoChat();
   const { pinnedParties, isLoaded: pinnedLoaded } = usePinnedParties();
+  const { requireSubscription } = useRequireSubscription();
   const [searchParams] = useSearchParams();
 
   const [loading, setLoading] = useState(false);
@@ -565,6 +567,9 @@ export const useCreateShipment = () => {
 
   const handleSubmit = async (e: React.FormEvent, onSuccess?: () => void, onClose?: () => void) => {
     e.preventDefault();
+
+    // === SUBSCRIPTION CHECK: Block if not paid ===
+    if (!requireSubscription()) return;
 
     const destinationFieldMissing = formData.destination_type === 'recycling' 
       ? !formData.recycler_id 

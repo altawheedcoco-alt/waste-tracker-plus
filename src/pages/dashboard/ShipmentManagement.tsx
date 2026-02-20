@@ -46,6 +46,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import BatchSignatureDialog from '@/components/signatures/BatchSignatureDialog';
 import type { BatchDocument } from '@/components/signatures/BatchSignatureDialog';
+import { useRequireSubscription } from '@/hooks/useRequireSubscription';
 import { PenTool, X } from 'lucide-react';
 
 
@@ -124,6 +125,7 @@ interface Organization {
 const ShipmentManagement = () => {
   const { t } = useLanguage();
   const { user, organization } = useAuth();
+  const { requireSubscription } = useRequireSubscription();
 
   const wasteTypes = [
     { value: 'plastic', label: t('shipmentMgmt.plastic') },
@@ -299,6 +301,9 @@ const ShipmentManagement = () => {
   };
 
   const handleCreateShipment = async () => {
+    // === SUBSCRIPTION CHECK ===
+    if (!requireSubscription()) return;
+
     if (!newShipment.generator_id || !newShipment.transporter_id || !newShipment.recycler_id) {
       toast({
         title: t('common.error'),
