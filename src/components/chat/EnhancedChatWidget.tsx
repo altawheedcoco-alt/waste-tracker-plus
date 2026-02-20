@@ -8,6 +8,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { cn } from '@/lib/utils';
 import { onWidgetToggle } from '@/lib/widgetBus';
+import { usePresence } from '@/hooks/usePresence';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 import ChatSidebar, { ChatPartner } from './ChatSidebar';
 import ChatHeader from './ChatHeader';
@@ -17,6 +20,7 @@ import EnhancedChatInput from './EnhancedChatInput';
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
   const { isMobile } = useDisplayMode();
+  const { isOrgOnline } = usePresence();
   const {
     messages,
     loading,
@@ -38,6 +42,7 @@ const EnhancedChatWidget = () => {
   const [loadingPartners, setLoadingPartners] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<ChatPartner | null>(null);
   const [unreadTotal, setUnreadTotal] = useState(0);
+  const [lastSeenMap, setLastSeenMap] = useState<Map<string, string>>(new Map());
 
   // Listen for unified menu toggle
   useEffect(() => {
@@ -48,6 +53,28 @@ const EnhancedChatWidget = () => {
       }
     });
   }, []);
+
+  // Fetch last message time for each partner (for "last seen")
+  const fetchLastSeenTimes = useCallback(async (partnerOrgIds: string[]) => {
+    if (!organization?.id || partnerOrgIds.length === 0) return;
+    try {
+      const map = new Map<string, string>();
+      for (const pId of partnerOrgIds) {
+        const { data } = await supabase
+          .from('chat_messages')
+          .select('created_at')
+          .eq('sender_organization_id', pId)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (data?.[0]?.created_at) {
+          map.set(pId, formatDistanceToNow(new Date(data[0].created_at), { addSuffix: true, locale: ar }));
+        }
+      }
+      setLastSeenMap(map);
+    } catch (e) {
+      console.error('Error fetching last seen:', e);
+    }
+  }, [organization?.id]);
 
   // Fetch partners when widget opens
   const fetchPartners = useCallback(async () => {
@@ -74,10 +101,11 @@ const EnhancedChatWidget = () => {
       });
 
       if (partnerIds.size > 0) {
+        const partnerIdsArr = Array.from(partnerIds);
         const { data: orgs } = await supabase
           .from('organizations')
           .select('id, name, organization_type, logo_url')
-          .in('id', Array.from(partnerIds))
+          .in('id', partnerIdsArr)
           .order('name');
         
         // Get unread counts for each partner
@@ -90,6 +118,7 @@ const EnhancedChatWidget = () => {
               organization_type: org.organization_type as 'generator' | 'transporter' | 'recycler',
               logo_url: org.logo_url,
               unreadCount,
+              isOnline: isOrgOnline(org.id),
             };
           })
         );
@@ -99,13 +128,21 @@ const EnhancedChatWidget = () => {
         // Calculate total unread
         const total = partnersWithUnread.reduce((sum, p) => sum + p.unreadCount, 0);
         setUnreadTotal(total);
+
+        // Fetch last seen times
+        fetchLastSeenTimes(partnerIdsArr);
       }
     } catch (error) {
       console.error('Error fetching partners:', error);
     } finally {
       setLoadingPartners(false);
     }
-  }, [organization?.id, getPartnerUnreadCount]);
+  }, [organization?.id, getPartnerUnreadCount, isOrgOnline, fetchLastSeenTimes]);
+
+  // Update online status in partners list when presence changes
+  useEffect(() => {
+    setPartners(prev => prev.map(p => ({ ...p, isOnline: isOrgOnline(p.id) })));
+  }, [isOrgOnline]);
 
   // Fetch partners on open
   useEffect(() => {
@@ -160,6 +197,9 @@ const EnhancedChatWidget = () => {
     : isMobile
       ? 'fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-2 right-2 z-50 h-[60vh]'
       : 'fixed bottom-20 left-4 z-50 w-[380px] h-[550px]';
+
+  const selectedPartnerOnline = selectedPartner ? isOrgOnline(selectedPartner.id) : false;
+  const selectedPartnerLastSeen = selectedPartner ? lastSeenMap.get(selectedPartner.id) : undefined;
 
   return (
     <>
@@ -216,6 +256,8 @@ const EnhancedChatWidget = () => {
                   partnerName={selectedPartner.name}
                   partnerType={selectedPartner.organization_type}
                   partnerLogo={selectedPartner.logo_url}
+                  isOnline={selectedPartnerOnline}
+                  lastSeen={selectedPartnerLastSeen}
                   onBack={handleBack}
                   soundEnabled={soundEnabled}
                   onToggleSound={() => setSoundEnabled(!soundEnabled)}
