@@ -20471,6 +20471,135 @@ export type Database = {
           },
         ]
       }
+      safety_quiz_attempts: {
+        Row: {
+          answers: Json | null
+          completed_at: string
+          course_id: string
+          created_at: string
+          id: string
+          organization_id: string
+          passed: boolean
+          percentage: number
+          record_id: string
+          score: number
+          total_points: number
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string
+          course_id: string
+          created_at?: string
+          id?: string
+          organization_id: string
+          passed?: boolean
+          percentage?: number
+          record_id: string
+          score?: number
+          total_points?: number
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          organization_id?: string
+          passed?: boolean
+          percentage?: number
+          record_id?: string
+          score?: number
+          total_points?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_quiz_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "safety_training_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_quiz_attempts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_quiz_attempts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_quiz_attempts_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "safety_training_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safety_quiz_questions: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          options: Json
+          organization_id: string
+          points: number
+          question_ar: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          options?: Json
+          organization_id: string
+          points?: number
+          question_ar: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          options?: Json
+          organization_id?: string
+          points?: number
+          question_ar?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_quiz_questions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "safety_training_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_quiz_questions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_quiz_questions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       safety_training_courses: {
         Row: {
           certificate_validity_months: number | null
