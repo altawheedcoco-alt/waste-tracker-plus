@@ -11,10 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSafetyTrainingCourses, useSafetyTrainingRecords } from '@/hooks/useSafetyTraining';
 import { useAuth } from '@/contexts/AuthContext';
-import { Plus, GraduationCap, Users, CreditCard, Printer, CheckCircle2, XCircle, QrCode, Clock } from 'lucide-react';
+import { Plus, GraduationCap, Users, CreditCard, Printer, CheckCircle2, XCircle, QrCode, Clock, FileQuestion } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import SafetyCardPrintView from './SafetyCardPrintView';
+import SafetyQuizManager from './SafetyQuizManager';
 
 const courseTypes: Record<string, string> = {
   general_safety: 'السلامة العامة',
@@ -172,6 +173,7 @@ const SafetyTrainingPanel = () => {
           <TabsTrigger value="courses" className="text-xs sm:text-sm gap-1 whitespace-nowrap"><GraduationCap className="w-3 h-3" />الدورات</TabsTrigger>
           <TabsTrigger value="trainees" className="text-xs sm:text-sm gap-1 whitespace-nowrap"><Users className="w-3 h-3" />المتدربون</TabsTrigger>
           <TabsTrigger value="cards" className="text-xs sm:text-sm gap-1 whitespace-nowrap"><CreditCard className="w-3 h-3" />الكروت الصادرة</TabsTrigger>
+          <TabsTrigger value="quizzes" className="text-xs sm:text-sm gap-1 whitespace-nowrap"><FileQuestion className="w-3 h-3" />الامتحانات</TabsTrigger>
         </TabsList>
 
         {/* Courses Tab */}
@@ -303,6 +305,10 @@ const SafetyTrainingPanel = () => {
               </div>
             );
           })()}
+        </TabsContent>
+
+        <TabsContent value="quizzes" className="space-y-3">
+          <SafetyQuizManager />
         </TabsContent>
       </Tabs>
     </div>
