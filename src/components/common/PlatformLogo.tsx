@@ -1,6 +1,5 @@
 import { memo } from 'react';
-import { Recycle } from 'lucide-react';
-import logo from '@/assets/logo.png';
+import irecycleLogo from '@/assets/irecycle-logo.jpg';
 import { cn } from '@/lib/utils';
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'print';
@@ -16,20 +15,22 @@ interface PlatformLogoProps {
   inverted?: boolean;
   /** For print documents - use simpler rendering */
   printMode?: boolean;
+  /** Show subtitle "Waste Management System" */
+  showSubtitle?: boolean;
 }
 
-const sizeMap: Record<LogoSize, { icon: string; img: string; text: string; subtext: string }> = {
-  xs: { icon: 'h-5 w-5', img: 'h-5 w-5', text: 'text-xs', subtext: 'text-[8px]' },
-  sm: { icon: 'h-6 w-6', img: 'h-6 w-6', text: 'text-sm', subtext: 'text-[10px]' },
-  md: { icon: 'h-8 w-8 sm:h-10 sm:w-10', img: 'h-8 w-8 sm:h-10 sm:w-10', text: 'text-sm sm:text-base lg:text-lg', subtext: 'text-[10px] sm:text-xs lg:text-sm' },
-  lg: { icon: 'h-12 w-12', img: 'h-12 w-12', text: 'text-xl', subtext: 'text-sm' },
-  xl: { icon: 'h-14 w-14', img: 'h-14 w-14', text: 'text-2xl', subtext: 'text-base' },
-  print: { icon: 'h-6 w-6', img: 'h-6 w-6', text: 'text-sm', subtext: 'text-xs' },
+const sizeMap: Record<LogoSize, { logoH: string; text: string; subtext: string; subtitle: string }> = {
+  xs: { logoH: 'h-6', text: 'text-xs', subtext: 'text-[8px]', subtitle: 'text-[6px]' },
+  sm: { logoH: 'h-8', text: 'text-sm', subtext: 'text-[10px]', subtitle: 'text-[7px]' },
+  md: { logoH: 'h-10 sm:h-12', text: 'text-sm sm:text-base lg:text-lg', subtext: 'text-[10px] sm:text-xs', subtitle: 'text-[8px] sm:text-[9px]' },
+  lg: { logoH: 'h-14', text: 'text-xl', subtext: 'text-sm', subtitle: 'text-[10px]' },
+  xl: { logoH: 'h-20', text: 'text-2xl', subtext: 'text-base', subtitle: 'text-xs' },
+  print: { logoH: 'h-10', text: 'text-sm', subtext: 'text-xs', subtitle: 'text-[8px]' },
 };
 
 /**
- * Unified platform logo component used across all pages, dashboard, and print documents.
- * Combines the Recycle icon + logo.png image for consistent branding.
+ * Unified platform logo component used across all pages, dashboards, and print documents.
+ * Uses the official iRecycle logo image for consistent high-quality branding.
  */
 const PlatformLogo = memo(({
   size = 'md',
@@ -40,23 +41,22 @@ const PlatformLogo = memo(({
   imgClassName,
   inverted = false,
   printMode = false,
+  showSubtitle = false,
 }: PlatformLogoProps) => {
   const s = sizeMap[size];
 
   return (
     <div className={cn('flex items-center gap-1.5', className)}>
-      {showRecycleIcon && (
-        <Recycle className={cn(s.icon, inverted ? 'text-white' : 'text-primary', iconClassName)} />
-      )}
       <img
-        src={logo}
-        alt="iRecycle"
+        src={irecycleLogo}
+        alt="iRecycle - Waste Management System"
         className={cn(
-          s.img,
-          'object-contain',
+          s.logoH,
+          'object-contain w-auto',
           inverted && 'brightness-0 invert',
           imgClassName
         )}
+        loading="eager"
       />
       {showText && (
         <div className="flex flex-col">
@@ -65,6 +65,18 @@ const PlatformLogo = memo(({
           </span>
           <span className={cn(s.subtext, 'font-semibold leading-tight', inverted ? 'text-white/70' : 'text-muted-foreground')}>
             آي ريسايكل
+          </span>
+          {showSubtitle && (
+            <span className={cn(s.subtitle, 'font-medium tracking-wider uppercase leading-tight mt-0.5', inverted ? 'text-white/50' : 'text-muted-foreground/70')}>
+              Waste Management System
+            </span>
+          )}
+        </div>
+      )}
+      {!showText && showSubtitle && (
+        <div className="flex flex-col">
+          <span className={cn(s.subtitle, 'font-medium tracking-wider uppercase leading-tight', inverted ? 'text-white/50' : 'text-muted-foreground/70')}>
+            Waste Management System
           </span>
         </div>
       )}

@@ -558,7 +558,7 @@ const Auth = () => {
             whileHover={{ scale: 1.05 }}
             className="inline-flex items-center gap-3 mb-4"
           >
-            <PlatformLogo size="xl" showText />
+            <PlatformLogo size="xl" showText showSubtitle />
           </motion.div>
         </div>
 
