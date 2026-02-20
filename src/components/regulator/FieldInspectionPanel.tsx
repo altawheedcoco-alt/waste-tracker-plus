@@ -153,7 +153,7 @@ const FieldInspectionPanel = () => {
                   </div>
                   <div>
                     <Label>العنوان / الموقع</Label>
-                    <Input value={form.location_address} onChange={(e) => setForm(f => ({ ...f, location_address: e.target.value }))} placeholder="عنوان موقع التفتيش" />
+                    <Input fieldContext="location_address" value={form.location_address} onChange={(e) => setForm(f => ({ ...f, location_address: e.target.value }))} placeholder="عنوان موقع التفتيش" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>

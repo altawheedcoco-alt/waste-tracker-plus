@@ -209,12 +209,12 @@ const OmalunaWorkerProfile = () => {
             <CardHeader><CardTitle className="text-base">البيانات الشخصية</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>الاسم الكامل *</Label><Input value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} /></div>
-                <div><Label>البريد الإلكتروني *</Label><Input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
+                <div><Label>الاسم الكامل *</Label><Input fieldContext="full_name" value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} /></div>
+                <div><Label>البريد الإلكتروني *</Label><Input fieldContext="email" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>الهاتف</Label><Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
-                <div><Label>الرقم القومي</Label><Input value={form.national_id} onChange={e => setForm(p => ({ ...p, national_id: e.target.value }))} /></div>
+                <div><Label>الهاتف</Label><Input fieldContext="phone" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
+                <div><Label>الرقم القومي</Label><Input fieldContext="national_id" value={form.national_id} onChange={e => setForm(p => ({ ...p, national_id: e.target.value }))} /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>تاريخ الميلاد</Label><Input type="date" value={form.date_of_birth} onChange={e => setForm(p => ({ ...p, date_of_birth: e.target.value }))} /></div>
@@ -230,10 +230,10 @@ const OmalunaWorkerProfile = () => {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>المحافظة</Label><Input value={form.governorate} onChange={e => setForm(p => ({ ...p, governorate: e.target.value }))} /></div>
-                <div><Label>المدينة</Label><Input value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} /></div>
+                <div><Label>المحافظة</Label><Input fieldContext="governorate" value={form.governorate} onChange={e => setForm(p => ({ ...p, governorate: e.target.value }))} /></div>
+                <div><Label>المدينة</Label><Input fieldContext="city" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} /></div>
               </div>
-              <div><Label>العنوان</Label><Input value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} /></div>
+              <div><Label>العنوان</Label><Input fieldContext="address" value={form.address} onChange={e => setForm(p => ({ ...p, address: e.target.value }))} /></div>
               <div><Label>نبذة عنك</Label><Textarea value={form.bio} onChange={e => setForm(p => ({ ...p, bio: e.target.value }))} rows={3} placeholder="اكتب نبذة مختصرة عنك..." /></div>
             </CardContent>
           </Card>
@@ -243,7 +243,7 @@ const OmalunaWorkerProfile = () => {
             <CardHeader><CardTitle className="text-base">المعلومات المهنية</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>المسمى الوظيفي</Label><Input value={form.job_title} onChange={e => setForm(p => ({ ...p, job_title: e.target.value }))} placeholder="مثال: فني فرز" /></div>
+                <div><Label>المسمى الوظيفي</Label><Input fieldContext="job_title" value={form.job_title} onChange={e => setForm(p => ({ ...p, job_title: e.target.value }))} placeholder="مثال: فني فرز" /></div>
                 <div><Label>سنوات الخبرة</Label><Input type="number" min={0} value={form.years_of_experience} onChange={e => setForm(p => ({ ...p, years_of_experience: Number(e.target.value) }))} /></div>
               </div>
               <div>

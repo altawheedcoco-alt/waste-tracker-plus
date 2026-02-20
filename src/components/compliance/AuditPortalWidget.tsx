@@ -172,9 +172,9 @@ const AuditPortalWidget = () => {
                 <SelectContent>{Object.entries(auditTypeLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>اسم المراجع *</Label><Input value={form.auditor_name} onChange={e => setForm({ ...form, auditor_name: e.target.value })} /></div>
-            <div><Label>المكتب الاستشاري</Label><Input value={form.auditor_organization} onChange={e => setForm({ ...form, auditor_organization: e.target.value })} /></div>
-            <div><Label>البريد الإلكتروني</Label><Input type="email" value={form.auditor_email} onChange={e => setForm({ ...form, auditor_email: e.target.value })} /></div>
+            <div><Label>اسم المراجع *</Label><Input fieldContext="auditor_name" value={form.auditor_name} onChange={e => setForm({ ...form, auditor_name: e.target.value })} /></div>
+            <div><Label>المكتب الاستشاري</Label><Input fieldContext="auditor_organization" value={form.auditor_organization} onChange={e => setForm({ ...form, auditor_organization: e.target.value })} /></div>
+            <div><Label>البريد الإلكتروني</Label><Input fieldContext="email" type="email" value={form.auditor_email} onChange={e => setForm({ ...form, auditor_email: e.target.value })} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>تاريخ المراجعة</Label><Input type="date" value={form.audit_date} onChange={e => setForm({ ...form, audit_date: e.target.value })} /></div>
               <div>

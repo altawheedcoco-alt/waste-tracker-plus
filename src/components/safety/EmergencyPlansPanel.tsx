@@ -55,7 +55,7 @@ const EmergencyPlansPanel = () => {
           <DialogContent dir="rtl" className="max-w-md">
             <DialogHeader><DialogTitle>خطة طوارئ جديدة</DialogTitle></DialogHeader>
             <div className="space-y-4 mt-4">
-              <div><Label>عنوان الخطة *</Label><Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="خطة الإخلاء الرئيسية" /></div>
+              <div><Label>عنوان الخطة *</Label><Input fieldContext="emergency_plan_title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="خطة الإخلاء الرئيسية" /></div>
               <div><Label>نوع الخطة</Label>
                 <Select value={form.plan_type} onValueChange={v => setForm(f => ({ ...f, plan_type: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>

@@ -112,7 +112,7 @@ const FleetVehicleDialog = ({ open, onOpenChange, vehicle, onSaved }: Props) => 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>رقم اللوحة *</Label>
-              <Input value={form.plate_number} onChange={e => setForm(p => ({ ...p, plate_number: e.target.value }))} />
+              <Input fieldContext="vehicle_plate" value={form.plate_number} onChange={e => setForm(p => ({ ...p, plate_number: e.target.value }))} />
             </div>
             <div>
               <Label>نوع المركبة</Label>
@@ -129,8 +129,8 @@ const FleetVehicleDialog = ({ open, onOpenChange, vehicle, onSaved }: Props) => 
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <div><Label>الماركة</Label><Input value={form.brand} onChange={e => setForm(p => ({ ...p, brand: e.target.value }))} /></div>
-            <div><Label>الموديل</Label><Input value={form.model} onChange={e => setForm(p => ({ ...p, model: e.target.value }))} /></div>
+            <div><Label>الماركة</Label><Input fieldContext="vehicle_brand" value={form.brand} onChange={e => setForm(p => ({ ...p, brand: e.target.value }))} /></div>
+            <div><Label>الموديل</Label><Input fieldContext="vehicle_model" value={form.model} onChange={e => setForm(p => ({ ...p, model: e.target.value }))} /></div>
             <div><Label>السنة</Label><Input type="number" value={form.year} onChange={e => setForm(p => ({ ...p, year: e.target.value }))} /></div>
           </div>
 

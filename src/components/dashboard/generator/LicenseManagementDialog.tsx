@@ -252,17 +252,17 @@ const LicenseManagementDialog = ({ open, onOpenChange, onSaved }: Props) => {
 
             <div>
               <Label>اسم الترخيص *</Label>
-              <Input value={form.license_name} onChange={e => setForm(p => ({ ...p, license_name: e.target.value }))} />
+              <Input fieldContext="license_name" value={form.license_name} onChange={e => setForm(p => ({ ...p, license_name: e.target.value }))} />
             </div>
 
             <div>
               <Label>الجهة المصدرة *</Label>
-              <Input value={form.issuing_authority} onChange={e => setForm(p => ({ ...p, issuing_authority: e.target.value }))} />
+              <Input fieldContext="issuing_authority" value={form.issuing_authority} onChange={e => setForm(p => ({ ...p, issuing_authority: e.target.value }))} />
             </div>
 
             <div>
               <Label>رقم الترخيص</Label>
-              <Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} />
+              <Input fieldContext="license_number" value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">

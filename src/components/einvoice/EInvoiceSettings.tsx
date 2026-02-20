@@ -158,15 +158,15 @@ const EInvoiceSettings: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>رقم التسجيل الضريبي</Label>
-                  <Input value={form.tax_registration_number} onChange={e => setForm(p => ({ ...p, tax_registration_number: e.target.value }))} placeholder="مثال: 123-456-789" dir="ltr" />
+                  <Input fieldContext="tax_registration_number" value={form.tax_registration_number} onChange={e => setForm(p => ({ ...p, tax_registration_number: e.target.value }))} placeholder="مثال: 123-456-789" dir="ltr" />
                 </div>
                 <div>
                   <Label>رقم الفرع (Branch ID)</Label>
-                  <Input value={form.branch_id} onChange={e => setForm(p => ({ ...p, branch_id: e.target.value }))} placeholder="0 للمقر الرئيسي" dir="ltr" />
+                  <Input fieldContext="branch_id" value={form.branch_id} onChange={e => setForm(p => ({ ...p, branch_id: e.target.value }))} placeholder="0 للمقر الرئيسي" dir="ltr" />
                 </div>
                 <div>
                   <Label>كود النشاط</Label>
-                  <Input value={form.activity_code} onChange={e => setForm(p => ({ ...p, activity_code: e.target.value }))} placeholder="كود النشاط من ETA" dir="ltr" />
+                  <Input fieldContext="activity_code" value={form.activity_code} onChange={e => setForm(p => ({ ...p, activity_code: e.target.value }))} placeholder="كود النشاط من ETA" dir="ltr" />
                 </div>
                 <div>
                   <Label>Client ID</Label>

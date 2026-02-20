@@ -147,11 +147,11 @@ export default function OrgMembersPanel() {
             <div className="space-y-3 mt-2">
               <div>
                 <Label>الاسم الكامل *</Label>
-                <Input value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} placeholder="أحمد محمد" className="text-right" />
+                <Input fieldContext="full_name" value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} placeholder="أحمد محمد" className="text-right" />
               </div>
               <div>
                 <Label>المسمى الوظيفي</Label>
-                <Input value={form.job_title_ar} onChange={e => setForm(p => ({ ...p, job_title_ar: e.target.value }))} placeholder="مثال: محاسب" className="text-right" />
+                <Input fieldContext="job_title" value={form.job_title_ar} onChange={e => setForm(p => ({ ...p, job_title_ar: e.target.value }))} placeholder="مثال: محاسب" className="text-right" />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -189,7 +189,7 @@ export default function OrgMembersPanel() {
               </div>
               <div>
                 <Label>رقم الجوال</Label>
-                <Input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+966..." dir="ltr" />
+                <Input fieldContext="phone" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+966..." dir="ltr" />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -215,7 +215,7 @@ export default function OrgMembersPanel() {
               </div>
               <div>
                 <Label>الرقم الوظيفي</Label>
-                <Input value={form.employee_number} onChange={e => setForm(p => ({ ...p, employee_number: e.target.value }))} placeholder="EMP-001" dir="ltr" />
+                <Input fieldContext="employee_number" value={form.employee_number} onChange={e => setForm(p => ({ ...p, employee_number: e.target.value }))} placeholder="EMP-001" dir="ltr" />
               </div>
               <Button onClick={handleAdd} disabled={addMember.isPending} className="w-full">
                 {addMember.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'إضافة العضو'}
