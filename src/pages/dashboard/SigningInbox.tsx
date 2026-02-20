@@ -26,6 +26,7 @@ import { ar } from 'date-fns/locale';
 import UniversalSignatureDialog from '@/components/signatures/UniversalSignatureDialog';
 import { saveDocumentSignature } from '@/components/signatures/signatureService';
 import type { SignatureData } from '@/components/signatures/UniversalSignatureDialog';
+import { withTagline } from '@/utils/platformTaglines';
 import SignatureBadges from '@/components/signatures/SignatureBadges';
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
@@ -293,7 +294,7 @@ export default function SigningInbox() {
             const notifications = senderMembers.map(m => ({
               user_id: m.user_id,
               title: `✅ تم توقيع المستند: ${signingRequest.document_title}`,
-              message: `قامت ${orgName || 'الجهة المستلمة'} بالتوقيع على "${signingRequest.document_title}" بنجاح. رقم الختم: ${result.sealNumber || '—'}`,
+              message: withTagline(`قامت ${orgName || 'الجهة المستلمة'} بالتوقيع على "${signingRequest.document_title}" بنجاح. رقم الختم: ${result.sealNumber || '—'}`),
               type: 'signing_request',
               reference_id: signingRequest.id,
               reference_type: 'signing_request',

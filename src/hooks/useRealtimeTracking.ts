@@ -123,15 +123,48 @@ export const useRealtimeTracking = ({
       try {
         const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
         const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
+        const { withTagline, SHIPMENT_STATUS_LABELS } = await import('@/utils/platformTaglines');
 
         // Fetch shipment details for org IDs
         const { data: shipmentData } = await supabase
           .from('shipments')
-          .select('generator_id, transporter_id, recycler_id')
+          .select('generator_id, transporter_id, recycler_id, shipment_number')
           .eq('id', shipmentId)
           .single();
 
         if (shipmentData) {
+          // === Send status change notifications to all parties ===
+          const statusLabel = SHIPMENT_STATUS_LABELS[newStatus] || newStatus;
+          const allOrgIds = [shipmentData.generator_id, shipmentData.transporter_id, shipmentData.recycler_id].filter(Boolean);
+          
+          try {
+            const { data: allUsers } = await supabase
+              .from('profiles')
+              .select('user_id, organization_id')
+              .in('organization_id', allOrgIds)
+              .limit(50);
+
+            if (allUsers && allUsers.length > 0) {
+              const statusNotifications = allUsers
+                .filter((u: any) => u.user_id !== user.id) // Don't notify the user who made the change
+                .map((u: any) => ({
+                  user_id: u.user_id,
+                  title: `📦 تحديث حالة الشحنة ${shipmentData.shipment_number}`,
+                  message: withTagline(`تم تغيير حالة الشحنة ${shipmentData.shipment_number} إلى: ${statusLabel}`),
+                  type: 'status_update',
+                  shipment_id: shipmentId,
+                  is_read: false,
+                }));
+
+              if (statusNotifications.length > 0) {
+                await supabase.from('notifications').insert(statusNotifications);
+                console.log(`[RealtimeTracking] Sent ${statusNotifications.length} status notifications`);
+              }
+            }
+          } catch (notifErr) {
+            console.error('[RealtimeTracking] Status notification failed (non-blocking):', notifErr);
+          }
+
           // Generator declaration on approved/registered/in_transit
           if (['approved', 'registered', 'in_transit'].includes(newStatus) && shipmentData.generator_id) {
             await autoCreateGeneratorDeclaration(shipmentId, shipmentData.generator_id, user.id);
