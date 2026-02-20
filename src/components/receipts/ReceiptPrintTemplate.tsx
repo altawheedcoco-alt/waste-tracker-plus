@@ -756,9 +756,17 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
           </div>
         </div>
         
+        <!-- Legal Disclaimer -->
+        <div style="padding: 10px 15px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 15px; font-size: 9px; color: #991b1b; line-height: 1.5;">
+          <p style="margin: 0; font-weight: bold;">⚖️ إخلاء مسؤولية وتحذير قانوني:</p>
+          <p style="margin: 3px 0 0 0;">
+            هذه الوثيقة ملزمة قانونياً لجميع الأطراف. أي مخالفة للبيانات المذكورة أو تلاعب بمحتويات الشحنة أو إخفاء معلومات جوهرية يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون تنظيم إدارة المخلفات 202/2020 وقانون حماية البيئة 4/1994 وقانون العقوبات المصري. يخضع هذا المستند لشروط وأحكام وسياسات منصة iRecycle المعتمدة. والمخالف يتحمل كافة التبعات القانونية المدنية والجنائية المترتبة على ذلك.
+          </p>
+        </div>
+
         <!-- Platform Rights -->
         <div class="platform-rights">
-          ⚖️ ضمان حقوق المنصة: هذه الوثيقة صادرة عن نظام آي ريسايكل لإدارة المخلفات وتخضع لشروط الاستخدام وسياسة الخصوصية
+          ⚖️ ضمان حقوق المنصة: هذه الوثيقة مؤمنة وذكية وصادرة عن نظام آي ريسايكل لإدارة المخلفات — تخضع لشروط الاستخدام وسياسة الخصوصية والأحكام العامة المنشورة والمعتمدة
         </div>
         
         <!-- Footer -->
@@ -771,6 +779,17 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
             <div class="footer-right">
               <span class="verification-code">🔐 ${verificationCode}</span>
             </div>
+          </div>
+          <div style="text-align: center; margin-top: 8px; font-style: italic; color: #059669; font-weight: bold; font-size: 9px;">
+            ${(() => {
+              const taglines = [
+                'الإنتاج عليك.. والدائرة المقفولة علينا. خليك I RECYCLE.',
+                'إدارة مخلفات بمواصفات عالمية.. I RECYCLE سيستم مبيغلطش.',
+                'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح. I RECYCLE.',
+                'من المصنع للمستقبل.. سكة واحدة مع I RECYCLE.',
+              ];
+              return taglines[Math.floor(Date.now() / 86400000) % 4];
+            })()}
           </div>
         </div>
       </div>
