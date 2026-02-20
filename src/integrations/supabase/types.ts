@@ -25191,12 +25191,16 @@ export type Database = {
           grace_period_hours: number | null
           id: string
           last_payment_date: string | null
+          linked_orgs_count: number
           organization_id: string | null
           payment_method: string | null
           paymob_subscription_id: string | null
           plan_id: string | null
+          price_per_seat: number
           start_date: string | null
           status: string
+          total_amount: number
+          total_seats: number
           updated_at: string
           user_id: string
         }
@@ -25207,12 +25211,16 @@ export type Database = {
           grace_period_hours?: number | null
           id?: string
           last_payment_date?: string | null
+          linked_orgs_count?: number
           organization_id?: string | null
           payment_method?: string | null
           paymob_subscription_id?: string | null
           plan_id?: string | null
+          price_per_seat?: number
           start_date?: string | null
           status?: string
+          total_amount?: number
+          total_seats?: number
           updated_at?: string
           user_id: string
         }
@@ -25223,12 +25231,16 @@ export type Database = {
           grace_period_hours?: number | null
           id?: string
           last_payment_date?: string | null
+          linked_orgs_count?: number
           organization_id?: string | null
           payment_method?: string | null
           paymob_subscription_id?: string | null
           plan_id?: string | null
+          price_per_seat?: number
           start_date?: string | null
           status?: string
+          total_amount?: number
+          total_seats?: number
           updated_at?: string
           user_id?: string
         }
@@ -27562,6 +27574,10 @@ export type Database = {
           shipments_processed: number
         }[]
       }
+      calculate_org_required_seats: {
+        Args: { org_id: string }
+        Returns: number
+      }
       can_access_contract: {
         Args: { _contract_id: string; _user_id: string }
         Returns: boolean
@@ -27626,6 +27642,7 @@ export type Database = {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
       }
+      can_org_operate: { Args: { org_id: string }; Returns: boolean }
       can_view_organization: { Args: { _org_id: string }; Returns: boolean }
       can_view_shipment: {
         Args: {
@@ -27951,6 +27968,7 @@ export type Database = {
         Returns: boolean
       }
       is_current_user_admin: { Args: never; Returns: boolean }
+      is_org_subscription_valid: { Args: { org_id: string }; Returns: boolean }
       is_user_driver: {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
