@@ -145,7 +145,7 @@ const ShipmentInsurancePanel: React.FC = () => {
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>إنشاء وثيقة تأمين</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-3">
-              <div><Label>نوع المخلفات *</Label><Input value={form.waste_type} onChange={e => setForm(p => ({ ...p, waste_type: e.target.value }))} /></div>
+              <div><Label>نوع المخلفات *</Label><Input fieldContext="waste_type" value={form.waste_type} onChange={e => setForm(p => ({ ...p, waste_type: e.target.value }))} /></div>
               <div>
                 <Label>نوع التغطية</Label>
                 <Select value={form.coverage_type} onValueChange={v => setForm(p => ({ ...p, coverage_type: v }))}>

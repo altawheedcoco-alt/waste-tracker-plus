@@ -115,11 +115,11 @@ const TransportFuturesPanel: React.FC = () => {
           <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
             <DialogHeader><DialogTitle>إنشاء عقد آجل</DialogTitle></DialogHeader>
             <div className="space-y-3 mt-3">
-              <div><Label>الطرف المقابل *</Label><Input value={form.counterparty_name} onChange={e => setForm(p => ({ ...p, counterparty_name: e.target.value }))} /></div>
-              <div><Label>نوع المخلفات *</Label><Input value={form.waste_type} onChange={e => setForm(p => ({ ...p, waste_type: e.target.value }))} /></div>
+              <div><Label>الطرف المقابل *</Label><Input fieldContext="counterparty_name" value={form.counterparty_name} onChange={e => setForm(p => ({ ...p, counterparty_name: e.target.value }))} /></div>
+              <div><Label>نوع المخلفات *</Label><Input fieldContext="waste_type" value={form.waste_type} onChange={e => setForm(p => ({ ...p, waste_type: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>من</Label><Input value={form.route_from} onChange={e => setForm(p => ({ ...p, route_from: e.target.value }))} /></div>
-                <div><Label>إلى</Label><Input value={form.route_to} onChange={e => setForm(p => ({ ...p, route_to: e.target.value }))} /></div>
+                <div><Label>من</Label><Input fieldContext="route_from" value={form.route_from} onChange={e => setForm(p => ({ ...p, route_from: e.target.value }))} /></div>
+                <div><Label>إلى</Label><Input fieldContext="route_to" value={form.route_to} onChange={e => setForm(p => ({ ...p, route_to: e.target.value }))} /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>السعر الثابت/طن (ج.م) *</Label><Input type="number" value={form.fixed_price_per_ton} onChange={e => setForm(p => ({ ...p, fixed_price_per_ton: e.target.value }))} /></div>

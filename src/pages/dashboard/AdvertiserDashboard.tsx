@@ -230,11 +230,11 @@ const AdvertiserDashboard = () => {
 
               <div className="space-y-2">
                 <Label>عنوان الإعلان *</Label>
-                <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="عنوان جذاب لإعلانك" className="text-right" />
+                <Input fieldContext="ad_title" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="عنوان جذاب لإعلانك" className="text-right" />
               </div>
               <div className="space-y-2">
                 <Label>عنوان فرعي</Label>
-                <Input value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="وصف مختصر" className="text-right" />
+                <Input fieldContext="ad_subtitle" value={form.subtitle} onChange={e => setForm(f => ({ ...f, subtitle: e.target.value }))} placeholder="وصف مختصر" className="text-right" />
               </div>
               <div className="space-y-2">
                 <Label>تفاصيل الإعلان</Label>
@@ -250,7 +250,7 @@ const AdvertiserDashboard = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>شارة مميزة</Label>
-                  <Input value={form.badge_text} onChange={e => setForm(f => ({ ...f, badge_text: e.target.value }))} placeholder="مثال: عرض خاص" className="text-right" />
+                  <Input fieldContext="badge_text" value={form.badge_text} onChange={e => setForm(f => ({ ...f, badge_text: e.target.value }))} placeholder="مثال: عرض خاص" className="text-right" />
                 </div>
               </div>
               <div className="space-y-2">
@@ -260,7 +260,7 @@ const AdvertiserDashboard = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label>نص الزر (CTA)</Label>
-                  <Input value={form.cta_text} onChange={e => setForm(f => ({ ...f, cta_text: e.target.value }))} className="text-right" />
+                  <Input fieldContext="cta_text" value={form.cta_text} onChange={e => setForm(f => ({ ...f, cta_text: e.target.value }))} className="text-right" />
                 </div>
                 <div className="space-y-2">
                   <Label>رابط الزر</Label>

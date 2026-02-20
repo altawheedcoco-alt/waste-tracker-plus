@@ -157,10 +157,10 @@ const CollectionRequestManager: React.FC = () => {
             </DialogHeader>
             <div className="space-y-3 mt-3">
               <div className="grid grid-cols-2 gap-3">
-                <div><Label>اسم العميل *</Label><Input value={form.customer_name} onChange={e => setForm(p => ({ ...p, customer_name: e.target.value }))} /></div>
-                <div><Label>الهاتف</Label><Input value={form.customer_phone} onChange={e => setForm(p => ({ ...p, customer_phone: e.target.value }))} dir="ltr" /></div>
+                <div><Label>اسم العميل *</Label><Input fieldContext="customer_name" value={form.customer_name} onChange={e => setForm(p => ({ ...p, customer_name: e.target.value }))} /></div>
+                <div><Label>الهاتف</Label><Input fieldContext="phone" value={form.customer_phone} onChange={e => setForm(p => ({ ...p, customer_phone: e.target.value }))} dir="ltr" /></div>
               </div>
-              <div><Label>البريد الإلكتروني</Label><Input value={form.customer_email} onChange={e => setForm(p => ({ ...p, customer_email: e.target.value }))} dir="ltr" /></div>
+              <div><Label>البريد الإلكتروني</Label><Input fieldContext="email" value={form.customer_email} onChange={e => setForm(p => ({ ...p, customer_email: e.target.value }))} dir="ltr" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>نوع المخلفات *</Label>
@@ -175,7 +175,7 @@ const CollectionRequestManager: React.FC = () => {
                 </div>
                 <div><Label>الوزن التقديري (كجم)</Label><Input type="number" value={form.estimated_weight_kg} onChange={e => setForm(p => ({ ...p, estimated_weight_kg: e.target.value }))} /></div>
               </div>
-              <div><Label>عنوان الاستلام *</Label><Input value={form.pickup_address} onChange={e => setForm(p => ({ ...p, pickup_address: e.target.value }))} /></div>
+              <div><Label>عنوان الاستلام *</Label><Input fieldContext="pickup_address" value={form.pickup_address} onChange={e => setForm(p => ({ ...p, pickup_address: e.target.value }))} /></div>
               <div><Label>وصف إضافي</Label><Textarea value={form.waste_description} onChange={e => setForm(p => ({ ...p, waste_description: e.target.value }))} rows={2} /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>التاريخ المفضل</Label><Input type="date" value={form.preferred_date} onChange={e => setForm(p => ({ ...p, preferred_date: e.target.value }))} /></div>

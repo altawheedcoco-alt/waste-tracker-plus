@@ -70,15 +70,15 @@ const EditCompanyDialog = ({ company, open, onOpenChange }: Props) => {
       <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader><DialogTitle>تعديل بيانات الشركة</DialogTitle></DialogHeader>
         <div className="grid gap-3">
-          <div><Label>اسم الشركة (إنجليزي)</Label><Input value={form.company_name} onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))} /></div>
-          <div><Label>اسم الشركة (عربي)</Label><Input value={form.company_name_ar} onChange={e => setForm(p => ({ ...p, company_name_ar: e.target.value }))} /></div>
+          <div><Label>اسم الشركة (إنجليزي)</Label><Input fieldContext="company_name" value={form.company_name} onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))} /></div>
+          <div><Label>اسم الشركة (عربي)</Label><Input fieldContext="company_name_ar" value={form.company_name_ar} onChange={e => setForm(p => ({ ...p, company_name_ar: e.target.value }))} /></div>
           <div><Label>نوع الترخيص</Label>
             <Select value={form.license_type} onValueChange={v => setForm(p => ({ ...p, license_type: v }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{LICENSE_TYPES.map(lt => <SelectItem key={lt.value} value={lt.value}>{lt.label}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div><Label>رقم الترخيص</Label><Input value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} /></div>
+          <div><Label>رقم الترخيص</Label><Input fieldContext="license_number" value={form.license_number} onChange={e => setForm(p => ({ ...p, license_number: e.target.value }))} /></div>
           <div><Label>تاريخ انتهاء الترخيص</Label><Input type="date" value={form.license_expiry_date} onChange={e => setForm(p => ({ ...p, license_expiry_date: e.target.value }))} /></div>
           <div><Label>المحافظة</Label>
             <Select value={form.governorate} onValueChange={v => setForm(p => ({ ...p, governorate: v }))}>
@@ -86,10 +86,10 @@ const EditCompanyDialog = ({ company, open, onOpenChange }: Props) => {
               <SelectContent>{GOVERNORATES.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div><Label>المدينة</Label><Input value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} /></div>
-          <div><Label>جهة الاتصال</Label><Input value={form.contact_person} onChange={e => setForm(p => ({ ...p, contact_person: e.target.value }))} /></div>
-          <div><Label>الهاتف</Label><Input value={form.contact_phone} onChange={e => setForm(p => ({ ...p, contact_phone: e.target.value }))} /></div>
-          <div><Label>البريد الإلكتروني</Label><Input value={form.contact_email} onChange={e => setForm(p => ({ ...p, contact_email: e.target.value }))} /></div>
+          <div><Label>المدينة</Label><Input fieldContext="city" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} /></div>
+          <div><Label>جهة الاتصال</Label><Input fieldContext="contact_person" value={form.contact_person} onChange={e => setForm(p => ({ ...p, contact_person: e.target.value }))} /></div>
+          <div><Label>الهاتف</Label><Input fieldContext="contact_phone" value={form.contact_phone} onChange={e => setForm(p => ({ ...p, contact_phone: e.target.value }))} /></div>
+          <div><Label>البريد الإلكتروني</Label><Input fieldContext="contact_email" value={form.contact_email} onChange={e => setForm(p => ({ ...p, contact_email: e.target.value }))} /></div>
           <Button onClick={() => updateMutation.mutate()} disabled={!form.company_name || updateMutation.isPending}>
             {updateMutation.isPending ? 'جاري التحديث...' : 'تحديث'}
           </Button>

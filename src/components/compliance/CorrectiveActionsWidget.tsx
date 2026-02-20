@@ -175,7 +175,7 @@ const CorrectiveActionsWidget = () => {
             <DialogTitle>{editingCAR ? `تعديل ${editingCAR.ticket_number}` : 'فتح تذكرة تصحيحية'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div><Label>العنوان *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+            <div><Label>العنوان *</Label><Input fieldContext="corrective_action_title" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
             <div><Label>الوصف</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -212,7 +212,7 @@ const CorrectiveActionsWidget = () => {
             <div><Label>الإجراء الوقائي</Label><Textarea value={form.preventive_action} onChange={e => setForm({ ...form, preventive_action: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label>الموعد النهائي</Label><Input type="date" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} /></div>
-              <div><Label>بند ISO</Label><Input value={form.iso_clause} onChange={e => setForm({ ...form, iso_clause: e.target.value })} placeholder="10.2" /></div>
+              <div><Label>بند ISO</Label><Input fieldContext="iso_clause" value={form.iso_clause} onChange={e => setForm({ ...form, iso_clause: e.target.value })} placeholder="10.2" /></div>
             </div>
             <div><Label>ملاحظات الإثبات</Label><Textarea value={form.evidence_notes} onChange={e => setForm({ ...form, evidence_notes: e.target.value })} rows={2} placeholder="وصف دليل الإصلاح المرفق" /></div>
           </div>

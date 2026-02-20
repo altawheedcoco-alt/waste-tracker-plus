@@ -136,7 +136,7 @@ const OmalunaPostJob = () => {
             <CardContent className="space-y-4">
               <div>
                 <Label>عنوان الوظيفة *</Label>
-                <Input value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="مثال: فني فرز مخلفات" />
+                <Input fieldContext="job_title" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} placeholder="مثال: فني فرز مخلفات" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -239,7 +239,7 @@ const OmalunaPostJob = () => {
                 </div>
                 <div>
                   <Label>المدينة</Label>
-                  <Input value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder="المدينة" />
+                  <Input fieldContext="city" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder="المدينة" />
                 </div>
               </div>
               <div className="flex items-center gap-2">

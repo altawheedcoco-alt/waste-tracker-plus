@@ -83,7 +83,7 @@ export const PlaceBidDialog = ({ isRTL, open, onOpenChange, listingId, organizat
           </div>
           <div>
             <Label>{isRTL ? 'شروط التوصيل' : 'Delivery Terms'}</Label>
-            <Input value={form.delivery_terms} onChange={e => setForm(p => ({ ...p, delivery_terms: e.target.value }))} />
+            <Input fieldContext="delivery_terms" value={form.delivery_terms} onChange={e => setForm(p => ({ ...p, delivery_terms: e.target.value }))} />
           </div>
           <div>
             <Label>{isRTL ? 'صالح حتى' : 'Valid Until'}</Label>

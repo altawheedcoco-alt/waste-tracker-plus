@@ -406,7 +406,7 @@ const OHSReportPanel = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>اسم المنشأة *</Label>
-                  <Input value={form.facility_name} onChange={e => setForm(f => ({ ...f, facility_name: e.target.value }))} placeholder="مصنع التدوير" />
+                  <Input fieldContext="facility_name" value={form.facility_name} onChange={e => setForm(f => ({ ...f, facility_name: e.target.value }))} placeholder="مصنع التدوير" />
                 </div>
                 <div>
                   <Label>نوع المنشأة</Label>
@@ -438,7 +438,7 @@ const OHSReportPanel = () => {
 
               <div>
                 <Label>عنوان المنشأة</Label>
-                <Input value={form.facility_address} onChange={e => setForm(f => ({ ...f, facility_address: e.target.value }))} />
+                <Input fieldContext="facility_address" value={form.facility_address} onChange={e => setForm(f => ({ ...f, facility_address: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -460,16 +460,16 @@ const OHSReportPanel = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>اسم المفتش *</Label>
-                  <Input value={form.inspector_name} onChange={e => setForm(f => ({ ...f, inspector_name: e.target.value }))} />
+                  <Input fieldContext="inspector_name" value={form.inspector_name} onChange={e => setForm(f => ({ ...f, inspector_name: e.target.value }))} />
                 </div>
                 <div>
                   <Label>المسمى الوظيفي</Label>
-                  <Input value={form.inspector_title} onChange={e => setForm(f => ({ ...f, inspector_title: e.target.value }))} />
+                  <Input fieldContext="job_title" value={form.inspector_title} onChange={e => setForm(f => ({ ...f, inspector_title: e.target.value }))} />
                 </div>
               </div>
               <div>
                 <Label>حالة الطقس</Label>
-                <Input value={form.weather_conditions} onChange={e => setForm(f => ({ ...f, weather_conditions: e.target.value }))} placeholder="مشمس، 35°م" />
+                <Input fieldContext="weather_conditions" value={form.weather_conditions} onChange={e => setForm(f => ({ ...f, weather_conditions: e.target.value }))} placeholder="مشمس، 35°م" />
               </div>
               <div>
                 <Label>ملخص مبدئي</Label>

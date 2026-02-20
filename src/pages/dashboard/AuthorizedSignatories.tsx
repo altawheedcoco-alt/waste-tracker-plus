@@ -269,15 +269,15 @@ const AuthorizedSignatories = () => {
                 </div>
                 <div>
                   <Label>الاسم الكامل</Label>
-                  <Input value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} />
+                  <Input fieldContext="full_name" value={form.full_name} onChange={e => setForm(p => ({ ...p, full_name: e.target.value }))} />
                 </div>
                 <div>
                   <Label>المسمى الوظيفي</Label>
-                  <Input value={form.job_title} onChange={e => setForm(p => ({ ...p, job_title: e.target.value }))} />
+                  <Input fieldContext="job_title" value={form.job_title} onChange={e => setForm(p => ({ ...p, job_title: e.target.value }))} />
                 </div>
                 <div>
                   <Label>الرقم القومي</Label>
-                  <Input value={form.national_id} onChange={e => setForm(p => ({ ...p, national_id: e.target.value }))} />
+                  <Input fieldContext="national_id" value={form.national_id} onChange={e => setForm(p => ({ ...p, national_id: e.target.value }))} />
                 </div>
                 <div>
                   <Label>مستوى السلطة</Label>

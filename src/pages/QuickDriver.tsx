@@ -338,6 +338,7 @@ const QuickDriver = () => {
                   اسم السائق *
                 </Label>
                 <Input
+                  fieldContext="driver_name"
                   value={driverName}
                   onChange={(e) => setDriverName(e.target.value)}
                   placeholder="أدخل اسم السائق الكامل"
@@ -352,6 +353,7 @@ const QuickDriver = () => {
                   رقم الهاتف *
                 </Label>
                 <Input
+                  fieldContext="phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="أدخل رقم الهاتف"
@@ -391,6 +393,7 @@ const QuickDriver = () => {
                   رقم اللوحة
                 </Label>
                 <Input
+                  fieldContext="vehicle_plate"
                   value={plateNumber}
                   onChange={(e) => setPlateNumber(e.target.value)}
                   placeholder="أدخل رقم لوحة المركبة"
@@ -405,6 +408,7 @@ const QuickDriver = () => {
                   رقم رخصة القيادة
                 </Label>
                 <Input
+                  fieldContext="license_number"
                   value={licenseNumber}
                   onChange={(e) => setLicenseNumber(e.target.value)}
                   placeholder="أدخل رقم رخصة القيادة"
