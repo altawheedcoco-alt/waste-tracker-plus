@@ -179,3 +179,6 @@ verify_jwt = false
 
 [functions.verify-page-password]
 verify_jwt = false
+
+[functions.smart-agent]
+verify_jwt = false

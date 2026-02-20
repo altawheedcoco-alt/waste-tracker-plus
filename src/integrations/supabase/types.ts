@@ -833,6 +833,426 @@ export type Database = {
           },
         ]
       }
+      ai_agent_configs: {
+        Row: {
+          agent_name: string | null
+          agent_personality: string | null
+          auto_create_orders: boolean | null
+          avg_response_time_seconds: number | null
+          created_at: string
+          customer_satisfaction_avg: number | null
+          escalation_keywords: string[] | null
+          escalation_message: string | null
+          facebook_enabled: boolean | null
+          facebook_page_id: string | null
+          id: string
+          is_enabled: boolean | null
+          language: string | null
+          max_messages_per_conversation: number | null
+          notify_on_new_conversation: boolean | null
+          notify_on_new_order: boolean | null
+          organization_id: string
+          outside_hours_message: string | null
+          telegram_bot_token: string | null
+          telegram_enabled: boolean | null
+          tone: string | null
+          total_conversations: number | null
+          total_orders_created: number | null
+          updated_at: string
+          website_widget_enabled: boolean | null
+          welcome_message: string | null
+          whatsapp_enabled: boolean | null
+          whatsapp_phone_id: string | null
+          working_hours_end: string | null
+          working_hours_start: string | null
+        }
+        Insert: {
+          agent_name?: string | null
+          agent_personality?: string | null
+          auto_create_orders?: boolean | null
+          avg_response_time_seconds?: number | null
+          created_at?: string
+          customer_satisfaction_avg?: number | null
+          escalation_keywords?: string[] | null
+          escalation_message?: string | null
+          facebook_enabled?: boolean | null
+          facebook_page_id?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          language?: string | null
+          max_messages_per_conversation?: number | null
+          notify_on_new_conversation?: boolean | null
+          notify_on_new_order?: boolean | null
+          organization_id: string
+          outside_hours_message?: string | null
+          telegram_bot_token?: string | null
+          telegram_enabled?: boolean | null
+          tone?: string | null
+          total_conversations?: number | null
+          total_orders_created?: number | null
+          updated_at?: string
+          website_widget_enabled?: boolean | null
+          welcome_message?: string | null
+          whatsapp_enabled?: boolean | null
+          whatsapp_phone_id?: string | null
+          working_hours_end?: string | null
+          working_hours_start?: string | null
+        }
+        Update: {
+          agent_name?: string | null
+          agent_personality?: string | null
+          auto_create_orders?: boolean | null
+          avg_response_time_seconds?: number | null
+          created_at?: string
+          customer_satisfaction_avg?: number | null
+          escalation_keywords?: string[] | null
+          escalation_message?: string | null
+          facebook_enabled?: boolean | null
+          facebook_page_id?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          language?: string | null
+          max_messages_per_conversation?: number | null
+          notify_on_new_conversation?: boolean | null
+          notify_on_new_order?: boolean | null
+          organization_id?: string
+          outside_hours_message?: string | null
+          telegram_bot_token?: string | null
+          telegram_enabled?: boolean | null
+          tone?: string | null
+          total_conversations?: number | null
+          total_orders_created?: number | null
+          updated_at?: string
+          website_widget_enabled?: boolean | null
+          welcome_message?: string | null
+          whatsapp_enabled?: boolean | null
+          whatsapp_phone_id?: string | null
+          working_hours_end?: string | null
+          working_hours_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_agent_configs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_conversations: {
+        Row: {
+          channel: string
+          channel_contact_id: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          escalated_to: string | null
+          escalation_reason: string | null
+          id: string
+          last_message_at: string | null
+          message_count: number | null
+          metadata: Json | null
+          order_created: boolean | null
+          order_id: string | null
+          organization_id: string
+          satisfaction_comment: string | null
+          satisfaction_rating: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          channel_contact_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          escalated_to?: string | null
+          escalation_reason?: string | null
+          id?: string
+          last_message_at?: string | null
+          message_count?: number | null
+          metadata?: Json | null
+          order_created?: boolean | null
+          order_id?: string | null
+          organization_id: string
+          satisfaction_comment?: string | null
+          satisfaction_rating?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          channel_contact_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          escalated_to?: string | null
+          escalation_reason?: string | null
+          id?: string
+          last_message_at?: string | null
+          message_count?: number | null
+          metadata?: Json | null
+          order_created?: boolean | null
+          order_id?: string | null
+          organization_id?: string
+          satisfaction_comment?: string | null
+          satisfaction_rating?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_conversations_escalated_to_fkey"
+            columns: ["escalated_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_agent_conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_knowledge: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          knowledge_type: string
+          last_used_at: string | null
+          organization_id: string
+          priority: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          knowledge_type?: string
+          last_used_at?: string | null
+          organization_id: string
+          priority?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          knowledge_type?: string
+          last_used_at?: string | null
+          organization_id?: string
+          priority?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_knowledge_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_knowledge_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_agent_knowledge_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          knowledge_sources: string[] | null
+          message_type: string | null
+          metadata: Json | null
+          response_time_ms: number | null
+          role: string
+          tokens_used: number | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          knowledge_sources?: string[] | null
+          message_type?: string | null
+          metadata?: Json | null
+          response_time_ms?: number | null
+          role: string
+          tokens_used?: number | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          knowledge_sources?: string[] | null
+          message_type?: string | null
+          metadata?: Json | null
+          response_time_ms?: number | null
+          role?: string
+          tokens_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agent_orders: {
+        Row: {
+          channel: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          conversation_id: string
+          created_at: string
+          currency: string | null
+          customer_address: string | null
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          items: Json | null
+          linked_shipment_id: string | null
+          linked_work_order_id: string | null
+          notes: string | null
+          order_type: string | null
+          organization_id: string
+          status: string | null
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          channel?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          conversation_id: string
+          created_at?: string
+          currency?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          items?: Json | null
+          linked_shipment_id?: string | null
+          linked_work_order_id?: string | null
+          notes?: string | null
+          order_type?: string | null
+          organization_id: string
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          conversation_id?: string
+          created_at?: string
+          currency?: string | null
+          customer_address?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          items?: Json | null
+          linked_shipment_id?: string | null
+          linked_work_order_id?: string | null
+          notes?: string | null
+          order_type?: string | null
+          organization_id?: string
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agent_orders_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_orders_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agent_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_agent_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_agent_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string

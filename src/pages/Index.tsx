@@ -21,6 +21,7 @@ const WhatsNewPopup = lazy(() => import("@/components/landing/WhatsNewPopup"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 const VideoIntroSection = lazy(() => import("@/components/landing/VideoIntroSection"));
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
+const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
@@ -72,6 +73,7 @@ const Index = () => {
             <LazySection><FeaturesList /></LazySection>
             <LazySection><Features /></LazySection>
             <LazySection><DocumentAIShowcase /></LazySection>
+            <LazySection><SmartAgentShowcase /></LazySection>
             <LazySection><VideoIntroSection /></LazySection>
             <LazySection><TestimonialsSection /></LazySection>
             <LazySection><Services /></LazySection>
