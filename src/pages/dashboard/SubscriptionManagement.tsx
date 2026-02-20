@@ -4,18 +4,24 @@ import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, CheckCircle, Clock, AlertTriangle, Crown, Sparkles, Receipt, Users, Building2 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Input } from '@/components/ui/input';
+import { CreditCard, CheckCircle, Clock, AlertTriangle, Crown, Sparkles, Receipt, Users, Building2, Wallet, ArrowDownCircle, ArrowUpCircle, Plus } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const SubscriptionManagement = () => {
   const { user, organization } = useAuth();
   const { requiredSeats, linkedOrgsCount, needsUpgrade } = useSubscriptionStatus();
+  const queryClient = useQueryClient();
+  const [depositAmount, setDepositAmount] = useState('');
+  const [showDeposit, setShowDeposit] = useState(false);
 
   const { data: plans = [] } = useQuery({
     queryKey: ['subscription-plans'],
@@ -56,6 +62,36 @@ const SubscriptionManagement = () => {
         .select('partner_org_id, partner:organizations!verified_partnerships_partner_org_id_fkey(name, organization_type)')
         .eq('requester_org_id', organization.id)
         .eq('status', 'active');
+      return data || [];
+    },
+    enabled: !!organization?.id,
+  });
+
+  // Wallet
+  const { data: wallet } = useQuery({
+    queryKey: ['subscription-wallet', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return null;
+      const { data } = await supabase
+        .from('subscription_wallet')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!organization?.id,
+  });
+
+  const { data: walletTxns = [] } = useQuery({
+    queryKey: ['wallet-transactions', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data } = await supabase
+        .from('subscription_wallet_transactions')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
       return data || [];
     },
     enabled: !!organization?.id,
@@ -103,6 +139,41 @@ const SubscriptionManagement = () => {
     }
   };
 
+  const handleDeposit = async () => {
+    const amount = parseFloat(depositAmount);
+    if (!amount || amount <= 0) {
+      toast.error('أدخل مبلغ صحيح');
+      return;
+    }
+    if (!organization?.id) return;
+    try {
+      // For now, call Paymob for deposit. In production this goes through payment gateway.
+      const { data, error } = await supabase.functions.invoke('paymob-checkout', {
+        body: { 
+          user_id: user?.id, 
+          organization_id: organization.id,
+          type: 'wallet_deposit',
+          amount,
+          payment_method: 'card'
+        },
+      });
+      if (error) throw error;
+      if (data?.payment_url) {
+        window.open(data.payment_url, '_blank');
+        setShowDeposit(false);
+        setDepositAmount('');
+      } else {
+        toast.error('لم يتم الحصول على رابط الدفع');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'حدث خطأ');
+    }
+  };
+
+  const monthlyRate = plans[0]?.price_egp || 299;
+  const monthlyCost = monthlyRate * requiredSeats;
+  const monthsCovered = wallet?.balance ? Math.floor(wallet.balance / monthlyCost) : 0;
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
@@ -131,12 +202,111 @@ const SubscriptionManagement = () => {
               <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
               إدارة الاشتراك والدفع
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">إدارة خطتك الحالية ومعاملاتك المالية</p>
+            <p className="text-sm sm:text-base text-muted-foreground">إدارة خطتك ومحفظة الاشتراكات</p>
           </div>
         </div>
 
+        {/* Prepaid Wallet */}
+        <Card className="border-primary/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-primary" />
+              محفظة الاشتراكات (دفع مسبق)
+            </CardTitle>
+            <CardDescription>ادفع مقدماً ويتم الخصم تلقائياً كل شهر</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-primary/5 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold text-primary">{(wallet?.balance || 0).toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">الرصيد الحالي (ج.م)</p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold">{monthlyCost.toLocaleString()}</p>
+                <p className="text-xs text-muted-foreground">التكلفة الشهرية</p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold">{monthsCovered}</p>
+                <p className="text-xs text-muted-foreground">أشهر مغطاة</p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <p className="text-2xl font-bold">{requiredSeats}</p>
+                <p className="text-xs text-muted-foreground">مقعد ({linkedOrgsCount} مرتبطة)</p>
+              </div>
+            </div>
+
+            {/* Quick deposit amounts */}
+            {!showDeposit ? (
+              <Button onClick={() => setShowDeposit(true)} className="w-full gap-2">
+                <Plus className="w-4 h-4" />
+                شحن الرصيد
+              </Button>
+            ) : (
+              <div className="space-y-3 bg-muted/30 rounded-lg p-4">
+                <p className="text-sm font-medium">اختر مبلغ الشحن أو أدخل مبلغ مخصص:</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {[monthlyCost, monthlyCost * 3, monthlyCost * 6, monthlyCost * 12, 5000, 10000].map((amt) => (
+                    <Button
+                      key={amt}
+                      variant={depositAmount === String(amt) ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setDepositAmount(String(amt))}
+                    >
+                      {amt.toLocaleString()} ج.م
+                    </Button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    placeholder="مبلغ مخصص"
+                    value={depositAmount}
+                    onChange={e => setDepositAmount(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleDeposit} disabled={!depositAmount || parseFloat(depositAmount) <= 0}>
+                    <CreditCard className="w-4 h-4 ml-1" />
+                    ادفع
+                  </Button>
+                  <Button variant="ghost" onClick={() => { setShowDeposit(false); setDepositAmount(''); }}>إلغاء</Button>
+                </div>
+                {depositAmount && parseFloat(depositAmount) > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    يغطي تقريباً <strong>{Math.floor(parseFloat(depositAmount) / monthlyCost)}</strong> شهر لـ {requiredSeats} مقعد
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Wallet transactions */}
+            {walletTxns.length > 0 && (
+              <div className="space-y-2 mt-3">
+                <p className="text-sm font-medium text-muted-foreground">آخر حركات المحفظة:</p>
+                {walletTxns.slice(0, 5).map((tx: any) => (
+                  <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded border text-sm">
+                    <div className="flex items-center gap-2">
+                      {tx.transaction_type === 'deposit' ? (
+                        <ArrowDownCircle className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowUpCircle className="w-4 h-4 text-destructive" />
+                      )}
+                      <span className="truncate max-w-[200px]">{tx.description}</span>
+                    </div>
+                    <div className="text-left shrink-0">
+                      <span className={tx.transaction_type === 'deposit' ? 'text-green-600 font-semibold' : 'text-destructive font-semibold'}>
+                        {tx.transaction_type === 'deposit' ? '+' : '-'}{tx.amount?.toLocaleString()}
+                      </span>
+                      <p className="text-xs text-muted-foreground">{format(new Date(tx.created_at), 'dd/MM/yy', { locale: ar })}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Seats Summary */}
-        <Card className="border-primary/20 bg-primary/5">
+        <Card className="border-muted">
           <CardContent className="pt-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -151,23 +321,19 @@ const SubscriptionManagement = () => {
               {needsUpgrade && (
                 <Badge variant="destructive" className="gap-1">
                   <AlertTriangle className="w-3 h-3" />
-                  يلزم ترقية الاشتراك
+                  يلزم ترقية
                 </Badge>
               )}
             </div>
-
-            {/* Linked Partners List */}
             {linkedPartners.length > 0 && (
               <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">الجهات المرتبطة (أنت تدفع اشتراكها):</p>
+                <p className="text-sm font-medium text-muted-foreground">الجهات المرتبطة:</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {linkedPartners.map((p: any) => (
                     <div key={p.partner_org_id} className="flex items-center gap-2 bg-background rounded-lg p-2 border">
                       <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
                       <span className="text-sm truncate">{p.partner?.name || 'جهة غير معروفة'}</span>
-                      <Badge variant="outline" className="text-xs mr-auto shrink-0">
-                        {getOrgTypeName(p.partner?.organization_type || '')}
-                      </Badge>
+                      <Badge variant="outline" className="text-xs mr-auto shrink-0">{getOrgTypeName(p.partner?.organization_type || '')}</Badge>
                     </div>
                   ))}
                 </div>
@@ -262,7 +428,7 @@ const SubscriptionManagement = () => {
           </div>
         </div>
 
-        {/* Transactions */}
+        {/* Payment Transactions */}
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">

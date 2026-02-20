@@ -23511,6 +23511,111 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_wallet: {
+        Row: {
+          auto_deduct: boolean
+          balance: number
+          created_at: string
+          id: string
+          organization_id: string
+          total_deducted: number
+          total_deposited: number
+          updated_at: string
+        }
+        Insert: {
+          auto_deduct?: boolean
+          balance?: number
+          created_at?: string
+          id?: string
+          organization_id: string
+          total_deducted?: number
+          total_deposited?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_deduct?: boolean
+          balance?: number
+          created_at?: string
+          id?: string
+          organization_id?: string
+          total_deducted?: number
+          total_deposited?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_wallet_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "subscription_wallet_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          balance_before: number
+          created_at: string
+          description: string | null
+          id: string
+          months_covered: number | null
+          organization_id: string
+          payment_reference: string | null
+          seats_count: number | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number
+          balance_before?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          months_covered?: number | null
+          organization_id: string
+          payment_reference?: string | null
+          seats_count?: number | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          balance_before?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          months_covered?: number | null
+          organization_id?: string
+          payment_reference?: string | null
+          seats_count?: number | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_wallet_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "subscription_wallet_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_quick_replies: {
         Row: {
           category: string
@@ -27627,6 +27732,7 @@ export type Database = {
       }
       auto_approve_delivery_certificates: { Args: never; Returns: undefined }
       auto_approve_expired_shipments: { Args: never; Returns: undefined }
+      auto_deduct_subscription: { Args: { org_id: string }; Returns: Json }
       auto_generate_permits_for_shipments: {
         Args: never
         Returns: {
@@ -27774,6 +27880,10 @@ export type Database = {
       count_recent_2fa_attempts: {
         Args: { _minutes?: number; _user_id: string }
         Returns: number
+      }
+      deposit_to_subscription_wallet: {
+        Args: { deposit_amount: number; org_id: string; pay_ref?: string }
+        Returns: Json
       }
       dispatch_whatsapp_event: {
         Args: { event_payload: Json }
