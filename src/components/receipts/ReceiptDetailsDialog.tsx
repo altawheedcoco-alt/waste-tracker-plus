@@ -44,6 +44,7 @@ import { generateReceiptPrintHTML } from './ReceiptPrintTemplate';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import AddNoteButton from '@/components/notes/AddNoteButton';
+import { withTagline } from '@/utils/platformTaglines';
 
 interface ReceiptDetailsDialogProps {
   open: boolean;
@@ -124,8 +125,8 @@ const ReceiptDetailsDialog = ({
           if (transporterUsers && transporterUsers.length > 0) {
             const notifications = transporterUsers.map((u: any) => ({
               user_id: u.user_id,
-              title: 'تأكيد شهادة الاستلام',
-              message: `تم تأكيد شهادة الاستلام ${receipt.receipt_number} من قبل الجهة المولدة`,
+              title: '✅ تأكيد شهادة الاستلام',
+              message: withTagline(`تم تأكيد شهادة الاستلام ${receipt.receipt_number} من قبل الجهة المولدة`),
               type: 'receipt_confirmed',
               shipment_id: receipt.shipment?.id || null,
               is_read: false,

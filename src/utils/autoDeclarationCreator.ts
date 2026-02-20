@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { withTagline } from '@/utils/platformTaglines';
 
 const GENERATOR_AUTO_DECLARATION_TEXT = `إقرار تسليم مخلفات — صادر تلقائياً من المولّد
 
@@ -103,6 +104,32 @@ export async function autoCreateGeneratorDeclaration(
     console.error('Auto generator declaration error:', error);
   } else {
     console.log('Auto generator declaration created for shipment:', shipmentId);
+    
+    // Send notification to transporter about generator declaration
+    try {
+      const transporterId = shipment.transporter_id;
+      if (transporterId) {
+        const { data: transporterUsers } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('organization_id', transporterId)
+          .limit(10);
+
+        if (transporterUsers && transporterUsers.length > 0) {
+          const notifs = transporterUsers.map((u: any) => ({
+            user_id: u.user_id,
+            title: '📝 إقرار تسليم جديد من المولّد',
+            message: withTagline(`أصدر المولّد "${getOrgName(shipment.generator_id)}" إقرار تسليم للشحنة ${shipment.shipment_number}. يرجى مراجعة المستند والتأكيد.`),
+            type: 'document_issued',
+            shipment_id: shipmentId,
+            is_read: false,
+          }));
+          await supabase.from('notifications').insert(notifs);
+        }
+      }
+    } catch (notifErr) {
+      console.error('Generator declaration notification failed:', notifErr);
+    }
   }
 }
 
@@ -163,6 +190,32 @@ export async function autoCreateRecyclerDeclaration(
     console.error('Auto recycler declaration error:', error);
   } else {
     console.log('Auto recycler declaration created for shipment:', shipmentId);
+    
+    // Send notification to generator & transporter about recycler receipt
+    try {
+      const notifyOrgIds = [shipment.generator_id, shipment.transporter_id].filter(Boolean);
+      if (notifyOrgIds.length > 0) {
+        const { data: usersToNotify } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .in('organization_id', notifyOrgIds)
+          .limit(20);
+
+        if (usersToNotify && usersToNotify.length > 0) {
+          const notifs = usersToNotify.map((u: any) => ({
+            user_id: u.user_id,
+            title: '📥 إقرار استلام من المدوّر/جهة التخلص',
+            message: withTagline(`أصدر المدوّر "${getOrgName(shipment.recycler_id)}" إقرار استلام للشحنة ${shipment.shipment_number}. تم توثيق سلسلة الحيازة بنجاح.`),
+            type: 'document_issued',
+            shipment_id: shipmentId,
+            is_read: false,
+          }));
+          await supabase.from('notifications').insert(notifs);
+        }
+      }
+    } catch (notifErr) {
+      console.error('Recycler declaration notification failed:', notifErr);
+    }
   }
 }
 
