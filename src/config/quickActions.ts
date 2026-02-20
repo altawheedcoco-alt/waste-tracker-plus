@@ -59,34 +59,30 @@ export interface QuickActionConfig {
 }
 
 // ============= TRANSPORTER QUICK ACTIONS =============
-// الجهة الناقلة: التركيز على الشحنات والسائقين والعقود
+// الجهة الناقلة: مرتبة حسب الأولوية اليومية الفعلية
 export const transporterQuickActions: QuickActionConfig[] = [
-  // 1️⃣ العمليات الأساسية
-  { id: 'transporter-shipments', title: 'إدارة الشحنات', subtitle: 'عرض وتتبع جميع الشحنات', icon: Package, path: '/dashboard/transporter-shipments', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
+  // 1️⃣ الأكثر استخداماً يومياً (حرج)
   { id: 'create-shipment', title: 'إنشاء شحنة جديدة', subtitle: 'تسجيل شحنة لأي شريك', icon: Plus, path: '/dashboard/shipments/new', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
+  { id: 'transporter-shipments', title: 'إدارة الشحنات', subtitle: 'عرض وتتبع جميع الشحنات', icon: Package, path: '/dashboard/transporter-shipments', iconBgClass: 'bg-gradient-to-br from-primary to-blue-600', category: 'primary' },
+  { id: 'driver-tracking', title: 'تتبع السائقين', subtitle: 'مراقبة مواقع السائقين لحظياً', icon: MapPin, path: '/dashboard/driver-tracking', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'primary' },
+  { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'primary' },
   { id: 'transporter-receipts', title: 'شهادات استلام الشحنات', subtitle: 'إصدار وإدارة شهادات الاستلام', icon: FileText, path: '/dashboard/transporter-receipts', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'primary' },
-  { id: 'navigation-demo', title: 'نظام الملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'primary' },
-  
-  // 2️⃣ الروابط السريعة
-  { id: 'quick-shipment-links', title: 'روابط الشحنات السريعة', subtitle: 'روابط مخصصة لتسجيل الشحنات', icon: Link2, path: '/dashboard/quick-shipment-links', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
-  { id: 'quick-deposit-links', title: 'روابط الإيداع السريع', subtitle: 'روابط مخصصة لاستقبال الإيداعات', icon: Zap, path: '/dashboard/quick-deposit-links', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'primary' },
-  
-  // 3️⃣ إدارة السائقين
+  { id: 'smart-weight-upload', title: 'رفع الوزنة الذكي', subtitle: 'استخراج البيانات من صورة الميزان', icon: Sparkles, onClick: 'openSmartWeightUpload', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'primary' },
+  { id: 'collection-requests', title: 'طلبات الجمع', subtitle: 'استقبال طلبات الجمع من المولدين', icon: ClipboardList, path: '/dashboard/collection-requests', iconBgClass: 'bg-gradient-to-br from-orange-500 to-red-500', category: 'primary' },
+
+  // 2️⃣ مهم يومي/أسبوعي
   { id: 'transporter-drivers', title: 'إدارة السائقين', subtitle: 'إضافة وتعديل بيانات السائقين', icon: Users, path: '/dashboard/transporter-drivers', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
-  { id: 'driver-tracking', title: 'تتبع السائقين', subtitle: 'مراقبة مواقع السائقين لحظياً', icon: MapPin, path: '/dashboard/driver-tracking', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'secondary' },
-  
-  // 4️⃣ المالية والعقود
-  { id: 'register-deposit', title: 'تسجيل إيداع', subtitle: 'تسجيل دفعة مالية لشريك', icon: Banknote, onClick: 'openDepositDialog', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'secondary' },
+  { id: 'quick-shipment-links', title: 'روابط الشحنات السريعة', subtitle: 'روابط مخصصة لتسجيل الشحنات', icon: Link2, path: '/dashboard/quick-shipment-links', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'secondary' },
+  { id: 'quick-deposit-links', title: 'روابط الإيداع السريع', subtitle: 'روابط مخصصة لاستقبال الإيداعات', icon: Zap, path: '/dashboard/quick-deposit-links', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'secondary' },
   { id: 'contracts', title: 'العقود والاتفاقيات', subtitle: 'إدارة عقود الجمع والنقل', icon: FileSignature, path: '/dashboard/contracts', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
   { id: 'external-records', title: 'سجل الكميات الخارجية', subtitle: 'تسجيل كميات من مصادر خارجية', icon: Scale, path: '/dashboard/external-records', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600', category: 'secondary' },
-  
-  // 5️⃣ التقارير والتحليلات
+  { id: 'navigation-demo', title: 'نظام الملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'secondary' },
+  { id: 'partners', title: 'الجهات المرتبطة', subtitle: 'الجهات المولدة والمدورة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'secondary' },
+
+  // 3️⃣ أدوات وتقارير
   { id: 'reports', title: 'التقارير', subtitle: 'تقارير الشحنات والأداء', icon: BarChart3, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
   { id: 'transporter-ai-tools', title: 'تحليلات الذكاء الاصطناعي', subtitle: 'إحصائيات وتحليلات متقدمة', icon: Bot, path: '/dashboard/transporter-ai-tools', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'utility' },
   { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'utility' },
-  
-  // 6️⃣ إدارة الجهات المرتبطة والفريق
-  { id: 'partners', title: 'الجهات المرتبطة', subtitle: 'الجهات المولدة والمدورة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'utility' },
   { id: 'employees', title: 'إدارة الموظفين', subtitle: 'صلاحيات فريق العمل', icon: Users, path: '/dashboard/employees', iconBgClass: 'bg-gradient-to-br from-blue-500 to-cyan-600', category: 'utility' },
   { id: 'org-structure', title: 'الهيكل التنظيمي', subtitle: 'الأقسام والمناصب الوظيفية', icon: Network, path: '/dashboard/org-structure', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-violet-600', category: 'utility' },
   { id: 'my-requests', title: 'الطلبات', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
