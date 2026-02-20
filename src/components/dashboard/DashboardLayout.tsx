@@ -81,6 +81,7 @@ import {
   Umbrella,
   PenTool,
   Network,
+  FileSignature,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -461,6 +462,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Inbox, label: t('sidebar.receivedDocs'), path: '/dashboard/document-archive?tab=received', key: 'doc-archive-received' },
       { icon: Send, label: t('sidebar.sentDocs'), path: '/dashboard/document-archive?tab=sent', key: 'doc-archive-sent' },
       { icon: FileText, label: t('sidebar.issuedDocs'), path: '/dashboard/document-archive?tab=issued', key: 'doc-archive-issued' },
+      { icon: FileSignature, label: language === 'ar' ? 'طلبات التوقيع' : 'Signing Requests', path: '/dashboard/document-archive?tab=signing_request', key: 'doc-archive-signing' },
     ]},
 
     // ═══════════════ سجلات المخلفات ═══════════════
