@@ -2,6 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
+export interface ArrearsInfo {
+  months_overdue: number;
+  monthly_rate: number;
+  seats: number;
+  subtotal: number;
+  penalty_rate: number;
+  penalty_amount: number;
+  total_due: number;
+}
+
 export interface SubscriptionStatus {
   hasActiveSubscription: boolean;
   isSystemAdmin: boolean;
@@ -12,13 +22,14 @@ export interface SubscriptionStatus {
   linkedOrgsCount: number;
   totalCost: number;
   planPrice: number;
-  needsUpgrade: boolean; // has sub but not enough seats
+  needsUpgrade: boolean;
+  hasArrears: boolean;
+  arrears: ArrearsInfo | null;
 }
 
 export const useSubscriptionStatus = (): SubscriptionStatus => {
   const { user, organization } = useAuth();
 
-  // Check if system admin
   const { data: isSystemAdmin = false, isLoading: adminLoading } = useQuery({
     queryKey: ['is-system-admin', user?.id],
     queryFn: async () => {
@@ -33,7 +44,6 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Check active subscription for the organization
   const { data: subscription = null, isLoading: subLoading } = useQuery({
     queryKey: ['active-subscription', organization?.id],
     queryFn: async () => {
@@ -52,7 +62,6 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     staleTime: 2 * 60 * 1000,
   });
 
-  // Calculate required seats (1 + linked partners count)
   const { data: requiredSeats = 1, isLoading: seatsLoading } = useQuery({
     queryKey: ['required-seats', organization?.id],
     queryFn: async () => {
@@ -66,14 +75,28 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     staleTime: 2 * 60 * 1000,
   });
 
+  // Calculate arrears if no active subscription
+  const { data: arrears = null, isLoading: arrearsLoading } = useQuery({
+    queryKey: ['org-arrears', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return null;
+      const { data } = await supabase.rpc('calculate_org_arrears' as any, {
+        org_id: organization.id,
+      });
+      return data as ArrearsInfo | null;
+    },
+    enabled: !!organization?.id && !subscription,
+    staleTime: 5 * 60 * 1000,
+  });
+
   const hasActiveSubscription = !!subscription;
   const linkedOrgsCount = requiredSeats - 1;
   const planPrice = subscription?.plan?.price_egp || 0;
   const totalCost = planPrice * requiredSeats;
   const paidSeats = subscription?.total_seats || 0;
   const needsUpgrade = hasActiveSubscription && paidSeats < requiredSeats;
+  const hasArrears = !!arrears && (arrears.months_overdue || 0) > 0;
 
-  // In preview/development, bypass subscription check for testing
   const isPreviewMode = window.location.hostname.includes('lovableproject.com') || 
                         window.location.hostname.includes('lovable.app') ||
                         window.location.hostname === 'localhost';
@@ -84,11 +107,13 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     isSystemAdmin,
     isExempt,
     subscription,
-    isLoading: adminLoading || subLoading || seatsLoading,
+    isLoading: adminLoading || subLoading || seatsLoading || arrearsLoading,
     requiredSeats,
     linkedOrgsCount,
     totalCost,
     planPrice,
     needsUpgrade,
+    hasArrears,
+    arrears,
   };
 };
