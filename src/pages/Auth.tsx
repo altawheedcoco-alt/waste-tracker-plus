@@ -556,9 +556,14 @@ const Auth = () => {
         <div className="text-center mb-8">
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="inline-flex items-center gap-3 mb-4"
+            className="inline-flex flex-col items-center gap-2 mb-4"
           >
-            <PlatformLogo size="xl" showText showSubtitle />
+            <PlatformLogo size="xl" />
+            <div className="flex flex-col items-center">
+              <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground/70">
+                Waste Management System
+              </span>
+            </div>
           </motion.div>
         </div>
 
