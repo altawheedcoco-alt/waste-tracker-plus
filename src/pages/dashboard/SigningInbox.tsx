@@ -28,6 +28,7 @@ import { saveDocumentSignature } from '@/components/signatures/signatureService'
 import type { SignatureData } from '@/components/signatures/UniversalSignatureDialog';
 import { withTagline } from '@/utils/platformTaglines';
 import SignatureBadges from '@/components/signatures/SignatureBadges';
+import PlatformDocumentPicker, { type PlatformDocument } from '@/components/signing/PlatformDocumentPicker';
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   pending: { label: 'في الانتظار', icon: Clock, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
@@ -174,6 +175,8 @@ export default function SigningInbox() {
   const [signLoading, setSignLoading] = useState(false);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedPlatformDoc, setSelectedPlatformDoc] = useState<PlatformDocument | null>(null);
   const [form, setForm] = useState({
     recipient_organization_id: '',
     document_title: '',
@@ -268,13 +271,33 @@ export default function SigningInbox() {
       setUploading(false);
     }
     
-    sendRequest.mutate({ ...form, document_url: documentUrl }, {
+    const docUrl = documentUrl || selectedPlatformDoc?.fileUrl || undefined;
+    const relatedShipment = selectedPlatformDoc?.relatedShipmentId || undefined;
+    
+    sendRequest.mutate({ 
+      ...form, 
+      document_url: docUrl, 
+      related_shipment_id: relatedShipment,
+      document_type: selectedPlatformDoc?.type || form.document_type,
+    }, {
       onSuccess: () => {
         setSendOpen(false);
         setUploadFile(null);
+        setSelectedPlatformDoc(null);
         setForm({ recipient_organization_id: '', document_title: '', document_description: '', message: '', priority: 'normal', requires_stamp: false, document_type: 'general' });
       },
     });
+  };
+
+  const handlePlatformDocSelect = (doc: PlatformDocument) => {
+    setSelectedPlatformDoc(doc);
+    setUploadFile(null); // Clear file upload if platform doc selected
+    // Auto-fill form fields
+    setForm(p => ({
+      ...p,
+      document_title: p.document_title || doc.title,
+      document_type: doc.type === 'shipment' ? 'receipt' : doc.type === 'award_letter' ? 'contract' : doc.type,
+    }));
   };
 
   const handleOpenSignDialog = (req: SigningRequest) => {
@@ -432,8 +455,22 @@ export default function SigningInbox() {
                 <Textarea value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} placeholder="أرجو التكرم بالتوقيع على..." className="text-right" rows={2} />
               </div>
               <div>
-                <Label>إرفاق مستند (PDF / صورة)</Label>
-                {uploadFile ? (
+                <Label>إرفاق مستند</Label>
+                
+                {/* Selected platform document */}
+                {selectedPlatformDoc && !uploadFile && (
+                  <div className="flex items-center gap-2 mt-1 p-2 rounded-lg border border-primary/30 bg-primary/5">
+                    <FileText className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span className="text-sm truncate flex-1">{selectedPlatformDoc.title}</span>
+                    <Badge variant="secondary" className="text-xs">{selectedPlatformDoc.type}</Badge>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => setSelectedPlatformDoc(null)} className="h-6 w-6 p-0">
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+
+                {/* Uploaded file */}
+                {uploadFile && (
                   <div className="flex items-center gap-2 mt-1 p-2 rounded-lg border bg-muted/50">
                     <Paperclip className="w-4 h-4 text-primary flex-shrink-0" />
                     <span className="text-sm truncate flex-1">{uploadFile.name}</span>
@@ -442,26 +479,36 @@ export default function SigningInbox() {
                       <X className="w-3 h-3" />
                     </Button>
                   </div>
-                ) : (
-                  <label className="flex items-center gap-2 mt-1 p-3 rounded-lg border-2 border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
-                    <Upload className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">اضغط لاختيار ملف...</span>
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
-                      className="hidden"
-                      onChange={e => {
-                        const f = e.target.files?.[0];
-                        if (f) {
-                          if (f.size > 20 * 1024 * 1024) {
-                            toast.error('حجم الملف يجب أن يكون أقل من 20 ميجابايت');
-                            return;
+                )}
+
+                {/* Action buttons */}
+                {!uploadFile && !selectedPlatformDoc && (
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    <label className="flex items-center justify-center gap-2 p-3 rounded-lg border-2 border-dashed cursor-pointer hover:bg-muted/50 transition-colors">
+                      <Upload className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">رفع ملف</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
+                        className="hidden"
+                        onChange={e => {
+                          const f = e.target.files?.[0];
+                          if (f) {
+                            if (f.size > 20 * 1024 * 1024) {
+                              toast.error('حجم الملف يجب أن يكون أقل من 20 ميجابايت');
+                              return;
+                            }
+                            setUploadFile(f);
+                            setSelectedPlatformDoc(null);
                           }
-                          setUploadFile(f);
-                        }
-                      }}
-                    />
-                  </label>
+                        }}
+                      />
+                    </label>
+                    <Button type="button" variant="outline" onClick={() => setPickerOpen(true)} className="gap-2 h-auto py-3">
+                      <FolderOpen className="w-4 h-4" />
+                      <span className="text-xs">اختيار من المنصة</span>
+                    </Button>
+                  </div>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -639,6 +686,13 @@ export default function SigningInbox() {
           loading={signLoading}
         />
       )}
+
+      {/* Platform Document Picker */}
+      <PlatformDocumentPicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onSelect={handlePlatformDocSelect}
+      />
     </div>
   );
 }
