@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Fetch all data in parallel
-    const [shipmentRes, logsRes, receiptsRes, endorsementsRes, custodyRes] = await Promise.all([
+    const [shipmentRes, logsRes, receiptsRes, endorsementsRes, custodyRes, declarationsRes] = await Promise.all([
       supabase.from("shipments").select(`
         *,
         generator:organizations!shipments_generator_id_fkey(name, address, city, commercial_register, phone, email, logo_url),
@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
         stamp:organization_stamps(stamp_url)
       `).eq("document_id", shipmentId).order("endorsed_at", { ascending: true }),
       supabase.from("custody_chain_events").select("*, actor_organization:organizations!custody_chain_events_actor_organization_id_fkey(name)").eq("shipment_id", shipmentId).order("created_at", { ascending: true }),
+      supabase.from("delivery_declarations").select("*").eq("shipment_id", shipmentId).order("declared_at", { ascending: true }),
     ]);
 
     if (shipmentRes.error || !shipmentRes.data) throw new Error(`Shipment not found: ${shipmentRes.error?.message}`);
@@ -44,9 +45,10 @@ Deno.serve(async (req) => {
     const receipts = receiptsRes.data || [];
     const endorsements = endorsementsRes.data || [];
     const custody = custodyRes.data || [];
+    const declarations = declarationsRes.data || [];
 
     // Use direct URLs for images instead of base64 to avoid freezing the browser
-    const html = generateCompleteDocHTML(shipment, logs, receipts, endorsements, custody);
+    const html = generateCompleteDocHTML(shipment, logs, receipts, endorsements, custody, declarations);
 
     return new Response(
       JSON.stringify({ success: true, html, shipmentNumber: shipment.shipment_number }),
@@ -61,7 +63,7 @@ Deno.serve(async (req) => {
   }
 });
 
-function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], endorsements: any[], custody: any[]) {
+function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], endorsements: any[], custody: any[], declarations: any[]) {
   const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString("ar-EG") : "—";
   const formatDateTime = (d: string | null) => d ? new Date(d).toLocaleString("ar-EG") : "—";
 
@@ -297,6 +299,50 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
       ${receiptRows}
     </table>
   </div>` : ""}
+</div>
+
+<!-- صفحة الإقرارات القانونية -->
+<div class="page">
+  <div class="header" style="padding-bottom:5px;margin-bottom:8px">
+    <h1 style="font-size:16px">📋 مستند الشحنة الكامل — ${shipment.shipment_number}</h1>
+    <p class="sub">صفحة الإقرارات القانونية للأطراف</p>
+  </div>
+
+  ${declarations.length > 0 ? `
+  <div class="section">
+    <div class="sec-title">الإقرارات والتصريحات القانونية (${declarations.length})</div>
+    ${declarations.map((d: any, i: number) => {
+      const typeLabels: Record<string, string> = {
+        generator_handover: '🏭 إقرار تسليم — المولّد',
+        recycler_receipt: '♻️ إقرار استلام — المدوّر/جهة التخلص',
+        transporter_delivery: '🚛 إقرار نقل — الناقل',
+      };
+      return `
+      <div style="border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;margin-bottom:8px;${d.status === 'rejected' ? 'background:#fef2f2;border-color:#fecaca' : 'background:#f0fdf4;border-color:#86efac'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;border-bottom:1px solid #e5e7eb;padding-bottom:4px">
+          <strong style="font-size:11px;color:#0f766e">${typeLabels[d.declaration_type] || d.declaration_type || 'إقرار'} — (${i + 1})</strong>
+          <span style="font-size:9px;padding:2px 8px;border-radius:10px;${d.status === 'rejected' ? 'background:#fee2e2;color:#991b1b' : d.status === 'confirmed' ? 'background:#dcfce7;color:#166534' : 'background:#fef9c3;color:#854d0e'}">${d.status === 'confirmed' ? '✅ مؤكد' : d.status === 'rejected' ? '❌ مرفوض' : '⏳ قيد الانتظار'}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:9px;margin-bottom:6px">
+          ${d.driver_name ? `<div><span class="l">السائق/المسلّم:</span> <strong>${d.driver_name}</strong></div>` : ''}
+          ${d.driver_national_id ? `<div><span class="l">رقم الهوية:</span> <strong>${d.driver_national_id}</strong></div>` : ''}
+          ${d.generator_name ? `<div><span class="l">المولد:</span> <strong>${d.generator_name}</strong></div>` : ''}
+          ${d.transporter_name ? `<div><span class="l">الناقل:</span> <strong>${d.transporter_name}</strong></div>` : ''}
+          ${d.recycler_name ? `<div><span class="l">المدوّر:</span> <strong>${d.recycler_name}</strong></div>` : ''}
+          ${d.disposal_name ? `<div><span class="l">جهة التخلص:</span> <strong>${d.disposal_name}</strong></div>` : ''}
+          <div><span class="l">تاريخ الإقرار:</span> <strong>${formatDateTime(d.declared_at)}</strong></div>
+          <div><span class="l">الكمية:</span> <strong>${d.quantity || '—'} ${d.unit || 'طن'}</strong></div>
+        </div>
+        <div style="white-space:pre-wrap;font-size:9px;line-height:1.6;padding:6px 8px;background:#fffbeb;border:1px solid #fde68a;border-radius:4px">${d.declaration_text}</div>
+        ${d.status === 'rejected' ? `<div style="font-size:8px;color:#991b1b;margin-top:4px">❌ سبب الرفض: ${d.rejection_reason || '—'} | بواسطة: ${d.rejected_by || '—'} | ${formatDateTime(d.rejected_at)}</div>` : ''}
+        ${d.auto_generated ? `<div style="font-size:7px;color:#6b7280;margin-top:3px">🤖 تم إنشاء هذا الإقرار تلقائياً بواسطة النظام</div>` : ''}
+      </div>`;
+    }).join('')}
+  </div>` : `
+  <div class="section">
+    <div class="sec-title">الإقرارات والتصريحات القانونية</div>
+    <p style="text-align:center;color:#999;padding:10px">لا توجد إقرارات تسليم مسجلة بعد</p>
+  </div>`}
 </div>
 
 <!-- الصفحة 2: الإقرارات والتوقيعات -->
