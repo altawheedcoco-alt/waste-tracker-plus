@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield, Loader2, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ const demoAccounts = [
   { email: 'demo-generator@irecycle.test', label: 'مولد مخلفات', desc: 'مصانع ومنشآت', icon: Factory, color: 'from-amber-500 to-orange-600' },
   { email: 'demo-recycler@irecycle.test', label: 'معيد تدوير', desc: 'مرافق إعادة التدوير', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
   { email: 'demo-transporter@irecycle.test', label: 'ناقل مخلفات', desc: 'شركات نقل المخلفات', icon: Truck, color: 'from-primary to-emerald-600' },
+  { email: 'demo-transport-office@irecycle.test', label: 'مكتب نقل', desc: 'تأجير مركبات نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
   { email: 'demo-disposal@irecycle.test', label: 'جهة تخلص آمن', desc: 'مدافن ومحارق', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
   { email: 'demo-driver@irecycle.test', label: 'سائق', desc: 'سائقي المركبات', icon: Car, color: 'from-rose-500 to-red-600' },
   { email: 'demo-employee@irecycle.test', label: 'موظف', desc: 'موظفي الشركات', icon: UserCog, color: 'from-slate-500 to-slate-700' },

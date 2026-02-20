@@ -20,6 +20,7 @@ const RecyclerDashboard = lazy(() => import('@/components/dashboard/RecyclerDash
 const AdminDashboard = lazy(() => import('@/components/dashboard/AdminDashboard'));
 const DriverDashboard = lazy(() => import('@/components/dashboard/DriverDashboard'));
 const DisposalDashboard = lazy(() => import('@/components/dashboard/DisposalDashboard'));
+const TransportOfficeDashboard = lazy(() => import('@/components/dashboard/TransportOfficeDashboard'));
 const CallLogWidget = lazy(() => import('@/components/calls/CallLogWidget'));
 const AIOperationsAssistant = lazy(() => import('@/components/ai/AIOperationsAssistant'));
 
@@ -72,7 +73,7 @@ const Dashboard = () => {
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
   const orgType = organization?.organization_type as string | undefined;
-  const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal');
+  const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
 
   const renderDashboard = () => {
     if (isDriver) return <DriverDashboard />;
@@ -83,6 +84,7 @@ const Dashboard = () => {
         case 'transporter': return <TransporterDashboard />;
         case 'recycler': return <RecyclerDashboard />;
         case 'disposal': return <DisposalDashboard embedded />;
+        case 'transport_office': return <TransportOfficeDashboard />;
         default: return <AdminDashboard />;
       }
     }
@@ -91,6 +93,7 @@ const Dashboard = () => {
       case 'transporter': return <TransporterDashboard />;
       case 'recycler': return <RecyclerDashboard />;
       case 'disposal': return <DisposalDashboard embedded />;
+      case 'transport_office': return <TransportOfficeDashboard />;
       default: return <GeneratorDashboard />;
     }
   };
