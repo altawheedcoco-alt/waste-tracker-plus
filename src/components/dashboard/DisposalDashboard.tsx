@@ -210,6 +210,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
         orgLabel="جهة التخلص النهائي"
+        orgLogoUrl={organization?.logo_url}
         icon={Factory}
         iconGradient="from-red-500 to-orange-600"
         facility={facility}

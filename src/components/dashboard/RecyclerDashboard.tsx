@@ -226,6 +226,7 @@ const RecyclerDashboard = () => {
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
         orgLabel="الجهة المدورة"
+        orgLogoUrl={organization?.logo_url}
         icon={Recycle}
         iconGradient="from-emerald-500 to-green-600"
         facility={facility}

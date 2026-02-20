@@ -960,6 +960,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   <div className="px-3 py-3 space-y-2">
                     <p className="text-xs text-muted-foreground">{getEntityTypeLabel()}</p>
                     <div className="flex items-center gap-2">
+                      {organization?.logo_url ? (
+                        <img src={organization.logo_url} alt={getEntityName()} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                          <Building2 className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      )}
                       <p className="font-semibold text-foreground">{getEntityName()}</p>
                       {organization?.is_verified && (
                         <Tooltip>
