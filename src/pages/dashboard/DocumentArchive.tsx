@@ -16,7 +16,7 @@ import {
   Search, FileText, FileCheck, Receipt, Truck, Recycle, Factory,
   Download, Eye, Clock, Building2, ArrowUpDown, Printer, X,
   FolderOpen, Inbox, Send as SendIcon, FileArchive, Scale, Briefcase, Bell,
-  Weight, Banknote, Image, Info, Tag, ExternalLink,
+  Weight, Banknote, Image, Info, Tag, ExternalLink, CheckCircle2,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
@@ -38,6 +38,8 @@ interface ArchiveDoc {
   issuedBy?: string;
   senderName?: string;
   recipientName?: string;
+  partnerOrgId?: string;
+  partnerOrgName?: string;
   status?: string;
   signed?: boolean;
   amount?: number;
@@ -58,6 +60,8 @@ const DocumentArchive = () => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState(tabFromUrl || 'all');
   const [sortDesc, setSortDesc] = useState(true);
+  const [selectedPartner, setSelectedPartner] = useState<string | null>(searchParams.get('partner') || null);
+  const [viewMode, setViewMode] = useState<'list' | 'partners'>(searchParams.get('view') === 'partners' ? 'partners' : 'list');
 
   useEffect(() => { if (tabFromUrl) setActiveTab(tabFromUrl); }, [tabFromUrl]);
 
@@ -113,7 +117,9 @@ const DocumentArchive = () => {
       if (error) throw error;
       return (data || []).map((d: any): ArchiveDoc => ({
         id: d.id, title: d.document_title || t('archive.receivedDoc'), type: d.reference_type || d.document_type || 'other', date: d.created_at, source: 'received',
-        status: d.status, senderName: d.sender_org?.name || t('archive.externalParty'), signed: !!d.signed_at, fileUrl: d.file_url, referenceId: d.reference_id, dedupKey: `shared-recv-${d.id}`,
+        status: d.status, senderName: d.sender_org?.name || t('archive.externalParty'), signed: !!d.signed_at, fileUrl: d.file_url, referenceId: d.reference_id,
+        partnerOrgId: d.sender_organization_id, partnerOrgName: d.sender_org?.name || '',
+        dedupKey: `shared-recv-${d.id}`,
       }));
     },
     enabled: !!orgId,
@@ -128,7 +134,9 @@ const DocumentArchive = () => {
       if (error) throw error;
       return (data || []).map((d: any): ArchiveDoc => ({
         id: d.id, title: d.document_title || t('archive.sentDoc'), type: d.reference_type || d.document_type || 'other', date: d.created_at, source: 'sent',
-        status: d.status, recipientName: d.recipient_org?.name || t('archive.externalParty'), signed: !!d.signed_at, fileUrl: d.file_url, referenceId: d.reference_id, dedupKey: `shared-sent-${d.id}`,
+        status: d.status, recipientName: d.recipient_org?.name || t('archive.externalParty'), signed: !!d.signed_at, fileUrl: d.file_url, referenceId: d.reference_id,
+        partnerOrgId: d.recipient_organization_id, partnerOrgName: d.recipient_org?.name || '',
+        dedupKey: `shared-sent-${d.id}`,
       }));
     },
     enabled: !!orgId,
@@ -139,13 +147,20 @@ const DocumentArchive = () => {
     queryKey: ['doc-archive-invoices', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase.from('invoices').select('id, invoice_number, created_at, status, total_amount, organization_id, partner_organization_id')
+      const { data, error } = await supabase.from('invoices').select('id, invoice_number, created_at, status, total_amount, organization_id, partner_organization_id, partner_org:organizations!invoices_partner_organization_id_fkey(name), owner_org:organizations!invoices_organization_id_fkey(name)')
         .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`).order('created_at', { ascending: false }).limit(300);
       if (error) throw error;
-      return (data || []).map((d: any): ArchiveDoc => ({
-        id: d.id, title: `${t('archive.invoice')} ${d.invoice_number || ''}`.trim(), type: 'invoice', date: d.created_at,
-        source: d.organization_id === orgId ? 'issued' : 'received', amount: d.total_amount, status: d.status, dedupKey: `invoice-${d.id}`,
-      }));
+      return (data || []).map((d: any): ArchiveDoc => {
+        const isOwner = d.organization_id === orgId;
+        const pId = isOwner ? d.partner_organization_id : d.organization_id;
+        const pName = isOwner ? (d.partner_org as any)?.name : (d.owner_org as any)?.name;
+        return {
+          id: d.id, title: `${t('archive.invoice')} ${d.invoice_number || ''}`.trim(), type: 'invoice', date: d.created_at,
+          source: isOwner ? 'issued' : 'received', amount: d.total_amount, status: d.status,
+          partnerOrgId: pId || undefined, partnerOrgName: pName || '',
+          dedupKey: `invoice-${d.id}`,
+        };
+      });
     },
     enabled: !!orgId,
   });
@@ -171,13 +186,20 @@ const DocumentArchive = () => {
     queryKey: ['doc-archive-awards', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase.from('award_letters').select('id, letter_number, title, created_at, attachment_url, status, organization_id, partner_organization_id')
+      const { data, error } = await supabase.from('award_letters').select('id, letter_number, title, created_at, attachment_url, status, organization_id, partner_organization_id, partner_org:organizations!award_letters_partner_organization_id_fkey(name), owner_org:organizations!award_letters_organization_id_fkey(name)')
         .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`).order('created_at', { ascending: false }).limit(200);
       if (error) throw error;
-      return (data || []).map((d: any): ArchiveDoc => ({
-        id: d.id, title: `${t('archive.awardLetter')} ${d.letter_number || ''} - ${d.title || ''}`.trim(), type: 'award_letter', date: d.created_at,
-        source: d.organization_id === orgId ? 'issued' : 'received', status: d.status, fileUrl: d.attachment_url, dedupKey: `award-${d.id}`,
-      }));
+      return (data || []).map((d: any): ArchiveDoc => {
+        const isOwner = d.organization_id === orgId;
+        const pId = isOwner ? d.partner_organization_id : d.organization_id;
+        const pName = isOwner ? (d.partner_org as any)?.name : (d.owner_org as any)?.name;
+        return {
+          id: d.id, title: `${t('archive.awardLetter')} ${d.letter_number || ''} - ${d.title || ''}`.trim(), type: 'award_letter', date: d.created_at,
+          source: isOwner ? 'issued' : 'received', status: d.status, fileUrl: d.attachment_url,
+          partnerOrgId: pId || undefined, partnerOrgName: pName || '',
+          dedupKey: `award-${d.id}`,
+        };
+      });
     },
     enabled: !!orgId,
   });
@@ -187,13 +209,20 @@ const DocumentArchive = () => {
     queryKey: ['doc-archive-contracts', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase.from('contracts').select('id, contract_number, title, created_at, attachment_url, status, organization_id, partner_organization_id')
+      const { data, error } = await supabase.from('contracts').select('id, contract_number, title, created_at, attachment_url, status, organization_id, partner_organization_id, partner_org:organizations!contracts_partner_organization_id_fkey(name), owner_org:organizations!contracts_organization_id_fkey(name)')
         .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`).order('created_at', { ascending: false }).limit(200);
       if (error) throw error;
-      return (data || []).map((d: any): ArchiveDoc => ({
-        id: d.id, title: `${t('archive.contract')} ${d.contract_number || ''} - ${d.title || ''}`.trim(), type: 'contract', date: d.created_at,
-        source: d.organization_id === orgId ? 'issued' : 'received', status: d.status, fileUrl: d.attachment_url, dedupKey: `contract-${d.id}`,
-      }));
+      return (data || []).map((d: any): ArchiveDoc => {
+        const isOwner = d.organization_id === orgId;
+        const pId = isOwner ? d.partner_organization_id : d.organization_id;
+        const pName = isOwner ? (d.partner_org as any)?.name : (d.owner_org as any)?.name;
+        return {
+          id: d.id, title: `${t('archive.contract')} ${d.contract_number || ''} - ${d.title || ''}`.trim(), type: 'contract', date: d.created_at,
+          source: isOwner ? 'issued' : 'received', status: d.status, fileUrl: d.attachment_url,
+          partnerOrgId: pId || undefined, partnerOrgName: pName || '',
+          dedupKey: `contract-${d.id}`,
+        };
+      });
     },
     enabled: !!orgId,
   });
@@ -278,7 +307,9 @@ const DocumentArchive = () => {
           id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع' : 'Signing Request'),
           type: d.document_type || 'signing_request', date: d.created_at, source: 'received',
           status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
-          senderName: (d.sender_org as any)?.name || '', dedupKey: `sign-in-${d.id}`,
+          senderName: (d.sender_org as any)?.name || '',
+          partnerOrgId: d.sender_organization_id, partnerOrgName: (d.sender_org as any)?.name || '',
+          dedupKey: `sign-in-${d.id}`,
         });
       });
       (outgoing || []).forEach((d: any) => {
@@ -286,7 +317,9 @@ const DocumentArchive = () => {
           id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع مُرسل' : 'Sent Signing Request'),
           type: d.document_type || 'signing_request', date: d.created_at, source: 'sent',
           status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
-          recipientName: (d.recipient_org as any)?.name || '', dedupKey: `sign-out-${d.id}`,
+          recipientName: (d.recipient_org as any)?.name || '',
+          partnerOrgId: d.recipient_organization_id, partnerOrgName: (d.recipient_org as any)?.name || '',
+          dedupKey: `sign-out-${d.id}`,
         });
       });
       return docs;
@@ -313,6 +346,8 @@ const DocumentArchive = () => {
   // ─── Filter ───
   const filteredDocs = useMemo(() => {
     let docs = allDocs;
+    // Partner filter
+    if (selectedPartner) docs = docs.filter(d => d.partnerOrgId === selectedPartner);
     if (activeTab === 'issued') docs = docs.filter(d => d.source === 'issued');
     else if (activeTab === 'received') docs = docs.filter(d => d.source === 'received');
     else if (activeTab === 'sent') docs = docs.filter(d => d.source === 'sent');
@@ -321,13 +356,30 @@ const DocumentArchive = () => {
     else if (activeTab !== 'all') docs = docs.filter(d => d.type === activeTab);
     if (search.trim()) {
       const s = search.toLowerCase();
-      docs = docs.filter(d => d.title?.toLowerCase().includes(s) || d.trackingCode?.toLowerCase().includes(s) || d.senderName?.toLowerCase().includes(s) || d.recipientName?.toLowerCase().includes(s) || d.issuedBy?.toLowerCase().includes(s));
+      docs = docs.filter(d => d.title?.toLowerCase().includes(s) || d.trackingCode?.toLowerCase().includes(s) || d.senderName?.toLowerCase().includes(s) || d.recipientName?.toLowerCase().includes(s) || d.issuedBy?.toLowerCase().includes(s) || d.partnerOrgName?.toLowerCase().includes(s));
     }
     return docs;
-  }, [allDocs, activeTab, search]);
+  }, [allDocs, activeTab, search, selectedPartner]);
 
   const statsByType = useMemo(() => { const counts: Record<string, number> = {}; allDocs.forEach(d => { counts[d.type] = (counts[d.type] || 0) + 1; }); return counts; }, [allDocs]);
   const sourceStats = useMemo(() => ({ issued: allDocs.filter(d => d.source === 'issued').length, received: allDocs.filter(d => d.source === 'received').length, sent: allDocs.filter(d => d.source === 'sent').length, system: allDocs.filter(d => d.source === 'system').length, auto: allDocs.filter(d => d.source === 'auto').length }), [allDocs]);
+
+  // ─── Partner grouping ───
+  const partnerGroups = useMemo(() => {
+    const groups = new Map<string, { id: string; name: string; docs: ArchiveDoc[]; types: Set<string> }>();
+    allDocs.forEach(doc => {
+      if (doc.partnerOrgId && doc.partnerOrgName) {
+        const existing = groups.get(doc.partnerOrgId);
+        if (existing) {
+          existing.docs.push(doc);
+          existing.types.add(doc.type);
+        } else {
+          groups.set(doc.partnerOrgId, { id: doc.partnerOrgId, name: doc.partnerOrgName, docs: [doc], types: new Set([doc.type]) });
+        }
+      }
+    });
+    return Array.from(groups.values()).sort((a, b) => b.docs.length - a.docs.length);
+  }, [allDocs]);
 
   // ─── Realtime ───
   useEffect(() => {
@@ -448,20 +500,85 @@ const DocumentArchive = () => {
           ))}
         </div>
 
-        {/* Search */}
-        <div className="flex items-center gap-2">
+        {/* View mode toggle + Search */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 border rounded-lg p-0.5">
+            <Button variant={viewMode === 'list' ? 'default' : 'ghost'} size="sm" className="h-7 text-xs gap-1" onClick={() => { setViewMode('list'); setSelectedPartner(null); }}>
+              <FileText className="w-3 h-3" /> {language === 'ar' ? 'القائمة' : 'List'}
+            </Button>
+            <Button variant={viewMode === 'partners' ? 'default' : 'ghost'} size="sm" className="h-7 text-xs gap-1" onClick={() => { setViewMode('partners'); setSelectedPartner(null); }}>
+              <Building2 className="w-3 h-3" /> {language === 'ar' ? 'حسب الجهة' : 'By Partner'}
+            </Button>
+          </div>
+          {selectedPartner && (
+            <Badge variant="secondary" className="gap-1 cursor-pointer" onClick={() => setSelectedPartner(null)}>
+              <Building2 className="w-3 h-3" />
+              {partnerGroups.find(p => p.id === selectedPartner)?.name || ''}
+              <X className="w-3 h-3" />
+            </Badge>
+          )}
           <Button variant="outline" size="sm" onClick={() => setSortDesc(!sortDesc)} className="gap-1">
             <ArrowUpDown className="w-3 h-3" />
             {sortDesc ? t('archive.newest') : t('archive.oldest')}
           </Button>
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder={t('archive.searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} className="pr-9" />
           </div>
         </div>
 
-        {/* Type filter tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {/* Partner cards view */}
+        {viewMode === 'partners' && !selectedPartner && (
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              {language === 'ar' ? `الجهات الشريكة (${partnerGroups.length})` : `Partners (${partnerGroups.length})`}
+            </h2>
+            {partnerGroups.length === 0 ? (
+              <Card className="p-8 text-center">
+                <Building2 className="w-12 h-12 mx-auto text-muted-foreground mb-3 opacity-50" />
+                <p className="text-muted-foreground">{language === 'ar' ? 'لا توجد مستندات مرتبطة بجهات شريكة' : 'No partner-linked documents'}</p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {partnerGroups.map(partner => {
+                  const typeIcons = Array.from(partner.types).slice(0, 4).map(t => {
+                    const cfg = DOC_TYPES[t] || DOC_TYPES.other;
+                    return <cfg.icon key={t} className={`w-3 h-3 ${cfg.color}`} />;
+                  });
+                  const signedCount = partner.docs.filter(d => d.signed).length;
+                  const pendingCount = partner.docs.filter(d => d.status === 'pending').length;
+                  return (
+                    <Card key={partner.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer border-r-4 border-r-primary/30 hover:border-r-primary" onClick={() => { setSelectedPartner(partner.id); setViewMode('list'); }}>
+                      <div className="flex items-start gap-3 justify-end">
+                        <div className="flex-1 text-right">
+                          <h3 className="font-semibold text-sm truncate">{partner.name}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {partner.docs.length} {language === 'ar' ? 'مستند' : 'documents'}
+                          </p>
+                          <div className="flex items-center gap-2 justify-end mt-2 flex-wrap">
+                            {signedCount > 0 && <Badge variant="outline" className="text-[10px] gap-0.5"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" /> {signedCount}</Badge>}
+                            {pendingCount > 0 && <Badge variant="outline" className="text-[10px] gap-0.5"><Clock className="w-2.5 h-2.5 text-amber-500" /> {pendingCount}</Badge>}
+                            <div className="flex items-center gap-0.5">{typeIcons}</div>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-1.5">
+                            {language === 'ar' ? 'أنواع:' : 'Types:'} {Array.from(partner.types).map(t => (DOC_TYPES[t] || DOC_TYPES.other).label).join('، ')}
+                          </p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <Building2 className="w-5 h-5 text-primary" />
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Type filter tabs - show when in list mode or partner selected */}
+        {(viewMode === 'list' || selectedPartner) && <Tabs value={activeTab} onValueChange={setActiveTab}>
           <ScrollArea className="w-full">
             <TabsList className="h-auto flex-wrap gap-1 bg-transparent p-0 justify-end">
               <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5">{t('archive.all')} ({allDocs.length})</TabsTrigger>
@@ -578,7 +695,7 @@ const DocumentArchive = () => {
               </div>
             )}
           </TabsContent>
-        </Tabs>
+        </Tabs>}
       </div>
 
     </DashboardLayout>
