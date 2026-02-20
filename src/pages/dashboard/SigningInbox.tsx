@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BackButton from '@/components/ui/back-button';
 import { useSigningInbox, SigningRequest } from '@/hooks/useSigningInbox';
 import { useAuth } from '@/contexts/auth/AuthContext';
@@ -18,7 +19,7 @@ import { toast } from 'sonner';
 import {
   Send, Inbox, FileSignature, Clock, CheckCircle2, XCircle, Eye,
   Loader2, AlertTriangle, Stamp, ArrowLeft, Building2, User, Calendar,
-  FileText, ExternalLink, PenTool,
+  FileText, ExternalLink, PenTool, FolderOpen,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -163,6 +164,7 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
 export default function SigningInbox() {
   const { incoming, outgoing, isLoading, sendRequest, updateStatus } = useSigningInbox();
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [sendOpen, setSendOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState<string | null>(null);
@@ -308,6 +310,10 @@ export default function SigningInbox() {
       <BackButton />
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+        <Button variant="outline" className="gap-2" onClick={() => navigate('/dashboard/document-archive?tab=signing_request')}>
+          <FolderOpen className="w-4 h-4" /> سجل المستندات
+        </Button>
         <Dialog open={sendOpen} onOpenChange={setSendOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -392,6 +398,7 @@ export default function SigningInbox() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
 
         <div className="text-right">
           <h1 className="text-2xl font-bold flex items-center gap-2 justify-end">

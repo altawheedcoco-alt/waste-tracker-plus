@@ -78,8 +78,9 @@ const DocumentArchive = () => {
     weighbridge_photo: { label: t('archive.weighbridgePhotos'), icon: Image, color: 'text-sky-600' },
     deposit: { label: t('archive.deposits'), icon: Banknote, color: 'text-lime-600' },
     entity_document: { label: t('archive.entityDocuments'), icon: FileArchive, color: 'text-rose-600' },
+    signing_request: { label: language === 'ar' ? 'طلبات التوقيع' : 'Signing Requests', icon: FileCheck, color: 'text-violet-600' },
     other: { label: t('archive.otherDocs'), icon: FileText, color: 'text-muted-foreground' },
-  }), [t]);
+  }), [t, language]);
 
   // ─── 1. Print log (issued docs) ───
   const { data: issuedDocs = [], isLoading: l1 } = useQuery({
@@ -258,11 +259,46 @@ const DocumentArchive = () => {
     enabled: !!orgId,
   });
 
-  const isLoading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9 || l10 || l11;
+  // ─── 12. Signing Requests (incoming + outgoing) ───
+  const { data: signingDocs = [], isLoading: l12 } = useQuery({
+    queryKey: ['doc-archive-signing', orgId],
+    queryFn: async () => {
+      if (!orgId) return [];
+      const { data: incoming, error: e1 } = await supabase.from('signing_requests')
+        .select('id, document_title, document_type, status, signed_at, created_at, signed_document_url, document_url, sender_organization_id, recipient_organization_id, sender_org:organizations!signing_requests_sender_organization_id_fkey(name)')
+        .eq('recipient_organization_id', orgId).order('created_at', { ascending: false }).limit(300);
+      if (e1) throw e1;
+      const { data: outgoing, error: e2 } = await supabase.from('signing_requests')
+        .select('id, document_title, document_type, status, signed_at, created_at, signed_document_url, document_url, sender_organization_id, recipient_organization_id, recipient_org:organizations!signing_requests_recipient_organization_id_fkey(name)')
+        .eq('sender_organization_id', orgId).order('created_at', { ascending: false }).limit(300);
+      if (e2) throw e2;
+      const docs: ArchiveDoc[] = [];
+      (incoming || []).forEach((d: any) => {
+        docs.push({
+          id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع' : 'Signing Request'),
+          type: d.document_type || 'signing_request', date: d.created_at, source: 'received',
+          status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
+          senderName: (d.sender_org as any)?.name || '', dedupKey: `sign-in-${d.id}`,
+        });
+      });
+      (outgoing || []).forEach((d: any) => {
+        docs.push({
+          id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع مُرسل' : 'Sent Signing Request'),
+          type: d.document_type || 'signing_request', date: d.created_at, source: 'sent',
+          status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
+          recipientName: (d.recipient_org as any)?.name || '', dedupKey: `sign-out-${d.id}`,
+        });
+      });
+      return docs;
+    },
+    enabled: !!orgId,
+  });
+
+  const isLoading = l1 || l2 || l3 || l4 || l5 || l6 || l7 || l8 || l9 || l10 || l11 || l12;
 
   // ─── Combine + Deduplicate ───
   const allDocs = useMemo(() => {
-    const combined: ArchiveDoc[] = [...issuedDocs, ...receivedDocs, ...sentDocs, ...invoiceDocs, ...certDocs, ...awardDocs, ...contractDocs, ...entityDocs, ...depositDocs, ...weightDocs, ...weighbridgeDocs];
+    const combined: ArchiveDoc[] = [...issuedDocs, ...receivedDocs, ...sentDocs, ...invoiceDocs, ...certDocs, ...awardDocs, ...contractDocs, ...entityDocs, ...depositDocs, ...weightDocs, ...weighbridgeDocs, ...signingDocs];
     const seen = new Map<string, ArchiveDoc>();
     const sourcePriority: Record<string, number> = { issued: 5, auto: 4, system: 3, received: 2, sent: 1 };
     for (const doc of combined) {
@@ -272,7 +308,7 @@ const DocumentArchive = () => {
     const deduped = Array.from(seen.values());
     deduped.sort((a, b) => { const dA = new Date(a.date).getTime(); const dB = new Date(b.date).getTime(); return sortDesc ? dB - dA : dA - dB; });
     return deduped;
-  }, [issuedDocs, receivedDocs, sentDocs, invoiceDocs, certDocs, awardDocs, contractDocs, entityDocs, depositDocs, weightDocs, weighbridgeDocs, sortDesc]);
+  }, [issuedDocs, receivedDocs, sentDocs, invoiceDocs, certDocs, awardDocs, contractDocs, entityDocs, depositDocs, weightDocs, weighbridgeDocs, signingDocs, sortDesc]);
 
   // ─── Filter ───
   const filteredDocs = useMemo(() => {
@@ -335,6 +371,7 @@ const DocumentArchive = () => {
       case 'receipt': return docId ? `/dashboard/shipments/${docId}` : '/dashboard/shipments';
       case 'report': return '/dashboard/reports';
       case 'entity_certificate': case 'entity_document': return '/dashboard/entity-profile';
+      case 'signing_request': return '/dashboard/signing-inbox';
       default: return docId ? `/dashboard/verify?code=${docId}` : null;
     }
   };
