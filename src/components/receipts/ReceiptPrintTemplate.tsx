@@ -110,10 +110,14 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .page {
           max-width: 210mm;
           margin: 0 auto;
-          padding: 10mm 12mm;
+          padding: 8mm 10mm;
           background: white;
           min-height: 297mm;
           position: relative;
+          page-break-after: always;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
         }
         
         /* Header Section */
@@ -149,7 +153,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         }
         
         .logo-text h1 {
-          font-size: 22px;
+          font-size: 18px;
           font-weight: 800;
           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
           -webkit-background-clip: text;
@@ -159,7 +163,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         }
         
         .logo-text p {
-          font-size: 11px;
+          font-size: 9px;
           color: #6b7280;
           font-weight: 500;
         }
@@ -188,17 +192,17 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .security-banner {
           background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
           border: 1px solid #f59e0b;
-          border-radius: 8px;
-          padding: 8px 15px;
-          margin-bottom: 20px;
+          border-radius: 6px;
+          padding: 5px 10px;
+          margin-bottom: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 10px;
+          gap: 8px;
         }
         
         .security-banner span {
-          font-size: 12px;
+          font-size: 10px;
           color: #92400e;
           font-weight: 600;
         }
@@ -206,18 +210,18 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         /* Document Title */
         .doc-title {
           text-align: center;
-          margin-bottom: 25px;
+          margin-bottom: 12px;
         }
         
         .doc-title h2 {
-          font-size: 24px;
+          font-size: 18px;
           font-weight: 700;
           color: #1f2937;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
         }
         
         .doc-title .subtitle {
-          font-size: 12px;
+          font-size: 10px;
           color: #6b7280;
         }
         
@@ -228,45 +232,37 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
           align-items: center;
           background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
           border: 2px solid #10b981;
-          border-radius: 12px;
-          padding: 15px 20px;
-          margin-bottom: 25px;
-        }
-        
-        .receipt-number {
-          text-align: right;
+          border-radius: 8px;
+          padding: 10px 15px;
+          margin-bottom: 12px;
         }
         
         .receipt-number label {
-          font-size: 11px;
+          font-size: 9px;
           color: #059669;
           font-weight: 600;
           display: block;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
         
         .receipt-number span {
-          font-size: 22px;
+          font-size: 16px;
           font-weight: 800;
           color: #047857;
           font-family: monospace;
           letter-spacing: 1px;
         }
         
-        .shipment-number {
-          text-align: left;
-        }
-        
         .shipment-number label {
-          font-size: 11px;
+          font-size: 9px;
           color: #6b7280;
           font-weight: 500;
           display: block;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
         
         .shipment-number span {
-          font-size: 16px;
+          font-size: 13px;
           font-weight: 600;
           color: #374151;
         }
@@ -274,11 +270,11 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         /* Barcode Section */
         .barcode-section {
           text-align: center;
-          margin-bottom: 25px;
+          margin-bottom: 12px;
         }
         
         .barcode-section img {
-          height: 50px;
+          height: 35px;
         }
         
         .barcode-section p {
@@ -290,25 +286,25 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         
         /* Info Grid */
         .info-section {
-          margin-bottom: 20px;
+          margin-bottom: 10px;
         }
         
         .section-title {
-          font-size: 14px;
+          font-size: 11px;
           font-weight: 700;
           color: #1f2937;
-          padding-bottom: 8px;
+          padding-bottom: 4px;
           border-bottom: 2px solid #10b981;
-          margin-bottom: 15px;
+          margin-bottom: 8px;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
         }
         
         .section-title::before {
           content: '';
-          width: 4px;
-          height: 18px;
+          width: 3px;
+          height: 14px;
           background: linear-gradient(180deg, #10b981 0%, #059669 100%);
           border-radius: 2px;
         }
@@ -316,14 +312,14 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .info-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 15px;
+          gap: 8px;
         }
         
         .info-card {
           background: #f9fafb;
           border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 12px 15px;
+          border-radius: 6px;
+          padding: 8px 10px;
         }
         
         .info-card.full-width {
@@ -331,59 +327,58 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         }
         
         .info-card label {
-          font-size: 10px;
+          font-size: 8px;
           color: #6b7280;
           font-weight: 600;
-          text-transform: uppercase;
           display: block;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
         
         .info-card .value {
-          font-size: 14px;
+          font-size: 11px;
           font-weight: 600;
           color: #1f2937;
         }
         
         .info-card .value.highlight {
           color: #059669;
-          font-size: 18px;
+          font-size: 14px;
         }
         
         /* Parties Section */
         .parties-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 15px;
-          margin-bottom: 20px;
+          gap: 8px;
+          margin-bottom: 10px;
         }
         
         .party-card {
           border: 1px solid #e5e7eb;
-          border-radius: 10px;
-          padding: 15px;
+          border-radius: 6px;
+          padding: 8px;
           background: #fafafa;
         }
         
         .party-card h4 {
-          font-size: 12px;
+          font-size: 9px;
           color: #6b7280;
           font-weight: 600;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
           display: flex;
           align-items: center;
-          gap: 6px;
+          gap: 4px;
         }
         
         .party-card .party-name {
-          font-size: 15px;
+          font-size: 12px;
           font-weight: 700;
           color: #1f2937;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
         }
         
         .party-card .party-details {
-          font-size: 11px;
+          font-size: 9px;
           color: #6b7280;
         }
         
@@ -391,34 +386,34 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .waste-details {
           background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
           border: 1px solid #86efac;
-          border-radius: 10px;
-          padding: 20px;
-          margin-bottom: 20px;
+          border-radius: 8px;
+          padding: 12px;
+          margin-bottom: 10px;
         }
         
         .waste-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 15px;
+          gap: 10px;
           text-align: center;
         }
         
         .waste-item label {
-          font-size: 11px;
+          font-size: 9px;
           color: #166534;
           font-weight: 600;
           display: block;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
         }
         
         .waste-item .value {
-          font-size: 20px;
+          font-size: 16px;
           font-weight: 800;
           color: #14532d;
         }
         
         .waste-item .unit {
-          font-size: 12px;
+          font-size: 10px;
           color: #166534;
           font-weight: 500;
         }
@@ -427,10 +422,10 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .status-badge {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          padding: 6px 14px;
+          gap: 4px;
+          padding: 3px 10px;
           border-radius: 20px;
-          font-size: 12px;
+          font-size: 10px;
           font-weight: 600;
         }
         
@@ -450,21 +445,21 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .notes-section {
           background: #fffbeb;
           border: 1px solid #fde68a;
-          border-radius: 8px;
-          padding: 12px 15px;
-          margin-bottom: 20px;
+          border-radius: 6px;
+          padding: 8px 10px;
+          margin-bottom: 10px;
         }
         
         .notes-section label {
-          font-size: 11px;
+          font-size: 9px;
           color: #92400e;
           font-weight: 600;
           display: block;
-          margin-bottom: 5px;
+          margin-bottom: 3px;
         }
         
         .notes-section p {
-          font-size: 13px;
+          font-size: 10px;
           color: #78350f;
         }
         
@@ -472,9 +467,9 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         .signatures {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          gap: 30px;
-          margin-top: 40px;
-          padding-top: 20px;
+          gap: 15px;
+          margin-top: 15px;
+          padding-top: 10px;
           border-top: 2px dashed #d1d5db;
         }
         
@@ -484,53 +479,43 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         
         .signature-line {
           border-bottom: 2px solid #9ca3af;
-          height: 50px;
-          margin-bottom: 10px;
-          background: repeating-linear-gradient(
-            90deg,
-            transparent,
-            transparent 5px,
-            #f3f4f6 5px,
-            #f3f4f6 6px
-          );
+          height: 30px;
+          margin-bottom: 5px;
         }
         
         .signature-label {
-          font-size: 12px;
+          font-size: 10px;
           color: #4b5563;
           font-weight: 600;
         }
         
         .signature-name {
-          font-size: 11px;
+          font-size: 9px;
           color: #9ca3af;
-          margin-top: 4px;
+          margin-top: 2px;
         }
         
         /* Stamp Area */
         .stamp-area {
           text-align: center;
-          margin-top: 30px;
-          padding: 20px;
+          margin-top: 10px;
+          padding: 10px;
           border: 2px dashed #d1d5db;
-          border-radius: 12px;
+          border-radius: 8px;
           background: #fafafa;
         }
         
         .stamp-area p {
-          font-size: 12px;
+          font-size: 10px;
           color: #9ca3af;
           font-weight: 500;
         }
         
         /* Footer */
         .footer {
-          position: absolute;
-          bottom: 15mm;
-          left: 20mm;
-          right: 20mm;
+          margin-top: auto;
           border-top: 1px solid #e5e7eb;
-          padding-top: 15px;
+          padding-top: 8px;
         }
         
         .footer-content {
@@ -540,21 +525,21 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         }
         
         .footer-left {
-          font-size: 9px;
+          font-size: 7px;
           color: #9ca3af;
         }
         
         .footer-right {
-          font-size: 10px;
+          font-size: 8px;
           color: #6b7280;
         }
         
         .verification-code {
           font-family: monospace;
-          font-size: 10px;
+          font-size: 8px;
           color: #059669;
           background: #ecfdf5;
-          padding: 4px 10px;
+          padding: 3px 8px;
           border-radius: 4px;
           border: 1px solid #a7f3d0;
         }
@@ -562,18 +547,38 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         /* Platform Rights */
         .platform-rights {
           text-align: center;
-          margin-top: 20px;
-          padding: 10px;
+          margin-top: 8px;
+          padding: 6px;
           background: #f3f4f6;
-          border-radius: 6px;
-          font-size: 9px;
+          border-radius: 4px;
+          font-size: 7px;
           color: #6b7280;
         }
+
+        /* Terms Back Page */
+        .terms-page {
+          page-break-before: always;
+          max-width: 210mm;
+          min-height: 297mm;
+          margin: 0 auto;
+          padding: 8mm 10mm;
+          background: white;
+          box-sizing: border-box;
+          font-size: 7pt;
+          line-height: 1.5;
+          display: flex;
+          flex-direction: column;
+        }
+        .terms-page h2 { font-size: 13pt; font-weight: bold; margin: 0; }
+        .terms-page .terms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; flex: 1; }
+        .terms-page .terms-section h3 { font-size: 8.5pt; font-weight: bold; border-bottom: 1px solid #e5e7eb; padding-bottom: 2px; margin-bottom: 4px; }
+        .terms-page .terms-section ul { margin: 0; padding-right: 12px; }
+        .terms-page .terms-section li { font-size: 7pt; line-height: 1.55; margin-bottom: 2px; }
         
         @media print {
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .page { padding: 8mm 10mm; min-height: auto; }
-          .footer { position: relative; bottom: auto; left: auto; right: auto; margin-top: 30px; }
+          .footer { position: relative; bottom: auto; left: auto; right: auto; }
         }
       </style>
     </head>
@@ -790,6 +795,133 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
               ];
               return taglines[Math.floor(Date.now() / 86400000) % 4];
             })()}
+          </div>
+        </div>
+      </div>
+
+      <!-- Page 2 — Terms & Policies -->
+      <div class="terms-page" dir="rtl" style="font-family: 'Tajawal', Arial, sans-serif;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 3px double #10b981;">
+          <div>
+            <h2 style="color: #10b981;">اشتراطات وسياسات وأحكام المنصة</h2>
+            <p style="font-size: 7.5pt; color: #6b7280;">الإصدار 2.0.0 • منصة iRecycle لإدارة المخلفات والاستدامة البيئية</p>
+          </div>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/platform-terms?v=2.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 6px 8px; margin-bottom: 10px; font-size: 7.5pt; line-height: 1.5;">
+          <p style="font-weight: bold; font-size: 8pt; margin: 0 0 3px;">⚖️ الإطار القانوني والتنظيمي</p>
+          تسري هذه الاشتراطات على جميع أطراف المنظومة (مولد، ناقل، مُدوِّر، جهة تخلص آمن) وفقاً لقانون تنظيم إدارة المخلفات 202/2020 ولائحته التنفيذية، وقانون البيئة 4/1994 المعدّل، واتفاقية بازل، ومعايير ISO 14001 و45001.
+        </div>
+
+        <div class="terms-grid">
+          <div class="terms-section">
+            <h3>1. التزامات المولد (GEN)</h3>
+            <ul>
+              <li>الإفصاح الدقيق عن نوع وكمية المخلفات وفصل الخطرة عن غير الخطرة</li>
+              <li>الحصول على التراخيص اللازمة من WMRA/EEAA/IDA</li>
+              <li>تطبيق مبدأ «الملوث يدفع» وفقاً لقانون 202/2020</li>
+              <li>توفير منطقة تجميع آمنة ومطابقة للمواصفات</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>2. التزامات النقل (TRN)</h3>
+            <ul>
+              <li>مركبة مرخصة بتجهيزات أمان وGPS وملصقات تحذيرية</li>
+              <li>سائق بشهادة تدريب والتزام بالمسار المحدد (Geofencing 200م)</li>
+              <li>صور ميزان وحمولة إلزامية • تفاوت الوزن المقبول &lt; 5%</li>
+              <li>الإبلاغ الفوري عن أي حادث خلال 10 دقائق</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>3. التزامات التدوير (RCY)</h3>
+            <ul>
+              <li>ترخيص تدوير ساري وفحص جودة دوري</li>
+              <li>تأكيد الاستلام خلال 15 دقيقة وإصدار شهادة تدوير رقمية</li>
+              <li>سجل رقمي كامل لسلسلة الحيازة</li>
+              <li>الامتثال لمعايير ISO 14001</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>4. التخلص الآمن (DSP)</h3>
+            <ul>
+              <li>الالتزام بمعايير التخلص وفقاً للقانون المصري واتفاقية بازل</li>
+              <li>توثيق كامل بالصور والأوزان وشهادة تخلص رقمية</li>
+              <li>تطبيق إجراءات السلامة ISO 45001</li>
+              <li>الاحتفاظ بسجلات التخلص لمدة 5 سنوات</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>5. المستندات والتوقيعات الإلكترونية</h3>
+            <ul>
+              <li>بصمة رقمية SHA-256 وتوقيع إلكتروني مُلزم (قانون 15/2004)</li>
+              <li>أرشفة غير قابلة للتعديل (Immutable Audit Trail)</li>
+              <li>تحقق بيومتري من هوية الموقعين</li>
+              <li>رمز QR فريد لكل مستند للتحقق الفوري</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>6. الامتثال والرقابة</h3>
+            <ul>
+              <li>مؤشر امتثال من 6 محاور • الحد الأدنى 70%</li>
+              <li>إشارة مرور للتراخيص: أخضر/أصفر/أحمر (حظر تلقائي)</li>
+              <li>تزييف GPS أو التلاعب = تعليق فوري + إبلاغ السلطات</li>
+              <li>مراجعة دورية آلية مع إشعارات استباقية</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>7. الاستدامة البيئية</h3>
+            <ul>
+              <li>حساب البصمة الكربونية وفقاً لمعاملات IPCC 2006</li>
+              <li>تتبع مؤشرات الاقتصاد الدائري (MCI) وجواز المنتج الرقمي</li>
+              <li>تقارير ESG دورية لكل منشأة مسجلة</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>8. أمن المعلومات والخصوصية</h3>
+            <ul>
+              <li>تشفير AES-256 لجميع البيانات وعزل RLS</li>
+              <li>تحقق هوية من 3 مراحل: OCR + بيومتري + توقيع</li>
+              <li>حماية البيانات الشخصية</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>9. المخالفات والعقوبات</h3>
+            <ul>
+              <li>16 نوع مخالفة تشغيلية مصنفة حسب الخطورة</li>
+              <li>التلاعب في البيانات = حظر نهائي</li>
+              <li>حق المنصة في الإبلاغ للجهات الرقابية</li>
+            </ul>
+          </div>
+          <div class="terms-section">
+            <h3>10. الأحكام العامة والقانون الحاكم</h3>
+            <ul>
+              <li>تخضع للقانون المصري وتختص المحاكم المصرية بأي نزاع</li>
+              <li>يحق للمنصة تعديل السياسات مع إخطار قبل 30 يوماً</li>
+              <li>أي تعديل بعد الطباعة يُعد باطلاً ما لم يكن مختوماً رقمياً</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="border-top: 3px double #10b981; padding-top: 8px; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 6.5pt; color: #6b7280;">
+            <div>
+              <p style="margin: 0;"><strong>⚖️ إقرار:</strong> بتوقيع هذا المستند أو استخدام المنصة يُقر الطرف بالموافقة الكاملة على جميع الاشتراطات والسياسات.</p>
+              <p style="margin: 2px 0 0;">• التوقيعات الإلكترونية مُلزمة قانونياً وفقاً لقانون التوقيع الإلكتروني 15/2004.</p>
+              <p style="margin: 2px 0 0;">• جميع المستندات محمية ببصمة SHA-256 ويمكن التحقق منها عبر QR.</p>
+            </div>
+            <div style="text-align: center; margin: 0 15px;">
+              <div style="width: 60px; height: 60px; border: 1px dashed #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(16,185,129,0.05);">
+                <span style="font-size: 6pt; color: #10b981;">♻️ مختوم رقمياً</span>
+              </div>
+            </div>
+            <div style="text-align: center;">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=platform-terms&version=2.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
+              <p style="font-size: 6pt; margin-top: 2px;">امسح للتحقق</p>
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 6px; font-size: 6pt; color: #6b7280;">
+            جميع الحقوق محفوظة © ${new Date().getFullYear()} iRecycle • الإصدار 2.0.0 • وثيقة محمية بتقنية SHA-256
           </div>
         </div>
       </div>
