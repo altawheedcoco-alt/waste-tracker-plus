@@ -193,6 +193,7 @@ const OmalunaMyJobs = lazy(() => import("./pages/dashboard/OmalunaMyJobs"));
 const OmalunaMyApplications = lazy(() => import("./pages/dashboard/OmalunaMyApplications"));
 const OmalunaJobApplications = lazy(() => import("./pages/dashboard/OmalunaJobApplications"));
 const PlatformBrochure = lazy(() => import("./pages/dashboard/PlatformBrochure"));
+const FullBrochure = lazy(() => import("./pages/Brochure"));
 const PlatformTermsAndPolicies = lazy(() => import("./pages/dashboard/PlatformTermsAndPolicies"));
 const AdminDocumentStamping = lazy(() => import("./pages/dashboard/AdminDocumentStamping"));
 
@@ -261,6 +262,7 @@ const AppRoutes = memo(() => (
      <Route path="/org-profile/:code" element={<PublicOrgProfile />} />
      <Route path="/portal/:slug" element={<PublicClientPortal />} />
      <Route path="/news" element={<News />} />
+     <Route path="/brochure" element={<FullBrochure />} />
      <Route path="/auth" element={<Auth />} />
     <Route path="/auth/google-setup" element={<GoogleSetup />} />
     {/* Guide Routes */}
