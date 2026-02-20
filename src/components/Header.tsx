@@ -67,10 +67,10 @@ const Header = memo(() => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border animate-fade-in">
             <nav className="flex flex-col gap-3">
-              <NavLink href="#features" mobile>{t('nav.features')}</NavLink>
-              <NavLink href="#services" mobile>{t('nav.services')}</NavLink>
-              <NavLink href="#stats" mobile>{t('nav.stats')}</NavLink>
-              <NavLink href="#contact" mobile>{t('nav.contact')}</NavLink>
+              <NavLink href="#features" mobile onNavigate={() => setIsMenuOpen(false)}>{t('nav.features')}</NavLink>
+              <NavLink href="#services" mobile onNavigate={() => setIsMenuOpen(false)}>{t('nav.services')}</NavLink>
+              <NavLink href="#stats" mobile onNavigate={() => setIsMenuOpen(false)}>{t('nav.stats')}</NavLink>
+              <NavLink href="#contact" mobile onNavigate={() => setIsMenuOpen(false)}>{t('nav.contact')}</NavLink>
               <div className="flex flex-col gap-3 pt-4">
                 <button
                   onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
@@ -99,10 +99,11 @@ const Header = memo(() => {
 
 Header.displayName = 'Header';
 
-const NavLink = ({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) => {
+const NavLink = ({ href, children, mobile = false, onNavigate }: { href: string; children: React.ReactNode; mobile?: boolean; onNavigate?: () => void }) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (href.startsWith('#')) {
       e.preventDefault();
+      onNavigate?.();
       const targetId = href.slice(1);
       const headerOffset = 80;
 
@@ -119,10 +120,8 @@ const NavLink = ({ href, children, mobile = false }: { href: string; children: R
         return false;
       };
 
-      // If element exists, scroll directly
       if (scrollToElement()) return;
 
-      // Otherwise, scroll down progressively to trigger lazy loading, then scroll to target
       let attempts = 0;
       const maxAttempts = 20;
       const tryScroll = () => {

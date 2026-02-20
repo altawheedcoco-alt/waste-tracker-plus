@@ -21,7 +21,7 @@ const Footer = () => {
           <div>
             <h4 className="text-base sm:text-lg font-bold mb-3 sm:mb-6">{t('footer.quickLinks')}</h4>
             <ul className="space-y-2 sm:space-y-3">
-              <FooterLink href="#">{t('nav.home')}</FooterLink>
+              <FooterLink href="#top">{t('nav.home')}</FooterLink>
               <FooterLink href="#features">{t('nav.features')}</FooterLink>
               <FooterLink href="#services">{t('nav.services')}</FooterLink>
               <FooterLink href="#stats">{t('nav.stats')}</FooterLink>
@@ -30,10 +30,10 @@ const Footer = () => {
           <div>
             <h4 className="text-base sm:text-lg font-bold mb-3 sm:mb-6">{t('footer.ourServices')}</h4>
             <ul className="space-y-2 sm:space-y-3">
-              <FooterLink href="#">{t('footer.shipmentMgmt')}</FooterLink>
-              <FooterLink href="#">{t('footer.transportTracking')}</FooterLink>
-              <FooterLink href="#">{t('footer.recyclingService')}</FooterLink>
-              <FooterLink href="#">{t('footer.envReports')}</FooterLink>
+              <FooterLink href="#services">{t('footer.shipmentMgmt')}</FooterLink>
+              <FooterLink href="#services">{t('footer.transportTracking')}</FooterLink>
+              <FooterLink href="#services">{t('footer.recyclingService')}</FooterLink>
+              <FooterLink href="#services">{t('footer.envReports')}</FooterLink>
             </ul>
           </div>
           <div>
@@ -54,13 +54,18 @@ const Footer = () => {
 };
 
 const SocialIcon = ({ icon: Icon }: { icon: typeof Facebook }) => (
-  <a href="#" className="w-10 h-10 rounded-full bg-background/10 hover:bg-primary hover:scale-110 hover:-translate-y-0.5 flex items-center justify-center transition-all duration-200">
+  <button className="w-10 h-10 rounded-full bg-background/10 hover:bg-primary hover:scale-110 hover:-translate-y-0.5 flex items-center justify-center transition-all duration-200 cursor-pointer">
     <Icon className="w-5 h-5" />
-  </a>
+  </button>
 );
 
 const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (href === '#top') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     if (href.startsWith('#') && href.length > 1) {
       e.preventDefault();
       const targetId = href.slice(1);
@@ -77,7 +82,6 @@ const FooterLink = ({ href, children }: { href: string; children: React.ReactNod
       };
 
       if (!scrollToElement()) {
-        // Scroll to top first then try to find the element
         window.scrollTo({ top: 0, behavior: 'instant' });
         let attempts = 0;
         const tryScroll = () => {
@@ -92,7 +96,7 @@ const FooterLink = ({ href, children }: { href: string; children: React.ReactNod
   };
 
   return (
-    <li><a href={href} onClick={handleClick} className="text-background/70 hover:text-primary hover:translate-x-[-4px] transition-all inline-block">{children}</a></li>
+    <li><a href={href} onClick={handleClick} className="text-background/70 hover:text-primary hover:translate-x-[-4px] transition-all inline-block cursor-pointer">{children}</a></li>
   );
 };
 
