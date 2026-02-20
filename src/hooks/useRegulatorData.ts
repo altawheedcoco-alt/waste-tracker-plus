@@ -115,7 +115,7 @@ export const useAllOrganizations = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('organizations')
-        .select('id, name, name_en, organization_type, is_verified, governorate, created_at')
+        .select('id, name, name_en, organization_type, is_verified, governorate, created_at, logo_url')
         .neq('organization_type', 'regulator')
         .order('name');
       return data || [];

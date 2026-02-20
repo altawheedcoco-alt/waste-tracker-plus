@@ -86,12 +86,16 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
     const Icon = getOrganizationIcon(organization.organization_type);
     return (
       <div className={cn("p-2", className)}>
-        <div className={cn(
-          "w-10 h-10 rounded-lg flex items-center justify-center",
-          getOrganizationColor(organization.organization_type)
-        )}>
-          <Icon className="w-5 h-5" />
-        </div>
+        {organization.logo_url ? (
+          <img src={organization.logo_url} alt={organization.name} className="w-10 h-10 rounded-lg object-cover" />
+        ) : (
+          <div className={cn(
+            "w-10 h-10 rounded-lg flex items-center justify-center",
+            getOrganizationColor(organization.organization_type)
+          )}>
+            <Icon className="w-5 h-5" />
+          </div>
+        )}
       </div>
     );
   }
@@ -127,12 +131,16 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
             </>
           ) : (
             <>
-              <div className={cn(
-                "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                getOrganizationColor(organization.organization_type)
-              )}>
-                <CurrentIcon className="w-5 h-5" />
-              </div>
+              {organization.logo_url ? (
+                <img src={organization.logo_url} alt={organization.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+              ) : (
+                <div className={cn(
+                  "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                  getOrganizationColor(organization.organization_type)
+                )}>
+                  <CurrentIcon className="w-5 h-5" />
+                </div>
+              )}
               <div className="flex-1 min-w-0 text-right">
                 <p className="font-medium text-sm truncate">{organization.name}</p>
                 <p className="text-xs text-muted-foreground">
@@ -183,12 +191,16 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
                       }}
                       disabled={switchingOrganization}
                     >
-                      <div className={cn(
-                        "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                        getOrganizationColor(org.organization_type)
-                      )}>
-                        <Icon className="w-5 h-5" />
-                      </div>
+                      {org.logo_url ? (
+                        <img src={org.logo_url} alt={org.organization_name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <div className={cn(
+                          "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                          getOrganizationColor(org.organization_type)
+                        )}>
+                          <Icon className="w-5 h-5" />
+                        </div>
+                      )}
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
