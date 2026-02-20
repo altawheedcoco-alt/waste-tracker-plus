@@ -11,7 +11,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-12 mb-8 sm:mb-12">
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-3 mb-4 sm:mb-6">
-              <PlatformLogo size="lg" showText inverted />
+              <PlatformLogo size="lg" showText inverted showSubtitle />
             </div>
             <p className="text-background/70 leading-relaxed mb-4 sm:mb-6 text-sm">{t('footer.brandDesc')}</p>
             <div className="flex gap-3 sm:gap-4">

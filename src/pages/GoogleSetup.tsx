@@ -198,7 +198,7 @@ const GoogleSetup = () => {
         {/* Logo */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-3 mb-3">
-            <PlatformLogo size="lg" showText />
+            <PlatformLogo size="lg" showText showSubtitle />
           </div>
         </div>
 

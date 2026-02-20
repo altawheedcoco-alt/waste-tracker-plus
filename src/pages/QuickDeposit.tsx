@@ -676,7 +676,7 @@ const QuickDeposit = () => {
                 className="mt-6 p-5 rounded-xl bg-gradient-to-br from-primary/10 via-emerald-500/5 to-accent/10 border border-primary/20"
               >
                 <div className="flex justify-center mb-4">
-                  <PlatformLogo size="lg" showText />
+                  <PlatformLogo size="lg" showText showSubtitle />
                 </div>
                 <p className="text-lg font-bold text-foreground mb-2 text-center">
                   شكراً لاستخدامك منصة آي ريسايكل
