@@ -196,6 +196,7 @@ const PlatformBrochure = lazy(() => import("./pages/dashboard/PlatformBrochure")
 const FullBrochure = lazy(() => import("./pages/Brochure"));
 const PlatformTermsAndPolicies = lazy(() => import("./pages/dashboard/PlatformTermsAndPolicies"));
 const AdminDocumentStamping = lazy(() => import("./pages/dashboard/AdminDocumentStamping"));
+const VehicleMarketplace = lazy(() => import("./pages/dashboard/VehicleMarketplace"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -428,6 +429,7 @@ const AppRoutes = memo(() => (
            <Route path="/dashboard/omaluna/my-applications" element={<OmalunaMyApplications />} />
            <Route path="/dashboard/omaluna/job/:jobId/applications" element={<OmalunaJobApplications />} />
          <Route path="/invite/:token" element={<InviteAccept />} />
+         <Route path="/dashboard/vehicle-marketplace" element={<VehicleMarketplace />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

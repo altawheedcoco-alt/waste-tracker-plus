@@ -96,6 +96,7 @@ const organizationTypes = [
   { value: 'generator', label: 'الجهة المولدة' },
   { value: 'recycler', label: 'الجهة المدورة' },
   { value: 'transporter', label: 'الجهة الناقلة' },
+  { value: 'transport_office', label: 'مكتب نقل' },
   { value: 'disposal', label: 'جهة التخلص الآمن' },
   { value: 'consultant', label: 'استشاري بيئي' },
   { value: 'consulting_office', label: 'مكتب استشاري' },

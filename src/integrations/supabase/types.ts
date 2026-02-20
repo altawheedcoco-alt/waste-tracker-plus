@@ -12432,6 +12432,99 @@ export type Database = {
           },
         ]
       }
+      fleet_vehicles: {
+        Row: {
+          brand: string | null
+          capacity_tons: number | null
+          created_at: string
+          daily_rate: number | null
+          driver_license_expiry: string | null
+          driver_name: string | null
+          driver_phone: string | null
+          id: string
+          insurance_expiry: string | null
+          is_available: boolean | null
+          license_expiry: string | null
+          model: string | null
+          notes: string | null
+          organization_id: string
+          per_trip_rate: number | null
+          photo_url: string | null
+          plate_number: string
+          service_areas: string[] | null
+          status: string
+          updated_at: string
+          vehicle_type: string
+          waste_types_allowed: string[] | null
+          year: number | null
+        }
+        Insert: {
+          brand?: string | null
+          capacity_tons?: number | null
+          created_at?: string
+          daily_rate?: number | null
+          driver_license_expiry?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          is_available?: boolean | null
+          license_expiry?: string | null
+          model?: string | null
+          notes?: string | null
+          organization_id: string
+          per_trip_rate?: number | null
+          photo_url?: string | null
+          plate_number: string
+          service_areas?: string[] | null
+          status?: string
+          updated_at?: string
+          vehicle_type?: string
+          waste_types_allowed?: string[] | null
+          year?: number | null
+        }
+        Update: {
+          brand?: string | null
+          capacity_tons?: number | null
+          created_at?: string
+          daily_rate?: number | null
+          driver_license_expiry?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          id?: string
+          insurance_expiry?: string | null
+          is_available?: boolean | null
+          license_expiry?: string | null
+          model?: string | null
+          notes?: string | null
+          organization_id?: string
+          per_trip_rate?: number | null
+          photo_url?: string | null
+          plate_number?: string
+          service_areas?: string[] | null
+          status?: string
+          updated_at?: string
+          vehicle_type?: string
+          waste_types_allowed?: string[] | null
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "fleet_vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fraud_alerts: {
         Row: {
           alert_type: string
@@ -24663,6 +24756,87 @@ export type Database = {
           },
         ]
       }
+      transport_office_contracts: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          attachment_url: string | null
+          commission_rate: number | null
+          contract_number: string
+          contract_type: string
+          created_at: string
+          created_by: string | null
+          end_date: string
+          id: string
+          max_vehicles: number | null
+          notes: string | null
+          organization_id: string
+          signed_by: string | null
+          start_date: string
+          status: string
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_url?: string | null
+          commission_rate?: number | null
+          contract_number: string
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          end_date: string
+          id?: string
+          max_vehicles?: number | null
+          notes?: string | null
+          organization_id: string
+          signed_by?: string | null
+          start_date: string
+          status?: string
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          attachment_url?: string | null
+          commission_rate?: number | null
+          contract_number?: string
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          max_vehicles?: number | null
+          notes?: string | null
+          organization_id?: string
+          signed_by?: string | null
+          start_date?: string
+          status?: string
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transport_office_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transport_office_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_costs: {
         Row: {
           created_at: string
@@ -25117,6 +25291,130 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      vehicle_bookings: {
+        Row: {
+          agreed_price: number | null
+          approved_at: string | null
+          approved_by: string | null
+          booking_type: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string
+          currency: string | null
+          delivery_location: string | null
+          end_date: string | null
+          estimated_weight: number | null
+          fleet_owner_org_id: string
+          id: string
+          owner_notes: string | null
+          pickup_location: string | null
+          requester_notes: string | null
+          requester_org_id: string
+          shipment_id: string | null
+          start_date: string
+          status: string
+          updated_at: string
+          vehicle_id: string
+          waste_type: string | null
+        }
+        Insert: {
+          agreed_price?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          booking_type?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          delivery_location?: string | null
+          end_date?: string | null
+          estimated_weight?: number | null
+          fleet_owner_org_id: string
+          id?: string
+          owner_notes?: string | null
+          pickup_location?: string | null
+          requester_notes?: string | null
+          requester_org_id: string
+          shipment_id?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+          vehicle_id: string
+          waste_type?: string | null
+        }
+        Update: {
+          agreed_price?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          booking_type?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          delivery_location?: string | null
+          end_date?: string | null
+          estimated_weight?: number | null
+          fleet_owner_org_id?: string
+          id?: string
+          owner_notes?: string | null
+          pickup_location?: string | null
+          requester_notes?: string | null
+          requester_org_id?: string
+          shipment_id?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+          vehicle_id?: string
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_bookings_fleet_owner_org_id_fkey"
+            columns: ["fleet_owner_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vehicle_bookings_fleet_owner_org_id_fkey"
+            columns: ["fleet_owner_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_bookings_requester_org_id_fkey"
+            columns: ["requester_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vehicle_bookings_requester_org_id_fkey"
+            columns: ["requester_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_bookings_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_bookings_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_compliance: {
         Row: {
