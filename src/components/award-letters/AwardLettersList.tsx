@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -27,10 +28,15 @@ import {
   CheckCircle,
   Clock,
   XCircle,
+  PenTool,
+  X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { motion, AnimatePresence } from 'framer-motion';
 import AwardLetterForm from './AwardLetterForm';
+import BatchSignatureDialog from '@/components/signatures/BatchSignatureDialog';
+import type { BatchDocument } from '@/components/signatures/BatchSignatureDialog';
 
 interface AwardLetter {
   id: string;
@@ -47,9 +53,11 @@ interface AwardLetter {
 
 export default function AwardLettersList() {
   const navigate = useNavigate();
-  const { organization } = useAuth();
+  const { organization, user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchSignOpen, setBatchSignOpen] = useState(false);
 
   const { data: letters = [], isLoading, refetch } = useQuery({
     queryKey: ['award-letters', organization?.id],
@@ -208,57 +216,113 @@ export default function AwardLettersList() {
         <ScrollArea className="h-[600px]">
           <div className="space-y-3 pr-4">
             {filteredLetters.map(letter => (
-              <Card
-                key={letter.id}
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                onClick={() => navigate(`/dashboard/award-letters/${letter.id}`)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {letter.letter_number}
-                        </Badge>
-                        {getStatusBadge(letter.status, letter.end_date)}
-                      </div>
+              <div key={letter.id} className={`flex items-start gap-3 ${selectedIds.has(letter.id) ? 'ring-1 ring-primary/30 rounded-lg' : ''}`}>
+                <div className="pt-5 pr-2">
+                  <Checkbox
+                    checked={selectedIds.has(letter.id)}
+                    onCheckedChange={() => {
+                      setSelectedIds(prev => {
+                        const next = new Set(prev);
+                        if (next.has(letter.id)) next.delete(letter.id); else next.add(letter.id);
+                        return next;
+                      });
+                    }}
+                  />
+                </div>
+                <Card
+                  className="flex-1 cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => navigate(`/dashboard/award-letters/${letter.id}`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {letter.letter_number}
+                          </Badge>
+                          {getStatusBadge(letter.status, letter.end_date)}
+                        </div>
 
-                      <h3 className="font-semibold text-lg mb-1">{letter.title}</h3>
+                        <h3 className="font-semibold text-lg mb-1">{letter.title}</h3>
 
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(letter.start_date), 'dd MMM yyyy', { locale: ar })}
-                          {letter.end_date && (
-                            <>
-                              {' → '}
-                              {format(new Date(letter.end_date), 'dd MMM yyyy', { locale: ar })}
-                            </>
-                          )}
-                        </span>
-
-                        {letter.partner && (
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {letter.partner.name}
+                            <Calendar className="h-3 w-3" />
+                            {format(new Date(letter.start_date), 'dd MMM yyyy', { locale: ar })}
+                            {letter.end_date && (
+                              <>
+                                {' → '}
+                                {format(new Date(letter.end_date), 'dd MMM yyyy', { locale: ar })}
+                              </>
+                            )}
                           </span>
-                        )}
 
-                        <span className="flex items-center gap-1">
-                          <Package className="h-3 w-3" />
-                          {letter.items_count} بند سعر
-                        </span>
+                          {letter.partner && (
+                            <span className="flex items-center gap-1">
+                              <Building2 className="h-3 w-3" />
+                              {letter.partner.name}
+                            </span>
+                          )}
+
+                          <span className="flex items-center gap-1">
+                            <Package className="h-3 w-3" />
+                            {letter.items_count} بند سعر
+                          </span>
+                        </div>
                       </div>
-                    </div>
 
-                    <ChevronLeft className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </CardContent>
-              </Card>
+                      <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             ))}
           </div>
         </ScrollArea>
       )}
+
+      {/* Floating Batch Action Bar */}
+      <AnimatePresence>
+        {selectedIds.size > 0 && (
+          <motion.div
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-card border shadow-lg rounded-xl px-5 py-3 flex items-center gap-4"
+            dir="rtl"
+          >
+            <Badge variant="secondary" className="text-sm px-3 py-1">
+              {selectedIds.size} محدد
+            </Badge>
+            <Button size="sm" className="gap-2" onClick={() => setBatchSignOpen(true)}>
+              <PenTool className="w-4 h-4" />
+              توقيع وختم جماعي
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
+              <X className="w-4 h-4" />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <BatchSignatureDialog
+        open={batchSignOpen}
+        onOpenChange={setBatchSignOpen}
+        documents={filteredLetters
+          .filter(l => selectedIds.has(l.id))
+          .map(l => ({
+            id: l.id,
+            documentType: 'award_letter' as const,
+            title: l.letter_number,
+            subtitle: l.title,
+          }))}
+        organizationId={organization?.id || ''}
+        userId={user?.id || ''}
+        onComplete={() => {
+          setSelectedIds(new Set());
+          refetch();
+        }}
+      />
     </div>
   );
 }
