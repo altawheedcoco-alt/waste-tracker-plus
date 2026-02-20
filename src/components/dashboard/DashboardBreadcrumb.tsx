@@ -1,3 +1,4 @@
+import React from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Home, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -91,25 +92,27 @@ const DashboardBreadcrumb = () => {
             const label = routeLabels[value] || value;
 
             return (
-              <BreadcrumbItem key={to}>
+              <React.Fragment key={to}>
                 <BreadcrumbSeparator>
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </BreadcrumbSeparator>
-                {isLast ? (
-                  <BreadcrumbPage className="font-medium text-foreground">
-                    {label}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink asChild>
-                    <Link 
-                      to={to}
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
+                <BreadcrumbItem>
+                  {isLast ? (
+                    <BreadcrumbPage className="font-medium text-foreground">
                       {label}
-                    </Link>
-                  </BreadcrumbLink>
-                )}
-              </BreadcrumbItem>
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink asChild>
+                      <Link 
+                        to={to}
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {label}
+                      </Link>
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+              </React.Fragment>
             );
           })}
         </BreadcrumbList>
