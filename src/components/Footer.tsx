@@ -59,8 +59,41 @@ const SocialIcon = ({ icon: Icon }: { icon: typeof Facebook }) => (
   </a>
 );
 
-const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <li><a href={href} className="text-background/70 hover:text-primary hover:translate-x-[-4px] transition-all inline-block">{children}</a></li>
-);
+const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (href.startsWith('#') && href.length > 1) {
+      e.preventDefault();
+      const targetId = href.slice(1);
+      const headerOffset = 80;
+
+      const scrollToElement = () => {
+        const element = document.getElementById(targetId);
+        if (element) {
+          const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: elementPosition - headerOffset, behavior: 'smooth' });
+          return true;
+        }
+        return false;
+      };
+
+      if (!scrollToElement()) {
+        // Scroll to top first then try to find the element
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        let attempts = 0;
+        const tryScroll = () => {
+          if (scrollToElement() || attempts >= 20) return;
+          attempts++;
+          window.scrollBy({ top: window.innerHeight, behavior: 'instant' });
+          requestAnimationFrame(() => setTimeout(tryScroll, 100));
+        };
+        setTimeout(tryScroll, 200);
+      }
+    }
+  };
+
+  return (
+    <li><a href={href} onClick={handleClick} className="text-background/70 hover:text-primary hover:translate-x-[-4px] transition-all inline-block">{children}</a></li>
+  );
+};
 
 export default Footer;
