@@ -335,7 +335,8 @@ export default function EntityProfileArchive({
     if (doc.fileUrl) {
       window.open(doc.fileUrl, '_blank');
     } else {
-      toast.info('لا يوجد ملف متاح للمعاينة');
+      // إذا لا يوجد ملف، توجه لصفحة التفاصيل
+      handleNavigateToDetails(doc);
     }
   };
 
@@ -348,7 +349,7 @@ export default function EntityProfileArchive({
       a.click();
       toast.success('جاري التحميل...');
     } else {
-      toast.info('لا يوجد ملف متاح للتحميل');
+      handleNavigateToDetails(doc);
     }
   };
 
@@ -357,7 +358,7 @@ export default function EntityProfileArchive({
       const pw = window.open(doc.fileUrl, '_blank');
       if (pw) pw.addEventListener('load', () => pw.print());
     } else {
-      toast.info('لا يوجد ملف متاح للطباعة');
+      handleNavigateToDetails(doc);
     }
   };
 
