@@ -147,18 +147,18 @@ const DocumentArchive = () => {
     queryKey: ['doc-archive-invoices', orgId],
     queryFn: async () => {
       if (!orgId) return [];
-      const { data, error } = await supabase.from('invoices').select('id, invoice_number, created_at, status, total_amount, organization_id, partner_organization_id, partner_org:organizations!invoices_partner_organization_id_fkey(name), owner_org:organizations!invoices_organization_id_fkey(name)')
+      const { data, error } = await supabase.from('invoices').select('id, invoice_number, created_at, status, total_amount, organization_id, partner_organization_id, partner_name')
         .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`).order('created_at', { ascending: false }).limit(300);
       if (error) throw error;
       return (data || []).map((d: any): ArchiveDoc => {
         const isOwner = d.organization_id === orgId;
         const pId = isOwner ? d.partner_organization_id : d.organization_id;
-        const pName = isOwner ? (d.partner_org as any)?.name : (d.owner_org as any)?.name;
+        const pName = d.partner_name || '';
         return {
           id: d.id, title: `${t('archive.invoice')} ${d.invoice_number || ''}`.trim(), type: 'invoice', date: d.created_at,
           source: isOwner ? 'issued' : 'received', amount: d.total_amount, status: d.status,
           referenceId: d.id,
-          partnerOrgId: pId || undefined, partnerOrgName: pName || '',
+          partnerOrgId: pId || undefined, partnerOrgName: pName,
           dedupKey: `invoice-${d.id}`,
         };
       });
