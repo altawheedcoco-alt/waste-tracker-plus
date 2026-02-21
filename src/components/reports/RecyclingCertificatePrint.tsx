@@ -280,8 +280,9 @@ const RecyclingCertificatePrint = ({
         className="print-container bg-white text-black print:p-0 print-break-after" 
         dir="rtl" 
         style={{ 
-          height: '297mm', 
-          width: '210mm', 
+          minHeight: '297mm', 
+          maxWidth: '210mm', 
+          width: '100%',
           margin: '0 auto',
           padding: '12px 15px',
           fontFamily: 'Cairo, sans-serif',
@@ -289,6 +290,7 @@ const RecyclingCertificatePrint = ({
           overflow: 'hidden',
           boxSizing: 'border-box',
           pageBreakAfter: 'always',
+          wordBreak: 'break-word' as const,
         }}
       >
       {/* Header with QR and Barcode */}

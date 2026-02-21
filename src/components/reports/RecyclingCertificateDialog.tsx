@@ -490,7 +490,7 @@ const RecyclingCertificateDialog = ({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-5xl max-h-[90vh] p-0">
+        <DialogContent className="max-w-5xl w-[96vw] max-h-[90vh] p-0" dir="rtl">
           <DialogHeader className="p-6 pb-0">
             <div className="flex items-center justify-between">
               <DialogTitle className="flex items-center gap-2 text-xl">
