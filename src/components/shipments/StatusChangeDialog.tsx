@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
 import DeliveryDeclarationDialog from './DeliveryDeclarationDialog';
+import ShipmentPhotoUpload from './ShipmentPhotoUpload';
 import {
   Dialog,
   DialogContent,
@@ -71,6 +72,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   const [showDeclaration, setShowDeclaration] = useState(false);
   const [recyclerWeight, setRecyclerWeight] = useState('');
   const [manualOverride, setManualOverride] = useState(false);
+  const [statusPhotos, setStatusPhotos] = useState<string[]>([]);
   const [geofenceCheck, setGeofenceCheck] = useState<{
     checking: boolean;
     isInside: boolean | null;
@@ -238,6 +240,8 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         updateData.delivery_weighbridge_metadata = receivingPhotoMeta;
       }
 
+      // Status photos will be saved in shipment_logs below
+
       // Check weight dispute when recycler confirms with weight
       if (showRecyclerWeightInput && recyclerWeight && shipment.quantity) {
         const recyclerW = parseFloat(recyclerWeight);
@@ -279,14 +283,18 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
       if (updateError) throw updateError;
 
       const statusConfig = getStatusConfig(selectedStatus);
+      const logEntry: any = {
+        shipment_id: shipment.id,
+        status: dbStatus as any,
+        notes: notes || `تم تغيير الحالة إلى ${statusConfig?.labelAr || selectedStatus}`,
+        changed_by: profile?.id,
+      };
+      if (statusPhotos.length > 0) {
+        logEntry.photos = statusPhotos;
+      }
       const { error: logError } = await supabase
         .from('shipment_logs')
-        .insert([{
-          shipment_id: shipment.id,
-          status: dbStatus as any,
-          notes: notes || `تم تغيير الحالة إلى ${statusConfig?.labelAr || selectedStatus}`,
-          changed_by: profile?.id,
-        }]);
+        .insert([logEntry]);
 
       if (logError) {
         console.error('Error logging status change:', logError);
@@ -354,6 +362,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     setReceivingPhotoUrl(null);
     setReceivingPhotoMeta(null);
     setRecyclerWeight('');
+    setStatusPhotos([]);
     setShowDeclaration(false);
     onClose();
   };
@@ -616,6 +625,15 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
                 </p>
               )}
             </div>
+          )}
+
+          {/* Shipment Photos */}
+          {canChange && availableStatuses.length > 0 && (
+            <ShipmentPhotoUpload
+              shipmentId={shipment.id}
+              maxPhotos={5}
+              onPhotosChanged={setStatusPhotos}
+            />
           )}
 
           {/* Notes */}

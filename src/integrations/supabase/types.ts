@@ -22807,6 +22807,7 @@ export type Database = {
           latitude: number | null
           longitude: number | null
           notes: string | null
+          photos: string[] | null
           shipment_id: string
           status: Database["public"]["Enums"]["shipment_status"]
         }
@@ -22817,6 +22818,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           notes?: string | null
+          photos?: string[] | null
           shipment_id: string
           status: Database["public"]["Enums"]["shipment_status"]
         }
@@ -22827,6 +22829,7 @@ export type Database = {
           latitude?: number | null
           longitude?: number | null
           notes?: string | null
+          photos?: string[] | null
           shipment_id?: string
           status?: Database["public"]["Enums"]["shipment_status"]
         }
