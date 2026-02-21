@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -331,16 +331,76 @@ export default function EntityProfileArchive({
     }
   };
 
-  const handleView = (doc: ArchiveDoc) => {
+  // توليد مستند الشحنة عند الطلب
+  const generateShipmentDoc = useCallback(async (shipmentId: string): Promise<string | null> => {
+    const toastId = toast.loading('جاري توليد المستند...');
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-manifest-pdf', {
+        body: { shipmentId },
+      });
+      toast.dismiss(toastId);
+      if (error || !data?.success) {
+        toast.error('فشل توليد المستند');
+        return null;
+      }
+      // Return HTML content to render
+      return data.html || data.manifestHtml || null;
+    } catch (e) {
+      toast.dismiss(toastId);
+      toast.error('فشل توليد المستند');
+      return null;
+    }
+  }, []);
+
+  const openHtmlInNewWindow = useCallback((html: string, title: string, autoPrint = false) => {
+    const pw = window.open('', '_blank');
+    if (pw) {
+      pw.document.write(html);
+      pw.document.title = title;
+      pw.document.close();
+      if (autoPrint) {
+        pw.addEventListener('load', () => pw.print());
+        // Fallback if load already fired
+        setTimeout(() => pw.print(), 500);
+      }
+    }
+  }, []);
+
+  const downloadHtmlAsPdf = useCallback((html: string, title: string) => {
+    // Open in new window with print instructions
+    const pw = window.open('', '_blank');
+    if (pw) {
+      pw.document.write(`
+        <html dir="rtl"><head><title>${title}</title>
+        <style>@media print { body { margin: 0; } }</style>
+        </head><body>
+        <div style="text-align:center;padding:10px;background:#f0f0f0;margin-bottom:10px;font-family:sans-serif;">
+          <strong>💡 لتحميل كـ PDF:</strong> اضغط Ctrl+P ثم اختر "حفظ كـ PDF"
+        </div>
+        ${html}
+        </body></html>
+      `);
+      pw.document.close();
+      setTimeout(() => pw.print(), 500);
+    }
+  }, []);
+
+  const handleView = useCallback(async (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
       window.open(doc.fileUrl, '_blank');
+      return;
+    }
+    // توليد المستند حسب النوع
+    if (doc.type === 'shipment' || doc.type === 'certificate') {
+      const docId = doc.referenceId || doc.id;
+      const html = await generateShipmentDoc(docId);
+      if (html) openHtmlInNewWindow(html, doc.title);
     } else {
-      // إذا لا يوجد ملف، توجه لصفحة التفاصيل
       handleNavigateToDetails(doc);
     }
-  };
+  }, [generateShipmentDoc, openHtmlInNewWindow]);
 
-  const handleDownload = (doc: ArchiveDoc) => {
+  const handleDownload = useCallback(async (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
       const a = document.createElement('a');
       a.href = doc.fileUrl;
@@ -348,19 +408,31 @@ export default function EntityProfileArchive({
       a.target = '_blank';
       a.click();
       toast.success('جاري التحميل...');
+      return;
+    }
+    if (doc.type === 'shipment' || doc.type === 'certificate') {
+      const docId = doc.referenceId || doc.id;
+      const html = await generateShipmentDoc(docId);
+      if (html) downloadHtmlAsPdf(html, doc.title);
     } else {
       handleNavigateToDetails(doc);
     }
-  };
+  }, [generateShipmentDoc, downloadHtmlAsPdf]);
 
-  const handlePrint = (doc: ArchiveDoc) => {
+  const handlePrint = useCallback(async (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
       const pw = window.open(doc.fileUrl, '_blank');
       if (pw) pw.addEventListener('load', () => pw.print());
+      return;
+    }
+    if (doc.type === 'shipment' || doc.type === 'certificate') {
+      const docId = doc.referenceId || doc.id;
+      const html = await generateShipmentDoc(docId);
+      if (html) openHtmlInNewWindow(html, doc.title, true);
     } else {
       handleNavigateToDetails(doc);
     }
-  };
+  }, [generateShipmentDoc, openHtmlInNewWindow]);
 
   const handleNavigateToDetails = (doc: ArchiveDoc) => {
     const docId = doc.referenceId || doc.id;
