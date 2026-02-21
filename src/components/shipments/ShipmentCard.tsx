@@ -555,13 +555,13 @@ const ShipmentCard = ({
         <Card className="hover:shadow-lg transition-all border-r-4 overflow-hidden"
           style={{ borderRightColor: currentStatusConfig ? `var(--${currentStatusConfig.key}-color, #94a3b8)` : undefined }}
         >
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-hidden">
             {/* Main Content */}
-            <div className="p-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                {/* Right Side - Shipment Info */}
-                <div className="flex-1 text-right order-1 sm:order-2">
-                  <div className="flex items-center gap-2 justify-end flex-wrap">
+            <div className="p-3 sm:p-4">
+              <div className="flex flex-col gap-3">
+                {/* Shipment Info */}
+                <div className="text-right min-w-0">
+                  <div className="flex items-center gap-1.5 justify-end flex-wrap">
                     {/* Generator Approval Badge */}
                     {shipment.generator_id && visibility.canViewGeneratorInfo && (
                       <ShipmentApprovalBadge
@@ -618,7 +618,7 @@ const ShipmentCard = ({
                     <Badge variant="outline" className="text-xs">
                       {currentStatusConfig?.phase === 'transporter' ? 'مرحلة النقل' : 'مرحلة التدوير'}
                     </Badge>
-                    <span className="font-mono font-bold text-lg">{shipment.shipment_number}</span>
+                    <span className="font-mono font-bold text-base sm:text-lg truncate">{shipment.shipment_number}</span>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3 text-sm">
@@ -652,16 +652,16 @@ const ShipmentCard = ({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground justify-end flex-wrap">
+                  <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-muted-foreground justify-end flex-wrap">
                     <span>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</span>
                     <span className="font-semibold">{shipment.quantity} {shipment.unit || 'كجم'}</span>
                     <span>{format(new Date(shipment.created_at), 'PP', { locale: ar })}</span>
                   </div>
                 </div>
 
-                {/* Left Side - Action Buttons */}
-                <div className="flex flex-col items-start gap-2 order-2 sm:order-1 w-full sm:w-auto">
-                  <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+                {/* Action Buttons */}
+                <div className="flex items-center gap-1.5 flex-wrap w-full overflow-hidden">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {/* Navigation Button Group - Google Maps & Waze - only if maps allowed */}
                     {visibility.canViewMaps && (
                       <NavigationButtonGroup
