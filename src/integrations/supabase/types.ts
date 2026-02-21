@@ -20485,6 +20485,68 @@ export type Database = {
           },
         ]
       }
+      portal_sessions: {
+        Row: {
+          client_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          organization_id: string
+          portal_id: string
+          token: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          organization_id: string
+          portal_id: string
+          token: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          organization_id?: string
+          portal_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_sessions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "portal_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "portal_sessions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_sessions_portal_id_fkey"
+            columns: ["portal_id"]
+            isOneToOne: false
+            referencedRelation: "client_portals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       position_permissions: {
         Row: {
           can_approve_payments: boolean | null
@@ -29559,6 +29621,7 @@ export type Database = {
         Args: { p_booking_date: string; p_timeslot_id: string }
         Returns: number
       }
+      cleanup_expired_portal_sessions: { Args: never; Returns: undefined }
       cleanup_old_api_request_logs: { Args: never; Returns: number }
       consultant_has_active_subscription: {
         Args: { _consultant_user_id: string }

@@ -11,10 +11,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { clientId, organizationId, dataType, portalId } = await req.json();
+    const { clientId, organizationId, dataType, portalId, sessionToken } = await req.json();
     if (!clientId || !organizationId || !dataType) {
       return new Response(JSON.stringify({ error: 'Missing params' }), {
         status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Require session token
+    if (!sessionToken) {
+      return new Response(JSON.stringify({ error: 'Session token required' }), {
+        status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -24,7 +32,40 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Verify the client still exists and is active
+    // Validate session token
+    const { data: session, error: sessionError } = await supabase
+      .from('portal_sessions')
+      .select('client_id, organization_id, expires_at')
+      .eq('token', sessionToken)
+      .eq('client_id', clientId)
+      .single();
+
+    if (sessionError || !session) {
+      return new Response(JSON.stringify({ error: 'Invalid session' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check expiry
+    if (new Date(session.expires_at) < new Date()) {
+      // Clean up expired session
+      await supabase.from('portal_sessions').delete().eq('token', sessionToken);
+      return new Response(JSON.stringify({ error: 'Session expired' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verify organization matches
+    if (session.organization_id !== organizationId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verify the client is still active
     const { data: client } = await supabase
       .from('portal_clients')
       .select('id, client_name, client_email, client_phone')
@@ -43,8 +84,6 @@ Deno.serve(async (req) => {
 
     switch (dataType) {
       case 'shipments': {
-        // Get shipments related to this client's organization
-        // Match by client name in generator/recycler or external partner
         const { data } = await supabase
           .from('shipments')
           .select(`
@@ -74,7 +113,6 @@ Deno.serve(async (req) => {
       }
 
       case 'collection_requests': {
-        // Get collection requests created by this client
         const { data } = await supabase
           .from('collection_requests')
           .select('*')
@@ -94,13 +132,6 @@ Deno.serve(async (req) => {
           .order('created_at', { ascending: false })
           .limit(50);
         result = data || [];
-        break;
-      }
-
-      case 'create_collection_request': {
-        // Create a new collection request from the portal
-        const { requestData } = await req.json().catch(() => ({ requestData: null }));
-        // Re-parse body since we already consumed it
         break;
       }
 

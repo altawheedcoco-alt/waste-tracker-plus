@@ -5,8 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MAX_IP_ATTEMPTS = 10; // Max attempts per IP per 15 min
-const MAX_ACCOUNT_ATTEMPTS = 5; // Max failed attempts before lockout
+const MAX_IP_ATTEMPTS = 10;
+const MAX_ACCOUNT_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 30;
 const RATE_WINDOW_MINUTES = 15;
 
@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Input validation
     if (slug.length > 100 || access_code.length > 50) {
       return new Response(JSON.stringify({ error: 'Invalid input' }), {
         status: 400,
@@ -60,7 +59,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Log this attempt
     await supabase.from('portal_auth_attempts').insert({
       ip_address: ipAddress,
       portal_slug: slug,
@@ -81,7 +79,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Find client by access code (check ALL matching clients for lockout)
+    // Find client by access code
     const { data: client, error: clientError } = await supabase
       .from('portal_clients')
       .select('id, client_name, client_email, client_phone, is_active, failed_login_attempts, locked_until')
@@ -91,7 +89,6 @@ Deno.serve(async (req) => {
       .single();
 
     if (clientError || !client) {
-      // Failed attempt - don't reveal if code exists or not
       return new Response(JSON.stringify({ error: 'رمز الوصول غير صحيح', error_en: 'Invalid access code' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -140,9 +137,26 @@ Deno.serve(async (req) => {
       .eq('id', portal.organization_id)
       .single();
 
-    // Generate a session token (simple, time-limited)
+    // Generate a session token and PERSIST it in portal_sessions
     const sessionToken = crypto.randomUUID();
     const sessionExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(); // 24h
+
+    // Clean up old sessions for this client
+    await supabase
+      .from('portal_sessions')
+      .delete()
+      .eq('client_id', client.id)
+      .lt('expires_at', new Date().toISOString());
+
+    // Store the new session
+    await supabase.from('portal_sessions').insert({
+      token: sessionToken,
+      client_id: client.id,
+      portal_id: portal.id,
+      organization_id: portal.organization_id,
+      ip_address: ipAddress,
+      expires_at: sessionExpiry,
+    });
 
     return new Response(JSON.stringify({
       success: true,
