@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Search, FileText, Settings, Loader2, Wand2 } from 'lucide-react';
 import { usePermits, Permit } from '@/hooks/usePermits';
+import { toast } from 'sonner';
 import PermitCard from '@/components/permits/PermitCard';
 import CreatePermitDialog from '@/components/permits/CreatePermitDialog';
 import SignPermitDialog from '@/components/permits/SignPermitDialog';
@@ -16,7 +17,7 @@ import PermitSignatoryRolesManager from '@/components/permits/PermitSignatoryRol
 import PermitViewDialog from '@/components/permits/PermitViewDialog';
 
 const Permits = () => {
-  const { permits, signatoryRoles, isLoading, autoGeneratePermits } = usePermits();
+  const { permits, signatoryRoles, isLoading, autoGeneratePermits, createRevision, generateShareToken } = usePermits();
   const [createOpen, setCreateOpen] = useState(false);
   const [signPermit, setSignPermit] = useState<Permit | null>(null);
   const [viewPermit, setViewPermit] = useState<Permit | null>(null);
@@ -113,6 +114,15 @@ const Permits = () => {
                   permit={permit}
                   onView={setViewPermit}
                   onSign={setSignPermit}
+                  onRevise={(p) => {
+                    const reason = window.prompt('سبب التعديل:', 'تعديل بيانات');
+                    if (reason !== null) {
+                      createRevision.mutate({ permitId: p.id, reason });
+                    }
+                  }}
+                  onShare={(p) => {
+                    generateShareToken.mutate(p.id);
+                  }}
                 />
               ))}
             </div>

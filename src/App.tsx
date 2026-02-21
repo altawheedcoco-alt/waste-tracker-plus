@@ -106,6 +106,7 @@ const DatabaseQueryOptimization = lazy(() => import("./pages/dashboard/DatabaseQ
 const AdvancedAnalytics = lazy(() => import("./pages/dashboard/AdvancedAnalytics"));
 const GDPRCompliance = lazy(() => import("./pages/dashboard/GDPRCompliance"));
 const News = lazy(() => import("./pages/News"));
+const PublicPermitView = lazy(() => import("./pages/PublicPermitView"));
 const InviteAccept = lazy(() => import("./pages/InviteAccept"));
 const SavedLocationsPage = lazy(() => import("./pages/SavedLocationsPage"));
 const QuickDeposit = lazy(() => import("./pages/QuickDeposit"));
@@ -265,6 +266,7 @@ const AppRoutes = memo(() => (
      <Route path="/portal/:slug" element={<PublicClientPortal />} />
      <Route path="/news" element={<News />} />
      <Route path="/brochure" element={<FullBrochure />} />
+     <Route path="/permit-view/:token" element={<PublicPermitView />} />
      <Route path="/auth" element={<Auth />} />
     <Route path="/auth/google-setup" element={<GoogleSetup />} />
     {/* Guide Routes */}

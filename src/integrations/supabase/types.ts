@@ -19663,6 +19663,70 @@ export type Database = {
           },
         ]
       }
+      permit_document_images: {
+        Row: {
+          created_at: string | null
+          document_number: string | null
+          id: string
+          image_type: string
+          image_url: string
+          ocr_extracted_data: Json | null
+          organization_id: string
+          person_name: string | null
+          tags: string[] | null
+          updated_at: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_number?: string | null
+          id?: string
+          image_type: string
+          image_url: string
+          ocr_extracted_data?: Json | null
+          organization_id: string
+          person_name?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_number?: string | null
+          id?: string
+          image_type?: string
+          image_url?: string
+          ocr_extracted_data?: Json | null
+          organization_id?: string
+          person_name?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permit_document_images_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "permit_document_images_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permit_document_images_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permit_signatory_roles: {
         Row: {
           created_at: string | null
@@ -19809,22 +19873,44 @@ export type Database = {
       }
       permits: {
         Row: {
+          auto_sent: boolean | null
           created_at: string | null
           created_by: string | null
           driver_id: string | null
           estimated_quantity: number | null
           id: string
+          id_card_back_url: string | null
+          id_card_front_url: string | null
+          image_source: string | null
           issuer_organization_id: string
+          license_back_url: string | null
+          license_expiry: string | null
+          license_front_url: string | null
+          license_number: string | null
+          linked_driver_id: string | null
+          linked_profile_id: string | null
           notes: string | null
+          ocr_data: Json | null
           organization_id: string
+          parent_permit_id: string | null
           permit_number: string
           permit_type: string
+          person_address: string | null
+          person_email: string | null
           person_id_number: string | null
           person_name: string | null
+          person_phone: string | null
+          person_photo_url: string | null
           person_role: string | null
           purpose: string | null
           qr_data: Json | null
           quantity_unit: string | null
+          revision_number: number | null
+          revision_reason: string | null
+          sent_at: string | null
+          sent_method: string | null
+          share_token: string | null
+          share_token_expires_at: string | null
           shipment_id: string | null
           special_instructions: string | null
           status: string
@@ -19832,27 +19918,50 @@ export type Database = {
           valid_from: string | null
           valid_until: string | null
           vehicle_plate: string | null
+          vehicle_type: string | null
           verification_code: string | null
           waste_description: string | null
           waste_type: string | null
         }
         Insert: {
+          auto_sent?: boolean | null
           created_at?: string | null
           created_by?: string | null
           driver_id?: string | null
           estimated_quantity?: number | null
           id?: string
+          id_card_back_url?: string | null
+          id_card_front_url?: string | null
+          image_source?: string | null
           issuer_organization_id: string
+          license_back_url?: string | null
+          license_expiry?: string | null
+          license_front_url?: string | null
+          license_number?: string | null
+          linked_driver_id?: string | null
+          linked_profile_id?: string | null
           notes?: string | null
+          ocr_data?: Json | null
           organization_id: string
+          parent_permit_id?: string | null
           permit_number: string
           permit_type?: string
+          person_address?: string | null
+          person_email?: string | null
           person_id_number?: string | null
           person_name?: string | null
+          person_phone?: string | null
+          person_photo_url?: string | null
           person_role?: string | null
           purpose?: string | null
           qr_data?: Json | null
           quantity_unit?: string | null
+          revision_number?: number | null
+          revision_reason?: string | null
+          sent_at?: string | null
+          sent_method?: string | null
+          share_token?: string | null
+          share_token_expires_at?: string | null
           shipment_id?: string | null
           special_instructions?: string | null
           status?: string
@@ -19860,27 +19969,50 @@ export type Database = {
           valid_from?: string | null
           valid_until?: string | null
           vehicle_plate?: string | null
+          vehicle_type?: string | null
           verification_code?: string | null
           waste_description?: string | null
           waste_type?: string | null
         }
         Update: {
+          auto_sent?: boolean | null
           created_at?: string | null
           created_by?: string | null
           driver_id?: string | null
           estimated_quantity?: number | null
           id?: string
+          id_card_back_url?: string | null
+          id_card_front_url?: string | null
+          image_source?: string | null
           issuer_organization_id?: string
+          license_back_url?: string | null
+          license_expiry?: string | null
+          license_front_url?: string | null
+          license_number?: string | null
+          linked_driver_id?: string | null
+          linked_profile_id?: string | null
           notes?: string | null
+          ocr_data?: Json | null
           organization_id?: string
+          parent_permit_id?: string | null
           permit_number?: string
           permit_type?: string
+          person_address?: string | null
+          person_email?: string | null
           person_id_number?: string | null
           person_name?: string | null
+          person_phone?: string | null
+          person_photo_url?: string | null
           person_role?: string | null
           purpose?: string | null
           qr_data?: Json | null
           quantity_unit?: string | null
+          revision_number?: number | null
+          revision_reason?: string | null
+          sent_at?: string | null
+          sent_method?: string | null
+          share_token?: string | null
+          share_token_expires_at?: string | null
           shipment_id?: string | null
           special_instructions?: string | null
           status?: string
@@ -19888,6 +20020,7 @@ export type Database = {
           valid_from?: string | null
           valid_until?: string | null
           vehicle_plate?: string | null
+          vehicle_type?: string | null
           verification_code?: string | null
           waste_description?: string | null
           waste_type?: string | null
@@ -19922,6 +20055,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "permits_linked_driver_id_fkey"
+            columns: ["linked_driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_linked_profile_id_fkey"
+            columns: ["linked_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "permits_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -19933,6 +20080,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permits_parent_permit_id_fkey"
+            columns: ["parent_permit_id"]
+            isOneToOne: false
+            referencedRelation: "permits"
             referencedColumns: ["id"]
           },
           {
@@ -29414,6 +29568,10 @@ export type Database = {
         Args: { _minutes?: number; _user_id: string }
         Returns: number
       }
+      create_permit_revision: {
+        Args: { original_permit_id: string; p_revision_reason?: string }
+        Returns: string
+      }
       deposit_to_subscription_wallet: {
         Args: { deposit_amount: number; org_id: string; pay_ref?: string }
         Returns: Json
@@ -29430,6 +29588,10 @@ export type Database = {
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
       generate_permit_number: { Args: { org_id: string }; Returns: string }
+      generate_permit_share_token: {
+        Args: { permit_id: string }
+        Returns: string
+      }
       generate_seal_number: { Args: never; Returns: string }
       generate_system_seal_number: { Args: never; Returns: string }
       generate_verification_code: { Args: never; Returns: string }

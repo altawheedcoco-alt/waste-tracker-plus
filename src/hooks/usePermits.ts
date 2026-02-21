@@ -30,6 +30,30 @@ export interface Permit {
   created_at: string;
   updated_at: string;
   signatures?: PermitSignature[];
+  // Enhanced fields
+  id_card_front_url: string | null;
+  id_card_back_url: string | null;
+  license_front_url: string | null;
+  license_back_url: string | null;
+  person_photo_url: string | null;
+  person_phone: string | null;
+  person_email: string | null;
+  person_address: string | null;
+  license_number: string | null;
+  license_expiry: string | null;
+  vehicle_type: string | null;
+  image_source: string | null;
+  linked_profile_id: string | null;
+  linked_driver_id: string | null;
+  parent_permit_id: string | null;
+  revision_number: number;
+  revision_reason: string | null;
+  share_token: string | null;
+  share_token_expires_at: string | null;
+  auto_sent: boolean;
+  sent_at: string | null;
+  sent_method: string | null;
+  ocr_data: any | null;
 }
 
 export interface PermitSignature {
@@ -69,6 +93,21 @@ export interface CreatePermitData {
   purpose?: string;
   notes?: string;
   special_instructions?: string;
+  // Enhanced fields
+  id_card_front_url?: string;
+  id_card_back_url?: string;
+  license_front_url?: string;
+  license_back_url?: string;
+  person_photo_url?: string;
+  person_phone?: string;
+  person_email?: string;
+  person_address?: string;
+  license_number?: string;
+  license_expiry?: string;
+  vehicle_type?: string;
+  image_source?: string;
+  linked_profile_id?: string;
+  linked_driver_id?: string;
 }
 
 export function usePermits() {
@@ -133,6 +172,21 @@ export function usePermits() {
           organization_id: orgId,
           issuer_organization_id: orgId,
           created_by: profile.id,
+          // Enhanced fields
+          id_card_front_url: data.id_card_front_url || null,
+          id_card_back_url: data.id_card_back_url || null,
+          license_front_url: data.license_front_url || null,
+          license_back_url: data.license_back_url || null,
+          person_photo_url: data.person_photo_url || null,
+          person_phone: data.person_phone || null,
+          person_email: data.person_email || null,
+          person_address: data.person_address || null,
+          license_number: data.license_number || null,
+          license_expiry: data.license_expiry || null,
+          vehicle_type: data.vehicle_type || null,
+          image_source: data.image_source || 'manual',
+          linked_profile_id: data.linked_profile_id || null,
+          linked_driver_id: data.linked_driver_id || null,
         })
         .select()
         .single();
@@ -214,6 +268,38 @@ export function usePermits() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const createRevision = useMutation({
+    mutationFn: async ({ permitId, reason }: { permitId: string; reason?: string }) => {
+      const { data, error } = await supabase.rpc('create_permit_revision', {
+        original_permit_id: permitId,
+        p_revision_reason: reason || 'تعديل بيانات',
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      toast.success('تم إنشاء نسخة معدّلة من التصريح');
+      queryClient.invalidateQueries({ queryKey: ['permits'] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const generateShareToken = useMutation({
+    mutationFn: async (permitId: string) => {
+      const { data, error } = await supabase.rpc('generate_permit_share_token', {
+        permit_id: permitId,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: (token: string) => {
+      const url = `${window.location.origin}/permit-view/${token}`;
+      navigator.clipboard.writeText(url);
+      toast.success('تم نسخ رابط المشاركة');
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   return {
     permits: permits || [],
     signatoryRoles: signatoryRoles || [],
@@ -223,6 +309,8 @@ export function usePermits() {
     addSignatoryRole,
     seedDefaultRoles,
     autoGeneratePermits,
+    createRevision,
+    generateShareToken,
   };
 }
 

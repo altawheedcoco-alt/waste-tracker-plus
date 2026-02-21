@@ -22,6 +22,16 @@ interface PermitPrintData {
   scope?: { transport?: boolean; loading?: boolean; unloading?: boolean };
   issuedAt: string;
   logisticsManager?: string;
+  // Enhanced fields
+  idCardFrontUrl?: string;
+  idCardBackUrl?: string;
+  licenseFrontUrl?: string;
+  licenseBackUrl?: string;
+  personPhotoUrl?: string;
+  personIdNumber?: string;
+  licenseNumber?: string;
+  personPhone?: string;
+  revisionNumber?: number;
 }
 
 interface Props {
@@ -84,8 +94,12 @@ const PermitPrintTemplate = ({ permit, onClose }: Props) => {
               ['اسم السائق', permit.driverName],
               ['رقم السيارة', permit.vehiclePlate],
               ...(permit.vehicleType ? [['نوع المركبة', permit.vehicleType]] : []),
+              ...(permit.personIdNumber ? [['رقم الهوية', permit.personIdNumber]] : []),
+              ...(permit.licenseNumber ? [['رقم الرخصة', permit.licenseNumber]] : []),
+              ...(permit.personPhone ? [['الهاتف', permit.personPhone]] : []),
               ...(permit.cargoType ? [['نوع الحمولة', permit.cargoType]] : []),
               ...(permit.purpose ? [['الغرض من النقل', permit.purpose]] : []),
+              ...(permit.revisionNumber && permit.revisionNumber > 1 ? [['رقم النسخة', `${permit.revisionNumber}`]] : []),
             ].map(([label, value], i) => (
               <tr key={i} className="border">
                 <td className="bg-muted/50 font-bold p-3 w-1/3">{label}</td>
@@ -116,6 +130,44 @@ const PermitPrintTemplate = ({ permit, onClose }: Props) => {
           <div className="border rounded p-4">
             <h3 className="font-bold mb-1">شروط خاصة:</h3>
             <p>{permit.conditions}</p>
+          </div>
+        )}
+
+        {/* Document Images */}
+        {(permit.idCardFrontUrl || permit.idCardBackUrl || permit.licenseFrontUrl || permit.licenseBackUrl) && (
+          <div className="border rounded p-4">
+            <h3 className="font-bold mb-2">صور المستندات المرفقة:</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {permit.idCardFrontUrl && (
+                <div>
+                  <p className="text-[9px] text-muted-foreground mb-0.5">البطاقة — وجه</p>
+                  <img src={permit.idCardFrontUrl} alt="بطاقة وجه" className="w-full h-24 object-cover rounded border" />
+                </div>
+              )}
+              {permit.idCardBackUrl && (
+                <div>
+                  <p className="text-[9px] text-muted-foreground mb-0.5">البطاقة — ظهر</p>
+                  <img src={permit.idCardBackUrl} alt="بطاقة ظهر" className="w-full h-24 object-cover rounded border" />
+                </div>
+              )}
+              {permit.licenseFrontUrl && (
+                <div>
+                  <p className="text-[9px] text-muted-foreground mb-0.5">الرخصة — وجه</p>
+                  <img src={permit.licenseFrontUrl} alt="رخصة وجه" className="w-full h-24 object-cover rounded border" />
+                </div>
+              )}
+              {permit.licenseBackUrl && (
+                <div>
+                  <p className="text-[9px] text-muted-foreground mb-0.5">الرخصة — ظهر</p>
+                  <img src={permit.licenseBackUrl} alt="رخصة ظهر" className="w-full h-24 object-cover rounded border" />
+                </div>
+              )}
+            </div>
+            {permit.personPhotoUrl && (
+              <div className="mt-2 flex justify-center">
+                <img src={permit.personPhotoUrl} alt="صورة شخصية" className="w-16 h-16 rounded-full object-cover border-2" />
+              </div>
+            )}
           </div>
         )}
 

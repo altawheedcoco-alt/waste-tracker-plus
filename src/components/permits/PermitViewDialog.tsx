@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
-import { CheckCircle, Clock, FileText, User, Package, Truck } from 'lucide-react';
+import { CheckCircle, Clock, FileText, User, Package, Truck, Image, GitBranch } from 'lucide-react';
 import { Permit, usePermitSignatures, PermitSignature } from '@/hooks/usePermits';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -31,6 +31,16 @@ const InfoRow = ({ label, value }: { label: string; value: string | null | undef
   );
 };
 
+const DocImage = ({ url, label }: { url: string | null | undefined; label: string }) => {
+  if (!url) return null;
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] text-muted-foreground font-medium">{label}</p>
+      <img src={url} alt={label} className="w-full h-24 object-cover rounded-md border cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(url, '_blank')} />
+    </div>
+  );
+};
+
 const PermitViewDialog = ({ open, onOpenChange, permit }: Props) => {
   const { data: signatures } = usePermitSignatures(permit?.id || null);
 
@@ -43,6 +53,8 @@ const PermitViewDialog = ({ open, onOpenChange, permit }: Props) => {
     valid_until: permit.valid_until,
   });
 
+  const hasImages = permit.id_card_front_url || permit.id_card_back_url || permit.license_front_url || permit.license_back_url;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
@@ -50,6 +62,12 @@ const PermitViewDialog = ({ open, onOpenChange, permit }: Props) => {
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
             {TYPE_LABELS[permit.permit_type] || 'تصريح'}
+            {permit.revision_number > 1 && (
+              <Badge variant="outline" className="text-[10px] gap-0.5">
+                <GitBranch className="w-3 h-3" />
+                نسخة {permit.revision_number}
+              </Badge>
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -60,15 +78,26 @@ const PermitViewDialog = ({ open, onOpenChange, permit }: Props) => {
             <InfoRow label="كود التحقق" value={permit.verification_code} />
             <InfoRow label="الحالة" value={permit.status} />
             <InfoRow label="تاريخ الإنشاء" value={new Date(permit.created_at).toLocaleString('ar-EG')} />
+            {permit.revision_reason && <InfoRow label="سبب التعديل" value={permit.revision_reason} />}
           </div>
 
-          {/* Details */}
+          {/* Person info with photo */}
           <div className="space-y-1">
+            {permit.person_photo_url && (
+              <div className="flex justify-center mb-2">
+                <img src={permit.person_photo_url} alt="صورة" className="w-16 h-16 rounded-full object-cover border-2 border-primary/20" />
+              </div>
+            )}
             <InfoRow label="الغرض" value={permit.purpose} />
             <InfoRow label="الشخص" value={permit.person_name} />
             <InfoRow label="الصفة" value={permit.person_role} />
             <InfoRow label="رقم الهوية" value={permit.person_id_number} />
+            <InfoRow label="الهاتف" value={permit.person_phone} />
+            <InfoRow label="البريد" value={permit.person_email} />
             <InfoRow label="لوحة المركبة" value={permit.vehicle_plate} />
+            <InfoRow label="نوع المركبة" value={permit.vehicle_type} />
+            <InfoRow label="رقم الرخصة" value={permit.license_number} />
+            <InfoRow label="انتهاء الرخصة" value={permit.license_expiry} />
             <InfoRow label="نوع المخلف" value={permit.waste_type} />
             <InfoRow label="الوصف" value={permit.waste_description} />
             {permit.estimated_quantity && (
@@ -79,6 +108,25 @@ const PermitViewDialog = ({ open, onOpenChange, permit }: Props) => {
             <InfoRow label="تعليمات خاصة" value={permit.special_instructions} />
             <InfoRow label="ملاحظات" value={permit.notes} />
           </div>
+
+          {/* Document Images */}
+          {hasImages && (
+            <>
+              <Separator />
+              <div>
+                <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5">
+                  <Image className="w-4 h-4 text-primary" />
+                  صور المستندات المرفقة
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <DocImage url={permit.id_card_front_url} label="البطاقة — وجه" />
+                  <DocImage url={permit.id_card_back_url} label="البطاقة — ظهر" />
+                  <DocImage url={permit.license_front_url} label="الرخصة — وجه" />
+                  <DocImage url={permit.license_back_url} label="الرخصة — ظهر" />
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator />
 
