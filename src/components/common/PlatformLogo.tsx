@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import irecycleLogo from '@/assets/irecycle-logo.jpg';
+import irecycleLogo from '@/assets/irecycle-logo.png';
 import { cn } from '@/lib/utils';
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'print';
