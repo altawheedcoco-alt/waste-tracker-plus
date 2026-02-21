@@ -226,7 +226,7 @@ ${DECLARATION_TEXT}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto p-0" dir="rtl">
+      <DialogContent className="max-w-3xl w-[96vw] max-h-[90vh] overflow-auto p-0" dir="rtl">
         <DialogHeader className="p-4 pb-2 border-b">
           <DialogTitle className="flex items-center gap-2 text-right">
             <ShieldCheck className="w-5 h-5 text-primary" />
@@ -362,7 +362,7 @@ ${DECLARATION_TEXT}`;
               style={{ fontFamily: 'Cairo, sans-serif' }}
             >
               {/* Page 1 — Main Document */}
-              <div style={{ padding: '8mm 10mm', width: '210mm', minHeight: '297mm', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column', fontSize: '8pt' }}>
+              <div style={{ padding: '8mm 10mm', maxWidth: '210mm', width: '100%', minHeight: '297mm', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column', fontSize: '8pt', margin: '0 auto', overflow: 'hidden', wordBreak: 'break-word' as const }}>
               {/* === PRINT HEADER === */}
               <header className="flex items-start justify-between mb-2 pb-2" style={{ borderBottom: '3px double #1e40af' }}>
                 <div className="text-center">
@@ -409,7 +409,7 @@ ${DECLARATION_TEXT}`;
               </div>
 
               {/* === PARTIES === */}
-              <div className="grid grid-cols-3 gap-1.5 mb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 mb-2">
                 <div className="rounded p-1.5" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' }}>
                   <h4 className="font-bold flex items-center gap-1 mb-0.5" style={{ color: '#1e40af', fontSize: '7pt' }}>
                     <Building2 className="w-2.5 h-2.5" /> الجهة المسلّمة (المولّد)

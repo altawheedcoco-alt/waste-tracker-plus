@@ -112,13 +112,17 @@ const TermsBackPage = () => {
         pageBreakBefore: 'always',
         fontSize: '7pt',
         lineHeight: '1.5',
-        width: '210mm',
+        maxWidth: '210mm',
+        width: '100%',
         minHeight: '297mm',
         boxSizing: 'border-box',
         padding: '8mm 10mm',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: "'Cairo', sans-serif",
+        overflow: 'hidden',
+        wordBreak: 'break-word' as const,
+        margin: '0 auto',
       }}
     >
       {/* Header */}
@@ -148,7 +152,7 @@ const TermsBackPage = () => {
       </div>
 
       {/* Sections Grid — fills the page */}
-      <div className="grid grid-cols-2 gap-x-5 gap-y-4 flex-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-4 flex-1">
         {sections.map((section, idx) => {
           const Icon = section.icon;
           return (
