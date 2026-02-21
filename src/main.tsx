@@ -23,36 +23,19 @@ if (rootElement) {
   );
 }
 
-// Defer all service worker operations to after render
+// Aggressively unregister ALL service workers and clear ALL caches
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    // Aggressively clean ALL old caches to prevent stale content
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        names.forEach(name => {
-          // Clean all workbox/precache caches to force fresh content
-          if (name.includes('precache') || name.includes('static-assets') || 
-              name.includes('images-cache') || name.includes('pages-cache') ||
-              name.includes('workbox')) {
-            caches.delete(name);
-          }
-        });
-      });
+  // Immediately unregister all service workers
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (const reg of registrations) {
+      reg.unregister();
     }
-
-    // Force SW update and activation
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      for (const reg of registrations) {
-        reg.update();
-        if (reg.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
-      }
-    });
-
-    // Listen for new SW and reload
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
   });
+
+  // Clear ALL caches
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => caches.delete(name));
+    });
+  }
 }
