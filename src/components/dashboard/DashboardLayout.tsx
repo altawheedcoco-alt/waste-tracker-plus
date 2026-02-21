@@ -656,7 +656,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   return (
     <FocusMusicProvider>
     <TooltipProvider>
-      <div className="min-h-screen bg-background flex" dir="rtl">
+      <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
         <LiveEventToast />
         {/* Desktop Sidebar - Hidden on mobile when using display mode */}
         <AnimatePresence>
@@ -886,7 +886,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
         {/* Main content - Responsive width */}
         <div 
-          className="flex-1 flex flex-col transition-all duration-300 min-w-0"
+          className="flex-1 flex flex-col transition-all duration-300 min-w-0 h-full overflow-hidden"
           style={{ 
             marginRight: !isMobile && isSidebarOpen ? `${sidebarWidth}px` : 0,
             width: !isMobile && isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
@@ -1168,7 +1168,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           </AnimatePresence>
 
           {/* Page content - Responsive padding with proper overflow handling and bottom spacing for bottom nav */}
-          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-24' : 'pb-6'} scroll-smooth`}>
+          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-24' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
             <DashboardBreadcrumb />
             <div className="w-full max-w-full">
               <OnboardingGuard>
