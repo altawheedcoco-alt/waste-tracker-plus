@@ -171,14 +171,12 @@
 
   html {
     scroll-behavior: smooth;
-    touch-action: manipulation;
     -webkit-text-size-adjust: 100%;
   }
 
   body {
     @apply bg-background text-foreground font-cairo antialiased;
     direction: rtl;
-    overscroll-behavior-y: contain;
   }
 
   /* Ensure minimum touch target size on mobile */
@@ -1269,9 +1267,7 @@
   button, a, [role="button"], [role="tab"], [role="link"],
   .cursor-pointer, [onclick] {
     -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
     user-select: none;
-    transition-duration: 0.1s !important;
   }
 
   /* Prevent text selection on interactive elements during scroll */
