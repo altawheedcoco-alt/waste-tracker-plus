@@ -1,6 +1,6 @@
 /**
  * TouchOptimizations - تحسينات تجربة اللمس للموبايل
- * يضيف CSS classes لتحسين التفاعل باللمس
+ * يضيف CSS وتحسينات JavaScript لتفاعل أفضل باللمس
  */
 import { memo, useEffect } from 'react';
 
@@ -12,19 +12,39 @@ const TouchOptimizations = memo(() => {
     const root = document.documentElement;
     root.classList.add('touch-device');
 
-    // Add touch-optimized styles
     const style = document.createElement('style');
     style.id = 'touch-optimizations';
     style.textContent = `
-      /* Larger touch targets */
+      /* === Global touch behavior === */
+      .touch-device,
+      .touch-device * {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .touch-device body {
+        touch-action: manipulation;
+        overscroll-behavior-y: contain;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      /* === Touch targets - minimum 44px for accessibility === */
       .touch-device button,
       .touch-device [role="button"],
-      .touch-device a,
-      .touch-device input,
-      .touch-device select,
-      .touch-device textarea {
+      .touch-device [role="tab"],
+      .touch-device [role="menuitem"],
+      .touch-device [role="option"],
+      .touch-device a:not(.inline-link) {
         min-height: 44px;
         min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Small icon-only buttons get padding instead */
+      .touch-device button svg:only-child,
+      .touch-device [role="button"] svg:only-child {
+        pointer-events: none;
       }
 
       .touch-device input[type="checkbox"],
@@ -33,69 +53,121 @@ const TouchOptimizations = memo(() => {
         min-width: 24px;
       }
 
-      /* Remove hover effects on touch */
-      .touch-device *:hover {
-        transition-duration: 0s !important;
-      }
-
-      /* Better tap feedback */
-      .touch-device button:active,
-      .touch-device [role="button"]:active,
-      .touch-device a:active {
-        transform: scale(0.97);
-        transition: transform 0.1s;
-      }
-
-      /* Prevent text selection on interactive elements */
-      .touch-device button,
-      .touch-device [role="button"] {
-        -webkit-user-select: none;
-        user-select: none;
-      }
-
-      /* Smooth scrolling */
-      .touch-device .overflow-auto,
-      .touch-device .overflow-y-auto,
-      .touch-device .overflow-x-auto {
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
-      }
-
-      /* Prevent zoom on input focus (iOS) */
+      /* === Prevent iOS zoom on input focus === */
       .touch-device input[type="text"],
       .touch-device input[type="email"],
       .touch-device input[type="password"],
       .touch-device input[type="number"],
       .touch-device input[type="tel"],
+      .touch-device input[type="search"],
+      .touch-device input[type="url"],
+      .touch-device input[type="date"],
       .touch-device select,
       .touch-device textarea {
         font-size: 16px !important;
       }
 
-      /* Better spacing for touch */
+      /* === Active state feedback (replaces hover on touch) === */
+      .touch-device button:active,
+      .touch-device [role="button"]:active,
+      .touch-device [role="tab"]:active,
+      .touch-device a:active {
+        transform: scale(0.97);
+        opacity: 0.85;
+        transition: transform 0.08s ease-out, opacity 0.08s ease-out;
+      }
+
+      /* === Disable hover effects on touch - use @media instead of class === */
+      @media (hover: none) and (pointer: coarse) {
+        .hover-lift:hover,
+        .hover-scale:hover,
+        .hover-glow:hover,
+        .glass-card-hover:hover,
+        .card-interactive:hover {
+          transform: none !important;
+          box-shadow: inherit !important;
+        }
+      }
+
+      /* === Prevent text selection on interactive elements === */
+      .touch-device button,
+      .touch-device [role="button"],
+      .touch-device [role="tab"],
+      .touch-device nav,
+      .touch-device .select-none {
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      /* === Momentum scrolling === */
+      .touch-device .overflow-auto,
+      .touch-device .overflow-y-auto,
+      .touch-device .overflow-x-auto,
+      .touch-device [data-radix-scroll-area-viewport] {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* === Better spacing between touch targets === */
+      .touch-device .space-y-1 > * + * { margin-top: 0.375rem; }
       .touch-device .gap-1 { gap: 0.375rem; }
       .touch-device .gap-2 { gap: 0.625rem; }
 
-      /* Pull-to-refresh prevention on main content */
-      .touch-device body {
-        overscroll-behavior-y: contain;
+      /* === Dialog/Sheet improvements for mobile === */
+      .touch-device [data-radix-dialog-content],
+      .touch-device [role="dialog"] {
+        max-height: calc(100dvh - 2rem);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* === Tabs improvements === */
+      .touch-device [role="tablist"] {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .touch-device [role="tablist"]::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* === Table horizontal scroll === */
+      .touch-device .overflow-x-auto {
+        scroll-snap-type: x proximity;
+      }
+
+      /* === Fix sticky elements on iOS === */
+      .touch-device .sticky {
+        position: -webkit-sticky;
+        position: sticky;
+      }
+
+      /* === Bottom navigation safe area === */
+      .touch-device .pb-safe {
+        padding-bottom: max(env(safe-area-inset-bottom, 16px), 16px);
       }
     `;
     document.head.appendChild(style);
 
-    // Disable double-tap zoom
+    // Prevent double-tap zoom on non-input elements
     let lastTap = 0;
     const preventDoubleTapZoom = (e: TouchEvent) => {
       const now = Date.now();
       if (now - lastTap < 300) {
         const target = e.target as HTMLElement;
-        if (!target.closest('input, textarea, [contenteditable]')) {
+        if (!target.closest('input, textarea, [contenteditable], a[href]')) {
           e.preventDefault();
         }
       }
       lastTap = now;
     };
     document.addEventListener('touchend', preventDoubleTapZoom, { passive: false });
+
+    // Fix 300ms click delay on older browsers
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (meta && !meta.getAttribute('content')?.includes('user-scalable')) {
+      // Viewport already set correctly in index.html
+    }
 
     return () => {
       root.classList.remove('touch-device');
