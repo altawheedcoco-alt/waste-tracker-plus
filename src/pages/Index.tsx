@@ -54,7 +54,7 @@ LazySection.displayName = 'LazySection';
 const Index = () => {
   return (
     <LandingWrapper>
-      <div className="min-h-screen bg-[hsl(140,20%,98%)]">
+      <div className="min-h-screen-safe bg-[hsl(140,20%,98%)] smooth-scroll">
         <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
           <Header />
           <NewsTicker />
