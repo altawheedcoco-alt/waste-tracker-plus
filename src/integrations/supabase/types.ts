@@ -29197,11 +29197,27 @@ export type Database = {
         Args: { _user_id: string }
         Returns: boolean
       }
+      is_consultant_assigned_to_org: {
+        Args: { _consultant_id: string; _org_id: string }
+        Returns: boolean
+      }
+      is_consultant_user: {
+        Args: { _consultant_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_current_user_admin: { Args: never; Returns: boolean }
       is_org_subscription_valid: { Args: { org_id: string }; Returns: boolean }
       is_regulator_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_driver: {
         Args: { _driver_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_work_order_owner: {
+        Args: { _org_id: string; _work_order_id: string }
+        Returns: boolean
+      }
+      is_work_order_recipient: {
+        Args: { _org_id: string; _work_order_id: string }
         Returns: boolean
       }
       log_security_event: {
