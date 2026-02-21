@@ -1189,6 +1189,20 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
+          {/* Floating Permits Button */}
+          <FloatingActionsStack
+            actions={[
+              {
+                id: 'permits',
+                icon: <FileText size={isMobile ? 16 : 22} />,
+                onClick: () => navigate('/dashboard/driver-permits'),
+                label: 'التصاريح العامة',
+                variant: 'primary',
+              },
+            ]}
+            position="bottom-left"
+          />
+
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />
 
