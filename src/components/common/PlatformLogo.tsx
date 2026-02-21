@@ -47,17 +47,14 @@ const PlatformLogo = memo(({
 
   return (
     <div className={cn('flex items-center gap-1.5', className)}>
-      <img
-        src={irecycleLogo}
-        alt="iRecycle - Waste Management System"
-        className={cn(
-          s.logoH,
-          'object-contain w-auto',
-          inverted && 'brightness-0 invert',
-          imgClassName
-        )}
-        loading="eager"
-      />
+      <div className={cn(s.logoH, 'aspect-square rounded-xl bg-white flex items-center justify-center p-1 shadow-sm', imgClassName)}>
+        <img
+          src={irecycleLogo}
+          alt="iRecycle - Waste Management System"
+          className="h-full w-full object-contain"
+          loading="eager"
+        />
+      </div>
       {showText && (
         <div className="flex flex-col">
           <span className={cn(s.text, 'font-bold leading-tight', inverted ? 'text-white' : 'text-primary')}>
