@@ -10742,38 +10742,68 @@ export type Database = {
         Row: {
           attendance_date: string
           check_in: string | null
+          check_in_latitude: number | null
+          check_in_longitude: number | null
+          check_in_method: string | null
           check_out: string | null
+          check_out_latitude: number | null
+          check_out_longitude: number | null
+          check_out_method: string | null
           created_at: string | null
+          early_leave_minutes: number | null
           employee_id: string
           id: string
+          late_minutes: number | null
           notes: string | null
           organization_id: string
           overtime_hours: number | null
+          policy_id: string | null
           status: string | null
+          working_hours: number | null
         }
         Insert: {
           attendance_date: string
           check_in?: string | null
+          check_in_latitude?: number | null
+          check_in_longitude?: number | null
+          check_in_method?: string | null
           check_out?: string | null
+          check_out_latitude?: number | null
+          check_out_longitude?: number | null
+          check_out_method?: string | null
           created_at?: string | null
+          early_leave_minutes?: number | null
           employee_id: string
           id?: string
+          late_minutes?: number | null
           notes?: string | null
           organization_id: string
           overtime_hours?: number | null
+          policy_id?: string | null
           status?: string | null
+          working_hours?: number | null
         }
         Update: {
           attendance_date?: string
           check_in?: string | null
+          check_in_latitude?: number | null
+          check_in_longitude?: number | null
+          check_in_method?: string | null
           check_out?: string | null
+          check_out_latitude?: number | null
+          check_out_longitude?: number | null
+          check_out_method?: string | null
           created_at?: string | null
+          early_leave_minutes?: number | null
           employee_id?: string
           id?: string
+          late_minutes?: number | null
           notes?: string | null
           organization_id?: string
           overtime_hours?: number | null
+          policy_id?: string | null
           status?: string | null
+          working_hours?: number | null
         }
         Relationships: [
           {
@@ -10795,6 +10825,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_attendance_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "hr_attendance_policies"
             referencedColumns: ["id"]
           },
         ]
@@ -10952,81 +10989,137 @@ export type Database = {
       }
       erp_employees: {
         Row: {
+          address: string | null
+          avatar_url: string | null
           bank_name: string | null
           base_salary: number | null
+          city: string | null
           contract_type: string | null
           created_at: string | null
+          date_of_birth: string | null
           department: string | null
+          department_id: string | null
           email: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relation: string | null
           employee_number: string | null
           full_name: string
+          gender: string | null
           hire_date: string | null
           housing_allowance: number | null
           iban: string | null
           id: string
           is_active: boolean | null
           job_title: string | null
+          marital_status: string | null
+          member_id: string | null
           national_id: string | null
           notes: string | null
           organization_id: string
           other_allowances: number | null
           phone: string | null
+          position_id: string | null
           profile_id: string | null
+          social_insurance_number: string | null
+          tax_id: string | null
           termination_date: string | null
           transport_allowance: number | null
           updated_at: string | null
         }
         Insert: {
+          address?: string | null
+          avatar_url?: string | null
           bank_name?: string | null
           base_salary?: number | null
+          city?: string | null
           contract_type?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           department?: string | null
+          department_id?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
           employee_number?: string | null
           full_name: string
+          gender?: string | null
           hire_date?: string | null
           housing_allowance?: number | null
           iban?: string | null
           id?: string
           is_active?: boolean | null
           job_title?: string | null
+          marital_status?: string | null
+          member_id?: string | null
           national_id?: string | null
           notes?: string | null
           organization_id: string
           other_allowances?: number | null
           phone?: string | null
+          position_id?: string | null
           profile_id?: string | null
+          social_insurance_number?: string | null
+          tax_id?: string | null
           termination_date?: string | null
           transport_allowance?: number | null
           updated_at?: string | null
         }
         Update: {
+          address?: string | null
+          avatar_url?: string | null
           bank_name?: string | null
           base_salary?: number | null
+          city?: string | null
           contract_type?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
           department?: string | null
+          department_id?: string | null
           email?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relation?: string | null
           employee_number?: string | null
           full_name?: string
+          gender?: string | null
           hire_date?: string | null
           housing_allowance?: number | null
           iban?: string | null
           id?: string
           is_active?: boolean | null
           job_title?: string | null
+          marital_status?: string | null
+          member_id?: string | null
           national_id?: string | null
           notes?: string | null
           organization_id?: string
           other_allowances?: number | null
           phone?: string | null
+          position_id?: string | null
           profile_id?: string | null
+          social_insurance_number?: string | null
+          tax_id?: string | null
           termination_date?: string | null
           transport_allowance?: number | null
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "erp_employees_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "organization_departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_employees_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "erp_employees_organization_id_fkey"
             columns: ["organization_id"]
@@ -11039,6 +11132,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_employees_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "organization_positions"
             referencedColumns: ["id"]
           },
         ]
@@ -11300,49 +11400,61 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          attachment_url: string | null
           created_at: string | null
           days_count: number | null
           employee_id: string
           end_date: string
           id: string
           leave_type: string
+          leave_type_id: string | null
           notes: string | null
           organization_id: string
           reason: string | null
+          rejection_reason: string | null
           start_date: string
           status: string | null
+          substitute_employee_id: string | null
           updated_at: string | null
         }
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          attachment_url?: string | null
           created_at?: string | null
           days_count?: number | null
           employee_id: string
           end_date: string
           id?: string
           leave_type: string
+          leave_type_id?: string | null
           notes?: string | null
           organization_id: string
           reason?: string | null
+          rejection_reason?: string | null
           start_date: string
           status?: string | null
+          substitute_employee_id?: string | null
           updated_at?: string | null
         }
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          attachment_url?: string | null
           created_at?: string | null
           days_count?: number | null
           employee_id?: string
           end_date?: string
           id?: string
           leave_type?: string
+          leave_type_id?: string | null
           notes?: string | null
           organization_id?: string
           reason?: string | null
+          rejection_reason?: string | null
           start_date?: string
           status?: string | null
+          substitute_employee_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -11351,6 +11463,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "erp_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_leave_requests_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "hr_leave_types"
             referencedColumns: ["id"]
           },
           {
@@ -11365,6 +11484,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "erp_leave_requests_substitute_employee_id_fkey"
+            columns: ["substitute_employee_id"]
+            isOneToOne: false
+            referencedRelation: "erp_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -13463,6 +13589,354 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_attendance_policies: {
+        Row: {
+          break_duration_minutes: number | null
+          created_at: string
+          early_leave_deduction_per_minute: number | null
+          geofencing_enabled: boolean | null
+          geofencing_latitude: number | null
+          geofencing_longitude: number | null
+          geofencing_radius_meters: number | null
+          grace_period_minutes: number | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          late_deduction_per_minute: number | null
+          name: string | null
+          name_ar: string
+          organization_id: string
+          overtime_rate_multiplier: number | null
+          updated_at: string
+          weekend_days: number[] | null
+          work_end_time: string
+          work_start_time: string
+        }
+        Insert: {
+          break_duration_minutes?: number | null
+          created_at?: string
+          early_leave_deduction_per_minute?: number | null
+          geofencing_enabled?: boolean | null
+          geofencing_latitude?: number | null
+          geofencing_longitude?: number | null
+          geofencing_radius_meters?: number | null
+          grace_period_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          late_deduction_per_minute?: number | null
+          name?: string | null
+          name_ar: string
+          organization_id: string
+          overtime_rate_multiplier?: number | null
+          updated_at?: string
+          weekend_days?: number[] | null
+          work_end_time?: string
+          work_start_time?: string
+        }
+        Update: {
+          break_duration_minutes?: number | null
+          created_at?: string
+          early_leave_deduction_per_minute?: number | null
+          geofencing_enabled?: boolean | null
+          geofencing_latitude?: number | null
+          geofencing_longitude?: number | null
+          geofencing_radius_meters?: number | null
+          grace_period_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          late_deduction_per_minute?: number | null
+          name?: string | null
+          name_ar?: string
+          organization_id?: string
+          overtime_rate_multiplier?: number | null
+          updated_at?: string
+          weekend_days?: number[] | null
+          work_end_time?: string
+          work_start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_attendance_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "hr_attendance_policies_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_employment_contracts: {
+        Row: {
+          annual_leave_days: number | null
+          attachment_url: string | null
+          base_salary: number
+          contract_number: string | null
+          contract_type: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          employee_id: string
+          end_date: string | null
+          food_allowance: number | null
+          housing_allowance: number | null
+          id: string
+          notes: string | null
+          notice_period_days: number | null
+          organization_id: string
+          other_allowances: number | null
+          probation_end_date: string | null
+          sick_leave_days: number | null
+          signed_at: string | null
+          signed_by_employee: boolean | null
+          signed_by_employer: boolean | null
+          start_date: string
+          status: string
+          terms: string | null
+          total_salary: number | null
+          transport_allowance: number | null
+          updated_at: string
+          working_days_per_week: number | null
+          working_hours_per_day: number | null
+        }
+        Insert: {
+          annual_leave_days?: number | null
+          attachment_url?: string | null
+          base_salary?: number
+          contract_number?: string | null
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          employee_id: string
+          end_date?: string | null
+          food_allowance?: number | null
+          housing_allowance?: number | null
+          id?: string
+          notes?: string | null
+          notice_period_days?: number | null
+          organization_id: string
+          other_allowances?: number | null
+          probation_end_date?: string | null
+          sick_leave_days?: number | null
+          signed_at?: string | null
+          signed_by_employee?: boolean | null
+          signed_by_employer?: boolean | null
+          start_date: string
+          status?: string
+          terms?: string | null
+          total_salary?: number | null
+          transport_allowance?: number | null
+          updated_at?: string
+          working_days_per_week?: number | null
+          working_hours_per_day?: number | null
+        }
+        Update: {
+          annual_leave_days?: number | null
+          attachment_url?: string | null
+          base_salary?: number
+          contract_number?: string | null
+          contract_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          employee_id?: string
+          end_date?: string | null
+          food_allowance?: number | null
+          housing_allowance?: number | null
+          id?: string
+          notes?: string | null
+          notice_period_days?: number | null
+          organization_id?: string
+          other_allowances?: number | null
+          probation_end_date?: string | null
+          sick_leave_days?: number | null
+          signed_at?: string | null
+          signed_by_employee?: boolean | null
+          signed_by_employer?: boolean | null
+          start_date?: string
+          status?: string
+          terms?: string | null
+          total_salary?: number | null
+          transport_allowance?: number | null
+          updated_at?: string
+          working_days_per_week?: number | null
+          working_hours_per_day?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_employment_contracts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "erp_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_employment_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "hr_employment_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_leave_balances: {
+        Row: {
+          adjustment_days: number | null
+          carried_over_days: number | null
+          created_at: string
+          employee_id: string
+          entitled_days: number
+          id: string
+          leave_type_id: string
+          organization_id: string
+          remaining_days: number | null
+          updated_at: string
+          used_days: number
+          year: number
+        }
+        Insert: {
+          adjustment_days?: number | null
+          carried_over_days?: number | null
+          created_at?: string
+          employee_id: string
+          entitled_days?: number
+          id?: string
+          leave_type_id: string
+          organization_id: string
+          remaining_days?: number | null
+          updated_at?: string
+          used_days?: number
+          year: number
+        }
+        Update: {
+          adjustment_days?: number | null
+          carried_over_days?: number | null
+          created_at?: string
+          employee_id?: string
+          entitled_days?: number
+          id?: string
+          leave_type_id?: string
+          organization_id?: string
+          remaining_days?: number | null
+          updated_at?: string
+          used_days?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_leave_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "erp_employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_leave_balances_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "hr_leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_leave_balances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "hr_leave_balances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hr_leave_types: {
+        Row: {
+          code: string
+          color: string | null
+          created_at: string
+          default_days: number | null
+          id: string
+          is_active: boolean | null
+          is_paid: boolean | null
+          max_carry_over: number | null
+          min_notice_days: number | null
+          name: string | null
+          name_ar: string
+          organization_id: string
+          requires_approval: boolean | null
+          requires_attachment: boolean | null
+          sort_order: number | null
+        }
+        Insert: {
+          code: string
+          color?: string | null
+          created_at?: string
+          default_days?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_paid?: boolean | null
+          max_carry_over?: number | null
+          min_notice_days?: number | null
+          name?: string | null
+          name_ar: string
+          organization_id: string
+          requires_approval?: boolean | null
+          requires_attachment?: boolean | null
+          sort_order?: number | null
+        }
+        Update: {
+          code?: string
+          color?: string | null
+          created_at?: string
+          default_days?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_paid?: boolean | null
+          max_carry_over?: number | null
+          min_notice_days?: number | null
+          name?: string | null
+          name_ar?: string
+          organization_id?: string
+          requires_approval?: boolean | null
+          requires_attachment?: boolean | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_leave_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "hr_leave_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -29129,7 +29603,9 @@ export type Database = {
       }
       get_transporter_stats: { Args: { p_org_id: string }; Returns: Json }
       get_user_driver_id: { Args: { _user_id: string }; Returns: string }
-      get_user_org_id: { Args: { _user_id: string }; Returns: string }
+      get_user_org_id:
+        | { Args: never; Returns: string }
+        | { Args: { _user_id: string }; Returns: string }
       get_user_org_id_safe: { Args: { _user_id: string }; Returns: string }
       get_user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_organization_id:
