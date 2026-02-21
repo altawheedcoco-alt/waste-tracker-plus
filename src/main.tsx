@@ -3,14 +3,40 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
-// Global error handlers to prevent white screen crashes
+// Auto-reload on chunk load failures (common in production after deployments)
+window.addEventListener('error', (event) => {
+  const target = event.target as HTMLElement;
+  // Detect failed script/link loads (chunk loading errors)
+  if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+    console.error('Resource failed to load:', (target as HTMLScriptElement).src || (target as HTMLLinkElement).href);
+    // Auto-reload once to get fresh chunks
+    const reloadKey = '__chunk_reload';
+    if (!sessionStorage.getItem(reloadKey)) {
+      sessionStorage.setItem(reloadKey, '1');
+      window.location.reload();
+    }
+    return;
+  }
+  console.error('Global error:', event.error);
+}, true); // Use capture phase to catch resource load errors
+
 window.addEventListener('unhandledrejection', (event) => {
+  const reason = String(event.reason);
+  // Detect dynamic import failures
+  if (reason.includes('Failed to fetch dynamically imported module') || 
+      reason.includes('Loading chunk') ||
+      reason.includes('error loading dynamically imported module')) {
+    console.error('Dynamic import failed, reloading:', event.reason);
+    const reloadKey = '__chunk_reload';
+    if (!sessionStorage.getItem(reloadKey)) {
+      sessionStorage.setItem(reloadKey, '1');
+      window.location.reload();
+    }
+    event.preventDefault();
+    return;
+  }
   console.error('Unhandled promise rejection:', event.reason);
   event.preventDefault();
-});
-
-window.addEventListener('error', (event) => {
-  console.error('Global error:', event.error);
 });
 
 // Render first, then handle SW cleanup
