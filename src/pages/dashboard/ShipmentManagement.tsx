@@ -467,13 +467,13 @@ const ShipmentManagement = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-4 sm:space-y-6 overflow-hidden"
       >
         {/* Back Button */}
         <BackButton />
 
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 flex-wrap-reverse">
           <div className="flex items-center gap-2">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogContent className="max-w-2xl" dir="rtl">
@@ -615,49 +615,49 @@ const ShipmentManagement = () => {
             </Button>
           </div>
 
-          <div className="text-right">
-            <h1 className="text-3xl font-bold">{t('shipmentMgmt.title')}</h1>
-            <p className="text-muted-foreground">{t('shipmentMgmt.subtitle')}</p>
+          <div className="text-right min-w-0">
+            <h1 className="text-xl sm:text-3xl font-bold truncate">{t('shipmentMgmt.title')}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground truncate">{t('shipmentMgmt.subtitle')}</p>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-6 text-right">
+            <CardContent className="p-3 sm:p-6 text-right">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Package className="w-6 h-6 text-primary" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('shipmentMgmt.totalShipments')}</p>
-                  <p className="text-3xl font-bold">{statsData.total}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('shipmentMgmt.totalShipments')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">{statsData.total}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-amber-500/30 bg-amber-500/5">
-            <CardContent className="p-6 text-right">
+            <CardContent className="p-3 sm:p-6 text-right">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <Truck className="w-6 h-6 text-amber-500" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('shipmentMgmt.activeShipments')}</p>
-                  <p className="text-3xl font-bold text-amber-600">{statsData.active}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('shipmentMgmt.activeShipments')}</p>
+                  <p className="text-xl sm:text-3xl font-bold text-amber-600">{statsData.active}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-green-500/30 bg-green-500/5">
-            <CardContent className="p-6 text-right">
+            <CardContent className="p-3 sm:p-6 text-right">
               <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <CheckCircle className="w-6 h-6 text-green-500" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('shipmentMgmt.completedShipments')}</p>
-                  <p className="text-3xl font-bold text-green-600">{statsData.completed}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{t('shipmentMgmt.completedShipments')}</p>
+                  <p className="text-xl sm:text-3xl font-bold text-green-600">{statsData.completed}</p>
                 </div>
               </div>
             </CardContent>
@@ -671,9 +671,9 @@ const ShipmentManagement = () => {
             <CardDescription>{t('shipmentMgmt.shipmentListDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder={t('shipmentMgmt.filterByStatus')} />
                 </SelectTrigger>
                 <SelectContent>
@@ -720,8 +720,8 @@ const ShipmentManagement = () => {
                   <span className="text-sm text-muted-foreground">تحديد الكل ({filteredShipments.length})</span>
                 </div>
                 {filteredShipments.map((shipment) => (
-                  <div key={shipment.id} className={`flex items-start gap-3 ${selectedIds.has(shipment.id) ? 'ring-1 ring-primary/30 rounded-lg' : ''}`}>
-                    <div className="pt-5 pr-2">
+                  <div key={shipment.id} className={`flex items-start gap-2 sm:gap-3 ${selectedIds.has(shipment.id) ? 'ring-1 ring-primary/30 rounded-lg' : ''}`}>
+                    <div className="pt-5 pr-1 sm:pr-2 shrink-0">
                       <Checkbox
                         checked={selectedIds.has(shipment.id)}
                         onCheckedChange={() => {
@@ -733,7 +733,7 @@ const ShipmentManagement = () => {
                         }}
                       />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       <ShipmentCard
                         shipment={shipment}
                         onStatusChange={fetchData}
