@@ -1298,7 +1298,7 @@
   }
 
   /* Better scroll performance for long lists */
-  .virtual-scroll, [class*="grid"], [class*="space-y"] {
+  .virtual-scroll {
     contain: layout style;
   }
 }
