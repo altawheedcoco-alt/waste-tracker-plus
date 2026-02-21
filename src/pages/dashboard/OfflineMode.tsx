@@ -49,7 +49,7 @@ const OfflineMode = () => {
   const [stats, setStats] = useState<StorageStats>({ pendingActions: 0, cachedItems: 0, drafts: 0 });
   const [storageUsage, setStorageUsage] = useState<{ used: number; quota: number } | null>(null);
   const [isClearing, setIsClearing] = useState(false);
-  const [swStatus, setSwStatus] = useState<'active' | 'installing' | 'waiting' | 'none'>('none');
+  
 
   const refreshStats = useCallback(async () => {
     try {
@@ -75,17 +75,6 @@ const OfflineMode = () => {
     }
   }, [stats]);
 
-  // Check service worker status
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg?.active) setSwStatus('active');
-        else if (reg?.installing) setSwStatus('installing');
-        else if (reg?.waiting) setSwStatus('waiting');
-        else setSwStatus('none');
-      });
-    }
-  }, []);
 
   const handleClearCache = async () => {
     setIsClearing(true);
@@ -346,55 +335,6 @@ const OfflineMode = () => {
           </Card>
         </div>
 
-        {/* Service Worker & PWA Status */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              حالة التطبيق (PWA)
-            </CardTitle>
-            <CardDescription>نظام الخدمة في الخلفية والتثبيت</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <div className={cn(
-                  'w-3 h-3 rounded-full',
-                  swStatus === 'active' ? 'bg-emerald-500' : 
-                  swStatus === 'installing' ? 'bg-amber-500 animate-pulse' : 'bg-muted-foreground'
-                )} />
-                <div>
-                  <p className="text-sm font-medium">Service Worker</p>
-                  <p className="text-xs text-muted-foreground">
-                    {swStatus === 'active' ? 'نشط ويعمل' : 
-                     swStatus === 'installing' ? 'قيد التثبيت...' :
-                     swStatus === 'waiting' ? 'في انتظار التفعيل' : 'غير مثبت'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <ArrowDownToLine className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">التخزين المؤقت</p>
-                  <p className="text-xs text-muted-foreground">
-                    الصفحات والأصول محفوظة
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <Zap className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">التحديث التلقائي</p>
-                  <p className="text-xs text-muted-foreground">
-                    يتم تحديث التطبيق تلقائياً
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* How Offline Mode Works */}
         <Card>

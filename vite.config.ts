@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
-// import { VitePWA } from "vite-plugin-pwa"; // Disabled - was causing white screen
+
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -84,8 +84,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    // PWA disabled - service workers were causing white screen on shared links
-    // VitePWA({...}),
   ].filter(Boolean),
   optimizeDeps: {
     include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
