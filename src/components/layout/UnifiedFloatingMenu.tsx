@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useCallback, startTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Headphones, Sparkles, MessageCircle, Plus, X, Truck } from 'lucide-react';
+import { Bot, Headphones, Sparkles, MessageCircle, Plus, X, Truck, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { openWidget, onWidgetToggle, type WidgetId } from '@/lib/widgetBus';
@@ -65,6 +65,13 @@ const UnifiedFloatingMenu = memo(() => {
       gradient: 'from-primary to-primary/80',
       visible: isTransporter || isDriver,
     },
+    {
+      id: 'driver-conversations',
+      icon: <Users size={iconSize} />,
+      label: 'محادثات السائقين',
+      gradient: 'from-blue-500 to-indigo-500',
+      visible: isTransporter && !isDriver,
+    },
   ];
 
   const visibleItems = menuItems.filter(item => item.visible);
@@ -72,6 +79,8 @@ const UnifiedFloatingMenu = memo(() => {
   const handleItemClick = useCallback((id: WidgetId) => {
     if (id === 'create-shipment') {
       startTransition(() => navigate('/dashboard/shipments/new'));
+    } else if (id === 'driver-conversations') {
+      startTransition(() => navigate('/dashboard/chat?filter=drivers'));
     } else {
       openWidget(id);
     }
