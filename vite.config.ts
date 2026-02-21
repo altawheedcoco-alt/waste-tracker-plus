@@ -143,22 +143,16 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,json}"],
         navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/api/, /^\/supabase/, /^\/~oauth/],
+        navigateFallbackAllowlist: [/^\/(?!api|supabase|~oauth)/],
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        // Force navigation requests to always go to network first
-        navigationPreload: true,
+        navigationPreload: false,
         runtimeCaching: [
           {
-            // HTML pages - always network first to get latest version
-            urlPattern: /^https:\/\/.*\/?$/i,
-            handler: "NetworkFirst",
-            options: {
-              cacheName: "pages-cache",
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 },
-              networkTimeoutSeconds: 5,
-            },
+            // HTML navigation - always network first, no cache fallback issues
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: "NetworkOnly",
           },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
