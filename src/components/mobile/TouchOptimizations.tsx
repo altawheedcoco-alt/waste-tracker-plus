@@ -22,8 +22,7 @@ const TouchOptimizations = memo(() => {
       }
 
       .touch-device body {
-        touch-action: pan-x pan-y;
-        overscroll-behavior-y: contain;
+        touch-action: auto;
         -webkit-text-size-adjust: 100%;
       }
 
@@ -149,19 +148,7 @@ const TouchOptimizations = memo(() => {
     `;
     document.head.appendChild(style);
 
-    // Prevent double-tap zoom on non-input elements
-    let lastTap = 0;
-    const preventDoubleTapZoom = (e: TouchEvent) => {
-      const now = Date.now();
-      if (now - lastTap < 300) {
-        const target = e.target as HTMLElement;
-        if (!target.closest('input, textarea, [contenteditable], a[href]')) {
-          e.preventDefault();
-        }
-      }
-      lastTap = now;
-    };
-    document.addEventListener('touchend', preventDoubleTapZoom, { passive: false });
+    // Note: removed preventDoubleTapZoom as it was blocking scroll on many devices
 
     // Fix 300ms click delay on older browsers
     const meta = document.querySelector('meta[name="viewport"]');
@@ -173,7 +160,6 @@ const TouchOptimizations = memo(() => {
       root.classList.remove('touch-device');
       const el = document.getElementById('touch-optimizations');
       if (el) el.remove();
-      document.removeEventListener('touchend', preventDoubleTapZoom);
     };
   }, []);
 
