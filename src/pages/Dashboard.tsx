@@ -31,8 +31,6 @@ const UnifiedSupportWidget = lazy(() => import('@/components/ai/UnifiedSupportWi
 const BetaBanner = lazy(() => import('@/components/BetaBanner'));
 const AccessibilityPanel = lazy(() => import('@/components/accessibility/AccessibilityPanel').then(m => ({ default: m.AccessibilityPanel })));
 const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
-const MobileOptimizations = lazy(() => import('@/components/mobile/MobileOptimizations'));
-const PWAShortcuts = lazy(() => import('@/components/mobile/PWAShortcuts'));
 const TouchOptimizations = lazy(() => import('@/components/mobile/TouchOptimizations'));
 
 const DashboardLoader = () => (
@@ -126,8 +124,6 @@ const Dashboard = () => {
               </Suspense>
             </ErrorBoundary>
             <Suspense fallback={null}>
-              <MobileOptimizations>{null}</MobileOptimizations>
-              <PWAShortcuts />
               <TouchOptimizations />
             </Suspense>
           </>
