@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
-import { Download, Pen, Eye, CheckCircle, Clock, XCircle, FileText, User, Truck, Package } from 'lucide-react';
+import { Download, Pen, Eye, CheckCircle, Clock, XCircle, FileText, User, Truck, Package, Copy, Share2, Edit, GitBranch } from 'lucide-react';
 import { useRef, useCallback } from 'react';
 import { Permit } from '@/hooks/usePermits';
 
@@ -20,6 +20,7 @@ const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'secondar
   active: { label: 'نشط', variant: 'default', icon: CheckCircle },
   expired: { label: 'منتهي', variant: 'destructive', icon: XCircle },
   cancelled: { label: 'ملغي', variant: 'destructive', icon: XCircle },
+  superseded: { label: 'مُعدّل', variant: 'outline', icon: GitBranch },
 };
 
 interface Props {
@@ -27,9 +28,11 @@ interface Props {
   signaturesCount?: number;
   onView: (permit: Permit) => void;
   onSign: (permit: Permit) => void;
+  onRevise?: (permit: Permit) => void;
+  onShare?: (permit: Permit) => void;
 }
 
-const PermitCard = ({ permit, signaturesCount = 0, onView, onSign }: Props) => {
+const PermitCard = ({ permit, signaturesCount = 0, onView, onSign, onRevise, onShare }: Props) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const typeInfo = TYPE_LABELS[permit.permit_type] || TYPE_LABELS.general;
   const statusInfo = STATUS_MAP[permit.status] || STATUS_MAP.draft;
@@ -56,6 +59,8 @@ const PermitCard = ({ permit, signaturesCount = 0, onView, onSign }: Props) => {
     });
   }, [permit.permit_number]);
 
+  const hasImages = permit.id_card_front_url || permit.license_front_url || permit.person_photo_url;
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <CardContent className="p-4 space-y-3">
@@ -70,10 +75,18 @@ const PermitCard = ({ permit, signaturesCount = 0, onView, onSign }: Props) => {
               <p className="text-xs text-muted-foreground font-mono">{permit.permit_number}</p>
             </div>
           </div>
-          <Badge variant={statusInfo.variant} className="gap-1 text-[10px]">
-            <StatusIcon className="w-3 h-3" />
-            {statusInfo.label}
-          </Badge>
+          <div className="flex flex-col items-end gap-1">
+            <Badge variant={statusInfo.variant} className="gap-1 text-[10px]">
+              <StatusIcon className="w-3 h-3" />
+              {statusInfo.label}
+            </Badge>
+            {permit.revision_number > 1 && (
+              <Badge variant="outline" className="text-[9px] gap-0.5">
+                <GitBranch className="w-2.5 h-2.5" />
+                نسخة {permit.revision_number}
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Details */}
@@ -81,9 +94,14 @@ const PermitCard = ({ permit, signaturesCount = 0, onView, onSign }: Props) => {
           <p className="text-sm text-muted-foreground line-clamp-2">{permit.purpose}</p>
         )}
         {permit.person_name && (
-          <div className="text-xs text-muted-foreground">
-            <span className="font-medium">الشخص:</span> {permit.person_name}
-            {permit.person_role && <span> ({permit.person_role})</span>}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {permit.person_photo_url && (
+              <img src={permit.person_photo_url} alt="" className="w-6 h-6 rounded-full object-cover border" />
+            )}
+            <span>
+              <span className="font-medium">الشخص:</span> {permit.person_name}
+              {permit.person_role && <span> ({permit.person_role})</span>}
+            </span>
           </div>
         )}
         {permit.waste_type && (
@@ -93,7 +111,21 @@ const PermitCard = ({ permit, signaturesCount = 0, onView, onSign }: Props) => {
           </div>
         )}
 
-        {/* Signatures count */}
+        {/* Document images indicator */}
+        {hasImages && (
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[9px] gap-0.5 bg-primary/5">
+              📎 مستندات مرفقة
+            </Badge>
+            {permit.image_source && permit.image_source !== 'manual' && (
+              <Badge variant="outline" className="text-[9px]">
+                {permit.image_source === 'driver' ? '🚛 سائق' : permit.image_source === 'profile' ? '👤 مستخدم' : permit.image_source === 'kyc' ? '🔒 KYC' : '📁 أرشيف'}
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Signatures count + validity */}
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Pen className="w-3 h-3" />
           <span>{signaturesCount} توقيع</span>
@@ -115,15 +147,25 @@ const PermitCard = ({ permit, signaturesCount = 0, onView, onSign }: Props) => {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5 flex-wrap">
           <Button variant="outline" size="sm" className="flex-1 gap-1" onClick={() => onView(permit)}>
             <Eye className="w-3 h-3" />
             عرض
           </Button>
-          <Button size="sm" className="flex-1 gap-1" onClick={() => onSign(permit)}>
+          <Button size="sm" className="flex-1 gap-1" onClick={() => onSign(permit)} disabled={permit.status === 'superseded' || permit.status === 'cancelled'}>
             <Pen className="w-3 h-3" />
             توقيع
           </Button>
+          {onRevise && permit.status !== 'superseded' && (
+            <Button variant="outline" size="sm" className="gap-1" onClick={() => onRevise(permit)}>
+              <Edit className="w-3 h-3" />
+            </Button>
+          )}
+          {onShare && (
+            <Button variant="outline" size="sm" className="gap-1" onClick={() => onShare(permit)}>
+              <Share2 className="w-3 h-3" />
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload}>
             <Download className="w-4 h-4" />
           </Button>
