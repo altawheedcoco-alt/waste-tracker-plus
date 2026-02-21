@@ -127,7 +127,7 @@ export default function InvoicesAccountView({
       </div>
 
       {/* Invoices Table */}
-      <div className="border rounded-xl overflow-hidden">
+      <div className="border rounded-xl overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50 hover:bg-muted/50">

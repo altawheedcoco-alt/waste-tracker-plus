@@ -119,7 +119,7 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
   }
 
   const renderShipmentTable = (shipmentsToRender: ShipmentWithPricing[], isCancelledSection: boolean) => (
-    <div className="border rounded-xl overflow-hidden">
+    <div className="border rounded-xl overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
