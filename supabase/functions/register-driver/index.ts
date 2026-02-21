@@ -196,15 +196,21 @@ Deno.serve(async (req) => {
         role: "driver",
       });
 
+    // Log credentials securely server-side for admin retrieval
+    console.log(`[DRIVER_REGISTERED] user_id=${newUser.user.id}, email=${generatedEmail}`);
+
+    // Return only the email (not password) - password must be reset via admin
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: "تم تسجيل السائق بنجاح",
         credentials: {
           email: generatedEmail,
-          password: generatedPassword,
+          // Password is not returned for security. Use "Reset Password" to set a new one.
+          password_notice: "تم إنشاء كلمة مرور مؤقتة. يجب على السائق إعادة تعيينها عند أول تسجيل دخول.",
         },
-        user_id: newUser.user.id 
+        user_id: newUser.user.id,
+        requires_password_reset: true,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

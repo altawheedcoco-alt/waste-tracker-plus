@@ -175,18 +175,17 @@ const TransporterDrivers = () => {
       // Store the credentials locally for the team credentials page
       if (response.data?.credentials) {
         const { storeCredentials } = await import('./TeamCredentials');
-        storeCredentials(response.data.credentials.email, response.data.credentials.password);
+        storeCredentials(response.data.credentials.email, '');
         
         toast.success(
           <div className="space-y-2">
             <p className="font-bold">تم تسجيل السائق بنجاح!</p>
             <p className="text-sm">بيانات الدخول:</p>
             <p className="text-xs font-mono bg-muted p-2 rounded">
-              البريد: {response.data.credentials.email}<br/>
-              كلمة المرور: {response.data.credentials.password}
+              البريد: {response.data.credentials.email}
             </p>
             <p className="text-xs text-muted-foreground">
-              يمكنك عرض البيانات لاحقاً من صفحة "بيانات الفريق"
+              {response.data.credentials.password_notice || 'يجب على السائق إعادة تعيين كلمة المرور عند أول تسجيل دخول'}
             </p>
           </div>,
           { duration: 15000 }
