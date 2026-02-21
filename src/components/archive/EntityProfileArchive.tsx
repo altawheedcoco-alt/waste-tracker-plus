@@ -361,6 +361,19 @@ export default function EntityProfileArchive({
     }
   };
 
+  const handleNavigateToDetails = (doc: ArchiveDoc) => {
+    const docId = doc.referenceId || doc.id;
+    switch (doc.type) {
+      case 'shipment': navigate(`/dashboard/shipments/${docId}`); break;
+      case 'invoice': navigate(`/dashboard/invoices?view=${docId}`); break;
+      case 'contract': navigate(`/dashboard/contracts?view=${docId}`); break;
+      case 'certificate': navigate(`/dashboard/shipments/${docId}?tab=certificate`); break;
+      case 'award_letter': navigate('/dashboard/award-letters'); break;
+      case 'deposit': navigate('/dashboard/accounting'); break;
+      default: toast.info('لا توجد صفحة تفاصيل لهذا المستند');
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -441,35 +454,52 @@ export default function EntityProfileArchive({
                   const catLabel = CATEGORY_LABELS[docCat]?.ar || docCat;
 
                   return (
-                    <Card key={doc.dedupKey} className="p-3 hover:shadow-sm transition-shadow cursor-pointer" onClick={() => handleView(doc)}>
+                    <Card key={doc.dedupKey} className="p-3 hover:shadow-sm transition-shadow">
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center gap-0.5 shrink-0">
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleView(doc)}><Eye className="w-3.5 h-3.5" /></Button>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleView(doc)}>
+                                <Eye className="w-3.5 h-3.5" />
+                              </Button>
                             </TooltipTrigger>
-                            <TooltipContent>عرض</TooltipContent>
+                            <TooltipContent>عرض الملف</TooltipContent>
                           </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handlePrint(doc)}><Printer className="w-3.5 h-3.5" /></Button>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handlePrint(doc)}>
+                                <Printer className="w-3.5 h-3.5" />
+                              </Button>
                             </TooltipTrigger>
                             <TooltipContent>طباعة</TooltipContent>
                           </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)}><Download className="w-3.5 h-3.5" /></Button>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleDownload(doc)}>
+                                <Download className="w-3.5 h-3.5" />
+                              </Button>
                             </TooltipTrigger>
                             <TooltipContent>تحميل</TooltipContent>
                           </Tooltip>
                           {doc.fileUrl && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => window.open(doc.fileUrl, '_blank')}><ExternalLink className="w-3.5 h-3.5" /></Button>
+                                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => window.open(doc.fileUrl, '_blank')}>
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </Button>
                               </TooltipTrigger>
                               <TooltipContent>فتح الملف</TooltipContent>
                             </Tooltip>
                           )}
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="sm" variant="outline" className="h-7 px-2 gap-1 text-xs text-primary" onClick={() => handleNavigateToDetails(doc)}>
+                                <Info className="w-3.5 h-3.5" />
+                                التفاصيل
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>عرض تفاصيل المستند</TooltipContent>
+                          </Tooltip>
                         </div>
                         <div className="flex-1 text-right min-w-0">
                           <div className="flex items-center gap-2 justify-end flex-wrap">
