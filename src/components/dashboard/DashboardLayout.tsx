@@ -611,17 +611,19 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     return getSidebarItemsFromQuickActions(actions);
   }, [quickActionsType, quickActionPrefs, applyOrder]);
 
-  // Filter menu items based on search (deep search into children)
+  // Filter menu items based on search (deep search into children - matches label, key, path)
   const filterMenuItems = (items: SidebarMenuItem[], search: string): SidebarMenuItem[] => {
     if (!search.trim()) return items;
     const searchLower = search.toLowerCase();
+    const matchItem = (item: SidebarMenuItem) =>
+      item.label.toLowerCase().includes(searchLower) ||
+      (item.key && item.key.toLowerCase().includes(searchLower)) ||
+      (item.path && item.path.toLowerCase().includes(searchLower));
     return items.reduce<SidebarMenuItem[]>((acc, item) => {
-      if (item.label.toLowerCase().includes(searchLower)) {
+      if (matchItem(item)) {
         acc.push(item);
       } else if (item.children) {
-        const filteredChildren = item.children.filter(
-          child => child.label.toLowerCase().includes(searchLower)
-        );
+        const filteredChildren = item.children.filter(matchItem);
         if (filteredChildren.length > 0) {
           acc.push({ ...item, children: filteredChildren });
         }
