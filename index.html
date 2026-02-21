@@ -59,7 +59,16 @@
   <meta name="twitter:description" content="نظام متكامل لإدارة النفايات والحفاظ على البيئة في مصر. تتبع ومراقبة شحنات النفايات من المصدر إلى وجهتها النهائية مع تقارير بيئية شاملة.">
 </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
+        <div style="width:40px;height:40px;border:3px solid #10b981;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
+    <noscript>
+      <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;direction:rtl;font-family:sans-serif;">
+        <p>يرجى تفعيل JavaScript لاستخدام التطبيق</p>
+      </div>
+    </noscript>
   </body>
 </html>

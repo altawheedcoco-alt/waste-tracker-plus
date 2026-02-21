@@ -232,7 +232,7 @@ const Providers = memo(() => (
             <BrowserRouter>
               <AuthProvider>
                 <ErrorBoundary fallbackTitle="حدث خطأ في تحميل الصفحة">
-                  <Suspense fallback={null}>
+                  <Suspense fallback={<PageLoader />}>
                     <AppRoutes />
                   </Suspense>
                 </ErrorBoundary>
