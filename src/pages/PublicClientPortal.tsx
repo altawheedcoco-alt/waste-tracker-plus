@@ -23,6 +23,7 @@ interface PortalSession {
   organization: { name: string; logoUrl: string | null; phone: string | null; email: string | null } | null;
   permissions: { trackShipments: boolean; viewInvoices: boolean; downloadDocuments: boolean; requestServices: boolean };
   organizationId: string;
+  sessionToken: string;
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -96,6 +97,7 @@ const PublicClientPortal: React.FC = () => {
           organizationId: s.organizationId,
           dataType: type,
           portalId: s.portal.id,
+          sessionToken: s.sessionToken,
         },
       });
       if (error) throw error;
@@ -127,6 +129,7 @@ const PublicClientPortal: React.FC = () => {
           organizationId: session.organizationId,
           dataType: 'submit_collection_request',
           portalId: session.portal.id,
+          sessionToken: session.sessionToken,
           requestData: {
             ...requestForm,
             customer_name: session.client.name,
