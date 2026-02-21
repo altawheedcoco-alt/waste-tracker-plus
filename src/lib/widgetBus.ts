@@ -1,5 +1,5 @@
 // Global event bus for opening/closing floating widgets
-type WidgetId = 'ai-chat' | 'support' | 'operations' | 'team-chat' | 'create-shipment';
+type WidgetId = 'ai-chat' | 'support' | 'operations' | 'team-chat' | 'create-shipment' | 'driver-conversations';
 
 type WidgetEventHandler = (widgetId: WidgetId) => void;
 
