@@ -1315,7 +1315,6 @@
 /* Auth page specific mobile optimizations */
 .auth-scroll-container {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
   scroll-behavior: smooth;
   min-height: 100dvh;
 }
