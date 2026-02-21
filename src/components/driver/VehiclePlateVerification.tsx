@@ -75,9 +75,11 @@ const VehiclePlateVerification = ({
         .from('weighbridge-photos')
         .upload(`plates/${fileName}`, file);
 
-      const photoUrl = uploadData?.path
-        ? supabase.storage.from('weighbridge-photos').getPublicUrl(`plates/${fileName}`).data.publicUrl
-        : null;
+      let photoUrl: string | null = null;
+      if (uploadData?.path) {
+        const { data: signedData } = await supabase.storage.from('weighbridge-photos').createSignedUrl(`plates/${fileName}`, 86400);
+        photoUrl = signedData?.signedUrl || null;
+      }
 
       // Call AI verification
       const formData = new FormData();

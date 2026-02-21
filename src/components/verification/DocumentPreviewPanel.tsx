@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Loader2, FileText, FileWarning, ExternalLink, Gavel } from 'lucide-react';
 import { OrganizationDocument } from './types';
+import SecureImage from '@/components/ui/SecureImage';
 
 interface DocumentPreviewPanelProps {
   document: OrganizationDocument;
@@ -70,11 +71,12 @@ const DocumentPreviewPanel = ({
           </div>
         ) : previewUrl ? (
           document.file_path.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-            <img 
-              src={previewUrl} 
+            <SecureImage 
+              src={document.file_path}
+              bucket="organization-documents"
               alt={document.file_name}
               className="max-w-full max-h-full object-contain"
-              onError={() => onPreviewError('فشل في عرض الصورة')}
+              zoomable={true}
             />
           ) : document.file_path.match(/\.pdf$/i) ? (
             <iframe

@@ -130,9 +130,11 @@ const DriverDeliverySignature = ({ shipmentId, driverId, onSigned }: DriverDeliv
         .from('shipment-photos')
         .upload(fileName, blob, { contentType: 'image/png' });
 
-      const url = uploadData
-        ? supabase.storage.from('shipment-photos').getPublicUrl(uploadData.path).data.publicUrl
-        : '';
+      let url = '';
+      if (uploadData?.path) {
+        const { data: signedData } = await supabase.storage.from('shipment-photos').createSignedUrl(uploadData.path, 86400);
+        url = signedData?.signedUrl || '';
+      }
 
       setSaved(true);
       toast({ title: 'تم حفظ التوقيع بنجاح ✅', description: `المستلم: ${receiverName}` });
