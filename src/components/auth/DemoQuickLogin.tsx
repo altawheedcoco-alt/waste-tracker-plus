@@ -27,11 +27,16 @@ interface DemoQuickLoginProps {
   onLoginEnd?: () => void;
 }
 
+const ACCESS_PIN = '575757';
+
 const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   const [loading, setLoading] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [accountsReady, setAccountsReady] = useState<boolean | null>(null);
+  const [pinInput, setPinInput] = useState('');
+  const [pinVerified, setPinVerified] = useState(false);
+  const [pinError, setPinError] = useState(false);
   const { signIn } = useAuth();
   const { toast } = useToast();
 
@@ -112,61 +117,104 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="pt-3 space-y-3">
-              {/* Seed button */}
-              {accountsReady !== true && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs border-dashed"
-                  onClick={handleSeedAccounts}
-                  disabled={seeding}
-                >
-                  {seeding ? (
-                    <>
-                      <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-                      جاري إنشاء الحسابات...
-                    </>
-                  ) : (
-                    '⚙️ تفعيل الحسابات التجريبية'
-                  )}
-                </Button>
-              )}
-
-              {/* Quick login grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {demoAccounts.map((account, i) => (
-                  <motion.button
-                    key={account.email}
+            {!pinVerified ? (
+              <div className="pt-3 space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    placeholder="أدخل رمز الدخول"
+                    value={pinInput}
+                    onChange={(e) => {
+                      setPinInput(e.target.value);
+                      setPinError(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        if (pinInput === ACCESS_PIN) {
+                          setPinVerified(true);
+                        } else {
+                          setPinError(true);
+                        }
+                      }
+                    }}
+                    className={`flex-1 px-3 py-2 text-sm rounded-lg border ${pinError ? 'border-destructive' : 'border-border'} bg-background text-center`}
+                    dir="ltr"
+                  />
+                  <Button
                     type="button"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.05 }}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => handleQuickLogin(account.email)}
-                    disabled={loading !== null}
-                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:border-primary/40 bg-card/50 hover:bg-primary/5 transition-all disabled:opacity-50"
+                    size="sm"
+                    onClick={() => {
+                      if (pinInput === ACCESS_PIN) {
+                        setPinVerified(true);
+                      } else {
+                        setPinError(true);
+                      }
+                    }}
                   >
-                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${account.color} flex items-center justify-center shadow-sm`}>
-                      {loading === account.email ? (
-                        <Loader2 className="w-4 h-4 text-white animate-spin" />
-                      ) : (
-                        <account.icon className="w-4 h-4 text-white" />
-                      )}
-                    </div>
-                    <span className="text-[11px] font-medium text-foreground/80 leading-tight text-center">
-                      {account.label}
-                    </span>
-                  </motion.button>
-                ))}
+                    دخول
+                  </Button>
+                </div>
+                {pinError && (
+                  <p className="text-xs text-destructive text-center">رمز الدخول غير صحيح</p>
+                )}
               </div>
+            ) : (
+              <div className="pt-3 space-y-3">
+                {/* Seed button */}
+                {accountsReady !== true && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs border-dashed"
+                    onClick={handleSeedAccounts}
+                    disabled={seeding}
+                  >
+                    {seeding ? (
+                      <>
+                        <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+                        جاري إنشاء الحسابات...
+                      </>
+                    ) : (
+                      '⚙️ تفعيل الحسابات التجريبية'
+                    )}
+                  </Button>
+                )}
 
-              <p className="text-[10px] text-muted-foreground text-center">
-                كلمة المرور: <span dir="ltr" className="font-mono">Demo@2026!</span>
-              </p>
-            </div>
+                {/* Quick login grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {demoAccounts.map((account, i) => (
+                    <motion.button
+                      key={account.email}
+                      type="button"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.05 }}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => handleQuickLogin(account.email)}
+                      disabled={loading !== null}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:border-primary/40 bg-card/50 hover:bg-primary/5 transition-all disabled:opacity-50"
+                    >
+                      <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${account.color} flex items-center justify-center shadow-sm`}>
+                        {loading === account.email ? (
+                          <Loader2 className="w-4 h-4 text-white animate-spin" />
+                        ) : (
+                          <account.icon className="w-4 h-4 text-white" />
+                        )}
+                      </div>
+                      <span className="text-[11px] font-medium text-foreground/80 leading-tight text-center">
+                        {account.label}
+                      </span>
+                    </motion.button>
+                  ))}
+                </div>
+
+                <p className="text-[10px] text-muted-foreground text-center">
+                  كلمة المرور: <span dir="ltr" className="font-mono">Demo@2026!</span>
+                </p>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
