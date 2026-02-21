@@ -332,9 +332,24 @@ export default function EntityProfileArchive({
   };
 
   // توليد مستند الشحنة عند الطلب
-  const generateShipmentDoc = useCallback(async (shipmentId: string): Promise<string | null> => {
+  const resolveShipmentUUID = useCallback(async (idOrNumber: string): Promise<string | null> => {
+    // Check if it's already a valid UUID format
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(idOrNumber)) return idOrNumber;
+    // Otherwise look up by shipment_number
+    const { data } = await supabase.from('shipments').select('id').eq('shipment_number', idOrNumber).maybeSingle();
+    return data?.id || null;
+  }, []);
+
+  const generateShipmentDoc = useCallback(async (shipmentIdOrNumber: string): Promise<string | null> => {
     const toastId = toast.loading('جاري توليد المستند...');
     try {
+      const shipmentId = await resolveShipmentUUID(shipmentIdOrNumber);
+      if (!shipmentId) {
+        toast.dismiss(toastId);
+        toast.error('لم يتم العثور على الشحنة');
+        return null;
+      }
       const { data, error } = await supabase.functions.invoke('generate-manifest-pdf', {
         body: { shipmentId },
       });
@@ -343,14 +358,13 @@ export default function EntityProfileArchive({
         toast.error('فشل توليد المستند');
         return null;
       }
-      // Return HTML content to render
       return data.html || data.manifestHtml || null;
     } catch (e) {
       toast.dismiss(toastId);
       toast.error('فشل توليد المستند');
       return null;
     }
-  }, []);
+  }, [resolveShipmentUUID]);
 
   const openHtmlInNewWindow = useCallback((html: string, title: string, autoPrint = false) => {
     const pw = window.open('', '_blank');
