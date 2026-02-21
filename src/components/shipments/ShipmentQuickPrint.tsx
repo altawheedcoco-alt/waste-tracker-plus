@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
+import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
 
 interface ShipmentQuickPrintProps {
   isOpen: boolean;
@@ -122,18 +123,7 @@ interface ShipmentData {
   } | null;
 }
 
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'بناء',
-  other: 'أخرى',
-};
+// wasteTypeLabels imported from '@/lib/shipmentStatusConfig'
 
 const statusLabels: Record<string, string> = {
   new: 'جديدة',

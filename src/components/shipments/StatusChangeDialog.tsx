@@ -35,6 +35,8 @@ import {
   StatusConfig,
   mapToDbStatus,
   ShipmentStatus,
+  getOrganizationTypeLabel,
+  type ShipmentOrganizationType,
 } from '@/lib/shipmentStatusConfig';
 import { calculateHaversineDistance } from '@/lib/mapUtils';
 import WeighbridgePhotoUpload from './WeighbridgePhotoUpload';
@@ -80,7 +82,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     error: string | null;
   }>({ checking: false, isInside: null, distance: null, error: null });
 
-  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
+  const organizationType = (organization?.organization_type || 'generator') as ShipmentOrganizationType;
 
   // Get delivery coordinates from shipment
   const deliveryLat = shipment.gps_delivery_lat ?? shipment.delivery_latitude;
@@ -459,7 +461,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             <div className="flex items-center gap-2 justify-end text-sm text-muted-foreground">
               <AlertCircle className="w-4 h-4" />
               <span>
-                أنت تعمل كـ <strong>{organizationType === 'transporter' ? 'جهة نقل' : organizationType === 'recycler' ? 'جهة تدوير' : organizationType === 'disposal' ? 'جهة تخلص نهائي' : 'جهة مولدة'}</strong>
+                أنت تعمل كـ <strong>{getOrganizationTypeLabel(organizationType)}</strong>
               </span>
             </div>
             {!canChange && (

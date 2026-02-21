@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getOrganizationTypeLabel } from '@/lib/shipmentStatusConfig';
 import { 
   Sparkles, 
   Save, 
@@ -69,14 +70,8 @@ const OrganizationPortfolio = ({
   const [saving, setSaving] = useState(false);
   const [generating, setGenerating] = useState<string | null>(null);
 
-  const getOrganizationTypeLabel = (type: string) => {
-    switch (type) {
-      case 'generator': return 'جهة مولدة للنفايات';
-      case 'transporter': return 'جهة ناقلة للنفايات';
-      case 'recycler': return 'جهة تدوير النفايات';
-      default: return type;
-    }
-  };
+  // Use centralized org type label utility
+  const getOrgTypeLabel = getOrganizationTypeLabel;
 
   const handleGenerateWithAI = async (field: 'description' | 'vision' | 'policy' | 'headquarters' | 'field_of_work') => {
     setGenerating(field);

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-
+import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
 interface GeneratorCompletionCardProps {
   shipment: {
     shipment_number: string;
@@ -37,11 +37,7 @@ interface GeneratorCompletionCardProps {
   };
 }
 
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
-  electronic: 'إلكترونيات', organic: 'عضوية', chemical: 'كيميائية',
-  medical: 'طبية', construction: 'مخلفات بناء', other: 'أخرى',
-};
+// wasteTypeLabels imported from '@/lib/shipmentStatusConfig'
 
 const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => {
   const isConfirmed = shipment.status === 'confirmed';
