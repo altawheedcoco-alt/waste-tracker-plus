@@ -660,7 +660,7 @@ const ShipmentCard = ({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center gap-1.5 flex-wrap w-full overflow-hidden">
+                <div className="flex items-center gap-1.5 flex-wrap w-full">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {/* Navigation Button Group - Google Maps & Waze - only if maps allowed */}
                     {visibility.canViewMaps && (
