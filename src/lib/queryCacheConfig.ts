@@ -141,11 +141,9 @@ export const createSmartQueryClient = () => new QueryClient({
       refetchOnWindowFocus: false,
       refetchOnMount: 'always',
       refetchOnReconnect: true,
-      networkMode: 'offlineFirst',
     },
     mutations: {
       retry: 1,
-      networkMode: 'offlineFirst',
     },
   },
 });
