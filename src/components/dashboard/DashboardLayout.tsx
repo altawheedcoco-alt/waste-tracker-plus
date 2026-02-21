@@ -1042,92 +1042,128 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </header>
 
-          {/* Mobile menu */}
+          {/* Mobile Slide-out Sidebar */}
           <AnimatePresence>
             {isMobileMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="lg:hidden bg-card border-b border-border overflow-hidden max-h-[70vh] overflow-y-auto"
-              >
-                {/* Mobile Search */}
-                <div className="px-3 sm:px-4 pt-3 sm:pt-4 sticky top-0 bg-card z-10">
-                  <div className="relative">
-                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      value={sidebarSearch}
-                      onChange={(e) => setSidebarSearch(e.target.value)}
-                      placeholder={t('sidebar.searchPlaceholder')}
-                      className="pr-9 pl-8 h-10 text-sm bg-muted/50"
-                    />
-                    {sidebarSearch && (
-                      <button
-                        onClick={() => setSidebarSearch('')}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded touch-manipulation"
-                      >
-                        <XIcon className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    )}
+              <>
+                {/* Backdrop overlay - tap to close */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm lg:hidden"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  onTouchEnd={(e) => { e.preventDefault(); setIsMobileMenuOpen(false); }}
+                />
+                {/* Slide-in panel from right (RTL) */}
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                  className="fixed top-0 right-0 z-50 h-full w-[85vw] max-w-[320px] bg-card shadow-2xl lg:hidden flex flex-col touch-manipulation"
+                  style={{ willChange: 'transform' }}
+                  drag="x"
+                  dragConstraints={{ left: 0, right: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={(_, info) => {
+                    if (info.offset.x > 100 || info.velocity.x > 300) {
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
+                >
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+                    <PlatformLogo size="sm" showText />
+                    <button
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation"
+                      aria-label="إغلاق القائمة"
+                    >
+                      <X size={22} />
+                    </button>
                   </div>
-                </div>
-                <nav className="p-3 sm:p-4 space-y-1 pb-safe">
-                  {filteredMenuItems.length > 0 ? (
-                    filteredMenuItems.map((item: SidebarMenuItem) => (
-                      <div key={item.key} onClick={(e) => {
-                        // Only close menu if a leaf link was clicked
-                        if ((e.target as HTMLElement).closest('a')) setIsMobileMenuOpen(false);
-                      }}>
-                        <SidebarNavGroup
-                          item={item}
-                          isCollapsed={false}
-                        />
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-sm text-muted-foreground">
-                      {t('commandPalette.noResults')}
-                    </div>
-                  )}
-                  
-                  {/* Quick Actions Section - Mobile */}
-                  {filteredQuickActions.length > 0 && (
-                    <div className="pt-4 mt-4 border-t border-border">
-                      <div className="flex items-center gap-2 px-2 mb-3">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-bold text-primary uppercase tracking-wide">
-                          {t('sidebar.quickActionsTitle')}
-                        </span>
-                        <div className="flex-1 h-px bg-border/50" />
-                      </div>
-                      <div className="space-y-1">
-                        {filteredQuickActions.map((item) => (
-                          <div key={item.key} onClick={() => setIsMobileMenuOpen(false)}>
-                            <SidebarNavItem
-                              icon={item.icon}
-                              label={item.label}
-                              path={item.path}
-                              isCollapsed={false}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
-                  {/* Logout Button - Mobile */}
-                  <div className="pt-4 mt-4 border-t border-border">
+                  {/* Search */}
+                  <div className="px-3 pt-3 shrink-0">
+                    <div className="relative">
+                      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        value={sidebarSearch}
+                        onChange={(e) => setSidebarSearch(e.target.value)}
+                        placeholder={t('sidebar.searchPlaceholder')}
+                        className="pr-9 pl-8 h-11 text-sm bg-muted/50"
+                      />
+                      {sidebarSearch && (
+                        <button
+                          onClick={() => setSidebarSearch('')}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded touch-manipulation"
+                        >
+                          <XIcon className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Nav items - scrollable */}
+                  <nav className="flex-1 overflow-y-auto p-3 space-y-1 pb-safe overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+                    {filteredMenuItems.length > 0 ? (
+                      filteredMenuItems.map((item: SidebarMenuItem) => (
+                        <div key={item.key} onClick={(e) => {
+                          if ((e.target as HTMLElement).closest('a')) setIsMobileMenuOpen(false);
+                        }}>
+                          <SidebarNavGroup
+                            item={item}
+                            isCollapsed={false}
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4 text-sm text-muted-foreground">
+                        {t('commandPalette.noResults')}
+                      </div>
+                    )}
+                    
+                    {/* Quick Actions Section */}
+                    {filteredQuickActions.length > 0 && (
+                      <div className="pt-4 mt-4 border-t border-border">
+                        <div className="flex items-center gap-2 px-2 mb-3">
+                          <Sparkles className="w-4 h-4 text-primary" />
+                          <span className="text-xs font-bold text-primary uppercase tracking-wide">
+                            {t('sidebar.quickActionsTitle')}
+                          </span>
+                          <div className="flex-1 h-px bg-border/50" />
+                        </div>
+                        <div className="space-y-1">
+                          {filteredQuickActions.map((item) => (
+                            <div key={item.key} onClick={() => setIsMobileMenuOpen(false)}>
+                              <SidebarNavItem
+                                icon={item.icon}
+                                label={item.label}
+                                path={item.path}
+                                isCollapsed={false}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </nav>
+
+                  {/* Bottom - Logout */}
+                  <div className="p-3 border-t border-border shrink-0">
                     <Button
                       variant="ghost"
                       onClick={() => { setIsMobileMenuOpen(false); handleSignOut(); }}
-                      className="w-full flex items-center justify-center gap-2 h-10 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      className="w-full flex items-center justify-center gap-2 h-12 text-destructive hover:bg-destructive/10 hover:text-destructive touch-manipulation"
                     >
                       <LogOut className="w-5 h-5" />
                       <span className="text-sm font-medium">{t('nav.logout')}</span>
                     </Button>
                   </div>
-                </nav>
-              </motion.div>
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
 
