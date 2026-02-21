@@ -5,7 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const DEMO_PASSWORD = 'Demo@2026!';
+// Password loaded from environment secret - never hardcoded
+const DEMO_PASSWORD = Deno.env.get('DEMO_ACCOUNT_PASSWORD') || crypto.randomUUID() + '!A1';
 
 const DEMO_ACCOUNTS = [
   { email: 'demo-generator@irecycle.test', fullName: 'مولد مخلفات', orgType: 'generator', role: 'generator', phone: '01000000001' },
@@ -28,7 +29,50 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, serviceKey);
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // === Admin Authentication Check ===
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ error: 'غير مصرح - يتطلب تسجيل الدخول' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ error: 'غير مصرح - جلسة غير صالحة' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
+
+    // Check admin role
+    const adminClient = createClient(supabaseUrl, serviceKey);
+    const { data: roleData } = await adminClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .single();
+
+    if (!roleData) {
+      return new Response(
+        JSON.stringify({ error: 'غير مصرح - للمديرين فقط' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // === Proceed with demo account operations ===
+    const supabase = adminClient;
 
     let body: any = {};
     try { body = await req.json(); } catch { /* no body */ }
@@ -71,11 +115,11 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const userId = authData.user!.id;
+      const newUserId = authData.user!.id;
 
       await supabase.from('profiles').upsert({
-        id: userId,
-        user_id: userId,
+        id: newUserId,
+        user_id: newUserId,
         full_name: account.fullName,
         email: account.email,
         phone: account.phone,
@@ -83,7 +127,7 @@ Deno.serve(async (req) => {
       }, { onConflict: 'id' });
 
       await supabase.from('user_roles').insert({
-        user_id: userId,
+        user_id: newUserId,
         role: account.role as any,
       });
 
@@ -91,7 +135,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, accounts: results }),
+      JSON.stringify({ success: true, accounts: results, password: DEMO_PASSWORD }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
