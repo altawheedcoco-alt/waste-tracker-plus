@@ -22,7 +22,7 @@ const TouchOptimizations = memo(() => {
       }
 
       .touch-device body {
-        touch-action: manipulation;
+        touch-action: pan-x pan-y;
         overscroll-behavior-y: contain;
         -webkit-text-size-adjust: 100%;
       }

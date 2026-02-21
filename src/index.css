@@ -1321,9 +1321,8 @@
 }
 
 /* Ensure smooth scrolling in sidebar/navigation */
-nav, [role="navigation"] {
+nav[class*="overflow"], [role="navigation"][class*="overflow"] {
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
 }
 
 /* Focus state improvements for touch */
@@ -1353,9 +1352,16 @@ nav, [role="navigation"] {
    Mobile Responsive Fixes - إصلاحات الجوال
    ======================================== */
 
-/* Prevent horizontal overflow on mobile */
-html, body {
+/* Prevent horizontal overflow on mobile - only horizontal */
+html {
   overflow-x: hidden;
+  overflow-y: auto;
+  max-width: 100vw;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: visible;
   max-width: 100vw;
 }
 
