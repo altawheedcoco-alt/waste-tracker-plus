@@ -73,14 +73,35 @@
       </div>
     </div>
     <script>
-      // Show reload button if app doesn't load within 12 seconds
+      // CRITICAL: Aggressively clean old Service Workers and caches BEFORE loading the app
+      // This runs immediately to prevent old SW from intercepting requests
+      (function(){
+        // Unregister ALL service workers
+        if('serviceWorker' in navigator){
+          navigator.serviceWorker.getRegistrations().then(function(regs){
+            regs.forEach(function(r){ r.unregister(); });
+          });
+          // Force the page to not be controlled by any SW
+          if(navigator.serviceWorker.controller){
+            navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'});
+          }
+        }
+        // Delete ALL caches
+        if('caches' in window){
+          caches.keys().then(function(names){
+            names.forEach(function(n){ caches.delete(n); });
+          });
+        }
+      })();
+
+      // Show reload button if app doesn't load within 10 seconds
       setTimeout(function(){
         var msg = document.getElementById('loader-timeout-msg');
         var root = document.getElementById('root');
         if(msg && root && root.querySelector('#initial-loader')){
           msg.style.display='block';
         }
-      }, 12000);
+      }, 10000);
     </script>
     <script type="module" src="/src/main.tsx"></script>
     <noscript>
