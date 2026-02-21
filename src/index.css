@@ -1232,6 +1232,118 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* ========================================
+   Enhanced Touch & Scroll Experience
+   ======================================== */
+
+/* Momentum scrolling for all scrollable containers */
+[style*="overflow"], .overflow-y-auto, .overflow-x-auto, .overflow-auto,
+.overflow-y-scroll, .overflow-x-scroll, .overflow-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent rubber-band bouncing on iOS for fixed layouts */
+.no-overscroll {
+  overscroll-behavior: none;
+}
+
+/* Smooth scroll containers with snap */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-y {
+  scroll-snap-type: y proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-item {
+  scroll-snap-align: start;
+}
+
+/* Improve touch response on interactive elements */
+@media (pointer: coarse) {
+  /* Faster visual feedback on tap */
+  button, a, [role="button"], [role="tab"], [role="link"],
+  .cursor-pointer, [onclick] {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    transition-duration: 0.1s !important;
+  }
+
+  /* Prevent text selection on interactive elements during scroll */
+  .touch-scroll-container {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Cards and interactive surfaces - faster response */
+  [class*="card"], [class*="Card"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent zoom on double-tap for form areas */
+  form, .form-container {
+    touch-action: manipulation;
+  }
+
+  /* Scrollable dialogs/modals */
+  [role="dialog"] [class*="overflow"] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Better scroll performance for long lists */
+  .virtual-scroll, [class*="grid"], [class*="space-y"] {
+    contain: layout style;
+  }
+}
+
+/* Pull-to-refresh prevention on fixed pages */
+.fixed-page {
+  overscroll-behavior-y: none;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Auth page specific mobile optimizations */
+.auth-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scroll-behavior: smooth;
+  min-height: 100dvh;
+}
+
+/* Ensure smooth scrolling in sidebar/navigation */
+nav, [role="navigation"] {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Focus state improvements for touch */
+@media (pointer: coarse) {
+  *:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+
+  /* Larger hit areas for close buttons and small icons */
+  [aria-label*="close"], [aria-label*="إغلاق"], [aria-label*="Close"] {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 /* Optimize rendering */
 .optimize-rendering {
   contain: layout style paint;
