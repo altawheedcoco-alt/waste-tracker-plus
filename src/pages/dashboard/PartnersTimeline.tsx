@@ -24,6 +24,7 @@ import { ar } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import PostInteractions from '@/components/organization/PostInteractions';
+import { getOrganizationTypeLabel } from '@/lib/shipmentStatusConfig';
 
 interface Post {
   id: string;
@@ -135,14 +136,8 @@ const PartnersTimeline = () => {
     }
   };
 
-  const getOrgTypeLabel = (type: string) => {
-    switch (type) {
-      case 'generator': return 'جهة مولدة';
-      case 'transporter': return 'جهة ناقلة';
-      case 'recycler': return 'جهة مدورة';
-      default: return 'جهة';
-    }
-  };
+  // getOrgTypeLabel now uses centralized utility
+  const getOrgTypeLabel = getOrganizationTypeLabel;
 
   const getOrgTypeColor = (type: string) => {
     switch (type) {

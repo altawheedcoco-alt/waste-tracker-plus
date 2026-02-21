@@ -525,3 +525,24 @@ export const disposalMethodLabels: Record<string, string> = {
   biological_treatment: 'المعالجة البيولوجية',
   solidification: 'التصلب والتثبيت',
 };
+
+// Organization type labels (centralized - DRY)
+export type OrganizationType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'transport_office';
+export type ShipmentOrganizationType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
+
+export const organizationTypeLabels: Record<string, string> = {
+  generator: 'جهة مولدة',
+  transporter: 'جهة ناقلة',
+  recycler: 'جهة مدورة',
+  disposal: 'جهة تخلص نهائي',
+  admin: 'مدير النظام',
+  transport_office: 'مكتب نقل',
+};
+
+export const getOrganizationTypeLabel = (type: string): string => {
+  return organizationTypeLabels[type] || type;
+};
+
+export const getOrganizationTypeCast = (orgType?: string | null): OrganizationType => {
+  return (orgType || 'generator') as OrganizationType;
+};
