@@ -24,25 +24,35 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       scale = 2,
     } = options;
 
-    // A4 margins in mm - minimal for more content space
     const marginMM = 8;
 
     // Temporarily apply A4-like width constraint for accurate capture
     const originalStyle = element.style.cssText;
-    element.style.width = '794px'; // A4 at 96dpi
+    element.style.width = '794px';
     element.style.maxWidth = '794px';
     element.style.padding = '24px';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
+    element.style.overflow = 'visible';
 
     // Hide no-print elements
     const noPrintEls = element.querySelectorAll('.no-print');
     noPrintEls.forEach(el => (el as HTMLElement).style.display = 'none');
 
     // Wait for reflow
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 200));
 
-    const canvas = await html2canvas(element, {
+    const pdf = new jsPDF({ orientation, unit: 'mm', format });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const contentWidth = pageWidth - marginMM * 2;
+    const contentHeight = pageHeight - marginMM * 2;
+
+    // Check for page-break sections (children with pageBreakAfter)
+    const children = Array.from(element.children) as HTMLElement[];
+    const hasPageBreaks = children.length > 1;
+
+    const captureOpts = {
       scale,
       useCORS: true,
       allowTaint: true,
@@ -50,39 +60,59 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       logging: false,
       width: 794,
       windowWidth: 794,
-    });
+    };
+
+    if (hasPageBreaks && children.length > 1) {
+      // Capture each top-level child as a separate page
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        const canvas = await html2canvas(child, captureOpts);
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        const imgWidth = contentWidth;
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+        if (i > 0) pdf.addPage();
+
+        // If content fits in one page, center it
+        if (imgHeight <= contentHeight) {
+          pdf.addImage(imgData, 'JPEG', marginMM, marginMM, imgWidth, imgHeight);
+        } else {
+          // Multi-page for this section
+          let heightLeft = imgHeight;
+          let position = 0;
+          pdf.addImage(imgData, 'JPEG', marginMM, marginMM + position, imgWidth, imgHeight);
+          heightLeft -= contentHeight;
+          while (heightLeft > 0) {
+            position = -(imgHeight - heightLeft);
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', marginMM, marginMM + position, imgWidth, imgHeight);
+            heightLeft -= contentHeight;
+          }
+        }
+      }
+    } else {
+      // Single capture fallback
+      const canvas = await html2canvas(element, captureOpts);
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = contentWidth;
+      const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
+      heightLeft -= contentHeight;
+
+      while (heightLeft > 0) {
+        position = -(imgHeight - heightLeft);
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
+        heightLeft -= contentHeight;
+      }
+    }
 
     // Restore original styles
     element.style.cssText = originalStyle;
     noPrintEls.forEach(el => (el as HTMLElement).style.display = '');
-
-    const pdf = new jsPDF({
-      orientation,
-      unit: 'mm',
-      format,
-    });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const contentWidth = pageWidth - marginMM * 2;
-    const contentHeight = pageHeight - marginMM * 2;
-
-    const imgData = canvas.toDataURL('image/png');
-    const imgWidth = contentWidth;
-    const imgHeight = (canvas.height * contentWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
-    heightLeft -= contentHeight;
-
-    while (heightLeft > 0) {
-      position = -(imgHeight - heightLeft);
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
-      heightLeft -= contentHeight;
-    }
 
     return pdf;
   }, [options]);

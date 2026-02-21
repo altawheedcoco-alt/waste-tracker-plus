@@ -68,50 +68,54 @@ const DeliveryDeclarationViewDialog = ({
     ? format(new Date(declaration.declared_at), 'dd MMMM yyyy - hh:mm a', { locale: ar })
     : '';
 
+  const declarationTitle = declaration.declaration_type === 'generator_handover' 
+    ? 'إقرار تسليم مخلفات من المولّد' 
+    : declaration.declaration_type === 'recycler_receipt' 
+    ? 'إقرار استلام مخلفات — المدوّر/جهة التخلص' 
+    : 'إقرار تسليم واستلام شحنة مخلفات';
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-        <DialogHeader className="p-4 border-b sticky top-0 bg-background z-10">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2 text-right">
-              <FileCheck className="w-5 h-5 text-primary" />
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0" dir="rtl">
+        <DialogHeader className="p-3 border-b sticky top-0 bg-background z-10">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <DialogTitle className="flex items-center gap-2 text-right text-sm sm:text-base">
+              <FileCheck className="w-5 h-5 text-primary flex-shrink-0" />
               إقرار تسليم الشحنة
             </DialogTitle>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handlePrint} disabled={isExporting}>
-                <Printer className="ml-2 h-4 w-4" />
-                طباعة
+              <Button variant="outline" size="sm" onClick={handlePrint} disabled={isExporting} className="gap-1.5">
+                <Printer className="h-4 w-4" />
+                <span className="hidden sm:inline">طباعة</span>
               </Button>
-              <Button variant="default" size="sm" onClick={handleDownload} disabled={isExporting}>
-                <Download className="ml-2 h-4 w-4" />
-                تحميل PDF
+              <Button variant="default" size="sm" onClick={handleDownload} disabled={isExporting} className="gap-1.5">
+                <Download className="h-4 w-4" />
+                <span className="hidden sm:inline">تحميل PDF</span>
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8">
                 <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
         </DialogHeader>
 
-        <ScrollArea className="max-h-[calc(90vh-80px)]">
+        <ScrollArea className="max-h-[calc(90vh-70px)]">
           <div ref={printRef} dir="rtl" className="print-document" style={{ fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif" }}>
             {/* Page 1 — Main Document */}
-            <div style={{ padding: '16px', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '16px', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column', maxWidth: '100%', overflow: 'hidden' }}>
               {/* Header */}
               <div style={{ textAlign: 'center', borderBottom: '3px double #16a34a', paddingBottom: '12px', marginBottom: '12px' }}>
-                <h1 style={{ color: '#16a34a', fontSize: '16px', margin: '0 0 2px', fontWeight: 'bold' }}>
-                  {declaration.declaration_type === 'generator_handover' ? 'إقرار تسليم مخلفات من المولّد' :
-                   declaration.declaration_type === 'recycler_receipt' ? 'إقرار استلام مخلفات — المدوّر/جهة التخلص' :
-                   'إقرار تسليم واستلام شحنة مخلفات'}
+                <h1 style={{ color: '#16a34a', fontSize: '15px', margin: '0 0 2px', fontWeight: 'bold', wordWrap: 'break-word' }}>
+                  {declarationTitle}
                 </h1>
                 <p style={{ color: '#374151', fontSize: '10px', margin: '2px 0', fontWeight: '600' }}>Waste Delivery & Receipt Declaration</p>
                 <p style={{ color: '#6b7280', fontSize: '9px', margin: 0 }}>وثيقة رسمية مؤمنة ومسجلة إلكترونياً — محمية ببصمة رقمية SHA-256</p>
               </div>
 
-              {/* Shipment Info */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', margin: '10px 0', padding: '10px', background: '#f0fdf4', borderRadius: '6px', fontSize: '11px', border: '1px solid #86efac' }}>
+              {/* Shipment Info - responsive grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '6px', margin: '10px 0', padding: '10px', background: '#f0fdf4', borderRadius: '6px', fontSize: '11px', border: '1px solid #86efac', wordBreak: 'break-word' }}>
                 <div><span style={{ color: '#6b7280' }}>رقم الشحنة: </span><strong>{declaration.shipment_number}</strong></div>
-                <div><span style={{ color: '#6b7280' }}>تاريخ الإقرار: </span><strong>{declaredDate}</strong></div>
+                <div><span style={{ color: '#6b7280' }}>تاريخ الإقرار: </span><strong style={{ fontSize: '10px' }}>{declaredDate}</strong></div>
                 <div><span style={{ color: '#6b7280' }}>نوع النفايات: </span><strong>{declaration.waste_type}</strong></div>
                 <div><span style={{ color: '#6b7280' }}>الكمية: </span><strong>{declaration.quantity} {declaration.unit || 'طن'}</strong></div>
                 {declaration.driver_name && <div><span style={{ color: '#6b7280' }}>اسم السائق/المسلّم: </span><strong><MemberNameLink name={declaration.driver_name} /></strong></div>}
@@ -123,12 +127,12 @@ const DeliveryDeclarationViewDialog = ({
               </div>
 
               {/* Declaration Text */}
-              <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '10px', margin: '10px 0', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '6px', background: '#fffbeb', flex: 1 }}>
+              <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '10px', margin: '10px 0', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '6px', background: '#fffbeb', flex: 1, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                 {declaration.declaration_text}
               </div>
 
               {/* Legal Disclaimer */}
-              <div style={{ padding: '8px 10px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', margin: '8px 0', fontSize: '9px', color: '#991b1b', lineHeight: '1.5' }}>
+              <div style={{ padding: '8px 10px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', margin: '8px 0', fontSize: '9px', color: '#991b1b', lineHeight: '1.5', wordBreak: 'break-word' }}>
                 <p style={{ margin: 0, fontWeight: 'bold' }}>⚖️ إخلاء مسؤولية وتحذير قانوني:</p>
                 <p style={{ margin: '3px 0 0 0' }}>
                   هذه الوثيقة ملزمة قانونياً لجميع الأطراف الموقعة والمسجلة. أي مخالفة للبيانات المذكورة أو تلاعب بمحتويات الشحنة أو إخفاء معلومات جوهرية يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 وقانون حماية البيئة رقم 4 لسنة 1994 وقانون العقوبات المصري. يخضع هذا المستند لشروط وأحكام وسياسات منصة iRecycle المعتمدة.
@@ -137,7 +141,7 @@ const DeliveryDeclarationViewDialog = ({
 
               {/* Signature Area */}
               <div style={{ borderTop: '2px solid #e5e7eb', paddingTop: '12px', marginTop: '10px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '10px', color: '#6b7280' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', fontSize: '10px', color: '#6b7280' }}>
                   <div>
                     <p><strong>المُقِر:</strong> {declaration.driver_name || 'غير محدد'}</p>
                     <p><strong>رقم الهوية:</strong> {declaration.driver_national_id || 'غير محدد'}</p>
@@ -149,14 +153,14 @@ const DeliveryDeclarationViewDialog = ({
                   </div>
                 </div>
                 <div style={{ border: '1px dashed #d1d5db', padding: '15px', textAlign: 'center', marginTop: '10px', borderRadius: '6px', color: '#9ca3af' }}>
-                  <p style={{ fontSize: '10px' }}>التوقيع الإلكتروني — تم التأكيد رقمياً عبر المنصة</p>
-                  <p style={{ fontSize: '8px', marginTop: '3px' }}>هذا الإقرار مسجل ومحمي ببصمة رقمية SHA-256 ولا يجوز تعديله أو التلاعب به</p>
+                  <p style={{ fontSize: '10px', margin: 0 }}>التوقيع الإلكتروني — تم التأكيد رقمياً عبر المنصة</p>
+                  <p style={{ fontSize: '8px', marginTop: '3px', margin: '3px 0 0' }}>هذا الإقرار مسجل ومحمي ببصمة رقمية SHA-256 ولا يجوز تعديله أو التلاعب به</p>
                 </div>
               </div>
 
               {/* Footer */}
               <div style={{ borderTop: '2px solid #e5e7eb', marginTop: '10px', paddingTop: '8px', textAlign: 'center', fontSize: '8px', color: '#6b7280' }}>
-                <p style={{ margin: 0 }}>وثيقة رسمية مؤمنة وذكية | رقم الوثيقة: DEC-{declaration.id.slice(0, 8).toUpperCase()} | الشحنة: {declaration.shipment_number} | يخضع لقانون 202/2020</p>
+                <p style={{ margin: 0, wordBreak: 'break-word' }}>وثيقة رسمية مؤمنة وذكية | رقم الوثيقة: DEC-{declaration.id.slice(0, 8).toUpperCase()} | الشحنة: {declaration.shipment_number} | يخضع لقانون 202/2020</p>
                 <p style={{ margin: '4px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '8px' }}>
                   {[
                     'الإنتاج عليك.. والدائرة المقفولة علينا. خليك I RECYCLE.',
