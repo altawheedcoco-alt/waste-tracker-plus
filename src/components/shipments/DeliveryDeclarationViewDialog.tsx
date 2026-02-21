@@ -76,23 +76,21 @@ const DeliveryDeclarationViewDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0" dir="rtl">
+      <DialogContent className="max-w-3xl w-[96vw] max-h-[90vh] p-0 overflow-hidden" dir="rtl">
         <DialogHeader className="p-3 border-b sticky top-0 bg-background z-10">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <DialogTitle className="flex items-center gap-2 text-right text-sm sm:text-base">
+          <div className="flex items-center justify-between gap-2">
+            <DialogTitle className="flex items-center gap-2 text-right text-sm sm:text-base truncate">
               <FileCheck className="w-5 h-5 text-primary flex-shrink-0" />
               إقرار تسليم الشحنة
             </DialogTitle>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handlePrint} disabled={isExporting} className="gap-1.5">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <Button variant="outline" size="icon" onClick={handlePrint} disabled={isExporting} className="h-9 w-9">
                 <Printer className="h-4 w-4" />
-                <span className="hidden sm:inline">طباعة</span>
               </Button>
-              <Button variant="default" size="sm" onClick={handleDownload} disabled={isExporting} className="gap-1.5">
+              <Button variant="default" size="icon" onClick={handleDownload} disabled={isExporting} className="h-9 w-9">
                 <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">تحميل PDF</span>
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8">
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-9 w-9">
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -100,9 +98,9 @@ const DeliveryDeclarationViewDialog = ({
         </DialogHeader>
 
         <ScrollArea className="max-h-[calc(90vh-70px)]">
-          <div ref={printRef} dir="rtl" className="print-document" style={{ fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif" }}>
+          <div ref={printRef} dir="rtl" className="print-document w-full overflow-hidden" style={{ fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif" }}>
             {/* Page 1 — Main Document */}
-            <div style={{ padding: '16px', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column', maxWidth: '100%', overflow: 'hidden' }}>
+            <div style={{ padding: '12px', boxSizing: 'border-box', pageBreakAfter: 'always', display: 'flex', flexDirection: 'column', width: '100%', overflow: 'hidden', wordBreak: 'break-word' }}>
               {/* Header */}
               <div style={{ textAlign: 'center', borderBottom: '3px double #16a34a', paddingBottom: '12px', marginBottom: '12px' }}>
                 <h1 style={{ color: '#16a34a', fontSize: '15px', margin: '0 0 2px', fontWeight: 'bold', wordWrap: 'break-word' }}>
@@ -113,7 +111,7 @@ const DeliveryDeclarationViewDialog = ({
               </div>
 
               {/* Shipment Info - responsive grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '6px', margin: '10px 0', padding: '10px', background: '#f0fdf4', borderRadius: '6px', fontSize: '11px', border: '1px solid #86efac', wordBreak: 'break-word' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 8px', margin: '8px 0', padding: '8px', background: '#f0fdf4', borderRadius: '6px', fontSize: '10px', border: '1px solid #86efac', wordBreak: 'break-word', overflow: 'hidden' }}>
                 <div><span style={{ color: '#6b7280' }}>رقم الشحنة: </span><strong>{declaration.shipment_number}</strong></div>
                 <div><span style={{ color: '#6b7280' }}>تاريخ الإقرار: </span><strong style={{ fontSize: '10px' }}>{declaredDate}</strong></div>
                 <div><span style={{ color: '#6b7280' }}>نوع النفايات: </span><strong>{declaration.waste_type}</strong></div>
@@ -127,7 +125,7 @@ const DeliveryDeclarationViewDialog = ({
               </div>
 
               {/* Declaration Text */}
-              <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '10px', margin: '10px 0', padding: '12px', border: '1px solid #e5e7eb', borderRadius: '6px', background: '#fffbeb', flex: 1, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+              <div style={{ whiteSpace: 'pre-line', lineHeight: '1.6', fontSize: '9px', margin: '8px 0', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '6px', background: '#fffbeb', flex: 1, wordBreak: 'break-word', overflowWrap: 'break-word', overflow: 'hidden' }}>
                 {declaration.declaration_text}
               </div>
 
@@ -141,7 +139,7 @@ const DeliveryDeclarationViewDialog = ({
 
               {/* Signature Area */}
               <div style={{ borderTop: '2px solid #e5e7eb', paddingTop: '12px', marginTop: '10px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px', fontSize: '10px', color: '#6b7280' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '9px', color: '#6b7280' }}>
                   <div>
                     <p><strong>المُقِر:</strong> {declaration.driver_name || 'غير محدد'}</p>
                     <p><strong>رقم الهوية:</strong> {declaration.driver_national_id || 'غير محدد'}</p>
