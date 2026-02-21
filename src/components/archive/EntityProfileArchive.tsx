@@ -332,30 +332,33 @@ export default function EntityProfileArchive({
   };
 
   const handleView = (doc: ArchiveDoc) => {
-    if (doc.fileUrl) { window.open(doc.fileUrl, '_blank'); return; }
-    const docId = doc.referenceId;
-    switch (doc.type) {
-      case 'shipment': navigate(docId ? `/dashboard/shipments/${docId}` : '/dashboard/shipments'); break;
-      case 'invoice': navigate(docId ? `/dashboard/invoices?view=${docId}` : '/dashboard/invoices'); break;
-      case 'contract': navigate(docId ? `/dashboard/contracts?view=${docId}` : '/dashboard/contracts'); break;
-      case 'certificate': navigate(docId ? `/dashboard/shipments/${docId}?tab=certificate` : '/dashboard/shipments'); break;
-      case 'award_letter': navigate('/dashboard/award-letters'); break;
-      case 'deposit': navigate('/dashboard/accounting'); break;
-      default: toast.info('لا يوجد معاينة متاحة');
+    if (doc.fileUrl) {
+      window.open(doc.fileUrl, '_blank');
+    } else {
+      toast.info('لا يوجد ملف متاح للمعاينة');
     }
   };
 
   const handleDownload = (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
-      const a = document.createElement('a'); a.href = doc.fileUrl; a.download = doc.title || 'document'; a.target = '_blank'; a.click();
-    } else handleView(doc);
+      const a = document.createElement('a');
+      a.href = doc.fileUrl;
+      a.download = doc.title || 'document';
+      a.target = '_blank';
+      a.click();
+      toast.success('جاري التحميل...');
+    } else {
+      toast.info('لا يوجد ملف متاح للتحميل');
+    }
   };
 
   const handlePrint = (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
       const pw = window.open(doc.fileUrl, '_blank');
       if (pw) pw.addEventListener('load', () => pw.print());
-    } else handleView(doc);
+    } else {
+      toast.info('لا يوجد ملف متاح للطباعة');
+    }
   };
 
   return (
