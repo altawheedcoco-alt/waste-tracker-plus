@@ -54,50 +54,6 @@ const MobileOptimizations = memo(({ children }: MobileOptimizationsProps) => {
     };
   }, [enableAnimations, reduceData, imageQuality, device.tier]);
 
-  // Memory pressure handling
-  useEffect(() => {
-    if (!('onmemorywarning' in window)) return;
-    
-    const handleMemoryPressure = () => {
-      // Clear image caches
-      if ('caches' in window) {
-        caches.open('images-cache').then(cache => {
-          cache.keys().then(keys => {
-            // Keep only recent 20 images
-            keys.slice(20).forEach(key => cache.delete(key));
-          });
-        });
-      }
-      console.warn('⚠️ Memory pressure detected, cleaning caches');
-    };
-
-    (window as any).addEventListener('memorywarning', handleMemoryPressure);
-    return () => (window as any).removeEventListener('memorywarning', handleMemoryPressure);
-  }, []);
-
-  // Prefetch critical routes on good connection
-  useEffect(() => {
-    if (!isOnline || isSlowConnection || device.isLowEnd) return;
-
-    const timer = setTimeout(() => {
-      const routes = [
-        () => import('@/pages/Dashboard'),
-        () => import('@/pages/dashboard/ShipmentManagement'),
-      ];
-      routes.forEach(r => r().catch(() => {}));
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [isOnline, isSlowConnection, device.isLowEnd]);
-
-  // Register for background sync
-  useEffect(() => {
-    if ('serviceWorker' in navigator && 'SyncManager' in window) {
-      navigator.serviceWorker.ready.then(reg => {
-        (reg as any).sync?.register('background-sync').catch(() => {});
-      });
-    }
-  }, []);
 
   return <>{children}</>;
 });
