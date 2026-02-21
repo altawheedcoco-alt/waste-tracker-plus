@@ -16,6 +16,12 @@ window.addEventListener('error', (event) => {
 // Render first, then handle SW cleanup
 const rootElement = document.getElementById("root");
 if (rootElement) {
+  // Remove initial loader immediately
+  const initialLoader = document.getElementById('initial-loader');
+  if (initialLoader) {
+    initialLoader.remove();
+  }
+  
   try {
     createRoot(rootElement).render(
       <React.StrictMode>
