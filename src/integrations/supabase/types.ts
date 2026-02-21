@@ -29960,8 +29960,6 @@ export type Database = {
         Args: { p_org_id: string; p_org_type: string }
         Returns: undefined
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
         Returns: boolean
