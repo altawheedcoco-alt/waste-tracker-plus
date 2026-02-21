@@ -76,8 +76,8 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
     try {
       const fileName = `loading-${shipment.id}-${Date.now()}.jpg`;
       await supabase.storage.from('weighbridge-photos').upload(`loading/${fileName}`, file);
-      const url = supabase.storage.from('weighbridge-photos').getPublicUrl(`loading/${fileName}`).data.publicUrl;
-      setLoadingPhotoUrl(url);
+      const { data: signedData } = await supabase.storage.from('weighbridge-photos').createSignedUrl(`loading/${fileName}`, 86400);
+      setLoadingPhotoUrl(signedData?.signedUrl || '');
       toast.success('📸 تم رفع صورة الحمولة بنجاح');
     } catch {
       toast.error('فشل رفع الصورة');
@@ -91,8 +91,8 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
     try {
       const fileName = `delivery-${shipment.id}-${Date.now()}.jpg`;
       await supabase.storage.from('weighbridge-photos').upload(`delivery/${fileName}`, file);
-      const url = supabase.storage.from('weighbridge-photos').getPublicUrl(`delivery/${fileName}`).data.publicUrl;
-      setDeliveryWeighbridgeUrl(url);
+      const { data: signedData } = await supabase.storage.from('weighbridge-photos').createSignedUrl(`delivery/${fileName}`, 86400);
+      setDeliveryWeighbridgeUrl(signedData?.signedUrl || '');
       toast.success('📸 تم رفع صورة ميزان الاستلام');
     } catch {
       toast.error('فشل رفع الصورة');
