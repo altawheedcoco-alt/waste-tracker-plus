@@ -78,19 +78,26 @@ const PartnerNotesDialog = ({ open, onOpenChange, partnerId, partnerName }: Part
   }, [open, organization?.id, partnerId]);
 
   const fetchNotes = async () => {
-    if (!organization?.id) return;
+    if (!organization?.id) {
+      console.warn('[PartnerNotes] No organization ID available');
+      return;
+    }
     
     setLoading(true);
     try {
+      console.log('[PartnerNotes] Fetching notes:', { orgId: organization.id, partnerId });
+      
       const { data, error } = await supabase
         .from('partner_notes')
         .select(`
           *,
-          sender:sender_organization_id!partner_notes_sender_organization_id_fkey(name),
-          receiver:receiver_organization_id!partner_notes_receiver_organization_id_fkey(name)
+          sender:organizations!partner_notes_sender_organization_id_fkey(name),
+          receiver:organizations!partner_notes_receiver_organization_id_fkey(name)
         `)
         .or(`and(sender_organization_id.eq.${organization.id},receiver_organization_id.eq.${partnerId}),and(sender_organization_id.eq.${partnerId},receiver_organization_id.eq.${organization.id})`)
         .order('created_at', { ascending: false });
+
+      console.log('[PartnerNotes] Result:', { data, error });
 
       if (error) throw error;
       setNotes((data || []) as unknown as Note[]);
