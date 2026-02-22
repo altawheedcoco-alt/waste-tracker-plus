@@ -576,204 +576,10 @@ const WazeLocationField = ({
               </Button>
             </div>
           </div>
-
-          {/* Dropdown */}
-          {showDropdown && (
-            <Card className="absolute z-50 top-full mt-1 w-full shadow-lg border rounded-lg overflow-hidden bg-background">
-              <ScrollArea className="max-h-[280px]">
-                {quickLocations && (
-                  <div className="p-2 space-y-1">
-                    {organizationAddress && (
-                      <button
-                        type="button"
-                        className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
-                        onClick={useOrgPrimary}
-                      >
-                        <Building2 className="w-4 h-4 text-primary flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium">{organizationName || 'المقر الرئيسي'}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">
-                            {organizationCity ? `${organizationAddress}, ${organizationCity}` : organizationAddress}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="text-[9px] flex-shrink-0">رئيسي</Badge>
-                      </button>
-                    )}
-
-                    {orgLocations.slice(0, 3).map(loc => (
-                      <button
-                        key={loc.id}
-                        type="button"
-                        className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
-                        onClick={() => handleSelect({
-                          id: `org-${loc.id}`,
-                          name: loc.location_name,
-                          address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
-                          lat: loc.latitude || 0,
-                          lng: loc.longitude || 0,
-                          type: 'org',
-                        })}
-                      >
-                        <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium">{loc.location_name}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">{loc.address}</p>
-                        </div>
-                      </button>
-                    ))}
-
-                    {savedLocations.length > 0 && (
-                      <>
-                        <div className="flex items-center gap-2 px-3 pt-2 pb-1">
-                          <Bookmark className="w-3 h-3 text-muted-foreground" />
-                          <span className="text-[10px] text-muted-foreground font-medium">آخر المستخدمة</span>
-                        </div>
-                        {savedLocations.slice(0, 4).map(loc => (
-                          <button
-                            key={loc.id}
-                            type="button"
-                            className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
-                            onClick={() => handleSelect({
-                              id: `saved-${loc.id}`,
-                              name: loc.name,
-                              address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
-                              lat: loc.latitude,
-                              lng: loc.longitude,
-                              type: 'saved',
-                            })}
-                          >
-                            <Star className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium">{loc.name}</p>
-                              <p className="text-[11px] text-muted-foreground truncate">{loc.address}</p>
-                            </div>
-                            {loc.usage_count > 0 && (
-                              <span className="text-[9px] text-muted-foreground">{loc.usage_count}×</span>
-                            )}
-                          </button>
-                        ))}
-                      </>
-                    )}
-                  </div>
-                )}
-
-                {results.length > 0 && (
-                  <div className="p-1">
-                    {(showAllResults ? results : results.slice(0, 5)).map((result) => (
-                      <button
-                        key={result.id}
-                        type="button"
-                        className="w-full px-3 py-2.5 text-right hover:bg-muted/80 rounded-md flex items-start gap-2.5 transition-colors"
-                        onClick={() => handleSelect(result)}
-                      >
-                        <div className="mt-0.5 flex-shrink-0">
-                          {getTypeIcon(result.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium truncate">{result.name}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">{result.address}</p>
-                        </div>
-                        <Badge variant="outline" className="text-[9px] flex-shrink-0 mt-0.5">
-                          {getTypeLabel(result.type)}
-                        </Badge>
-                      </button>
-                    ))}
-                    {!showAllResults && results.length > 5 && (
-                      <button
-                        type="button"
-                        className="w-full px-3 py-2 text-center text-xs font-medium text-primary hover:bg-primary/5 rounded-md transition-colors"
-                        onClick={() => setShowAllResults(true)}
-                      >
-                        عرض الكل ({results.length} نتيجة)
-                      </button>
-                    )}
-                    {showAllResults && results.length > 5 && (
-                      <button
-                        type="button"
-                        className="w-full px-3 py-2 text-center text-xs font-medium text-muted-foreground hover:bg-muted/80 rounded-md transition-colors"
-                        onClick={() => setShowAllResults(false)}
-                      >
-                        عرض أقل
-                      </button>
-                    )}
-                  </div>
-                )}
-              </ScrollArea>
-            </Card>
-          )}
         </div>
       )}
 
-      {/* Map Link Input */}
-      <div className="space-y-1">
-        <Label className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-          <Link2 className="w-3 h-3" />
-          لصق رابط خريطة (Google Maps, Waze, OSM)
-        </Label>
-        <div className="flex gap-2">
-          <Input
-            value={mapLink}
-            onChange={(e) => onMapLinkChange?.(e.target.value)}
-            placeholder="https://www.google.com/maps?q=30.0444,31.2357"
-            className="text-xs h-8 flex-1"
-            dir="ltr"
-            onPaste={(e) => {
-              // Auto-parse on paste
-              setTimeout(() => {
-                const pastedLink = e.currentTarget.value;
-                if (pastedLink) {
-                  const coords = parseMapLink(pastedLink);
-                  if (coords) {
-                    onMapLinkChange?.(pastedLink);
-                    setMapCenter(coords);
-                    setMapZoom(16);
-                    // Reverse geocode to get address
-                    reverseGeocode(coords.lat, coords.lng).then((address) => {
-                      if (address) {
-                        onChange(address, coords);
-                      } else {
-                        onChange(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, coords);
-                      }
-                    });
-                    toast.success('📍 تم تحديد الموقع من الرابط');
-                  } else {
-                    toast.error('لم يتم العثور على إحداثيات في الرابط');
-                  }
-                }
-              }, 0);
-            }}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-8 text-[11px] gap-1 px-2.5"
-            disabled={!mapLink}
-            onClick={() => {
-              const coords = parseMapLink(mapLink);
-              if (coords) {
-                setMapCenter(coords);
-                setMapZoom(16);
-                reverseGeocode(coords.lat, coords.lng).then((address) => {
-                  if (address) {
-                    onChange(address, coords);
-                  } else {
-                    onChange(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, coords);
-                  }
-                });
-                toast.success('📍 تم تحديد الموقع من الرابط');
-              } else {
-                toast.error('لم يتم العثور على إحداثيات في الرابط');
-              }
-            }}
-          >
-            <MapPin className="w-3 h-3" />
-            تحديد
-          </Button>
-        </div>
-      </div>
-
-      {/* Map Section with Provider Switcher */}
+      {/* Map Section - PRIORITY: shown first */}
       {showMap && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -806,7 +612,6 @@ const WazeLocationField = ({
             </Button>
           </div>
 
-          {/* Provider-specific map with native search */}
           {mapProvider === 'google' && (
             <div className="space-y-1">
               <div className="text-[10px] text-muted-foreground">🔍 استخدم بحث Google Maps الأصلي داخل الخريطة</div>
@@ -876,6 +681,198 @@ const WazeLocationField = ({
           )}
         </div>
       )}
+
+      {/* Search Results - below the map */}
+      {(!value || focused) && showDropdown && (
+        <Card className="w-full shadow-sm border rounded-lg overflow-hidden bg-background">
+          <ScrollArea className="max-h-[220px]">
+            {quickLocations && (
+              <div className="p-2 space-y-1">
+                {organizationAddress && (
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
+                    onClick={useOrgPrimary}
+                  >
+                    <Building2 className="w-4 h-4 text-primary flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium">{organizationName || 'المقر الرئيسي'}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">
+                        {organizationCity ? `${organizationAddress}, ${organizationCity}` : organizationAddress}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-[9px] flex-shrink-0">رئيسي</Badge>
+                  </button>
+                )}
+
+                {orgLocations.slice(0, 3).map(loc => (
+                  <button
+                    key={loc.id}
+                    type="button"
+                    className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
+                    onClick={() => handleSelect({
+                      id: `org-${loc.id}`,
+                      name: loc.location_name,
+                      address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
+                      lat: loc.latitude || 0,
+                      lng: loc.longitude || 0,
+                      type: 'org',
+                    })}
+                  >
+                    <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium">{loc.location_name}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{loc.address}</p>
+                    </div>
+                  </button>
+                ))}
+
+                {savedLocations.length > 0 && (
+                  <>
+                    <div className="flex items-center gap-2 px-3 pt-2 pb-1">
+                      <Bookmark className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-[10px] text-muted-foreground font-medium">آخر المستخدمة</span>
+                    </div>
+                    {savedLocations.slice(0, 4).map(loc => (
+                      <button
+                        key={loc.id}
+                        type="button"
+                        className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
+                        onClick={() => handleSelect({
+                          id: `saved-${loc.id}`,
+                          name: loc.name,
+                          address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
+                          lat: loc.latitude,
+                          lng: loc.longitude,
+                          type: 'saved',
+                        })}
+                      >
+                        <Star className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium">{loc.name}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{loc.address}</p>
+                        </div>
+                        {loc.usage_count > 0 && (
+                          <span className="text-[9px] text-muted-foreground">{loc.usage_count}×</span>
+                        )}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+
+            {results.length > 0 && (
+              <div className="p-1">
+                {(showAllResults ? results : results.slice(0, 5)).map((result) => (
+                  <button
+                    key={result.id}
+                    type="button"
+                    className="w-full px-3 py-2.5 text-right hover:bg-muted/80 rounded-md flex items-start gap-2.5 transition-colors"
+                    onClick={() => handleSelect(result)}
+                  >
+                    <div className="mt-0.5 flex-shrink-0">
+                      {getTypeIcon(result.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{result.name}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{result.address}</p>
+                    </div>
+                    <Badge variant="outline" className="text-[9px] flex-shrink-0 mt-0.5">
+                      {getTypeLabel(result.type)}
+                    </Badge>
+                  </button>
+                ))}
+                {!showAllResults && results.length > 5 && (
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 text-center text-xs font-medium text-primary hover:bg-primary/5 rounded-md transition-colors"
+                    onClick={() => setShowAllResults(true)}
+                  >
+                    عرض الكل ({results.length} نتيجة)
+                  </button>
+                )}
+                {showAllResults && results.length > 5 && (
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 text-center text-xs font-medium text-muted-foreground hover:bg-muted/80 rounded-md transition-colors"
+                    onClick={() => setShowAllResults(false)}
+                  >
+                    عرض أقل
+                  </button>
+                )}
+              </div>
+            )}
+          </ScrollArea>
+        </Card>
+      )}
+
+      {/* Map Link Input */}
+      <div className="space-y-1">
+        <Label className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+          <Link2 className="w-3 h-3" />
+          لصق رابط خريطة (Google Maps, Waze, OSM)
+        </Label>
+        <div className="flex gap-2">
+          <Input
+            value={mapLink}
+            onChange={(e) => onMapLinkChange?.(e.target.value)}
+            placeholder="https://www.google.com/maps?q=30.0444,31.2357"
+            className="text-xs h-8 flex-1"
+            dir="ltr"
+            onPaste={(e) => {
+              setTimeout(() => {
+                const pastedLink = e.currentTarget.value;
+                if (pastedLink) {
+                  const coords = parseMapLink(pastedLink);
+                  if (coords) {
+                    onMapLinkChange?.(pastedLink);
+                    setMapCenter(coords);
+                    setMapZoom(16);
+                    reverseGeocode(coords.lat, coords.lng).then((address) => {
+                      if (address) {
+                        onChange(address, coords);
+                      } else {
+                        onChange(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, coords);
+                      }
+                    });
+                    toast.success('📍 تم تحديد الموقع من الرابط');
+                  } else {
+                    toast.error('لم يتم العثور على إحداثيات في الرابط');
+                  }
+                }
+              }, 0);
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 text-[11px] gap-1 px-2.5"
+            disabled={!mapLink}
+            onClick={() => {
+              const coords = parseMapLink(mapLink);
+              if (coords) {
+                setMapCenter(coords);
+                setMapZoom(16);
+                reverseGeocode(coords.lat, coords.lng).then((address) => {
+                  if (address) {
+                    onChange(address, coords);
+                  } else {
+                    onChange(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, coords);
+                  }
+                });
+                toast.success('📍 تم تحديد الموقع من الرابط');
+              } else {
+                toast.error('لم يتم العثور على إحداثيات في الرابط');
+              }
+            }}
+          >
+            <MapPin className="w-3 h-3" />
+            تحديد
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
