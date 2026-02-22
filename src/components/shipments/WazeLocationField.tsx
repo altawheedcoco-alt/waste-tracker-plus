@@ -77,7 +77,7 @@ const WazeLocationField = ({
   organizationCity,
   coordinates,
   icon = 'pickup',
-  showMap = false,
+  showMap = true,
 }: WazeLocationFieldProps) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
