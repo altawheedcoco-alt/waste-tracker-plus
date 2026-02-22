@@ -219,14 +219,15 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-35deg);
-    font-size: 120px;
+    font-size: 130px;
     font-weight: 900;
-    color: rgba(22, 163, 74, 0.04);
+    color: rgba(22, 163, 74, 0.08);
     pointer-events: none;
-    z-index: 0;
+    z-index: 9999;
     letter-spacing: 20px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  body > * { position: relative; z-index: 1; }
   
   /* Header */
   .hdr { text-align: center; border-bottom: 2px solid #16a34a; padding-bottom: 6px; margin-bottom: 6px; }
