@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, Loader2, MapPin, Navigation, X, ExternalLink,
-  Bookmark, Building2, LocateFixed, Star, Map,
+  Bookmark, Building2, LocateFixed, Star, Map, Link2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -42,6 +42,41 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string | null> 
     );
     const data = await res.json();
     return data.display_name || null;
+  } catch {
+    return null;
+  }
+};
+
+// Parse coordinates from various map links (Google Maps, Waze, OSM, etc.)
+const parseMapLink = (link: string): { lat: number; lng: number } | null => {
+  try {
+    // Google Maps: various formats
+    // https://www.google.com/maps?q=30.0444,31.2357
+    // https://www.google.com/maps/@30.0444,31.2357,15z
+    // https://maps.google.com/maps?ll=30.0444,31.2357
+    // https://goo.gl/maps/... (short links won't work without redirect)
+    let match = link.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+    match = link.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+    match = link.match(/[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+    // Waze: https://waze.com/ul?ll=30.0444,31.2357
+    match = link.match(/waze\.com.*[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+    // OSM: https://www.openstreetmap.org/#map=16/30.0444/31.2357
+    match = link.match(/openstreetmap\.org.*#map=\d+\/(-?\d+\.?\d*)\/(-?\d+\.?\d*)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+    // Generic: just two decimal numbers separated by comma
+    match = link.match(/(-?\d{1,3}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+    return null;
   } catch {
     return null;
   }
@@ -143,6 +178,8 @@ interface OrgLocation {
 interface WazeLocationFieldProps {
   value: string;
   onChange: (address: string, coordinates?: { lat: number; lng: number }) => void;
+  mapLink?: string;
+  onMapLinkChange?: (link: string) => void;
   label: string;
   placeholder?: string;
   organizationId?: string;
@@ -157,6 +194,8 @@ interface WazeLocationFieldProps {
 const WazeLocationField = ({
   value,
   onChange,
+  mapLink = '',
+  onMapLinkChange,
   label,
   placeholder = 'ابحث عن موقع...',
   organizationId,
@@ -653,6 +692,75 @@ const WazeLocationField = ({
           )}
         </div>
       )}
+
+      {/* Map Link Input */}
+      <div className="space-y-1">
+        <Label className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+          <Link2 className="w-3 h-3" />
+          لصق رابط خريطة (Google Maps, Waze, OSM)
+        </Label>
+        <div className="flex gap-2">
+          <Input
+            value={mapLink}
+            onChange={(e) => onMapLinkChange?.(e.target.value)}
+            placeholder="https://www.google.com/maps?q=30.0444,31.2357"
+            className="text-xs h-8 flex-1"
+            dir="ltr"
+            onPaste={(e) => {
+              // Auto-parse on paste
+              setTimeout(() => {
+                const pastedLink = e.currentTarget.value;
+                if (pastedLink) {
+                  const coords = parseMapLink(pastedLink);
+                  if (coords) {
+                    onMapLinkChange?.(pastedLink);
+                    setMapCenter(coords);
+                    setMapZoom(16);
+                    // Reverse geocode to get address
+                    reverseGeocode(coords.lat, coords.lng).then((address) => {
+                      if (address) {
+                        onChange(address, coords);
+                      } else {
+                        onChange(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, coords);
+                      }
+                    });
+                    toast.success('📍 تم تحديد الموقع من الرابط');
+                  } else {
+                    toast.error('لم يتم العثور على إحداثيات في الرابط');
+                  }
+                }
+              }, 0);
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 text-[11px] gap-1 px-2.5"
+            disabled={!mapLink}
+            onClick={() => {
+              const coords = parseMapLink(mapLink);
+              if (coords) {
+                setMapCenter(coords);
+                setMapZoom(16);
+                reverseGeocode(coords.lat, coords.lng).then((address) => {
+                  if (address) {
+                    onChange(address, coords);
+                  } else {
+                    onChange(`${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, coords);
+                  }
+                });
+                toast.success('📍 تم تحديد الموقع من الرابط');
+              } else {
+                toast.error('لم يتم العثور على إحداثيات في الرابط');
+              }
+            }}
+          >
+            <MapPin className="w-3 h-3" />
+            تحديد
+          </Button>
+        </div>
+      </div>
 
       {/* Map Section with Provider Switcher */}
       {showMap && (
