@@ -53,8 +53,8 @@ const PrintCenter = () => {
   const navigate = useNavigate();
   const orgId = organization?.id;
 
-  const [dateMode, setDateMode] = useState<'today' | 'range'>('today');
-  const [dateFrom, setDateFrom] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [dateMode, setDateMode] = useState<'today' | 'range'>('range');
+  const [dateFrom, setDateFrom] = useState(format(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [selectedPartner, setSelectedPartner] = useState<string>('all');
   const [selectedDocTypes, setSelectedDocTypes] = useState<DocType[]>(['all']);
@@ -169,50 +169,74 @@ const PrintCenter = () => {
         });
       }
 
-      // Receipts
+      // Receipts - fetch via shipment IDs linked to org
       if (isAll || selectedDocTypes.includes('receipts')) {
-        const { data } = await supabase
-          .from('shipment_receipts')
-          .select('id, receipt_number, status, receipt_type, actual_weight, unit, created_at, shipment_id')
+        // First get shipment IDs for this org
+        const { data: orgShipments } = await supabase
+          .from('shipments')
+          .select('id')
+          .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId},disposal_facility_id.eq.${orgId}`)
           .gte('created_at', fromISO)
-          .lte('created_at', toISO)
-          .order('created_at', { ascending: false });
+          .lte('created_at', toISO);
 
-        (data || []).forEach((r: any) => {
-          items.push({
-            id: `rcpt-${r.id}`,
-            type: 'receipts',
-            typeLabel: 'إيصال استلام',
-            title: `إيصال - ${r.receipt_number || r.id.substring(0, 8)}`,
-            subtitle: `${r.receipt_type || '-'} • ${r.actual_weight || '-'} ${r.unit || ''}`,
-            date: r.created_at,
-            status: r.status || 'pending',
-            rawData: r,
+        const shipmentIds = (orgShipments || []).map((s: any) => s.id);
+        if (shipmentIds.length > 0) {
+          const { data } = await supabase
+            .from('shipment_receipts')
+            .select('id, receipt_number, status, receipt_type, actual_weight, unit, created_at, shipment_id')
+            .in('shipment_id', shipmentIds)
+            .order('created_at', { ascending: false });
+
+          (data || []).forEach((r: any) => {
+            items.push({
+              id: `rcpt-${r.id}`,
+              type: 'receipts',
+              typeLabel: 'إيصال استلام',
+              title: `إيصال - ${r.receipt_number || r.id.substring(0, 8)}`,
+              subtitle: `${r.receipt_type || '-'} • ${r.actual_weight || '-'} ${r.unit || ''}`,
+              date: r.created_at,
+              status: r.status || 'pending',
+              rawData: r,
+            });
           });
-        });
+        }
       }
 
-      // Certificates
+      // Certificates - fetch via shipment IDs linked to org
       if (isAll || selectedDocTypes.includes('certificates')) {
-        const { data } = await supabase
-          .from('recycling_reports')
-          .select('id, report_number, created_at, shipment_id')
+        // Reuse shipment IDs if already fetched, otherwise fetch
+        let certShipmentIds: string[] = [];
+        if (isAll || selectedDocTypes.includes('receipts')) {
+          // Already fetched above, but we need to refetch if not
+        }
+        const { data: certShipments } = await supabase
+          .from('shipments')
+          .select('id')
+          .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId},disposal_facility_id.eq.${orgId}`)
           .gte('created_at', fromISO)
-          .lte('created_at', toISO)
-          .order('created_at', { ascending: false });
+          .lte('created_at', toISO);
 
-        (data || []).forEach((r: any) => {
-          items.push({
-            id: `cert-${r.id}`,
-            type: 'certificates',
-            typeLabel: 'شهادة تدوير',
-            title: `شهادة - ${r.report_number || r.id.substring(0, 8)}`,
-            subtitle: `شحنة: ${r.shipment_id ? r.shipment_id.substring(0, 8) : '-'}`,
-            date: r.created_at,
-            status: 'completed',
-            rawData: r,
+        certShipmentIds = (certShipments || []).map((s: any) => s.id);
+        if (certShipmentIds.length > 0) {
+          const { data } = await supabase
+            .from('recycling_reports')
+            .select('id, report_number, created_at, shipment_id')
+            .in('shipment_id', certShipmentIds)
+            .order('created_at', { ascending: false });
+
+          (data || []).forEach((r: any) => {
+            items.push({
+              id: `cert-${r.id}`,
+              type: 'certificates',
+              typeLabel: 'شهادة تدوير',
+              title: `شهادة - ${r.report_number || r.id.substring(0, 8)}`,
+              subtitle: `شحنة: ${r.shipment_id ? r.shipment_id.substring(0, 8) : '-'}`,
+              date: r.created_at,
+              status: 'completed',
+              rawData: r,
+            });
           });
-        });
+        }
       }
 
       return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
