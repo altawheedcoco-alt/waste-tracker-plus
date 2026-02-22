@@ -13,25 +13,73 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useSavedLocations } from '@/hooks/useSavedLocations';
 import { supabase } from '@/integrations/supabase/client';
+import L from 'leaflet';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
-// Waze iframe using pure React - no direct DOM manipulation
-const WazeEmbed = ({ lat, lng, zoom }: { lat: number; lng: number; zoom: number }) => {
-  const src = `https://embed.waze.com/iframe?zoom=${zoom}&lat=${lat}&lon=${lng}&pin=1`;
-  return (
-    <iframe
-      key={`${lat}-${lng}-${zoom}`}
-      src={src}
-      width="100%"
-      height="100%"
-      allowFullScreen
-      loading="lazy"
-      style={{ border: 'none' }}
-      title="Waze Map"
-      className="rounded-lg"
-    />
-  );
+// Interactive Leaflet mini-map - replaces Waze iframe to fix removeChild error
+const LocationMiniMap = ({ 
+  lat, lng, zoom, onLocationSelect 
+}: { 
+  lat: number; lng: number; zoom: number;
+  onLocationSelect?: (lat: number, lng: number) => void;
+}) => {
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
+  const onSelectRef = useRef(onLocationSelect);
+  onSelectRef.current = onLocationSelect;
+
+  useEffect(() => {
+    const container = mapContainerRef.current;
+    if (!container) return;
+
+    // Prevent double init in strict mode
+    if (mapInstanceRef.current) return;
+
+    const map = L.map(container, {
+      center: [lat, lng],
+      zoom,
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    const icon = L.divIcon({
+      html: `<div style="background:hsl(142,76%,36%);width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="hsl(142,76%,36%)"/></svg>
+      </div>`,
+      className: '',
+      iconSize: [24, 24],
+      iconAnchor: [12, 24],
+    });
+
+    const marker = L.marker([lat, lng], { icon }).addTo(map);
+    markerRef.current = marker;
+    mapInstanceRef.current = map;
+
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      onSelectRef.current?.(e.latlng.lat, e.latlng.lng);
+    });
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+      markerRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (mapInstanceRef.current && markerRef.current) {
+      mapInstanceRef.current.setView([lat, lng], zoom, { animate: true });
+      markerRef.current.setLatLng([lat, lng]);
+    }
+  }, [lat, lng, zoom]);
+
+  return <div ref={mapContainerRef} className="w-full h-full rounded-lg" style={{ zIndex: 0 }} />;
 };
 
 interface SearchResult {
@@ -464,16 +512,13 @@ const WazeLocationField = ({
         </div>
       )}
 
-      {/* Waze Embedded Map */}
+      {/* Interactive Map */}
       {showMap && (
         <div className="space-y-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" fill="hsl(var(--primary))" opacity="0.15"/>
-                <path d="M12 2C6.5 2 2 6.5 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10c0-5.5-4.5-10-10-10zm-2 15c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm3.5-5c-.3 0-.5-.2-.5-.5v-1c0-2.8-2.2-5-5-5s-5 2.2-5 5v1c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1c0 .3-.2.5-.5.5z" fill="hsl(var(--primary))"/>
-              </svg>
-              <span>Waze خريطة</span>
+              <MapPin className="w-3.5 h-3.5 text-primary" />
+              <span>انقر على الخريطة لتحديد الموقع</span>
             </div>
             <Button
               type="button"
@@ -487,10 +532,37 @@ const WazeLocationField = ({
             </Button>
           </div>
           <div className={cn(
-            "transition-all duration-300",
+            "transition-all duration-300 border rounded-lg overflow-hidden",
             mapExpanded ? "h-[300px]" : "h-[160px]"
           )}>
-            <WazeEmbed lat={mapCenter.lat} lng={mapCenter.lng} zoom={mapZoom} />
+            <LocationMiniMap 
+              lat={mapCenter.lat} 
+              lng={mapCenter.lng} 
+              zoom={mapZoom}
+              onLocationSelect={async (lat, lng) => {
+                // Reverse geocode the clicked location
+                try {
+                  const res = await fetch(
+                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=ar`
+                  );
+                  const data = await res.json();
+                  if (data.features?.[0]) {
+                    onChange(data.features[0].place_name, { lat, lng });
+                    setMapCenter({ lat, lng });
+                    setMapZoom(15);
+                    toast.success('📍 تم تحديد الموقع من الخريطة');
+                  } else {
+                    onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
+                    setMapCenter({ lat, lng });
+                    setMapZoom(15);
+                  }
+                } catch {
+                  onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
+                  setMapCenter({ lat, lng });
+                  setMapZoom(15);
+                }
+              }}
+            />
           </div>
         </div>
       )}
