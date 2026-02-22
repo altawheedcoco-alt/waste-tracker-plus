@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SmartLocationSearch from '@/components/maps/SmartLocationSearch';
-import GooglePlacesSearch from '@/components/maps/GooglePlacesSearch';
+import GooglePlacesSearch from '@/components/maps/FreeLocationSearch';
 import { 
   MapPin, 
   Navigation, 
@@ -47,7 +47,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 // Lazy load map component
-const InteractiveMapPicker = lazy(() => import('@/components/maps/InteractiveMapPicker'));
+const InteractiveMapPicker = lazy(() => import('@/components/maps/LeafletLocationPicker'));
 
 // Helper functions for external navigation
 const openInGoogleMaps = (address: string, coords?: { lat: number; lng: number }) => {

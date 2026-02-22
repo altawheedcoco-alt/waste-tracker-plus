@@ -11,7 +11,7 @@ import ShipmentDocumentsPanel from '@/components/documents/ShipmentDocumentsPane
 import ShipmentProgressLogs from '@/components/shipments/ShipmentProgressLogs';
 import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
-import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
+import ShipmentTrackingMap from '@/components/maps/LeafletShipmentTracking';
 import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker';
 import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
 import RouteProgressBar from '@/components/tracking/RouteProgressBar';

@@ -15,8 +15,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import GoogleMapComponent from '@/components/maps/GoogleMapComponent';
-import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
+import GoogleMapComponent from '@/components/maps/LeafletMapComponent';
+import GoogleMapsSearchBox from '@/components/maps/LeafletSearchBox';
 
 // أنماط الخريطة المتاحة (Google Maps)
 const MAP_STYLES = {
