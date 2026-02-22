@@ -128,7 +128,7 @@ interface SearchResult {
   address: string;
   lat: number;
   lng: number;
-  type: 'waze' | 'saved' | 'org';
+  type: 'waze' | 'saved' | 'org' | 'google' | 'osm';
 }
 
 interface OrgLocation {
@@ -251,31 +251,60 @@ const WazeLocationField = ({
           type: 'org' as const,
         }));
 
-      // Use Waze search via edge function
-      const center = coordinates || mapCenter;
-      const wazeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/waze-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lon=${center.lng}&lang=ar`;
-      const response = await fetch(wazeUrl, {
-        headers: {
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-      });
-      const data = await response.json();
-      const wazeResults: SearchResult[] = (data.results || []).map((r: any) => ({
-        id: r.id,
-        name: r.name,
-        address: r.address,
-        lat: r.lat,
-        lng: r.lng,
-        type: 'waze' as const,
-      }));
+      // Search based on selected map provider
+      let mapResults: SearchResult[] = [];
 
-      setResults([...savedResults, ...orgResults, ...wazeResults]);
+      if (mapProvider === 'waze') {
+        // Waze search via edge function
+        const center = coordinates || mapCenter;
+        const wazeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/waze-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lon=${center.lng}&lang=ar`;
+        const response = await fetch(wazeUrl, {
+          headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+        });
+        const data = await response.json();
+        mapResults = (data.results || []).map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          address: r.address,
+          lat: r.lat,
+          lng: r.lng,
+          type: 'waze' as const,
+        }));
+      } else if (mapProvider === 'google') {
+        // Google via Mapbox geocoding (best free alternative)
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=8&language=ar&types=address,place,locality,neighborhood,poi`;
+        const response = await fetch(url);
+        const data = await response.json();
+        mapResults = (data.features || []).map((f: any, i: number) => ({
+          id: `google-${f.id}-${i}`,
+          name: f.text || f.place_name.split(',')[0],
+          address: f.place_name,
+          lat: f.center[1],
+          lng: f.center[0],
+          type: 'google' as const,
+        }));
+      } else {
+        // OSM via Nominatim
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=8&accept-language=ar`;
+        const response = await fetch(url);
+        const data = await response.json();
+        mapResults = (data || []).map((r: any, i: number) => ({
+          id: `osm-${r.place_id}-${i}`,
+          name: r.display_name.split(',')[0],
+          address: r.display_name,
+          lat: parseFloat(r.lat),
+          lng: parseFloat(r.lon),
+          type: 'osm' as const,
+        }));
+      }
+
+      setResults([...savedResults, ...orgResults, ...mapResults]);
     } catch {
       setResults([]);
     } finally {
       setLoading(false);
     }
-  }, [savedLocations, orgLocations, coordinates, mapCenter]);
+  }, [savedLocations, orgLocations, coordinates, mapCenter, mapProvider]);
 
   const handleSelect = (result: SearchResult) => {
     onChange(result.address, { lat: result.lat, lng: result.lng });
@@ -391,6 +420,8 @@ const WazeLocationField = ({
       case 'saved': return <Star className="w-3.5 h-3.5 text-amber-500" />;
       case 'org': return <Building2 className="w-3.5 h-3.5 text-primary" />;
       case 'waze': return <Navigation className="w-3.5 h-3.5 text-primary" />;
+      case 'google': return <MapPin className="w-3.5 h-3.5 text-destructive" />;
+      case 'osm': return <Map className="w-3.5 h-3.5 text-primary" />;
     }
   };
 
@@ -399,6 +430,8 @@ const WazeLocationField = ({
       case 'saved': return 'محفوظ';
       case 'org': return 'منظمة';
       case 'waze': return 'Waze';
+      case 'google': return 'Google';
+      case 'osm': return 'OSM';
     }
   };
 
