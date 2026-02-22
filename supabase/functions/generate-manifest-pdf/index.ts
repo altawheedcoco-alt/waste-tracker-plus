@@ -30,13 +30,14 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Fetch shipment with all related data
+    const orgFields = `name, name_en, address, address_details, city, region, phone, secondary_phone, email, business_email, commercial_register, tax_card, license_number, environmental_license, environmental_approval_number, wmra_license, ida_license, land_transport_license, industrial_registry, establishment_registration, organization_type, partner_code, client_code, representative_name, representative_phone, representative_email, representative_position, representative_national_id, agent_name, agent_phone, agent_email, agent_national_id, delegate_name, delegate_phone, delegate_email, delegate_national_id, activity_type, field_of_work, hazardous_certified, headquarters, logo_url`;
     const { data: shipment, error } = await supabase
       .from("shipments")
       .select(`
         *,
-        generator:organizations!shipments_generator_id_fkey(name, address, city, commercial_register, phone, email),
-        transporter:organizations!shipments_transporter_id_fkey(name, address, city, commercial_register, license_number, phone),
-        recycler:organizations!shipments_recycler_id_fkey(name, address, city, commercial_register, phone)
+        generator:organizations!shipments_generator_id_fkey(${orgFields}),
+        transporter:organizations!shipments_transporter_id_fkey(${orgFields}),
+        recycler:organizations!shipments_recycler_id_fkey(${orgFields})
       `)
       .eq("id", shipmentId)
       .single();
@@ -321,28 +322,69 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 
 <!-- 1. الأطراف -->
 <div class="sec">
-  <div class="sec-t">القسم الأول: الأطراف المعنية</div>
+  <div class="sec-t">القسم الأول: الأطراف المعنية | Involved Parties</div>
   <div class="parties">
     <div class="party">
-      <h4>🏭 المولّد (الطرف الأول)</h4>
+      <h4>🏭 المولّد (الطرف الأول) | Generator</h4>
       <p><span class="lbl">الاسم:</span> <span class="val">${shipment.generator?.name || shipment.manual_generator_name || "—"}</span></p>
-      <p><span class="lbl">العنوان:</span> ${shipment.generator?.address || "—"}, ${shipment.generator?.city || ""}</p>
-      <p><span class="lbl">السجل:</span> ${shipment.generator?.commercial_register || "—"}</p>
-      <p><span class="lbl">هاتف:</span> ${shipment.generator?.phone || "—"}</p>
+      ${shipment.generator?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.generator.name_en}</span></p>` : ''}
+      <p><span class="lbl">كود الشريك:</span> ${shipment.generator?.partner_code || "—"} ${shipment.generator?.client_code ? `| كود العميل: ${shipment.generator.client_code}` : ''}</p>
+      <p><span class="lbl">النوع:</span> ${shipment.generator?.organization_type || "—"} ${shipment.generator?.activity_type ? `| النشاط: ${shipment.generator.activity_type}` : ''}</p>
+      <p><span class="lbl">العنوان:</span> ${shipment.generator?.address || "—"}${shipment.generator?.address_details ? ` - ${shipment.generator.address_details}` : ''}</p>
+      <p><span class="lbl">المدينة:</span> ${shipment.generator?.city || "—"} ${shipment.generator?.region ? `| المنطقة: ${shipment.generator.region}` : ''} ${shipment.generator?.headquarters ? `| المقر: ${shipment.generator.headquarters}` : ''}</p>
+      <p><span class="lbl">هاتف:</span> ${shipment.generator?.phone || "—"} ${shipment.generator?.secondary_phone ? `| ${shipment.generator.secondary_phone}` : ''}</p>
+      <p><span class="lbl">بريد:</span> ${shipment.generator?.email || "—"} ${shipment.generator?.business_email ? `| ${shipment.generator.business_email}` : ''}</p>
+      <p><span class="lbl">سجل تجاري:</span> ${shipment.generator?.commercial_register || "—"} ${shipment.generator?.tax_card ? `| بطاقة ضريبية: ${shipment.generator.tax_card}` : ''}</p>
+      ${shipment.generator?.industrial_registry ? `<p><span class="lbl">سجل صناعي:</span> ${shipment.generator.industrial_registry}</p>` : ''}
+      ${shipment.generator?.environmental_license ? `<p><span class="lbl">ترخيص بيئي:</span> ${shipment.generator.environmental_license}</p>` : ''}
+      ${shipment.generator?.environmental_approval_number ? `<p><span class="lbl">رقم الموافقة البيئية:</span> ${shipment.generator.environmental_approval_number}</p>` : ''}
+      ${shipment.generator?.wmra_license ? `<p><span class="lbl">ترخيص WMRA:</span> ${shipment.generator.wmra_license}</p>` : ''}
+      ${shipment.generator?.establishment_registration ? `<p><span class="lbl">قيد المنشأة:</span> ${shipment.generator.establishment_registration}</p>` : ''}
+      ${shipment.generator?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.generator.representative_name} ${shipment.generator?.representative_position ? `(${shipment.generator.representative_position})` : ''}</p>` : ''}
+      ${shipment.generator?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.generator.representative_phone} ${shipment.generator?.representative_national_id ? `| رقم قومي: ${shipment.generator.representative_national_id}` : ''}</p>` : ''}
+      ${shipment.generator?.field_of_work ? `<p><span class="lbl">مجال العمل:</span> ${shipment.generator.field_of_work}</p>` : ''}
     </div>
     <div class="party">
-      <h4>🚛 الناقل (الطرف الثاني)</h4>
+      <h4>🚛 الناقل (الطرف الثاني) | Transporter</h4>
       <p><span class="lbl">الاسم:</span> <span class="val">${shipment.transporter?.name || shipment.manual_transporter_name || "—"}</span></p>
-      <p><span class="lbl">العنوان:</span> ${shipment.transporter?.address || "—"}, ${shipment.transporter?.city || ""}</p>
-      <p><span class="lbl">ترخيص:</span> ${shipment.transporter?.license_number || "—"}</p>
-      <p><span class="lbl">هاتف:</span> ${shipment.transporter?.phone || "—"}</p>
+      ${shipment.transporter?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.transporter.name_en}</span></p>` : ''}
+      <p><span class="lbl">كود الشريك:</span> ${shipment.transporter?.partner_code || "—"} ${shipment.transporter?.client_code ? `| كود العميل: ${shipment.transporter.client_code}` : ''}</p>
+      <p><span class="lbl">النوع:</span> ${shipment.transporter?.organization_type || "—"} ${shipment.transporter?.activity_type ? `| النشاط: ${shipment.transporter.activity_type}` : ''}</p>
+      <p><span class="lbl">العنوان:</span> ${shipment.transporter?.address || "—"}${shipment.transporter?.address_details ? ` - ${shipment.transporter.address_details}` : ''}</p>
+      <p><span class="lbl">المدينة:</span> ${shipment.transporter?.city || "—"} ${shipment.transporter?.region ? `| المنطقة: ${shipment.transporter.region}` : ''} ${shipment.transporter?.headquarters ? `| المقر: ${shipment.transporter.headquarters}` : ''}</p>
+      <p><span class="lbl">هاتف:</span> ${shipment.transporter?.phone || "—"} ${shipment.transporter?.secondary_phone ? `| ${shipment.transporter.secondary_phone}` : ''}</p>
+      <p><span class="lbl">بريد:</span> ${shipment.transporter?.email || "—"} ${shipment.transporter?.business_email ? `| ${shipment.transporter.business_email}` : ''}</p>
+      <p><span class="lbl">سجل تجاري:</span> ${shipment.transporter?.commercial_register || "—"} ${shipment.transporter?.tax_card ? `| بطاقة ضريبية: ${shipment.transporter.tax_card}` : ''}</p>
+      <p><span class="lbl">ترخيص نقل:</span> ${shipment.transporter?.license_number || "—"}</p>
+      ${shipment.transporter?.land_transport_license ? `<p><span class="lbl">ترخيص نقل بري:</span> ${shipment.transporter.land_transport_license}</p>` : ''}
+      ${shipment.transporter?.environmental_license ? `<p><span class="lbl">ترخيص بيئي:</span> ${shipment.transporter.environmental_license}</p>` : ''}
+      ${shipment.transporter?.wmra_license ? `<p><span class="lbl">ترخيص WMRA:</span> ${shipment.transporter.wmra_license}</p>` : ''}
+      ${shipment.transporter?.ida_license ? `<p><span class="lbl">ترخيص IDA:</span> ${shipment.transporter.ida_license}</p>` : ''}
+      ${shipment.transporter?.hazardous_certified ? `<p><span class="lbl">معتمد للمخلفات الخطرة:</span> ✅ نعم</p>` : ''}
+      ${shipment.transporter?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.transporter.representative_name} ${shipment.transporter?.representative_position ? `(${shipment.transporter.representative_position})` : ''}</p>` : ''}
+      ${shipment.transporter?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.transporter.representative_phone} ${shipment.transporter?.representative_national_id ? `| رقم قومي: ${shipment.transporter.representative_national_id}` : ''}</p>` : ''}
+      ${shipment.transporter?.field_of_work ? `<p><span class="lbl">مجال العمل:</span> ${shipment.transporter.field_of_work}</p>` : ''}
     </div>
     <div class="party">
-      <h4>♻️ المدوّر (الطرف الثالث)</h4>
+      <h4>♻️ المدوّر (الطرف الثالث) | Recycler</h4>
       <p><span class="lbl">الاسم:</span> <span class="val">${shipment.recycler?.name || shipment.manual_recycler_name || "—"}</span></p>
-      <p><span class="lbl">العنوان:</span> ${shipment.recycler?.address || "—"}, ${shipment.recycler?.city || ""}</p>
-      <p><span class="lbl">السجل:</span> ${shipment.recycler?.commercial_register || "—"}</p>
-      <p><span class="lbl">هاتف:</span> ${shipment.recycler?.phone || "—"}</p>
+      ${shipment.recycler?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.recycler.name_en}</span></p>` : ''}
+      <p><span class="lbl">كود الشريك:</span> ${shipment.recycler?.partner_code || "—"} ${shipment.recycler?.client_code ? `| كود العميل: ${shipment.recycler.client_code}` : ''}</p>
+      <p><span class="lbl">النوع:</span> ${shipment.recycler?.organization_type || "—"} ${shipment.recycler?.activity_type ? `| النشاط: ${shipment.recycler.activity_type}` : ''}</p>
+      <p><span class="lbl">العنوان:</span> ${shipment.recycler?.address || "—"}${shipment.recycler?.address_details ? ` - ${shipment.recycler.address_details}` : ''}</p>
+      <p><span class="lbl">المدينة:</span> ${shipment.recycler?.city || "—"} ${shipment.recycler?.region ? `| المنطقة: ${shipment.recycler.region}` : ''} ${shipment.recycler?.headquarters ? `| المقر: ${shipment.recycler.headquarters}` : ''}</p>
+      <p><span class="lbl">هاتف:</span> ${shipment.recycler?.phone || "—"} ${shipment.recycler?.secondary_phone ? `| ${shipment.recycler.secondary_phone}` : ''}</p>
+      <p><span class="lbl">بريد:</span> ${shipment.recycler?.email || "—"} ${shipment.recycler?.business_email ? `| ${shipment.recycler.business_email}` : ''}</p>
+      <p><span class="lbl">سجل تجاري:</span> ${shipment.recycler?.commercial_register || "—"} ${shipment.recycler?.tax_card ? `| بطاقة ضريبية: ${shipment.recycler.tax_card}` : ''}</p>
+      ${shipment.recycler?.environmental_license ? `<p><span class="lbl">ترخيص بيئي:</span> ${shipment.recycler.environmental_license}</p>` : ''}
+      ${shipment.recycler?.environmental_approval_number ? `<p><span class="lbl">رقم الموافقة البيئية:</span> ${shipment.recycler.environmental_approval_number}</p>` : ''}
+      ${shipment.recycler?.wmra_license ? `<p><span class="lbl">ترخيص WMRA:</span> ${shipment.recycler.wmra_license}</p>` : ''}
+      ${shipment.recycler?.ida_license ? `<p><span class="lbl">ترخيص IDA:</span> ${shipment.recycler.ida_license}</p>` : ''}
+      ${shipment.recycler?.industrial_registry ? `<p><span class="lbl">سجل صناعي:</span> ${shipment.recycler.industrial_registry}</p>` : ''}
+      ${shipment.recycler?.hazardous_certified ? `<p><span class="lbl">معتمد للمخلفات الخطرة:</span> ✅ نعم</p>` : ''}
+      ${shipment.recycler?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.recycler.representative_name} ${shipment.recycler?.representative_position ? `(${shipment.recycler.representative_position})` : ''}</p>` : ''}
+      ${shipment.recycler?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.recycler.representative_phone} ${shipment.recycler?.representative_national_id ? `| رقم قومي: ${shipment.recycler.representative_national_id}` : ''}</p>` : ''}
+      ${shipment.recycler?.field_of_work ? `<p><span class="lbl">مجال العمل:</span> ${shipment.recycler.field_of_work}</p>` : ''}
     </div>
   </div>
 </div>
