@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTabChannelName } from '@/lib/tabSession';
+import { playNotificationSound, mapNotificationTypeToSound } from '@/hooks/useNotificationSound';
 
 interface LiveNotification {
   id: string;
@@ -59,6 +60,10 @@ const LiveEventToast = () => {
         (payload) => {
           const newEvent = payload.new as LiveNotification;
           setEvents(prev => [newEvent, ...prev].slice(0, 5));
+
+          // Play notification sound based on type
+          const soundType = mapNotificationTypeToSound(newEvent.type);
+          playNotificationSound(soundType);
 
           // Auto-dismiss after 8 seconds
           setTimeout(() => {
