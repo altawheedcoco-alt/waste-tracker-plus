@@ -17968,6 +17968,7 @@ export type Database = {
           bio: string | null
           branches: Json | null
           business_email: string | null
+          certifications_approvals: Json | null
           city: string | null
           client_code: string | null
           commercial_register: string | null
@@ -17979,7 +17980,10 @@ export type Database = {
           delegate_national_id: string | null
           delegate_phone: string | null
           description: string | null
+          digital_declaration_number: string | null
           documents_submitted: boolean | null
+          eeaa_license_expiry_date: string | null
+          eeaa_license_issue_date: string | null
           email: string
           environmental_approval_number: string | null
           environmental_license: string | null
@@ -17990,6 +17994,8 @@ export type Database = {
           headquarters: string | null
           id: string
           ida_license: string | null
+          ida_license_expiry_date: string | null
+          ida_license_issue_date: string | null
           identity_verified: boolean | null
           industrial_registry: string | null
           is_active: boolean | null
@@ -17997,6 +18003,8 @@ export type Database = {
           is_suspended: boolean | null
           is_verified: boolean | null
           land_transport_license: string | null
+          land_transport_license_expiry_date: string | null
+          land_transport_license_issue_date: string | null
           license_expiry_date: string | null
           license_number: string | null
           license_renewal_url: string | null
@@ -18036,6 +18044,8 @@ export type Database = {
           vision: string | null
           website_url: string | null
           wmra_license: string | null
+          wmra_license_expiry_date: string | null
+          wmra_license_issue_date: string | null
           working_hours: Json | null
         }
         Insert: {
@@ -18050,6 +18060,7 @@ export type Database = {
           bio?: string | null
           branches?: Json | null
           business_email?: string | null
+          certifications_approvals?: Json | null
           city?: string | null
           client_code?: string | null
           commercial_register?: string | null
@@ -18061,7 +18072,10 @@ export type Database = {
           delegate_national_id?: string | null
           delegate_phone?: string | null
           description?: string | null
+          digital_declaration_number?: string | null
           documents_submitted?: boolean | null
+          eeaa_license_expiry_date?: string | null
+          eeaa_license_issue_date?: string | null
           email: string
           environmental_approval_number?: string | null
           environmental_license?: string | null
@@ -18072,6 +18086,8 @@ export type Database = {
           headquarters?: string | null
           id?: string
           ida_license?: string | null
+          ida_license_expiry_date?: string | null
+          ida_license_issue_date?: string | null
           identity_verified?: boolean | null
           industrial_registry?: string | null
           is_active?: boolean | null
@@ -18079,6 +18095,8 @@ export type Database = {
           is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
+          land_transport_license_expiry_date?: string | null
+          land_transport_license_issue_date?: string | null
           license_expiry_date?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
@@ -18118,6 +18136,8 @@ export type Database = {
           vision?: string | null
           website_url?: string | null
           wmra_license?: string | null
+          wmra_license_expiry_date?: string | null
+          wmra_license_issue_date?: string | null
           working_hours?: Json | null
         }
         Update: {
@@ -18132,6 +18152,7 @@ export type Database = {
           bio?: string | null
           branches?: Json | null
           business_email?: string | null
+          certifications_approvals?: Json | null
           city?: string | null
           client_code?: string | null
           commercial_register?: string | null
@@ -18143,7 +18164,10 @@ export type Database = {
           delegate_national_id?: string | null
           delegate_phone?: string | null
           description?: string | null
+          digital_declaration_number?: string | null
           documents_submitted?: boolean | null
+          eeaa_license_expiry_date?: string | null
+          eeaa_license_issue_date?: string | null
           email?: string
           environmental_approval_number?: string | null
           environmental_license?: string | null
@@ -18154,6 +18178,8 @@ export type Database = {
           headquarters?: string | null
           id?: string
           ida_license?: string | null
+          ida_license_expiry_date?: string | null
+          ida_license_issue_date?: string | null
           identity_verified?: boolean | null
           industrial_registry?: string | null
           is_active?: boolean | null
@@ -18161,6 +18187,8 @@ export type Database = {
           is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
+          land_transport_license_expiry_date?: string | null
+          land_transport_license_issue_date?: string | null
           license_expiry_date?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
@@ -18200,6 +18228,8 @@ export type Database = {
           vision?: string | null
           website_url?: string | null
           wmra_license?: string | null
+          wmra_license_expiry_date?: string | null
+          wmra_license_issue_date?: string | null
           working_hours?: Json | null
         }
         Relationships: []

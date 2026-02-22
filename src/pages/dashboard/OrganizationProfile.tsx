@@ -46,6 +46,7 @@ import OrganizationPhotoGallery from '@/components/organization/OrganizationPhot
 import BusinessProfileView from '@/components/organization/BusinessProfileView';
 import BusinessProfileSettings from '@/components/organization/BusinessProfileSettings';
 import LMSProfileCertificates from '@/components/lms/LMSProfileCertificates';
+import LegalDataSection from '@/components/organization/LegalDataSection';
 
 interface OrganizationDocument {
   id: string;
@@ -155,6 +156,18 @@ const OrganizationProfile = () => {
           ida_license: orgData.ida_license,
           industrial_registry: orgData.industrial_registry,
           license_number: orgData.license_number,
+          // تواريخ التراخيص
+          wmra_license_issue_date: orgData.wmra_license_issue_date || null,
+          wmra_license_expiry_date: orgData.wmra_license_expiry_date || null,
+          eeaa_license_issue_date: orgData.eeaa_license_issue_date || null,
+          eeaa_license_expiry_date: orgData.eeaa_license_expiry_date || null,
+          ida_license_issue_date: orgData.ida_license_issue_date || null,
+          ida_license_expiry_date: orgData.ida_license_expiry_date || null,
+          land_transport_license_issue_date: orgData.land_transport_license_issue_date || null,
+          land_transport_license_expiry_date: orgData.land_transport_license_expiry_date || null,
+          digital_declaration_number: orgData.digital_declaration_number,
+          certifications_approvals: orgData.certifications_approvals || [],
+          hazardous_certified: orgData.hazardous_certified,
           location_url: orgData.location_url,
           address_details: orgData.address_details,
           location_description: orgData.location_description,
@@ -506,6 +519,7 @@ const OrganizationProfile = () => {
                 <CardDescription>{t('orgProfile.basicDataDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* البيانات الأساسية */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('orgProfile.orgNameAr')}</Label>
@@ -522,62 +536,6 @@ const OrganizationProfile = () => {
                       onChange={(e) => setOrgData({ ...orgData, name_en: e.target.value })}
                       disabled={!isCompanyAdmin}
                       dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('orgProfile.commercialRegister')}</Label>
-                    <Input
-                      value={orgData?.commercial_register || ''}
-                      onChange={(e) => setOrgData({ ...orgData, commercial_register: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('orgProfile.taxCard')}</Label>
-                    <Input
-                      value={orgData?.tax_card || ''}
-                      onChange={(e) => setOrgData({ ...orgData, tax_card: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('orgProfile.envApprovalNumber')}</Label>
-                    <Input
-                      value={orgData?.environmental_approval_number || ''}
-                      onChange={(e) => setOrgData({ ...orgData, environmental_approval_number: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('orgProfile.envLicense')}</Label>
-                    <Input
-                      value={orgData?.environmental_license || ''}
-                      onChange={(e) => setOrgData({ ...orgData, environmental_license: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('orgProfile.wmraLicense')}</Label>
-                    <Input
-                      value={orgData?.wmra_license || ''}
-                      onChange={(e) => setOrgData({ ...orgData, wmra_license: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('orgProfile.establishmentReg')}</Label>
-                    <Input
-                      value={orgData?.establishment_registration || ''}
-                      onChange={(e) => setOrgData({ ...orgData, establishment_registration: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('orgProfile.registeredActivity')}</Label>
-                    <Input
-                      value={orgData?.registered_activity || ''}
-                      onChange={(e) => setOrgData({ ...orgData, registered_activity: e.target.value })}
-                      disabled={!isCompanyAdmin}
                     />
                   </div>
                   <div className="space-y-2">
@@ -622,64 +580,19 @@ const OrganizationProfile = () => {
                   </div>
                 </div>
 
-                {/* حقول خاصة بالجهة الناقلة */}
-                {organization.organization_type === 'transporter' && (
-                  <>
-                    <Separator />
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-primary">{t('orgProfile.transporterFields')}</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t('orgProfile.landTransportLicense')}</Label>
-                          <Input
-                            value={orgData?.land_transport_license || ''}
-                            onChange={(e) => setOrgData({ ...orgData, land_transport_license: e.target.value })}
-                            disabled={!isCompanyAdmin}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                <Separator />
 
-                {/* حقول خاصة بجهة التدوير */}
-                {organization.organization_type === 'recycler' && (
-                  <>
-                    <Separator />
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-primary">{t('orgProfile.recyclerFields')}</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t('orgProfile.idaLicense')}</Label>
-                          <Input
-                            value={orgData?.ida_license || ''}
-                            onChange={(e) => setOrgData({ ...orgData, ida_license: e.target.value })}
-                            disabled={!isCompanyAdmin}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t('orgProfile.industrialRegistry')}</Label>
-                          <Input
-                            value={orgData?.industrial_registry || ''}
-                            onChange={(e) => setOrgData({ ...orgData, industrial_registry: e.target.value })}
-                            disabled={!isCompanyAdmin}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t('orgProfile.licenseNumber')}</Label>
-                          <Input
-                            value={orgData?.license_number || ''}
-                            onChange={(e) => setOrgData({ ...orgData, license_number: e.target.value })}
-                            disabled={!isCompanyAdmin}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                {/* البيانات القانونية والتراخيص - مكون منفصل حسب نوع المنشأة */}
+                <LegalDataSection
+                  orgData={orgData}
+                  organizationType={organization.organization_type as string}
+                  isEditable={isCompanyAdmin}
+                  onUpdate={setOrgData}
+                />
 
                 <Separator />
 
+                {/* العنوان */}
                 <div className="space-y-4">
                   <h4 className="font-medium flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
