@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import L from 'leaflet';
+import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, ExternalLink, Route, Clock, Truck } from 'lucide-react';
+import { Loader2, MapPin, ExternalLink, Route, Clock, Truck, Navigation } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
@@ -33,47 +32,29 @@ const geocode = async (address: string): Promise<{ lat: number; lng: number } | 
 const LeafletRouteDialog = ({
   isOpen, onClose, pickupAddress, deliveryAddress, shipmentNumber,
 }: LeafletRouteDialogProps) => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const layerRef = useRef<L.LayerGroup | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [coords, setCoords] = useState<{ origin: { lat: number; lng: number }; dest: { lat: number; lng: number } } | null>(null);
 
   const calculateRoute = useCallback(async () => {
-    if (!mapRef.current || !pickupAddress || !deliveryAddress) return;
+    if (!pickupAddress || !deliveryAddress) return;
     setIsCalculating(true);
     try {
       const [origin, dest] = await Promise.all([geocode(pickupAddress), geocode(deliveryAddress)]);
       if (!origin || !dest) { toast.error('فشل في تحديد العناوين'); setIsCalculating(false); return; }
 
-      if (!mapInstanceRef.current) {
-        mapInstanceRef.current = L.map(mapRef.current, { center: [30.0444, 31.2357], zoom: 10, zoomControl: true });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(mapInstanceRef.current);
-        layerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
-      }
-      layerRef.current!.clearLayers();
+      setCoords({ origin, dest });
 
-      // Get route from OSRM
-      const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=full&geometries=geojson`);
+      // Get distance/duration from OSRM for display
+      const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${dest.lng},${dest.lat}?overview=false`);
       const routeData = await routeRes.json();
 
       if (routeData.routes?.[0]) {
         const route = routeData.routes[0];
-        const coords: L.LatLngExpression[] = route.geometry.coordinates.map((c: number[]) => [c[1], c[0]]);
-        L.polyline(coords, { color: '#22c55e', weight: 5 }).addTo(layerRef.current!);
-        
         const distKm = (route.distance / 1000).toFixed(1);
         const durMin = Math.round(route.duration / 60);
         setRouteInfo({ distance: `${distKm} كم`, duration: `${durMin} دقيقة` });
       }
-
-      // Markers
-      const greenIcon = L.divIcon({ html: '<div style="width:20px;height:20px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>', className: '', iconSize: [20, 20], iconAnchor: [10, 10] });
-      const redIcon = L.divIcon({ html: '<div style="width:20px;height:20px;border-radius:50%;background:#ef4444;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>', className: '', iconSize: [20, 20], iconAnchor: [10, 10] });
-      L.marker([origin.lat, origin.lng], { icon: greenIcon }).bindPopup('نقطة الاستلام').addTo(layerRef.current!);
-      L.marker([dest.lat, dest.lng], { icon: redIcon }).bindPopup('نقطة التسليم').addTo(layerRef.current!);
-
-      mapInstanceRef.current.fitBounds(L.latLngBounds([[origin.lat, origin.lng], [dest.lat, dest.lng]]), { padding: [50, 50] });
     } catch (e) {
       console.error('Route error:', e);
       toast.error('فشل في حساب المسار');
@@ -88,14 +69,25 @@ const LeafletRouteDialog = ({
 
   useEffect(() => {
     if (!isOpen) {
-      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null; }
       setRouteInfo(null);
+      setCoords(null);
     }
   }, [isOpen]);
+
+  const openInWaze = () => {
+    if (coords) {
+      window.open(`https://waze.com/ul?ll=${coords.dest.lat},${coords.dest.lng}&navigate=yes&from=ll.${coords.origin.lat},${coords.origin.lng}`, '_blank');
+    }
+  };
 
   const openInGoogleMaps = () => {
     window.open(`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(pickupAddress)}&destination=${encodeURIComponent(deliveryAddress)}&travelmode=driving`, '_blank');
   };
+
+  // Build Waze embed URL
+  const wazeEmbedUrl = coords
+    ? `https://embed.waze.com/iframe?zoom=12&lat=${(coords.origin.lat + coords.dest.lat) / 2}&lon=${(coords.origin.lng + coords.dest.lng) / 2}&pin=1&from=ll.${coords.origin.lat},${coords.origin.lng}&to=ll.${coords.dest.lat},${coords.dest.lng}`
+    : null;
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
@@ -123,10 +115,29 @@ const LeafletRouteDialog = ({
                 <div className="text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto mb-2 text-primary" /><p className="text-sm text-muted-foreground">جاري حساب المسار...</p></div>
               </div>
             )}
-            <div ref={mapRef} className="w-full h-full" />
+            {wazeEmbedUrl ? (
+              <iframe
+                src={wazeEmbedUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 'none' }}
+                loading="lazy"
+                allowFullScreen
+                title="Waze Route Map"
+              />
+            ) : (
+              !isCalculating && (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <p className="text-sm text-muted-foreground">أدخل عنواني الاستلام والتسليم لعرض المسار</p>
+                </div>
+              )
+            )}
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" onClick={onClose}>إغلاق</Button>
+            <Button variant="outline" onClick={openInWaze} className="gap-2" disabled={!coords}>
+              <Navigation className="w-4 h-4" />فتح في Waze
+            </Button>
             <Button onClick={openInGoogleMaps} className="gap-2"><ExternalLink className="w-4 h-4" />فتح في خرائط جوجل</Button>
           </div>
         </div>
