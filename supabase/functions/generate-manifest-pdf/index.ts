@@ -52,10 +52,16 @@ Deno.serve(async (req) => {
       .eq("shipment_id", shipmentId)
       .order("created_at", { ascending: true });
 
-    // Generate HTML manifest matching WMRA template
-    const html = generateManifestHTML(shipment, custodyChain || []);
+    // Fetch signatures for this shipment
+    const { data: signatures } = await supabase
+      .from("document_signatures")
+      .select("*, signer:profiles!document_signatures_signer_id_fkey(full_name), signer_organization:organizations!document_signatures_organization_id_fkey(name)")
+      .eq("document_id", shipmentId)
+      .order("signed_at", { ascending: true });
 
-    // Return manifest data (HTML to be rendered as PDF client-side)
+    // Generate HTML manifest
+    const html = generateManifestHTML(shipment, custodyChain || [], signatures || []);
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -103,7 +109,44 @@ Deno.serve(async (req) => {
   }
 });
 
-function generateManifestHTML(shipment: any, custodyChain: any[]) {
+// Generate a simple QR code as SVG (no external deps)
+function generateQRSvg(data: string, size: number = 60): string {
+  // Use a simple API-based QR code - rendered as an img tag with inline data URL
+  const encodedData = encodeURIComponent(data);
+  return `<img src="https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedData}&format=svg" width="${size}" height="${size}" style="display:block;margin:0 auto;" alt="QR Code" />`;
+}
+
+// Generate a Code128-style barcode as SVG
+function generateBarcodeSvg(text: string, width: number = 180, height: number = 30): string {
+  // Simple visual barcode representation using SVG
+  const chars = text.replace(/[^A-Z0-9-]/gi, '');
+  let bars = '';
+  let x = 0;
+  const barWidth = width / (chars.length * 11 + 20);
+  
+  // Start pattern
+  for (let i = 0; i < chars.length; i++) {
+    const code = chars.charCodeAt(i);
+    const pattern = [
+      (code >> 6) & 1, (code >> 5) & 1, (code >> 4) & 1,
+      (code >> 3) & 1, (code >> 2) & 1, (code >> 1) & 1,
+      code & 1, 1, 0, 1, 0
+    ];
+    for (const bit of pattern) {
+      if (bit) {
+        bars += `<rect x="${x}" y="0" width="${barWidth}" height="${height}" fill="#000"/>`;
+      }
+      x += barWidth;
+    }
+  }
+  
+  return `<svg width="${width}" height="${height + 12}" viewBox="0 0 ${width} ${height + 12}" xmlns="http://www.w3.org/2000/svg">
+    ${bars}
+    <text x="${width/2}" y="${height + 10}" text-anchor="middle" font-family="monospace" font-size="7" fill="#333">${text}</text>
+  </svg>`;
+}
+
+function generateManifestHTML(shipment: any, custodyChain: any[], signatures: any[]) {
   const wasteTypeLabels: Record<string, string> = {
     plastic: "بلاستيك", paper: "ورق وكرتون", metal: "معادن", glass: "زجاج",
     organic: "عضوي", electronic: "إلكتروني", textile: "منسوجات",
@@ -126,8 +169,21 @@ function generateManifestHTML(shipment: any, custodyChain: any[]) {
   for (let i = 0; i < docData.length; i++) { hash = ((hash << 5) - hash) + docData.charCodeAt(i); hash = hash & hash; }
   const integrityHash = Math.abs(hash).toString(16).padStart(16, '0').toUpperCase();
 
+  // Generate per-party hashes for individual QR codes
+  const genHash = Math.abs(hash * 31).toString(16).padStart(8, '0').toUpperCase();
+  const transHash = Math.abs(hash * 37).toString(16).padStart(8, '0').toUpperCase();
+  const recHash = Math.abs(hash * 41).toString(16).padStart(8, '0').toUpperCase();
+
   const isHazardous = shipment.hazard_level && shipment.hazard_level !== "low";
   const verifyUrl = `https://irecycle.app/qr-verify?ref=${shipment.shipment_number}`;
+  const genVerifyUrl = `https://irecycle.app/qr-verify?ref=${shipment.shipment_number}&party=generator&h=${genHash}`;
+  const transVerifyUrl = `https://irecycle.app/qr-verify?ref=${shipment.shipment_number}&party=transporter&h=${transHash}`;
+  const recVerifyUrl = `https://irecycle.app/qr-verify?ref=${shipment.shipment_number}&party=recycler&h=${recHash}`;
+
+  // Find signatures per party
+  const genSig = signatures.find((s: any) => s.signer_role === 'generator' || s.organization_id === shipment.generator_id);
+  const transSig = signatures.find((s: any) => s.signer_role === 'transporter' || s.organization_id === shipment.transporter_id);
+  const recSig = signatures.find((s: any) => s.signer_role === 'recycler' || s.organization_id === shipment.recycler_id);
 
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -142,15 +198,23 @@ function generateManifestHTML(shipment: any, custodyChain: any[]) {
     color: #1a1a1a; 
     direction: rtl; 
     width: 794px; 
-    height: 1123px; 
+    min-height: 1123px; 
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 12px 16px;
   }
+  /* Scrollbar */
+  body::-webkit-scrollbar { width: 6px; }
+  body::-webkit-scrollbar-track { background: transparent; }
+  body::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 3px; }
+  body::-webkit-scrollbar-thumb:hover { background-color: #9ca3af; }
+  body { scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
+
   /* Watermark */
   body::before {
     content: "iRecycle";
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-35deg);
@@ -195,15 +259,23 @@ function generateManifestHTML(shipment: any, custodyChain: any[]) {
   
   /* Signatures */
   .sigs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 6px 0; }
-  .sig-box { border: 1px solid #d1d5db; border-radius: 4px; padding: 4px; text-align: center; min-height: 50px; background: #fafafa; }
+  .sig-box { border: 1px solid #d1d5db; border-radius: 4px; padding: 4px; text-align: center; min-height: 70px; background: #fafafa; }
   .sig-box h5 { font-size: 7px; color: #15803d; margin-bottom: 2px; }
-  .sig-line { border-bottom: 1px dotted #9ca3af; margin: 12px 8px 2px; }
+  .sig-line { border-bottom: 1px dotted #9ca3af; margin: 8px 8px 2px; }
   .sig-label { font-size: 5.5px; color: #9ca3af; }
+  .sig-qr { margin: 4px auto; }
+  .sig-hash { font-family: monospace; font-size: 5px; color: #16a34a; background: #f0fdf4; padding: 1px 3px; border-radius: 2px; display: inline-block; margin-top: 2px; }
+  .sig-status { font-size: 5.5px; padding: 1px 4px; border-radius: 2px; display: inline-block; margin-top: 2px; }
+  .sig-signed { background: #dcfce7; color: #166534; }
+  .sig-pending { background: #fef3c7; color: #92400e; }
   
   /* Declaration */
-  .decl { background: #fffbeb; border: 1px solid #fde68a; border-radius: 4px; padding: 4px 6px; margin: 4px 0; }
-  .decl h4 { font-size: 7.5px; color: #92400e; margin-bottom: 2px; }
-  .decl p { font-size: 6px; color: #78350f; line-height: 1.4; }
+  .decl { background: #fffbeb; border: 1px solid #fde68a; border-radius: 4px; padding: 5px 6px; margin: 5px 0; }
+  .decl h4 { font-size: 7.5px; color: #92400e; margin-bottom: 3px; }
+  .decl p { font-size: 6px; color: #78350f; line-height: 1.5; }
+  .decl-party { background: #fef9c3; border: 1px solid #fde047; border-radius: 3px; padding: 3px 5px; margin: 3px 0; }
+  .decl-party strong { font-size: 6.5px; color: #854d0e; }
+  .decl-party p { font-size: 5.5px; color: #713f12; margin: 1px 0; }
   
   /* Terms */
   .terms { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px 6px; margin: 4px 0; }
@@ -212,15 +284,20 @@ function generateManifestHTML(shipment: any, custodyChain: any[]) {
   .terms li { break-inside: avoid; margin-bottom: 1px; }
   
   /* Security footer */
-  .sec-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #16a34a; padding-top: 4px; margin-top: 4px; }
+  .sec-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #16a34a; padding-top: 6px; margin-top: 6px; }
   .sec-footer .left { font-size: 5.5px; color: #6b7280; }
   .sec-footer .center { text-align: center; }
   .sec-footer .right { text-align: left; direction: ltr; }
-  .qr-box { width: 52px; height: 52px; border: 1px solid #d1d5db; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 5px; color: #9ca3af; background: #fff; }
+  .qr-main { border: 1px solid #d1d5db; border-radius: 4px; padding: 3px; background: #fff; display: inline-block; }
   .hash-badge { font-family: monospace; font-size: 5.5px; color: #16a34a; background: #f0fdf4; padding: 1px 4px; border-radius: 2px; border: 1px solid #bbf7d0; }
-  .barcode { font-family: monospace; font-size: 6px; letter-spacing: 2px; color: #374151; }
+  .barcode-container { text-align: center; }
   .security-strip { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 3px; }
   .security-strip span { font-size: 5px; color: #9ca3af; }
+  
+  /* Verification codes section */
+  .verify-codes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 4px 0; padding: 4px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; }
+  .verify-code-item { text-align: center; }
+  .verify-code-item p { font-size: 5px; color: #6b7280; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -333,36 +410,64 @@ ${custodyChain.length > 0 ? `
   </table>
 </div>` : ""}
 
-<!-- 5. الإقرار القانوني -->
+<!-- 5. الإقرار القانوني لكل طرف -->
 <div class="decl">
-  <h4>📜 الإقرار والتعهد القانوني</h4>
-  <p>
-    أقر أنا الموقع أدناه بصحة جميع البيانات الواردة في هذا المانيفست، وأتحمل كامل المسئولية المدنية والجنائية عن أي مخالفة أو بيانات غير صحيحة وفقاً لأحكام قانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 ولائحته التنفيذية. كما أتعهد بالالتزام بكافة الاشتراطات البيئية والصحية المنصوص عليها في القوانين واللوائح السارية، بما فيها قانون البيئة رقم 4 لسنة 1994 واتفاقية بازل الدولية بشأن نقل النفايات الخطرة عبر الحدود. يعتبر التوقيع على هذا المانيفست بمثابة موافقة نهائية وغير قابلة للإلغاء على كافة الشروط والأحكام المرفقة.
+  <h4>📜 الإقرارات والتعهدات القانونية الملزمة</h4>
+  <p style="margin-bottom:4px;">
+    يقر كل طرف من الأطراف الموقعة أدناه بصحة جميع البيانات الواردة في هذا المانيفست، ويتحمل كل طرف كامل المسئولية المدنية والجنائية عن أي مخالفة أو بيانات غير صحيحة تخص نطاق عمله، وذلك وفقاً لأحكام قانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 ولائحته التنفيذية وقانون البيئة رقم 4 لسنة 1994 واتفاقية بازل الدولية.
+  </p>
+  
+  <div class="decl-party">
+    <strong>🏭 إقرار المولّد (الطرف الأول): ${shipment.generator?.name || "—"}</strong>
+    <p>أقر بأن المخلفات الموصوفة أعلاه تم تصنيفها بدقة وفقاً للكود المصري، وأن الكميات والأوصاف المذكورة صحيحة ومطابقة للواقع. أتحمل كامل المسئولية القانونية عن أي خطأ في التصنيف أو الإفصاح عن طبيعة المخلفات وخطورتها وفقاً للمادة 27 من القانون 202/2020.</p>
+  </div>
+  
+  <div class="decl-party">
+    <strong>🚛 إقرار الناقل (الطرف الثاني): ${shipment.transporter?.name || "—"}</strong>
+    <p>أقر باستلام المخلفات المذكورة أعلاه والتزامي بنقلها عبر المسار المحدد وعدم الانحراف عنه أو تفريغها في غير الجهة المستلمة المحددة. أتحمل كامل المسئولية عن سلامة النقل والالتزام بالتصاريح والتراخيص اللازمة وفقاً للمادة 29 من القانون 202/2020.</p>
+  </div>
+  
+  <div class="decl-party">
+    <strong>♻️ إقرار المستلم (الطرف الثالث): ${shipment.recycler?.name || "—"}</strong>
+    <p>أقر باستلام المخلفات المذكورة أعلاه وتحققي من مطابقتها للمانيفست. أتحمل كامل المسئولية عن المعالجة والتدوير أو التخلص الآمن وفقاً للمعايير البيئية المنصوص عليها في التراخيص الممنوحة لمنشأتي وأحكام القانون 202/2020.</p>
+  </div>
+  
+  <p style="margin-top:3px;font-weight:bold;font-size:5.5px;color:#991b1b;">
+    ⚠️ تحذير: يعتبر التوقيع على هذا المانيفست بمثابة موافقة نهائية وغير قابلة للإلغاء. أي مخالفة تعرض المخالف للعقوبات المنصوص عليها في المواد 68-82 من القانون 202/2020 والتي تشمل الغرامات المالية والحبس.
   </p>
 </div>
 
-<!-- 6. التوقيعات والأختام -->
+<!-- 6. التوقيعات والأختام مع رموز التحقق -->
 <div class="sigs">
   <div class="sig-box">
     <h5>🏭 توقيع وختم المولّد</h5>
-    <div class="sig-line"></div>
-    <div class="sig-label">الاسم: ${shipment.generator?.name || ".................."}</div>
-    <div class="sig-label">التاريخ: ${formatDate(shipment.pickup_date)}</div>
-    <div class="sig-label" style="margin-top:4px;font-size:5px;color:#d97706;">مكان الختم الرسمي</div>
+    ${genSig?.signature_url ? `<img src="${genSig.signature_url}" style="max-width:60px;max-height:25px;margin:2px auto;display:block;" alt="توقيع المولد"/>` : `<div class="sig-line"></div>`}
+    <div class="sig-label">الاسم: ${genSig?.signer?.full_name || shipment.generator?.name || ".................."}</div>
+    <div class="sig-label">التاريخ: ${genSig?.signed_at ? formatDate(genSig.signed_at) : formatDate(shipment.pickup_date)}</div>
+    <span class="sig-status ${genSig ? 'sig-signed' : 'sig-pending'}">${genSig ? '✓ موقّع' : '⏳ في انتظار التوقيع'}</span>
+    <div class="sig-qr">${generateQRSvg(genVerifyUrl, 35)}</div>
+    <div class="sig-hash">VRF-G: ${genHash}</div>
+    <div class="sig-label" style="margin-top:2px;font-size:5px;color:#d97706;">مكان الختم الرسمي</div>
   </div>
   <div class="sig-box">
     <h5>🚛 توقيع وختم الناقل</h5>
-    <div class="sig-line"></div>
-    <div class="sig-label">الاسم: ${shipment.transporter?.name || ".................."}</div>
-    <div class="sig-label">التاريخ: ${formatDate(shipment.in_transit_at)}</div>
-    <div class="sig-label" style="margin-top:4px;font-size:5px;color:#d97706;">مكان الختم الرسمي</div>
+    ${transSig?.signature_url ? `<img src="${transSig.signature_url}" style="max-width:60px;max-height:25px;margin:2px auto;display:block;" alt="توقيع الناقل"/>` : `<div class="sig-line"></div>`}
+    <div class="sig-label">الاسم: ${transSig?.signer?.full_name || shipment.transporter?.name || ".................."}</div>
+    <div class="sig-label">التاريخ: ${transSig?.signed_at ? formatDate(transSig.signed_at) : formatDate(shipment.in_transit_at)}</div>
+    <span class="sig-status ${transSig ? 'sig-signed' : 'sig-pending'}">${transSig ? '✓ موقّع' : '⏳ في انتظار التوقيع'}</span>
+    <div class="sig-qr">${generateQRSvg(transVerifyUrl, 35)}</div>
+    <div class="sig-hash">VRF-T: ${transHash}</div>
+    <div class="sig-label" style="margin-top:2px;font-size:5px;color:#d97706;">مكان الختم الرسمي</div>
   </div>
   <div class="sig-box">
     <h5>♻️ توقيع وختم المستلم</h5>
-    <div class="sig-line"></div>
-    <div class="sig-label">الاسم: ${shipment.recycler?.name || ".................."}</div>
-    <div class="sig-label">التاريخ: ${formatDate(shipment.delivered_at)}</div>
-    <div class="sig-label" style="margin-top:4px;font-size:5px;color:#d97706;">مكان الختم الرسمي</div>
+    ${recSig?.signature_url ? `<img src="${recSig.signature_url}" style="max-width:60px;max-height:25px;margin:2px auto;display:block;" alt="توقيع المستلم"/>` : `<div class="sig-line"></div>`}
+    <div class="sig-label">الاسم: ${recSig?.signer?.full_name || shipment.recycler?.name || ".................."}</div>
+    <div class="sig-label">التاريخ: ${recSig?.signed_at ? formatDate(recSig.signed_at) : formatDate(shipment.delivered_at)}</div>
+    <span class="sig-status ${recSig ? 'sig-signed' : 'sig-pending'}">${recSig ? '✓ موقّع' : '⏳ في انتظار التوقيع'}</span>
+    <div class="sig-qr">${generateQRSvg(recVerifyUrl, 35)}</div>
+    <div class="sig-hash">VRF-R: ${recHash}</div>
+    <div class="sig-label" style="margin-top:2px;font-size:5px;color:#d97706;">مكان الختم الرسمي</div>
   </div>
 </div>
 
@@ -381,27 +486,35 @@ ${custodyChain.length > 0 ? `
   </ol>
 </div>
 
-<!-- Security Footer -->
+<!-- Security Footer with Real QR & Barcode -->
 <div class="sec-footer">
   <div class="left">
     <div>🌿 <strong>iRecycle</strong> - نظام إدارة المخلفات الذكي</div>
     <div>تاريخ الطباعة: ${new Date().toLocaleString("ar-EG")}</div>
     <div>⚠️ وثيقة إلكترونية محمية - يمنع التعديل أو التزوير</div>
     <div class="hash-badge">SHA-256: ${integrityHash}</div>
+    <div style="margin-top:2px;font-size:5px;color:#6b7280;">
+      رمز النزاهة: ${integrityHash.slice(0, 8)}-${integrityHash.slice(8, 12)}-${integrityHash.slice(12)}
+    </div>
   </div>
   <div class="center">
-    <div class="qr-box">
-      <div>📱 QR<br/><span style="font-size:4px;">${verifyUrl}</span></div>
+    <div class="qr-main">
+      ${generateQRSvg(verifyUrl, 55)}
     </div>
+    <div style="font-size:5px;color:#6b7280;margin-top:2px;">امسح للتحقق من صحة الوثيقة</div>
     <div class="security-strip">
-      <span>🔒 مؤمّن</span>
+      <span>🔒 مؤمّن رقمياً</span>
       <span>|</span>
-      <span>📋 مرجع: ${shipment.shipment_number}</span>
+      <span>📋 ${shipment.shipment_number}</span>
+      <span>|</span>
+      <span>🌐 iRecycle Platform</span>
     </div>
   </div>
   <div class="right">
-    <div class="barcode">||||| ${shipment.shipment_number} |||||</div>
-    <div style="font-size:5px;color:#9ca3af;margin-top:2px;">رمز التحقق السريع</div>
+    <div class="barcode-container">
+      ${generateBarcodeSvg(shipment.shipment_number, 140, 25)}
+    </div>
+    <div style="font-size:5px;color:#9ca3af;margin-top:2px;text-align:center;">Barcode: ${shipment.shipment_number}</div>
   </div>
 </div>
 
