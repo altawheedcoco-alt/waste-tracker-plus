@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { 
   FileText, Printer, Download, Calendar, Building2, Filter, 
-  Loader2, FileStack, ClipboardList, Award, Receipt, Package
+  Loader2, FileStack, ClipboardList, Award, Receipt, Package,
+  PenTool, Stamp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +30,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
-type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'all';
+type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'all';
 
 const DOC_TYPES: { id: DocType; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'جميع المستندات', icon: <FileStack className="h-4 w-4" /> },
@@ -38,6 +39,7 @@ const DOC_TYPES: { id: DocType; label: string; icon: React.ReactNode }[] = [
   { id: 'manifests', label: 'المانيفست الموحد', icon: <FileText className="h-4 w-4" /> },
   { id: 'invoices', label: 'الفواتير', icon: <Receipt className="h-4 w-4" /> },
   { id: 'receipts', label: 'إيصالات الاستلام', icon: <Package className="h-4 w-4" /> },
+  { id: 'signing', label: 'حالة التوقيعات والأختام', icon: <PenTool className="h-4 w-4" /> },
 ];
 
 const BulkDocumentPrintDialog = () => {
@@ -135,7 +137,7 @@ const BulkDocumentPrintDialog = () => {
         shipmentQuery = shipmentQuery.or(`generator_id.eq.${selectedPartner},transporter_id.eq.${selectedPartner},recycler_id.eq.${selectedPartner}` as any);
       }
 
-      const [shipmentsRes, invoicesRes, receiptsRes, reportsRes] = await Promise.all([
+      const [shipmentsRes, invoicesRes, receiptsRes, reportsRes, signingOutRes, signingInRes, docSigsRes] = await Promise.all([
         shipmentQuery,
         (isAll || selectedDocTypes.includes('invoices'))
           ? supabase.from('invoices').select('id, invoice_number, status, total_amount, created_at, due_date, partner_name')
@@ -153,12 +155,39 @@ const BulkDocumentPrintDialog = () => {
               .gte('created_at', fromISO).lte('created_at', toISO)
               .order('created_at', { ascending: false })
           : Promise.resolve({ data: [] }),
+        // Signing requests sent by us
+        (isAll || selectedDocTypes.includes('signing'))
+          ? supabase.from('signing_requests')
+              .select('id, document_title, document_type, status, signed_at, created_at, requires_stamp, signature_id, recipient_organization_id, recipient_org:organizations!signing_requests_recipient_organization_id_fkey(name)')
+              .eq('sender_organization_id', orgId)
+              .gte('created_at', fromISO).lte('created_at', toISO)
+              .order('created_at', { ascending: false })
+          : Promise.resolve({ data: [] }),
+        // Signing requests received by us
+        (isAll || selectedDocTypes.includes('signing'))
+          ? supabase.from('signing_requests')
+              .select('id, document_title, document_type, status, signed_at, created_at, requires_stamp, signature_id, sender_organization_id, sender_org:organizations!signing_requests_sender_organization_id_fkey(name)')
+              .eq('recipient_organization_id', orgId)
+              .gte('created_at', fromISO).lte('created_at', toISO)
+              .order('created_at', { ascending: false })
+          : Promise.resolve({ data: [] }),
+        // Document signatures from our org
+        (isAll || selectedDocTypes.includes('signing'))
+          ? supabase.from('document_signatures')
+              .select('id, document_type, document_id, signer_name, signer_role, signature_method, stamp_applied, platform_seal_number, document_hash, status, created_at')
+              .eq('organization_id', orgId)
+              .gte('created_at', fromISO).lte('created_at', toISO)
+              .order('created_at', { ascending: false })
+          : Promise.resolve({ data: [] }),
       ]);
 
       const shipments = (shipmentsRes.data || []) as any[];
       const invoices = ((invoicesRes as any).data || []) as any[];
       const receipts = ((receiptsRes as any).data || []) as any[];
       const reports = ((reportsRes as any).data || []) as any[];
+      const signingOut = ((signingOutRes as any).data || []) as any[];
+      const signingIn = ((signingInRes as any).data || []) as any[];
+      const docSignatures = ((docSigsRes as any).data || []) as any[];
 
       // Get partner names
       const partnerIds = new Set<string>();
@@ -190,6 +219,24 @@ const BulkDocumentPrintDialog = () => {
       const showManifests = isAll || selectedDocTypes.includes('manifests');
       const showInvoices = isAll || selectedDocTypes.includes('invoices');
       const showReceipts = isAll || selectedDocTypes.includes('receipts');
+      const showSigning = isAll || selectedDocTypes.includes('signing');
+
+      // Signing stats
+      const sigOutSigned = signingOut.filter((s: any) => s.status === 'signed').length;
+      const sigOutPending = signingOut.filter((s: any) => s.status === 'pending').length;
+      const sigOutRejected = signingOut.filter((s: any) => s.status === 'rejected').length;
+      const sigInSigned = signingIn.filter((s: any) => s.status === 'signed').length;
+      const sigInPending = signingIn.filter((s: any) => s.status === 'pending').length;
+      const sigInRejected = signingIn.filter((s: any) => s.status === 'rejected').length;
+      const stamped = docSignatures.filter((s: any) => s.stamp_applied).length;
+      const withQR = docSignatures.filter((s: any) => s.platform_seal_number).length;
+      const withHash = docSignatures.filter((s: any) => s.document_hash).length;
+
+      const sigStatusBadge = (status: string) => {
+        if (status === 'signed') return '<span class="badge badge-s">✅ موقّع</span>';
+        if (status === 'rejected') return '<span class="badge badge-d">❌ مرفوض</span>';
+        return '<span class="badge badge-w">⏳ قيد الانتظار</span>';
+      };
 
       const html = `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
@@ -247,11 +294,12 @@ const BulkDocumentPrintDialog = () => {
   <div class="filter-item"><span class="filter-label">📄 المستندات:</span> ${isAll ? 'الكل' : selectedDocTypes.map(d => DOC_TYPES.find(dt => dt.id === d)?.label).join('، ')}</div>
 </div>
 
-<div class="summary">
+<div class="summary" style="grid-template-columns: repeat(5, 1fr);">
   <div class="sum-card"><div class="sum-val">${shipments.length}</div><div class="sum-lbl">شحنات</div></div>
   <div class="sum-card"><div class="sum-val">${invoices.length}</div><div class="sum-lbl">فواتير</div></div>
   <div class="sum-card"><div class="sum-val">${receipts.length}</div><div class="sum-lbl">إيصالات</div></div>
   <div class="sum-card"><div class="sum-val">${reports.length}</div><div class="sum-lbl">شهادات</div></div>
+  <div class="sum-card"><div class="sum-val">${signingOut.length + signingIn.length}</div><div class="sum-lbl">طلبات توقيع</div></div>
 </div>
 
 ${(showDeclarations || showManifests) && shipments.length > 0 ? `
@@ -320,6 +368,83 @@ ${receipts.map((r: any, i: number) => `<tr>
 </tr>`).join('')}
 </tbody>
 </table>
+` : ''}
+
+${showSigning ? `
+<h2>✍️ حالة التوقيعات والأختام</h2>
+
+<div class="summary" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="sum-card"><div class="sum-val">${signingOut.length}</div><div class="sum-lbl">طلبات مرسلة (مني)</div></div>
+  <div class="sum-card"><div class="sum-val">${signingIn.length}</div><div class="sum-lbl">طلبات واردة (إليّ)</div></div>
+  <div class="sum-card"><div class="sum-val">${docSignatures.length}</div><div class="sum-lbl">توقيعات رقمية</div></div>
+</div>
+
+<div class="summary" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="sum-card" style="border-color:#bbf7d0;"><div class="sum-val" style="color:#16a34a;">${sigOutSigned + sigInSigned}</div><div class="sum-lbl">✅ تم التوقيع</div></div>
+  <div class="sum-card" style="border-color:#fde68a;"><div class="sum-val" style="color:#d97706;">${sigOutPending + sigInPending}</div><div class="sum-lbl">⏳ قيد الانتظار</div></div>
+  <div class="sum-card" style="border-color:#fecaca;"><div class="sum-val" style="color:#dc2626;">${sigOutRejected + sigInRejected}</div><div class="sum-lbl">❌ مرفوض</div></div>
+  <div class="sum-card" style="border-color:#c4b5fd;"><div class="sum-val" style="color:#7c3aed;">${stamped}</div><div class="sum-lbl">🔏 مختوم</div></div>
+</div>
+
+${signingOut.length > 0 ? `
+<h2 style="font-size:12px;">📤 طلبات التوقيع المرسلة (مني) - ${signingOut.length}</h2>
+<table>
+<thead><tr><th>#</th><th>عنوان المستند</th><th>النوع</th><th>الجهة المستلمة</th><th>يتطلب ختم</th><th>الحالة</th><th>تاريخ التوقيع</th><th>التاريخ</th></tr></thead>
+<tbody>
+${signingOut.map((s: any, i: number) => `<tr>
+  <td>${i + 1}</td>
+  <td>${s.document_title || '-'}</td>
+  <td>${s.document_type || '-'}</td>
+  <td>${(s.recipient_org as any)?.name || '-'}</td>
+  <td>${s.requires_stamp ? '🔏 نعم' : '—'}</td>
+  <td>${sigStatusBadge(s.status)}</td>
+  <td>${s.signed_at ? format(new Date(s.signed_at), 'yyyy/MM/dd HH:mm') : '—'}</td>
+  <td>${s.created_at ? format(new Date(s.created_at), 'yyyy/MM/dd') : '-'}</td>
+</tr>`).join('')}
+</tbody>
+</table>
+` : ''}
+
+${signingIn.length > 0 ? `
+<h2 style="font-size:12px;">📥 طلبات التوقيع الواردة (إليّ) - ${signingIn.length}</h2>
+<table>
+<thead><tr><th>#</th><th>عنوان المستند</th><th>النوع</th><th>الجهة المرسلة</th><th>يتطلب ختم</th><th>الحالة</th><th>تاريخ التوقيع</th><th>التاريخ</th></tr></thead>
+<tbody>
+${signingIn.map((s: any, i: number) => `<tr>
+  <td>${i + 1}</td>
+  <td>${s.document_title || '-'}</td>
+  <td>${s.document_type || '-'}</td>
+  <td>${(s.sender_org as any)?.name || '-'}</td>
+  <td>${s.requires_stamp ? '🔏 نعم' : '—'}</td>
+  <td>${sigStatusBadge(s.status)}</td>
+  <td>${s.signed_at ? format(new Date(s.signed_at), 'yyyy/MM/dd HH:mm') : '—'}</td>
+  <td>${s.created_at ? format(new Date(s.created_at), 'yyyy/MM/dd') : '-'}</td>
+</tr>`).join('')}
+</tbody>
+</table>
+` : ''}
+
+${docSignatures.length > 0 ? `
+<h2 style="font-size:12px;">🔐 التوقيعات الرقمية والأختام - ${docSignatures.length}</h2>
+<table>
+<thead><tr><th>#</th><th>نوع المستند</th><th>الموقّع</th><th>الدور</th><th>طريقة التوقيع</th><th>ختم</th><th>QR/رقم كودي</th><th>هاش SHA</th><th>التاريخ</th></tr></thead>
+<tbody>
+${docSignatures.map((s: any, i: number) => `<tr>
+  <td>${i + 1}</td>
+  <td>${s.document_type || '-'}</td>
+  <td>${s.signer_name || '-'}</td>
+  <td>${s.signer_role || '-'}</td>
+  <td>${s.signature_method || '-'}</td>
+  <td>${s.stamp_applied ? '<span class="badge badge-s">✅ مختوم</span>' : '<span class="badge badge-w">—</span>'}</td>
+  <td>${s.platform_seal_number || '—'}</td>
+  <td style="font-size:8px;font-family:monospace;">${s.document_hash ? s.document_hash.substring(0, 16) + '...' : '—'}</td>
+  <td>${s.created_at ? format(new Date(s.created_at), 'yyyy/MM/dd HH:mm') : '-'}</td>
+</tr>`).join('')}
+</tbody>
+</table>
+` : ''}
+
+${(signingOut.length === 0 && signingIn.length === 0 && docSignatures.length === 0) ? '<p class="empty">لا توجد طلبات توقيع أو أختام في هذه الفترة</p>' : ''}
 ` : ''}
 
 <div class="footer">
