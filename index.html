@@ -95,17 +95,25 @@
         }
       })();
 
-      // Show reload message if app doesn't load within 15 seconds
-      // Created dynamically to avoid being detected as LCP element
+      // Show reload message if app doesn't load within 10 seconds (reduced from 15)
       setTimeout(function(){
         var loader = document.getElementById('initial-loader');
         if(loader && document.getElementById('root').contains(loader)){
+          // Clear all caches and try reload automatically first time
+          var autoKey = '__auto_boot_reload';
+          var lastAuto = Number(sessionStorage.getItem(autoKey) || '0');
+          if(Date.now() - lastAuto > 60000){
+            sessionStorage.setItem(autoKey, String(Date.now()));
+            if('caches' in window){ caches.keys().then(function(n){ n.forEach(function(k){ caches.delete(k); }); }); }
+            location.reload();
+            return;
+          }
           var p = document.createElement('p');
           p.style.cssText='direction:rtl;font-family:Cairo,sans-serif;text-align:center;color:#666;font-size:14px;';
-          p.innerHTML='التحميل يستغرق وقتاً أطول من المتوقع...<br/><button onclick="location.reload()" style="margin-top:12px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">إعادة تحميل</button>';
+          p.innerHTML='التحميل يستغرق وقتاً أطول من المتوقع...<br/><button onclick="sessionStorage.clear();location.reload()" style="margin-top:12px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">إعادة تحميل</button>';
           loader.appendChild(p);
         }
-      }, 15000);
+      }, 10000);
     </script>
     <script type="module" src="/src/main.tsx"></script>
     <noscript>
