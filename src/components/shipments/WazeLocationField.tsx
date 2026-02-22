@@ -348,22 +348,31 @@ const WazeLocationField = ({
 
       {/* Current value display */}
       {value && !focused && (
-        <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg border text-sm group">
-          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-          <span className="flex-1 truncate">{value}</span>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => openInMap('waze')} title="Waze">
-              <Navigation className="w-3 h-3 text-primary" />
-            </Button>
-            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => openInMap('google')} title="Google Maps">
-              <MapPin className="w-3 h-3 text-destructive" />
-            </Button>
-            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => openInMap('osm')} title="OpenStreetMap">
-              <Map className="w-3 h-3 text-muted-foreground" />
-            </Button>
-            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setFocused(true); setTimeout(() => inputRef.current?.focus(), 50); }} title="تغيير">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 p-2.5 bg-muted/50 rounded-lg border text-sm">
+            <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+            <span className="flex-1 truncate">{value}</span>
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Button type="button" variant="outline" size="sm" className="h-7 text-[11px] gap-1.5" onClick={() => { setFocused(true); setTimeout(() => inputRef.current?.focus(), 50); }}>
               <Search className="w-3 h-3" />
+              تعديل الموقع
             </Button>
+            <Button type="button" variant="outline" size="sm" className="h-7 text-[11px] gap-1.5" onClick={getCurrentLocation} disabled={gettingLocation}>
+              {gettingLocation ? <Loader2 className="w-3 h-3 animate-spin" /> : <LocateFixed className="w-3 h-3" />}
+              موقعي الحالي
+            </Button>
+            <div className="flex items-center gap-0.5 mr-auto">
+              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openInMap('waze')} title="Waze">
+                <Navigation className="w-3.5 h-3.5 text-primary" />
+              </Button>
+              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openInMap('google')} title="Google Maps">
+                <MapPin className="w-3.5 h-3.5 text-destructive" />
+              </Button>
+              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openInMap('osm')} title="OpenStreetMap">
+                <Map className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+            </div>
           </div>
         </div>
       )}
