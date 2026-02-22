@@ -55,6 +55,8 @@ interface EnhancedLocationPickerProps {
   organizationCity: string;
   value: string;
   onChange: (address: string, coordinates?: { lat: number; lng: number }) => void;
+  onShareToPickup?: (data: { name: string; address: string; position: { lat: number; lng: number } }) => void;
+  onShareToDelivery?: (data: { name: string; address: string; position: { lat: number; lng: number } }) => void;
   label?: string;
   placeholder?: string;
   coordinates?: { lat: number; lng: number } | null;
@@ -104,6 +106,8 @@ const EnhancedLocationPicker = ({
   organizationCity,
   value,
   onChange,
+  onShareToPickup,
+  onShareToDelivery,
   label = 'الموقع',
   placeholder = 'اختر الموقع',
   coordinates,
@@ -525,6 +529,8 @@ const EnhancedLocationPicker = ({
                   });
                   setShowSavePrompt(true);
                 }}
+                onShareToPickup={onShareToPickup}
+                onShareToDelivery={onShareToDelivery}
                 placeholder="ابحث عن عنوان، مصنع، شركة..."
                 showWazeEmbed={false}
               />

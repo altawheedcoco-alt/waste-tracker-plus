@@ -484,6 +484,8 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
               organizationCity={generators.find(g => g.id === formData.generator_id)?.city || ''}
               value={formData.pickup_address}
               onChange={(address) => setFormData(prev => ({ ...prev, pickup_address: address }))}
+              onShareToPickup={(data) => setFormData(prev => ({ ...prev, pickup_address: data.address }))}
+              onShareToDelivery={(data) => setFormData(prev => ({ ...prev, delivery_address: data.address }))}
               label="موقع الاستلام (الجهة المولدة)"
               placeholder="اختر موقع الاستلام"
             />
@@ -520,6 +522,8 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
               }
               value={formData.delivery_address}
               onChange={(address) => setFormData(prev => ({ ...prev, delivery_address: address }))}
+              onShareToPickup={(data) => setFormData(prev => ({ ...prev, pickup_address: data.address }))}
+              onShareToDelivery={(data) => setFormData(prev => ({ ...prev, delivery_address: data.address }))}
               label={formData.destination_type === 'recycling' ? 'موقع التسليم (جهة التدوير)' : 'موقع التسليم (جهة التخلص النهائي)'}
               placeholder="اختر موقع التسليم"
             />
