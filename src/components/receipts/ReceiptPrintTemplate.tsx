@@ -785,15 +785,16 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
               <span class="verification-code">🔐 ${verificationCode}</span>
             </div>
           </div>
-          <div style="text-align: center; margin-top: 8px; font-style: italic; color: #059669; font-weight: bold; font-size: 9px;">
+          <div style="text-align: center; margin-top: 8px; font-style: italic; color: #059669; font-weight: bold; font-size: 9px; display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap;">
             ${(() => {
               const taglines = [
-                'الإنتاج عليك.. والدائرة المقفولة علينا. خليك I RECYCLE.',
-                'إدارة مخلفات بمواصفات عالمية.. I RECYCLE سيستم مبيغلطش.',
-                'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح. I RECYCLE.',
-                'من المصنع للمستقبل.. سكة واحدة مع I RECYCLE.',
+                'الإنتاج عليك.. والدائرة المقفولة علينا. خليك',
+                'إدارة مخلفات بمواصفات عالمية.. سيستم مبيغلطش.',
+                'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح.',
+                'من المصنع للمستقبل.. سكة واحدة مع',
               ];
-              return taglines[Math.floor(Date.now() / 86400000) % 4];
+              const logo = '<img src="/irecycle-logo.png" alt="iRecycle" style="height:16px;vertical-align:middle;display:inline-block;margin:0 3px;border-radius:3px;" />';
+              return taglines[Math.floor(Date.now() / 86400000) % 4] + ' ' + logo;
             })()}
           </div>
         </div>

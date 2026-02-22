@@ -138,8 +138,8 @@ const SafetyCardPrintView = ({ record, organizationName, onClose }: SafetyCardPr
               <li>يمكن التحقق من صلاحية الكارنيه بمسح رمز QR</li>
               <li>وفقاً لقانون العمل المصري وقانون البيئة رقم 4/1994</li>
             </ul>
-            <div style={{ textAlign: 'center', marginTop: '8px', opacity: 0.6, fontSize: '9px' }}>
-              صادر من نظام I RECYCLE لإدارة المخلفات — {new Date().getFullYear()}
+            <div style={{ textAlign: 'center', marginTop: '8px', opacity: 0.6, fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              صادر من نظام <img src="/irecycle-logo.png" alt="iRecycle" style={{ height: '14px', verticalAlign: 'middle', borderRadius: '3px' }} /> لإدارة المخلفات — {new Date().getFullYear()}
             </div>
           </div>
         </div>
