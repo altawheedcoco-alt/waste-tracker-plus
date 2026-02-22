@@ -22,9 +22,9 @@ Deno.serve(async (req) => {
     const [shipmentRes, logsRes, receiptsRes, endorsementsRes, custodyRes, declarationsRes] = await Promise.all([
       supabase.from("shipments").select(`
         *,
-        generator:organizations!shipments_generator_id_fkey(name, address, city, commercial_register, phone, email, logo_url),
-        transporter:organizations!shipments_transporter_id_fkey(name, address, city, commercial_register, license_number, phone, logo_url),
-        recycler:organizations!shipments_recycler_id_fkey(name, address, city, commercial_register, phone, logo_url)
+        generator:organizations!shipments_generator_id_fkey(name, address, city, commercial_register, phone, email, logo_url, organization_type, wmra_license, wmra_license_expiry_date, environmental_license, eeaa_license_expiry_date, ida_license, ida_license_expiry_date, digital_declaration_number),
+        transporter:organizations!shipments_transporter_id_fkey(name, address, city, commercial_register, license_number, phone, logo_url, organization_type, wmra_license, wmra_license_expiry_date, environmental_license, eeaa_license_expiry_date, land_transport_license, land_transport_license_expiry_date, hazardous_certified, digital_declaration_number),
+        recycler:organizations!shipments_recycler_id_fkey(name, address, city, commercial_register, phone, logo_url, organization_type, wmra_license, wmra_license_expiry_date, environmental_license, eeaa_license_expiry_date, ida_license, ida_license_expiry_date, digital_declaration_number)
       `).eq("id", shipmentId).single(),
       supabase.from("shipment_logs").select("*").eq("shipment_id", shipmentId).order("created_at", { ascending: true }),
       supabase.from("shipment_receipts").select("*").eq("shipment_id", shipmentId).order("created_at", { ascending: true }),
@@ -88,6 +88,30 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
     pending: "قيد الانتظار", confirmed: "مؤكد", rejected: "مرفوض",
   };
 
+  const getLicenseStatus = (expiryDate: string | null | undefined): string => {
+    if (!expiryDate) return '<span style="color:#9ca3af;font-size:7px">⚪ غير محدد</span>';
+    const now = new Date();
+    const expiry = new Date(expiryDate);
+    const days = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (days < 0) return `<span style="color:#dc2626;font-size:7px;font-weight:bold">🔴 منتهي</span>`;
+    if (days <= 30) return `<span style="color:#d97706;font-size:7px;font-weight:bold">🟡 ينتهي خلال ${days} يوم</span>`;
+    return `<span style="color:#16a34a;font-size:7px">🟢 ساري</span>`;
+  };
+
+  const renderLicenses = (org: any): string => {
+    if (!org) return '';
+    const isTransporter = org.organization_type === 'transporter';
+    let html = `<div style="border-top:1px dashed #d1d5db;margin-top:3px;padding-top:3px;">`;
+    html += `<p style="font-size:7px;font-weight:bold;color:#0f766e;margin-bottom:2px;">📋 التراخيص:</p>`;
+    if (org.wmra_license) html += `<p><span class="l">WMRA:</span> ${org.wmra_license} ${getLicenseStatus(org.wmra_license_expiry_date)}</p>`;
+    if (org.environmental_license) html += `<p><span class="l">EEAA:</span> ${org.environmental_license} ${getLicenseStatus(org.eeaa_license_expiry_date)}</p>`;
+    if (!isTransporter && org.ida_license) html += `<p><span class="l">IDA:</span> ${org.ida_license} ${getLicenseStatus(org.ida_license_expiry_date)}</p>`;
+    if (isTransporter && org.land_transport_license) html += `<p><span class="l">نقل بري:</span> ${org.land_transport_license} ${getLicenseStatus(org.land_transport_license_expiry_date)}</p>`;
+    if (org.digital_declaration_number) html += `<p><span class="l">إقرار رقمي:</span> ${org.digital_declaration_number}</p>`;
+    html += `</div>`;
+    return html;
+  };
+
   const partyBox = (icon: string, title: string, org: any, fallbackName?: string) => `
     <div class="party-box">
       <h4>${icon} ${title}</h4>
@@ -97,6 +121,8 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
       <p><span class="l">الهاتف:</span> ${org?.phone || "—"}</p>
       ${org?.email ? `<p><span class="l">البريد:</span> ${org.email}</p>` : ""}
       ${org?.license_number ? `<p><span class="l">رقم الترخيص:</span> ${org.license_number}</p>` : ""}
+      ${org?.hazardous_certified ? `<p><span class="l">مخلفات خطرة:</span> ✅ معتمد</p>` : ""}
+      ${renderLicenses(org)}
     </div>`;
 
   const endorsementRows = endorsements.map((e: any, i: number) => {
