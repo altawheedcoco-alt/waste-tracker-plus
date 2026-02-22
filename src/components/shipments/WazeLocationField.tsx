@@ -620,75 +620,31 @@ const WazeLocationField = ({
             </Button>
           </div>
 
-          {mapProvider === 'google' && (
-            <div className="space-y-1">
-              <div className="text-[10px] text-muted-foreground">🔍 استخدم بحث Google Maps الأصلي داخل الخريطة</div>
-              <div className={cn(
-                "transition-all duration-300 border rounded-lg overflow-hidden",
-                mapExpanded ? "h-[350px]" : "h-[200px]"
-              )}>
-                <iframe
-                  key={`google-${mapCenter.lat.toFixed(5)}-${mapCenter.lng.toFixed(5)}`}
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(value || `${mapCenter.lat},${mapCenter.lng}`)}&z=${mapZoom}&output=embed`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none' }}
-                  loading="eager"
-                  allowFullScreen
-                  title="Google Maps"
-                />
-              </div>
+          <div className="space-y-1">
+            <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة • طبقة: {MAP_TILES[mapProvider].label}</div>
+            <div className={cn(
+              "transition-all duration-300 border rounded-lg overflow-hidden",
+              mapExpanded ? "h-[350px]" : "h-[200px]"
+            )}>
+              <LocationMiniMap 
+                lat={mapCenter.lat} 
+                lng={mapCenter.lng} 
+                zoom={mapZoom}
+                provider={mapProvider}
+                onLocationSelect={async (lat, lng) => {
+                  const address = await reverseGeocode(lat, lng);
+                  if (address) {
+                    onChange(address, { lat, lng });
+                  } else {
+                    onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
+                  }
+                  setMapCenter({ lat, lng });
+                  setMapZoom(15);
+                  toast.success('📍 تم تحديد الموقع من الخريطة');
+                }}
+              />
             </div>
-          )}
-
-          {mapProvider === 'waze' && (
-            <div className="space-y-1">
-              <div className="text-[10px] text-muted-foreground">🔍 اختر من نتائج البحث وسيظهر الموقع مباشرة على الخريطة</div>
-              <div className={cn(
-                "transition-all duration-300 border rounded-lg overflow-hidden",
-                mapExpanded ? "h-[350px]" : "h-[200px]"
-              )}>
-                <iframe
-                  key={`waze-${mapCenter.lat.toFixed(5)}-${mapCenter.lng.toFixed(5)}-${mapZoom}`}
-                  src={`https://embed.waze.com/iframe?zoom=${mapZoom}&lat=${mapCenter.lat}&lon=${mapCenter.lng}&pin=1${value ? `&q=${encodeURIComponent(value)}` : ''}`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none' }}
-                  loading="eager"
-                  allowFullScreen
-                  title="Waze Map"
-                />
-              </div>
-            </div>
-          )}
-
-          {mapProvider === 'osm' && (
-            <div className="space-y-1">
-              <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
-              <div className={cn(
-                "transition-all duration-300 border rounded-lg overflow-hidden",
-                mapExpanded ? "h-[350px]" : "h-[200px]"
-              )}>
-                <LocationMiniMap 
-                  lat={mapCenter.lat} 
-                  lng={mapCenter.lng} 
-                  zoom={mapZoom}
-                  provider={mapProvider}
-                  onLocationSelect={async (lat, lng) => {
-                    const address = await reverseGeocode(lat, lng);
-                    if (address) {
-                      onChange(address, { lat, lng });
-                    } else {
-                      onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
-                    }
-                    setMapCenter({ lat, lng });
-                    setMapZoom(15);
-                    toast.success('📍 تم تحديد الموقع من الخريطة');
-                  }}
-                />
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
 
