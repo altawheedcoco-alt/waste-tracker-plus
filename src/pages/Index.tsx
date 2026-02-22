@@ -19,7 +19,7 @@ const OmalunaSection = lazy(() => import("@/components/landing/OmalunaSection"))
 const WhatsNewSection = lazy(() => import("@/components/landing/WhatsNewSection"));
 const WhatsNewPopup = lazy(() => import("@/components/landing/WhatsNewPopup"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
-const VideoIntroSection = lazy(() => import("@/components/landing/VideoIntroSection"));
+
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
 const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
 
@@ -74,7 +74,7 @@ const Index = () => {
             <LazySection><Features /></LazySection>
             <LazySection><DocumentAIShowcase /></LazySection>
             <LazySection><SmartAgentShowcase /></LazySection>
-            <LazySection><VideoIntroSection /></LazySection>
+            
             <LazySection><TestimonialsSection /></LazySection>
             <LazySection><Services /></LazySection>
             <LazySection><CTA /></LazySection>
