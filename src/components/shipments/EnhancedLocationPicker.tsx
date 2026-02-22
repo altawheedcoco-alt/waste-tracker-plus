@@ -526,7 +526,7 @@ const EnhancedLocationPicker = ({
                   setShowSavePrompt(true);
                 }}
                 placeholder="ابحث عن عنوان، مصنع، شركة..."
-                showWazeEmbed={true}
+                showWazeEmbed={false}
               />
               
               {/* Save Location Prompt */}
