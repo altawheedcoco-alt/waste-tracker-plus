@@ -83,6 +83,7 @@ import {
   Network,
   FileSignature,
   ClipboardCheck,
+  Printer,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -330,6 +331,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Full menu items for organizations and admins - with unique keys (GROUPED)
   const fullMenuItems: SidebarMenuItem[] = [
     { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard', key: 'dashboard' },
+    { icon: Printer, label: language === 'ar' ? 'مركز الطباعة' : 'Print Center', path: '/dashboard/print-center', key: 'print-center' },
+    { icon: PenTool, label: language === 'ar' ? 'التوقيعات والأختام' : 'Signing Status', path: '/dashboard/signing-status', key: 'signing-status' },
     
     // ═══════════════ المنظمة والهيكل ═══════════════
     { icon: Building2, label: t('sidebar.orgGroup'), path: '#', key: 'org-group', badge: sectionBadges['org-group'], children: [
