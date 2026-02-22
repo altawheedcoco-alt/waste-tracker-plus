@@ -88,7 +88,7 @@ interface SearchResult {
   address: string;
   lat: number;
   lng: number;
-  type: 'mapbox' | 'saved' | 'org';
+  type: 'waze' | 'saved' | 'org';
 }
 
 interface OrgLocation {
@@ -210,25 +210,31 @@ const WazeLocationField = ({
           type: 'org' as const,
         }));
 
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=5&language=ar&types=address,place,locality,neighborhood,poi`;
-      const response = await fetch(url);
+      // Use Waze search via edge function
+      const center = coordinates || mapCenter;
+      const wazeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/waze-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lon=${center.lng}&lang=ar`;
+      const response = await fetch(wazeUrl, {
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+      });
       const data = await response.json();
-      const mapboxResults: SearchResult[] = (data.features || []).map((f: any, i: number) => ({
-        id: `mb-${f.id}-${i}`,
-        name: f.text || f.place_name.split(',')[0],
-        address: f.place_name,
-        lat: f.center[1],
-        lng: f.center[0],
-        type: 'mapbox' as const,
+      const wazeResults: SearchResult[] = (data.results || []).map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        address: r.address,
+        lat: r.lat,
+        lng: r.lng,
+        type: 'waze' as const,
       }));
 
-      setResults([...savedResults, ...orgResults, ...mapboxResults]);
+      setResults([...savedResults, ...orgResults, ...wazeResults]);
     } catch {
       setResults([]);
     } finally {
       setLoading(false);
     }
-  }, [savedLocations, orgLocations]);
+  }, [savedLocations, orgLocations, coordinates, mapCenter]);
 
   const handleSelect = (result: SearchResult) => {
     onChange(result.address, { lat: result.lat, lng: result.lng });
@@ -310,7 +316,7 @@ const WazeLocationField = ({
     switch (type) {
       case 'saved': return <Star className="w-3.5 h-3.5 text-amber-500" />;
       case 'org': return <Building2 className="w-3.5 h-3.5 text-primary" />;
-      case 'mapbox': return <MapPin className="w-3.5 h-3.5 text-blue-500" />;
+      case 'waze': return <Navigation className="w-3.5 h-3.5 text-primary" />;
     }
   };
 
@@ -318,7 +324,7 @@ const WazeLocationField = ({
     switch (type) {
       case 'saved': return 'محفوظ';
       case 'org': return 'منظمة';
-      case 'mapbox': return 'Waze';
+      case 'waze': return 'Waze';
     }
   };
 
