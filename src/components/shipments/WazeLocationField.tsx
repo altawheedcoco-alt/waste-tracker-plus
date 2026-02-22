@@ -805,8 +805,9 @@ const WazeLocationField = ({
             className="text-xs h-8 flex-1"
             dir="ltr"
             onPaste={(e) => {
+              const target = e.currentTarget;
               setTimeout(() => {
-                const pastedLink = e.currentTarget.value;
+                const pastedLink = target?.value;
                 if (pastedLink) {
                   const coords = parseMapLink(pastedLink);
                   if (coords) {
