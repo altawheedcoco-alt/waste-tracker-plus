@@ -17,16 +17,35 @@ import L from 'leaflet';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
-// Interactive Leaflet mini-map - replaces Waze iframe to fix removeChild error
+type MapProvider = 'osm' | 'google' | 'waze';
+
+const MAP_TILES: Record<MapProvider, { url: string; label: string }> = {
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    label: 'OpenStreetMap',
+  },
+  google: {
+    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    label: 'Google Maps',
+  },
+  waze: {
+    url: 'https://worldtiles1.waze.com/tiles/{z}/{x}/{y}.png',
+    label: 'Waze',
+  },
+};
+
+// Interactive Leaflet mini-map with switchable tile providers
 const LocationMiniMap = ({ 
-  lat, lng, zoom, onLocationSelect 
+  lat, lng, zoom, onLocationSelect, provider = 'osm'
 }: { 
   lat: number; lng: number; zoom: number;
   onLocationSelect?: (lat: number, lng: number) => void;
+  provider?: MapProvider;
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const onSelectRef = useRef(onLocationSelect);
   onSelectRef.current = onLocationSelect;
 
@@ -34,7 +53,6 @@ const LocationMiniMap = ({
     const container = mapContainerRef.current;
     if (!container) return;
 
-    // Prevent double init in strict mode
     if (mapInstanceRef.current) return;
 
     const map = L.map(container, {
@@ -44,7 +62,8 @@ const LocationMiniMap = ({
       attributionControl: false,
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    const tile = L.tileLayer(MAP_TILES[provider].url, { maxZoom: 19 }).addTo(map);
+    tileLayerRef.current = tile;
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     const icon = L.divIcon({
@@ -68,9 +87,17 @@ const LocationMiniMap = ({
       map.remove();
       mapInstanceRef.current = null;
       markerRef.current = null;
+      tileLayerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Switch tile layer when provider changes
+  useEffect(() => {
+    if (mapInstanceRef.current && tileLayerRef.current) {
+      tileLayerRef.current.setUrl(MAP_TILES[provider].url);
+    }
+  }, [provider]);
 
   useEffect(() => {
     if (mapInstanceRef.current && markerRef.current) {
@@ -136,6 +163,7 @@ const WazeLocationField = ({
   const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
   const [mapZoom, setMapZoom] = useState(12);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const [mapProvider, setMapProvider] = useState<MapProvider>('waze');
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -527,24 +555,40 @@ const WazeLocationField = ({
         </div>
       )}
 
-      {/* Interactive Map */}
+      {/* Interactive Map with Provider Switcher */}
       {showMap && (
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-              <MapPin className="w-3.5 h-3.5 text-primary" />
-              <span>انقر على الخريطة لتحديد الموقع</span>
+            <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
+              {(Object.keys(MAP_TILES) as MapProvider[]).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={cn(
+                    "px-2.5 py-1 text-[10px] font-medium rounded-md transition-all",
+                    mapProvider === key 
+                      ? "bg-background text-foreground shadow-sm" 
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  onClick={() => setMapProvider(key)}
+                >
+                  {MAP_TILES[key].label}
+                </button>
+              ))}
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-5 px-1.5 text-[10px] gap-1"
-              onClick={() => setMapExpanded(!mapExpanded)}
-            >
-              <Map className="w-3 h-3" />
-              {mapExpanded ? 'تصغير' : 'تكبير'}
-            </Button>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">انقر للتحديد</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-5 px-1.5 text-[10px] gap-1"
+                onClick={() => setMapExpanded(!mapExpanded)}
+              >
+                <Map className="w-3 h-3" />
+                {mapExpanded ? 'تصغير' : 'تكبير'}
+              </Button>
+            </div>
           </div>
           <div className={cn(
             "transition-all duration-300 border rounded-lg overflow-hidden",
@@ -554,8 +598,8 @@ const WazeLocationField = ({
               lat={mapCenter.lat} 
               lng={mapCenter.lng} 
               zoom={mapZoom}
+              provider={mapProvider}
               onLocationSelect={async (lat, lng) => {
-                // Reverse geocode the clicked location
                 try {
                   const res = await fetch(
                     `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=ar`
