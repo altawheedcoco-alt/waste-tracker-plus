@@ -26,6 +26,7 @@ serve(async (req) => {
     const HERE_API_KEY = Deno.env.get("HERE_API_KEY");
     const LOCATIONIQ_API_KEY = Deno.env.get("LOCATIONIQ_API_KEY");
     const OPENCAGE_API_KEY = Deno.env.get("OPENCAGE_API_KEY");
+    const TOMTOM_API_KEY = Deno.env.get("TOMTOM_API_KEY");
 
     const promises: Promise<any[]>[] = [];
 
@@ -165,7 +166,26 @@ serve(async (req) => {
         .catch(() => [])
     );
 
-    const allArrays = await Promise.all(promises);
+    // 8. TomTom (2500 free/day)
+    if (TOMTOM_API_KEY) {
+      promises.push(
+        fetch(`https://api.tomtom.com/search/2/search/${encodeURIComponent(q)}.json?key=${TOMTOM_API_KEY}&countrySet=EG&lat=${lat}&lon=${lng}&limit=6&language=${lang}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data?.results) return [];
+            return data.results.map((item: any, i: number) => ({
+              id: `tomtom-${i}`,
+              name: item.poi?.name || item.address?.freeformAddress?.split(",")[0] || "",
+              address: item.address?.freeformAddress || "",
+              lat: item.position?.lat || 0,
+              lng: item.position?.lon || 0,
+              source: "tomtom",
+            }));
+          })
+          .catch(() => [])
+      );
+    }
+
     const allResults = allArrays.flat();
 
     // Deduplicate by proximity (~200m)
@@ -183,6 +203,7 @@ serve(async (req) => {
       HERE_API_KEY ? "here" : null,
       LOCATIONIQ_API_KEY ? "locationiq" : null,
       OPENCAGE_API_KEY ? "opencage" : null,
+      TOMTOM_API_KEY ? "tomtom" : null,
       "mapbox",
       "photon",
       "herewego",
