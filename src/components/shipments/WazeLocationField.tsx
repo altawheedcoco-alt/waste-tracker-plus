@@ -7,14 +7,32 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, Loader2, MapPin, Navigation, X, ExternalLink,
-  Bookmark, Building2, LocateFixed, Star,
+  Bookmark, Building2, LocateFixed, Star, Map,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { useSavedLocations, SavedLocation } from '@/hooks/useSavedLocations';
+import { useSavedLocations } from '@/hooks/useSavedLocations';
 import { supabase } from '@/integrations/supabase/client';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+
+// Waze iframe using pure React - no direct DOM manipulation
+const WazeEmbed = ({ lat, lng, zoom }: { lat: number; lng: number; zoom: number }) => {
+  const src = `https://embed.waze.com/iframe?zoom=${zoom}&lat=${lat}&lon=${lng}&pin=1`;
+  return (
+    <iframe
+      key={`${lat}-${lng}-${zoom}`}
+      src={src}
+      width="100%"
+      height="100%"
+      allowFullScreen
+      loading="lazy"
+      style={{ border: 'none' }}
+      title="Waze Map"
+      className="rounded-lg"
+    />
+  );
+};
 
 interface SearchResult {
   id: string;
@@ -45,6 +63,7 @@ interface WazeLocationFieldProps {
   organizationCity?: string;
   coordinates?: { lat: number; lng: number } | null;
   icon?: 'pickup' | 'delivery';
+  showMap?: boolean;
 }
 
 const WazeLocationField = ({
@@ -58,6 +77,7 @@ const WazeLocationField = ({
   organizationCity,
   coordinates,
   icon = 'pickup',
+  showMap = false,
 }: WazeLocationFieldProps) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -65,10 +85,21 @@ const WazeLocationField = ({
   const [focused, setFocused] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [orgLocations, setOrgLocations] = useState<OrgLocation[]>([]);
+  const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
+  const [mapZoom, setMapZoom] = useState(12);
+  const [mapExpanded, setMapExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { locations: savedLocations, incrementUsage } = useSavedLocations();
+
+  // Sync map center with coordinates
+  useEffect(() => {
+    if (coordinates) {
+      setMapCenter({ lat: coordinates.lat, lng: coordinates.lng });
+      setMapZoom(15);
+    }
+  }, [coordinates]);
 
   // Fetch org locations
   useEffect(() => {
@@ -106,7 +137,6 @@ const WazeLocationField = ({
   const searchPlaces = useCallback(async (q: string) => {
     setLoading(true);
     try {
-      // Search saved locations first
       const lq = q.toLowerCase();
       const savedResults: SearchResult[] = savedLocations
         .filter(l => l.name.toLowerCase().includes(lq) || l.address.toLowerCase().includes(lq))
@@ -120,7 +150,6 @@ const WazeLocationField = ({
           type: 'saved' as const,
         }));
 
-      // Search org locations
       const orgResults: SearchResult[] = orgLocations
         .filter(l => l.location_name.toLowerCase().includes(lq) || l.address.toLowerCase().includes(lq))
         .slice(0, 2)
@@ -133,7 +162,6 @@ const WazeLocationField = ({
           type: 'org' as const,
         }));
 
-      // Search Mapbox
       const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=5&language=ar&types=address,place,locality,neighborhood,poi`;
       const response = await fetch(url);
       const data = await response.json();
@@ -156,12 +184,13 @@ const WazeLocationField = ({
 
   const handleSelect = (result: SearchResult) => {
     onChange(result.address, { lat: result.lat, lng: result.lng });
+    setMapCenter({ lat: result.lat, lng: result.lng });
+    setMapZoom(15);
     setQuery('');
     setResults([]);
     setFocused(false);
     if (result.type === 'saved') {
-      const savedId = result.id.replace('saved-', '');
-      incrementUsage(savedId);
+      incrementUsage(result.id.replace('saved-', ''));
     }
     toast.success('✅ تم تحديد الموقع');
   };
@@ -182,6 +211,8 @@ const WazeLocationField = ({
           const data = await res.json();
           if (data.features?.[0]) {
             onChange(data.features[0].place_name, { lat: latitude, lng: longitude });
+            setMapCenter({ lat: latitude, lng: longitude });
+            setMapZoom(15);
             toast.success('📍 تم تحديد موقعك');
           }
         } catch {
@@ -282,7 +313,7 @@ const WazeLocationField = ({
         </div>
       )}
 
-      {/* Search input - shown when no value or focused */}
+      {/* Search input */}
       {(!value || focused) && (
         <div className="relative">
           <div className="relative">
@@ -327,10 +358,8 @@ const WazeLocationField = ({
           {showDropdown && (
             <Card className="absolute z-50 top-full mt-1 w-full shadow-lg border rounded-lg overflow-hidden bg-background">
               <ScrollArea className="max-h-[280px]">
-                {/* Quick actions when no query */}
                 {quickLocations && (
                   <div className="p-2 space-y-1">
-                    {/* Org primary address */}
                     {organizationAddress && (
                       <button
                         type="button"
@@ -348,7 +377,6 @@ const WazeLocationField = ({
                       </button>
                     )}
 
-                    {/* Org additional locations */}
                     {orgLocations.slice(0, 3).map(loc => (
                       <button
                         key={loc.id}
@@ -371,7 +399,6 @@ const WazeLocationField = ({
                       </button>
                     ))}
 
-                    {/* Recent saved locations */}
                     {savedLocations.length > 0 && (
                       <>
                         <div className="flex items-center gap-2 px-3 pt-2 pb-1">
@@ -407,7 +434,6 @@ const WazeLocationField = ({
                   </div>
                 )}
 
-                {/* Search results */}
                 {results.length > 0 && (
                   <div className="p-1">
                     {results.map((result) => (
@@ -434,6 +460,37 @@ const WazeLocationField = ({
               </ScrollArea>
             </Card>
           )}
+        </div>
+      )}
+
+      {/* Waze Embedded Map */}
+      {showMap && (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" fill="hsl(var(--primary))" opacity="0.15"/>
+                <path d="M12 2C6.5 2 2 6.5 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10c0-5.5-4.5-10-10-10zm-2 15c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm3.5-5c-.3 0-.5-.2-.5-.5v-1c0-2.8-2.2-5-5-5s-5 2.2-5 5v1c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1c0 .3-.2.5-.5.5z" fill="hsl(var(--primary))"/>
+              </svg>
+              <span>Waze خريطة</span>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-5 px-1.5 text-[10px] gap-1"
+              onClick={() => setMapExpanded(!mapExpanded)}
+            >
+              <Map className="w-3 h-3" />
+              {mapExpanded ? 'تصغير' : 'تكبير'}
+            </Button>
+          </div>
+          <div className={cn(
+            "transition-all duration-300",
+            mapExpanded ? "h-[300px]" : "h-[160px]"
+          )}>
+            <WazeEmbed lat={mapCenter.lat} lng={mapCenter.lng} zoom={mapZoom} />
+          </div>
         </div>
       )}
     </div>

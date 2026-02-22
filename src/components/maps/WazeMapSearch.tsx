@@ -8,39 +8,19 @@ import { Search, Loader2, MapPin, Navigation, X, Globe, Share2, Truck, Package }
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-// Separate iframe component to isolate DOM manipulation from React tree
+// Pure React Waze iframe - no direct DOM manipulation
 const WazeEmbedMap = ({ url }: { url: string }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Clear previous iframe
-    while (container.firstChild) {
-      container.removeChild(container.firstChild);
-    }
-
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    iframe.width = '100%';
-    iframe.height = '250';
-    iframe.allowFullscreen = true;
-    iframe.loading = 'lazy';
-    iframe.style.border = 'none';
-    container.appendChild(iframe);
-
-    return () => {
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
-    };
-  }, [url]);
-
   return (
-    <div
-      ref={containerRef}
-      className="rounded-lg overflow-hidden border border-[#33CCFF]/20"
+    <iframe
+      key={url}
+      src={url}
+      width="100%"
+      height="250"
+      allowFullScreen
+      loading="lazy"
+      style={{ border: 'none' }}
+      title="Waze Map"
+      className="rounded-lg border border-[#33CCFF]/20"
     />
   );
 };
