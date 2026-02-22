@@ -1,2 +1,2 @@
-// Re-export Leaflet Search Box for backwards compatibility
+// Re-export Leaflet Search Box
 export { default } from './LeafletSearchBox';

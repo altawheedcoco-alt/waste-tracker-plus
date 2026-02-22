@@ -1,2 +1,2 @@
-// Re-export Google Maps Driver Tracking for backwards compatibility
-export { default } from './GoogleMapsDriverTracking';
+// Re-export Leaflet Driver Tracking
+export { default } from './LeafletDriverTracking';

@@ -1,2 +1,2 @@
-// Re-export Google Maps version
-export { default } from './GoogleMapsLocationPicker';
+// Re-export Leaflet Location Picker
+export { default } from './LeafletLocationPicker';
