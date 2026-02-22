@@ -73,6 +73,22 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('date-fns') || id.includes('react-day-picker')) {
             return 'date-utils';
           }
+          // Maps
+          if (id.includes('leaflet')) {
+            return 'maps';
+          }
+          // Carousel & misc UI
+          if (id.includes('embla-carousel') || id.includes('vaul') || id.includes('cmdk') || id.includes('input-otp')) {
+            return 'ui-extras';
+          }
+          // Sonner toast
+          if (id.includes('sonner')) {
+            return 'toast';
+          }
+          // JSZip
+          if (id.includes('jszip')) {
+            return 'zip';
+          }
           // Remaining vendor
           if (id.includes('node_modules/')) {
             return 'vendor';
