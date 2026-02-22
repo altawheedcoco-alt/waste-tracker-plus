@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { SmartInput } from '@/components/ui/smart-input';
@@ -62,6 +63,9 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
     navigate,
     organization,
   } = useCreateShipment();
+
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   return (
     <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-6">
@@ -477,18 +481,25 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <WazeLocationField
           value={formData.pickup_address}
-          onChange={(address, coords) => setFormData(prev => ({ ...prev, pickup_address: address }))}
+          onChange={(address, coords) => {
+            setFormData(prev => ({ ...prev, pickup_address: address }));
+            if (coords) setPickupCoords(coords);
+          }}
           label="موقع الاستلام"
           placeholder="ابحث عن موقع الاستلام..."
           organizationId={formData.generator_id || undefined}
           organizationName={generators.find(g => g.id === formData.generator_id)?.name}
           organizationAddress={generators.find(g => g.id === formData.generator_id)?.address}
           organizationCity={generators.find(g => g.id === formData.generator_id)?.city}
+          coordinates={pickupCoords}
           icon="pickup"
         />
         <WazeLocationField
           value={formData.delivery_address}
-          onChange={(address, coords) => setFormData(prev => ({ ...prev, delivery_address: address }))}
+          onChange={(address, coords) => {
+            setFormData(prev => ({ ...prev, delivery_address: address }));
+            if (coords) setDeliveryCoords(coords);
+          }}
           label={formData.destination_type === 'recycling' ? 'موقع التسليم (تدوير)' : 'موقع التسليم (تخلص)'}
           placeholder="ابحث عن موقع التسليم..."
           organizationId={
@@ -510,6 +521,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
               ? recyclers.find(r => r.id === formData.recycler_id)?.city
               : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.city
           }
+          coordinates={deliveryCoords}
           icon="delivery"
         />
       </div>
