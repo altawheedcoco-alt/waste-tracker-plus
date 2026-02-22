@@ -296,27 +296,7 @@ const WazeLocationField = ({
       const center = coordinates || mapCenter;
       
       const searchPromises = [
-        // Google Places (PRIORITY - same data as Waze iframe uses internally)
-        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places-search`, {
-          method: 'POST',
-          headers: {
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query: q, userLat: center.lat, userLng: center.lng, radius: 80000 }),
-        })
-          .then(r => r.json())
-          .then(data => (data.results || []).slice(0, 8).map((r: any) => ({
-            id: `google-${r.id}`,
-            name: r.name,
-            address: r.address,
-            lat: r.lat,
-            lng: r.lng,
-            type: 'google' as const,
-          })))
-          .catch(() => [] as SearchResult[]),
-
-        // Waze search
+        // Waze search (primary)
         fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/waze-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lon=${center.lng}&lang=ar`, {
           headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
         })
@@ -345,10 +325,10 @@ const WazeLocationField = ({
           .catch(() => [] as SearchResult[]),
       ];
 
-      const [googleResults, wazeResults, osmResults] = await Promise.all(searchPromises);
+      const [wazeResults, osmResults] = await Promise.all(searchPromises);
       
-      // Google Places first (most accurate, same as Waze iframe), then Waze, then OSM
-      const allMapResults = [...googleResults, ...wazeResults, ...osmResults];
+      // Waze first, then OSM
+      const allMapResults = [...wazeResults, ...osmResults];
       const deduped: SearchResult[] = [];
       for (const r of allMapResults) {
         const isDupe = deduped.some(
