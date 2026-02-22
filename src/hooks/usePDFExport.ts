@@ -302,8 +302,14 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     `);
     printWindow.document.close();
     
-    printWindow.onload = () => { setTimeout(() => { printWindow.print(); }, 300); };
-    setTimeout(() => { printWindow.print(); }, 1000);
+    let printed = false;
+    const doPrint = () => {
+      if (printed) return;
+      printed = true;
+      printWindow.print();
+    };
+    printWindow.onload = () => { setTimeout(doPrint, 300); };
+    setTimeout(doPrint, 1500);
   }, []);
 
   /** Print with a specific theme applied */
