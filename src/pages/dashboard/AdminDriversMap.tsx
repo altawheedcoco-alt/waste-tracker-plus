@@ -29,8 +29,8 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import DriverTrackingMap from '@/components/maps/DriverTrackingMap';
-import DriverLocationHistory from '@/components/maps/DriverLocationHistory';
+import DriverTrackingMap from '@/components/maps/LeafletDriverTracking';
+import DriverLocationHistory from '@/components/maps/LeafletDriverHistory';
 import BackButton from '@/components/ui/back-button';
 
 interface DriverProfile {

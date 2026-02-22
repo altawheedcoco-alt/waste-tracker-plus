@@ -26,7 +26,7 @@ import {
   Phone,
 } from 'lucide-react';
 import { getStatusConfig, mapLegacyStatus, allStatuses } from '@/lib/shipmentStatusConfig';
-import ShipmentTrackingMap from '@/components/maps/ShipmentTrackingMap';
+import ShipmentTrackingMap from '@/components/maps/LeafletShipmentTracking';
 
 interface DriverInfo {
   id: string;

@@ -22,7 +22,7 @@ import {
   Gauge
 } from 'lucide-react';
 import { toast } from 'sonner';
-import DriverMiniMap from '@/components/maps/DriverMiniMap';
+import DriverMiniMap from '@/components/maps/LeafletMiniMap';
 import TrackingStatsCard from '@/components/tracking/TrackingStatsCard';
 
 interface OrganizationInfo {

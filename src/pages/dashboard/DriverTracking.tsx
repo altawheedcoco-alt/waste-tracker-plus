@@ -29,8 +29,8 @@ import {
   Eye,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import DriverTrackingMap from '@/components/maps/DriverTrackingMap';
-import DriverLocationHistory from '@/components/maps/DriverLocationHistory';
+import DriverTrackingMap from '@/components/maps/LeafletDriverTracking';
+import DriverLocationHistory from '@/components/maps/LeafletDriverHistory';
 import BackButton from '@/components/ui/back-button';
 import SendDriverNotificationDialog from '@/components/drivers/SendDriverNotificationDialog';
 

@@ -18,84 +18,35 @@ export default defineConfig(({ mode }) => ({
     cssCodeSplit: true,
     sourcemap: false,
     minify: 'esbuild',
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // React core - rarely changes, cached long-term
+          // React core
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
             return 'react-core';
           }
-          // Router
-          if (id.includes('react-router')) {
-            return 'router';
-          }
-          // UI library (Radix + shadcn primitives)
-          if (id.includes('@radix-ui/')) {
-            return 'ui-primitives';
-          }
-          // Charts & visualization
-          if (id.includes('recharts') || id.includes('d3-')) {
-            return 'charts';
-          }
-          // Data fetching
-          if (id.includes('@tanstack/react-query')) {
-            return 'query';
-          }
-          // Supabase SDK
-          if (id.includes('@supabase/')) {
-            return 'supabase';
-          }
-          // Animation
-          if (id.includes('framer-motion')) {
-            return 'animation';
-          }
-          // PDF/Export
-          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('xlsx')) {
-            return 'export';
-          }
-          // Icons
-          if (id.includes('lucide-react')) {
-            return 'icons';
-          }
-          // Forms
-          if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
-            return 'forms';
-          }
-          // QR/Barcode
-          if (id.includes('qrcode') || id.includes('html5-qrcode') || id.includes('react-barcode')) {
-            return 'qr-barcode';
-          }
-          // Markdown
-          if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype') || id.includes('unified') || id.includes('micromark') || id.includes('mdast')) {
-            return 'markdown';
-          }
-          // Date utilities
-          if (id.includes('date-fns') || id.includes('react-day-picker')) {
-            return 'date-utils';
-          }
-          // Maps
-          if (id.includes('leaflet')) {
-            return 'maps';
-          }
-          // Carousel & misc UI
-          if (id.includes('embla-carousel') || id.includes('vaul') || id.includes('cmdk') || id.includes('input-otp')) {
-            return 'ui-extras';
-          }
-          // Sonner toast
-          if (id.includes('sonner')) {
-            return 'toast';
-          }
-          // JSZip
-          if (id.includes('jszip')) {
-            return 'zip';
-          }
-          // Remaining vendor
-          if (id.includes('node_modules/')) {
-            return 'vendor';
-          }
+          if (id.includes('react-router')) return 'router';
+          if (id.includes('@radix-ui/')) return 'ui-primitives';
+          if (id.includes('recharts') || id.includes('d3-')) return 'charts';
+          if (id.includes('@tanstack/react-query')) return 'query';
+          if (id.includes('@supabase/')) return 'supabase';
+          if (id.includes('framer-motion')) return 'animation';
+          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('xlsx')) return 'export';
+          if (id.includes('lucide-react')) return 'icons';
+          if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) return 'forms';
+          if (id.includes('qrcode') || id.includes('html5-qrcode') || id.includes('react-barcode')) return 'qr-barcode';
+          if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype') || id.includes('unified') || id.includes('micromark') || id.includes('mdast')) return 'markdown';
+          if (id.includes('date-fns') || id.includes('react-day-picker')) return 'date-utils';
+          if (id.includes('leaflet')) return 'maps';
+          if (id.includes('embla-carousel') || id.includes('vaul') || id.includes('cmdk') || id.includes('input-otp')) return 'ui-extras';
+          if (id.includes('sonner')) return 'toast';
+          if (id.includes('jszip')) return 'zip';
+          if (id.includes('node_modules/')) return 'vendor';
         },
       },
     },
+    reportCompressedSize: false,
   },
   plugins: [
     react(),
