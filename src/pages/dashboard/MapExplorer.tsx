@@ -1,4 +1,4 @@
-/// <reference types="@types/google.maps" />
+import L from 'leaflet';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,7 +15,6 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
 import GoogleMapComponent from '@/components/maps/GoogleMapComponent';
 import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
 
@@ -43,7 +42,7 @@ interface IndustrialFacility {
 }
 
 const MapExplorer = () => {
-  const { isLoaded, loadError } = useGoogleMaps();
+  const isLoaded = true; // Leaflet is always loaded
   const [selectedPosition, setSelectedPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [mapStyle, setMapStyle] = useState<MapStyleKey>('roadmap');
@@ -55,8 +54,8 @@ const MapExplorer = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
   const [mapZoom, setMapZoom] = useState(10);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
   // Get user location on mount
   useEffect(() => {
@@ -131,55 +130,39 @@ const MapExplorer = () => {
 
   // Update markers when facilities change
   useEffect(() => {
-    if (!mapInstanceRef.current || !isLoaded || !showFactoryMarkers) {
-      // Clear markers if not showing
-      markersRef.current.forEach(marker => marker.setMap(null));
-      markersRef.current = [];
+    if (!mapInstanceRef.current || !showFactoryMarkers) {
+      markersLayerRef.current?.clearLayers();
       return;
     }
 
-    // Clear old markers
-    markersRef.current.forEach(marker => marker.setMap(null));
-    markersRef.current = [];
+    if (!markersLayerRef.current) {
+      markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
+    }
+    markersLayerRef.current.clearLayers();
 
-    // Add new markers
     facilities.forEach(facility => {
-      const marker = new window.google.maps.Marker({
-        position: { lat: facility.latitude, lng: facility.longitude },
-        map: mapInstanceRef.current!,
-        title: facility.name_ar || facility.name,
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: facility.is_verified ? '#22c55e' : '#3b82f6',
-          fillOpacity: 0.9,
-          strokeColor: '#ffffff',
-          strokeWeight: 2,
-        },
+      const color = facility.is_verified ? '#22c55e' : '#3b82f6';
+      const icon = L.divIcon({
+        html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
+        className: '', iconSize: [16, 16], iconAnchor: [8, 8],
       });
-
-      marker.addListener('click', () => {
+      const marker = L.marker([facility.latitude, facility.longitude], { icon })
+        .bindPopup(`<div dir="rtl"><b>${facility.name_ar || facility.name}</b><br/>${facility.city || ''}</div>`);
+      marker.on('click', () => {
         setSelectedPosition({ lat: facility.latitude, lng: facility.longitude });
         setSelectedAddress(`${facility.name_ar || facility.name} - ${facility.city || ''} - ${facility.governorate || ''}`);
-        toast.success('تم تحديد الموقع');
       });
-
-      markersRef.current.push(marker);
+      markersLayerRef.current!.addLayer(marker);
     });
-  }, [facilities, isLoaded, showFactoryMarkers]);
+  }, [facilities, showFactoryMarkers]);
 
   // Handle map load
-  const handleMapLoad = (map: google.maps.Map) => {
+  const handleMapLoad = (map: L.Map) => {
     mapInstanceRef.current = map;
-    map.setMapTypeId(mapStyle);
   };
 
-  // Handle map style change
-  useEffect(() => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.setMapTypeId(mapStyle);
-    }
-  }, [mapStyle]);
+  // Map style not applicable for OSM tiles
+  useEffect(() => {}, [mapStyle]);
 
   // Handle position select from map
   const handlePositionSelect = async (position: { lat: number; lng: number }, address?: string) => {
@@ -223,7 +206,7 @@ const MapExplorer = () => {
     }
   };
 
-  if (loadError) {
+  if (false) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center text-destructive">
@@ -365,9 +348,6 @@ const MapExplorer = () => {
               onMapLoad={handleMapLoad}
               height="100%"
               clickable={true}
-              mapTypeControl={false}
-              fullscreenControl={true}
-              zoomControl={true}
             />
 
             {/* Selected Location Info */}
