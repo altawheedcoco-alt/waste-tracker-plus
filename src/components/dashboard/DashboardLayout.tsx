@@ -134,7 +134,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
-  const { profile, organization, signOut, roles } = useAuth();
+  const { profile, organization, signOut, roles, user, loading } = useAuth();
   const { count: partnersCount } = usePartnersCount();
   const { unreadCount: notificationCount } = useNotifications();
   const sectionBadges = useNotificationCounts();
@@ -150,6 +150,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     shouldCollapseSidebar,
     getResponsiveClass 
   } = useDisplayMode();
+
+  // Auth guard - redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   // Auto-collapse sidebar on mobile/tablet
   useEffect(() => {
@@ -657,6 +664,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     tablet: 'p-4',
     desktop: 'p-6',
   });
+
+  // Auth guard early returns - after all hooks
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <FocusMusicProvider>
