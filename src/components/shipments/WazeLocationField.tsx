@@ -311,6 +311,21 @@ const WazeLocationField = ({
           })))
           .catch(() => [] as SearchResult[]),
 
+        // Multi-geocode: HERE + LocationIQ + OpenCage + Photon
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/multi-geocode-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lng=${center.lng}&lang=ar`, {
+          headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+        })
+          .then(r => r.json())
+          .then(data => (data.results || []).map((r: any) => ({
+            id: r.id,
+            name: r.name,
+            address: r.address,
+            lat: r.lat,
+            lng: r.lng,
+            type: (r.source || 'multi') as any,
+          })))
+          .catch(() => [] as SearchResult[]),
+
         // OSM Nominatim (fallback)
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=5&accept-language=ar`)
           .then(r => r.json())
@@ -325,10 +340,10 @@ const WazeLocationField = ({
           .catch(() => [] as SearchResult[]),
       ];
 
-      const [wazeResults, osmResults] = await Promise.all(searchPromises);
+      const [wazeResults, multiResults, osmResults] = await Promise.all(searchPromises);
       
-      // Waze first, then OSM
-      const allMapResults = [...wazeResults, ...osmResults];
+      // Waze first, then multi-geocode results, then OSM
+      const allMapResults = [...wazeResults, ...multiResults, ...osmResults];
       const deduped: SearchResult[] = [];
       for (const r of allMapResults) {
         const isDupe = deduped.some(
