@@ -177,9 +177,9 @@ const SustainabilityCertificate = ({
           </div>
 
           {/* Watermark */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ opacity: 0.08, zIndex: 9999 }}>
             <span className="text-[120px] font-bold text-green-800 rotate-[-30deg] select-none">
-              شهادة رسمية
+              iRecycle
             </span>
           </div>
 

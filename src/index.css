@@ -932,11 +932,15 @@
     position: fixed !important;
     top: 50% !important;
     left: 50% !important;
-    transform: translate(-50%, -50%) rotate(-45deg) !important;
-    font-size: 60pt !important;
-    color: rgba(0, 0, 0, 0.03) !important;
-    z-index: -1 !important;
+    transform: translate(-50%, -50%) rotate(-35deg) !important;
+    font-size: 70pt !important;
+    color: rgba(22, 163, 74, 0.08) !important;
+    z-index: 9999 !important;
     pointer-events: none !important;
+    letter-spacing: 10px !important;
+    font-weight: 900 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* ===== Official Document ===== */

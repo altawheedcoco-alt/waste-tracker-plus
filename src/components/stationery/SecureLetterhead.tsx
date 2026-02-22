@@ -76,8 +76,8 @@ const GuillochePattern: React.FC<{ color: string; opacity?: number }> = ({ color
 /** Watermark overlay */
 const WatermarkOverlay: React.FC<{ text: string; opacity: number }> = ({ text, opacity }) => (
   <div 
-    className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden z-0"
-    style={{ opacity }}
+    className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden"
+    style={{ opacity: Math.max(opacity, 0.06), zIndex: 9999 }}
   >
     <div className="transform -rotate-45 select-none">
       <p className="text-[80pt] font-bold text-gray-400 whitespace-nowrap tracking-widest">
