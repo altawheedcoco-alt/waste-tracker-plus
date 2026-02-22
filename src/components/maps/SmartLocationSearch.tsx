@@ -321,9 +321,9 @@ const SmartLocationSearch = ({
 
       {/* Search Source Badges */}
       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-        <Badge variant="outline" className="text-[10px] gap-1 py-0 h-5 bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800">
-          <Globe className="w-3 h-3" />
-          Mapbox
+        <Badge variant="outline" className="text-[10px] gap-1 py-0 h-5 bg-[#33CCFF]/10 text-[#33CCFF] border-[#33CCFF]/30">
+          <Navigation className="w-3 h-3" />
+          Waze
         </Badge>
         {enableAI && (
           <Badge variant="secondary" className="text-[10px] gap-1 py-0 h-5 bg-gradient-to-r from-primary/10 to-purple-500/10 text-primary border-0">
@@ -376,11 +376,11 @@ const SmartLocationSearch = ({
             {/* Mapbox Results */}
             {hasMapboxResults && (
               <div className="border-b">
-                <div className="px-4 py-2 bg-gradient-to-r from-blue-500/5 to-sky-500/5">
+                <div className="px-4 py-2 bg-gradient-to-r from-[#33CCFF]/5 to-sky-500/5">
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-medium text-blue-600 flex items-center gap-1">
-                      <Globe className="w-3 h-3" />
-                      نتائج Mapbox
+                    <p className="text-[11px] font-medium text-[#33CCFF] flex items-center gap-1">
+                      <Navigation className="w-3 h-3" />
+                      نتائج Waze
                     </p>
                   </div>
                 </div>
@@ -388,7 +388,7 @@ const SmartLocationSearch = ({
                   <button
                     key={`mapbox-${result.id}-${index}`}
                     type="button"
-                    className="w-full px-4 py-2.5 text-right hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all duration-150 flex items-start gap-3 group"
+                    className="w-full px-4 py-2.5 text-right hover:bg-[#33CCFF]/5 transition-all duration-150 flex items-start gap-3 group"
                     onClick={() => {
                       const coords = { lat: result.center[1], lng: result.center[0] };
                       onChange(result.place_name, coords);
@@ -399,19 +399,19 @@ const SmartLocationSearch = ({
                       toast.success('تم اختيار الموقع');
                     }}
                   >
-                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-600">
+                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-[#33CCFF]/10 text-[#33CCFF]">
                       <MapPin className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <span className="font-medium text-sm text-foreground group-hover:text-blue-600 transition-colors block truncate">
+                        <span className="font-medium text-sm text-foreground group-hover:text-[#33CCFF] transition-colors block truncate">
                         {result.text || result.place_name.split(',')[0]}
                       </span>
                       <p className="text-xs text-muted-foreground truncate">
                         {result.context?.map((c: any) => c.text).join('، ') || ''}
                       </p>
                     </div>
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-blue-200 text-blue-500 self-center">
-                      Mapbox
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-[#33CCFF]/30 text-[#33CCFF] self-center">
+                      Waze
                     </Badge>
                   </button>
                 ))}

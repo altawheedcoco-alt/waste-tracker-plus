@@ -15,10 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useEnhancedLocationSearch, SearchResult } from '@/hooks/useEnhancedLocationSearch';
 import { useSavedLocations, SavedLocation } from '@/hooks/useSavedLocations';
-import FreeLocationSearch from '@/components/maps/FreeLocationSearch';
-import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
-import GoogleMapsLocationPicker from '@/components/maps/GoogleMapsLocationPicker';
+import WazeMapSearch from '@/components/maps/WazeMapSearch';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -515,16 +512,11 @@ const EnhancedLocationPicker = ({
           </Card>
         </TabsContent>
 
-        {/* Google Places Search Tab - Primary */}
+        {/* Waze Search Tab - Primary */}
         <TabsContent value="search" className="mt-3">
           <Card>
             <CardContent className="p-4 space-y-3">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Globe className="w-4 h-4 text-primary" />
-                <span>بحث عن المواقع والعناوين</span>
-                <Badge variant="secondary" className="text-[10px]">Google Places</Badge>
-              </div>
-              <GoogleMapsSearchBox
+              <WazeMapSearch
                 onSelect={(result) => {
                   onChange(result.address, result.position);
                   setLastSelectedLocation({ 
@@ -532,10 +524,9 @@ const EnhancedLocationPicker = ({
                     coords: result.position 
                   });
                   setShowSavePrompt(true);
-                  toast.success('تم اختيار الموقع');
                 }}
                 placeholder="ابحث عن عنوان، مصنع، شركة..."
-                showLocalResults={true}
+                showWazeEmbed={true}
               />
               
               {/* Save Location Prompt */}
@@ -564,10 +555,6 @@ const EnhancedLocationPicker = ({
                   </Button>
                 </div>
               )}
-              
-              <p className="text-xs text-muted-foreground">
-                💡 بحث Google Places يدعم الأماكن والعناوين والمباني بدقة عالية
-              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -862,14 +849,14 @@ const EnhancedLocationPicker = ({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Google Maps Interactive Picker */}
-            <GoogleMapsLocationPicker
-              value={mapCoordinates}
-              onChange={handleMapPositionSelect}
-              showSearch={true}
-              showCurrentLocation={true}
-              height="450px"
-              label="ابحث عن موقع أو اضغط على الخريطة"
+            {/* Waze Embedded Map for location picking */}
+            <WazeMapSearch
+              onSelect={(result) => {
+                setMapCoordinates(result.position);
+              }}
+              placeholder="ابحث عن موقع..."
+              showWazeEmbed={true}
+              defaultCenter={mapCoordinates || { lat: 30.0444, lng: 31.2357 }}
             />
 
             {/* Coordinates Input */}
