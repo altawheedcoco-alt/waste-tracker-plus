@@ -370,12 +370,39 @@ const DriverDashboard = () => {
                     </Card>
                   ) : (
                     activeShipments.map((shipment) => (
-                      <ShipmentCard
-                        key={shipment.id}
-                        shipment={shipment}
-                        onStatusChange={fetchDriverData}
-                        variant="full"
-                      />
+                      <div key={shipment.id} className="flex flex-col gap-2">
+                        <div className="flex gap-3">
+                          <div className="flex-1 min-w-0">
+                            <ShipmentCard
+                              shipment={shipment}
+                              onStatusChange={fetchDriverData}
+                              variant="full"
+                            />
+                          </div>
+                          <Card className="w-[180px] flex-shrink-0 overflow-hidden">
+                            <div className="h-full min-h-[140px] relative">
+                              <iframe
+                                src={`https://maps.google.com/maps?q=${encodeURIComponent(
+                                  shipment.status === 'approved' ? shipment.pickup_address : shipment.delivery_address
+                                )}&z=14&output=embed`}
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none', minHeight: '140px' }}
+                                loading="lazy"
+                                title={`خريطة ${shipment.shipment_number}`}
+                              />
+                              <button
+                                type="button"
+                                className="absolute bottom-1 left-1 bg-background/90 backdrop-blur-sm rounded-md px-2 py-1 text-[10px] font-medium flex items-center gap-1 shadow-sm border hover:bg-background transition-colors"
+                                onClick={() => handleNavigateToShipment(shipment)}
+                              >
+                                <Navigation className="w-3 h-3 text-primary" />
+                                ابدأ
+                              </button>
+                            </div>
+                          </Card>
+                        </div>
+                      </div>
                     ))
                   )}
                 </div>
