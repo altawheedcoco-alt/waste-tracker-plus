@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FileText, Printer, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
-  Eye, Download, CheckSquare, Square, CheckCircle
+  Eye, Download, CheckSquare, Square, CheckCircle, ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,6 +50,7 @@ interface DocumentItem {
 
 const PrintCenter = () => {
   const { organization, profile } = useAuth();
+  const navigate = useNavigate();
   const orgId = organization?.id;
 
   const [dateMode, setDateMode] = useState<'today' | 'range'>('today');
@@ -386,6 +388,9 @@ const PrintCenter = () => {
     <div className="space-y-6" dir="rtl">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="shrink-0">
+            <ArrowRight className="h-5 w-5" />
+          </Button>
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <FileStack className="h-5 w-5 text-primary" />
           </div>
