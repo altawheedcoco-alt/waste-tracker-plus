@@ -16,8 +16,6 @@ const DocumentVerification = lazy(() => import("@/components/DocumentVerificatio
 const HomepageAds = lazy(() => import("@/components/ads/HomepageAds"));
 const FeaturedConsultants = lazy(() => import("@/components/landing/FeaturedConsultants"));
 const OmalunaSection = lazy(() => import("@/components/landing/OmalunaSection"));
-const WhatsNewSection = lazy(() => import("@/components/landing/WhatsNewSection"));
-const WhatsNewPopup = lazy(() => import("@/components/landing/WhatsNewPopup"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
@@ -65,7 +63,6 @@ const Index = () => {
         <main>
           <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
             <LazySection><HomepageAds /></LazySection>
-            <LazySection><WhatsNewSection /></LazySection>
             <LazySection><DocumentVerification /></LazySection>
             <LazySection><FeaturedConsultants /></LazySection>
             <LazySection><OmalunaSection /></LazySection>
@@ -79,9 +76,6 @@ const Index = () => {
             <LazySection><Services /></LazySection>
             <LazySection><CTA /></LazySection>
           </ErrorBoundary>
-          <Suspense fallback={null}>
-            <WhatsNewPopup />
-          </Suspense>
         </main>
         <LazySection><Footer /></LazySection>
       </div>
