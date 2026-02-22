@@ -6,6 +6,7 @@ import { LucideIcon } from 'lucide-react';
 import CreateShipmentButton from '../CreateShipmentButton';
 import SmartRequestDialog from '../SmartRequestDialog';
 import DashboardPrintReports from './DashboardPrintReports';
+import BulkDocumentPrintDialog from './BulkDocumentPrintDialog';
 import { useState } from 'react';
 
 interface FacilityDashboardHeaderProps {
@@ -64,6 +65,7 @@ const FacilityDashboardHeader = ({
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         {/* Actions */}
         <div className="flex items-center gap-2 flex-wrap">
+          <BulkDocumentPrintDialog />
           <DashboardPrintReports />
           {showCreateShipment && <CreateShipmentButton onSuccess={onRefresh} />}
           {showSmartRequest && <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />}
