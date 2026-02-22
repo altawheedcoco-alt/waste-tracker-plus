@@ -186,6 +186,7 @@ serve(async (req) => {
       );
     }
 
+    const allArrays = await Promise.all(promises);
     const allResults = allArrays.flat();
 
     // Deduplicate by proximity (~200m)
