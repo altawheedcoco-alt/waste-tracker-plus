@@ -43,7 +43,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   const handleSeedAccounts = async () => {
     setSeeding(true);
     try {
-      const { data, error } = await supabase.functions.invoke('seed-demo-accounts');
+      const { data, error } = await supabase.functions.invoke('seed-demo-accounts', { body: { pin: ACCESS_PIN } });
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'فشل إنشاء الحسابات');
       
