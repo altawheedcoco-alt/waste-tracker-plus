@@ -350,7 +350,15 @@ const WazeLocationField = ({
         if (!isDupe) deduped.push(r);
       }
 
-      setResults([...savedResults, ...orgResults, ...deduped]);
+      const allResults = [...savedResults, ...orgResults, ...deduped];
+      setResults(allResults);
+      
+      // Auto-center map on first result with coordinates
+      const firstWithCoords = allResults.find(r => r.lat && r.lng);
+      if (firstWithCoords) {
+        setMapCenter({ lat: firstWithCoords.lat, lng: firstWithCoords.lng });
+        setMapZoom(15);
+      }
     } catch {
       setResults([]);
     } finally {
