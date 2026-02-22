@@ -41,36 +41,66 @@ const SigningStatus = () => {
   const [dateFrom, setDateFrom] = useState(format(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'));
   const [dateTo, setDateTo] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedPartner, setSelectedPartner] = useState<string>('all');
 
   const fromISO = `${dateMode === 'today' ? format(new Date(), 'yyyy-MM-dd') : dateFrom}T00:00:00.000Z`;
   const toISO = `${dateMode === 'today' ? format(new Date(), 'yyyy-MM-dd') : dateTo}T23:59:59.999Z`;
 
+  // Fetch partner organizations from signing requests
+  const { data: sigPartners } = useQuery({
+    queryKey: ['signing-partners', orgId],
+    enabled: !!orgId,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const { data: outReqs } = await supabase
+        .from('signing_requests')
+        .select('recipient_organization_id')
+        .eq('sender_organization_id', orgId!);
+      const { data: inReqs } = await supabase
+        .from('signing_requests')
+        .select('sender_organization_id')
+        .eq('recipient_organization_id', orgId!);
+
+      const ids = new Set<string>();
+      (outReqs || []).forEach((r: any) => { if (r.recipient_organization_id) ids.add(r.recipient_organization_id); });
+      (inReqs || []).forEach((r: any) => { if (r.sender_organization_id) ids.add(r.sender_organization_id); });
+
+      if (ids.size === 0) return [];
+      const { data } = await supabase.from('organizations').select('id, name, organization_type').in('id', Array.from(ids));
+      return data || [];
+    },
+  });
+
   const { data: signingOut, isLoading: loadingOut } = useQuery({
-    queryKey: ['signing-out', orgId, fromISO, toISO],
+    queryKey: ['signing-out', orgId, fromISO, toISO, selectedPartner],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data } = await supabase
+      let q = supabase
         .from('signing_requests')
         .select('id, document_title, document_type, status, signed_at, created_at, requires_stamp, signature_id, recipient_organization_id, recipient_org:organizations!signing_requests_recipient_organization_id_fkey(name)')
         .eq('sender_organization_id', orgId!)
         .gte('created_at', fromISO)
         .lte('created_at', toISO)
         .order('created_at', { ascending: false });
+      if (selectedPartner !== 'all') q = q.eq('recipient_organization_id', selectedPartner);
+      const { data } = await q;
       return data || [];
     },
   });
 
   const { data: signingIn, isLoading: loadingIn } = useQuery({
-    queryKey: ['signing-in', orgId, fromISO, toISO],
+    queryKey: ['signing-in', orgId, fromISO, toISO, selectedPartner],
     enabled: !!orgId,
     queryFn: async () => {
-      const { data } = await supabase
+      let q = supabase
         .from('signing_requests')
         .select('id, document_title, document_type, status, signed_at, created_at, requires_stamp, signature_id, sender_organization_id, sender_org:organizations!signing_requests_sender_organization_id_fkey(name)')
         .eq('recipient_organization_id', orgId!)
         .gte('created_at', fromISO)
         .lte('created_at', toISO)
         .order('created_at', { ascending: false });
+      if (selectedPartner !== 'all') q = q.eq('sender_organization_id', selectedPartner);
+      const { data } = await q;
       return data || [];
     },
   });
@@ -293,6 +323,18 @@ const SigningStatus = () => {
                 </div>
               </>
             )}
+            <div className="space-y-1">
+              <Label className="flex items-center gap-1.5 text-xs"><Building2 className="h-3.5 w-3.5" /> الجهة</Label>
+              <Select value={selectedPartner} onValueChange={setSelectedPartner}>
+                <SelectTrigger className="w-[180px]"><SelectValue placeholder="جميع الجهات" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الجهات</SelectItem>
+                  {(sigPartners || []).map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -301,25 +343,25 @@ const SigningStatus = () => {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{outSigned + inSigned}</div>
+            <div className="text-2xl font-bold text-primary">{outSigned + inSigned}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1"><CheckCircle className="w-3 h-3" /> تم التوقيع</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-amber-600">{outPending + inPending}</div>
+            <div className="text-2xl font-bold text-accent-foreground">{outPending + inPending}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1"><Clock className="w-3 h-3" /> قيد الانتظار</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-red-600">{outRejected + inRejected}</div>
+            <div className="text-2xl font-bold text-destructive">{outRejected + inRejected}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1"><XCircle className="w-3 h-3" /> مرفوض</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-4 text-center">
-            <div className="text-2xl font-bold text-violet-600">{stamped}</div>
+            <div className="text-2xl font-bold text-secondary-foreground">{stamped}</div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1"><Stamp className="w-3 h-3" /> مختوم</p>
           </CardContent>
         </Card>
@@ -375,7 +417,7 @@ const SigningStatus = () => {
                               <td className="py-2 px-2 font-medium">{s.document_title || '-'}</td>
                               <td className="py-2 px-2">{s.document_type || '-'}</td>
                               <td className="py-2 px-2">{(s.recipient_org as any)?.name || '-'}</td>
-                              <td className="py-2 px-2">{s.requires_stamp ? <Stamp className="w-4 h-4 text-violet-500" /> : '—'}</td>
+                              <td className="py-2 px-2">{s.requires_stamp ? <Stamp className="w-4 h-4 text-primary" /> : '—'}</td>
                               <td className="py-2 px-2">{statusBadge(s.status)}</td>
                               <td className="py-2 px-2 text-muted-foreground">{s.created_at ? format(new Date(s.created_at), 'yyyy/MM/dd') : '-'}</td>
                               <td className="py-2 px-2">
@@ -431,7 +473,7 @@ const SigningStatus = () => {
                               <td className="py-2 px-2 font-medium">{s.document_title || '-'}</td>
                               <td className="py-2 px-2">{s.document_type || '-'}</td>
                               <td className="py-2 px-2">{(s.sender_org as any)?.name || '-'}</td>
-                              <td className="py-2 px-2">{s.requires_stamp ? <Stamp className="w-4 h-4 text-violet-500" /> : '—'}</td>
+                              <td className="py-2 px-2">{s.requires_stamp ? <Stamp className="w-4 h-4 text-primary" /> : '—'}</td>
                               <td className="py-2 px-2">{statusBadge(s.status)}</td>
                               <td className="py-2 px-2 text-muted-foreground">{s.created_at ? format(new Date(s.created_at), 'yyyy/MM/dd') : '-'}</td>
                               <td className="py-2 px-2">
