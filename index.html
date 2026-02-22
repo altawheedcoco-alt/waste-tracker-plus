@@ -67,7 +67,8 @@
     <div id="root">
       <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:16px;">
         <div style="width:40px;height:40px;border:3px solid #10b981;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></div>
-        <p id="loader-timeout-msg" style="display:none;direction:rtl;font-family:Cairo,sans-serif;text-align:center;color:#666;font-size:14px;">
+        <!-- Hidden via CSS containment to prevent LCP attribution -->
+        <p id="loader-timeout-msg" style="display:none;contain:layout style paint;direction:rtl;font-family:Cairo,sans-serif;text-align:center;color:#666;font-size:14px;">
           التحميل يستغرق وقتاً أطول من المتوقع...<br/>
           <button onclick="location.reload()" style="margin-top:12px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">إعادة تحميل</button>
         </p>
@@ -95,14 +96,14 @@
         }
       })();
 
-      // Show reload button if app doesn't load within 10 seconds
+      // Show reload button if app doesn't load within 15 seconds
       setTimeout(function(){
         var msg = document.getElementById('loader-timeout-msg');
         var root = document.getElementById('root');
         if(msg && root && root.querySelector('#initial-loader')){
           msg.style.display='block';
         }
-      }, 10000);
+      }, 15000);
     </script>
     <script type="module" src="/src/main.tsx"></script>
     <noscript>
