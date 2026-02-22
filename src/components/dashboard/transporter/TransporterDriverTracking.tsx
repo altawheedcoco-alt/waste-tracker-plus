@@ -8,8 +8,7 @@ import { DriverSummary } from '@/hooks/useTransporterExtended';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
-import GoogleMapComponent from '@/components/maps/GoogleMapComponent';
+import LeafletMultiDriverMap from '@/components/maps/LeafletMultiDriverMap';
 
 interface TransporterDriverTrackingProps {
   drivers: DriverSummary[];
@@ -18,7 +17,7 @@ interface TransporterDriverTrackingProps {
 
 const TransporterDriverTracking = ({ drivers, isLoading }: TransporterDriverTrackingProps) => {
   const navigate = useNavigate();
-  const { isLoaded: mapsLoaded } = useGoogleMaps();
+  
   const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
 
   const availableDrivers = drivers.filter(d => d.isAvailable);
@@ -131,9 +130,9 @@ const TransporterDriverTracking = ({ drivers, isLoading }: TransporterDriverTrac
           ) : viewMode === 'map' ? (
             <div className="space-y-3">
               {/* Embedded Map */}
-              {mapsLoaded && driversWithLocation.length > 0 ? (
+              {driversWithLocation.length > 0 ? (
                 <div className="rounded-lg overflow-hidden border">
-                  <GoogleMapComponent
+                  <LeafletMultiDriverMap
                     center={mapCenter}
                     zoom={10}
                     markers={mapMarkers}
@@ -144,9 +143,7 @@ const TransporterDriverTracking = ({ drivers, isLoading }: TransporterDriverTrac
                 <div className="h-[350px] rounded-lg border bg-muted/30 flex items-center justify-center">
                   <div className="text-center text-muted-foreground">
                     <MapPin className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">
-                      {!mapsLoaded ? 'جاري تحميل الخريطة...' : 'لا توجد مواقع مسجلة للسائقين'}
-                    </p>
+                    <p className="text-sm">لا توجد مواقع مسجلة للسائقين</p>
                   </div>
                 </div>
               )}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import L from 'leaflet';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +14,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface WasteFlow {
   id: string;
@@ -62,9 +62,9 @@ const SEVERITY_COLORS: Record<string, string> = {
 const WasteFlowHeatmap = () => {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
-  const { isLoaded } = useGoogleMaps();
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const layerGroupRef = useRef<L.LayerGroup | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('map');
   const [wasteFilter, setWasteFilter] = useState('all');
@@ -97,96 +97,55 @@ const WasteFlowHeatmap = () => {
 
   useEffect(() => { fetchFlowData(); }, []);
 
-  // Initialize Google Map
+  // Initialize Leaflet Map
   useEffect(() => {
-    if (!isLoaded || !mapRef.current || mapInstanceRef.current) return;
-
-    const map = new google.maps.Map(mapRef.current, {
-      center: { lat: 30.0444, lng: 31.2357 },
-      zoom: 6,
-      mapTypeId: 'roadmap',
-      styles: [
-        { elementType: 'geometry', stylers: [{ color: '#1a1a2e' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#1a1a2e' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#8888aa' }] },
-        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0e1a3a' }] },
-        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2a2a4e' }] },
-      ],
-    });
+    if (!mapContainerRef.current || mapInstanceRef.current) return;
+    const map = L.map(mapContainerRef.current, { center: [30.0444, 31.2357], zoom: 6, zoomControl: true });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CartoDB', maxZoom: 19,
+    }).addTo(map);
+    layerGroupRef.current = L.layerGroup().addTo(map);
     mapInstanceRef.current = map;
-  }, [isLoaded]);
+    return () => { map.remove(); mapInstanceRef.current = null; };
+  }, []);
 
   // Draw flows on map
   useEffect(() => {
-    if (!mapInstanceRef.current || flows.length === 0) return;
-    const map = mapInstanceRef.current;
+    if (!mapInstanceRef.current || !layerGroupRef.current || flows.length === 0) return;
+    layerGroupRef.current.clearLayers();
 
-    // Clear previous overlays
-    // Add flow lines
     flows.forEach(flow => {
       if (!flow.source_lat || !flow.destination_lat) return;
-
       const color = FLOW_COLORS[flow.waste_category] || '#888';
       const weight = Math.max(2, Math.min(8, flow.quantity_tons / 50));
 
-      const line = new google.maps.Polyline({
-        path: [
-          { lat: flow.source_lat, lng: flow.source_lng },
-          { lat: flow.destination_lat, lng: flow.destination_lng },
-        ],
-        geodesic: true,
-        strokeColor: color,
-        strokeOpacity: 0.7,
-        strokeWeight: weight,
-        map,
-      });
+      L.polyline(
+        [[flow.source_lat, flow.source_lng], [flow.destination_lat, flow.destination_lng]],
+        { color, weight, opacity: 0.7 }
+      ).addTo(layerGroupRef.current!);
 
-      // Source marker
-      new google.maps.Marker({
-        position: { lat: flow.source_lat, lng: flow.source_lng },
-        map,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: '#3b82f6',
-          fillOpacity: 0.8,
-          strokeColor: '#fff',
-          strokeWeight: 1,
-          scale: 6,
-        },
-        title: flow.source_region,
+      const srcIcon = L.divIcon({
+        html: `<div style="width:12px;height:12px;border-radius:50%;background:#3b82f6;border:1px solid white;"></div>`,
+        className: '', iconSize: [12, 12], iconAnchor: [6, 6],
       });
+      L.marker([flow.source_lat, flow.source_lng], { icon: srcIcon })
+        .bindPopup(flow.source_region).addTo(layerGroupRef.current!);
 
-      // Destination marker
-      new google.maps.Marker({
-        position: { lat: flow.destination_lat, lng: flow.destination_lng },
-        map,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: color,
-          fillOpacity: 0.8,
-          strokeColor: '#fff',
-          strokeWeight: 1,
-          scale: 8,
-        },
-        title: `${flow.destination_region} - ${flow.quantity_tons}T`,
+      const dstIcon = L.divIcon({
+        html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:1px solid white;"></div>`,
+        className: '', iconSize: [16, 16], iconAnchor: [8, 8],
       });
+      L.marker([flow.destination_lat, flow.destination_lng], { icon: dstIcon })
+        .bindPopup(`${flow.destination_region} - ${flow.quantity_tons}T`).addTo(layerGroupRef.current!);
     });
 
-    // Add alert markers
     alerts.filter(a => a.is_active).forEach(alert => {
-      new google.maps.Marker({
-        position: { lat: alert.region_lat, lng: alert.region_lng },
-        map,
-        icon: {
-          path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-          fillColor: alert.severity === 'critical' ? '#ef4444' : '#f97316',
-          fillOpacity: 0.9,
-          strokeColor: '#fff',
-          strokeWeight: 2,
-          scale: 7,
-        },
-        title: alert.message,
+      const alertIcon = L.divIcon({
+        html: `<div style="width:14px;height:14px;background:${alert.severity === 'critical' ? '#ef4444' : '#f97316'};border:2px solid white;border-radius:2px;transform:rotate(45deg);"></div>`,
+        className: '', iconSize: [14, 14], iconAnchor: [7, 7],
       });
+      L.marker([alert.region_lat, alert.region_lng], { icon: alertIcon })
+        .bindPopup(alert.message).addTo(layerGroupRef.current!);
     });
   }, [flows, alerts]);
 
@@ -285,12 +244,7 @@ const WasteFlowHeatmap = () => {
         <TabsContent value="map">
           <Card>
             <CardContent className="p-0">
-              <div ref={mapRef} className="w-full h-[500px] md:h-[600px] rounded-lg" />
-              {!isLoaded && (
-                <div className="w-full h-[500px] flex items-center justify-center bg-muted rounded-lg">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
-              )}
+              <div ref={mapContainerRef} className="w-full h-[500px] md:h-[600px] rounded-lg" />
             </CardContent>
           </Card>
           {/* Flow Legend */}

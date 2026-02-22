@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback, memo } from 'react';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import L from 'leaflet';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +40,16 @@ interface DriverRouteVisualizationProps {
   onDriverLocationUpdate?: (location: DriverLocation) => void;
 }
 
+const createCircleIcon = (color: string, label: string) => L.divIcon({
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:12px;">${label}</div>`,
+  className: '', iconSize: [28, 28], iconAnchor: [14, 14],
+});
+
+const createDriverIcon = (online: boolean, heading: number | null) => L.divIcon({
+  html: `<div style="width:24px;height:24px;border-radius:50%;background:${online ? '#22c55e' : '#6b7280'};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;transform:rotate(${heading || 0}deg);"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></div>`,
+  className: '', iconSize: [24, 24], iconAnchor: [12, 12],
+});
+
 const DriverRouteVisualization = memo(({
   shipmentId,
   driverId,
@@ -50,14 +60,13 @@ const DriverRouteVisualization = memo(({
   height = 400,
   onDriverLocationUpdate,
 }: DriverRouteVisualizationProps) => {
-  const { isLoaded } = useGoogleMaps();
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const pickupMarkerRef = useRef<google.maps.Marker | null>(null);
-  const deliveryMarkerRef = useRef<google.maps.Marker | null>(null);
-  const driverMarkerRef = useRef<google.maps.Marker | null>(null);
-  const plannedRouteRef = useRef<google.maps.Polyline | null>(null);
-  const actualRouteRef = useRef<google.maps.Polyline | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const pickupMarkerRef = useRef<L.Marker | null>(null);
+  const deliveryMarkerRef = useRef<L.Marker | null>(null);
+  const driverMarkerRef = useRef<L.Marker | null>(null);
+  const plannedRouteRef = useRef<L.Polyline | null>(null);
+  const actualRouteRef = useRef<L.Polyline | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(null);
@@ -71,39 +80,31 @@ const DriverRouteVisualization = memo(({
   const [totalDistanceTraveled, setTotalDistanceTraveled] = useState<number>(0);
   const [avgSpeed, setAvgSpeed] = useState<number>(0);
 
-  // Auto progress logger - logs milestones automatically
   useAutoProgressLogger({
-    shipmentId,
-    driverId,
-    pickupCoords,
-    deliveryCoords,
-    status,
+    shipmentId, driverId, pickupCoords, deliveryCoords, status,
     enabled: status === 'in_transit' || status === 'approved',
   });
 
   // Initialize map
   useEffect(() => {
-    if (!isLoaded || !containerRef.current || mapRef.current) return;
-
-    mapRef.current = new google.maps.Map(containerRef.current, {
-      center: { lat: 30.0444, lng: 31.2357 },
-      zoom: 12,
-      mapTypeControl: false,
-      fullscreenControl: true,
-      streetViewControl: false,
+    if (!containerRef.current || mapRef.current) return;
+    mapRef.current = L.map(containerRef.current, {
+      center: [30.0444, 31.2357], zoom: 12, zoomControl: true,
     });
-  }, [isLoaded]);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 19,
+    }).addTo(mapRef.current);
+    return () => { mapRef.current?.remove(); mapRef.current = null; };
+  }, []);
 
   // Initialize locations and route
   useEffect(() => {
     if (!mapRef.current) return;
-
     const initializeRoute = async () => {
       setLoading(true);
       try {
         const [pickupResult, deliveryResult] = await Promise.all([
-          geocodeAddress(pickupAddress),
-          geocodeAddress(deliveryAddress),
+          geocodeAddress(pickupAddress), geocodeAddress(deliveryAddress),
         ]);
 
         if (pickupResult.success && deliveryResult.success) {
@@ -111,77 +112,32 @@ const DriverRouteVisualization = memo(({
           setDeliveryCoords({ lat: deliveryResult.lat, lng: deliveryResult.lng });
 
           // Pickup marker
-          if (pickupMarkerRef.current) {
-            pickupMarkerRef.current.setPosition({ lat: pickupResult.lat, lng: pickupResult.lng });
-          } else {
-            pickupMarkerRef.current = new google.maps.Marker({
-              position: { lat: pickupResult.lat, lng: pickupResult.lng },
-              map: mapRef.current,
-              label: { text: 'A', color: 'white', fontWeight: 'bold' },
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 14,
-                fillColor: '#22c55e',
-                fillOpacity: 1,
-                strokeColor: 'white',
-                strokeWeight: 3,
-              },
-              title: 'نقطة الاستلام',
-            });
-          }
+          if (pickupMarkerRef.current) pickupMarkerRef.current.setLatLng([pickupResult.lat, pickupResult.lng]);
+          else pickupMarkerRef.current = L.marker([pickupResult.lat, pickupResult.lng], { icon: createCircleIcon('#22c55e', 'A') }).addTo(mapRef.current!).bindPopup('نقطة الاستلام');
 
           // Delivery marker
-          if (deliveryMarkerRef.current) {
-            deliveryMarkerRef.current.setPosition({ lat: deliveryResult.lat, lng: deliveryResult.lng });
-          } else {
-            deliveryMarkerRef.current = new google.maps.Marker({
-              position: { lat: deliveryResult.lat, lng: deliveryResult.lng },
-              map: mapRef.current,
-              label: { text: 'B', color: 'white', fontWeight: 'bold' },
-              icon: {
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 14,
-                fillColor: '#ef4444',
-                fillOpacity: 1,
-                strokeColor: 'white',
-                strokeWeight: 3,
-              },
-              title: 'نقطة التسليم',
-            });
-          }
+          if (deliveryMarkerRef.current) deliveryMarkerRef.current.setLatLng([deliveryResult.lat, deliveryResult.lng]);
+          else deliveryMarkerRef.current = L.marker([deliveryResult.lat, deliveryResult.lng], { icon: createCircleIcon('#ef4444', 'B') }).addTo(mapRef.current!).bindPopup('نقطة التسليم');
 
-          // Fetch road route (planned route - blue)
+          // Fetch road route (planned - blue)
           const routeResult = await fetchRoadRoute(
             { lat: pickupResult.lat, lng: pickupResult.lng },
             { lat: deliveryResult.lat, lng: deliveryResult.lng }
           );
 
           if (routeResult.success) {
-            const path = routeResult.coordinates.map(c => ({ lat: c[0], lng: c[1] }));
-            
-            if (plannedRouteRef.current) {
-              plannedRouteRef.current.setPath(path);
-            } else {
-              plannedRouteRef.current = new google.maps.Polyline({
-                path,
-                map: mapRef.current,
-                strokeColor: '#3b82f6',
-                strokeOpacity: 0.7,
-                strokeWeight: 5,
-              });
-            }
-
-            setRouteInfo({
-              distance: routeResult.distance,
-              duration: routeResult.duration,
-            });
+            const path: L.LatLngExpression[] = routeResult.coordinates.map((c: [number, number]) => [c[0], c[1]]);
+            if (plannedRouteRef.current) plannedRouteRef.current.setLatLngs(path);
+            else plannedRouteRef.current = L.polyline(path, { color: '#3b82f6', weight: 5, opacity: 0.7 }).addTo(mapRef.current!);
+            setRouteInfo({ distance: routeResult.distance, duration: routeResult.duration });
           }
 
           // Fit bounds
-          const bounds = new google.maps.LatLngBounds();
-          bounds.extend({ lat: pickupResult.lat, lng: pickupResult.lng });
-          bounds.extend({ lat: deliveryResult.lat, lng: deliveryResult.lng });
-          mapRef.current?.fitBounds(bounds, 50);
+          const bounds = L.latLngBounds([
+            [pickupResult.lat, pickupResult.lng],
+            [deliveryResult.lat, deliveryResult.lng],
+          ]);
+          mapRef.current?.fitBounds(bounds, { padding: [50, 50] });
         }
       } catch (error) {
         console.error('Error initializing route:', error);
@@ -189,32 +145,26 @@ const DriverRouteVisualization = memo(({
         setLoading(false);
       }
     };
-
     initializeRoute();
   }, [pickupAddress, deliveryAddress]);
 
-  // Fetch driver location and path
+  // Fetch driver data
   const fetchDriverData = useCallback(async () => {
     if (!driverId) return;
-
     try {
-      // Fetch current location
       const { data: locationData } = await supabase
         .from('driver_location_logs')
         .select('latitude, longitude, speed, heading, accuracy, recorded_at')
         .eq('driver_id', driverId)
         .order('recorded_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1).maybeSingle();
 
       if (locationData) {
         setDriverLocation(locationData);
-        const isOnline = new Date().getTime() - new Date(locationData.recorded_at).getTime() < 5 * 60 * 1000;
-        setIsDriverOnline(isOnline);
+        setIsDriverOnline(new Date().getTime() - new Date(locationData.recorded_at).getTime() < 5 * 60 * 1000);
         onDriverLocationUpdate?.(locationData);
       }
 
-      // Fetch driver path (last 100 points for better visualization)
       const { data: pathData } = await supabase
         .from('driver_location_logs')
         .select('latitude, longitude, speed')
@@ -225,164 +175,62 @@ const DriverRouteVisualization = memo(({
       if (pathData && pathData.length > 0) {
         const path: [number, number][] = pathData.map(p => [Number(p.latitude), Number(p.longitude)]);
         setDriverPath(path);
-
-        // Calculate total distance traveled
         let totalDist = 0;
         for (let i = 1; i < path.length; i++) {
           totalDist += calculateHaversineDistance(path[i-1][0], path[i-1][1], path[i][0], path[i][1]);
         }
         setTotalDistanceTraveled(totalDist);
-
-        // Calculate average speed
         const speeds = pathData.filter(p => p.speed !== null).map(p => p.speed as number);
-        if (speeds.length > 0) {
-          setAvgSpeed(speeds.reduce((a, b) => a + b, 0) / speeds.length);
-        }
+        if (speeds.length > 0) setAvgSpeed(speeds.reduce((a, b) => a + b, 0) / speeds.length);
       }
     } catch (error) {
       console.error('Error fetching driver data:', error);
     }
   }, [driverId, onDriverLocationUpdate]);
 
-  useEffect(() => {
-    fetchDriverData();
-  }, [fetchDriverData]);
+  useEffect(() => { fetchDriverData(); }, [fetchDriverData]);
 
-  // Update actual route (driver path - green)
+  // Update actual route (green)
   useEffect(() => {
     if (!mapRef.current || driverPath.length < 2) return;
-
-    const path = driverPath.map(c => ({ lat: c[0], lng: c[1] }));
-
-    if (actualRouteRef.current) {
-      actualRouteRef.current.setPath(path);
-    } else {
-      actualRouteRef.current = new google.maps.Polyline({
-        path,
-        map: mapRef.current,
-        strokeColor: '#22c55e',
-        strokeOpacity: 0.9,
-        strokeWeight: 4,
-      });
-    }
+    const path: L.LatLngExpression[] = driverPath.map(c => [c[0], c[1]]);
+    if (actualRouteRef.current) actualRouteRef.current.setLatLngs(path);
+    else actualRouteRef.current = L.polyline(path, { color: '#22c55e', weight: 4, opacity: 0.9 }).addTo(mapRef.current);
   }, [driverPath]);
 
   // Update driver marker
   useEffect(() => {
     if (!mapRef.current || !driverLocation) return;
+    const pos: L.LatLngExpression = [driverLocation.latitude, driverLocation.longitude];
+    const icon = createDriverIcon(isDriverOnline, driverLocation.heading);
+    if (driverMarkerRef.current) { driverMarkerRef.current.setLatLng(pos); driverMarkerRef.current.setIcon(icon); }
+    else driverMarkerRef.current = L.marker(pos, { icon, zIndexOffset: 1000 }).addTo(mapRef.current).bindPopup('موقع السائق');
 
-    const position = { lat: driverLocation.latitude, lng: driverLocation.longitude };
-
-    if (driverMarkerRef.current) {
-      driverMarkerRef.current.setPosition(position);
-      driverMarkerRef.current.setIcon({
-        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-        scale: 7,
-        fillColor: isDriverOnline ? '#22c55e' : '#6b7280',
-        fillOpacity: 1,
-        strokeColor: 'white',
-        strokeWeight: 2,
-        rotation: driverLocation.heading || 0,
-      });
-    } else {
-      driverMarkerRef.current = new google.maps.Marker({
-        position,
-        map: mapRef.current,
-        icon: {
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          scale: 7,
-          fillColor: isDriverOnline ? '#22c55e' : '#6b7280',
-          fillOpacity: 1,
-          strokeColor: 'white',
-          strokeWeight: 2,
-          rotation: driverLocation.heading || 0,
-        },
-        title: 'موقع السائق',
-        zIndex: 100,
-      });
-    }
-
-    // Calculate remaining distance and progress
     if (deliveryCoords && pickupCoords) {
-      const remaining = calculateHaversineDistance(
-        driverLocation.latitude,
-        driverLocation.longitude,
-        deliveryCoords.lat,
-        deliveryCoords.lng
-      );
+      const remaining = calculateHaversineDistance(driverLocation.latitude, driverLocation.longitude, deliveryCoords.lat, deliveryCoords.lng);
       setRemainingDistance(remaining);
-
-      const totalDistance = calculateHaversineDistance(
-        pickupCoords.lat,
-        pickupCoords.lng,
-        deliveryCoords.lat,
-        deliveryCoords.lng
-      );
-      const traveled = calculateHaversineDistance(
-        pickupCoords.lat,
-        pickupCoords.lng,
-        driverLocation.latitude,
-        driverLocation.longitude
-      );
-      const progressPercent = Math.min(100, Math.max(0, (traveled / totalDistance) * 100));
-      setProgress(progressPercent);
+      const totalDistance = calculateHaversineDistance(pickupCoords.lat, pickupCoords.lng, deliveryCoords.lat, deliveryCoords.lng);
+      const traveled = calculateHaversineDistance(pickupCoords.lat, pickupCoords.lng, driverLocation.latitude, driverLocation.longitude);
+      setProgress(Math.min(100, Math.max(0, (traveled / totalDistance) * 100)));
     }
   }, [driverLocation, isDriverOnline, pickupCoords, deliveryCoords]);
 
   // Real-time updates
   useEffect(() => {
     if (!driverId) return;
-
     const channel = supabase
       .channel(getTabChannelName(`route-viz-${shipmentId}`))
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'driver_location_logs',
-          filter: `driver_id=eq.${driverId}`,
-        },
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'driver_location_logs', filter: `driver_id=eq.${driverId}` },
         (payload) => {
           const newLocation = payload.new as DriverLocation;
           setDriverLocation(newLocation);
           setIsDriverOnline(true);
           onDriverLocationUpdate?.(newLocation);
-
-          setDriverPath(prev => {
-            const newPath = [...prev, [Number(newLocation.latitude), Number(newLocation.longitude)] as [number, number]];
-            return newPath.slice(-100);
-          });
+          setDriverPath(prev => [...prev, [Number(newLocation.latitude), Number(newLocation.longitude)] as [number, number]].slice(-100));
         }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      ).subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [driverId, shipmentId, onDriverLocationUpdate]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      pickupMarkerRef.current?.setMap(null);
-      deliveryMarkerRef.current?.setMap(null);
-      driverMarkerRef.current?.setMap(null);
-      plannedRouteRef.current?.setMap(null);
-      actualRouteRef.current?.setMap(null);
-      mapRef.current = null;
-    };
-  }, []);
-
-  if (!isLoaded) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="overflow-hidden">
@@ -407,22 +255,12 @@ const DriverRouteVisualization = memo(({
             </Button>
           </div>
         </div>
-
-        {/* Route legend */}
         <div className="flex items-center gap-4 text-xs mt-2">
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-1 bg-blue-500 rounded" />
-            <span className="text-muted-foreground">المسار المخطط</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-1 bg-green-500 rounded" />
-            <span className="text-muted-foreground">المسار الفعلي</span>
-          </div>
+          <div className="flex items-center gap-1"><div className="w-4 h-1 bg-blue-500 rounded" /><span className="text-muted-foreground">المسار المخطط</span></div>
+          <div className="flex items-center gap-1"><div className="w-4 h-1 bg-green-500 rounded" /><span className="text-muted-foreground">المسار الفعلي</span></div>
         </div>
       </CardHeader>
-
       <CardContent className="p-0">
-        {/* Map */}
         <div className="relative border-y" style={{ height }}>
           <div ref={containerRef} className="w-full h-full" />
           {loading && (
@@ -431,67 +269,36 @@ const DriverRouteVisualization = memo(({
             </div>
           )}
         </div>
-
         {showStats && (
           <div className="p-4 space-y-4">
-            {/* Progress bar */}
-            <RouteProgressBar
-              status={status}
-              pickupAddress={pickupAddress}
-              deliveryAddress={deliveryAddress}
-              progress={progress}
-              remainingDistance={remainingDistance}
-              compact
-            />
-
+            <RouteProgressBar status={status} pickupAddress={pickupAddress} deliveryAddress={deliveryAddress} progress={progress} remainingDistance={remainingDistance} compact />
             <Separator />
-
-            {/* Stats grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="p-3 rounded-lg bg-muted/50 text-center">
                 <Route className="h-5 w-5 mx-auto text-primary mb-1" />
                 <p className="text-xs text-muted-foreground">المسافة الكلية</p>
-                <p className="font-bold">
-                  {routeInfo ? formatDistance(routeInfo.distance) : '--'}
-                </p>
+                <p className="font-bold">{routeInfo ? formatDistance(routeInfo.distance) : '--'}</p>
               </div>
-
               <div className="p-3 rounded-lg bg-muted/50 text-center">
                 <Navigation className="h-5 w-5 mx-auto text-amber-500 mb-1" />
                 <p className="text-xs text-muted-foreground">المتبقي</p>
-                <p className="font-bold">
-                  {remainingDistance !== null 
-                    ? formatDistance(remainingDistance * 1000) 
-                    : '--'}
-                </p>
+                <p className="font-bold">{remainingDistance !== null ? formatDistance(remainingDistance * 1000) : '--'}</p>
               </div>
-
               <div className="p-3 rounded-lg bg-muted/50 text-center">
                 <Gauge className="h-5 w-5 mx-auto text-green-500 mb-1" />
                 <p className="text-xs text-muted-foreground">السرعة الحالية</p>
-                <p className="font-bold">
-                  {driverLocation?.speed 
-                    ? `${Math.round(driverLocation.speed)} كم/س` 
-                    : '--'}
-                </p>
+                <p className="font-bold">{driverLocation?.speed ? `${Math.round(driverLocation.speed)} كم/س` : '--'}</p>
               </div>
-
               <div className="p-3 rounded-lg bg-muted/50 text-center">
                 <Activity className="h-5 w-5 mx-auto text-blue-500 mb-1" />
                 <p className="text-xs text-muted-foreground">متوسط السرعة</p>
-                <p className="font-bold">
-                  {avgSpeed > 0 ? `${Math.round(avgSpeed)} كم/س` : '--'}
-                </p>
+                <p className="font-bold">{avgSpeed > 0 ? `${Math.round(avgSpeed)} كم/س` : '--'}</p>
               </div>
             </div>
-
-            {/* Last update */}
             {driverLocation && (
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
-                <span>
-                  آخر تحديث: {format(new Date(driverLocation.recorded_at), 'hh:mm:ss a dd/MM', { locale: ar })}
-                </span>
+                <span>آخر تحديث: {format(new Date(driverLocation.recorded_at), 'hh:mm:ss a', { locale: ar })}</span>
               </div>
             )}
           </div>
@@ -502,5 +309,4 @@ const DriverRouteVisualization = memo(({
 });
 
 DriverRouteVisualization.displayName = 'DriverRouteVisualization';
-
 export default DriverRouteVisualization;

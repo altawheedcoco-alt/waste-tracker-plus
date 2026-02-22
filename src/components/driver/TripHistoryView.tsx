@@ -10,7 +10,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import L from 'leaflet';
 import {
   MapPin,
   Clock,
@@ -71,13 +71,12 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [weekSummary, setWeekSummary] = useState<{ date: string; distance: number; trips: number }[]>([]);
 
-  const { isLoaded } = useGoogleMaps();
-  const mapRef = useRef<google.maps.Map | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const markersRef = useRef<google.maps.Marker[]>([]);
-  const polylineFullRef = useRef<google.maps.Polyline | null>(null);
-  const polylinePlayedRef = useRef<google.maps.Polyline | null>(null);
-  const playbackMarkerRef = useRef<google.maps.Marker | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const polylineFullRef = useRef<L.Polyline | null>(null);
+  const polylinePlayedRef = useRef<L.Polyline | null>(null);
+  const playbackMarkerRef = useRef<L.Marker | null>(null);
 
   useEffect(() => {
     if (driverId) {
@@ -105,148 +104,65 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
 
   // Initialize map when dialog opens
   useEffect(() => {
-    if (showTripDialog && isLoaded && mapContainerRef.current && !mapRef.current && selectedTrip) {
+    if (showTripDialog && mapContainerRef.current && !mapRef.current && selectedTrip) {
       const centerLat = (selectedTrip.start_location.lat + selectedTrip.end_location.lat) / 2;
       const centerLng = (selectedTrip.start_location.lng + selectedTrip.end_location.lng) / 2;
-
-      mapRef.current = new google.maps.Map(mapContainerRef.current, {
-        center: { lat: centerLat, lng: centerLng },
-        zoom: 13,
-        mapTypeControl: false,
-        fullscreenControl: true,
-        streetViewControl: false,
-      });
-
-      // Draw trip on map
+      mapRef.current = L.map(mapContainerRef.current, { center: [centerLat, centerLng], zoom: 13, zoomControl: true });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM', maxZoom: 19 }).addTo(mapRef.current);
       drawTripOnMap(selectedTrip);
     }
-  }, [showTripDialog, isLoaded, selectedTrip]);
+  }, [showTripDialog, selectedTrip]);
 
   // Update playback position
   useEffect(() => {
     if (selectedTrip && mapRef.current && selectedTrip.locations[playbackIndex]) {
       const currentLoc = selectedTrip.locations[playbackIndex];
-      const pos = { lat: Number(currentLoc.latitude), lng: Number(currentLoc.longitude) };
-
-      // Update played path
+      const pos: L.LatLngExpression = [Number(currentLoc.latitude), Number(currentLoc.longitude)];
       if (polylinePlayedRef.current) {
-        const playedPath = selectedTrip.locations.slice(0, playbackIndex + 1).map(l => ({
-          lat: Number(l.latitude),
-          lng: Number(l.longitude),
-        }));
-        polylinePlayedRef.current.setPath(playedPath);
+        const playedPath: L.LatLngExpression[] = selectedTrip.locations.slice(0, playbackIndex + 1).map(l => [Number(l.latitude), Number(l.longitude)]);
+        polylinePlayedRef.current.setLatLngs(playedPath);
       }
-
-      // Update playback marker
-      if (playbackMarkerRef.current) {
-        playbackMarkerRef.current.setPosition(pos);
-      }
+      if (playbackMarkerRef.current) playbackMarkerRef.current.setLatLng(pos);
     }
   }, [playbackIndex, selectedTrip]);
 
   // Cleanup on dialog close
-  useEffect(() => {
-    if (!showTripDialog) {
-      cleanupMap();
-    }
-  }, [showTripDialog]);
+  useEffect(() => { if (!showTripDialog) cleanupMap(); }, [showTripDialog]);
 
   const cleanupMap = useCallback(() => {
-    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
-    polylineFullRef.current?.setMap(null);
-    polylineFullRef.current = null;
-    polylinePlayedRef.current?.setMap(null);
-    polylinePlayedRef.current = null;
-    playbackMarkerRef.current?.setMap(null);
-    playbackMarkerRef.current = null;
-    mapRef.current = null;
+    polylineFullRef.current?.remove(); polylineFullRef.current = null;
+    polylinePlayedRef.current?.remove(); polylinePlayedRef.current = null;
+    playbackMarkerRef.current?.remove(); playbackMarkerRef.current = null;
+    mapRef.current?.remove(); mapRef.current = null;
   }, []);
 
   const drawTripOnMap = (trip: TripSession) => {
     if (!mapRef.current) return;
+    const fullPath: L.LatLngExpression[] = trip.locations.map(l => [Number(l.latitude), Number(l.longitude)]);
 
-    // Full path (gray)
-    const fullPath = trip.locations.map(l => ({
-      lat: Number(l.latitude),
-      lng: Number(l.longitude),
-    }));
-
-    polylineFullRef.current = new google.maps.Polyline({
-      path: fullPath,
-      strokeColor: '#9ca3af',
-      strokeOpacity: 0.5,
-      strokeWeight: 3,
-      map: mapRef.current,
+    const createCircle = (color: string, label: string) => L.divIcon({
+      html: `<div style="width:24px;height:24px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:11px;">${label}</div>`,
+      className: '', iconSize: [24, 24], iconAnchor: [12, 12],
     });
 
-    // Played path (green)
-    polylinePlayedRef.current = new google.maps.Polyline({
-      path: fullPath.slice(0, 1),
-      strokeColor: '#22c55e',
-      strokeOpacity: 1,
-      strokeWeight: 4,
-      map: mapRef.current,
-    });
+    polylineFullRef.current = L.polyline(fullPath, { color: '#9ca3af', weight: 3, opacity: 0.5 }).addTo(mapRef.current);
+    polylinePlayedRef.current = L.polyline([fullPath[0]], { color: '#22c55e', weight: 4, opacity: 1 }).addTo(mapRef.current);
 
-    // Start marker
-    const startMarker = new google.maps.Marker({
-      position: trip.start_location,
-      map: mapRef.current,
-      label: {
-        text: 'S',
-        color: 'white',
-        fontWeight: 'bold',
-      },
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 12,
-        fillColor: '#22c55e',
-        fillOpacity: 1,
-        strokeColor: 'white',
-        strokeWeight: 2,
-      },
-    });
+    const startMarker = L.marker([trip.start_location.lat, trip.start_location.lng], { icon: createCircle('#22c55e', 'S') }).addTo(mapRef.current);
     markersRef.current.push(startMarker);
-
-    // End marker
-    const endMarker = new google.maps.Marker({
-      position: trip.end_location,
-      map: mapRef.current,
-      label: {
-        text: 'E',
-        color: 'white',
-        fontWeight: 'bold',
-      },
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 12,
-        fillColor: '#ef4444',
-        fillOpacity: 1,
-        strokeColor: 'white',
-        strokeWeight: 2,
-      },
-    });
+    const endMarker = L.marker([trip.end_location.lat, trip.end_location.lng], { icon: createCircle('#ef4444', 'E') }).addTo(mapRef.current);
     markersRef.current.push(endMarker);
 
-    // Playback marker
-    playbackMarkerRef.current = new google.maps.Marker({
-      position: trip.start_location,
-      map: mapRef.current,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 10,
-        fillColor: '#3b82f6',
-        fillOpacity: 1,
-        strokeColor: 'white',
-        strokeWeight: 2,
-      },
+    const playIcon = L.divIcon({
+      html: `<div style="width:20px;height:20px;border-radius:50%;background:#3b82f6;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
+      className: '', iconSize: [20, 20], iconAnchor: [10, 10],
     });
+    playbackMarkerRef.current = L.marker([trip.start_location.lat, trip.start_location.lng], { icon: playIcon }).addTo(mapRef.current);
 
-    // Fit bounds
-    const bounds = new google.maps.LatLngBounds();
-    fullPath.forEach(p => bounds.extend(p));
-    mapRef.current.fitBounds(bounds, 50);
+    const bounds = L.latLngBounds(fullPath);
+    mapRef.current.fitBounds(bounds, { padding: [50, 50] });
   };
 
   const fetchWeekSummary = async () => {
@@ -662,15 +578,9 @@ const TripHistoryView = ({ driverId }: TripHistoryViewProps) => {
                 </p>
               </div>
 
-              {/* Google Map */}
+              {/* Leaflet Map */}
               <div className="h-[400px] rounded-lg overflow-hidden border">
-                {isLoaded ? (
-                  <div ref={mapContainerRef} className="w-full h-full" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  </div>
-                )}
+                <div ref={mapContainerRef} className="w-full h-full" />
               </div>
             </div>
           )}

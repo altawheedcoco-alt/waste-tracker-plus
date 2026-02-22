@@ -1,5 +1,5 @@
 import { useRef, useEffect, memo } from 'react';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import L from 'leaflet';
 import { Loader2 } from 'lucide-react';
 
 interface LocationState {
@@ -36,6 +36,16 @@ interface DriverNavigationMapProps {
   accuracy: number | null;
 }
 
+const createCircleIcon = (color: string, label: string) => L.divIcon({
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:12px;">${label}</div>`,
+  className: '', iconSize: [28, 28], iconAnchor: [14, 14],
+});
+
+const createDriverIcon = (heading: number | null) => L.divIcon({
+  html: `<div style="width:28px;height:28px;border-radius:50%;background:#3b82f6;border:2px solid white;box-shadow:0 2px 8px rgba(59,130,246,0.5);display:flex;align-items:center;justify-content:center;transform:rotate(${heading || 0}deg);"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></div>`,
+  className: '', iconSize: [28, 28], iconAnchor: [14, 14],
+});
+
 const DriverNavigationMap = memo(({
   driverPosition,
   driverHeading,
@@ -47,232 +57,141 @@ const DriverNavigationMap = memo(({
   isNavigating,
   accuracy,
 }: DriverNavigationMapProps) => {
-  const { isLoaded } = useGoogleMaps();
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
-  const driverMarkerRef = useRef<google.maps.Marker | null>(null);
-  const pickupMarkerRef = useRef<google.maps.Marker | null>(null);
-  const deliveryMarkerRef = useRef<google.maps.Marker | null>(null);
-  const routePolylineRef = useRef<google.maps.Polyline | null>(null);
-  const completedPolylineRef = useRef<google.maps.Polyline | null>(null);
-  const accuracyCircleRef = useRef<google.maps.Circle | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const driverMarkerRef = useRef<L.Marker | null>(null);
+  const pickupMarkerRef = useRef<L.Marker | null>(null);
+  const deliveryMarkerRef = useRef<L.Marker | null>(null);
+  const routePolylineRef = useRef<L.Polyline | null>(null);
+  const completedPolylineRef = useRef<L.Polyline | null>(null);
+  const accuracyCircleRef = useRef<L.Circle | null>(null);
 
   // Initialize map
   useEffect(() => {
-    if (!isLoaded || !containerRef.current || mapRef.current) return;
+    if (!containerRef.current || mapRef.current) return;
 
-    const defaultCenter = driverPosition 
-      ? { lat: driverPosition.lat, lng: driverPosition.lng }
-      : { lat: 30.0444, lng: 31.2357 };
+    const defaultCenter: L.LatLngExpression = driverPosition
+      ? [driverPosition.lat, driverPosition.lng]
+      : [30.0444, 31.2357];
 
-    mapRef.current = new google.maps.Map(containerRef.current, {
+    mapRef.current = L.map(containerRef.current, {
       center: defaultCenter,
       zoom: 15,
-      mapTypeControl: false,
-      fullscreenControl: false,
-      streetViewControl: false,
       zoomControl: true,
     });
-  }, [isLoaded]);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19,
+    }).addTo(mapRef.current);
+
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, []);
 
   // Update pickup marker
   useEffect(() => {
     if (!mapRef.current || !pickupCoords) return;
-
-    const position = { lat: pickupCoords[0], lng: pickupCoords[1] };
-
+    const pos: L.LatLngExpression = [pickupCoords[0], pickupCoords[1]];
     if (pickupMarkerRef.current) {
-      pickupMarkerRef.current.setPosition(position);
+      pickupMarkerRef.current.setLatLng(pos);
     } else {
-      pickupMarkerRef.current = new google.maps.Marker({
-        position,
-        map: mapRef.current,
-        label: { text: 'A', color: 'white', fontWeight: 'bold' },
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 12,
-          fillColor: '#22c55e',
-          fillOpacity: 1,
-          strokeColor: 'white',
-          strokeWeight: 2,
-        },
-        title: 'نقطة الاستلام',
-      });
+      pickupMarkerRef.current = L.marker(pos, { icon: createCircleIcon('#22c55e', 'A') })
+        .addTo(mapRef.current).bindPopup('نقطة الاستلام');
     }
   }, [pickupCoords]);
 
   // Update delivery marker
   useEffect(() => {
     if (!mapRef.current || !deliveryCoords) return;
-
-    const position = { lat: deliveryCoords[0], lng: deliveryCoords[1] };
-
+    const pos: L.LatLngExpression = [deliveryCoords[0], deliveryCoords[1]];
     if (deliveryMarkerRef.current) {
-      deliveryMarkerRef.current.setPosition(position);
+      deliveryMarkerRef.current.setLatLng(pos);
     } else {
-      deliveryMarkerRef.current = new google.maps.Marker({
-        position,
-        map: mapRef.current,
-        label: { text: 'B', color: 'white', fontWeight: 'bold' },
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 12,
-          fillColor: '#ef4444',
-          fillOpacity: 1,
-          strokeColor: 'white',
-          strokeWeight: 2,
-        },
-        title: 'نقطة التسليم',
-      });
+      deliveryMarkerRef.current = L.marker(pos, { icon: createCircleIcon('#ef4444', 'B') })
+        .addTo(mapRef.current).bindPopup('نقطة التسليم');
     }
   }, [deliveryCoords]);
 
-  // Update route polyline
+  // Update route polyline (remaining - gray)
   useEffect(() => {
     if (!mapRef.current) return;
-
     if (routeCoordinates.length < 2) {
-      if (routePolylineRef.current) {
-        routePolylineRef.current.setMap(null);
-        routePolylineRef.current = null;
-      }
+      if (routePolylineRef.current) { routePolylineRef.current.remove(); routePolylineRef.current = null; }
       return;
     }
-
-    const path = routeCoordinates.map(coord => ({ lat: coord[0], lng: coord[1] }));
-
+    const path: L.LatLngExpression[] = routeCoordinates.map(c => [c[0], c[1]]);
     if (routePolylineRef.current) {
-      routePolylineRef.current.setPath(path);
+      routePolylineRef.current.setLatLngs(path);
     } else {
-      routePolylineRef.current = new google.maps.Polyline({
-        path,
-        map: mapRef.current,
-        strokeColor: '#9ca3af',
-        strokeOpacity: 0.6,
-        strokeWeight: 5,
-      });
+      routePolylineRef.current = L.polyline(path, { color: '#9ca3af', weight: 5, opacity: 0.6 }).addTo(mapRef.current);
     }
   }, [routeCoordinates]);
 
-  // Update completed path polyline
+  // Update completed path (green)
   useEffect(() => {
     if (!mapRef.current) return;
-
     if (completedCoordinates.length < 2) {
-      if (completedPolylineRef.current) {
-        completedPolylineRef.current.setMap(null);
-        completedPolylineRef.current = null;
-      }
+      if (completedPolylineRef.current) { completedPolylineRef.current.remove(); completedPolylineRef.current = null; }
       return;
     }
-
-    const path = completedCoordinates.map(coord => ({ lat: coord[0], lng: coord[1] }));
-
+    const path: L.LatLngExpression[] = completedCoordinates.map(c => [c[0], c[1]]);
     if (completedPolylineRef.current) {
-      completedPolylineRef.current.setPath(path);
+      completedPolylineRef.current.setLatLngs(path);
     } else {
-      completedPolylineRef.current = new google.maps.Polyline({
-        path,
-        map: mapRef.current,
-        strokeColor: '#22c55e',
-        strokeOpacity: 1,
-        strokeWeight: 5,
-      });
+      completedPolylineRef.current = L.polyline(path, { color: '#22c55e', weight: 5, opacity: 1 }).addTo(mapRef.current);
     }
   }, [completedCoordinates]);
 
   // Update driver marker
   useEffect(() => {
     if (!mapRef.current || !driverPosition) return;
-
-    const position = { lat: driverPosition.lat, lng: driverPosition.lng };
+    const pos: L.LatLngExpression = [driverPosition.lat, driverPosition.lng];
+    const icon = createDriverIcon(driverHeading);
 
     if (driverMarkerRef.current) {
-      driverMarkerRef.current.setPosition(position);
-      driverMarkerRef.current.setIcon({
-        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-        scale: 7,
-        fillColor: '#3b82f6',
-        fillOpacity: 1,
-        strokeColor: 'white',
-        strokeWeight: 2,
-        rotation: driverHeading || 0,
-      });
+      driverMarkerRef.current.setLatLng(pos);
+      driverMarkerRef.current.setIcon(icon);
     } else {
-      driverMarkerRef.current = new google.maps.Marker({
-        position,
-        map: mapRef.current,
-        icon: {
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          scale: 7,
-          fillColor: '#3b82f6',
-          fillOpacity: 1,
-          strokeColor: 'white',
-          strokeWeight: 2,
-          rotation: driverHeading || 0,
-        },
-        zIndex: 100,
-        title: 'موقعك الحالي',
-      });
+      driverMarkerRef.current = L.marker(pos, { icon, zIndexOffset: 1000 })
+        .addTo(mapRef.current).bindPopup('موقعك الحالي');
     }
 
     // Update accuracy circle
-    if (accuracy) {
+    if (accuracy && accuracy > 0) {
       if (accuracyCircleRef.current) {
-        accuracyCircleRef.current.setCenter(position);
+        accuracyCircleRef.current.setLatLng(pos);
         accuracyCircleRef.current.setRadius(accuracy);
       } else {
-        accuracyCircleRef.current = new google.maps.Circle({
-          map: mapRef.current,
-          center: position,
+        accuracyCircleRef.current = L.circle(pos, {
           radius: accuracy,
           fillColor: '#3b82f6',
           fillOpacity: 0.1,
-          strokeColor: '#3b82f6',
-          strokeOpacity: 0.3,
-          strokeWeight: 1,
-        });
+          color: '#3b82f6',
+          opacity: 0.3,
+          weight: 1,
+        }).addTo(mapRef.current);
       }
     }
 
-    // Center map on driver when navigating
     if (isNavigating) {
-      mapRef.current.panTo(position);
+      mapRef.current.panTo(pos);
     }
   }, [driverPosition, driverHeading, accuracy, isNavigating]);
 
   // Fit bounds when not navigating
   useEffect(() => {
     if (!mapRef.current || isNavigating) return;
-
-    const bounds = new google.maps.LatLngBounds();
-    let hasPoints = false;
-
-    if (pickupCoords) {
-      bounds.extend({ lat: pickupCoords[0], lng: pickupCoords[1] });
-      hasPoints = true;
-    }
-    if (deliveryCoords) {
-      bounds.extend({ lat: deliveryCoords[0], lng: deliveryCoords[1] });
-      hasPoints = true;
-    }
-    if (driverPosition) {
-      bounds.extend({ lat: driverPosition.lat, lng: driverPosition.lng });
-      hasPoints = true;
-    }
-
-    if (hasPoints) {
-      mapRef.current.fitBounds(bounds, 50);
+    const bounds = L.latLngBounds([]);
+    if (pickupCoords) bounds.extend([pickupCoords[0], pickupCoords[1]]);
+    if (deliveryCoords) bounds.extend([deliveryCoords[0], deliveryCoords[1]]);
+    if (driverPosition) bounds.extend([driverPosition.lat, driverPosition.lng]);
+    if (bounds.isValid()) {
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [pickupCoords, deliveryCoords, driverPosition, isNavigating]);
-
-  if (!isLoaded) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-muted">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
 
   return <div ref={containerRef} className="w-full h-full" />;
 });
