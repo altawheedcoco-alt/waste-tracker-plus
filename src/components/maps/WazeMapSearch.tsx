@@ -8,6 +8,42 @@ import { Search, Loader2, MapPin, Navigation, X, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+// Separate iframe component to isolate DOM manipulation from React tree
+const WazeEmbedMap = ({ url }: { url: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Clear previous iframe
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.width = '100%';
+    iframe.height = '250';
+    iframe.allowFullscreen = true;
+    iframe.loading = 'lazy';
+    iframe.style.border = 'none';
+    container.appendChild(iframe);
+
+    return () => {
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+    };
+  }, [url]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="rounded-lg overflow-hidden border border-[#33CCFF]/20"
+    />
+  );
+};
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
 interface WazeSearchResult {
@@ -203,16 +239,7 @@ const WazeMapSearch = ({
 
       {/* Waze Embedded Map */}
       {showWazeEmbed && (
-        <div className="rounded-lg overflow-hidden border border-[#33CCFF]/20">
-          <iframe
-            src={wazeEmbedUrl}
-            width="100%"
-            height="250"
-            allowFullScreen
-            loading="lazy"
-            className="border-0"
-          />
-        </div>
+        <WazeEmbedMap url={wazeEmbedUrl} />
       )}
 
       <p className="text-xs text-muted-foreground">
