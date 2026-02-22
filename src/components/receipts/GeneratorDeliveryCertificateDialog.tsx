@@ -553,13 +553,14 @@ ${DECLARATION_TEXT}`;
                 <p style={{ margin: 0 }}>
                   وثيقة رسمية مؤمنة وذكية | {certNumber} | {shipment.shipment_number} | {currentDate} | قانون 202/2020
                 </p>
-                <p style={{ margin: '2px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '6.5pt' }}>
+                <p style={{ margin: '2px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '6.5pt', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap' }}>
                   {[
-                    'الإنتاج عليك.. والدائرة المقفولة علينا. خليك I RECYCLE.',
-                    'إدارة مخلفات بمواصفات عالمية.. I RECYCLE سيستم مبيغلطش.',
-                    'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح. I RECYCLE.',
-                    'من المصنع للمستقبل.. سكة واحدة مع I RECYCLE.',
+                    'الإنتاج عليك.. والدائرة المقفولة علينا. خليك',
+                    'إدارة مخلفات بمواصفات عالمية.. سيستم مبيغلطش.',
+                    'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح.',
+                    'من المصنع للمستقبل.. سكة واحدة مع',
                   ][Math.floor(Date.now() / 86400000) % 4]}
+                  <img src="/irecycle-logo.png" alt="iRecycle" style={{ height: '14px', verticalAlign: 'middle', borderRadius: '3px' }} />
                 </p>
               </footer>
               </div>

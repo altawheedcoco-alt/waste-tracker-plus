@@ -2,11 +2,20 @@
  * شعارات منصة iRecycle — تُستخدم في الإشعارات والمستندات والتذييلات
  */
 export const IRECYCLE_TAGLINES = [
-  'الإنتاج عليك.. والدائرة المقفولة علينا. خليك I RECYCLE.',
-  'إدارة مخلفات بمواصفات عالمية.. I RECYCLE سيستم مبيغلطش.',
-  'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح. I RECYCLE.',
-  'من المصنع للمستقبل.. سكة واحدة مع I RECYCLE.',
+  'الإنتاج عليك.. والدائرة المقفولة علينا. خليك iRecycle.',
+  'إدارة مخلفات بمواصفات عالمية.. iRecycle سيستم مبيغلطش.',
+  'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح. iRecycle.',
+  'من المصنع للمستقبل.. سكة واحدة مع iRecycle.',
 ] as const;
+
+/** HTML tagline with logo for print templates */
+export const IRECYCLE_LOGO_URL = '/irecycle-logo.png';
+
+export function getDailyTaglineHTML(): string {
+  const dayIndex = Math.floor(Date.now() / 86400000) % IRECYCLE_TAGLINES.length;
+  const tagline = IRECYCLE_TAGLINES[dayIndex];
+  return tagline.replace('iRecycle', `<img src="${IRECYCLE_LOGO_URL}" alt="iRecycle" style="height:14px;vertical-align:middle;display:inline-block;margin:0 2px;border-radius:3px;" />`);
+}
 
 /**
  * يعيد شعار اليوم — يتغير يومياً بشكل دوري

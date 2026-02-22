@@ -159,13 +159,14 @@ const DeliveryDeclarationViewDialog = ({
               {/* Footer */}
               <div style={{ borderTop: '2px solid #e5e7eb', marginTop: '10px', paddingTop: '8px', textAlign: 'center', fontSize: '8px', color: '#6b7280' }}>
                 <p style={{ margin: 0, wordBreak: 'break-word' }}>وثيقة رسمية مؤمنة وذكية | رقم الوثيقة: DEC-{declaration.id.slice(0, 8).toUpperCase()} | الشحنة: {declaration.shipment_number} | يخضع لقانون 202/2020</p>
-                <p style={{ margin: '4px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '8px' }}>
+                <p style={{ margin: '4px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap' }}>
                   {[
-                    'الإنتاج عليك.. والدائرة المقفولة علينا. خليك I RECYCLE.',
-                    'إدارة مخلفات بمواصفات عالمية.. I RECYCLE سيستم مبيغلطش.',
-                    'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح. I RECYCLE.',
-                    'من المصنع للمستقبل.. سكة واحدة مع I RECYCLE.',
+                    'الإنتاج عليك.. والدائرة المقفولة علينا. خليك',
+                    'إدارة مخلفات بمواصفات عالمية.. سيستم مبيغلطش.',
+                    'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح.',
+                    'من المصنع للمستقبل.. سكة واحدة مع',
                   ][Math.floor(Date.now() / 86400000) % 4]}
+                  <img src="/irecycle-logo.png" alt="iRecycle" style={{ height: '14px', verticalAlign: 'middle', borderRadius: '3px' }} />
                 </p>
               </div>
             </div>
