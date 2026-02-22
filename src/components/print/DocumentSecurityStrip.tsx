@@ -170,10 +170,22 @@ const DocumentSecurityStrip: React.FC<DocumentSecurityStripProps> = ({
         </div>
       )}
 
-      {/* Security footer note */}
-      <p className="text-center text-[6pt] text-gray-400 mt-2">
+      {/* Legal digital signature notice */}
+      <div className="mt-2 p-2 border border-gray-300 rounded bg-amber-50/60 text-center">
+        <p className="text-[7pt] font-bold text-gray-700 mb-0.5">
+          <Shield className="w-3 h-3 inline ml-1" style={{ color: accentColor }} />
+          إقرار بالحجية الرقمية
+        </p>
+        <p className="text-[6pt] text-gray-600 leading-relaxed">
+          رمز الاستجابة السريعة (QR Code) والباركود المُدرجان على هذا المستند يقومان مقام التوقيع والختم الحيّ، 
+          ولا يحتاج المستند إلى إمضاء أو ختم يدوي إضافي، وذلك وفقاً لأحكام قانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004 
+          ولائحته التنفيذية. يُعد هذا المستند الإلكتروني حجة قانونية كاملة في الإثبات ما لم يُثبت العكس.
+        </p>
+      </div>
+      {/* Verification instruction */}
+      <p className="text-center text-[6pt] text-gray-400 mt-1">
         <CheckCircle2 className="w-2.5 h-2.5 inline ml-0.5" />
-        مستند مؤمّن بتشفير رقمي — للتحقق امسح رمز QR أو أدخل كود التحقق في بوابة التحقق الإلكترونية
+        للتحقق من صحة المستند امسح رمز QR أو أدخل كود التحقق في بوابة التحقق الإلكترونية
       </p>
     </div>
   );
