@@ -61,8 +61,7 @@ import {
   Clock,
   StickyNote,
 } from 'lucide-react';
-import GoogleMapsSearchBox from '@/components/maps/GoogleMapsSearchBox';
-import { useGoogleMaps } from '@/components/maps/GoogleMapsProvider';
+import WazeMapSearch from '@/components/maps/WazeMapSearch';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 
 interface Partner {
@@ -190,9 +189,6 @@ const ShipmentLinksManager = () => {
   const [allowRecyclerEdit, setAllowRecyclerEdit] = useState(false);
   const [allowLocationEdit, setAllowLocationEdit] = useState(true);
   const [requirePhoto, setRequirePhoto] = useState(false);
-  
-  // Google Maps
-  const { isLoaded: mapsLoaded } = useGoogleMaps();
 
   const loadLinks = async () => {
     if (!profile?.organization_id) {
@@ -684,8 +680,8 @@ const ShipmentLinksManager = () => {
                                 <X className="h-4 w-4" />
                               </Button>
                             </div>
-                          ) : mapsLoaded ? (
-                            <GoogleMapsSearchBox
+                          ) : (
+                            <WazeMapSearch
                               onSelect={(result) => {
                                 setPresetPickupLocation({
                                   address: result.address,
@@ -694,12 +690,8 @@ const ShipmentLinksManager = () => {
                                 });
                               }}
                               placeholder="ابحث عن مكان الاستلام..."
-                              showLocalResults={true}
+                              showWazeEmbed={false}
                             />
-                          ) : (
-                            <div className="p-3 rounded-lg bg-muted text-sm text-muted-foreground text-center">
-                              جاري تحميل الخريطة...
-                            </div>
                           )}
                         </div>
 
@@ -723,8 +715,8 @@ const ShipmentLinksManager = () => {
                                 <X className="h-4 w-4" />
                               </Button>
                             </div>
-                          ) : mapsLoaded ? (
-                            <GoogleMapsSearchBox
+                          ) : (
+                            <WazeMapSearch
                               onSelect={(result) => {
                                 setPresetDeliveryLocation({
                                   address: result.address,
@@ -733,12 +725,8 @@ const ShipmentLinksManager = () => {
                                 });
                               }}
                               placeholder="ابحث عن مكان التسليم..."
-                              showLocalResults={true}
+                              showWazeEmbed={false}
                             />
-                          ) : (
-                            <div className="p-3 rounded-lg bg-muted text-sm text-muted-foreground text-center">
-                              جاري تحميل الخريطة...
-                            </div>
                           )}
                         </div>
                       </div>
