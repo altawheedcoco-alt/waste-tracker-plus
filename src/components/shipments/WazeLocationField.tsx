@@ -666,29 +666,75 @@ const WazeLocationField = ({
               {mapExpanded ? 'تصغير' : 'تكبير'}
             </Button>
           </div>
-          <div className="text-[10px] text-muted-foreground mb-1">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
-          <div className={cn(
-            "transition-all duration-300 border rounded-lg overflow-hidden",
-            mapExpanded ? "h-[350px]" : "h-[200px]"
-          )}>
-            <LocationMiniMap 
-              lat={mapCenter.lat} 
-              lng={mapCenter.lng} 
-              zoom={mapZoom}
-              provider={mapProvider}
-              onLocationSelect={async (lat, lng) => {
-                const address = await reverseGeocode(lat, lng);
-                if (address) {
-                  onChange(address, { lat, lng });
-                } else {
-                  onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
-                }
-                setMapCenter({ lat, lng });
-                setMapZoom(15);
-                toast.success('📍 تم تحديد الموقع من الخريطة');
-              }}
-            />
-          </div>
+
+          {/* Provider-specific map with native search */}
+          {mapProvider === 'google' && (
+            <div className="space-y-1">
+              <div className="text-[10px] text-muted-foreground">🔍 استخدم بحث Google Maps الأصلي داخل الخريطة</div>
+              <div className={cn(
+                "transition-all duration-300 border rounded-lg overflow-hidden",
+                mapExpanded ? "h-[350px]" : "h-[200px]"
+              )}>
+                <iframe
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(value || `${mapCenter.lat},${mapCenter.lng}`)}&z=${mapZoom}&output=embed`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  loading="lazy"
+                  allowFullScreen
+                  title="Google Maps"
+                />
+              </div>
+            </div>
+          )}
+
+          {mapProvider === 'waze' && (
+            <div className="space-y-1">
+              <div className="text-[10px] text-muted-foreground">🔍 استخدم بحث Waze الأصلي داخل الخريطة</div>
+              <div className={cn(
+                "transition-all duration-300 border rounded-lg overflow-hidden",
+                mapExpanded ? "h-[350px]" : "h-[200px]"
+              )}>
+                <iframe
+                  src={`https://embed.waze.com/iframe?zoom=${mapZoom}&lat=${mapCenter.lat}&lon=${mapCenter.lng}&pin=1`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 'none' }}
+                  loading="lazy"
+                  allowFullScreen
+                  title="Waze Map"
+                />
+              </div>
+            </div>
+          )}
+
+          {mapProvider === 'osm' && (
+            <div className="space-y-1">
+              <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
+              <div className={cn(
+                "transition-all duration-300 border rounded-lg overflow-hidden",
+                mapExpanded ? "h-[350px]" : "h-[200px]"
+              )}>
+                <LocationMiniMap 
+                  lat={mapCenter.lat} 
+                  lng={mapCenter.lng} 
+                  zoom={mapZoom}
+                  provider={mapProvider}
+                  onLocationSelect={async (lat, lng) => {
+                    const address = await reverseGeocode(lat, lng);
+                    if (address) {
+                      onChange(address, { lat, lng });
+                    } else {
+                      onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
+                    }
+                    setMapCenter({ lat, lng });
+                    setMapZoom(15);
+                    toast.success('📍 تم تحديد الموقع من الخريطة');
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
