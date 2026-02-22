@@ -8,7 +8,7 @@ export interface SearchResult {
   id: string;
   name: string;
   address: string;
-  type: 'mapbox' | 'local' | 'ai' | 'google';
+  type: 'mapbox' | 'local' | 'ai';
   source: string;
   lat: number;
   lng: number;
@@ -109,41 +109,6 @@ export const useMultiSourceSearch = () => {
     }
   }, []);
 
-  // Search Google Places API (via Edge Function)
-  const searchGooglePlaces = useCallback(async (query: string): Promise<SearchResult[]> => {
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke('google-places-search', {
-        body: { 
-          query,
-          userLat: userLocation?.lat || 30.0444,
-          userLng: userLocation?.lng || 31.2357,
-          radius: 100000 // 100km radius
-        }
-      });
-      
-      if (fnError) {
-        console.error('Google Places search error:', fnError);
-        return [];
-      }
-      
-      return (data?.results || []).map((place: any) => ({
-        id: place.id,
-        name: place.name,
-        address: place.address,
-        type: 'google' as const,
-        source: 'Google Maps',
-        lat: place.lat,
-        lng: place.lng,
-        distance: place.distance,
-        rank: place.rank,
-        relevanceScore: place.rank ? 100 - place.rank : 50,
-      }));
-    } catch (err) {
-      console.error('Google Places search error:', err);
-      return [];
-    }
-  }, [userLocation]);
-
   // Search using AI assistant
   const searchWithAI = useCallback(async (query: string): Promise<AISearchSuggestion | null> => {
     try {
@@ -184,26 +149,16 @@ export const useMultiSourceSearch = () => {
       setError(null);
 
       try {
-        // Run all searches in parallel - prioritize Google Places
-        const [localResults, mapboxResults, googleResults, aiData] = await Promise.all([
+        // Run all searches in parallel
+        const [localResults, mapboxResults, aiData] = await Promise.all([
           Promise.resolve(searchLocalDatabase(query)),
           searchMapbox(query),
-          searchGooglePlaces(query),
           searchWithAI(query),
         ]);
 
         // Combine and deduplicate results
         const allResults: SearchResult[] = [];
         const seenNames = new Set<string>();
-
-        // Add Google results first (highest priority - real-time data)
-        googleResults.forEach(result => {
-          const key = result.name.toLowerCase();
-          if (!seenNames.has(key)) {
-            seenNames.add(key);
-            allResults.push(result);
-          }
-        });
 
         // Add local results (high priority)
         localResults.forEach(result => {
@@ -241,7 +196,7 @@ export const useMultiSourceSearch = () => {
         setIsSearching(false);
       }
     }, 200); // Faster debounce for better responsiveness
-  }, [searchLocalDatabase, searchMapbox, searchGooglePlaces, searchWithAI, getUserLocation]);
+  }, [searchLocalDatabase, searchMapbox, searchWithAI, getUserLocation]);
 
   const clearResults = useCallback(() => {
     setResults([]);
