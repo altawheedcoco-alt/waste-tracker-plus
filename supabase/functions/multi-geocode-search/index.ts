@@ -1,0 +1,144 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const url = new URL(req.url);
+    const q = url.searchParams.get("q");
+    const lat = url.searchParams.get("lat") || "30.0444";
+    const lng = url.searchParams.get("lng") || "31.2357";
+    const lang = url.searchParams.get("lang") || "ar";
+
+    if (!q || q.length < 2) {
+      return new Response(JSON.stringify({ results: [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const HERE_API_KEY = Deno.env.get("HERE_API_KEY");
+    const LOCATIONIQ_API_KEY = Deno.env.get("LOCATIONIQ_API_KEY");
+    const OPENCAGE_API_KEY = Deno.env.get("OPENCAGE_API_KEY");
+
+    const promises: Promise<any[]>[] = [];
+
+    // 1. HERE Maps (best for Middle East)
+    if (HERE_API_KEY) {
+      promises.push(
+        fetch(`https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(q)}&in=countryCode:EGY&at=${lat},${lng}&limit=6&lang=${lang}&apiKey=${HERE_API_KEY}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data?.items) return [];
+            return data.items.map((item: any, i: number) => ({
+              id: `here-${i}`,
+              name: item.title || item.address?.label?.split(",")[0] || "",
+              address: item.address?.label || "",
+              lat: item.position?.lat || 0,
+              lng: item.position?.lng || 0,
+              source: "here",
+            }));
+          })
+          .catch(() => [])
+      );
+    }
+
+    // 2. LocationIQ
+    if (LOCATIONIQ_API_KEY) {
+      promises.push(
+        fetch(`https://us1.locationiq.com/v1/search?key=${LOCATIONIQ_API_KEY}&q=${encodeURIComponent(q)}&countrycodes=eg&format=json&limit=6&accept-language=${lang}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data || !Array.isArray(data)) return [];
+            return data.map((item: any, i: number) => ({
+              id: `liq-${i}`,
+              name: item.display_name?.split(",")[0] || "",
+              address: item.display_name || "",
+              lat: parseFloat(item.lat) || 0,
+              lng: parseFloat(item.lon) || 0,
+              source: "locationiq",
+            }));
+          })
+          .catch(() => [])
+      );
+    }
+
+    // 3. OpenCage
+    if (OPENCAGE_API_KEY) {
+      promises.push(
+        fetch(`https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(q)}&countrycode=eg&limit=6&language=${lang}&key=${OPENCAGE_API_KEY}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data?.results) return [];
+            return data.results.map((item: any, i: number) => ({
+              id: `ocg-${i}`,
+              name: item.formatted?.split(",")[0] || "",
+              address: item.formatted || "",
+              lat: item.geometry?.lat || 0,
+              lng: item.geometry?.lng || 0,
+              source: "opencage",
+            }));
+          })
+          .catch(() => [])
+      );
+    }
+
+    // 4. Photon/Komoot (always free, no key needed)
+    promises.push(
+      fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lng}&limit=6&lang=en&osm_tag=place&osm_tag=building&osm_tag=highway`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data?.features) return [];
+          return data.features.map((f: any, i: number) => ({
+            id: `photon-${i}`,
+            name: f.properties?.name || f.properties?.street || "",
+            address: [f.properties?.street, f.properties?.city, f.properties?.state, f.properties?.country]
+              .filter(Boolean).join("، ") || f.properties?.name || "",
+            lat: f.geometry?.coordinates?.[1] || 0,
+            lng: f.geometry?.coordinates?.[0] || 0,
+            source: "photon",
+          }));
+        })
+        .catch(() => [])
+    );
+
+    const allArrays = await Promise.all(promises);
+    const allResults = allArrays.flat();
+
+    // Deduplicate by proximity (~200m)
+    const deduped: any[] = [];
+    for (const r of allResults) {
+      if (!r.lat && !r.lng) continue;
+      if (!r.name) continue;
+      const isDupe = deduped.some(
+        d => Math.abs(d.lat - r.lat) < 0.002 && Math.abs(d.lng - r.lng) < 0.002
+      );
+      if (!isDupe) deduped.push(r);
+    }
+
+    const configuredSources = [
+      HERE_API_KEY ? "here" : null,
+      LOCATIONIQ_API_KEY ? "locationiq" : null,
+      OPENCAGE_API_KEY ? "opencage" : null,
+      "photon",
+    ].filter(Boolean);
+
+    console.log(`Multi-geocode "${q}": ${deduped.length} results from [${configuredSources.join(", ")}]`);
+
+    return new Response(JSON.stringify({ results: deduped.slice(0, 15), sources: configuredSources }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Multi-geocode error:", error);
+    return new Response(
+      JSON.stringify({ results: [], error: error.message }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+});
