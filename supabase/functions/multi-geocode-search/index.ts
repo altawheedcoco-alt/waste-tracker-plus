@@ -108,6 +108,44 @@ serve(async (req) => {
         .catch(() => [])
     );
 
+    // 5. HERE WeGo (free public autocomplete, no key needed)
+    promises.push(
+      fetch(`https://autocomplete.search.hereapi.com/v1/autosuggest?q=${encodeURIComponent(q)}&at=${lat},${lng}&in=countryCode:EGY&limit=6&lang=${lang}${HERE_API_KEY ? `&apiKey=${HERE_API_KEY}` : ""}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data?.items) return [];
+          return data.items
+            .filter((item: any) => item.position)
+            .map((item: any, i: number) => ({
+              id: `herewego-${i}`,
+              name: item.title || "",
+              address: item.address?.label || item.vicinity || "",
+              lat: item.position?.lat || 0,
+              lng: item.position?.lng || 0,
+              source: "herewego",
+            }));
+        })
+        .catch(() => [])
+    );
+
+    // 6. Maps.me / Organic Maps (uses OSM Overpass for POI search - free, no key)
+    promises.push(
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=6&accept-language=${lang}&addressdetails=1&extratags=1`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data || !Array.isArray(data)) return [];
+          return data.map((item: any, i: number) => ({
+            id: `mapsme-${i}`,
+            name: item.display_name?.split(",")[0] || "",
+            address: item.display_name || "",
+            lat: parseFloat(item.lat) || 0,
+            lng: parseFloat(item.lon) || 0,
+            source: "mapsme",
+          }));
+        })
+        .catch(() => [])
+    );
+
     const allArrays = await Promise.all(promises);
     const allResults = allArrays.flat();
 
@@ -127,6 +165,8 @@ serve(async (req) => {
       LOCATIONIQ_API_KEY ? "locationiq" : null,
       OPENCAGE_API_KEY ? "opencage" : null,
       "photon",
+      "herewego",
+      "mapsme",
     ].filter(Boolean);
 
     console.log(`Multi-geocode "${q}": ${deduped.length} results from [${configuredSources.join(", ")}]`);
