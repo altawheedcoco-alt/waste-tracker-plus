@@ -1,7 +1,7 @@
-// Map utilities for routing and geocoding - Google Maps Only
-// Note: This project uses Google Maps exclusively for all mapping features.
+// Map utilities for routing, geocoding and navigation
+// Uses OSRM for routing, Google Geocoding for address lookup, and external navigation links
 
-// Google Maps API Key (publishable)
+// Google Maps API Key (publishable - used only for geocoding)
 const GOOGLE_MAPS_API_KEY = 'AIzaSyCIisN0sh-m5-pXvpnSELbCBhFabrEcwrE';
 
 export interface RouteResult {
@@ -110,125 +110,44 @@ export const reverseGeocode = async (lat: number, lng: number): Promise<string> 
 };
 
 /**
- * Fetch road route between two points using Google Maps Directions Service SDK
- * Uses the SDK instead of direct fetch to avoid CORS issues
+ * Fetch road route between two points using OSRM (free, no API key needed)
  */
 export const fetchRoadRoute = async (
   origin: { lat: number; lng: number },
   destination: { lat: number; lng: number }
 ): Promise<RouteResult> => {
-  return new Promise((resolve) => {
-    // Check if Google Maps SDK is loaded
-    if (typeof google === 'undefined' || !google.maps) {
-      console.warn('Google Maps SDK not loaded, using fallback');
-      resolve({
-        coordinates: [
-          [origin.lat, origin.lng],
-          [destination.lat, destination.lng],
-        ],
-        distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
-        duration: 0,
-        success: false,
-      });
-      return;
-    }
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
+    const response = await fetch(url);
+    const data = await response.json();
 
-    try {
-      const directionsService = new google.maps.DirectionsService();
-
-      directionsService.route(
-        {
-          origin: new google.maps.LatLng(origin.lat, origin.lng),
-          destination: new google.maps.LatLng(destination.lat, destination.lng),
-          travelMode: google.maps.TravelMode.DRIVING,
-          region: 'EG',
-        },
-        (result, status) => {
-          if (status === google.maps.DirectionsStatus.OK && result?.routes?.[0]) {
-            const route = result.routes[0];
-            const leg = route.legs[0];
-            
-            // Extract coordinates from the route path
-            const coordinates: [number, number][] = route.overview_path.map(
-              (point) => [point.lat(), point.lng()] as [number, number]
-            );
-            
-            resolve({
-              coordinates,
-              distance: leg.distance?.value || 0, // meters
-              duration: leg.duration?.value || 0, // seconds
-              success: true,
-            });
-          } else {
-            console.warn('Directions request failed:', status);
-            // Fallback to straight line
-            resolve({
-              coordinates: [
-                [origin.lat, origin.lng],
-                [destination.lat, destination.lng],
-              ],
-              distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
-              duration: 0,
-              success: false,
-            });
-          }
-        }
+    if (data.code === 'Ok' && data.routes?.[0]) {
+      const route = data.routes[0];
+      const coordinates: [number, number][] = route.geometry.coordinates.map(
+        (coord: [number, number]) => [coord[1], coord[0]] as [number, number]
       );
-    } catch (error) {
-      console.error('Route fetch error:', error);
-      // Fallback to straight line
-      resolve({
-        coordinates: [
-          [origin.lat, origin.lng],
-          [destination.lat, destination.lng],
-        ],
-        distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
-        duration: 0,
-        success: false,
-      });
+      return {
+        coordinates,
+        distance: route.distance,
+        duration: route.duration,
+        success: true,
+      };
     }
-  });
-};
-
-/**
- * Decode Google Maps encoded polyline
- */
-export const decodePolyline = (encoded: string): [number, number][] => {
-  const points: [number, number][] = [];
-  let index = 0;
-  let lat = 0;
-  let lng = 0;
-
-  while (index < encoded.length) {
-    let b;
-    let shift = 0;
-    let result = 0;
-    
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    
-    const dlat = result & 1 ? ~(result >> 1) : result >> 1;
-    lat += dlat;
-
-    shift = 0;
-    result = 0;
-    
-    do {
-      b = encoded.charCodeAt(index++) - 63;
-      result |= (b & 0x1f) << shift;
-      shift += 5;
-    } while (b >= 0x20);
-    
-    const dlng = result & 1 ? ~(result >> 1) : result >> 1;
-    lng += dlng;
-
-    points.push([lat / 1e5, lng / 1e5]);
+    return {
+      coordinates: [[origin.lat, origin.lng], [destination.lat, destination.lng]],
+      distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
+      duration: 0,
+      success: false,
+    };
+  } catch (error) {
+    console.error('OSRM route fetch error:', error);
+    return {
+      coordinates: [[origin.lat, origin.lng], [destination.lat, destination.lng]],
+      distance: calculateHaversineDistance(origin.lat, origin.lng, destination.lat, destination.lng) * 1000,
+      duration: 0,
+      success: false,
+    };
   }
-
-  return points;
 };
 
 /**

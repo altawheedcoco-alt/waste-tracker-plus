@@ -10,7 +10,7 @@ import SubscriptionGuard from '@/components/guards/SubscriptionGuard';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Loader2 } from 'lucide-react';
-import { LazyGoogleMapsProvider } from '@/components/maps/GoogleMapsProvider';
+
 
 
 // Lazy load heavy dashboard components - only one renders per user role
@@ -98,7 +98,6 @@ const Dashboard = () => {
 
   return (
     <SubscriptionGuard>
-    <LazyGoogleMapsProvider>
         <PinVerificationGate>
           <>
             <ErrorBoundary fallbackTitle="حدث خطأ في لوحة التحكم">
@@ -128,7 +127,6 @@ const Dashboard = () => {
             </Suspense>
           </>
         </PinVerificationGate>
-    </LazyGoogleMapsProvider>
     </SubscriptionGuard>
   );
 };

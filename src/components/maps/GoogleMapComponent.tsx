@@ -1,2 +1,2 @@
-// Re-export Leaflet Map Component for backwards compatibility
+// Re-export Leaflet Map Component
 export { default } from './LeafletMapComponent';

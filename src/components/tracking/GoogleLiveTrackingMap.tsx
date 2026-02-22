@@ -1,2 +1,2 @@
-// Re-export Leaflet Live Tracking Map for backwards compatibility
+// Re-export Leaflet Live Tracking Map
 export { default } from './LeafletLiveTrackingMap';

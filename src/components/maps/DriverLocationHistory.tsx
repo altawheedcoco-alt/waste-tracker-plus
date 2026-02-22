@@ -1,2 +1,2 @@
-// Re-export Google Maps Driver History for backwards compatibility
-export { default } from './GoogleMapsDriverHistory';
+// Re-export Leaflet Driver History
+export { default } from './LeafletDriverHistory';
