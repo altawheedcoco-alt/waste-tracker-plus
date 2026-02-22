@@ -238,11 +238,23 @@ const WazeLocationField = ({
     }
   };
 
-  const openInWaze = () => {
-    if (coordinates) {
-      window.open(`https://waze.com/ul?ll=${coordinates.lat},${coordinates.lng}&navigate=yes`, '_blank');
-    } else if (value) {
-      window.open(`https://waze.com/ul?q=${encodeURIComponent(value)}&navigate=yes`, '_blank');
+  const openInMap = (type: 'waze' | 'google' | 'apple' | 'osm') => {
+    const lat = coordinates?.lat;
+    const lng = coordinates?.lng;
+    const q = value || '';
+    switch (type) {
+      case 'waze':
+        window.open(lat ? `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` : `https://waze.com/ul?q=${encodeURIComponent(q)}&navigate=yes`, '_blank');
+        break;
+      case 'google':
+        window.open(lat ? `https://www.google.com/maps?q=${lat},${lng}` : `https://www.google.com/maps/search/${encodeURIComponent(q)}`, '_blank');
+        break;
+      case 'apple':
+        window.open(lat ? `https://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(q)}` : `https://maps.apple.com/?q=${encodeURIComponent(q)}`, '_blank');
+        break;
+      case 'osm':
+        window.open(lat ? `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}` : `https://www.openstreetmap.org/search?query=${encodeURIComponent(q)}`, '_blank');
+        break;
     }
   };
 
@@ -286,27 +298,16 @@ const WazeLocationField = ({
           <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
           <span className="flex-1 truncate">{value}</span>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={openInWaze}
-              title="فتح في Waze"
-            >
-              <ExternalLink className="w-3 h-3" />
+            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => openInMap('waze')} title="Waze">
+              <Navigation className="w-3 h-3 text-primary" />
             </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => {
-                setFocused(true);
-                setTimeout(() => inputRef.current?.focus(), 50);
-              }}
-              title="تغيير"
-            >
+            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => openInMap('google')} title="Google Maps">
+              <MapPin className="w-3 h-3 text-destructive" />
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => openInMap('osm')} title="OpenStreetMap">
+              <Map className="w-3 h-3 text-muted-foreground" />
+            </Button>
+            <Button type="button" variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { setFocused(true); setTimeout(() => inputRef.current?.focus(), 50); }} title="تغيير">
               <Search className="w-3 h-3" />
             </Button>
           </div>
