@@ -199,6 +199,8 @@ const PlatformTermsAndPolicies = lazy(() => import("./pages/dashboard/PlatformTe
 const AdminDocumentStamping = lazy(() => import("./pages/dashboard/AdminDocumentStamping"));
 const VehicleMarketplace = lazy(() => import("./pages/dashboard/VehicleMarketplace"));
 const SmartAgentDashboard = lazy(() => import("./pages/dashboard/SmartAgentDashboard"));
+const PrintCenter = lazy(() => import("./pages/dashboard/PrintCenter"));
+const SigningStatus = lazy(() => import("./pages/dashboard/SigningStatus"));
 
 const GeneratorGuide = lazy(() => import("./pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("./pages/guide/TransporterGuide"));
@@ -276,6 +278,8 @@ const AppRoutes = memo(() => (
     <Route path="/guide/driver" element={<DriverGuide />} />
     <Route path="/guide/admin" element={<AdminGuide />} />
     <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/dashboard/print-center" element={<PrintCenter />} />
+    <Route path="/dashboard/signing-status" element={<SigningStatus />} />
     <Route path="/dashboard/drivers" element={<Drivers />} />
     <Route path="/dashboard/drivers/:driverId" element={<DriverDetails />} />
     <Route path="/dashboard/company-approvals" element={<CompanyApprovals />} />
