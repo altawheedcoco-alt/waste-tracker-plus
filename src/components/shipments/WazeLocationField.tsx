@@ -278,36 +278,69 @@ const WazeLocationField = ({
   };
 
   const getCurrentLocation = async () => {
-    if (!navigator.geolocation) {
-      toast.error('المتصفح لا يدعم تحديد الموقع');
-      return;
-    }
     setGettingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        try {
-          const res = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&language=ar`
-          );
-          const data = await res.json();
-          if (data.features?.[0]) {
-            onChange(data.features[0].place_name, { lat: latitude, lng: longitude });
-            setMapCenter({ lat: latitude, lng: longitude });
-            setMapZoom(15);
-            toast.success('📍 تم تحديد موقعك');
-          }
-        } catch {
-          onChange(`${latitude}, ${longitude}`, { lat: latitude, lng: longitude });
+    
+    const applyLocation = async (latitude: number, longitude: number) => {
+      try {
+        const res = await fetch(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&language=ar`
+        );
+        const data = await res.json();
+        if (data.features?.[0]) {
+          onChange(data.features[0].place_name, { lat: latitude, lng: longitude });
+          setMapCenter({ lat: latitude, lng: longitude });
+          setMapZoom(15);
+          toast.success('📍 تم تحديد موقعك');
+        } else {
+          onChange(`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`, { lat: latitude, lng: longitude });
+          setMapCenter({ lat: latitude, lng: longitude });
+          setMapZoom(15);
         }
-        setGettingLocation(false);
-      },
-      () => {
-        toast.error('فشل تحديد الموقع');
-        setGettingLocation(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+      } catch {
+        onChange(`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`, { lat: latitude, lng: longitude });
+        setMapCenter({ lat: latitude, lng: longitude });
+        setMapZoom(15);
+      }
+      setGettingLocation(false);
+    };
+
+    // Try browser geolocation first
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => applyLocation(pos.coords.latitude, pos.coords.longitude),
+        async (err) => {
+          console.warn('Geolocation failed, trying IP fallback:', err.message);
+          // Fallback: IP-based location
+          try {
+            const res = await fetch('https://ipapi.co/json/');
+            const data = await res.json();
+            if (data.latitude && data.longitude) {
+              await applyLocation(data.latitude, data.longitude);
+              toast.info('📍 تم تحديد موقعك التقريبي (عبر الإنترنت)');
+              return;
+            }
+          } catch {
+            console.warn('IP fallback also failed');
+          }
+          toast.error('فشل تحديد الموقع - جرّب البحث بالاسم');
+          setGettingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else {
+      // No geolocation API, use IP fallback directly
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        if (data.latitude && data.longitude) {
+          await applyLocation(data.latitude, data.longitude);
+          toast.info('📍 تم تحديد موقعك التقريبي (عبر الإنترنت)');
+          return;
+        }
+      } catch {}
+      toast.error('المتصفح لا يدعم تحديد الموقع');
+      setGettingLocation(false);
+    }
   };
 
   const useOrgPrimary = () => {
