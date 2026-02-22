@@ -21,28 +21,13 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          // React core
+      manualChunks(id) {
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
             return 'react-core';
           }
           if (id.includes('react-router')) return 'router';
-          if (id.includes('@radix-ui/')) return 'ui-primitives';
-          if (id.includes('recharts') || id.includes('d3-')) return 'charts';
-          if (id.includes('@tanstack/react-query')) return 'query';
           if (id.includes('@supabase/')) return 'supabase';
-          if (id.includes('framer-motion')) return 'animation';
-          if (id.includes('jspdf') || id.includes('html2canvas') || id.includes('xlsx')) return 'export';
-          if (id.includes('lucide-react')) return 'icons';
-          if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) return 'forms';
-          if (id.includes('qrcode') || id.includes('html5-qrcode') || id.includes('react-barcode')) return 'qr-barcode';
-          if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype') || id.includes('unified') || id.includes('micromark') || id.includes('mdast')) return 'markdown';
-          if (id.includes('date-fns') || id.includes('react-day-picker')) return 'date-utils';
-          if (id.includes('leaflet')) return 'maps';
-          if (id.includes('embla-carousel') || id.includes('vaul') || id.includes('cmdk') || id.includes('input-otp')) return 'ui-extras';
-          if (id.includes('sonner')) return 'toast';
-          if (id.includes('jszip')) return 'zip';
-          if (id.includes('node_modules/')) return 'vendor';
+          if (id.includes('@radix-ui/')) return 'ui';
         },
       },
     },
