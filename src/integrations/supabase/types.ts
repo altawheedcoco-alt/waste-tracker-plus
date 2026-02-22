@@ -19583,7 +19583,6 @@ export type Database = {
         Row: {
           card_integration_id: string | null
           created_at: string
-          hmac_secret: string | null
           id: string
           iframe_id: string | null
           is_active: boolean | null
@@ -19595,7 +19594,6 @@ export type Database = {
         Insert: {
           card_integration_id?: string | null
           created_at?: string
-          hmac_secret?: string | null
           id?: string
           iframe_id?: string | null
           is_active?: boolean | null
@@ -19607,7 +19605,6 @@ export type Database = {
         Update: {
           card_integration_id?: string | null
           created_at?: string
-          hmac_secret?: string | null
           id?: string
           iframe_id?: string | null
           is_active?: boolean | null
