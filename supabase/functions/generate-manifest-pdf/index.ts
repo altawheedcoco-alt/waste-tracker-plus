@@ -389,13 +389,60 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   </div>
 </div>
 
-<!-- 2. السائق والمركبة + المخلفات -->
+<!-- 2. توصيف المخلف بالتفصيل -->
 <div class="sec">
-  <div class="sec-t">القسم الثاني: بيانات السائق والمخلفات</div>
+  <div class="sec-t">القسم الثاني: التوصيف الدقيق للمخلف | Waste Detailed Description</div>
   <table>
     <tr>
-      <th>اسم السائق</th><th>رخصة القيادة</th><th>هاتف السائق</th><th>نوع المركبة</th><th>رقم اللوحة</th>
-      <th>نوع المخلف</th><th>الوصف</th><th>الكمية</th><th>الحالة</th><th>التعبئة</th>
+      <th style="width:12%">تصنيف المخلف</th>
+      <th style="width:22%">الوصف التفصيلي</th>
+      <th>الحالة الفيزيائية</th>
+      <th>مستوى الخطورة</th>
+      <th>طريقة التعبئة</th>
+      <th>طريقة المعالجة</th>
+      <th>نوع التخلص</th>
+    </tr>
+    <tr>
+      <td><strong>${wasteTypeLabels[shipment.waste_type] || shipment.waste_type || "—"}</strong></td>
+      <td>${shipment.waste_description || "غير محدد"}</td>
+      <td>${shipment.waste_state || "—"}</td>
+      <td style="${isHazardous ? 'color:#dc2626;font-weight:bold;' : ''}">${hazardLabels[shipment.hazard_level] || shipment.hazard_level || "غير محدد"} ${isHazardous ? '⚠️' : ''}</td>
+      <td>${shipment.packaging_method || "—"}</td>
+      <td>${shipment.disposal_method || "—"}</td>
+      <td>${shipment.disposal_type || "—"}</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 3. الكميات والأوزان -->
+<div class="sec">
+  <div class="sec-t">القسم الثالث: الكميات والأوزان | Quantities & Weights</div>
+  <table>
+    <tr>
+      <th>الكمية</th><th>الوحدة</th><th>تذكرة الميزان</th><th>إجمالي (كجم)</th><th>فارغة (كجم)</th><th>صافي (كجم)</th><th>فعلي (كجم)</th><th>عند المصدر</th><th>عند الوجهة</th><th>فرق %</th>
+    </tr>
+    <tr>
+      <td><strong>${shipment.quantity || "—"}</strong></td>
+      <td>${shipment.unit || "طن"}</td>
+      <td>${shipment.weighbridge_ticket_number || "—"}</td>
+      <td>${shipment.weighbridge_gross_weight || "—"}</td>
+      <td>${shipment.weighbridge_tare_weight || "—"}</td>
+      <td>${shipment.weighbridge_net_weight || "—"}</td>
+      <td>${shipment.actual_weight || "—"}</td>
+      <td>${shipment.weight_at_source || "—"}</td>
+      <td>${shipment.weight_at_destination || "—"}</td>
+      <td style="${shipment.weight_discrepancy_pct && shipment.weight_discrepancy_pct > 5 ? 'color:#dc2626;font-weight:bold;' : ''}">${shipment.weight_discrepancy_pct != null ? shipment.weight_discrepancy_pct + '%' : "—"}</td>
+    </tr>
+  </table>
+  ${shipment.weighbridge_date ? `<p style="font-size:5.5px;color:#6b7280;margin-top:2px;">تاريخ الوزن: ${formatDateTime(shipment.weighbridge_date)} ${shipment.weighbridge_verified ? '| ✅ تم التحقق' : '| ⏳ لم يُتحقق'}</p>` : ''}
+</div>
+
+<!-- 4. السائق والمركبة -->
+<div class="sec">
+  <div class="sec-t">القسم الرابع: بيانات السائق والمركبة | Driver & Vehicle</div>
+  <table>
+    <tr>
+      <th>اسم السائق</th><th>رخصة القيادة</th><th>هاتف السائق</th><th>نوع المركبة</th><th>رقم اللوحة</th><th>تحقق اللوحة</th>
     </tr>
     <tr>
       <td>${shipment.driver?.full_name || shipment.manual_driver_name || "—"}</td>
@@ -403,41 +450,79 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       <td>${shipment.driver?.phone || "—"}</td>
       <td>${shipment.driver?.vehicle_type || "—"}</td>
       <td>${shipment.driver?.vehicle_plate_number || shipment.manual_vehicle_plate || "—"}</td>
-      <td>${wasteTypeLabels[shipment.waste_type] || shipment.waste_type || "—"}</td>
-      <td>${shipment.waste_description || "—"}</td>
-      <td>${shipment.quantity || "—"} ${shipment.unit || "طن"}</td>
-      <td>${shipment.waste_state || "—"}</td>
-      <td>${shipment.packaging_method || "—"}</td>
+      <td>${shipment.plate_verified ? '✅ تم التحقق' : '—'}</td>
     </tr>
   </table>
 </div>
 
-<!-- 3. الأوزان والمسار -->
+<!-- 5. المسار الجغرافي والجدول الزمني -->
 <div class="sec">
-  <div class="sec-t">القسم الثالث: الأوزان والمسار الجغرافي</div>
+  <div class="sec-t">القسم الخامس: المسار والجدول الزمني | Route & Timeline</div>
   <table>
     <tr>
-      <th>تذكرة الميزان</th><th>إجمالي (كجم)</th><th>فارغة (كجم)</th><th>صافي (كجم)</th><th>فعلي (كجم)</th>
-      <th>نقطة الاستلام</th><th>إحداثيات</th><th>نقطة التسليم</th><th>إحداثيات</th>
+      <th>نقطة الاستلام</th><th>مدينة الاستلام</th><th>إحداثيات الاستلام</th><th>نقطة التسليم</th><th>مدينة التسليم</th><th>إحداثيات التسليم</th>
     </tr>
     <tr>
-      <td>${shipment.weighbridge_ticket_number || "—"}</td>
-      <td>${shipment.weighbridge_gross_weight || "—"}</td>
-      <td>${shipment.weighbridge_tare_weight || "—"}</td>
-      <td>${shipment.weighbridge_net_weight || "—"}</td>
-      <td>${shipment.actual_weight || "—"}</td>
       <td>${shipment.pickup_address || "—"}</td>
-      <td style="font-family:monospace;font-size:5.5px;">${shipment.gps_pickup_lat ? `${Number(shipment.gps_pickup_lat).toFixed(4)},${Number(shipment.gps_pickup_lng).toFixed(4)}` : "—"}</td>
+      <td>${shipment.pickup_city || "—"}</td>
+      <td style="font-family:monospace;font-size:5.5px;">${shipment.gps_pickup_lat ? `${Number(shipment.gps_pickup_lat).toFixed(4)},${Number(shipment.gps_pickup_lng).toFixed(4)}` : (shipment.pickup_latitude ? `${Number(shipment.pickup_latitude).toFixed(4)},${Number(shipment.pickup_longitude).toFixed(4)}` : "—")}</td>
       <td>${shipment.delivery_address || "—"}</td>
-      <td style="font-family:monospace;font-size:5.5px;">${shipment.gps_delivery_lat ? `${Number(shipment.gps_delivery_lat).toFixed(4)},${Number(shipment.gps_delivery_lng).toFixed(4)}` : "—"}</td>
+      <td>${shipment.delivery_city || "—"}</td>
+      <td style="font-family:monospace;font-size:5.5px;">${shipment.gps_delivery_lat ? `${Number(shipment.gps_delivery_lat).toFixed(4)},${Number(shipment.gps_delivery_lng).toFixed(4)}` : (shipment.delivery_latitude ? `${Number(shipment.delivery_latitude).toFixed(4)},${Number(shipment.delivery_longitude).toFixed(4)}` : "—")}</td>
     </tr>
   </table>
+  <table style="margin-top:3px;">
+    <tr>
+      <th>تاريخ الإنشاء</th><th>تاريخ الاستلام</th><th>بدء النقل</th><th>التسليم المتوقع</th><th>تاريخ التسليم</th><th>تاريخ الاعتماد</th><th>تاريخ التأكيد</th>
+    </tr>
+    <tr>
+      <td>${formatDateTime(shipment.created_at)}</td>
+      <td>${formatDate(shipment.pickup_date)}</td>
+      <td>${formatDateTime(shipment.in_transit_at)}</td>
+      <td>${formatDate(shipment.expected_delivery_date)}</td>
+      <td>${formatDateTime(shipment.delivered_at)}</td>
+      <td>${formatDateTime(shipment.approved_at)}</td>
+      <td>${formatDateTime(shipment.confirmed_at)}</td>
+    </tr>
+  </table>
+  <p style="font-size:5.5px;color:#6b7280;margin-top:2px;">
+    GPS: ${shipment.gps_active_throughout ? '✅ نشط طوال الرحلة' : '⚠️ غير مؤكد'}${shipment.gps_signal_lost_at ? ` | فقدان إشارة: ${formatDateTime(shipment.gps_signal_lost_at)}` : ''}
+    | سلسلة الحيازة: ${shipment.custody_chain_complete ? '✅ مكتملة' : '⏳ غير مكتملة'}
+    | الامتثال: ${shipment.compliance_verified ? '✅ تم التحقق' : '⏳ غير مؤكد'}
+  </p>
+</div>
+
+<!-- 6. البيانات المالية والملاحظات -->
+<div class="sec">
+  <div class="sec-t">القسم السادس: البيانات المالية والملاحظات | Financial & Notes</div>
+  <table>
+    <tr>
+      <th>سعر الوحدة</th><th>القيمة الإجمالية</th><th>إجمالي العميل</th><th>تكلفة التخلص</th><th>أجر السائق</th><th>حالة الدفع</th><th>نوع الشحنة</th><th>الحالة</th>
+    </tr>
+    <tr>
+      <td>${shipment.price_per_unit != null ? shipment.price_per_unit + ' ج.م' : "—"}</td>
+      <td>${shipment.total_value != null ? shipment.total_value + ' ج.م' : "—"}</td>
+      <td>${shipment.client_total != null ? shipment.client_total + ' ج.م' : "—"}</td>
+      <td>${shipment.disposal_cost != null ? shipment.disposal_cost + ' ج.م' : "—"}</td>
+      <td>${shipment.driver_fee != null ? shipment.driver_fee + ' ج.م' : "—"}</td>
+      <td>${shipment.payment_status || "—"}</td>
+      <td>${shipment.shipment_type || "عادي"}</td>
+      <td><strong>${shipment.status || "—"}</strong></td>
+    </tr>
+  </table>
+  ${(shipment.notes || shipment.generator_notes || shipment.recycler_notes || shipment.delay_reason) ? `
+  <div style="margin-top:3px;padding:3px 5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;font-size:6px;">
+    ${shipment.notes ? `<p><span class="lbl">ملاحظات عامة:</span> ${shipment.notes}</p>` : ''}
+    ${shipment.generator_notes ? `<p><span class="lbl">ملاحظات المولّد:</span> ${shipment.generator_notes}</p>` : ''}
+    ${shipment.recycler_notes ? `<p><span class="lbl">ملاحظات المستلم:</span> ${shipment.recycler_notes}</p>` : ''}
+    ${shipment.delay_reason ? `<p style="color:#dc2626;"><span class="lbl">سبب التأخير:</span> ${shipment.delay_reason}</p>` : ''}
+  </div>` : ''}
 </div>
 
 <!-- 4. سلسلة الحيازة -->
 ${custodyChain.length > 0 ? `
 <div class="sec">
-  <div class="sec-t">القسم الرابع: سلسلة الحيازة الرقمية (Digital Chain of Custody)</div>
+  <div class="sec-t">القسم السابع: سلسلة الحيازة الرقمية (Digital Chain of Custody)</div>
   <table>
     <tr><th>#</th><th>الحدث</th><th>الجهة</th><th>التاريخ/الوقت</th><th>الإحداثيات</th><th>بصمة التحقق</th></tr>
     ${custodyChain.slice(0, 6).map((evt: any, i: number) => `
@@ -452,7 +537,7 @@ ${custodyChain.length > 0 ? `
   </table>
 </div>` : ""}
 
-<!-- 5. الإقرار القانوني لكل طرف -->
+<!-- 8. الإقرار القانوني لكل طرف -->
 <div class="decl">
   <h4>📜 الإقرارات والتعهدات القانونية الملزمة</h4>
   <p style="margin-bottom:4px;">
@@ -479,7 +564,7 @@ ${custodyChain.length > 0 ? `
   </p>
 </div>
 
-<!-- 6. التوقيعات والأختام مع رموز التحقق -->
+<!-- 9. التوقيعات والأختام مع رموز التحقق -->
 <div class="sigs">
   <div class="sig-box">
     <h5>🏭 توقيع وختم المولّد</h5>
@@ -513,7 +598,7 @@ ${custodyChain.length > 0 ? `
   </div>
 </div>
 
-<!-- 7. الشروط والأحكام -->
+<!-- 10. الشروط والأحكام -->
 <div class="terms">
   <h4>📋 الشروط والأحكام الأساسية</h4>
   <ol>
