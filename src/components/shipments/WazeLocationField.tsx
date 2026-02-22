@@ -296,29 +296,23 @@ const WazeLocationField = ({
       const center = coordinates || mapCenter;
       
       const searchPromises = [
-        // Mapbox geocoding
-        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=5&language=ar&types=address,place,locality,neighborhood,poi`)
+        // Google Places (PRIORITY - same data as Waze iframe uses internally)
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places-search`, {
+          method: 'POST',
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: q, userLat: center.lat, userLng: center.lng, radius: 80000 }),
+        })
           .then(r => r.json())
-          .then(data => (data.features || []).map((f: any, i: number) => ({
-            id: `google-${f.id}-${i}`,
-            name: f.text || f.place_name.split(',')[0],
-            address: f.place_name,
-            lat: f.center[1],
-            lng: f.center[0],
+          .then(data => (data.results || []).slice(0, 8).map((r: any) => ({
+            id: `google-${r.id}`,
+            name: r.name,
+            address: r.address,
+            lat: r.lat,
+            lng: r.lng,
             type: 'google' as const,
-          })))
-          .catch(() => [] as SearchResult[]),
-
-        // OSM Nominatim
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=5&accept-language=ar`)
-          .then(r => r.json())
-          .then(data => (data || []).map((r: any, i: number) => ({
-            id: `osm-${r.place_id}-${i}`,
-            name: r.display_name.split(',')[0],
-            address: r.display_name,
-            lat: parseFloat(r.lat),
-            lng: parseFloat(r.lon),
-            type: 'osm' as const,
           })))
           .catch(() => [] as SearchResult[]),
 
@@ -336,12 +330,25 @@ const WazeLocationField = ({
             type: 'waze' as const,
           })))
           .catch(() => [] as SearchResult[]),
+
+        // OSM Nominatim (fallback)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=5&accept-language=ar`)
+          .then(r => r.json())
+          .then(data => (data || []).map((r: any, i: number) => ({
+            id: `osm-${r.place_id}-${i}`,
+            name: r.display_name.split(',')[0],
+            address: r.display_name,
+            lat: parseFloat(r.lat),
+            lng: parseFloat(r.lon),
+            type: 'osm' as const,
+          })))
+          .catch(() => [] as SearchResult[]),
       ];
 
-      const [mapboxResults, osmResults, wazeResults] = await Promise.all(searchPromises);
+      const [googleResults, wazeResults, osmResults] = await Promise.all(searchPromises);
       
-      // Deduplicate by proximity (within ~100m)
-      const allMapResults = [...wazeResults, ...mapboxResults, ...osmResults];
+      // Google Places first (most accurate, same as Waze iframe), then Waze, then OSM
+      const allMapResults = [...googleResults, ...wazeResults, ...osmResults];
       const deduped: SearchResult[] = [];
       for (const r of allMapResults) {
         const isDupe = deduped.some(
