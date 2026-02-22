@@ -20,17 +20,17 @@ const ORG_NAMES: Record<string, string> = {
 };
 
 const DEMO_ACCOUNTS = [
-  { email: 'demo-generator@irecycle.test', fullName: 'مولد مخلفات', orgType: 'generator', role: 'company_admin', phone: '01000000001' },
-  { email: 'demo-recycler@irecycle.test', fullName: 'معيد تدوير', orgType: 'recycler', role: 'company_admin', phone: '01000000002' },
-  { email: 'demo-transporter@irecycle.test', fullName: 'ناقل مخلفات', orgType: 'transporter', role: 'company_admin', phone: '01000000003' },
-  { email: 'demo-transport-office@irecycle.test', fullName: 'مكتب نقل', orgType: 'transporter', role: 'company_admin', phone: '01000000011' },
-  { email: 'demo-disposal@irecycle.test', fullName: 'جهة تخلص آمن', orgType: 'disposal', role: 'company_admin', phone: '01000000004' },
-  { email: 'demo-driver@irecycle.test', fullName: 'سائق', orgType: 'transporter', role: 'driver', phone: '01000000005', joinExisting: true },
-  { email: 'demo-employee@irecycle.test', fullName: 'موظف', orgType: 'transporter', role: 'employee', phone: '01000000006', joinExisting: true },
-  { email: 'demo-admin@irecycle.test', fullName: 'مدير النظام', orgType: 'transporter', role: 'admin', phone: '01000000007', joinExisting: true },
-  { email: 'demo-consultant@irecycle.test', fullName: 'استشاري بيئي', orgType: 'consultant', role: 'company_admin', phone: '01000000008' },
-  { email: 'demo-consulting-office@irecycle.test', fullName: 'مكتب استشاري', orgType: 'consulting_office', role: 'company_admin', phone: '01000000009' },
-  { email: 'demo-iso-body@irecycle.test', fullName: 'جهة مانحة للأيزو', orgType: 'iso_body', role: 'company_admin', phone: '01000000010' },
+  { email: 'demo-generator@irecycle.test', fullName: 'مولد مخلفات', orgType: 'generator', orgName: 'شركة المولد التجريبية', role: 'company_admin', phone: '01000000001' },
+  { email: 'demo-recycler@irecycle.test', fullName: 'معيد تدوير', orgType: 'recycler', orgName: 'شركة التدوير التجريبية', role: 'company_admin', phone: '01000000002' },
+  { email: 'demo-transporter@irecycle.test', fullName: 'ناقل مخلفات', orgType: 'transporter', orgName: 'شركة النقل التجريبية', role: 'company_admin', phone: '01000000003' },
+  { email: 'demo-transport-office@irecycle.test', fullName: 'مكتب نقل', orgType: 'transporter', orgName: 'مكتب النقل التجريبي', role: 'company_admin', phone: '01000000011' },
+  { email: 'demo-disposal@irecycle.test', fullName: 'جهة تخلص آمن', orgType: 'disposal', orgName: 'شركة التخلص الآمن التجريبية', role: 'company_admin', phone: '01000000004' },
+  { email: 'demo-driver@irecycle.test', fullName: 'سائق', orgType: 'transporter', orgName: 'شركة سائق النقل التجريبية', role: 'driver', phone: '01000000005' },
+  { email: 'demo-employee@irecycle.test', fullName: 'موظف', orgType: 'transporter', orgName: 'شركة الموظف التجريبية', role: 'employee', phone: '01000000006' },
+  { email: 'demo-admin@irecycle.test', fullName: 'مدير النظام', orgType: 'transporter', orgName: 'شركة المدير التجريبية', role: 'admin', phone: '01000000007' },
+  { email: 'demo-consultant@irecycle.test', fullName: 'استشاري بيئي', orgType: 'consultant', orgName: 'مكتب الاستشارات البيئية التجريبي', role: 'company_admin', phone: '01000000008' },
+  { email: 'demo-consulting-office@irecycle.test', fullName: 'مكتب استشاري', orgType: 'consulting_office', orgName: 'المكتب الاستشاري التجريبي', role: 'company_admin', phone: '01000000009' },
+  { email: 'demo-iso-body@irecycle.test', fullName: 'جهة مانحة للأيزو', orgType: 'iso_body', orgName: 'جهة الأيزو التجريبية', role: 'company_admin', phone: '01000000010' },
 ];
 
 Deno.serve(async (req) => {
@@ -106,9 +106,6 @@ Deno.serve(async (req) => {
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
     const results: any[] = [];
 
-    // Cache of orgType -> org_id for reuse (driver/employee/admin join existing transporter org)
-    const orgCache: Record<string, string> = {};
-
     for (const account of DEMO_ACCOUNTS) {
       const existing = existingUsers?.users?.find(u => u.email === account.email);
       if (existing) {
@@ -130,41 +127,31 @@ Deno.serve(async (req) => {
 
       const newUserId = authData.user!.id;
 
-      // Find or create organization
+      // Find or create independent organization for each account
       let orgId: string | null = null;
-      const acct = account as any;
+      const { data: existingOrg } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('name', account.orgName)
+        .eq('organization_type', account.orgType)
+        .limit(1)
+        .single();
 
-      if (acct.joinExisting && orgCache[account.orgType]) {
-        // Join existing org (driver, employee, admin join the transporter org)
-        orgId = orgCache[account.orgType];
+      if (existingOrg) {
+        orgId = existingOrg.id;
       } else {
-        const orgName = ORG_NAMES[account.orgType] || `${account.fullName} - تجريبي`;
-        // Check if org already exists by name
-        const { data: existingOrg } = await supabase
+        const { data: newOrg } = await supabase
           .from('organizations')
+          .insert({
+            name: account.orgName,
+            organization_type: account.orgType,
+            email: account.email,
+            phone: account.phone,
+            is_active: true,
+          })
           .select('id')
-          .eq('name', orgName)
-          .eq('organization_type', account.orgType)
-          .limit(1)
           .single();
-
-        if (existingOrg) {
-          orgId = existingOrg.id;
-        } else {
-          const { data: newOrg } = await supabase
-            .from('organizations')
-            .insert({
-              name: orgName,
-              organization_type: account.orgType,
-              email: account.email,
-              phone: account.phone,
-              is_active: true,
-            })
-            .select('id')
-            .single();
-          orgId = newOrg?.id || null;
-        }
-        if (orgId) orgCache[account.orgType] = orgId;
+        orgId = newOrg?.id || null;
       }
 
       await supabase.from('profiles').upsert({
