@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Search, Loader2, MapPin, Navigation, X, Globe } from 'lucide-react';
+import { Search, Loader2, MapPin, Navigation, X, Globe, Share2, Truck, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -55,8 +55,16 @@ interface WazeSearchResult {
   source: 'mapbox' | 'waze';
 }
 
+export interface WazeLocationData {
+  name: string;
+  address: string;
+  position: { lat: number; lng: number };
+}
+
 interface WazeMapSearchProps {
-  onSelect: (result: { address: string; position: { lat: number; lng: number } }) => void;
+  onSelect: (result: WazeLocationData) => void;
+  onShareToPickup?: (result: WazeLocationData) => void;
+  onShareToDelivery?: (result: WazeLocationData) => void;
   placeholder?: string;
   className?: string;
   showWazeEmbed?: boolean;
@@ -65,6 +73,8 @@ interface WazeMapSearchProps {
 
 const WazeMapSearch = ({
   onSelect,
+  onShareToPickup,
+  onShareToDelivery,
   placeholder = 'ابحث عن عنوان، مصنع، شركة...',
   className,
   showWazeEmbed = true,
@@ -134,17 +144,34 @@ const WazeMapSearch = ({
     return () => clearTimeout(timer);
   }, [query, searchPlaces]);
 
+  const buildLocationData = (result: WazeSearchResult): WazeLocationData => ({
+    name: result.name,
+    address: result.address,
+    position: { lat: result.lat, lng: result.lng },
+  });
+
   const handleSelect = (result: WazeSearchResult) => {
-    onSelect({
-      address: result.address,
-      position: { lat: result.lat, lng: result.lng },
-    });
+    onSelect(buildLocationData(result));
     setMapCenter({ lat: result.lat, lng: result.lng });
     setMapZoom(15);
     setQuery('');
     setResults([]);
     setShowResults(false);
     toast.success('تم اختيار الموقع');
+  };
+
+  const handleShareToPickup = (result: WazeSearchResult) => {
+    onShareToPickup?.(buildLocationData(result));
+    setMapCenter({ lat: result.lat, lng: result.lng });
+    setMapZoom(15);
+    toast.success('تم إرسال الموقع لحقل الاستلام');
+  };
+
+  const handleShareToDelivery = (result: WazeSearchResult) => {
+    onShareToDelivery?.(buildLocationData(result));
+    setMapCenter({ lat: result.lat, lng: result.lng });
+    setMapZoom(15);
+    toast.success('تم إرسال الموقع لحقل التسليم');
   };
 
   const openInWaze = () => {
@@ -229,6 +256,31 @@ const WazeMapSearch = ({
                     <p className="text-xs text-muted-foreground truncate">
                       {result.address}
                     </p>
+                    {/* Share to pickup/delivery buttons */}
+                    {(onShareToPickup || onShareToDelivery) && (
+                      <div className="flex gap-1.5 mt-1.5" onClick={(e) => e.stopPropagation()}>
+                        {onShareToPickup && (
+                          <button
+                            type="button"
+                            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                            onClick={() => handleShareToPickup(result)}
+                          >
+                            <Package className="w-3 h-3" />
+                            استلام
+                          </button>
+                        )}
+                        {onShareToDelivery && (
+                          <button
+                            type="button"
+                            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                            onClick={() => handleShareToDelivery(result)}
+                          >
+                            <Truck className="w-3 h-3" />
+                            تسليم
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </button>
               ))}
