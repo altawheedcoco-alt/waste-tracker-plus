@@ -23,6 +23,7 @@ PageLoader.displayName = 'PageLoader';
 
 // Eagerly loaded pages (critical path only)
 import Index from "./pages/Index";
+import ProtectedRoute from "./components/guards/ProtectedRoute";
 
 // Lazy loaded auth & dashboard pages
 const Auth = lazy(() => import("./pages/Auth"));
@@ -277,7 +278,7 @@ const AppRoutes = memo(() => (
     <Route path="/guide/recycler" element={<RecyclerGuide />} />
     <Route path="/guide/driver" element={<DriverGuide />} />
     <Route path="/guide/admin" element={<AdminGuide />} />
-    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
     <Route path="/dashboard/print-center" element={<PrintCenter />} />
     <Route path="/dashboard/signing-status" element={<SigningStatus />} />
     <Route path="/dashboard/drivers" element={<Drivers />} />
