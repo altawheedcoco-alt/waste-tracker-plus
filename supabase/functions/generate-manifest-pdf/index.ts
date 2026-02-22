@@ -169,12 +169,22 @@ function renderLicensesBlock(org: any): string {
   if (org.wmra_license) html += `<p><span class="lbl">WMRA:</span> ${org.wmra_license} ${getLicenseStatusHTML(org.wmra_license_expiry_date)}</p>`;
   // EEAA - all types
   if (org.environmental_license) html += `<p><span class="lbl">EEAA:</span> ${org.environmental_license} ${getLicenseStatusHTML(org.eeaa_license_expiry_date)}</p>`;
-  // IDA - recycler/disposal/generator
-  if (!isTransporter && org.ida_license) html += `<p><span class="lbl">IDA:</span> ${org.ida_license} ${getLicenseStatusHTML(org.ida_license_expiry_date)}</p>`;
+  // IDA - recycler/disposal
+  if (isRecyclerOrDisposal && org.ida_license) html += `<p><span class="lbl">IDA:</span> ${org.ida_license} ${getLicenseStatusHTML(org.ida_license_expiry_date)}</p>`;
   // Land transport - transporter
   if (isTransporter && org.land_transport_license) html += `<p><span class="lbl">نقل بري:</span> ${org.land_transport_license} ${getLicenseStatusHTML(org.land_transport_license_expiry_date)}</p>`;
   // Digital declaration
   if (org.digital_declaration_number) html += `<p><span class="lbl">إقرار رقمي:</span> ${org.digital_declaration_number}</p>`;
+  
+  // Dynamic certifications
+  if (org.certifications_approvals && Array.isArray(org.certifications_approvals) && org.certifications_approvals.length > 0) {
+    html += `<p style="font-size:5.5px;font-weight:bold;color:#15803d;margin-top:2px;">🏅 شهادات/موافقات:</p>`;
+    for (const cert of org.certifications_approvals) {
+      if (cert.name) {
+        html += `<p><span class="lbl">${cert.name}:</span> ${cert.number || '—'} ${cert.expiry_date ? getLicenseStatusHTML(cert.expiry_date) : ''}</p>`;
+      }
+    }
+  }
   
   html += `</div>`;
   return html;
@@ -380,6 +390,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       ${renderLicensesBlock(shipment.generator)}
     </div>
     <div class="party">
+      <h4>🚛 الناقل (الطرف الثاني) | Transporter</h4>
       <p><span class="lbl">الاسم:</span> <span class="val">${shipment.transporter?.name || shipment.manual_transporter_name || "—"}</span></p>
       ${shipment.transporter?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.transporter.name_en}</span></p>` : ''}
       <p><span class="lbl">كود الشريك:</span> ${shipment.transporter?.partner_code || "—"} ${shipment.transporter?.client_code ? `| كود العميل: ${shipment.transporter.client_code}` : ''}</p>

@@ -22,9 +22,9 @@ Deno.serve(async (req) => {
     const [shipmentRes, logsRes, receiptsRes, endorsementsRes, custodyRes, declarationsRes] = await Promise.all([
       supabase.from("shipments").select(`
         *,
-        generator:organizations!shipments_generator_id_fkey(name, address, city, commercial_register, phone, email, logo_url, organization_type, wmra_license, wmra_license_expiry_date, environmental_license, eeaa_license_expiry_date, ida_license, ida_license_expiry_date, digital_declaration_number),
-        transporter:organizations!shipments_transporter_id_fkey(name, address, city, commercial_register, license_number, phone, logo_url, organization_type, wmra_license, wmra_license_expiry_date, environmental_license, eeaa_license_expiry_date, land_transport_license, land_transport_license_expiry_date, hazardous_certified, digital_declaration_number),
-        recycler:organizations!shipments_recycler_id_fkey(name, address, city, commercial_register, phone, logo_url, organization_type, wmra_license, wmra_license_expiry_date, environmental_license, eeaa_license_expiry_date, ida_license, ida_license_expiry_date, digital_declaration_number)
+        generator:organizations!shipments_generator_id_fkey(name, address, city, commercial_register, tax_card, establishment_registration, registered_activity, environmental_approval_number, phone, email, logo_url, organization_type, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, environmental_license, eeaa_license_issue_date, eeaa_license_expiry_date, ida_license, ida_license_issue_date, ida_license_expiry_date, industrial_registry, license_number, digital_declaration_number, certifications_approvals),
+        transporter:organizations!shipments_transporter_id_fkey(name, address, city, commercial_register, tax_card, establishment_registration, registered_activity, environmental_approval_number, license_number, phone, logo_url, organization_type, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, environmental_license, eeaa_license_issue_date, eeaa_license_expiry_date, land_transport_license, land_transport_license_issue_date, land_transport_license_expiry_date, hazardous_certified, digital_declaration_number, certifications_approvals),
+        recycler:organizations!shipments_recycler_id_fkey(name, address, city, commercial_register, tax_card, establishment_registration, registered_activity, environmental_approval_number, phone, logo_url, organization_type, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, environmental_license, eeaa_license_issue_date, eeaa_license_expiry_date, ida_license, ida_license_issue_date, ida_license_expiry_date, industrial_registry, license_number, digital_declaration_number, certifications_approvals, hazardous_certified)
       `).eq("id", shipmentId).single(),
       supabase.from("shipment_logs").select("*").eq("shipment_id", shipmentId).order("created_at", { ascending: true }),
       supabase.from("shipment_receipts").select("*").eq("shipment_id", shipmentId).order("created_at", { ascending: true }),
@@ -112,17 +112,35 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
     return html;
   };
 
+  const renderCertifications = (org: any): string => {
+    if (!org?.certifications_approvals || !Array.isArray(org.certifications_approvals) || org.certifications_approvals.length === 0) return '';
+    let html = `<div style="border-top:1px dashed #d1d5db;margin-top:3px;padding-top:3px;">`;
+    html += `<p style="font-size:7px;font-weight:bold;color:#0f766e;margin-bottom:2px;">🏅 شهادات/موافقات:</p>`;
+    for (const cert of org.certifications_approvals) {
+      if (cert.name) {
+        html += `<p><span class="l">${cert.name}:</span> ${cert.number || '—'} ${cert.expiry_date ? getLicenseStatus(cert.expiry_date) : ''}</p>`;
+      }
+    }
+    html += `</div>`;
+    return html;
+  };
+
   const partyBox = (icon: string, title: string, org: any, fallbackName?: string) => `
     <div class="party-box">
       <h4>${icon} ${title}</h4>
       <p><span class="l">الاسم:</span> <strong>${org?.name || fallbackName || "—"}</strong></p>
       <p><span class="l">العنوان:</span> ${org?.address || "—"}، ${org?.city || "—"}</p>
-      <p><span class="l">السجل التجاري:</span> ${org?.commercial_register || "—"}</p>
+      <p><span class="l">السجل التجاري:</span> ${org?.commercial_register || "—"} ${org?.tax_card ? `| بطاقة ضريبية: ${org.tax_card}` : ''}</p>
+      ${org?.establishment_registration ? `<p><span class="l">رقم تسجيل المنشأة:</span> ${org.establishment_registration}</p>` : ''}
+      ${org?.registered_activity ? `<p><span class="l">النشاط المسجل:</span> ${org.registered_activity}</p>` : ''}
+      ${org?.environmental_approval_number ? `<p><span class="l">الموافقة البيئية:</span> ${org.environmental_approval_number}</p>` : ''}
       <p><span class="l">الهاتف:</span> ${org?.phone || "—"}</p>
       ${org?.email ? `<p><span class="l">البريد:</span> ${org.email}</p>` : ""}
       ${org?.license_number ? `<p><span class="l">رقم الترخيص:</span> ${org.license_number}</p>` : ""}
+      ${org?.industrial_registry ? `<p><span class="l">السجل الصناعي:</span> ${org.industrial_registry}</p>` : ""}
       ${org?.hazardous_certified ? `<p><span class="l">مخلفات خطرة:</span> ✅ معتمد</p>` : ""}
       ${renderLicenses(org)}
+      ${renderCertifications(org)}
     </div>`;
 
   const endorsementRows = endorsements.map((e: any, i: number) => {
