@@ -945,8 +945,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {/* Network Status Indicator */}
               <OfflineIndicator />
 
-              {/* Focus Music Player - Hidden on mobile */}
-              {!isMobile && <FocusMusicPlayer />}
+              {/* Focus Music Player */}
+              <FocusMusicPlayer />
 
               {/* Theme Customizer - Hidden on mobile */}
               {!isMobile && <ThemeCustomizer />}
