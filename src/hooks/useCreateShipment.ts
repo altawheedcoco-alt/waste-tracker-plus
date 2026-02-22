@@ -12,6 +12,12 @@ import type { Database } from '@/integrations/supabase/types';
 
 export type WasteType = Database['public']['Enums']['waste_type'];
 
+const VALID_WASTE_TYPES: WasteType[] = ['plastic', 'paper', 'metal', 'glass', 'electronic', 'organic', 'chemical', 'medical', 'construction', 'other'];
+
+export const isValidWasteType = (value: string): value is WasteType => {
+  return VALID_WASTE_TYPES.includes(value as WasteType);
+};
+
 export interface Organization {
   id: string;
   name: string;
@@ -663,7 +669,7 @@ export const useCreateShipment = () => {
         transporter_id: transporterId || organization?.id,
         disposal_facility_id: disposalFacilityId,
         driver_id: driverId,
-        waste_type: formData.waste_type as WasteType,
+        waste_type: isValidWasteType(formData.waste_type) ? formData.waste_type : 'other',
         quantity: parseFloat(formData.quantity),
         unit: formData.unit,
         pickup_address: formData.pickup_address,
@@ -788,7 +794,7 @@ export const useCreateShipment = () => {
       recycler_id: data.recycler?.id || prev.recycler_id,
       pickup_address: data.pickupAddress || data.generator?.address || prev.pickup_address,
       delivery_address: data.deliveryAddress || data.recycler?.address || prev.delivery_address,
-      waste_type: (data.wasteType as any) || prev.waste_type,
+      waste_type: (data.wasteType && isValidWasteType(data.wasteType) ? data.wasteType : prev.waste_type),
       waste_description: data.wasteDescription || prev.waste_description,
     }));
   };
