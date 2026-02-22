@@ -633,51 +633,28 @@ const WazeLocationField = ({
               {mapExpanded ? 'تصغير' : 'تكبير'}
             </Button>
           </div>
+          <div className="text-[10px] text-muted-foreground mb-1">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
           <div className={cn(
             "transition-all duration-300 border rounded-lg overflow-hidden",
             mapExpanded ? "h-[350px]" : "h-[200px]"
           )}>
-            {mapProvider === 'waze' ? (
-              <iframe
-                key={`waze-${mapCenter.lat}-${mapCenter.lng}-${mapZoom}`}
-                src={`https://embed.waze.com/iframe?zoom=${mapZoom}&lat=${mapCenter.lat}&lon=${mapCenter.lng}&pin=1&ct=livemap`}
-                width="100%"
-                height="100%"
-                allowFullScreen
-                loading="lazy"
-                style={{ border: 'none' }}
-                title="Waze Map"
-              />
-            ) : mapProvider === 'google' ? (
-              <iframe
-                key={`google-${mapCenter.lat}-${mapCenter.lng}-${mapZoom}`}
-                src={`https://maps.google.com/maps?q=${mapCenter.lat},${mapCenter.lng}&z=${mapZoom}&output=embed`}
-                width="100%"
-                height="100%"
-                allowFullScreen
-                loading="lazy"
-                style={{ border: 'none' }}
-                title="Google Maps"
-              />
-            ) : (
-              <LocationMiniMap 
-                lat={mapCenter.lat} 
-                lng={mapCenter.lng} 
-                zoom={mapZoom}
-                provider="osm"
-                onLocationSelect={async (lat, lng) => {
-                  const address = await reverseGeocode(lat, lng);
-                  if (address) {
-                    onChange(address, { lat, lng });
-                  } else {
-                    onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
-                  }
-                  setMapCenter({ lat, lng });
-                  setMapZoom(15);
-                  toast.success('📍 تم تحديد الموقع من الخريطة');
-                }}
-              />
-            )}
+            <LocationMiniMap 
+              lat={mapCenter.lat} 
+              lng={mapCenter.lng} 
+              zoom={mapZoom}
+              provider={mapProvider}
+              onLocationSelect={async (lat, lng) => {
+                const address = await reverseGeocode(lat, lng);
+                if (address) {
+                  onChange(address, { lat, lng });
+                } else {
+                  onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
+                }
+                setMapCenter({ lat, lng });
+                setMapZoom(15);
+                toast.success('📍 تم تحديد الموقع من الخريطة');
+              }}
+            />
           </div>
         </div>
       )}
