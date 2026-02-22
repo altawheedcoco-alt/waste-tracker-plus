@@ -373,52 +373,62 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
 
       {/* Map Dialog */}
       <Dialog open={showMapDialog} onOpenChange={setShowMapDialog}>
-        <DialogContent className="max-w-3xl" dir="rtl">
+        <DialogContent className="max-w-4xl max-h-[90vh]" dir="rtl">
           <DialogHeader>
-            <DialogTitle>تحديد الموقع على الخريطة</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Map className="w-5 h-5 text-primary" />
+              تحديد الموقع على الخريطة
+              <Badge variant="secondary" className="text-[10px] bg-[#33CCFF]/10 text-[#33CCFF] border-0">Waze</Badge>
+            </DialogTitle>
           </DialogHeader>
-          <div className="h-[400px] bg-muted rounded-lg overflow-hidden relative flex items-center justify-center">
-            <div className="bg-background/90 backdrop-blur-sm p-4 rounded-lg text-center">
-              <MapPin className="w-8 h-8 mx-auto mb-2 text-primary" />
-              <p className="text-sm text-muted-foreground mb-2">
-                للتحديد الدقيق، استخدم البحث بالاسم أو أدخل الإحداثيات
+          <div className="space-y-4">
+            {/* Waze Search + Map */}
+            <WazeMapSearch
+              onSelect={(result) => {
+                setMapCoordinates(result.position);
+              }}
+              placeholder="ابحث عن موقع..."
+              showWazeEmbed={true}
+              defaultCenter={mapCoordinates || { lat: 30.0444, lng: 31.2357 }}
+            />
+
+            {/* Coordinates Input */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs">خط العرض (Latitude)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  placeholder="مثال: 30.0444"
+                  value={mapCoordinates?.lat || ''}
+                  onChange={(e) => setMapCoordinates(prev => ({
+                    lat: parseFloat(e.target.value) || 0,
+                    lng: prev?.lng || 0
+                  }))}
+                />
+              </div>
+              <div>
+                <Label className="text-xs">خط الطول (Longitude)</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  placeholder="مثال: 31.2357"
+                  value={mapCoordinates?.lng || ''}
+                  onChange={(e) => setMapCoordinates(prev => ({
+                    lat: prev?.lat || 0,
+                    lng: parseFloat(e.target.value) || 0
+                  }))}
+                />
+              </div>
+            </div>
+
+            {mapCoordinates && (
+              <p className="text-xs text-center text-muted-foreground" dir="ltr">
+                📍 {mapCoordinates.lat.toFixed(6)}, {mapCoordinates.lng.toFixed(6)}
               </p>
-              {mapCoordinates && (
-                <p className="text-xs font-mono text-muted-foreground">
-                  {mapCoordinates.lat.toFixed(6)}, {mapCoordinates.lng.toFixed(6)}
-                </p>
-              )}
-            </div>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>خط العرض (Latitude)</Label>
-              <Input
-                type="number"
-                step="any"
-                placeholder="مثال: 30.0444"
-                value={mapCoordinates?.lat || ''}
-                onChange={(e) => setMapCoordinates(prev => ({
-                  lat: parseFloat(e.target.value) || 0,
-                  lng: prev?.lng || 0
-                }))}
-              />
-            </div>
-            <div>
-              <Label>خط الطول (Longitude)</Label>
-              <Input
-                type="number"
-                step="any"
-                placeholder="مثال: 31.2357"
-                value={mapCoordinates?.lng || ''}
-                onChange={(e) => setMapCoordinates(prev => ({
-                  lat: prev?.lat || 0,
-                  lng: parseFloat(e.target.value) || 0
-                }))}
-              />
-            </div>
-          </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button type="button" variant="outline" onClick={() => setShowMapDialog(false)}>
               إلغاء
             </Button>
