@@ -292,60 +292,71 @@ const WazeLocationField = ({
           type: 'org' as const,
         }));
 
-      // Search based on selected map provider
-      let mapResults: SearchResult[] = [];
+      // Search ALL providers simultaneously for best coverage
+      const center = coordinates || mapCenter;
+      
+      const searchPromises = [
+        // Mapbox geocoding
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=5&language=ar&types=address,place,locality,neighborhood,poi`)
+          .then(r => r.json())
+          .then(data => (data.features || []).map((f: any, i: number) => ({
+            id: `google-${f.id}-${i}`,
+            name: f.text || f.place_name.split(',')[0],
+            address: f.place_name,
+            lat: f.center[1],
+            lng: f.center[0],
+            type: 'google' as const,
+          })))
+          .catch(() => [] as SearchResult[]),
 
-      if (mapProvider === 'waze') {
-        // Waze search via edge function
-        const center = coordinates || mapCenter;
-        const wazeUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/waze-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lon=${center.lng}&lang=ar`;
-        const response = await fetch(wazeUrl, {
+        // OSM Nominatim
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=5&accept-language=ar`)
+          .then(r => r.json())
+          .then(data => (data || []).map((r: any, i: number) => ({
+            id: `osm-${r.place_id}-${i}`,
+            name: r.display_name.split(',')[0],
+            address: r.display_name,
+            lat: parseFloat(r.lat),
+            lng: parseFloat(r.lon),
+            type: 'osm' as const,
+          })))
+          .catch(() => [] as SearchResult[]),
+
+        // Waze search
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/waze-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lon=${center.lng}&lang=ar`, {
           headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-        });
-        const data = await response.json();
-        mapResults = (data.results || []).map((r: any) => ({
-          id: r.id,
-          name: r.name,
-          address: r.address,
-          lat: r.lat,
-          lng: r.lng,
-          type: 'waze' as const,
-        }));
-      } else if (mapProvider === 'google') {
-        // Google via Mapbox geocoding (best free alternative)
-        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=8&language=ar&types=address,place,locality,neighborhood,poi`;
-        const response = await fetch(url);
-        const data = await response.json();
-        mapResults = (data.features || []).map((f: any, i: number) => ({
-          id: `google-${f.id}-${i}`,
-          name: f.text || f.place_name.split(',')[0],
-          address: f.place_name,
-          lat: f.center[1],
-          lng: f.center[0],
-          type: 'google' as const,
-        }));
-      } else {
-        // OSM via Nominatim
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=8&accept-language=ar`;
-        const response = await fetch(url);
-        const data = await response.json();
-        mapResults = (data || []).map((r: any, i: number) => ({
-          id: `osm-${r.place_id}-${i}`,
-          name: r.display_name.split(',')[0],
-          address: r.display_name,
-          lat: parseFloat(r.lat),
-          lng: parseFloat(r.lon),
-          type: 'osm' as const,
-        }));
+        })
+          .then(r => r.json())
+          .then(data => (data.results || []).map((r: any) => ({
+            id: r.id,
+            name: r.name,
+            address: r.address,
+            lat: r.lat,
+            lng: r.lng,
+            type: 'waze' as const,
+          })))
+          .catch(() => [] as SearchResult[]),
+      ];
+
+      const [mapboxResults, osmResults, wazeResults] = await Promise.all(searchPromises);
+      
+      // Deduplicate by proximity (within ~100m)
+      const allMapResults = [...wazeResults, ...mapboxResults, ...osmResults];
+      const deduped: SearchResult[] = [];
+      for (const r of allMapResults) {
+        const isDupe = deduped.some(
+          d => Math.abs(d.lat - r.lat) < 0.001 && Math.abs(d.lng - r.lng) < 0.001
+        );
+        if (!isDupe) deduped.push(r);
       }
 
-      setResults([...savedResults, ...orgResults, ...mapResults]);
+      setResults([...savedResults, ...orgResults, ...deduped]);
     } catch {
       setResults([]);
     } finally {
       setLoading(false);
     }
-  }, [savedLocations, orgLocations, coordinates, mapCenter, mapProvider]);
+  }, [savedLocations, orgLocations, coordinates, mapCenter]);
 
   const handleSelect = (result: SearchResult) => {
     onChange(result.address, { lat: result.lat, lng: result.lng });
