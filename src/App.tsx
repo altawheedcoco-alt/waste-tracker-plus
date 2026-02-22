@@ -117,6 +117,7 @@ const QuickDriverLinks = lazy(() => import("./pages/dashboard/QuickDriverLinks")
 const QuickDepositLinks = lazy(() => import("./pages/dashboard/QuickDepositLinks"));
 const QuickShipmentLinks = lazy(() => import("./pages/dashboard/QuickShipmentLinks"));
 const TransporterReceipts = lazy(() => import("./pages/dashboard/TransporterReceipts"));
+const WazeLiveMap = lazy(() => import("./pages/dashboard/WazeLiveMap"));
 const GeneratorReceipts = lazy(() => import("./pages/dashboard/GeneratorReceipts"));
 const CreateReceipt = lazy(() => import("./pages/dashboard/CreateReceipt"));
 const GuillochePatterns = lazy(() => import("./pages/dashboard/GuillochePatterns"));
@@ -358,7 +359,8 @@ const AppRoutes = memo(() => (
         <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
         <Route path="/dashboard/quick-shipment-links" element={<QuickShipmentLinks />} />
         <Route path="/dashboard/quick-driver-links" element={<QuickDriverLinks />} />
-        <Route path="/dashboard/transporter-receipts" element={<TransporterReceipts />} />
+    <Route path="/dashboard/transporter-receipts" element={<TransporterReceipts />} />
+        <Route path="/dashboard/waze-live-map" element={<WazeLiveMap />} />
         <Route path="/dashboard/create-receipt" element={<CreateReceipt />} />
         <Route path="/dashboard/generator-receipts" element={<GeneratorReceipts />} />
         <Route path="/dashboard/guilloche-patterns" element={<GuillochePatterns />} />
