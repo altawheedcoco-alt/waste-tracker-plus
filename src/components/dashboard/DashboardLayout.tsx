@@ -945,8 +945,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {/* Network Status Indicator */}
               <OfflineIndicator />
 
-              {/* Focus Music Player */}
-              <FocusMusicPlayer />
+              {/* Focus Music Player - Hidden on mobile, shown in sidebar */}
+              {!isMobile && <FocusMusicPlayer />}
 
               {/* Theme Customizer - Hidden on mobile */}
               {!isMobile && <ThemeCustomizer />}
@@ -1174,8 +1174,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     )}
                   </nav>
 
-                  {/* Bottom - Logout */}
-                  <div className="p-3 border-t border-border shrink-0">
+                  {/* Bottom - Music Player & Logout */}
+                  <div className="p-3 border-t border-border shrink-0 space-y-2">
+                    <div className="flex items-center justify-center">
+                      <FocusMusicPlayer />
+                    </div>
                     <Button
                       variant="ghost"
                       onClick={() => { setIsMobileMenuOpen(false); handleSignOut(); }}
