@@ -322,15 +322,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        // Add timeout to prevent hanging forever
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
+        
+        const result = await Promise.race([sessionPromise, timeoutPromise]);
         
         if (!mounted) return;
         
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await fetchUserData(session.user.id);
+        if (result && 'data' in result) {
+          const { data: { session } } = result;
+          setSession(session);
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            // Don't await - let it load in background
+            fetchUserData(session.user.id).catch(console.error);
+          }
+        } else {
+          // Timeout - proceed without auth
+          console.warn('Auth session fetch timed out, proceeding without auth');
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
