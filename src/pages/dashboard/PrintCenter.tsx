@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FileText, Printer, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
-  Eye, Download, CheckSquare, Square, CheckCircle, ArrowRight
+  Eye, Download, CheckSquare, Square, CheckCircle, ArrowRight,
+  PenTool, Stamp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +27,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
-type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'all';
+type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'all';
 
 const DOC_TYPES: { id: DocType; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'جميع المستندات', icon: <FileStack className="h-4 w-4" /> },
@@ -35,6 +36,8 @@ const DOC_TYPES: { id: DocType; label: string; icon: React.ReactNode }[] = [
   { id: 'manifests', label: 'المانيفست الموحد', icon: <FileText className="h-4 w-4" /> },
   { id: 'invoices', label: 'الفواتير', icon: <Receipt className="h-4 w-4" /> },
   { id: 'receipts', label: 'إيصالات الاستلام', icon: <Package className="h-4 w-4" /> },
+  { id: 'signing', label: 'طلبات التوقيع', icon: <PenTool className="h-4 w-4" /> },
+  { id: 'signatures', label: 'التوقيعات الرقمية', icon: <Stamp className="h-4 w-4" /> },
 ];
 
 interface DocumentItem {
@@ -239,6 +242,62 @@ const PrintCenter = () => {
         }
       }
 
+      // Signing Requests
+      if (isAll || selectedDocTypes.includes('signing')) {
+        const { data: outgoing } = await supabase
+          .from('signing_requests')
+          .select('id, document_title, document_type, status, signed_at, created_at, requires_stamp, recipient_organization_id, sender_organization_id, recipient_org:organizations!signing_requests_recipient_organization_id_fkey(name), sender_org:organizations!signing_requests_sender_organization_id_fkey(name)')
+          .or(`sender_organization_id.eq.${orgId},recipient_organization_id.eq.${orgId}`)
+          .gte('created_at', fromISO)
+          .lte('created_at', toISO)
+          .order('created_at', { ascending: false });
+
+        (outgoing || []).forEach((s: any) => {
+          const isSender = s.sender_organization_id === orgId;
+          const partnerName = isSender ? (s.recipient_org as any)?.name : (s.sender_org as any)?.name;
+          
+          if (selectedPartner !== 'all') {
+            const partnerId = isSender ? s.recipient_organization_id : s.sender_organization_id;
+            if (partnerId !== selectedPartner) return;
+          }
+
+          items.push({
+            id: `sign-${s.id}`,
+            type: 'signing',
+            typeLabel: isSender ? 'طلب توقيع مرسل' : 'طلب توقيع وارد',
+            title: `${s.document_title || 'طلب توقيع'}`,
+            subtitle: `${isSender ? '← ' : '→ '}${partnerName || '-'} • ${s.requires_stamp ? '🔏 ختم مطلوب' : ''} • ${s.document_type || ''}`,
+            date: s.created_at,
+            status: s.status || 'pending',
+            rawData: { ...s, isSender },
+          });
+        });
+      }
+
+      // Digital Signatures
+      if (isAll || selectedDocTypes.includes('signatures')) {
+        const { data: sigs } = await supabase
+          .from('document_signatures')
+          .select('id, document_type, document_id, signer_name, signer_role, signature_method, stamp_applied, platform_seal_number, document_hash, status, created_at')
+          .eq('organization_id', orgId!)
+          .gte('created_at', fromISO)
+          .lte('created_at', toISO)
+          .order('created_at', { ascending: false });
+
+        (sigs || []).forEach((s: any) => {
+          items.push({
+            id: `dsig-${s.id}`,
+            type: 'signatures',
+            typeLabel: 'توقيع رقمي',
+            title: `توقيع - ${s.signer_name || '-'} (${s.signer_role || '-'})`,
+            subtitle: `${s.document_type || '-'} • ${s.signature_method || '-'} • ${s.stamp_applied ? '✅ مختوم' : ''} ${s.platform_seal_number ? `QR: ${s.platform_seal_number}` : ''}`,
+            date: s.created_at,
+            status: s.status || 'signed',
+            rawData: s,
+          });
+        });
+      }
+
       return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     },
   });
@@ -253,13 +312,14 @@ const PrintCenter = () => {
       new: 'جديدة', pending: 'معلقة', approved: 'معتمدة', collecting: 'قيد الجمع',
       in_transit: 'في الطريق', delivered: 'تم التسليم', draft: 'مسودة',
       confirmed: 'مؤكدة', cancelled: 'ملغاة', completed: 'مكتملة', paid: 'مدفوعة',
+      signed: 'موقّع', rejected: 'مرفوض',
     };
     return map[s] || s;
   };
 
   const statusColor = (s: string) => {
-    if (['delivered', 'confirmed', 'completed', 'paid'].includes(s)) return 'default';
-    if (['cancelled'].includes(s)) return 'destructive';
+    if (['delivered', 'confirmed', 'completed', 'paid', 'signed'].includes(s)) return 'default';
+    if (['cancelled', 'rejected'].includes(s)) return 'destructive';
     return 'secondary';
   };
 
@@ -368,6 +428,25 @@ const PrintCenter = () => {
         tablesHtml += `<h2>🏅 ${label} (${items.length})</h2>
         <table><thead><tr><th>#</th><th>رقم الشهادة</th><th>رقم الشحنة</th><th>التاريخ</th></tr></thead><tbody>
         ${items.map((d, i) => `<tr><td>${i+1}</td><td>${d.rawData.report_number || '-'}</td><td>${d.rawData.shipment_id ? d.rawData.shipment_id.substring(0, 8) : '-'}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd HH:mm') : '-'}</td></tr>`).join('')}
+        </tbody></table>`;
+      } else if (type === 'signing') {
+        tablesHtml += `<h2>✍️ ${label} (${items.length})</h2>
+        <table><thead><tr><th>#</th><th>عنوان المستند</th><th>النوع</th><th>الاتجاه</th><th>الجهة</th><th>ختم</th><th>الحالة</th><th>تاريخ التوقيع</th><th>التاريخ</th></tr></thead><tbody>
+        ${items.map((d, i) => {
+          const r = d.rawData;
+          const direction = r.isSender ? '📤 مرسل' : '📥 وارد';
+          const partner = r.isSender ? (r.recipient_org?.name || '-') : (r.sender_org?.name || '-');
+          const sigStatus = r.status === 'signed' ? '<span class="badge badge-s">✅ موقّع</span>' : r.status === 'rejected' ? '<span class="badge" style="background:#fee2e2;color:#991b1b;">❌ مرفوض</span>' : '<span class="badge" style="background:#fef3c7;color:#92400e;">⏳ انتظار</span>';
+          return `<tr><td>${i+1}</td><td>${r.document_title || '-'}</td><td>${r.document_type || '-'}</td><td>${direction}</td><td>${partner}</td><td>${r.requires_stamp ? '🔏 نعم' : '—'}</td><td>${sigStatus}</td><td>${r.signed_at ? format(new Date(r.signed_at), 'yyyy/MM/dd HH:mm') : '—'}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd') : '-'}</td></tr>`;
+        }).join('')}
+        </tbody></table>`;
+      } else if (type === 'signatures') {
+        tablesHtml += `<h2>🔐 ${label} (${items.length})</h2>
+        <table><thead><tr><th>#</th><th>نوع المستند</th><th>الموقّع</th><th>الدور</th><th>الطريقة</th><th>ختم</th><th>QR/كود</th><th>هاش SHA</th><th>التاريخ</th></tr></thead><tbody>
+        ${items.map((d, i) => {
+          const r = d.rawData;
+          return `<tr><td>${i+1}</td><td>${r.document_type || '-'}</td><td>${r.signer_name || '-'}</td><td>${r.signer_role || '-'}</td><td>${r.signature_method || '-'}</td><td>${r.stamp_applied ? '✅ مختوم' : '—'}</td><td>${r.platform_seal_number || '—'}</td><td style="font-size:8px;font-family:monospace;">${r.document_hash ? r.document_hash.substring(0, 16) + '...' : '—'}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd HH:mm') : '-'}</td></tr>`;
+        }).join('')}
         </tbody></table>`;
       }
     }
