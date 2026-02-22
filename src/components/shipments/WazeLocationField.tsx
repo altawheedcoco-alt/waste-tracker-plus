@@ -716,7 +716,7 @@ const WazeLocationField = ({
                 mapExpanded ? "h-[350px]" : "h-[200px]"
               )}>
                 <iframe
-                  src={`https://embed.waze.com/iframe?zoom=${mapZoom}&lat=${mapCenter.lat}&lon=${mapCenter.lng}&pin=1`}
+                  src={`https://embed.waze.com/iframe?zoom=${mapZoom}&lat=${mapCenter.lat}&lon=${mapCenter.lng}&pin=1${value ? `&q=${encodeURIComponent(value)}` : ''}`}
                   width="100%"
                   height="100%"
                   style={{ border: 'none' }}
