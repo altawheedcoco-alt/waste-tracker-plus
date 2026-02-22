@@ -89,7 +89,26 @@ serve(async (req) => {
       );
     }
 
-    // 4. Photon/Komoot (always free, no key needed)
+    // 4. Mapbox (100K free/month, publishable token)
+    const MAPBOX_TOKEN = Deno.env.get("MAPBOX_TOKEN") || "pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g";
+    promises.push(
+      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=6&language=${lang}&types=address,place,locality,neighborhood,poi`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data?.features) return [];
+          return data.features.map((f: any, i: number) => ({
+            id: `mapbox-${i}`,
+            name: f.text || f.place_name?.split(",")[0] || "",
+            address: f.place_name || "",
+            lat: f.center?.[1] || 0,
+            lng: f.center?.[0] || 0,
+            source: "mapbox",
+          }));
+        })
+        .catch(() => [])
+    );
+
+    // 5. Photon/Komoot (always free, no key needed)
     promises.push(
       fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lng}&limit=6&lang=en&osm_tag=place&osm_tag=building&osm_tag=highway`)
         .then(r => r.ok ? r.json() : null)
@@ -164,6 +183,7 @@ serve(async (req) => {
       HERE_API_KEY ? "here" : null,
       LOCATIONIQ_API_KEY ? "locationiq" : null,
       OPENCAGE_API_KEY ? "opencage" : null,
+      "mapbox",
       "photon",
       "herewego",
       "mapsme",
