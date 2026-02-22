@@ -309,7 +309,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
     <div style="font-size:6px;color:#666;text-align:right;">
       جمهورية مصر العربية<br/>جهاز تنظيم إدارة المخلفات (WMRA)
     </div>
-    <div class="hdr-logo">🌿 iRecycle</div>
+    <div class="hdr-logo">iRecycle</div>
     <div style="font-size:6px;color:#666;text-align:left;direction:ltr;">
       Arab Republic of Egypt<br/>Waste Management Regulatory Agency
     </div>
@@ -616,7 +616,7 @@ ${custodyChain.length > 0 ? `
 <!-- Security Footer with Real QR & Barcode -->
 <div class="sec-footer">
   <div class="left">
-    <div>🌿 <strong>iRecycle</strong> - نظام إدارة المخلفات الذكي</div>
+    <div><strong>iRecycle</strong> - نظام إدارة المخلفات الذكي</div>
     <div>تاريخ الطباعة: ${new Date().toLocaleString("ar-EG")}</div>
     <div>⚠️ وثيقة إلكترونية محمية - يمنع التعديل أو التزوير</div>
     <div class="hash-badge">SHA-256: ${integrityHash}</div>
