@@ -8,7 +8,7 @@ import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame } from 'lucide-
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
-import EnhancedLocationPicker from '@/components/shipments/EnhancedLocationPicker';
+import WazeLocationField from '@/components/shipments/WazeLocationField';
 import LocationPicker from '@/components/maps/LocationPicker';
 import RouteEstimation from '@/components/shipments/RouteEstimation';
 import PricingModeSelector from '@/components/shipments/PricingModeSelector';
@@ -473,71 +473,45 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
         </div>
       </div>
 
-      {/* Pickup & Delivery Addresses */}
+      {/* Pickup & Delivery Addresses - Waze Direct Search */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          {formData.generator_id ? (
-            <EnhancedLocationPicker
-              organizationId={formData.generator_id}
-              organizationName={generators.find(g => g.id === formData.generator_id)?.name || ''}
-              organizationAddress={generators.find(g => g.id === formData.generator_id)?.address || ''}
-              organizationCity={generators.find(g => g.id === formData.generator_id)?.city || ''}
-              value={formData.pickup_address}
-              onChange={(address) => setFormData(prev => ({ ...prev, pickup_address: address }))}
-              onShareToPickup={(data) => setFormData(prev => ({ ...prev, pickup_address: data.address }))}
-              onShareToDelivery={(data) => setFormData(prev => ({ ...prev, delivery_address: data.address }))}
-              label="موقع الاستلام (الجهة المولدة)"
-              placeholder="اختر موقع الاستلام"
-            />
-          ) : (
-            <div>
-              <Label>موقع الاستلام</Label>
-              <LocationPicker
-                value={formData.pickup_address}
-                onChange={(address) => setFormData(prev => ({ ...prev, pickup_address: address }))}
-                placeholder="اختر الجهة المولدة أولاً"
-              />
-            </div>
-          )}
-        </div>
-        <div>
-          {/* Delivery location based on destination type */}
-          {(formData.destination_type === 'recycling' ? formData.recycler_id : formData.disposal_facility_id) ? (
-            <EnhancedLocationPicker
-              organizationId={formData.destination_type === 'recycling' ? formData.recycler_id : formData.disposal_facility_id}
-              organizationName={
-                formData.destination_type === 'recycling'
-                  ? recyclers.find(r => r.id === formData.recycler_id)?.name || ''
-                  : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.name || ''
-              }
-              organizationAddress={
-                formData.destination_type === 'recycling'
-                  ? recyclers.find(r => r.id === formData.recycler_id)?.address || ''
-                  : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.address || ''
-              }
-              organizationCity={
-                formData.destination_type === 'recycling'
-                  ? recyclers.find(r => r.id === formData.recycler_id)?.city || ''
-                  : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.city || ''
-              }
-              value={formData.delivery_address}
-              onChange={(address) => setFormData(prev => ({ ...prev, delivery_address: address }))}
-              onShareToPickup={(data) => setFormData(prev => ({ ...prev, pickup_address: data.address }))}
-              onShareToDelivery={(data) => setFormData(prev => ({ ...prev, delivery_address: data.address }))}
-              label={formData.destination_type === 'recycling' ? 'موقع التسليم (جهة التدوير)' : 'موقع التسليم (جهة التخلص النهائي)'}
-              placeholder="اختر موقع التسليم"
-            />
-          ) : (
-            <div>
-              <Label>موقع التسليم</Label>
-              <LocationPicker
-                value={formData.delivery_address}
-                onChange={(address) => setFormData(prev => ({ ...prev, delivery_address: address }))}
-                placeholder={formData.destination_type === 'recycling' ? 'اختر جهة التدوير أولاً' : 'اختر جهة التخلص أولاً'}
-              />
-            </div>
-          )}
-        </div>
+        <WazeLocationField
+          value={formData.pickup_address}
+          onChange={(address, coords) => setFormData(prev => ({ ...prev, pickup_address: address }))}
+          label="موقع الاستلام"
+          placeholder="ابحث عن موقع الاستلام..."
+          organizationId={formData.generator_id || undefined}
+          organizationName={generators.find(g => g.id === formData.generator_id)?.name}
+          organizationAddress={generators.find(g => g.id === formData.generator_id)?.address}
+          organizationCity={generators.find(g => g.id === formData.generator_id)?.city}
+          icon="pickup"
+        />
+        <WazeLocationField
+          value={formData.delivery_address}
+          onChange={(address, coords) => setFormData(prev => ({ ...prev, delivery_address: address }))}
+          label={formData.destination_type === 'recycling' ? 'موقع التسليم (تدوير)' : 'موقع التسليم (تخلص)'}
+          placeholder="ابحث عن موقع التسليم..."
+          organizationId={
+            formData.destination_type === 'recycling' ? formData.recycler_id || undefined
+              : formData.disposal_facility_id || undefined
+          }
+          organizationName={
+            formData.destination_type === 'recycling'
+              ? recyclers.find(r => r.id === formData.recycler_id)?.name
+              : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.name
+          }
+          organizationAddress={
+            formData.destination_type === 'recycling'
+              ? recyclers.find(r => r.id === formData.recycler_id)?.address
+              : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.address
+          }
+          organizationCity={
+            formData.destination_type === 'recycling'
+              ? recyclers.find(r => r.id === formData.recycler_id)?.city
+              : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.city
+          }
+          icon="delivery"
+        />
       </div>
 
       {/* Route Estimation */}
