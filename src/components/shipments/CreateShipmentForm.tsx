@@ -485,6 +485,8 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
             setFormData(prev => ({ ...prev, pickup_address: address }));
             if (coords) setPickupCoords(coords);
           }}
+          mapLink={formData.pickup_map_link}
+          onMapLinkChange={(link) => setFormData(prev => ({ ...prev, pickup_map_link: link }))}
           label="موقع الاستلام"
           placeholder="ابحث عن موقع الاستلام..."
           organizationId={formData.generator_id || undefined}
@@ -500,6 +502,8 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
             setFormData(prev => ({ ...prev, delivery_address: address }));
             if (coords) setDeliveryCoords(coords);
           }}
+          mapLink={formData.delivery_map_link}
+          onMapLinkChange={(link) => setFormData(prev => ({ ...prev, delivery_map_link: link }))}
           label={formData.destination_type === 'recycling' ? 'موقع التسليم (تدوير)' : 'موقع التسليم (تخلص)'}
           placeholder="ابحث عن موقع التسليم..."
           organizationId={

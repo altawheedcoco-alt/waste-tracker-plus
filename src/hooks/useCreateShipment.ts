@@ -54,6 +54,8 @@ export interface ShipmentFormData {
   unit: string;
   pickup_address: string;
   delivery_address: string;
+  pickup_map_link: string;
+  delivery_map_link: string;
   waste_description: string;
   notes: string;
   pickup_date: string;
@@ -181,6 +183,8 @@ export const useCreateShipment = () => {
     unit: prefilledUnit,
     pickup_address: '',
     delivery_address: '',
+    pickup_map_link: '',
+    delivery_map_link: '',
     waste_description: prefilledMaterialType,
     notes: combinedNotes,
     pickup_date: prefilledWeightDate,
@@ -664,6 +668,8 @@ export const useCreateShipment = () => {
         unit: formData.unit,
         pickup_address: formData.pickup_address,
         delivery_address: formData.delivery_address,
+        pickup_map_link: formData.pickup_map_link || null,
+        delivery_map_link: formData.delivery_map_link || null,
         waste_description: formData.waste_description || null,
         notes: formData.notes || null,
         created_by: profile?.id!,

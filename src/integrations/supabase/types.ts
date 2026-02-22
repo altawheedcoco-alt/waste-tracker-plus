@@ -23967,6 +23967,7 @@ export type Database = {
           delivery_city: string | null
           delivery_latitude: number | null
           delivery_longitude: number | null
+          delivery_map_link: string | null
           disposal_certificate_url: string | null
           disposal_cost: number | null
           disposal_facility_id: string | null
@@ -24017,6 +24018,7 @@ export type Database = {
           pickup_date: string | null
           pickup_latitude: number | null
           pickup_longitude: number | null
+          pickup_map_link: string | null
           plate_verified: boolean | null
           price_per_unit: number | null
           price_source: string | null
@@ -24082,6 +24084,7 @@ export type Database = {
           delivery_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_map_link?: string | null
           disposal_certificate_url?: string | null
           disposal_cost?: number | null
           disposal_facility_id?: string | null
@@ -24132,6 +24135,7 @@ export type Database = {
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
+          pickup_map_link?: string | null
           plate_verified?: boolean | null
           price_per_unit?: number | null
           price_source?: string | null
@@ -24197,6 +24201,7 @@ export type Database = {
           delivery_city?: string | null
           delivery_latitude?: number | null
           delivery_longitude?: number | null
+          delivery_map_link?: string | null
           disposal_certificate_url?: string | null
           disposal_cost?: number | null
           disposal_facility_id?: string | null
@@ -24247,6 +24252,7 @@ export type Database = {
           pickup_date?: string | null
           pickup_latitude?: number | null
           pickup_longitude?: number | null
+          pickup_map_link?: string | null
           plate_verified?: boolean | null
           price_per_unit?: number | null
           price_source?: string | null
