@@ -163,7 +163,7 @@ interface SearchResult {
   address: string;
   lat: number;
   lng: number;
-  type: 'waze' | 'saved' | 'org' | 'google' | 'osm';
+  type: 'waze' | 'saved' | 'org' | 'google' | 'osm' | 'here' | 'herewego' | 'mapbox' | 'photon' | 'locationiq' | 'opencage' | 'mapsme' | 'tomtom' | 'multi';
 }
 
 interface OrgLocation {
@@ -483,7 +483,14 @@ const WazeLocationField = ({
       case 'org': return <Building2 className="w-3.5 h-3.5 text-primary" />;
       case 'waze': return <Navigation className="w-3.5 h-3.5 text-primary" />;
       case 'google': return <MapPin className="w-3.5 h-3.5 text-destructive" />;
-      case 'osm': return <Map className="w-3.5 h-3.5 text-primary" />;
+      case 'here': case 'herewego': return <MapPin className="w-3.5 h-3.5 text-emerald-500" />;
+      case 'mapbox': return <Map className="w-3.5 h-3.5 text-blue-500" />;
+      case 'photon': return <Map className="w-3.5 h-3.5 text-violet-500" />;
+      case 'locationiq': return <MapPin className="w-3.5 h-3.5 text-orange-500" />;
+      case 'opencage': return <MapPin className="w-3.5 h-3.5 text-teal-500" />;
+      case 'mapsme': return <Map className="w-3.5 h-3.5 text-green-500" />;
+      case 'tomtom': return <Navigation className="w-3.5 h-3.5 text-red-500" />;
+      default: return <MapPin className="w-3.5 h-3.5 text-primary" />;
     }
   };
 
@@ -493,7 +500,16 @@ const WazeLocationField = ({
       case 'org': return 'منظمة';
       case 'waze': return 'Waze';
       case 'google': return 'Google';
+      case 'here': return 'HERE';
+      case 'herewego': return 'HERE WeGo';
+      case 'mapbox': return 'Mapbox';
+      case 'photon': return 'Photon';
+      case 'locationiq': return 'LocationIQ';
+      case 'opencage': return 'OpenCage';
+      case 'mapsme': return 'Maps.me';
+      case 'tomtom': return 'TomTom';
       case 'osm': return 'OSM';
+      default: return type;
     }
   };
 
