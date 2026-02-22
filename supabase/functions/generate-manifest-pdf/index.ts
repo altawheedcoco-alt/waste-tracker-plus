@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Fetch shipment with all related data
-    const orgFields = `name, name_en, address, address_details, city, region, phone, secondary_phone, email, business_email, commercial_register, tax_card, license_number, environmental_license, environmental_approval_number, wmra_license, ida_license, land_transport_license, industrial_registry, establishment_registration, organization_type, partner_code, client_code, representative_name, representative_phone, representative_email, representative_position, representative_national_id, agent_name, agent_phone, agent_email, agent_national_id, delegate_name, delegate_phone, delegate_email, delegate_national_id, activity_type, field_of_work, hazardous_certified, headquarters, logo_url`;
+    const orgFields = `name, name_en, address, address_details, city, region, phone, secondary_phone, email, business_email, commercial_register, tax_card, license_number, environmental_license, environmental_approval_number, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, eeaa_license_issue_date, eeaa_license_expiry_date, ida_license, ida_license_issue_date, ida_license_expiry_date, land_transport_license, land_transport_license_issue_date, land_transport_license_expiry_date, industrial_registry, establishment_registration, organization_type, partner_code, client_code, representative_name, representative_phone, representative_email, representative_position, representative_national_id, agent_name, agent_phone, agent_email, agent_national_id, delegate_name, delegate_phone, delegate_email, delegate_national_id, activity_type, field_of_work, hazardous_certified, headquarters, logo_url, digital_declaration_number, certifications_approvals`;
     const { data: shipment, error } = await supabase
       .from("shipments")
       .select(`
@@ -145,6 +145,39 @@ function generateBarcodeSvg(text: string, width: number = 180, height: number = 
     ${bars}
     <text x="${width/2}" y="${height + 10}" text-anchor="middle" font-family="monospace" font-size="7" fill="#333">${text}</text>
   </svg>`;
+}
+
+function getLicenseStatusHTML(expiryDate: string | null | undefined): string {
+  if (!expiryDate) return '<span style="color:#9ca3af;font-size:5.5px">⚪ غير محدد</span>';
+  const now = new Date();
+  const expiry = new Date(expiryDate);
+  const days = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  if (days < 0) return `<span style="color:#dc2626;font-size:5.5px;font-weight:bold">🔴 منتهي (${new Date(expiryDate).toLocaleDateString("ar-EG")})</span>`;
+  if (days <= 30) return `<span style="color:#d97706;font-size:5.5px;font-weight:bold">🟡 ينتهي خلال ${days} يوم (${new Date(expiryDate).toLocaleDateString("ar-EG")})</span>`;
+  return `<span style="color:#16a34a;font-size:5.5px">🟢 ساري حتى ${new Date(expiryDate).toLocaleDateString("ar-EG")}</span>`;
+}
+
+function renderLicensesBlock(org: any): string {
+  if (!org) return '';
+  const isTransporter = org.organization_type === 'transporter';
+  const isRecyclerOrDisposal = org.organization_type === 'recycler' || org.organization_type === 'disposal';
+  
+  let html = `<div style="border-top:1px dashed #d1d5db;margin-top:2px;padding-top:2px;">`;
+  html += `<p style="font-size:6px;font-weight:bold;color:#15803d;margin-bottom:1px;">📋 حالة التراخيص:</p>`;
+  
+  // WMRA - all types
+  if (org.wmra_license) html += `<p><span class="lbl">WMRA:</span> ${org.wmra_license} ${getLicenseStatusHTML(org.wmra_license_expiry_date)}</p>`;
+  // EEAA - all types
+  if (org.environmental_license) html += `<p><span class="lbl">EEAA:</span> ${org.environmental_license} ${getLicenseStatusHTML(org.eeaa_license_expiry_date)}</p>`;
+  // IDA - recycler/disposal/generator
+  if (!isTransporter && org.ida_license) html += `<p><span class="lbl">IDA:</span> ${org.ida_license} ${getLicenseStatusHTML(org.ida_license_expiry_date)}</p>`;
+  // Land transport - transporter
+  if (isTransporter && org.land_transport_license) html += `<p><span class="lbl">نقل بري:</span> ${org.land_transport_license} ${getLicenseStatusHTML(org.land_transport_license_expiry_date)}</p>`;
+  // Digital declaration
+  if (org.digital_declaration_number) html += `<p><span class="lbl">إقرار رقمي:</span> ${org.digital_declaration_number}</p>`;
+  
+  html += `</div>`;
+  return html;
 }
 
 function generateManifestHTML(shipment: any, custodyChain: any[], signatures: any[]) {
@@ -344,9 +377,9 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       ${shipment.generator?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.generator.representative_name} ${shipment.generator?.representative_position ? `(${shipment.generator.representative_position})` : ''}</p>` : ''}
       ${shipment.generator?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.generator.representative_phone} ${shipment.generator?.representative_national_id ? `| رقم قومي: ${shipment.generator.representative_national_id}` : ''}</p>` : ''}
       ${shipment.generator?.field_of_work ? `<p><span class="lbl">مجال العمل:</span> ${shipment.generator.field_of_work}</p>` : ''}
+      ${renderLicensesBlock(shipment.generator)}
     </div>
     <div class="party">
-      <h4>🚛 الناقل (الطرف الثاني) | Transporter</h4>
       <p><span class="lbl">الاسم:</span> <span class="val">${shipment.transporter?.name || shipment.manual_transporter_name || "—"}</span></p>
       ${shipment.transporter?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.transporter.name_en}</span></p>` : ''}
       <p><span class="lbl">كود الشريك:</span> ${shipment.transporter?.partner_code || "—"} ${shipment.transporter?.client_code ? `| كود العميل: ${shipment.transporter.client_code}` : ''}</p>
@@ -365,6 +398,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       ${shipment.transporter?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.transporter.representative_name} ${shipment.transporter?.representative_position ? `(${shipment.transporter.representative_position})` : ''}</p>` : ''}
       ${shipment.transporter?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.transporter.representative_phone} ${shipment.transporter?.representative_national_id ? `| رقم قومي: ${shipment.transporter.representative_national_id}` : ''}</p>` : ''}
       ${shipment.transporter?.field_of_work ? `<p><span class="lbl">مجال العمل:</span> ${shipment.transporter.field_of_work}</p>` : ''}
+      ${renderLicensesBlock(shipment.transporter)}
     </div>
     <div class="party">
       <h4>♻️ المدوّر (الطرف الثالث) | Recycler</h4>
@@ -386,6 +420,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       ${shipment.recycler?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.recycler.representative_name} ${shipment.recycler?.representative_position ? `(${shipment.recycler.representative_position})` : ''}</p>` : ''}
       ${shipment.recycler?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.recycler.representative_phone} ${shipment.recycler?.representative_national_id ? `| رقم قومي: ${shipment.recycler.representative_national_id}` : ''}</p>` : ''}
       ${shipment.recycler?.field_of_work ? `<p><span class="lbl">مجال العمل:</span> ${shipment.recycler.field_of_work}</p>` : ''}
+      ${renderLicensesBlock(shipment.recycler)}
     </div>
   </div>
 </div>
