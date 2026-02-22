@@ -20,18 +20,31 @@ const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGd
 type MapProvider = 'osm' | 'google' | 'waze';
 
 const MAP_TILES: Record<MapProvider, { url: string; label: string }> = {
-  osm: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    label: 'OpenStreetMap',
-  },
-  google: {
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-    label: 'Google Maps',
-  },
   waze: {
     url: 'https://worldtiles1.waze.com/tiles/{z}/{x}/{y}.png',
     label: 'Waze',
   },
+  google: {
+    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    label: 'Google',
+  },
+  osm: {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    label: 'OpenStreetMap',
+  },
+};
+
+// Reverse geocode using Nominatim (OSM) - free, no key needed
+const reverseGeocode = async (lat: number, lng: number): Promise<string | null> => {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar&zoom=18`
+    );
+    const data = await res.json();
+    return data.display_name || null;
+  } catch {
+    return null;
+  }
 };
 
 // Interactive Leaflet mini-map with switchable tile providers
@@ -633,26 +646,15 @@ const WazeLocationField = ({
               zoom={mapZoom}
               provider={mapProvider}
               onLocationSelect={async (lat, lng) => {
-                try {
-                  const res = await fetch(
-                    `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=ar`
-                  );
-                  const data = await res.json();
-                  if (data.features?.[0]) {
-                    onChange(data.features[0].place_name, { lat, lng });
-                    setMapCenter({ lat, lng });
-                    setMapZoom(15);
-                    toast.success('📍 تم تحديد الموقع من الخريطة');
-                  } else {
-                    onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
-                    setMapCenter({ lat, lng });
-                    setMapZoom(15);
-                  }
-                } catch {
+                const address = await reverseGeocode(lat, lng);
+                if (address) {
+                  onChange(address, { lat, lng });
+                } else {
                   onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
-                  setMapCenter({ lat, lng });
-                  setMapZoom(15);
                 }
+                setMapCenter({ lat, lng });
+                setMapZoom(15);
+                toast.success('📍 تم تحديد الموقع من الخريطة');
               }}
             />
           </div>
