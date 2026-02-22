@@ -177,6 +177,7 @@ const WazeLocationField = ({
   const [mapZoom, setMapZoom] = useState(12);
   const [mapExpanded, setMapExpanded] = useState(false);
   const [mapProvider, setMapProvider] = useState<MapProvider>('waze');
+  const [showAllResults, setShowAllResults] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -225,6 +226,7 @@ const WazeLocationField = ({
 
   const searchPlaces = useCallback(async (q: string) => {
     setLoading(true);
+    setShowAllResults(false);
     try {
       const lq = q.toLowerCase();
       const savedResults: SearchResult[] = savedLocations
@@ -607,7 +609,7 @@ const WazeLocationField = ({
 
                 {results.length > 0 && (
                   <div className="p-1">
-                    {results.map((result) => (
+                    {(showAllResults ? results : results.slice(0, 5)).map((result) => (
                       <button
                         key={result.id}
                         type="button"
@@ -626,6 +628,24 @@ const WazeLocationField = ({
                         </Badge>
                       </button>
                     ))}
+                    {!showAllResults && results.length > 5 && (
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2 text-center text-xs font-medium text-primary hover:bg-primary/5 rounded-md transition-colors"
+                        onClick={() => setShowAllResults(true)}
+                      >
+                        عرض الكل ({results.length} نتيجة)
+                      </button>
+                    )}
+                    {showAllResults && results.length > 5 && (
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2 text-center text-xs font-medium text-muted-foreground hover:bg-muted/80 rounded-md transition-colors"
+                        onClick={() => setShowAllResults(false)}
+                      >
+                        عرض أقل
+                      </button>
+                    )}
                   </div>
                 )}
               </ScrollArea>
