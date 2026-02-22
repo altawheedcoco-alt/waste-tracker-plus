@@ -492,32 +492,6 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   </p>
 </div>
 
-<!-- 6. البيانات المالية والملاحظات -->
-<div class="sec">
-  <div class="sec-t">القسم السادس: البيانات المالية والملاحظات | Financial & Notes</div>
-  <table>
-    <tr>
-      <th>سعر الوحدة</th><th>القيمة الإجمالية</th><th>إجمالي العميل</th><th>تكلفة التخلص</th><th>أجر السائق</th><th>حالة الدفع</th><th>نوع الشحنة</th><th>الحالة</th>
-    </tr>
-    <tr>
-      <td>${shipment.price_per_unit != null ? shipment.price_per_unit + ' ج.م' : "—"}</td>
-      <td>${shipment.total_value != null ? shipment.total_value + ' ج.م' : "—"}</td>
-      <td>${shipment.client_total != null ? shipment.client_total + ' ج.م' : "—"}</td>
-      <td>${shipment.disposal_cost != null ? shipment.disposal_cost + ' ج.م' : "—"}</td>
-      <td>${shipment.driver_fee != null ? shipment.driver_fee + ' ج.م' : "—"}</td>
-      <td>${shipment.payment_status || "—"}</td>
-      <td>${shipment.shipment_type || "عادي"}</td>
-      <td><strong>${shipment.status || "—"}</strong></td>
-    </tr>
-  </table>
-  ${(shipment.notes || shipment.generator_notes || shipment.recycler_notes || shipment.delay_reason) ? `
-  <div style="margin-top:3px;padding:3px 5px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;font-size:6px;">
-    ${shipment.notes ? `<p><span class="lbl">ملاحظات عامة:</span> ${shipment.notes}</p>` : ''}
-    ${shipment.generator_notes ? `<p><span class="lbl">ملاحظات المولّد:</span> ${shipment.generator_notes}</p>` : ''}
-    ${shipment.recycler_notes ? `<p><span class="lbl">ملاحظات المستلم:</span> ${shipment.recycler_notes}</p>` : ''}
-    ${shipment.delay_reason ? `<p style="color:#dc2626;"><span class="lbl">سبب التأخير:</span> ${shipment.delay_reason}</p>` : ''}
-  </div>` : ''}
-</div>
 
 <!-- 4. سلسلة الحيازة -->
 ${custodyChain.length > 0 ? `
