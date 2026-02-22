@@ -31,51 +31,49 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // === Admin Authentication Check ===
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(
-        JSON.stringify({ error: 'غير مصرح - يتطلب تسجيل الدخول' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const authClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ error: 'غير مصرح - جلسة غير صالحة' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const userId = claimsData.claims.sub;
-
-    // Check admin role
+    // === Authentication: Admin session OR access PIN ===
     const adminClient = createClient(supabaseUrl, serviceKey);
-    const { data: roleData } = await adminClient
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
-      .single();
+    let authorized = false;
 
-    if (!roleData) {
+    // Method 1: Check access PIN from body
+    let body: any = {};
+    try { body = await req.json(); } catch { /* no body */ }
+    
+    const ACCESS_PIN = Deno.env.get('DEMO_ACCESS_PIN') || '575757';
+    if (body?.pin === ACCESS_PIN) {
+      authorized = true;
+    }
+
+    // Method 2: Check admin session
+    if (!authorized) {
+      const authHeader = req.headers.get('Authorization');
+      if (authHeader?.startsWith('Bearer ')) {
+        const authClient = createClient(supabaseUrl, anonKey, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const token = authHeader.replace('Bearer ', '');
+        const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+        if (!claimsError && claimsData?.claims?.sub) {
+          const { data: roleData } = await adminClient
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', claimsData.claims.sub)
+            .eq('role', 'admin')
+            .single();
+          if (roleData) authorized = true;
+        }
+      }
+    }
+
+    if (!authorized) {
       return new Response(
-        JSON.stringify({ error: 'غير مصرح - للمديرين فقط' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'غير مصرح - رمز الدخول غير صحيح' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // === Proceed with demo account operations ===
     const supabase = adminClient;
-
-    let body: any = {};
-    try { body = await req.json(); } catch { /* no body */ }
 
     if (body?.reset) {
       const { data: existingUsers } = await supabase.auth.admin.listUsers();
