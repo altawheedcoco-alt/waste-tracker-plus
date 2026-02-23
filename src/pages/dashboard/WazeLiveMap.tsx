@@ -19,7 +19,7 @@ const WazeLiveMap = () => {
   const [locationName, setLocationName] = useState('القاهرة، مصر');
   const [pin, setPin] = useState(false);
 
-  const wazeIframeSrc = `https://embed.waze.com/iframe?zoom=${zoom}&lat=${lat}&lon=${lng}&ct=livemap${pin ? '&pin=1' : ''}`;
+  const wazeIframeSrc = `https://embed.waze.com/iframe?zoom=${zoom}&lat=${lat}&lon=${lng}${pin ? '&pin=1' : ''}`;
 
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim()) return;
