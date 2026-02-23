@@ -168,7 +168,7 @@ const LeafletLocationPicker = ({
             {isGettingLocation ? <Loader2 className="h-5 w-5 animate-spin" /> : <Navigation className="h-5 w-5" />}
           </Button>
         )}
-        <LeafletMapComponent center={value || { lat: 30.0444, lng: 31.2357 }} zoom={value ? 15 : 12} selectedPosition={value} onPositionSelect={handlePositionSelect} height={height} clickable={true} />
+        <LeafletMapComponent center={value || { lat: 26.8, lng: 30.8 }} zoom={value ? 15 : 6} selectedPosition={value} onPositionSelect={handlePositionSelect} height={height} clickable={true} />
       </div>
       {selectedAddress && (
         <div className="p-3 bg-muted/50 rounded-lg border text-sm">

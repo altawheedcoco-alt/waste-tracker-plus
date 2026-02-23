@@ -67,9 +67,12 @@ const reverseGeocodeOSM = async (lat: number, lng: number): Promise<string> => {
   }
 };
 
+// Egypt bounds
+const EGYPT_BOUNDS: L.LatLngBoundsExpression = [[22.0, 24.7], [31.7, 37.0]];
+
 const LeafletMapComponent = memo(({
-  center = { lat: 30.0444, lng: 31.2357 },
-  zoom = 12,
+  center = { lat: 26.8, lng: 30.8 },
+  zoom = 6,
   markers = [],
   selectedPosition,
   onPositionSelect,
@@ -92,6 +95,9 @@ const LeafletMapComponent = memo(({
       center: [center.lat, center.lng],
       zoom,
       zoomControl: true,
+      maxBounds: EGYPT_BOUNDS,
+      maxBoundsViscosity: 1.0,
+      minZoom: 5,
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
