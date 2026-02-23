@@ -113,6 +113,7 @@ const LeafletSearchBox = ({ onSelect, onResultsChange, placeholder = 'ابحث �
     if (result.source === 'here' || result.source === 'herewego') return 'HERE';
     if (result.source === 'mapbox') return 'Mapbox';
     if (result.source === 'tomtom') return 'TomTom';
+    if (result.source === 'google') return 'Google';
     if (result.source === 'photon' || result.source === 'mapsme') return 'OSM';
     if (result.source === 'locationiq') return 'LocationIQ';
     if (result.source === 'opencage') return 'OpenCage';
