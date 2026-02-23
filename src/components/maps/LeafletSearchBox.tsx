@@ -132,7 +132,7 @@ const LeafletSearchBox = ({ onSelect, onResultsChange, placeholder = 'ابحث �
       </div>
       {showResults && results.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-lg z-50 overflow-hidden">
-          <ScrollArea className="max-h-[400px]">
+          <div className="max-h-[400px] overflow-y-auto">
             {results.map((r) => {
               const sourceLabel = getSourceLabel(r);
               return (
@@ -148,7 +148,7 @@ const LeafletSearchBox = ({ onSelect, onResultsChange, placeholder = 'ابحث �
                 </button>
               );
             })}
-          </ScrollArea>
+          </div>
         </div>
       )}
     </div>
