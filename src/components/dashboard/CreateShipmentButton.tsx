@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, X } from 'lucide-react';
-import CreateShipment from '@/pages/dashboard/CreateShipment';
+import CreateShipmentForm from '@/components/shipments/CreateShipmentForm';
 
 interface CreateShipmentButtonProps {
   variant?: 'default' | 'eco' | 'outline' | 'ghost';
@@ -43,12 +43,11 @@ const CreateShipmentButton = ({
               <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>
-              <DialogTitle className="text-xl">إنشاء شحنة جديدة</DialogTitle>
+              <DialogTitle className="text-xl font-bold">إنشاء شحنة جديدة</DialogTitle>
             </div>
           </DialogHeader>
           <div className="p-6 pt-4">
-            <CreateShipment 
-              isModal={true} 
+            <CreateShipmentForm 
               onClose={() => setIsOpen(false)} 
               onSuccess={handleSuccess}
             />

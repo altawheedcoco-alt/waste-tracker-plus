@@ -5,7 +5,7 @@ import { SmartInput } from '@/components/ui/smart-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame } from 'lucide-react';
+import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles } from 'lucide-react';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
@@ -23,11 +23,56 @@ import {
   type DestinationType,
 } from '@/hooks/useCreateShipment';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface CreateShipmentFormProps {
   onSuccess?: () => void;
   onClose?: () => void;
 }
+
+// Section wrapper component
+const FormSection = ({ 
+  icon: Icon, 
+  title, 
+  subtitle,
+  children, 
+  className,
+  accentColor = 'primary',
+}: { 
+  icon: React.ElementType; 
+  title: string; 
+  subtitle?: string;
+  children: React.ReactNode; 
+  className?: string;
+  accentColor?: string;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 12 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+    className={cn(
+      "relative rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden",
+      className
+    )}
+  >
+    <div className="flex items-center gap-3 p-4 pb-3 border-b bg-muted/30">
+      <div className={cn(
+        "flex items-center justify-center w-9 h-9 rounded-lg",
+        accentColor === 'destructive' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
+      )}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div className="flex-1 text-right">
+        <h3 className="font-semibold text-sm">{title}</h3>
+        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+      </div>
+    </div>
+    <div className="p-4 space-y-4">
+      {children}
+    </div>
+  </motion.div>
+);
 
 const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => {
   const {
@@ -68,7 +113,16 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   return (
-    <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-6">
+    <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-5">
+      
+      {/* Header Badge */}
+      <div className="flex items-center gap-2 justify-end">
+        <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          الحقول تحفظ تلقائياً — اكتب حرفين لظهور الاقتراحات
+        </span>
+      </div>
+
       {/* Pinned Parties Controls - for transporters */}
       {organization?.organization_type === 'transporter' && (
         <PinnedPartiesControls
@@ -82,198 +136,194 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
         />
       )}
 
-      {/* Destination Type Selector - for transporters */}
+      {/* ══════════ SECTION 1: Destination Type ══════════ */}
       {(organization?.organization_type === 'transporter' || isAdmin) && (
-        <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5 space-y-3">
-          <Label className="text-base font-semibold">وجهة الشحنة *</Label>
+        <FormSection icon={Route} title="وجهة الشحنة" subtitle="حدد مسار الشحنة النهائي">
           <RadioGroup
             value={formData.destination_type}
             onValueChange={(v) => {
               setFormData(prev => ({
                 ...prev,
                 destination_type: v as DestinationType,
-                // Clear the non-selected destination
                 ...(v === 'recycling' ? { disposal_facility_id: '' } : { recycler_id: '' }),
                 delivery_address: '',
               }));
             }}
-            className="flex gap-6"
+            className="grid grid-cols-2 gap-3"
           >
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="recycling" id="dest-recycling" />
-              <Label htmlFor="dest-recycling" className="flex items-center gap-2 cursor-pointer font-medium">
-                <Recycle className="h-5 w-5 text-primary" />
-                إلى التدوير
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <RadioGroupItem value="disposal" id="dest-disposal" />
-              <Label htmlFor="dest-disposal" className="flex items-center gap-2 cursor-pointer font-medium">
-                <Flame className="h-5 w-5 text-destructive" />
-                إلى التخلص النهائي
-              </Label>
-            </div>
+            <label
+              htmlFor="dest-recycling"
+              className={cn(
+                "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                formData.destination_type === 'recycling'
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-border hover:border-primary/40"
+              )}
+            >
+              <RadioGroupItem value="recycling" id="dest-recycling" className="sr-only" />
+              <Recycle className={cn("h-6 w-6", formData.destination_type === 'recycling' ? "text-primary" : "text-muted-foreground")} />
+              <div className="text-right flex-1">
+                <p className="font-semibold text-sm">إلى التدوير</p>
+                <p className="text-xs text-muted-foreground">إعادة تدوير واستخلاص المواد</p>
+              </div>
+            </label>
+            <label
+              htmlFor="dest-disposal"
+              className={cn(
+                "flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all",
+                formData.destination_type === 'disposal'
+                  ? "border-destructive bg-destructive/5 shadow-sm"
+                  : "border-border hover:border-destructive/40"
+              )}
+            >
+              <RadioGroupItem value="disposal" id="dest-disposal" className="sr-only" />
+              <Flame className={cn("h-6 w-6", formData.destination_type === 'disposal' ? "text-destructive" : "text-muted-foreground")} />
+              <div className="text-right flex-1">
+                <p className="font-semibold text-sm">التخلص النهائي</p>
+                <p className="text-xs text-muted-foreground">دفن أو حرق المخلفات</p>
+              </div>
+            </label>
           </RadioGroup>
-          <p className="text-xs text-muted-foreground">
-            {formData.destination_type === 'recycling' 
-              ? 'سيتم توجيه الشحنة لجهة إعادة التدوير وتطبيق مراحل التدوير'
-              : 'سيتم توجيه الشحنة لجهة التخلص النهائي وتطبيق مراحل التخلص (استقبال ← وزن ← فحص ← تصنيف ← معالجة ← دفن/حرق ← اكتمال)'}
-          </p>
-        </div>
+        </FormSection>
       )}
 
-      {/* Row 1: Generator, Transporter, Destination (Recycler OR Disposal) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <Label>الشركة المولدة *</Label>
-          <ComboboxWithInput
-            options={generatorOptions}
-            value={formData.generator_id}
-            onValueChange={handleGeneratorChange}
-            placeholder="اختر أو أدخل الشركة المولدة"
-            searchPlaceholder="ابحث عن شركة..."
-            emptyMessage="لا توجد شركات"
-            manualInputLabel="إدخال يدوي"
-          />
-        </div>
-
-        <div>
-          <Label>شركة النقل *</Label>
-          {isDriver ? (
-            <Input value={driverOrganization?.name || 'غير محدد'} disabled className="bg-muted" />
-          ) : isAdmin ? (
+      {/* ══════════ SECTION 2: Parties ══════════ */}
+      <FormSection icon={User} title="أطراف الشحنة" subtitle="الشركة المولدة، الناقل، والوجهة">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">الشركة المولدة *</Label>
             <ComboboxWithInput
-              options={transporterOptions}
-              value={formData.transporter_id}
-              onValueChange={handleTransporterChange}
-              placeholder="اختر أو أدخل شركة النقل"
+              options={generatorOptions}
+              value={formData.generator_id}
+              onValueChange={handleGeneratorChange}
+              placeholder="اختر أو أدخل الشركة المولدة"
               searchPlaceholder="ابحث عن شركة..."
               emptyMessage="لا توجد شركات"
               manualInputLabel="إدخال يدوي"
             />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">شركة النقل *</Label>
+            {isDriver ? (
+              <Input value={driverOrganization?.name || 'غير محدد'} disabled className="bg-muted" />
+            ) : isAdmin ? (
+              <ComboboxWithInput
+                options={transporterOptions}
+                value={formData.transporter_id}
+                onValueChange={handleTransporterChange}
+                placeholder="اختر أو أدخل شركة النقل"
+                searchPlaceholder="ابحث عن شركة..."
+                emptyMessage="لا توجد شركات"
+                manualInputLabel="إدخال يدوي"
+              />
+            ) : (
+              <Input value={organization?.name || ''} disabled className="bg-muted" />
+            )}
+          </div>
+
+          {formData.destination_type === 'recycling' ? (
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">شركة إعادة التدوير *</Label>
+              <ComboboxWithInput
+                options={recyclerOptions}
+                value={formData.recycler_id}
+                onValueChange={handleRecyclerChange}
+                placeholder="اختر أو أدخل شركة التدوير"
+                searchPlaceholder="ابحث عن شركة..."
+                emptyMessage="لا توجد شركات"
+                manualInputLabel="إدخال يدوي"
+              />
+            </div>
           ) : (
-            <Input value={organization?.name || ''} disabled className="bg-muted" />
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">جهة التخلص النهائي *</Label>
+              <ComboboxWithInput
+                options={disposalFacilityOptions}
+                value={formData.disposal_facility_id}
+                onValueChange={handleDisposalFacilityChange}
+                placeholder="اختر جهة التخلص"
+                searchPlaceholder="ابحث عن مدفن أو محرقة..."
+                emptyMessage="لا توجد جهات تخلص"
+                manualInputLabel="إدخال يدوي"
+              />
+            </div>
           )}
         </div>
 
-        {/* Show Recycler or Disposal based on destination_type */}
-        {formData.destination_type === 'recycling' ? (
-          <div>
-            <Label>شركة إعادة التدوير *</Label>
-            <ComboboxWithInput
-              options={recyclerOptions}
-              value={formData.recycler_id}
-              onValueChange={handleRecyclerChange}
-              placeholder="اختر أو أدخل شركة إعادة التدوير"
-              searchPlaceholder="ابحث عن شركة..."
-              emptyMessage="لا توجد شركات"
-              manualInputLabel="إدخال يدوي"
-            />
-          </div>
-        ) : (
-          <div>
-            <Label>جهة التخلص النهائي *</Label>
-            <ComboboxWithInput
-              options={disposalFacilityOptions}
-              value={formData.disposal_facility_id}
-              onValueChange={handleDisposalFacilityChange}
-              placeholder="اختر أو أدخل جهة التخلص النهائي"
-              searchPlaceholder="ابحث عن مدفن أو محرقة..."
-              emptyMessage="لا توجد جهات تخلص"
-              manualInputLabel="إدخال يدوي"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              المدافن والمحارق المرخصة للمخلفات الخطرة والطبية
-            </p>
+        {/* Optional secondary destination */}
+        {formData.destination_type === 'recycling' && (
+          <div className="pt-2 border-t border-dashed">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">جهة التخلص النهائي (اختياري)</Label>
+                <ComboboxWithInput
+                  options={disposalFacilityOptions}
+                  value={formData.disposal_facility_id}
+                  onValueChange={handleDisposalFacilityChange}
+                  placeholder="في حال وجود مخلفات غير قابلة للتدوير"
+                  searchPlaceholder="ابحث عن مدفن أو محرقة..."
+                  emptyMessage="لا توجد جهات تخلص"
+                  manualInputLabel="إدخال يدوي"
+                />
+              </div>
+            </div>
           </div>
         )}
-      </div>
+      </FormSection>
 
-      {/* Optional secondary destination (recycler can optionally have disposal, and vice versa) */}
-      {formData.destination_type === 'recycling' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>جهة التخلص النهائي (اختياري)</Label>
-            <ComboboxWithInput
-              options={disposalFacilityOptions}
-              value={formData.disposal_facility_id}
-              onValueChange={handleDisposalFacilityChange}
-              placeholder="اختر أو أدخل جهة التخلص النهائي"
-              searchPlaceholder="ابحث عن مدفن أو محرقة..."
-              emptyMessage="لا توجد جهات تخلص"
-              manualInputLabel="إدخال يدوي"
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              في حال وجود مخلفات غير قابلة للتدوير
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Driver Data Section - Shows when user is a driver */}
+      {/* ══════════ SECTION 3: Driver (if user is driver) ══════════ */}
       {isDriver && driverInfo && (
-        <div className="p-4 rounded-lg border-2 border-primary/30 bg-primary/5 space-y-4">
-          <div className="flex items-center justify-between">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={fetchDriverCurrentLocation}
-              disabled={loadingDriverLocation}
-            >
-              {loadingDriverLocation ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="ml-2 h-4 w-4" />
-              )}
-              تحديث الموقع
-            </Button>
-            <div className="flex items-center gap-2 text-primary font-medium">
-              <User className="h-5 w-5" />
-              <span>بيانات السائق (أنت)</span>
-            </div>
-          </div>
-
+        <FormSection icon={Truck} title="بيانات السائق" subtitle="بياناتك كسائق مسجل" accentColor="primary">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                اسم السائق
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium flex items-center gap-1.5">
+                <User className="h-3.5 w-3.5" /> اسم السائق
               </Label>
-              <Input
+              <SmartInput
+                fieldContext="driver_name"
                 value={formData.manual_driver_name}
-                onChange={(e) => setFormData(prev => ({ ...prev, manual_driver_name: e.target.value }))}
+                onChange={(v) => setFormData(prev => ({ ...prev, manual_driver_name: v }))}
                 placeholder="اسمك"
-                className="bg-background"
               />
             </div>
-            <div>
-              <Label className="flex items-center gap-2">
-                <Truck className="h-4 w-4" />
-                رقم المركبة
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium flex items-center gap-1.5">
+                <Truck className="h-3.5 w-3.5" /> رقم المركبة
               </Label>
               <SmartInput
                 fieldContext="vehicle_plate"
                 value={formData.manual_vehicle_plate}
                 onChange={(v) => setFormData(prev => ({ ...prev, manual_vehicle_plate: v }))}
                 placeholder="رقم مركبتك"
-                className="bg-background"
               />
             </div>
           </div>
 
-          {/* Current Location Display */}
-          <div>
-            <Label className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              موقعك الحالي (موقع الاستلام الافتراضي)
-            </Label>
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={fetchDriverCurrentLocation}
+                disabled={loadingDriverLocation}
+                className="text-xs h-7"
+              >
+                {loadingDriverLocation ? <Loader2 className="ml-1.5 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="ml-1.5 h-3.5 w-3.5" />}
+                تحديث الموقع
+              </Button>
+              <Label className="text-xs font-medium flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5" /> موقعك الحالي
+              </Label>
+            </div>
             <div className="flex gap-2">
-              <Input
+              <SmartInput
+                fieldContext="pickup_address"
                 value={formData.pickup_address}
-                onChange={(e) => setFormData(prev => ({ ...prev, pickup_address: e.target.value }))}
+                onChange={(v) => setFormData(prev => ({ ...prev, pickup_address: v }))}
                 placeholder={loadingDriverLocation ? 'جاري تحديد موقعك...' : 'موقع الاستلام'}
-                className="bg-background flex-1"
+                className="flex-1"
               />
               {loadingDriverLocation && (
                 <div className="flex items-center px-3 text-muted-foreground">
@@ -282,96 +332,98 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
               )}
             </div>
             {driverCurrentLocation && (
-              <p className="text-xs text-muted-foreground mt-1">
-                📍 الإحداثيات: {driverCurrentLocation.latitude.toFixed(6)}, {driverCurrentLocation.longitude.toFixed(6)}
+              <p className="text-xs text-muted-foreground">
+                📍 {driverCurrentLocation.latitude.toFixed(6)}, {driverCurrentLocation.longitude.toFixed(6)}
               </p>
             )}
           </div>
-        </div>
+        </FormSection>
       )}
 
-      {/* Driver Input Type - Only for non-drivers */}
+      {/* ══════════ SECTION 3b: Driver (non-driver input) ══════════ */}
       {!isDriver && (
-        <div>
-          <Label>نوع إدخال السائق</Label>
-          <Select value={driverInputType} onValueChange={(v) => setDriverInputType(v as 'select' | 'manual')}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {driverInputTypes.map(type => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <FormSection icon={Truck} title="بيانات السائق" subtitle="أدخل بيانات السائق يدوياً أو اختر من القائمة">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">طريقة الإدخال</Label>
+            <Select value={driverInputType} onValueChange={(v) => setDriverInputType(v as 'select' | 'manual')}>
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {driverInputTypes.map(type => (
+                  <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {driverInputType === 'select' ? (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">السائق</Label>
+                  <Select value={formData.driver_id} onValueChange={(v) => setFormData(prev => ({ ...prev, driver_id: v }))}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue placeholder="اختر السائق (اختياري)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {drivers.length === 0 ? (
+                        <div className="p-2 text-sm text-muted-foreground text-center">لا يوجد سائقين</div>
+                      ) : (
+                        drivers.map(driver => (
+                          <SelectItem key={driver.id} value={driver.id}>
+                            {driver.profile?.full_name} - {driver.vehicle_plate}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">رقم المركبة</Label>
+                  <Input 
+                    value={drivers.find(d => d.id === formData.driver_id)?.vehicle_plate || ''}
+                    disabled 
+                    placeholder="يملأ تلقائياً"
+                    className="bg-muted h-9"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">اسم السائق</Label>
+                  <SmartInput
+                    fieldContext="driver_name"
+                    value={formData.manual_driver_name}
+                    onChange={(v) => setFormData(prev => ({ ...prev, manual_driver_name: v }))}
+                    placeholder="أدخل اسم السائق"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">رقم المركبة</Label>
+                  <SmartInput
+                    fieldContext="vehicle_plate"
+                    value={formData.manual_vehicle_plate}
+                    onChange={(v) => setFormData(prev => ({ ...prev, manual_vehicle_plate: v }))}
+                    placeholder="أدخل رقم المركبة"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        </FormSection>
       )}
 
-      {/* Driver Details - Only for non-drivers */}
-      {!isDriver && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {driverInputType === 'select' ? (
-            <>
-              <div>
-                <Label>السائق</Label>
-                <Select value={formData.driver_id} onValueChange={(v) => setFormData(prev => ({ ...prev, driver_id: v }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="اختر السائق (اختياري)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {drivers.length === 0 ? (
-                      <div className="p-2 text-sm text-muted-foreground text-center">لا يوجد سائقين متاحين</div>
-                    ) : (
-                      drivers.map(driver => (
-                        <SelectItem key={driver.id} value={driver.id}>
-                          {driver.profile?.full_name} - {driver.vehicle_plate}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>رقم المركبة</Label>
-                <Input 
-                  value={drivers.find(d => d.id === formData.driver_id)?.vehicle_plate || ''}
-                  disabled 
-                  placeholder="سيتم ملؤه تلقائياً"
-                  className="bg-muted"
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <div>
-                <Label>اسم السائق</Label>
-                <SmartInput
-                  fieldContext="driver_name"
-                  value={formData.manual_driver_name}
-                  onChange={(v) => setFormData(prev => ({ ...prev, manual_driver_name: v }))}
-                  placeholder="أدخل اسم السائق"
-                />
-              </div>
-              <div>
-                <Label>رقم المركبة</Label>
-                <SmartInput
-                  fieldContext="vehicle_plate"
-                  value={formData.manual_vehicle_plate}
-                  onChange={(v) => setFormData(prev => ({ ...prev, manual_vehicle_plate: v }))}
-                  placeholder="أدخل رقم المركبة"
-                />
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Waste Type & Description */}
-      <div className="space-y-4">
-        <div>
-          <Label>نوع المخلف *</Label>
+      {/* ══════════ SECTION 4: Waste Details ══════════ */}
+      <FormSection 
+        icon={Package} 
+        title="تفاصيل المخلفات" 
+        subtitle="نوع وحالة وخطورة المخلفات"
+        accentColor={formData.hazard_level === 'hazardous' ? 'destructive' : 'primary'}
+      >
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">نوع المخلف *</Label>
           <FlexibleWasteTypeSelector
             value={formData.waste_description || ''}
             onChange={(wasteType, hazardLevel, wasteDescription) => {
@@ -385,51 +437,46 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
           />
         </div>
 
-        {/* Waste Type Details Card */}
-        {formData.waste_description && (
-          <div className={`p-4 rounded-lg border-2 ${
-            formData.hazard_level === 'hazardous' 
-              ? 'bg-destructive/5 border-destructive/30' 
-              : 'bg-primary/5 border-primary/30'
-          }`}>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 space-y-2 text-right">
-                <div className="flex items-center gap-2 justify-end">
-                  <span className="font-bold text-lg">{formData.waste_description.split(' - ')[1] || formData.waste_description}</span>
-                  {formData.hazard_level === 'hazardous' ? (
-                    <span className="text-destructive">⚠️</span>
-                  ) : (
-                    <span className="text-primary">♻️</span>
-                  )}
-                </div>
-                <div className="flex flex-wrap items-center gap-3 justify-end text-sm">
-                  <span className="font-mono bg-muted px-2 py-1 rounded text-xs">
-                    {formData.waste_description.split(' - ')[0]}
-                  </span>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    formData.hazard_level === 'hazardous' 
-                      ? 'bg-destructive/20 text-destructive' 
-                      : 'bg-primary/20 text-primary'
-                  }`}>
-                    {formData.hazard_level === 'hazardous' ? 'مخلفات خطرة' : 'مخلفات غير خطرة'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Waste State Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label className="flex items-center gap-2">
-              حالة المخلف
-              {suggestingWasteState && (
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  جاري التحليل...
-                </span>
+        {/* Waste Info Badge */}
+        <AnimatePresence>
+          {formData.waste_description && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className={cn(
+                "p-3 rounded-lg border",
+                formData.hazard_level === 'hazardous' 
+                  ? 'bg-destructive/5 border-destructive/30' 
+                  : 'bg-primary/5 border-primary/30'
               )}
+            >
+              <div className="flex items-center gap-3 justify-end">
+                <div className="text-right space-y-1">
+                  <p className="font-semibold text-sm">{formData.waste_description.split(' - ')[1] || formData.waste_description}</p>
+                  <div className="flex items-center gap-2 justify-end">
+                    <span className="font-mono bg-muted px-2 py-0.5 rounded text-[10px]">
+                      {formData.waste_description.split(' - ')[0]}
+                    </span>
+                    <span className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-medium",
+                      formData.hazard_level === 'hazardous' ? 'bg-destructive/20 text-destructive' : 'bg-primary/20 text-primary'
+                    )}>
+                      {formData.hazard_level === 'hazardous' ? '⚠️ خطرة' : '✓ غير خطرة'}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-2xl">{formData.hazard_level === 'hazardous' ? '⚠️' : '♻️'}</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium flex items-center gap-1.5">
+              حالة المخلف
+              {suggestingWasteState && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
             </Label>
             <ComboboxWithInput
               options={[
@@ -440,229 +487,218 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
               ]}
               value={formData.waste_state}
               onValueChange={(v) => setFormData(prev => ({ ...prev, waste_state: v }))}
-              placeholder="اختر أو أدخل حالة المخلف"
-              searchPlaceholder="ابحث أو أدخل حالة جديدة..."
+              placeholder="اختر حالة المخلف"
+              searchPlaceholder="ابحث..."
               emptyMessage="لا توجد نتائج"
             />
           </div>
-          <div>
-            <Label>طريقة التعبئة</Label>
-            <Select 
-              value={formData.packaging_method} 
-              onValueChange={(v) => setFormData(prev => ({ ...prev, packaging_method: v }))}
-            >
-              <SelectTrigger>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">طريقة التعبئة</Label>
+            <Select value={formData.packaging_method} onValueChange={(v) => setFormData(prev => ({ ...prev, packaging_method: v }))}>
+              <SelectTrigger className="h-9">
                 <SelectValue placeholder="اختر طريقة التعبئة" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="packaged">معبأ</SelectItem>
-                <SelectItem value="unpackaged">غير معبأ</SelectItem>
-                <SelectItem value="drums">براميل</SelectItem>
-                <SelectItem value="tanks">خزانات</SelectItem>
-                <SelectItem value="bags">أكياس</SelectItem>
-                <SelectItem value="bulk">سائب</SelectItem>
+                {packagingMethods.map(method => (
+                  <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">طريقة التخلص</Label>
+            <Select value={formData.disposal_method} onValueChange={(v) => setFormData(prev => ({ ...prev, disposal_method: v }))}>
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="اختر طريقة التخلص" />
+              </SelectTrigger>
+              <SelectContent>
+                {disposalMethods.map(method => (
+                  <SelectItem key={method.value} value={method.value}>{method.label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        <div>
-          <Label>وصف إضافي للنفايات (اختياري)</Label>
-          <Textarea
+        <div className="space-y-1.5">
+          <Label className="text-xs font-medium">ملاحظات إضافية</Label>
+          <SmartInput
+            fieldContext="shipment_notes"
             value={formData.notes}
-            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-            placeholder="أي ملاحظات إضافية حول طبيعة النفايات أو متطلبات خاصة..."
-            rows={2}
+            onChange={(v) => setFormData(prev => ({ ...prev, notes: v }))}
+            placeholder="أي ملاحظات حول طبيعة المخلفات أو متطلبات خاصة..."
           />
         </div>
-      </div>
+      </FormSection>
 
-      {/* Pickup & Delivery Addresses - Waze Direct Search */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <WazeLocationField
-          value={formData.pickup_address}
-          onChange={(address, coords) => {
-            setFormData(prev => ({ ...prev, pickup_address: address }));
-            if (coords) setPickupCoords(coords);
-          }}
-          mapLink={formData.pickup_map_link}
-          onMapLinkChange={(link) => setFormData(prev => ({ ...prev, pickup_map_link: link }))}
-          label="موقع الاستلام"
-          placeholder="ابحث عن موقع الاستلام..."
-          organizationId={formData.generator_id || undefined}
-          organizationName={generators.find(g => g.id === formData.generator_id)?.name}
-          organizationAddress={generators.find(g => g.id === formData.generator_id)?.address}
-          organizationCity={generators.find(g => g.id === formData.generator_id)?.city}
-          coordinates={pickupCoords}
-          icon="pickup"
-        />
-        <WazeLocationField
-          value={formData.delivery_address}
-          onChange={(address, coords) => {
-            setFormData(prev => ({ ...prev, delivery_address: address }));
-            if (coords) setDeliveryCoords(coords);
-          }}
-          mapLink={formData.delivery_map_link}
-          onMapLinkChange={(link) => setFormData(prev => ({ ...prev, delivery_map_link: link }))}
-          label={formData.destination_type === 'recycling' ? 'موقع التسليم (تدوير)' : 'موقع التسليم (تخلص)'}
-          placeholder="ابحث عن موقع التسليم..."
-          organizationId={
-            formData.destination_type === 'recycling' ? formData.recycler_id || undefined
-              : formData.disposal_facility_id || undefined
-          }
-          organizationName={
-            formData.destination_type === 'recycling'
-              ? recyclers.find(r => r.id === formData.recycler_id)?.name
-              : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.name
-          }
-          organizationAddress={
-            formData.destination_type === 'recycling'
-              ? recyclers.find(r => r.id === formData.recycler_id)?.address
-              : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.address
-          }
-          organizationCity={
-            formData.destination_type === 'recycling'
-              ? recyclers.find(r => r.id === formData.recycler_id)?.city
-              : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.city
-          }
-          coordinates={deliveryCoords}
-          icon="delivery"
-        />
-      </div>
-
-      {/* Route Estimation */}
-      {formData.pickup_address && formData.delivery_address && (
-        <RouteEstimation
-          pickupAddress={formData.pickup_address}
-          deliveryAddress={formData.delivery_address}
-        />
-      )}
-
-      {/* Dates */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label>تاريخ الاستلام</Label>
-          <Input
-            type="date"
-            value={formData.pickup_date}
-            onChange={(e) => setFormData(prev => ({ ...prev, pickup_date: e.target.value }))}
+      {/* ══════════ SECTION 5: Locations ══════════ */}
+      <FormSection icon={MapPin} title="المواقع" subtitle="موقع الاستلام والتسليم">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <WazeLocationField
+            value={formData.pickup_address}
+            onChange={(address, coords) => {
+              setFormData(prev => ({ ...prev, pickup_address: address }));
+              if (coords) setPickupCoords(coords);
+            }}
+            mapLink={formData.pickup_map_link}
+            onMapLinkChange={(link) => setFormData(prev => ({ ...prev, pickup_map_link: link }))}
+            label="موقع الاستلام"
+            placeholder="ابحث عن موقع الاستلام..."
+            organizationId={formData.generator_id || undefined}
+            organizationName={generators.find(g => g.id === formData.generator_id)?.name}
+            organizationAddress={generators.find(g => g.id === formData.generator_id)?.address}
+            organizationCity={generators.find(g => g.id === formData.generator_id)?.city}
+            coordinates={pickupCoords}
+            icon="pickup"
+          />
+          <WazeLocationField
+            value={formData.delivery_address}
+            onChange={(address, coords) => {
+              setFormData(prev => ({ ...prev, delivery_address: address }));
+              if (coords) setDeliveryCoords(coords);
+            }}
+            mapLink={formData.delivery_map_link}
+            onMapLinkChange={(link) => setFormData(prev => ({ ...prev, delivery_map_link: link }))}
+            label={formData.destination_type === 'recycling' ? 'موقع التسليم (تدوير)' : 'موقع التسليم (تخلص)'}
+            placeholder="ابحث عن موقع التسليم..."
+            organizationId={
+              formData.destination_type === 'recycling' ? formData.recycler_id || undefined
+                : formData.disposal_facility_id || undefined
+            }
+            organizationName={
+              formData.destination_type === 'recycling'
+                ? recyclers.find(r => r.id === formData.recycler_id)?.name
+                : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.name
+            }
+            organizationAddress={
+              formData.destination_type === 'recycling'
+                ? recyclers.find(r => r.id === formData.recycler_id)?.address
+                : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.address
+            }
+            organizationCity={
+              formData.destination_type === 'recycling'
+                ? recyclers.find(r => r.id === formData.recycler_id)?.city
+                : disposalFacilities.find(d => d.id === formData.disposal_facility_id)?.city
+            }
+            coordinates={deliveryCoords}
+            icon="delivery"
           />
         </div>
-        <div>
-          <Label>تاريخ التسليم المتوقع</Label>
-          <Input
-            type="date"
-            value={formData.expected_delivery_date}
-            onChange={(e) => setFormData(prev => ({ ...prev, expected_delivery_date: e.target.value }))}
-          />
-        </div>
-      </div>
 
-      {/* Quantity & Shipment Type */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label>الكمية (كجم) *</Label>
-          <Input
-            type="number"
-            value={formData.quantity}
-            onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
-            placeholder="0"
-            min="0"
-            step="0.01"
-          />
-        </div>
-        <div>
-          <Label>نوع النقلة</Label>
-          <Select value={formData.shipment_type} onValueChange={(v) => setFormData(prev => ({ ...prev, shipment_type: v }))}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {shipmentTypes.map(type => (
-                <SelectItem key={type.value} value={type.value}>
-                  {type.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+        <AnimatePresence>
+          {formData.pickup_address && formData.delivery_address && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RouteEstimation
+                pickupAddress={formData.pickup_address}
+                deliveryAddress={formData.delivery_address}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </FormSection>
 
-      {/* Hazard Level Display */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label>طريقة التعبئة</Label>
-          <Select value={formData.packaging_method} onValueChange={(v) => setFormData(prev => ({ ...prev, packaging_method: v }))}>
-            <SelectTrigger>
-              <SelectValue placeholder="اختر طريقة التعبئة" />
-            </SelectTrigger>
-            <SelectContent>
-              {packagingMethods.map(method => (
-                <SelectItem key={method.value} value={method.value}>
-                  {method.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label>مستوى الخطورة (يتحدد تلقائياً)</Label>
-          <div className={`flex items-center gap-2 p-3 rounded-md border ${
-            formData.hazard_level === 'hazardous' 
-              ? 'bg-destructive/10 border-destructive text-destructive' 
-              : formData.hazard_level === 'non_hazardous'
-              ? 'bg-primary/10 border-primary text-primary'
-              : 'bg-muted border-border text-muted-foreground'
-          }`}>
-            {formData.hazard_level === 'hazardous' && <span className="font-medium">⚠️ خطرة</span>}
-            {formData.hazard_level === 'non_hazardous' && <span className="font-medium">✓ غير خطرة</span>}
-            {!formData.hazard_level && <span>سيتم التحديد عند اختيار نوع النفايات</span>}
+      {/* ══════════ SECTION 6: Quantity, Dates & Type ══════════ */}
+      <FormSection icon={Scale} title="الكمية والجدولة" subtitle="الوزن والتواريخ ونوع النقلة">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">الكمية (كجم) *</Label>
+            <Input
+              type="number"
+              value={formData.quantity}
+              onChange={(e) => setFormData(prev => ({ ...prev, quantity: e.target.value }))}
+              placeholder="0"
+              min="0"
+              step="0.01"
+              className="h-9"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">نوع النقلة</Label>
+            <Select value={formData.shipment_type} onValueChange={(v) => setFormData(prev => ({ ...prev, shipment_type: v }))}>
+              <SelectTrigger className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {shipmentTypes.map(type => (
+                  <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" /> تاريخ الاستلام
+            </Label>
+            <Input
+              type="date"
+              value={formData.pickup_date}
+              onChange={(e) => setFormData(prev => ({ ...prev, pickup_date: e.target.value }))}
+              className="h-9"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" /> التسليم المتوقع
+            </Label>
+            <Input
+              type="date"
+              value={formData.expected_delivery_date}
+              onChange={(e) => setFormData(prev => ({ ...prev, expected_delivery_date: e.target.value }))}
+              className="h-9"
+            />
           </div>
         </div>
-      </div>
 
-      {/* Disposal Method */}
-      <div>
-        <Label>طريقة التخلص</Label>
-        <Select value={formData.disposal_method} onValueChange={(v) => setFormData(prev => ({ ...prev, disposal_method: v }))}>
-          <SelectTrigger>
-            <SelectValue placeholder="اختر طريقة التخلص" />
-          </SelectTrigger>
-          <SelectContent>
-            {disposalMethods.map(method => (
-              <SelectItem key={method.value} value={method.value}>
-                {method.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        {/* Hazard level display */}
+        <div className={cn(
+          "flex items-center gap-2 p-2.5 rounded-lg border text-sm",
+          formData.hazard_level === 'hazardous' 
+            ? 'bg-destructive/10 border-destructive/30 text-destructive' 
+            : formData.hazard_level === 'non_hazardous'
+            ? 'bg-primary/10 border-primary/30 text-primary'
+            : 'bg-muted border-border text-muted-foreground'
+        )}>
+          {formData.hazard_level === 'hazardous' && <span className="font-medium">⚠️ مخلفات خطرة — تتطلب تراخيص خاصة</span>}
+          {formData.hazard_level === 'non_hazardous' && <span className="font-medium">✓ مخلفات غير خطرة</span>}
+          {!formData.hazard_level && <span>مستوى الخطورة — يتحدد تلقائياً عند اختيار النوع</span>}
+        </div>
+      </FormSection>
 
-      {/* Pricing Mode */}
+      {/* ══════════ SECTION 7: Pricing ══════════ */}
       {(organization?.organization_type === 'transporter' || isAdmin) && (
-        <PricingModeSelector formData={formData} setFormData={setFormData} />
+        <FormSection icon={DollarSign} title="التسعير" subtitle="تحديد تكلفة الرحلة">
+          <PricingModeSelector formData={formData} setFormData={setFormData} />
+        </FormSection>
       )}
 
-      {/* Submit Buttons */}
-      <div className="flex justify-start gap-4 pt-4">
-        <Button type="submit" variant="eco" disabled={loading}>
+      {/* ══════════ Submit ══════════ */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex justify-start gap-3 pt-2 pb-4"
+      >
+        <Button type="submit" variant="eco" size="lg" disabled={loading} className="min-w-[160px]">
           {loading ? (
             <>
               <Loader2 className="ml-2 h-4 w-4 animate-spin" />
               جاري الإنشاء...
             </>
           ) : (
-            'إنشاء الشحنة'
+            <>
+              <FileText className="ml-2 h-4 w-4" />
+              إنشاء الشحنة
+            </>
           )}
         </Button>
         <Button 
           type="button" 
           variant="outline" 
+          size="lg"
           onClick={onClose || (() => navigate(-1))}
         >
           إلغاء
         </Button>
-      </div>
+      </motion.div>
     </form>
   );
 };
