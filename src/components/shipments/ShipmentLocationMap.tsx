@@ -4,11 +4,33 @@ import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
+
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+
+interface MultiGeoResult {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  source: string;
+}
+
+const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
+  here: { label: 'HERE', color: 'bg-blue-500/15 text-blue-700 dark:text-blue-400' },
+  locationiq: { label: 'LocationIQ', color: 'bg-purple-500/15 text-purple-700 dark:text-purple-400' },
+  opencage: { label: 'OpenCage', color: 'bg-amber-500/15 text-amber-700 dark:text-amber-400' },
+  mapbox: { label: 'Mapbox', color: 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-400' },
+  photon: { label: 'Photon', color: 'bg-green-500/15 text-green-700 dark:text-green-400' },
+  herewego: { label: 'HERE Auto', color: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400' },
+  mapsme: { label: 'OSM', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
+  tomtom: { label: 'TomTom', color: 'bg-red-500/15 text-red-700 dark:text-red-400' },
+};
 
 interface Coords {
   lat: number;
@@ -74,8 +96,11 @@ const ShipmentLocationMap = ({
   const [mode, setMode] = useState<SelectionMode>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<MultiGeoResult[]>([]);
+  const [showResults, setShowResults] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
 
   // Initialize map
   useEffect(() => {
@@ -211,41 +236,68 @@ const ShipmentLocationMap = ({
     else if (deliveryCoords && !pickupCoords) map.setView([deliveryCoords.lat, deliveryCoords.lng], 14);
   }, [pickupCoords, deliveryCoords]);
 
-  // Search
+  // Close results on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target as Node)) setShowResults(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Multi-source search via edge function
   const handleSearch = useCallback(async () => {
     if (!searchQuery.trim() || !mapRef.current) return;
     setSearching(true);
+    setSearchResults([]);
+    setShowResults(true);
     try {
-      const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&country=eg&language=ar&limit=1`
-      );
-      const data = await res.json();
-      if (data.features?.[0]) {
-        const [lng, lat] = data.features[0].center;
-        mapRef.current.setView([lat, lng], 15);
-        if (mode) {
-          const address = data.features[0].place_name;
-          if (mode === 'pickup') {
-            onPickupChange(address, { lat, lng });
-            if (!deliveryCoords) setMode('delivery');
-            else setMode(null);
-          } else {
-            onDeliveryChange(address, { lat, lng });
-            setMode(null);
-          }
-          toast.success('تم تحديد الموقع');
-        } else {
-          toast.success('تم العثور على الموقع — اختر وضع التحديد أولاً');
-        }
+      const center = mapRef.current.getCenter();
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/multi-geocode-search?q=${encodeURIComponent(searchQuery)}&lat=${center.lat}&lng=${center.lng}&lang=ar`;
+      const res = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+      });
+      const result = await res.json();
+      
+      if (result.results?.length) {
+        setSearchResults(result.results);
       } else {
-        toast.error('لم يتم العثور على الموقع');
+        toast.error('لم يتم العثور على نتائج');
+        setShowResults(false);
       }
     } catch {
       toast.error('خطأ في البحث');
+      setShowResults(false);
     } finally {
       setSearching(false);
     }
-  }, [searchQuery, mode, deliveryCoords, onPickupChange, onDeliveryChange]);
+  }, [searchQuery]);
+
+  // Select a result from multi-source dropdown
+  const handleSelectResult = useCallback((result: MultiGeoResult) => {
+    const map = mapRef.current;
+    if (!map) return;
+    setShowResults(false);
+    setSearchQuery(result.name);
+
+    map.setView([result.lat, result.lng], 15);
+
+    if (mode === 'pickup') {
+      onPickupChange(result.address || result.name, { lat: result.lat, lng: result.lng });
+      if (!deliveryCoords) setMode('delivery');
+      else setMode(null);
+      toast.success('تم تحديد نقطة الاستلام');
+    } else if (mode === 'delivery') {
+      onDeliveryChange(result.address || result.name, { lat: result.lat, lng: result.lng });
+      setMode(null);
+      toast.success('تم تحديد نقطة التسليم');
+    } else {
+      toast.info('اختر وضع التحديد أولاً (استلام / تسليم)');
+    }
+  }, [mode, deliveryCoords, onPickupChange, onDeliveryChange]);
 
   const handleMyLocation = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
@@ -302,18 +354,57 @@ const ShipmentLocationMap = ({
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Input
-            placeholder="ابحث عن مكان... (مثال: مصنع بيبسي، الأهرامات)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
-            className="h-8 text-xs"
-          />
-          <Button type="button" size="sm" className="h-8 text-xs gap-1" onClick={handleSearch} disabled={searching}>
-            {searching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-            بحث
-          </Button>
+        <div className="relative" ref={searchBoxRef}>
+          <div className="flex gap-2">
+            <Input
+              placeholder="ابحث عن مكان... (مثال: مصنع بيبسي، الأهرامات)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
+              onFocus={() => searchResults.length > 0 && setShowResults(true)}
+              className="h-8 text-xs"
+            />
+            {searchQuery && (
+              <Button type="button" size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setSearchQuery(''); setSearchResults([]); setShowResults(false); }}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            )}
+            <Button type="button" size="sm" className="h-8 text-xs gap-1" onClick={handleSearch} disabled={searching}>
+              {searching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+              بحث
+            </Button>
+          </div>
+
+          {/* Multi-source results dropdown */}
+          {showResults && searchResults.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-xl z-[1000] overflow-hidden">
+              <div className="px-3 py-1.5 border-b bg-muted/50">
+                <span className="text-[10px] text-muted-foreground font-medium">{searchResults.length} نتيجة من مصادر متعددة</span>
+              </div>
+              <ScrollArea className="max-h-[250px]">
+                {searchResults.map((r) => {
+                  const src = SOURCE_LABELS[r.source] || { label: r.source, color: 'bg-muted text-muted-foreground' };
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      className="w-full px-3 py-2 text-right hover:bg-accent transition-colors flex items-center gap-2 border-b border-border/30 last:border-0"
+                      onClick={() => handleSelectResult(r)}
+                    >
+                      <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{r.name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{r.address}</p>
+                      </div>
+                      <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4 flex-shrink-0", src.color)}>
+                        {src.label}
+                      </Badge>
+                    </button>
+                  );
+                })}
+              </ScrollArea>
+            </div>
+          )}
         </div>
 
         {mode && (
