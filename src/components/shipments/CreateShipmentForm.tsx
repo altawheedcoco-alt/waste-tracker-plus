@@ -636,27 +636,84 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
 
         <AnimatePresence>
           {formData.pickup_address && formData.delivery_address && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="space-y-3">
               {pickupCoords && deliveryCoords && (
-              <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border text-xs">
-                  <div className="flex items-center gap-1.5 text-primary">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span className="font-mono">{pickupCoords.lat.toFixed(4)},{pickupCoords.lng.toFixed(4)}</span>
+                <>
+                  {/* Coordinates & Distance Bar */}
+                  <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border text-xs">
+                    <div className="flex items-center gap-1.5 text-primary">
+                      <MapPin className="w-3.5 h-3.5" />
+                      <span className="font-mono">{pickupCoords.lat.toFixed(4)},{pickupCoords.lng.toFixed(4)}</span>
+                    </div>
+                    <span className="text-muted-foreground">→</span>
+                    <div className="flex items-center gap-1.5 text-primary">
+                      <NavigationIcon className="w-3.5 h-3.5" />
+                      <span className="font-mono">{deliveryCoords.lat.toFixed(4)},{deliveryCoords.lng.toFixed(4)}</span>
+                    </div>
+                    <span className="mr-auto text-muted-foreground font-medium">
+                      ~{(
+                        Math.sqrt(
+                          Math.pow((deliveryCoords.lat - pickupCoords.lat) * 111, 2) +
+                          Math.pow((deliveryCoords.lng - pickupCoords.lng) * 111 * Math.cos(pickupCoords.lat * Math.PI / 180), 2)
+                        )
+                      ).toFixed(1)} كم
+                    </span>
                   </div>
-                  <span className="text-muted-foreground">→</span>
-                  <div className="flex items-center gap-1.5 text-primary">
-                    <NavigationIcon className="w-3.5 h-3.5" />
-                    <span className="font-mono">{deliveryCoords.lat.toFixed(4)},{deliveryCoords.lng.toFixed(4)}</span>
+
+                  {/* Waze Directions iFrame */}
+                  <div className="rounded-xl border overflow-hidden bg-card">
+                    <div className="flex items-center justify-between p-3 bg-muted/40 border-b">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[11px] gap-1.5"
+                          onClick={() => {
+                            window.open(
+                              `https://waze.com/ul?ll=${deliveryCoords.lat},${deliveryCoords.lng}&navigate=yes&from=ll.${pickupCoords.lat},${pickupCoords.lng}`,
+                              '_blank'
+                            );
+                          }}
+                        >
+                          <NavigationIcon className="w-3 h-3" />
+                          فتح في Waze
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 text-[11px] gap-1.5"
+                          onClick={() => {
+                            window.open(
+                              `https://www.google.com/maps/dir/?api=1&origin=${pickupCoords.lat},${pickupCoords.lng}&destination=${deliveryCoords.lat},${deliveryCoords.lng}&travelmode=driving`,
+                              '_blank'
+                            );
+                          }}
+                        >
+                          <MapPin className="w-3 h-3" />
+                          خرائط جوجل
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold border border-primary/20">
+                          <Route className="w-3 h-3" />
+                          اتجاهات القيادة
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-[350px]">
+                      <iframe
+                        src={`https://embed.waze.com/iframe?zoom=13&lat=${(pickupCoords.lat + deliveryCoords.lat) / 2}&lon=${(pickupCoords.lng + deliveryCoords.lng) / 2}&from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}&pin=1`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        title="Waze Driving Directions"
+                      />
+                    </div>
                   </div>
-                  <span className="mr-auto text-muted-foreground font-medium">
-                    ~{(
-                      Math.sqrt(
-                        Math.pow((deliveryCoords.lat - pickupCoords.lat) * 111, 2) +
-                        Math.pow((deliveryCoords.lng - pickupCoords.lng) * 111 * Math.cos(pickupCoords.lat * Math.PI / 180), 2)
-                      )
-                    ).toFixed(1)} كم
-                  </span>
-                </div>
+                </>
               )}
               <RouteEstimation
                 pickupAddress={formData.pickup_address}
