@@ -104,20 +104,30 @@ const ShipmentLocationMap = ({
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Egypt bounds for restricting map view
+  const egyptBounds: L.LatLngBoundsExpression = [
+    [22.0, 24.7],  // SW corner
+    [31.7, 37.0],  // NE corner
+  ];
+
   // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = L.map(mapContainerRef.current, {
       center: [30.0444, 31.2357],
-      zoom: 10,
+      zoom: 7,
       zoomControl: false,
+      maxBounds: egyptBounds,
+      maxBoundsViscosity: 1.0,
+      minZoom: 6,
     });
 
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap',
+      bounds: egyptBounds,
     }).addTo(map);
 
     mapRef.current = map;
@@ -452,7 +462,7 @@ const ShipmentLocationMap = ({
       </div>
 
       {/* Map container */}
-      <div ref={mapContainerRef} className="h-[420px] w-full" />
+      <div ref={mapContainerRef} className="h-[550px] w-full" />
 
       {/* Route info footer */}
       {(routeInfo || loadingRoute) && (

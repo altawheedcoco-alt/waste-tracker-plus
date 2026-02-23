@@ -108,6 +108,9 @@ const LocationMiniMap = ({
       zoom,
       zoomControl: false,
       attributionControl: false,
+      maxBounds: [[22.0, 24.7], [31.7, 37.0]],
+      maxBoundsViscosity: 1.0,
+      minZoom: 6,
     });
 
     const tile = L.tileLayer(MAP_TILES[provider].url, { maxZoom: 19 }).addTo(map);
