@@ -35,7 +35,8 @@ const LeafletLiveTrackingMap = memo(({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    mapRef.current = L.map(containerRef.current, { center: [30.0444, 31.2357], zoom: 12, zoomControl: true });
+    const EGYPT_BOUNDS: L.LatLngBoundsExpression = [[22.0, 24.7], [31.7, 37.0]];
+    mapRef.current = L.map(containerRef.current, { center: [26.8, 30.8], zoom: 6, zoomControl: true, maxBounds: EGYPT_BOUNDS, maxBoundsViscosity: 1.0, minZoom: 5 });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(mapRef.current);
     return () => { mapRef.current?.remove(); mapRef.current = null; };
   }, []);

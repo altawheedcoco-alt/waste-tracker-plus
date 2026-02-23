@@ -74,10 +74,14 @@ const DriverNavigationMap = memo(({
       ? [driverPosition.lat, driverPosition.lng]
       : [30.0444, 31.2357];
 
+    const EGYPT_BOUNDS: L.LatLngBoundsExpression = [[22.0, 24.7], [31.7, 37.0]];
     mapRef.current = L.map(containerRef.current, {
       center: defaultCenter,
       zoom: 15,
       zoomControl: true,
+      maxBounds: EGYPT_BOUNDS,
+      maxBoundsViscosity: 1.0,
+      minZoom: 5,
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
