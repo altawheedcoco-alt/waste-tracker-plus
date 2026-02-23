@@ -115,12 +115,16 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
   return (
     <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-5">
       
-      {/* Header Badge */}
-      <div className="flex items-center gap-2 justify-end">
-        <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
-          الحقول تحفظ تلقائياً — اكتب حرفين لظهور الاقتراحات
-        </span>
+      {/* Progress indicator - visual only */}
+      <div className="flex items-center gap-1.5 justify-center opacity-60">
+        {['وجهة', 'أطراف', 'سائق', 'مخلفات', 'مواقع', 'كمية', 'تسعير'].map((step, i) => (
+          <div key={step} className="flex items-center gap-1.5">
+            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center border border-primary/20">
+              {i + 1}
+            </span>
+            {i < 6 && <div className="w-3 h-px bg-border" />}
+          </div>
+        ))}
       </div>
 
       {/* Pinned Parties Controls - for transporters */}
