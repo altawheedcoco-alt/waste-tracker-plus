@@ -640,27 +640,50 @@ const WazeLocationField = ({
 
           <div className="space-y-1">
             <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة • طبقة: {MAP_TILES[mapProvider].label}</div>
-            <div className={cn(
-              "transition-all duration-300 border rounded-lg overflow-hidden",
-              mapExpanded ? "h-[350px]" : "h-[200px]"
-            )}>
-              <LocationMiniMap 
-                lat={mapCenter.lat} 
-                lng={mapCenter.lng} 
-                zoom={mapZoom}
-                provider={mapProvider}
-                onLocationSelect={async (lat, lng) => {
-                  const address = await reverseGeocode(lat, lng);
-                  if (address) {
-                    onChange(address, { lat, lng });
-                  } else {
-                    onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
-                  }
-                  setMapCenter({ lat, lng });
-                  setMapZoom(15);
-                  toast.success('📍 تم تحديد الموقع من الخريطة');
-                }}
-              />
+            <div className="grid grid-cols-2 gap-2">
+              {/* Interactive Leaflet Map */}
+              <div className={cn(
+                "transition-all duration-300 border rounded-lg overflow-hidden",
+                mapExpanded ? "h-[350px]" : "h-[200px]"
+              )}>
+                <LocationMiniMap 
+                  lat={mapCenter.lat} 
+                  lng={mapCenter.lng} 
+                  zoom={mapZoom}
+                  provider={mapProvider}
+                  onLocationSelect={async (lat, lng) => {
+                    const address = await reverseGeocode(lat, lng);
+                    if (address) {
+                      onChange(address, { lat, lng });
+                    } else {
+                      onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
+                    }
+                    setMapCenter({ lat, lng });
+                    setMapZoom(15);
+                    toast.success('📍 تم تحديد الموقع من الخريطة');
+                  }}
+                />
+              </div>
+              {/* Waze Live iFrame */}
+              <div className={cn(
+                "transition-all duration-300 border rounded-lg overflow-hidden relative",
+                mapExpanded ? "h-[350px]" : "h-[200px]"
+              )}>
+                <div className="absolute top-1.5 right-1.5 z-10">
+                  <Badge variant="secondary" className="text-[9px] gap-1 bg-background/90 backdrop-blur-sm shadow-sm">
+                    <Navigation className="w-2.5 h-2.5" />
+                    Waze Live
+                  </Badge>
+                </div>
+                <iframe
+                  src={`https://embed.waze.com/iframe?zoom=${mapZoom > 16 ? 16 : mapZoom}&lat=${mapCenter.lat}&lon=${mapCenter.lng}&pin=1`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  title="Waze Live Map"
+                />
+              </div>
             </div>
           </div>
         </div>
