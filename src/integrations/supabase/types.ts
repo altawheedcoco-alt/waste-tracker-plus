@@ -30076,6 +30076,7 @@ export type Database = {
         | "consulting_office"
         | "iso_body"
         | "regulator"
+        | "transport_office"
       shipment_status:
         | "new"
         | "registered"
@@ -30292,6 +30293,7 @@ export const Constants = {
         "consulting_office",
         "iso_body",
         "regulator",
+        "transport_office",
       ],
       shipment_status: [
         "new",
