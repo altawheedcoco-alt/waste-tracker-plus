@@ -1,6 +1,7 @@
 import { useMemo, lazy, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { useEmployeeDashboardData } from '@/hooks/useEmployeeDashboardData';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -10,12 +11,15 @@ import StoryCircles from '@/components/stories/StoryCircles';
 import {
   User, Package, DollarSign, FileText, Truck, Users,
   Settings, ShieldCheck, BarChart3, Eye, ClipboardList,
-  Loader2, Building2
+  Loader2, Building2, CalendarDays
 } from 'lucide-react';
 import PermissionGate from '@/components/common/PermissionGate';
+import EmployeeKPICards from './employee/EmployeeKPICards';
+import EmployeeLeaveWidget from './employee/EmployeeLeaveWidget';
+import EmployeeNotificationsWidget from './employee/EmployeeNotificationsWidget';
+import EmployeeContextWidgets from './employee/EmployeeContextWidgets';
 
-// Lazy load tab content
-const ShipmentCard = lazy(() => import('@/components/shipments/ShipmentCard'));
+// Lazy load heavy tab content
 const PendingApprovalsWidget = lazy(() => import('@/components/shipments/PendingApprovalsWidget'));
 const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
 const DriverCodeLookup = lazy(() => import('@/components/drivers/DriverCodeLookup'));
@@ -40,12 +44,13 @@ const orgTypeLabels: Record<string, string> = {
 const EmployeeDashboard = () => {
   const { profile, organization, roles } = useAuth();
   const { hasPermission, hasAnyPermission, permissions, isLoading: permsLoading } = useMyPermissions();
+  const { data: stats, isLoading: statsLoading } = useEmployeeDashboardData();
   const navigate = useNavigate();
-  const orgType = organization?.organization_type as string | undefined;
+  const orgType = organization?.organization_type as string || '';
 
   // Build available tabs based on permissions
   const availableTabs = useMemo(() => {
-    const tabs: { id: string; label: string; icon: React.ElementType; permission?: string[] }[] = [
+    const tabs: { id: string; label: string; icon: React.ElementType }[] = [
       { id: 'overview', label: 'نظرة عامة', icon: Eye },
     ];
 
@@ -67,6 +72,8 @@ const EmployeeDashboard = () => {
     if (hasAnyPermission('view_reports', 'create_reports', 'export_reports')) {
       tabs.push({ id: 'reports', label: 'التقارير', icon: FileText });
     }
+    // Always show leave tab
+    tabs.push({ id: 'leave', label: 'الإجازات', icon: CalendarDays });
     if (hasPermission('view_settings')) {
       tabs.push({ id: 'settings', label: 'الإعدادات', icon: Settings });
     }
@@ -74,7 +81,7 @@ const EmployeeDashboard = () => {
     return tabs;
   }, [hasPermission, hasAnyPermission, permissions]);
 
-  if (permsLoading) {
+  if (permsLoading || statsLoading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -104,77 +111,63 @@ const EmployeeDashboard = () => {
                   {orgTypeLabels[orgType] || orgType}
                 </Badge>
               )}
+              {stats?.erpEmployee && (
+                <>
+                  <span className="text-xs">•</span>
+                  <span className="text-xs">{stats.erpEmployee.job_title || stats.erpEmployee.department}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          {stats?.erpEmployee?.employee_number && (
+            <Badge variant="outline" className="gap-1 text-xs">
+              رقم: {stats.erpEmployee.employee_number}
+            </Badge>
+          )}
           <Badge variant="outline" className="gap-1">
             <ShieldCheck className="w-3 h-3" />
-            {permissions.length === 0 ? 'بدون صلاحيات محددة' : `${permissions.length} صلاحية`}
+            {permissions.length === 0 ? 'بدون صلاحيات' : `${permissions.length} صلاحية`}
           </Badge>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <PermissionGate permissions={['view_shipments']}>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/dashboard/shipments')}>
-            <CardContent className="p-4 text-center">
-              <Package className="w-7 h-7 text-primary mx-auto mb-1.5" />
-              <p className="text-xs text-muted-foreground">الشحنات</p>
-              <p className="text-sm font-medium mt-1">عرض ومتابعة</p>
-            </CardContent>
-          </Card>
-        </PermissionGate>
-        <PermissionGate permissions={['view_deposits']}>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/dashboard/deposits')}>
-            <CardContent className="p-4 text-center">
-              <DollarSign className="w-7 h-7 text-primary mx-auto mb-1.5" />
-              <p className="text-xs text-muted-foreground">الإيداعات</p>
-              <p className="text-sm font-medium mt-1">إدارة مالية</p>
-            </CardContent>
-          </Card>
-        </PermissionGate>
-        <PermissionGate permissions={['view_reports']}>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/dashboard/reports')}>
-            <CardContent className="p-4 text-center">
-              <FileText className="w-7 h-7 text-primary mx-auto mb-1.5" />
-              <p className="text-xs text-muted-foreground">التقارير</p>
-              <p className="text-sm font-medium mt-1">عرض وتصدير</p>
-            </CardContent>
-          </Card>
-        </PermissionGate>
-        <PermissionGate permissions={['view_partners']}>
-          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/dashboard/partners')}>
-            <CardContent className="p-4 text-center">
-              <Users className="w-7 h-7 text-primary mx-auto mb-1.5" />
-              <p className="text-xs text-muted-foreground">الشركاء</p>
-              <p className="text-sm font-medium mt-1">الجهات المرتبطة</p>
-            </CardContent>
-          </Card>
-        </PermissionGate>
-      </div>
+      {/* KPI Cards */}
+      {stats && <EmployeeKPICards stats={stats} orgType={orgType} />}
 
       {/* Tabbed Content */}
-      {availableTabs.length > 1 && (
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full flex flex-wrap h-auto gap-1 p-1">
-            {availableTabs.map(tab => (
-              <TabsTrigger key={tab.id} value={tab.id} className="gap-1.5 text-xs sm:text-sm">
-                <tab.icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="w-full flex flex-wrap h-auto gap-1 p-1">
+          {availableTabs.map(tab => (
+            <TabsTrigger key={tab.id} value={tab.id} className="gap-1.5 text-xs sm:text-sm">
+              <tab.icon className="w-3.5 h-3.5" />
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-          <TabsContent value="overview" className="mt-4 space-y-4">
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="mt-4 space-y-4">
+          {/* Context-aware quick actions */}
+          <EmployeeContextWidgets orgType={orgType} />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Leave Balances */}
+            {stats && <EmployeeLeaveWidget balances={stats.leaveBalances} />}
+
+            {/* Notifications */}
+            {stats && <EmployeeNotificationsWidget notifications={stats.recentNotifications} />}
+          </div>
+
+          {/* Pending Approvals */}
+          <PermissionGate permissions={['view_shipments', 'manage_shipments']}>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <ClipboardList className="w-5 h-5" />
-                  ملخص المهام
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ClipboardList className="w-4 h-4" />
+                  الموافقات المعلقة
                 </CardTitle>
-                <CardDescription>المهام والإشعارات المخصصة لك</CardDescription>
               </CardHeader>
               <CardContent>
                 <Suspense fallback={<TabFallback />}>
@@ -182,119 +175,165 @@ const EmployeeDashboard = () => {
                 </Suspense>
               </CardContent>
             </Card>
-
-            <Suspense fallback={<TabFallback />}>
-              <UnifiedDocumentSearch />
-            </Suspense>
-
-            <PermissionGate permissions={['view_drivers']}>
-              <Suspense fallback={<TabFallback />}>
-                <DriverCodeLookup />
-              </Suspense>
-            </PermissionGate>
-          </TabsContent>
-
-          <PermissionGate permissions={['view_shipments']}>
-            <TabsContent value="shipments" className="mt-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">إدارة الشحنات</h3>
-                <PermissionGate permissions={['create_shipments']}>
-                  <Button size="sm" onClick={() => navigate('/dashboard/shipments')}>
-                    عرض الكل
-                  </Button>
-                </PermissionGate>
-              </div>
-              <Suspense fallback={<TabFallback />}>
-                <PendingApprovalsWidget />
-              </Suspense>
-            </TabsContent>
           </PermissionGate>
 
-          <PermissionGate permissions={['view_deposits']}>
-            <TabsContent value="deposits" className="mt-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <DollarSign className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">لإدارة الإيداعات والمعاملات المالية</p>
-                  <Button className="mt-3" onClick={() => navigate('/dashboard/deposits')}>
-                    الذهاب للإيداعات
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </PermissionGate>
+          {/* Document Search */}
+          <Suspense fallback={<TabFallback />}>
+            <UnifiedDocumentSearch />
+          </Suspense>
 
-          <PermissionGate permissions={['view_accounts']}>
-            <TabsContent value="accounts" className="mt-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <BarChart3 className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">لعرض الحسابات والتقارير المالية</p>
-                  <Button className="mt-3" onClick={() => navigate('/dashboard/accounts')}>
-                    الذهاب للحسابات
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </PermissionGate>
-
-          <PermissionGate permissions={['view_partners']}>
-            <TabsContent value="partners" className="mt-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">عرض وإدارة الجهات المرتبطة بالمنظمة</p>
-                  <Button className="mt-3" onClick={() => navigate('/dashboard/partners')}>
-                    الذهاب للشركاء
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </PermissionGate>
-
+          {/* Driver Lookup (for transport-related orgs) */}
           <PermissionGate permissions={['view_drivers']}>
-            <TabsContent value="drivers" className="mt-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <Truck className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">إدارة السائقين والمركبات</p>
-                  <Button className="mt-3" onClick={() => navigate('/dashboard/fleet')}>
-                    إدارة الأسطول
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
+            <Suspense fallback={<TabFallback />}>
+              <DriverCodeLookup />
+            </Suspense>
           </PermissionGate>
+        </TabsContent>
 
-          <PermissionGate permissions={['view_reports']}>
-            <TabsContent value="reports" className="mt-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">عرض وتصدير التقارير</p>
-                  <Button className="mt-3" onClick={() => navigate('/dashboard/reports')}>
-                    الذهاب للتقارير
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </PermissionGate>
+        {/* Shipments Tab */}
+        <PermissionGate permissions={['view_shipments']}>
+          <TabsContent value="shipments" className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">إدارة الشحنات</h3>
+              <PermissionGate permissions={['create_shipments']}>
+                <Button size="sm" onClick={() => navigate('/dashboard/shipments/new')}>
+                  شحنة جديدة
+                </Button>
+              </PermissionGate>
+            </div>
+            <Suspense fallback={<TabFallback />}>
+              <PendingApprovalsWidget />
+            </Suspense>
+            <Button variant="outline" className="w-full" onClick={() => navigate('/dashboard/shipments')}>
+              عرض كل الشحنات
+            </Button>
+          </TabsContent>
+        </PermissionGate>
 
-          <PermissionGate permissions={['view_settings']}>
-            <TabsContent value="settings" className="mt-4">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <Settings className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">إعدادات المنظمة</p>
-                  <Button className="mt-3" onClick={() => navigate('/dashboard/settings')}>
-                    الذهاب للإعدادات
-                  </Button>
+        {/* Deposits Tab */}
+        <PermissionGate permissions={['view_deposits']}>
+          <TabsContent value="deposits" className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">الإيداعات والمعاملات المالية</h3>
+              <PermissionGate permissions={['create_deposits']}>
+                <Button size="sm" onClick={() => navigate('/dashboard/deposits/new')}>
+                  إيداع جديد
+                </Button>
+              </PermissionGate>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/deposits')}>
+                <CardContent className="p-4 text-center">
+                  <DollarSign className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <p className="text-sm font-medium">كل الإيداعات</p>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </PermissionGate>
-        </Tabs>
-      )}
+              <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/accounts')}>
+                <CardContent className="p-4 text-center">
+                  <BarChart3 className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <p className="text-sm font-medium">كشف الحساب</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </PermissionGate>
+
+        {/* Accounts Tab */}
+        <PermissionGate permissions={['view_accounts']}>
+          <TabsContent value="accounts" className="mt-4">
+            <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/accounts')}>
+              <CardContent className="p-6 text-center">
+                <BarChart3 className="w-10 h-10 text-primary mx-auto mb-3" />
+                <h3 className="font-semibold mb-1">الحسابات والتقارير المالية</h3>
+                <p className="text-sm text-muted-foreground mb-3">عرض كشوف الحسابات والأرصدة</p>
+                <Button>فتح الحسابات</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </PermissionGate>
+
+        {/* Partners Tab */}
+        <PermissionGate permissions={['view_partners']}>
+          <TabsContent value="partners" className="mt-4">
+            <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/partners')}>
+              <CardContent className="p-6 text-center">
+                <Users className="w-10 h-10 text-primary mx-auto mb-3" />
+                <h3 className="font-semibold mb-1">الجهات المرتبطة</h3>
+                <p className="text-sm text-muted-foreground mb-3">عرض وإدارة الشركاء والجهات</p>
+                <Button>فتح الجهات المرتبطة</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </PermissionGate>
+
+        {/* Drivers Tab */}
+        <PermissionGate permissions={['view_drivers']}>
+          <TabsContent value="drivers" className="mt-4 space-y-4">
+            <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/fleet')}>
+              <CardContent className="p-6 text-center">
+                <Truck className="w-10 h-10 text-primary mx-auto mb-3" />
+                <h3 className="font-semibold mb-1">إدارة السائقين والأسطول</h3>
+                <p className="text-sm text-muted-foreground mb-3">متابعة السائقين والمركبات</p>
+                <Button>فتح الأسطول</Button>
+              </CardContent>
+            </Card>
+            <Suspense fallback={<TabFallback />}>
+              <DriverCodeLookup />
+            </Suspense>
+          </TabsContent>
+        </PermissionGate>
+
+        {/* Reports Tab */}
+        <PermissionGate permissions={['view_reports']}>
+          <TabsContent value="reports" className="mt-4">
+            <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/reports')}>
+              <CardContent className="p-6 text-center">
+                <FileText className="w-10 h-10 text-primary mx-auto mb-3" />
+                <h3 className="font-semibold mb-1">التقارير</h3>
+                <p className="text-sm text-muted-foreground mb-3">عرض وتصدير التقارير</p>
+                <Button>فتح التقارير</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </PermissionGate>
+
+        {/* Leave Tab - always visible */}
+        <TabsContent value="leave" className="mt-4 space-y-4">
+          {stats && <EmployeeLeaveWidget balances={stats.leaveBalances} />}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/hr/leave-requests')}>
+              <CardContent className="p-4 text-center">
+                <CalendarDays className="w-8 h-8 text-primary mx-auto mb-2" />
+                <p className="text-sm font-medium">طلبات الإجازة</p>
+                {(stats?.pendingLeaveRequests || 0) > 0 && (
+                  <Badge variant="secondary" className="mt-1">{stats?.pendingLeaveRequests} معلقة</Badge>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/hr/attendance')}>
+              <CardContent className="p-4 text-center">
+                <ClipboardList className="w-8 h-8 text-primary mx-auto mb-2" />
+                <p className="text-sm font-medium">سجل الحضور</p>
+                <p className="text-xs text-muted-foreground mt-1">{stats?.monthAttendanceDays || 0} يوم هذا الشهر</p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* Settings Tab */}
+        <PermissionGate permissions={['view_settings']}>
+          <TabsContent value="settings" className="mt-4">
+            <Card className="cursor-pointer hover:shadow-md" onClick={() => navigate('/dashboard/settings')}>
+              <CardContent className="p-6 text-center">
+                <Settings className="w-10 h-10 text-primary mx-auto mb-3" />
+                <h3 className="font-semibold mb-1">إعدادات المنظمة</h3>
+                <p className="text-sm text-muted-foreground mb-3">إدارة إعدادات وتفضيلات الجهة</p>
+                <Button>فتح الإعدادات</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </PermissionGate>
+      </Tabs>
 
       {/* No permissions message */}
       {permissions.length === 0 && !permsLoading && (
