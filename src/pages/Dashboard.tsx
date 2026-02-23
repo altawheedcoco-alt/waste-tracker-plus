@@ -21,6 +21,9 @@ const AdminDashboard = lazy(() => import('@/components/dashboard/AdminDashboard'
 const DriverDashboard = lazy(() => import('@/components/dashboard/DriverDashboard'));
 const DisposalDashboard = lazy(() => import('@/components/dashboard/DisposalDashboard'));
 const TransportOfficeDashboard = lazy(() => import('@/components/dashboard/TransportOfficeDashboard'));
+const ConsultantDashboard = lazy(() => import('@/components/dashboard/ConsultantDashboard'));
+const ConsultingOfficeDashboard = lazy(() => import('@/components/dashboard/ConsultingOfficeDashboard'));
+const ISOBodyDashboard = lazy(() => import('@/components/dashboard/ISOBodyDashboard'));
 const CallLogWidget = lazy(() => import('@/components/calls/CallLogWidget'));
 const AIOperationsAssistant = lazy(() => import('@/components/ai/AIOperationsAssistant'));
 
@@ -83,6 +86,9 @@ const Dashboard = () => {
         case 'recycler': return <RecyclerDashboard />;
         case 'disposal': return <DisposalDashboard embedded />;
         case 'transport_office': return <TransportOfficeDashboard />;
+        case 'consultant': return <ConsultantDashboard />;
+        case 'consulting_office': return <ConsultingOfficeDashboard />;
+        case 'iso_body': return <ISOBodyDashboard />;
         default: return <AdminDashboard />;
       }
     }
@@ -92,6 +98,9 @@ const Dashboard = () => {
       case 'recycler': return <RecyclerDashboard />;
       case 'disposal': return <DisposalDashboard embedded />;
       case 'transport_office': return <TransportOfficeDashboard />;
+      case 'consultant': return <ConsultantDashboard />;
+      case 'consulting_office': return <ConsultingOfficeDashboard />;
+      case 'iso_body': return <ISOBodyDashboard />;
       default: return <GeneratorDashboard />;
     }
   };
