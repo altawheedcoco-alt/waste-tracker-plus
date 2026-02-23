@@ -702,17 +702,15 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
                         </span>
                       </div>
                     </div>
-                    <div className="h-[500px]">
+                    <div className="h-[400px]">
                       <iframe
-                        src={`https://www.waze.com/ar/live-map/directions?from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}&utm_campaign=iframe_search&utm_medium=web-iframe-desktop`}
+                        src={`https://embed.waze.com/iframe?zoom=13&lat=${(pickupCoords.lat + deliveryCoords.lat) / 2}&lon=${(pickupCoords.lng + deliveryCoords.lng) / 2}&from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}&pin=1`}
                         width="100%"
                         height="100%"
                         style={{ border: 0 }}
                         allowFullScreen
                         loading="lazy"
-                        referrerPolicy="no-referrer"
-                        title="Waze Live Directions"
-                        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+                        title="Waze Directions"
                       />
                     </div>
                   </div>
