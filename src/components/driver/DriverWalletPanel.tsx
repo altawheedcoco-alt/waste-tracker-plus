@@ -21,7 +21,7 @@ const levelConfig = {
 };
 
 const rewardOptions = [
-  { id: 'fuel', label: 'قسيمة وقود', points: 100, icon: Fuel, description: '50 ريال بنزين' },
+  { id: 'fuel', label: 'قسيمة وقود', points: 100, icon: Fuel, description: '50 ج.م بنزين' },
   { id: 'maintenance', label: 'صيانة مجانية', points: 250, icon: Wrench, description: 'فحص شامل للمركبة' },
   { id: 'dayoff', label: 'يوم إجازة', points: 500, icon: CalendarDays, description: 'إجازة مدفوعة' },
 ];

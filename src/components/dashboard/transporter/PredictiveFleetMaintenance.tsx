@@ -188,7 +188,7 @@ const PredictiveFleetMaintenance = () => {
         <Card><CardContent className="pt-4 text-center">
           <Fuel className="w-6 h-6 mx-auto text-orange-500 mb-1" />
           <div className="text-2xl font-bold">{totalCost.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground">إجمالي التكاليف (ريال)</div>
+          <div className="text-xs text-muted-foreground">إجمالي التكاليف (ج.م)</div>
         </CardContent></Card>
       </div>
 
@@ -258,7 +258,7 @@ const PredictiveFleetMaintenance = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Input type="number" placeholder="عداد الكيلومتر" value={newRecord.odometer_km} onChange={e => setNewRecord(p => ({ ...p, odometer_km: e.target.value }))} />
-              <Input type="number" placeholder="التكلفة (ريال)" value={newRecord.cost} onChange={e => setNewRecord(p => ({ ...p, cost: e.target.value }))} />
+              <Input type="number" placeholder="التكلفة (ج.م)" value={newRecord.cost} onChange={e => setNewRecord(p => ({ ...p, cost: e.target.value }))} />
               <Input placeholder="ملاحظات" value={newRecord.notes} onChange={e => setNewRecord(p => ({ ...p, notes: e.target.value }))} />
             </div>
             <Button onClick={addMaintenance} size="sm">حفظ</Button>
@@ -290,7 +290,7 @@ const PredictiveFleetMaintenance = () => {
                   </div>
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <span>{record.scheduled_date}</span>
-                    {record.cost > 0 && <span>{record.cost} ريال</span>}
+                    {record.cost > 0 && <span>{record.cost} ج.م</span>}
                     {record.status === 'scheduled' && (
                       <Button variant="ghost" size="sm" onClick={() => completeMaintenance(record.id)}>
                         <CheckCircle className="w-4 h-4" />
