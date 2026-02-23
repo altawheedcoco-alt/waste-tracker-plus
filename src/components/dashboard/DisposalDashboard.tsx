@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck } from 'lucide-react';
+import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, Wrench, BarChart3, Users, FileText, Settings } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
-import FacilityDashboardHeader from '@/components/dashboard/shared/FacilityDashboardHeader';
+import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useNavigate } from 'react-router-dom';
+import FacilityDashboardHeader from '@/components/dashboard/shared/FacilityDashboardHeader';
 import FacilityCapacityCard from '@/components/dashboard/shared/FacilityCapacityCard';
 import StatsCardsGrid, { StatCardItem } from '@/components/dashboard/shared/StatsCardsGrid';
 import DisposalIncomingPanel from '@/components/dashboard/disposal/DisposalIncomingPanel';
@@ -18,7 +19,6 @@ import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
-import DashboardWidgetCustomizer from '@/components/dashboard/DashboardWidgetCustomizer';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
@@ -80,31 +80,21 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  // Fetch disposal facility linked to this organization
   const { data: facility } = useQuery({
     queryKey: ['disposal-facility', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return null;
-      const { data } = await supabase
-        .from('disposal_facilities')
-        .select('*')
-        .eq('organization_id', organization.id)
-        .single();
+      const { data } = await supabase.from('disposal_facilities').select('*').eq('organization_id', organization.id).single();
       return data;
     },
     enabled: !!organization?.id
   });
 
-  // Fetch operations stats
   const { data: operationsStats, isLoading: statsLoading } = useQuery({
     queryKey: ['disposal-operations-stats', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return null;
-      const { data } = await supabase
-        .from('disposal_operations')
-        .select('status, quantity')
-        .eq('organization_id', organization.id);
-      
+      const { data } = await supabase.from('disposal_operations').select('status, quantity').eq('organization_id', organization.id);
       return {
         total: data?.length || 0,
         pending: data?.filter(o => o.status === 'pending').length || 0,
@@ -116,12 +106,10 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
     enabled: !!organization?.id
   });
 
-  // Fetch recent shipments destined to this disposal facility
   const { data: shipmentsData, isLoading: shipmentsLoading } = useQuery({
     queryKey: ['disposal-shipments', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
-
       const { data: shipments, error } = await supabase
         .from('shipments')
         .select(`
@@ -138,7 +126,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         .eq('recycler_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(10);
-
       if (error) throw error;
       return (shipments || []) as unknown as RecentShipment[];
     },
@@ -150,7 +137,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   // Realtime subscription
   useEffect(() => {
     if (!organization?.id) return;
-
     const channel = supabase
       .channel(getTabChannelName('disposal-ops-realtime'))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'disposal_operations', filter: `organization_id=eq.${organization.id}` },
@@ -168,7 +154,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         () => { queryClient.invalidateQueries({ queryKey: ['disposal-shipments'] }); }
       )
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [organization?.id, queryClient]);
 
@@ -181,11 +166,11 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   };
 
   const statsCards: StatCardItem[] = [
-    { title: 'إجمالي العمليات', value: operationsStats?.total || 0, icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-    { title: 'شحنات واردة', value: recentShipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length, icon: Truck, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
-    { title: 'قيد المعالجة', value: operationsStats?.processing || 0, icon: Clock, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
-    { title: 'مكتملة', value: operationsStats?.completed || 0, icon: CheckCircle, color: 'text-green-500', bgColor: 'bg-green-500/10' },
-    { title: 'إجمالي الكميات', value: operationsStats?.totalQuantity?.toFixed(1) || '0', subtitle: 'طن', icon: TrendingUp, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
+    { title: 'إجمالي العمليات', value: operationsStats?.total || 0, icon: Package, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { title: 'شحنات واردة', value: recentShipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length, icon: Truck, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { title: 'قيد المعالجة', value: operationsStats?.processing || 0, icon: Clock, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { title: 'مكتملة', value: operationsStats?.completed || 0, icon: CheckCircle, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { title: 'إجمالي الكميات', value: operationsStats?.totalQuantity?.toFixed(1) || '0', subtitle: 'طن', icon: TrendingUp, color: 'text-primary', bgColor: 'bg-primary/10' },
   ];
 
   const quickActions = useQuickActions({ type: 'disposal', handlers: {
@@ -199,7 +184,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
       {/* Mission Control Button */}
       <Button
-        className="w-full gap-3 h-14 text-base bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 shadow-lg"
+        className="w-full gap-3 h-14 text-base bg-gradient-to-r from-destructive to-primary hover:opacity-90 shadow-lg"
         onClick={() => navigate('/dashboard/disposal/mission-control')}
       >
         <Shield className="w-5 h-5" />
@@ -212,94 +197,125 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         orgLabel="جهة التخلص النهائي"
         orgLogoUrl={organization?.logo_url}
         icon={Factory}
-        iconGradient="from-red-500 to-orange-600"
+        iconGradient="from-destructive to-primary"
         facility={facility}
         onSmartWeightUpload={() => setShowSmartWeightUpload(true)}
         onRefresh={handleRefresh}
       />
 
       {facility && <FacilityCapacityCard facility={facility} />}
-
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
-
-      {/* Automation Toggle */}
       <AutomationSettingsDialog organizationType="disposal" />
 
-      <DisposalDailyOperations />
-      <OperationalAlertsWidget />
-      <UnifiedDocumentSearch />
-      <DriverCodeLookup />
-      <DisposalIncomingPanel facilityId={facility?.id} />
-      <PendingApprovalsWidget />
+      {/* Main Tabs */}
+      <Tabs defaultValue="operations" className="w-full">
+        <TabsList className="w-full flex flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="operations" className="gap-1 text-xs sm:text-sm">
+            <Package className="w-3.5 h-3.5" /> العمليات
+          </TabsTrigger>
+          <TabsTrigger value="shipments" className="gap-1 text-xs sm:text-sm">
+            <Truck className="w-3.5 h-3.5" /> الشحنات الواردة
+          </TabsTrigger>
+          <TabsTrigger value="compliance" className="gap-1 text-xs sm:text-sm">
+            <Shield className="w-3.5 h-3.5" /> الامتثال
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1 text-xs sm:text-sm">
+            <FileText className="w-3.5 h-3.5" /> المستندات
+          </TabsTrigger>
+          <TabsTrigger value="fleet" className="gap-1 text-xs sm:text-sm">
+            <Truck className="w-3.5 h-3.5" /> الأسطول
+          </TabsTrigger>
+        </TabsList>
 
-      <QuickActionsGrid
-        actions={quickActions}
-        title="الإجراءات السريعة"
-        subtitle="وظائف التخلص النهائي المستخدمة بكثرة"
-      />
+        {/* Operations Tab */}
+        <TabsContent value="operations" className="mt-4 space-y-4">
+          <DisposalDailyOperations />
+          <OperationalAlertsWidget />
+          <DisposalIncomingPanel facilityId={facility?.id} />
+          <PendingApprovalsWidget />
+          <QuickActionsGrid
+            actions={quickActions}
+            title="الإجراءات السريعة"
+            subtitle="وظائف التخلص النهائي"
+          />
+          <DisposalRecentOperations />
+        </TabsContent>
 
-      {/* Recent Shipments - like recycler but with disposal naming */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 flex-wrap">
-              <BulkCertificateButton
-                shipments={recentShipments.map(s => ({
-                  id: s.id, shipment_number: s.shipment_number, status: s.status,
-                  created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
-                  unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
-                  has_report: s.has_report,
-                  generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
-                  transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
-                  recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
-                }))}
-                type="certificate"
-                onSuccess={handleRefresh}
-              />
-              <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
-                <Eye className="ml-2 h-4 w-4" />
-                عرض الكل
-              </Button>
-            </div>
-            <div className="text-right">
-              <CardTitle className="flex items-center gap-2 justify-end">
-                <Factory className="w-5 h-5" />
-                الشحنات الواردة للتخلص
-              </CardTitle>
-              <CardDescription>آخر 10 شحنات واردة إلى منشأة التخلص النهائي</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {shipmentsLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="animate-pulse h-24 bg-muted rounded-lg" />
-              ))}
-            </div>
-          ) : recentShipments.length === 0 ? (
-            <div className="text-center py-8">
-              <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
-              <CreateShipmentButton className="mt-4" onSuccess={handleRefresh} />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentShipments.map((shipment) => (
-                <ShipmentCard key={shipment.id} shipment={shipment} onStatusChange={handleRefresh} />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        {/* Shipments Tab */}
+        <TabsContent value="shipments" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <BulkCertificateButton
+                    shipments={recentShipments.map(s => ({
+                      id: s.id, shipment_number: s.shipment_number, status: s.status,
+                      created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
+                      unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
+                      has_report: s.has_report,
+                      generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
+                      transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
+                      recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
+                    }))}
+                    type="certificate"
+                    onSuccess={handleRefresh}
+                  />
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
+                    <Eye className="ml-2 h-4 w-4" />
+                    عرض الكل
+                  </Button>
+                </div>
+                <div className="text-right">
+                  <CardTitle className="flex items-center gap-2 justify-end">
+                    <Factory className="w-5 h-5" />
+                    الشحنات الواردة للتخلص
+                  </CardTitle>
+                  <CardDescription>آخر 10 شحنات واردة إلى منشأة التخلص النهائي</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {shipmentsLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="animate-pulse h-24 bg-muted rounded-lg" />
+                  ))}
+                </div>
+              ) : recentShipments.length === 0 ? (
+                <div className="text-center py-8">
+                  <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
+                  <CreateShipmentButton className="mt-4" onSuccess={handleRefresh} />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentShipments.map((shipment) => (
+                    <ShipmentCard key={shipment.id} shipment={shipment} onStatusChange={handleRefresh} />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      <DisposalRecentOperations />
+        {/* Compliance Tab */}
+        <TabsContent value="compliance" className="mt-4 space-y-4">
+          <LegalComplianceWidget />
+          <IncidentReportManager />
+        </TabsContent>
 
-      {/* Legal Compliance */}
-      <LegalComplianceWidget />
-      <VehicleComplianceManager />
-      <DriverComplianceManager />
-      <IncidentReportManager />
+        {/* Documents Tab */}
+        <TabsContent value="documents" className="mt-4 space-y-4">
+          <UnifiedDocumentSearch />
+          <DriverCodeLookup />
+        </TabsContent>
+
+        {/* Fleet Tab */}
+        <TabsContent value="fleet" className="mt-4 space-y-4">
+          <VehicleComplianceManager />
+          <DriverComplianceManager />
+        </TabsContent>
+      </Tabs>
 
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
