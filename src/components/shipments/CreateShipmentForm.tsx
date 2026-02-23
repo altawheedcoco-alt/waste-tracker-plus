@@ -660,8 +660,8 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
                     </span>
                   </div>
 
-                  {/* Waze Directions iFrame */}
-                  <div className="rounded-xl border overflow-hidden bg-card">
+                  {/* Waze Full Directions Page */}
+                  <div className="rounded-xl border overflow-hidden bg-card shadow-sm">
                     <div className="flex items-center justify-between p-3 bg-muted/40 border-b">
                       <div className="flex items-center gap-2">
                         <Button
@@ -671,7 +671,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
                           className="h-7 text-[11px] gap-1.5"
                           onClick={() => {
                             window.open(
-                              `https://waze.com/ul?ll=${deliveryCoords.lat},${deliveryCoords.lng}&navigate=yes&from=ll.${pickupCoords.lat},${pickupCoords.lng}`,
+                              `https://www.waze.com/ar/live-map/directions?from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}`,
                               '_blank'
                             );
                           }}
@@ -698,18 +698,21 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
                       <div className="flex items-center gap-2">
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold border border-primary/20">
                           <Route className="w-3 h-3" />
-                          اتجاهات القيادة
+                          اتجاهات القيادة - Waze Live
                         </span>
                       </div>
                     </div>
-                    <div className="h-[350px]">
+                    <div className="h-[500px]">
                       <iframe
-                        src={`https://embed.waze.com/iframe?zoom=13&lat=${(pickupCoords.lat + deliveryCoords.lat) / 2}&lon=${(pickupCoords.lng + deliveryCoords.lng) / 2}&from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}&pin=1`}
+                        src={`https://www.waze.com/ar/live-map/directions?from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}&utm_campaign=iframe_search&utm_medium=web-iframe-desktop`}
                         width="100%"
                         height="100%"
                         style={{ border: 0 }}
                         allowFullScreen
-                        title="Waze Driving Directions"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        title="Waze Live Directions"
+                        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
                       />
                     </div>
                   </div>
