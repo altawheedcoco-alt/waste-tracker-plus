@@ -106,7 +106,7 @@ const DriverEarningsDashboard = () => {
             >
               {earnings.month.toLocaleString('ar-SA')}
             </motion.p>
-            <p className="text-sm text-muted-foreground">ريال هذا الشهر</p>
+            <p className="text-sm text-muted-foreground">ج.م هذا الشهر</p>
           </div>
 
           {/* Projected */}
@@ -117,7 +117,7 @@ const DriverEarningsDashboard = () => {
             </div>
             <div className="text-left">
               <span className="font-bold">{earnings.projected.toLocaleString('ar-SA')}</span>
-              <span className="text-xs text-muted-foreground mr-1">ريال</span>
+              <span className="text-xs text-muted-foreground mr-1">ج.م</span>
             </div>
           </div>
 
@@ -177,7 +177,7 @@ const DriverEarningsDashboard = () => {
                 <p className="text-[10px] text-muted-foreground">{earnings.totalTrips} رحلة مكتملة</p>
               </div>
             </div>
-            <p className="text-lg font-bold text-primary">{earnings.total.toLocaleString('ar-SA')} <span className="text-xs text-muted-foreground">ريال</span></p>
+            <p className="text-lg font-bold text-primary">{earnings.total.toLocaleString('ar-SA')} <span className="text-xs text-muted-foreground">ج.م</span></p>
           </div>
         </CardContent>
       </Card>

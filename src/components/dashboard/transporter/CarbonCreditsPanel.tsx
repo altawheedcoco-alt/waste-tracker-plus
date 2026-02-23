@@ -109,7 +109,7 @@ const CarbonCreditsPanel = () => {
           <CardContent className="pt-4 text-center">
             <DollarSign className="w-6 h-6 mx-auto mb-1 text-primary" />
             <p className="text-2xl font-bold">{totalValueSAR.toFixed(0)}</p>
-            <p className="text-xs text-muted-foreground">ريال (قيمة تقديرية)</p>
+            <p className="text-xs text-muted-foreground">ج.م (قيمة تقديرية)</p>
           </CardContent>
         </Card>
         <Card>
@@ -158,7 +158,7 @@ const CarbonCreditsPanel = () => {
                   <div className="flex items-center gap-2">
                     <div className="text-left">
                       <p className="text-sm font-bold">{credit.carbon_tons} طن</p>
-                      <p className="text-xs text-muted-foreground">{credit.credit_value_sar} ريال</p>
+                      <p className="text-xs text-muted-foreground">{credit.credit_value_sar} ج.م</p>
                     </div>
                     <Badge variant="outline" className={statusColors[credit.status]}>
                       {statusLabels[credit.status]}

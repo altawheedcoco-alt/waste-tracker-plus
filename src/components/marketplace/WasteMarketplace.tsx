@@ -265,7 +265,7 @@ const WasteMarketplace = () => {
 
                   {(listing.min_price || listing.max_price) && (
                     <div className="text-sm font-medium text-primary">
-                      💰 {listing.min_price && `${listing.min_price.toLocaleString()}`} {listing.min_price && listing.max_price && ' - '} {listing.max_price && `${listing.max_price.toLocaleString()}`} ريال
+                      💰 {listing.min_price && `${listing.min_price.toLocaleString()}`} {listing.min_price && listing.max_price && ' - '} {listing.max_price && `${listing.max_price.toLocaleString()}`} ج.م
                     </div>
                   )}
 
@@ -317,7 +317,7 @@ const WasteMarketplace = () => {
             {myBids.map(bid => (
               <div key={bid.id} className="p-4 rounded-lg border flex items-center justify-between">
                 <div>
-                  <span className="font-bold">{bid.price.toLocaleString()} ريال</span>
+                  <span className="font-bold">{bid.price.toLocaleString()} ج.م</span>
                   <div className="text-sm text-muted-foreground">{new Date(bid.created_at).toLocaleDateString('ar')}</div>
                 </div>
                 <Badge variant={bid.status === 'accepted' ? 'default' : bid.status === 'rejected' ? 'destructive' : 'outline'}>
@@ -343,7 +343,7 @@ const WasteMarketplace = () => {
               {selectedListing?.special_requirements && <p><strong>متطلبات:</strong> {selectedListing?.special_requirements}</p>}
             </div>
             <div>
-              <label className="text-sm font-medium">عرض السعر (ريال) *</label>
+              <label className="text-sm font-medium">عرض السعر (ج.م) *</label>
               <Input type="number" value={bidAmount} onChange={e => setBidAmount(e.target.value)} placeholder="أدخل عرض السعر" />
             </div>
             <div>
@@ -379,8 +379,8 @@ const WasteMarketplace = () => {
               <Input placeholder="المدينة" value={newListing.pickup_city} onChange={e => setNewListing(p => ({ ...p, pickup_city: e.target.value }))} />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Input type="number" placeholder="أقل سعر (ريال)" value={newListing.min_price} onChange={e => setNewListing(p => ({ ...p, min_price: e.target.value }))} />
-              <Input type="number" placeholder="أعلى سعر (ريال)" value={newListing.max_price} onChange={e => setNewListing(p => ({ ...p, max_price: e.target.value }))} />
+              <Input type="number" placeholder="أقل سعر (ج.م)" value={newListing.min_price} onChange={e => setNewListing(p => ({ ...p, min_price: e.target.value }))} />
+              <Input type="number" placeholder="أعلى سعر (ج.م)" value={newListing.max_price} onChange={e => setNewListing(p => ({ ...p, max_price: e.target.value }))} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Input type="date" placeholder="التاريخ المفضل" value={newListing.preferred_date} onChange={e => setNewListing(p => ({ ...p, preferred_date: e.target.value }))} />

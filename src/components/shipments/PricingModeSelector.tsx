@@ -49,7 +49,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
       {formData.pricing_mode === 'driver_fee_plus_margin' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <Label className="text-sm">أجرة السائق (ريال)</Label>
+            <Label className="text-sm">أجرة السائق (ج.م)</Label>
             <Input
               type="number"
               value={formData.driver_fee}
@@ -72,7 +72,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
             />
           </div>
           <div>
-            <Label className="text-sm">مبلغ ثابت إضافي (ريال)</Label>
+            <Label className="text-sm">مبلغ ثابت إضافي (ج.م)</Label>
             <Input
               type="number"
               value={formData.transporter_margin_fixed}
@@ -87,7 +87,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
               <Badge variant="secondary" className="text-xs">
                 💡 إجمالي العميل ≈ {(
                   parseFloat(formData.driver_fee || '0') * (1 + parseFloat(formData.transporter_margin_percent || '0') / 100) + parseFloat(formData.transporter_margin_fixed || '0')
-                ).toFixed(2)} ريال
+                ).toFixed(2)} ج.م
               </Badge>
             </div>
           )}
@@ -97,7 +97,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
       {/* Transport Only */}
       {formData.pricing_mode === 'transport_only' && (
         <div>
-          <Label className="text-sm">تكلفة النقل (ريال)</Label>
+          <Label className="text-sm">تكلفة النقل (ج.م)</Label>
           <Input
             type="number"
             value={formData.manual_price}
@@ -113,7 +113,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
       {formData.pricing_mode === 'transport_and_disposal' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <Label className="text-sm">تكلفة النقل (ريال)</Label>
+            <Label className="text-sm">تكلفة النقل (ج.م)</Label>
             <Input
               type="number"
               value={formData.driver_fee}
@@ -124,7 +124,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
             />
           </div>
           <div>
-            <Label className="text-sm">تكلفة التخلص (ريال)</Label>
+            <Label className="text-sm">تكلفة التخلص (ج.م)</Label>
             <Input
               type="number"
               value={formData.disposal_cost}
@@ -137,7 +137,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
           {(formData.driver_fee || formData.disposal_cost) && (
             <div className="col-span-full">
               <Badge variant="secondary" className="text-xs">
-                💡 الإجمالي = {(parseFloat(formData.driver_fee || '0') + parseFloat(formData.disposal_cost || '0')).toFixed(2)} ريال
+                💡 الإجمالي = {(parseFloat(formData.driver_fee || '0') + parseFloat(formData.disposal_cost || '0')).toFixed(2)} ج.م
               </Badge>
             </div>
           )}
@@ -147,7 +147,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
       {/* Externally Agreed */}
       {formData.pricing_mode === 'externally_agreed' && (
         <div>
-          <Label className="text-sm">المبلغ المتفق عليه (ريال) - اختياري</Label>
+          <Label className="text-sm">المبلغ المتفق عليه (ج.م) - اختياري</Label>
           <Input
             type="number"
             value={formData.manual_price}
@@ -169,7 +169,7 @@ const PricingModeSelector = ({ formData, setFormData }: PricingModeSelectorProps
       {/* Manual */}
       {formData.pricing_mode === 'manual' && (
         <div>
-          <Label className="text-sm">السعر الإجمالي (ريال) *</Label>
+          <Label className="text-sm">السعر الإجمالي (ج.م) *</Label>
           <Input
             type="number"
             value={formData.manual_price}
