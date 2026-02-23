@@ -33,6 +33,7 @@ serve(async (req) => {
     const LOCATIONIQ_API_KEY = Deno.env.get("LOCATIONIQ_API_KEY");
     const OPENCAGE_API_KEY = Deno.env.get("OPENCAGE_API_KEY");
     const TOMTOM_API_KEY = Deno.env.get("TOMTOM_API_KEY");
+    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_MAPS_API_KEY");
 
     const promises: Promise<any[]>[] = [];
 
@@ -200,6 +201,28 @@ serve(async (req) => {
       );
     }
 
+    // 9. Google Places Text Search (best for POI/brands/companies)
+    if (GOOGLE_API_KEY) {
+      for (const sl of searchLangs) {
+        promises.push(
+          fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(q + " مصر")}&location=${lat},${lng}&radius=50000&language=${sl}&key=${GOOGLE_API_KEY}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+              if (!data?.results) return [];
+              return data.results.slice(0, 10).map((place: any, i: number) => ({
+                id: `google-${sl}-${i}`,
+                name: place.name || "",
+                address: place.formatted_address || place.vicinity || "",
+                lat: place.geometry?.location?.lat || 0,
+                lng: place.geometry?.location?.lng || 0,
+                source: "google",
+              }));
+            })
+            .catch(() => [])
+        );
+      }
+    }
+
     const allArrays = await Promise.all(promises);
     const allResults = allArrays.flat();
 
@@ -221,6 +244,7 @@ serve(async (req) => {
       LOCATIONIQ_API_KEY ? "locationiq" : null,
       OPENCAGE_API_KEY ? "opencage" : null,
       TOMTOM_API_KEY ? "tomtom" : null,
+      GOOGLE_API_KEY ? "google" : null,
       "mapbox",
       "photon",
       "herewego",
