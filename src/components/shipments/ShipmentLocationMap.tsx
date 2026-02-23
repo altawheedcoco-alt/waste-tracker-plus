@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed, X } from 'lucide-react';
+import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed, X, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
+import { searchEgyptLocations } from '@/data/egyptLocations';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
 
@@ -30,6 +30,7 @@ const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
   herewego: { label: 'HERE Auto', color: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400' },
   mapsme: { label: 'OSM', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
   tomtom: { label: 'TomTom', color: 'bg-red-500/15 text-red-700 dark:text-red-400' },
+  local: { label: 'محلي', color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' },
 };
 
 interface Coords {
@@ -101,6 +102,7 @@ const ShipmentLocationMap = ({
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -245,15 +247,11 @@ const ShipmentLocationMap = ({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Multi-source search via edge function
-  const handleSearch = useCallback(async () => {
-    if (!searchQuery.trim() || !mapRef.current) return;
-    setSearching(true);
-    setSearchResults([]);
-    setShowResults(true);
+  // Fetch from multi-geocode edge function
+  const fetchMultiGeo = useCallback(async (q: string): Promise<MultiGeoResult[]> => {
     try {
-      const center = mapRef.current.getCenter();
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/multi-geocode-search?q=${encodeURIComponent(searchQuery)}&lat=${center.lat}&lng=${center.lng}&lang=ar`;
+      const center = mapRef.current?.getCenter() || { lat: 30.0444, lng: 31.2357 };
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/multi-geocode-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lng=${center.lng}&lang=ar`;
       const res = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
@@ -261,43 +259,78 @@ const ShipmentLocationMap = ({
         },
       });
       const result = await res.json();
-      
-      if (result.results?.length) {
-        setSearchResults(result.results);
-      } else {
-        toast.error('لم يتم العثور على نتائج');
-        setShowResults(false);
-      }
+      return result.results || [];
     } catch {
-      toast.error('خطأ في البحث');
-      setShowResults(false);
-    } finally {
-      setSearching(false);
+      return [];
     }
-  }, [searchQuery]);
+  }, []);
 
-  // Select a result from multi-source dropdown
+  // Auto-search: local results instantly, multi-source with debounce
+  const performSearch = useCallback((q: string) => {
+    if (!q || q.length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      setSearching(false);
+      return;
+    }
+
+    // Instant local results
+    const localResults: MultiGeoResult[] = searchEgyptLocations(q).slice(0, 5).map((loc, i) => ({
+      id: `local-${loc.id || i}`,
+      name: loc.name,
+      address: `${loc.name}، ${loc.governorate}`,
+      lat: loc.lat,
+      lng: loc.lng,
+      source: 'local',
+    }));
+
+    setSearchResults(localResults);
+    setShowResults(true);
+    setSearching(true);
+
+    // Debounced multi-source search
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      const remoteResults = await fetchMultiGeo(q);
+      // Merge: local first, then remote (deduplicate by proximity)
+      const merged = [...localResults];
+      for (const r of remoteResults) {
+        const isDupe = merged.some(m => Math.abs(m.lat - r.lat) < 0.002 && Math.abs(m.lng - r.lng) < 0.002);
+        if (!isDupe && r.name) merged.push(r);
+      }
+      setSearchResults(merged);
+      setSearching(false);
+    }, 250);
+  }, [fetchMultiGeo]);
+
+  // Handle input change with auto-search
+  const handleInputChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    performSearch(value);
+  }, [performSearch]);
+
+  // Select a result — auto-set mode if not selected
   const handleSelectResult = useCallback((result: MultiGeoResult) => {
     const map = mapRef.current;
     if (!map) return;
     setShowResults(false);
     setSearchQuery(result.name);
-
     map.setView([result.lat, result.lng], 15);
 
-    if (mode === 'pickup') {
+    // Smart auto-mode: if no mode selected, pick the first empty slot
+    const activeMode = mode || (!pickupCoords ? 'pickup' : !deliveryCoords ? 'delivery' : 'pickup');
+
+    if (activeMode === 'pickup') {
       onPickupChange(result.address || result.name, { lat: result.lat, lng: result.lng });
       if (!deliveryCoords) setMode('delivery');
       else setMode(null);
-      toast.success('تم تحديد نقطة الاستلام');
-    } else if (mode === 'delivery') {
+      toast.success('✅ تم تحديد نقطة الاستلام');
+    } else {
       onDeliveryChange(result.address || result.name, { lat: result.lat, lng: result.lng });
       setMode(null);
-      toast.success('تم تحديد نقطة التسليم');
-    } else {
-      toast.info('اختر وضع التحديد أولاً (استلام / تسليم)');
+      toast.success('✅ تم تحديد نقطة التسليم');
     }
-  }, [mode, deliveryCoords, onPickupChange, onDeliveryChange]);
+  }, [mode, pickupCoords, deliveryCoords, onPickupChange, onDeliveryChange]);
 
   const handleMyLocation = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
@@ -355,24 +388,25 @@ const ShipmentLocationMap = ({
         </div>
 
         <div className="relative" ref={searchBoxRef}>
-          <div className="flex gap-2">
-            <Input
-              placeholder="ابحث عن مكان... (مثال: مصنع بيبسي، الأهرامات)"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
-              onFocus={() => searchResults.length > 0 && setShowResults(true)}
-              className="h-8 text-xs"
-            />
-            {searchQuery && (
-              <Button type="button" size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => { setSearchQuery(''); setSearchResults([]); setShowResults(false); }}>
-                <X className="w-3.5 h-3.5" />
-              </Button>
-            )}
-            <Button type="button" size="sm" className="h-8 text-xs gap-1" onClick={handleSearch} disabled={searching}>
-              {searching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-              بحث
-            </Button>
+          <div className="flex gap-2 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input
+                placeholder="⚡ ابحث بسرعة... اكتب اسم المكان أو المصنع"
+                value={searchQuery}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                className="h-9 text-xs pr-8 pl-8"
+              />
+              <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {searching && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+                {searchQuery && !searching && (
+                  <button type="button" className="hover:text-foreground text-muted-foreground" onClick={() => { setSearchQuery(''); setSearchResults([]); setShowResults(false); }}>
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Multi-source results dropdown */}
