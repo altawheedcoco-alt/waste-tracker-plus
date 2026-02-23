@@ -3,11 +3,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Search, Loader2, MapPin, X, Building2, Factory, Landmark } from 'lucide-react';
+import { Search, Loader2, MapPin, X, Building2, Factory, Landmark, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { searchEgyptLocations, EgyptLocation } from '@/data/egyptLocations';
-
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LeafletSearchBoxProps {
   onSelect: (result: { position: { lat: number; lng: number }; address: string; name: string; type?: string; }) => void;
@@ -17,7 +16,7 @@ interface LeafletSearchBoxProps {
 }
 
 interface SearchResult {
-  id: string; name: string; address: string; position: { lat: number; lng: number }; type: 'local' | 'mapbox'; category?: string;
+  id: string; name: string; address: string; position: { lat: number; lng: number }; type: 'local' | 'mapbox' | 'multi'; category?: string; source?: string;
 }
 
 const LeafletSearchBox = ({ onSelect, placeholder = 'ابحث عن موقع أو مصنع...', className = '', showLocalResults = true }: LeafletSearchBoxProps) => {
@@ -38,18 +37,46 @@ const LeafletSearchBox = ({ onSelect, placeholder = 'ابحث عن موقع أو
     if (!q || q.length < 2) { setResults([]); return; }
     setIsSearching(true);
     const all: SearchResult[] = [];
+    
+    // 1. Local results first (instant)
     if (showLocalResults) {
       searchEgyptLocations(q).slice(0, 5).forEach((loc: EgyptLocation) => {
         all.push({ id: `local-${loc.id}`, name: loc.name, address: `${loc.name}، ${loc.governorate}`, position: { lat: loc.lat, lng: loc.lng }, type: 'local', category: loc.type });
       });
     }
+    
+    // 2. Multi-geocode search (multiple providers in parallel)
     try {
-      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=5&language=ar&types=address,place,locality,neighborhood,poi`);
-      const data = await res.json();
-      (data.features || []).forEach((f: any) => {
-        all.push({ id: f.id, name: f.text || f.place_name.split(',')[0], address: f.place_name, position: { lat: f.center[1], lng: f.center[0] }, type: 'mapbox' });
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/multi-geocode-search?q=${encodeURIComponent(q)}&lang=ar`;
+      const res = await fetch(url, {
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
       });
-    } catch {}
+      const geoData = await res.json();
+      
+      if (geoData?.results) {
+        const seenNames = new Set(all.map(r => r.name.toLowerCase()));
+        geoData.results.forEach((r: any) => {
+          const key = r.name?.toLowerCase();
+          if (key && !seenNames.has(key)) {
+            seenNames.add(key);
+            all.push({
+              id: r.id || `multi-${Math.random()}`,
+              name: r.name,
+              address: r.address || '',
+              position: { lat: r.lat, lng: r.lng },
+              type: 'multi',
+              source: r.source,
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Multi-geocode search error:', err);
+    }
+    
     setResults(all);
     setShowResults(true);
     setIsSearching(false);
@@ -67,11 +94,25 @@ const LeafletSearchBox = ({ onSelect, placeholder = 'ابحث عن موقع أو
     onSelect({ position: result.position, address: result.address, name: result.name, type: result.category });
   };
 
-  const getIcon = (cat?: string) => {
-    if (cat === 'industrial') return <Factory className="h-4 w-4" />;
-    if (cat === 'landmark') return <Landmark className="h-4 w-4" />;
-    if (cat === 'city' || cat === 'district') return <Building2 className="h-4 w-4" />;
+  const getIcon = (result: SearchResult) => {
+    if (result.type === 'local') {
+      if (result.category === 'industrial') return <Factory className="h-4 w-4" />;
+      if (result.category === 'landmark') return <Landmark className="h-4 w-4" />;
+      if (result.category === 'city' || result.category === 'district') return <Building2 className="h-4 w-4" />;
+    }
+    if (result.type === 'multi') return <Globe className="h-4 w-4" />;
     return <MapPin className="h-4 w-4" />;
+  };
+
+  const getSourceLabel = (result: SearchResult) => {
+    if (result.type === 'local') return 'محلي';
+    if (result.source === 'here' || result.source === 'herewego') return 'HERE';
+    if (result.source === 'mapbox') return 'Mapbox';
+    if (result.source === 'tomtom') return 'TomTom';
+    if (result.source === 'photon' || result.source === 'mapsme') return 'OSM';
+    if (result.source === 'locationiq') return 'LocationIQ';
+    if (result.source === 'opencage') return 'OpenCage';
+    return null;
   };
 
   return (
@@ -86,16 +127,22 @@ const LeafletSearchBox = ({ onSelect, placeholder = 'ابحث عن موقع أو
       </div>
       {showResults && results.length > 0 && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-lg z-50 overflow-hidden">
-          <ScrollArea className="max-h-[300px]">
-            {results.map((r) => (
-              <button key={r.id} type="button" className="w-full px-3 py-2 text-right hover:bg-accent transition-colors flex items-center gap-2" onClick={() => handleSelect(r)}>
-                <div className="text-primary flex-shrink-0">{r.type === 'local' ? getIcon(r.category) : <MapPin className="h-4 w-4" />}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2"><p className="text-sm font-medium truncate">{r.name}</p>{r.type === 'local' && <Badge variant="secondary" className="text-[10px] px-1">محلي</Badge>}</div>
-                  <p className="text-xs text-muted-foreground truncate">{r.address}</p>
-                </div>
-              </button>
-            ))}
+          <ScrollArea className="max-h-[400px]">
+            {results.map((r) => {
+              const sourceLabel = getSourceLabel(r);
+              return (
+                <button key={r.id} type="button" className="w-full px-3 py-2 text-right hover:bg-accent transition-colors flex items-center gap-2" onClick={() => handleSelect(r)}>
+                  <div className="text-primary flex-shrink-0">{getIcon(r)}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium truncate">{r.name}</p>
+                      {sourceLabel && <Badge variant="secondary" className="text-[10px] px-1 flex-shrink-0">{sourceLabel}</Badge>}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">{r.address}</p>
+                  </div>
+                </button>
+              );
+            })}
           </ScrollArea>
         </div>
       )}
