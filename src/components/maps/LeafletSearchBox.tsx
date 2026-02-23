@@ -10,16 +10,19 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface LeafletSearchBoxProps {
   onSelect: (result: { position: { lat: number; lng: number }; address: string; name: string; type?: string; }) => void;
+  onResultsChange?: (results: SearchResult[]) => void;
   placeholder?: string;
   className?: string;
   showLocalResults?: boolean;
 }
 
+export type { SearchResult as LeafletSearchResult };
+
 interface SearchResult {
   id: string; name: string; address: string; position: { lat: number; lng: number }; type: 'local' | 'mapbox' | 'multi'; category?: string; source?: string;
 }
 
-const LeafletSearchBox = ({ onSelect, placeholder = 'ابحث عن موقع أو مصنع...', className = '', showLocalResults = true }: LeafletSearchBoxProps) => {
+const LeafletSearchBox = ({ onSelect, onResultsChange, placeholder = 'ابحث عن موقع أو مصنع...', className = '', showLocalResults = true }: LeafletSearchBoxProps) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -80,7 +83,8 @@ const LeafletSearchBox = ({ onSelect, placeholder = 'ابحث عن موقع أو
     setResults(all);
     setShowResults(true);
     setIsSearching(false);
-  }, [showLocalResults]);
+    onResultsChange?.(all);
+  }, [showLocalResults, onResultsChange]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);

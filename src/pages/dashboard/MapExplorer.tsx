@@ -6,17 +6,18 @@ import {
   MapPin, Loader2, 
   Building2, Factory, Globe, X,
   Layers, Map as MapIcon, Satellite, Download, RefreshCw, Database,
-  Copy, ExternalLink
+  Copy, ExternalLink, ChevronLeft, ChevronRight, Search
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import GoogleMapComponent from '@/components/maps/LeafletMapComponent';
-import GoogleMapsSearchBox from '@/components/maps/LeafletSearchBox';
+import GoogleMapsSearchBox, { type LeafletSearchResult } from '@/components/maps/LeafletSearchBox';
 
 // أنماط الخريطة المتاحة (Google Maps)
 const MAP_STYLES = {
@@ -56,6 +57,31 @@ const MapExplorer = () => {
   const [mapZoom, setMapZoom] = useState(10);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<LeafletSearchResult[]>([]);
+
+  const handleSearchResults = useCallback((results: LeafletSearchResult[]) => {
+    setSearchResults(results);
+    if (results.length > 0) setSidebarOpen(true);
+  }, []);
+
+  const getResultIcon = (result: LeafletSearchResult) => {
+    if (result.type === 'local') {
+      if (result.category === 'industrial') return <Factory className="h-4 w-4" />;
+      return <Building2 className="h-4 w-4" />;
+    }
+    if (result.type === 'multi') return <Globe className="h-4 w-4" />;
+    return <MapPin className="h-4 w-4" />;
+  };
+
+  const getSourceLabel = (result: LeafletSearchResult) => {
+    if (result.type === 'local') return 'محلي';
+    if (result.source === 'here' || result.source === 'herewego') return 'HERE';
+    if (result.source === 'mapbox') return 'Mapbox';
+    if (result.source === 'tomtom') return 'TomTom';
+    if (result.source === 'photon' || result.source === 'mapsme') return 'OSM';
+    return result.source || null;
+  };
 
   // Get user location on mount
   useEffect(() => {
@@ -252,6 +278,7 @@ const MapExplorer = () => {
         <CardContent className="pt-4 space-y-4">
           <GoogleMapsSearchBox
             onSelect={handleSearchResultSelect}
+            onResultsChange={handleSearchResults}
             placeholder="ابحث عن موقع، مصنع، منطقة صناعية..."
             showLocalResults={true}
           />
@@ -299,121 +326,191 @@ const MapExplorer = () => {
         </CardContent>
       </Card>
 
-      {/* Map */}
+      {/* Map + Sidebar */}
       <Card className="overflow-hidden">
         <CardContent className="p-0">
-          <div className="relative" style={{ height: 'calc(100vh - 450px)', minHeight: '400px' }}>
-            {/* Map Style Switcher */}
-            <div className="absolute top-3 right-3 z-10 flex flex-col sm:flex-row gap-2">
-              <ToggleGroup 
-                type="single" 
-                value={mapStyle} 
-                onValueChange={(value) => value && setMapStyle(value as MapStyleKey)}
-                className="bg-background/95 backdrop-blur-sm shadow-lg rounded-lg border p-1"
-              >
-                {Object.entries(MAP_STYLES).map(([key, style]) => {
-                  const IconComponent = style.icon;
-                  return (
-                    <ToggleGroupItem
-                      key={key}
-                      value={key}
-                      aria-label={style.label}
-                      className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 py-2 gap-1.5"
-                    >
-                      <IconComponent className="w-4 h-4" />
-                      <span className="text-xs hidden sm:inline">{style.label}</span>
-                    </ToggleGroupItem>
-                  );
-                })}
-              </ToggleGroup>
-              
-              {/* Toggle Factory Markers */}
-              <Button
-                variant={showFactoryMarkers ? "default" : "outline"}
-                size="sm"
-                onClick={() => setShowFactoryMarkers(!showFactoryMarkers)}
-                className="gap-1.5 shadow-lg bg-background/95 backdrop-blur-sm"
-              >
-                <Factory className="w-4 h-4" />
-                <span className="hidden sm:inline">المصانع ({facilitiesCount})</span>
-              </Button>
-            </div>
-
-            {/* Map Component */}
-            <GoogleMapComponent
-              center={mapCenter}
-              zoom={mapZoom}
-              selectedPosition={selectedPosition}
-              onPositionSelect={handlePositionSelect}
-              onMapLoad={handleMapLoad}
-              height="100%"
-              clickable={true}
-            />
-
-            {/* Selected Location Info */}
+          <div className="flex relative" style={{ height: 'calc(100vh - 450px)', minHeight: '400px' }} dir="rtl">
+            
+            {/* Results Sidebar */}
             <AnimatePresence>
-              {selectedPosition && (
+              {sidebarOpen && searchResults.length > 0 && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-10"
+                  initial={{ width: 0, opacity: 0 }}
+                  animate={{ width: 340, opacity: 1 }}
+                  exit={{ width: 0, opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="h-full border-l bg-background flex-shrink-0 overflow-hidden relative z-20"
                 >
-                  <Card className="shadow-xl border-2">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-sm flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-primary" />
-                          الموقع المحدد
-                        </CardTitle>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
+                  <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/50">
+                    <div className="flex items-center gap-2">
+                      <Search className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold">نتائج البحث</span>
+                      <Badge variant="secondary" className="text-xs">{searchResults.length}</Badge>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setSidebarOpen(false)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <ScrollArea className="h-[calc(100%-41px)]">
+                    {searchResults.map((r) => {
+                      const sourceLabel = getSourceLabel(r);
+                      const isSelected = selectedPosition?.lat === r.position.lat && selectedPosition?.lng === r.position.lng;
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          className={`w-full px-3 py-3 text-right border-b border-border/50 hover:bg-accent/60 transition-colors flex items-start gap-3 ${isSelected ? 'bg-primary/10 border-r-2 border-r-primary' : ''}`}
                           onClick={() => {
-                            setSelectedPosition(null);
-                            setSelectedAddress('');
+                            handleSearchResultSelect({ position: r.position, address: r.address, name: r.name });
                           }}
                         >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {selectedAddress && (
-                        <div className="text-sm">
-                          <p className="text-muted-foreground mb-1">العنوان:</p>
-                          <p className="font-medium leading-relaxed">{selectedAddress}</p>
-                        </div>
-                      )}
-                      
-                      <div className="text-sm">
-                        <p className="text-muted-foreground mb-1">الإحداثيات:</p>
-                        <p className="font-mono text-xs" dir="ltr">
-                          {selectedPosition.lat.toFixed(6)}, {selectedPosition.lng.toFixed(6)}
-                        </p>
-                      </div>
-
-                      <div className="flex gap-2 flex-wrap">
-                        <Button size="sm" variant="outline" onClick={handleCopyCoordinates} className="gap-1.5 flex-1">
-                          <Copy className="w-3 h-3" />
-                          نسخ الإحداثيات
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={handleCopyAddress} className="gap-1.5 flex-1">
-                          <Copy className="w-3 h-3" />
-                          نسخ العنوان
-                        </Button>
-                      </div>
-
-                      <Button size="sm" variant="default" onClick={openInGoogleMaps} className="w-full gap-2">
-                        <ExternalLink className="w-4 h-4" />
-                        فتح في خرائط جوجل
-                      </Button>
-                    </CardContent>
-                  </Card>
+                          <div className="text-primary flex-shrink-0 mt-0.5">{getResultIcon(r)}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="text-sm font-medium truncate">{r.name}</p>
+                              {sourceLabel && <Badge variant="outline" className="text-[10px] px-1.5 py-0 flex-shrink-0">{sourceLabel}</Badge>}
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{r.address}</p>
+                            <p className="text-[10px] text-muted-foreground/60 font-mono mt-1" dir="ltr">
+                              {r.position.lat.toFixed(4)}, {r.position.lng.toFixed(4)}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </ScrollArea>
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Sidebar Toggle (when closed) */}
+            {!sidebarOpen && searchResults.length > 0 && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setSidebarOpen(true)}
+                className="absolute top-3 right-3 z-20 gap-1.5 shadow-lg"
+              >
+                <Search className="w-4 h-4" />
+                النتائج ({searchResults.length})
+                <ChevronLeft className="w-3 h-3" />
+              </Button>
+            )}
+
+            {/* Map Area */}
+            <div className="flex-1 relative h-full" dir="ltr">
+              {/* Map Style Switcher */}
+              <div className="absolute top-3 right-3 z-10 flex flex-col sm:flex-row gap-2">
+                <ToggleGroup 
+                  type="single" 
+                  value={mapStyle} 
+                  onValueChange={(value) => value && setMapStyle(value as MapStyleKey)}
+                  className="bg-background/95 backdrop-blur-sm shadow-lg rounded-lg border p-1"
+                >
+                  {Object.entries(MAP_STYLES).map(([key, style]) => {
+                    const IconComponent = style.icon;
+                    return (
+                      <ToggleGroupItem
+                        key={key}
+                        value={key}
+                        aria-label={style.label}
+                        className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground px-3 py-2 gap-1.5"
+                      >
+                        <IconComponent className="w-4 h-4" />
+                        <span className="text-xs hidden sm:inline">{style.label}</span>
+                      </ToggleGroupItem>
+                    );
+                  })}
+                </ToggleGroup>
+                
+                {/* Toggle Factory Markers */}
+                <Button
+                  variant={showFactoryMarkers ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setShowFactoryMarkers(!showFactoryMarkers)}
+                  className="gap-1.5 shadow-lg bg-background/95 backdrop-blur-sm"
+                >
+                  <Factory className="w-4 h-4" />
+                  <span className="hidden sm:inline">المصانع ({facilitiesCount})</span>
+                </Button>
+              </div>
+
+              {/* Map Component */}
+              <GoogleMapComponent
+                center={mapCenter}
+                zoom={mapZoom}
+                selectedPosition={selectedPosition}
+                onPositionSelect={handlePositionSelect}
+                onMapLoad={handleMapLoad}
+                height="100%"
+                clickable={true}
+              />
+
+              {/* Selected Location Info */}
+              <AnimatePresence>
+                {selectedPosition && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-10"
+                  >
+                    <Card className="shadow-xl border-2">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <MapPin className="w-4 h-4 text-primary" />
+                            الموقع المحدد
+                          </CardTitle>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => {
+                              setSelectedPosition(null);
+                              setSelectedAddress('');
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {selectedAddress && (
+                          <div className="text-sm">
+                            <p className="text-muted-foreground mb-1">العنوان:</p>
+                            <p className="font-medium leading-relaxed">{selectedAddress}</p>
+                          </div>
+                        )}
+                        
+                        <div className="text-sm">
+                          <p className="text-muted-foreground mb-1">الإحداثيات:</p>
+                          <p className="font-mono text-xs" dir="ltr">
+                            {selectedPosition.lat.toFixed(6)}, {selectedPosition.lng.toFixed(6)}
+                          </p>
+                        </div>
+
+                        <div className="flex gap-2 flex-wrap">
+                          <Button size="sm" variant="outline" onClick={handleCopyCoordinates} className="gap-1.5 flex-1">
+                            <Copy className="w-3 h-3" />
+                            نسخ الإحداثيات
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={handleCopyAddress} className="gap-1.5 flex-1">
+                            <Copy className="w-3 h-3" />
+                            نسخ العنوان
+                          </Button>
+                        </div>
+
+                        <Button size="sm" variant="default" onClick={openInGoogleMaps} className="w-full gap-2">
+                          <ExternalLink className="w-4 h-4" />
+                          فتح في خرائط جوجل
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </CardContent>
       </Card>
