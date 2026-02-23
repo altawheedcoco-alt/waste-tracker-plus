@@ -23,6 +23,12 @@ serve(async (req) => {
       });
     }
 
+    // Search in both Arabic and English for better coverage
+    const searchQueries = [q];
+    // Detect if query is Arabic or English and add the other language variant
+    const isArabic = /[\u0600-\u06FF]/.test(q);
+    const searchLangs = isArabic ? ["ar", "en"] : ["en", "ar"];
+
     const HERE_API_KEY = Deno.env.get("HERE_API_KEY");
     const LOCATIONIQ_API_KEY = Deno.env.get("LOCATIONIQ_API_KEY");
     const OPENCAGE_API_KEY = Deno.env.get("OPENCAGE_API_KEY");
@@ -30,24 +36,26 @@ serve(async (req) => {
 
     const promises: Promise<any[]>[] = [];
 
-    // 1. HERE Maps (best for Middle East)
+    // 1. HERE Maps (best for Middle East) - search in both languages
     if (HERE_API_KEY) {
-      promises.push(
-        fetch(`https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(q)}&in=countryCode:EGY&at=${lat},${lng}&limit=6&lang=${lang}&apiKey=${HERE_API_KEY}`)
-          .then(r => r.ok ? r.json() : null)
-          .then(data => {
-            if (!data?.items) return [];
-            return data.items.map((item: any, i: number) => ({
-              id: `here-${i}`,
-              name: item.title || item.address?.label?.split(",")[0] || "",
-              address: item.address?.label || "",
-              lat: item.position?.lat || 0,
-              lng: item.position?.lng || 0,
-              source: "here",
-            }));
-          })
-          .catch(() => [])
-      );
+      for (const sl of searchLangs) {
+        promises.push(
+          fetch(`https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(q)}&in=countryCode:EGY&at=${lat},${lng}&limit=8&lang=${sl}&apiKey=${HERE_API_KEY}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+              if (!data?.items) return [];
+              return data.items.map((item: any, i: number) => ({
+                id: `here-${sl}-${i}`,
+                name: item.title || item.address?.label?.split(",")[0] || "",
+                address: item.address?.label || "",
+                lat: item.position?.lat || 0,
+                lng: item.position?.lng || 0,
+                source: "here",
+              }));
+            })
+            .catch(() => [])
+        );
+      }
     }
 
     // 2. LocationIQ
@@ -90,28 +98,30 @@ serve(async (req) => {
       );
     }
 
-    // 4. Mapbox (100K free/month, publishable token)
+    // 4. Mapbox - search in both languages with POI support
     const MAPBOX_TOKEN = Deno.env.get("MAPBOX_TOKEN") || "pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g";
-    promises.push(
-      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=6&language=${lang}&types=address,place,locality,neighborhood,poi`)
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (!data?.features) return [];
-          return data.features.map((f: any, i: number) => ({
-            id: `mapbox-${i}`,
-            name: f.text || f.place_name?.split(",")[0] || "",
-            address: f.place_name || "",
-            lat: f.center?.[1] || 0,
-            lng: f.center?.[0] || 0,
-            source: "mapbox",
-          }));
-        })
-        .catch(() => [])
-    );
+    for (const sl of searchLangs) {
+      promises.push(
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=8&language=${sl}&types=address,place,locality,neighborhood,poi,region`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data?.features) return [];
+            return data.features.map((f: any, i: number) => ({
+              id: `mapbox-${sl}-${i}`,
+              name: f.text || f.place_name?.split(",")[0] || "",
+              address: f.place_name || "",
+              lat: f.center?.[1] || 0,
+              lng: f.center?.[0] || 0,
+              source: "mapbox",
+            }));
+          })
+          .catch(() => [])
+      );
+    }
 
-    // 5. Photon/Komoot (always free, no key needed)
+    // 5. Photon/Komoot - no tag restriction to find POIs/companies
     promises.push(
-      fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lng}&limit=6&lang=en&osm_tag=place&osm_tag=building&osm_tag=highway`)
+      fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lng}&limit=10&lang=en`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (!data?.features) return [];
@@ -128,43 +138,47 @@ serve(async (req) => {
         .catch(() => [])
     );
 
-    // 5. HERE WeGo (free public autocomplete, no key needed)
-    promises.push(
-      fetch(`https://autocomplete.search.hereapi.com/v1/autosuggest?q=${encodeURIComponent(q)}&at=${lat},${lng}&in=countryCode:EGY&limit=6&lang=${lang}${HERE_API_KEY ? `&apiKey=${HERE_API_KEY}` : ""}`)
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (!data?.items) return [];
-          return data.items
-            .filter((item: any) => item.position)
-            .map((item: any, i: number) => ({
-              id: `herewego-${i}`,
-              name: item.title || "",
-              address: item.address?.label || item.vicinity || "",
-              lat: item.position?.lat || 0,
-              lng: item.position?.lng || 0,
-              source: "herewego",
-            }));
-        })
-        .catch(() => [])
-    );
+    // 6. HERE Autosuggest - search both languages
+    for (const sl of searchLangs) {
+      promises.push(
+        fetch(`https://autocomplete.search.hereapi.com/v1/autosuggest?q=${encodeURIComponent(q)}&at=${lat},${lng}&in=countryCode:EGY&limit=8&lang=${sl}${HERE_API_KEY ? `&apiKey=${HERE_API_KEY}` : ""}`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data?.items) return [];
+            return data.items
+              .filter((item: any) => item.position)
+              .map((item: any, i: number) => ({
+                id: `herewego-${sl}-${i}`,
+                name: item.title || "",
+                address: item.address?.label || item.vicinity || "",
+                lat: item.position?.lat || 0,
+                lng: item.position?.lng || 0,
+                source: "herewego",
+              }));
+          })
+          .catch(() => [])
+      );
+    }
 
-    // 6. Maps.me / Organic Maps (uses OSM Overpass for POI search - free, no key)
-    promises.push(
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=6&accept-language=${lang}&addressdetails=1&extratags=1`)
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (!data || !Array.isArray(data)) return [];
-          return data.map((item: any, i: number) => ({
-            id: `mapsme-${i}`,
-            name: item.display_name?.split(",")[0] || "",
-            address: item.display_name || "",
-            lat: parseFloat(item.lat) || 0,
-            lng: parseFloat(item.lon) || 0,
-            source: "mapsme",
-          }));
-        })
-        .catch(() => [])
-    );
+    // 7. Nominatim/OSM - search both languages for POIs
+    for (const sl of searchLangs) {
+      promises.push(
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=8&accept-language=${sl}&addressdetails=1&extratags=1`)
+          .then(r => r.ok ? r.json() : null)
+          .then(data => {
+            if (!data || !Array.isArray(data)) return [];
+            return data.map((item: any, i: number) => ({
+              id: `osm-${sl}-${i}`,
+              name: item.display_name?.split(",")[0] || "",
+              address: item.display_name || "",
+              lat: parseFloat(item.lat) || 0,
+              lng: parseFloat(item.lon) || 0,
+              source: "osm",
+            }));
+          })
+          .catch(() => [])
+      );
+    }
 
     // 8. TomTom (2500 free/day)
     if (TOMTOM_API_KEY) {
@@ -189,13 +203,15 @@ serve(async (req) => {
     const allArrays = await Promise.all(promises);
     const allResults = allArrays.flat();
 
-    // Deduplicate by proximity (~200m)
+    // Deduplicate by name similarity + proximity (~200m)
     const deduped: any[] = [];
     for (const r of allResults) {
       if (!r.lat && !r.lng) continue;
       if (!r.name) continue;
+      const nameLower = r.name.toLowerCase().trim();
       const isDupe = deduped.some(
-        d => Math.abs(d.lat - r.lat) < 0.002 && Math.abs(d.lng - r.lng) < 0.002
+        d => (Math.abs(d.lat - r.lat) < 0.002 && Math.abs(d.lng - r.lng) < 0.002) ||
+             (d.name.toLowerCase().trim() === nameLower && Math.abs(d.lat - r.lat) < 0.01)
       );
       if (!isDupe) deduped.push(r);
     }
@@ -208,12 +224,12 @@ serve(async (req) => {
       "mapbox",
       "photon",
       "herewego",
-      "mapsme",
+      "osm",
     ].filter(Boolean);
 
-    console.log(`Multi-geocode "${q}": ${deduped.length} results from [${configuredSources.join(", ")}]`);
+    console.log(`Multi-geocode "${q}": ${deduped.length} results from [${configuredSources.join(", ")}] (langs: ${searchLangs.join(",")})`);
 
-    return new Response(JSON.stringify({ results: deduped.slice(0, 15), sources: configuredSources }), {
+    return new Response(JSON.stringify({ results: deduped.slice(0, 30), sources: configuredSources }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
