@@ -49,29 +49,27 @@ const FormSection = ({
   accentColor?: string;
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 10 }}
+    initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.25, ease: 'easeOut' }}
+    transition={{ duration: 0.3 }}
     className={cn(
-      "relative rounded-2xl border bg-card shadow-sm overflow-hidden",
+      "relative rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden",
       className
     )}
   >
-    <div className="flex items-center gap-3 px-5 py-3.5 border-b bg-gradient-to-l from-muted/60 to-muted/20">
+    <div className="flex items-center gap-3 p-4 pb-3 border-b bg-muted/30">
       <div className={cn(
-        "flex items-center justify-center w-10 h-10 rounded-xl shadow-sm",
-        accentColor === 'destructive' 
-          ? 'bg-destructive/10 text-destructive border border-destructive/20' 
-          : 'bg-primary/10 text-primary border border-primary/20'
+        "flex items-center justify-center w-9 h-9 rounded-lg",
+        accentColor === 'destructive' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'
       )}>
         <Icon className="w-5 h-5" />
       </div>
       <div className="flex-1 text-right">
-        <h3 className="font-bold text-sm tracking-tight">{title}</h3>
-        {subtitle && <p className="text-[11px] text-muted-foreground mt-0.5">{subtitle}</p>}
+        <h3 className="font-semibold text-sm">{title}</h3>
+        {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
       </div>
     </div>
-    <div className="p-5 space-y-4">
+    <div className="p-4 space-y-4">
       {children}
     </div>
   </motion.div>
@@ -119,16 +117,13 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
     <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-5">
       
       {/* Progress indicator - visual only */}
-      <div className="flex items-center gap-1 justify-center py-2 px-4 rounded-2xl bg-muted/40 border border-border/50">
+      <div className="flex items-center gap-1.5 justify-center opacity-60">
         {['وجهة', 'أطراف', 'سائق', 'مخلفات', 'مواقع', 'كمية', 'تسعير'].map((step, i) => (
-          <div key={step} className="flex items-center gap-1">
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center border border-primary/20 shadow-sm">
-                {i + 1}
-              </span>
-              <span className="text-[9px] text-muted-foreground font-medium hidden sm:block">{step}</span>
-            </div>
-            {i < 6 && <div className="w-4 h-px bg-border/60 mb-3 sm:mb-0" />}
+          <div key={step} className="flex items-center gap-1.5">
+            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center border border-primary/20">
+              {i + 1}
+            </span>
+            {i < 6 && <div className="w-3 h-px bg-border" />}
           </div>
         ))}
       </div>
