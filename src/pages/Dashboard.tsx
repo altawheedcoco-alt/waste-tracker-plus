@@ -19,6 +19,7 @@ const TransporterDashboard = lazy(() => import('@/components/dashboard/Transport
 const RecyclerDashboard = lazy(() => import('@/components/dashboard/RecyclerDashboard'));
 const AdminDashboard = lazy(() => import('@/components/dashboard/AdminDashboard'));
 const DriverDashboard = lazy(() => import('@/components/dashboard/DriverDashboard'));
+const EmployeeDashboard = lazy(() => import('@/components/dashboard/EmployeeDashboard'));
 const DisposalDashboard = lazy(() => import('@/components/dashboard/DisposalDashboard'));
 const TransportOfficeDashboard = lazy(() => import('@/components/dashboard/TransportOfficeDashboard'));
 const ConsultantDashboard = lazy(() => import('@/components/dashboard/ConsultantDashboard'));
@@ -73,11 +74,13 @@ const Dashboard = () => {
 
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
+  const isEmployee = roles.includes('employee') && !roles.includes('company_admin') && !isAdmin;
   const orgType = organization?.organization_type as string | undefined;
   const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
 
   const renderDashboard = () => {
     if (isDriver) return <DriverDashboard />;
+    if (isEmployee) return <EmployeeDashboard />;
     // Admin sees the target org's dashboard when impersonating, otherwise AdminDashboard
     if (isAdmin) {
       switch (orgType) {
