@@ -5,7 +5,7 @@ import { SmartInput } from '@/components/ui/smart-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles } from 'lucide-react';
+import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles, Navigation as NavigationIcon } from 'lucide-react';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
 import PinnedPartiesControls from '@/components/shipments/PinnedPartiesControls';
@@ -537,6 +537,51 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
 
       {/* ══════════ SECTION 5: Locations ══════════ */}
       <FormSection icon={MapPin} title="المواقع" subtitle="موقع الاستلام والتسليم">
+        {/* Quick Actions Bar */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {(formData.pickup_address || formData.delivery_address) && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-7 text-[11px] gap-1.5 border-dashed"
+              onClick={() => {
+                setFormData(prev => ({
+                  ...prev,
+                  pickup_address: prev.delivery_address,
+                  delivery_address: prev.pickup_address,
+                  pickup_map_link: prev.delivery_map_link,
+                  delivery_map_link: prev.pickup_map_link,
+                }));
+                const tempCoords = pickupCoords;
+                setPickupCoords(deliveryCoords);
+                setDeliveryCoords(tempCoords);
+              }}
+            >
+              <RefreshCw className="w-3 h-3" />
+              تبديل المواقع
+            </Button>
+          )}
+          {formData.pickup_address && !formData.delivery_address && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-[11px] gap-1.5"
+              onClick={() => {
+                setFormData(prev => ({
+                  ...prev,
+                  delivery_address: prev.pickup_address,
+                  delivery_map_link: prev.pickup_map_link,
+                }));
+                setDeliveryCoords(pickupCoords);
+              }}
+            >
+              استخدم نفس الموقع للتسليم
+            </Button>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <WazeLocationField
             value={formData.pickup_address}
@@ -591,7 +636,28 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
 
         <AnimatePresence>
           {formData.pickup_address && formData.delivery_address && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+              {pickupCoords && deliveryCoords && (
+              <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border text-xs">
+                  <div className="flex items-center gap-1.5 text-primary">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="font-mono">{pickupCoords.lat.toFixed(4)},{pickupCoords.lng.toFixed(4)}</span>
+                  </div>
+                  <span className="text-muted-foreground">→</span>
+                  <div className="flex items-center gap-1.5 text-primary">
+                    <NavigationIcon className="w-3.5 h-3.5" />
+                    <span className="font-mono">{deliveryCoords.lat.toFixed(4)},{deliveryCoords.lng.toFixed(4)}</span>
+                  </div>
+                  <span className="mr-auto text-muted-foreground font-medium">
+                    ~{(
+                      Math.sqrt(
+                        Math.pow((deliveryCoords.lat - pickupCoords.lat) * 111, 2) +
+                        Math.pow((deliveryCoords.lng - pickupCoords.lng) * 111 * Math.cos(pickupCoords.lat * Math.PI / 180), 2)
+                      )
+                    ).toFixed(1)} كم
+                  </span>
+                </div>
+              )}
               <RouteEstimation
                 pickupAddress={formData.pickup_address}
                 deliveryAddress={formData.delivery_address}
