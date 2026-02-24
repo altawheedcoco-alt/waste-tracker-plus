@@ -139,7 +139,7 @@ export const createSmartQueryClient = () => new QueryClient({
         return failureCount < 2;
       },
       refetchOnWindowFocus: false,
-      refetchOnMount: 'always',
+      refetchOnMount: false,
       refetchOnReconnect: true,
     },
     mutations: {

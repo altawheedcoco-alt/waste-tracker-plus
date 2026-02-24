@@ -254,14 +254,15 @@ export const ThemeSettingsProvider = ({ children }: { children: ReactNode }) => 
     root.style.fontSize = `${settings.fontSize}px`;
     document.body.style.fontFamily = fontFamilyCSS[settings.fontFamily];
 
+    const fontUrl = `https://fonts.googleapis.com/css2?family=${fontImports[settings.fontFamily]}&display=swap`;
     const fontLink = document.getElementById('dynamic-font') as HTMLLinkElement;
     if (fontLink) {
-      fontLink.href = `https://fonts.googleapis.com/css2?family=${fontImports[settings.fontFamily]}&display=swap`;
+      if (fontLink.href !== fontUrl) fontLink.href = fontUrl;
     } else {
       const link = document.createElement('link');
       link.id = 'dynamic-font';
       link.rel = 'stylesheet';
-      link.href = `https://fonts.googleapis.com/css2?family=${fontImports[settings.fontFamily]}&display=swap`;
+      link.href = fontUrl;
       document.head.appendChild(link);
     }
 

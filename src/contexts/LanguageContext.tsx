@@ -40,25 +40,35 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return 'ar';
   });
 
-  // Load language preference from database on mount
+  // Load language preference from database only when auth state changes (not on every mount)
   useEffect(() => {
+    // Don't make DB calls if we already have a saved preference
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === 'ar' || saved === 'en') return;
+
     const loadPreference = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('preferred_language')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('preferred_language')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
 
-      if (profile?.preferred_language && (profile.preferred_language === 'ar' || profile.preferred_language === 'en')) {
-        setLanguageState(profile.preferred_language as Language);
-        localStorage.setItem(STORAGE_KEY, profile.preferred_language);
+        if (profile?.preferred_language && (profile.preferred_language === 'ar' || profile.preferred_language === 'en')) {
+          setLanguageState(profile.preferred_language as Language);
+          localStorage.setItem(STORAGE_KEY, profile.preferred_language);
+        }
+      } catch {
+        // Silently fail - localStorage preference is sufficient
       }
     };
 
-    loadPreference();
+    // Defer DB call to not block initial render
+    const timer = setTimeout(loadPreference, 2000);
+    return () => clearTimeout(timer);
   }, []);
 
   const setLanguage = useCallback(async (lang: Language) => {
