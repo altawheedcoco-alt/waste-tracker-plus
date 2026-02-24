@@ -378,7 +378,7 @@ const WazeLocationField = ({
     }
   };
 
-  const openInMap = (type: 'waze' | 'google' | 'apple' | 'osm') => {
+  const openInMap = (type: 'waze' | 'google' | 'apple' | 'osm' | 'mapbox') => {
     const lat = coordinates?.lat;
     const lng = coordinates?.lng;
     const q = value || '';
@@ -394,6 +394,9 @@ const WazeLocationField = ({
         break;
       case 'osm':
         window.open(lat ? `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}` : `https://www.openstreetmap.org/search?query=${encodeURIComponent(q)}`, '_blank');
+        break;
+      case 'mapbox':
+        window.open(lat ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#15/${lat}/${lng}` : `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#10/30.0444/31.2357`, '_blank');
         break;
     }
   };
@@ -468,15 +471,18 @@ const WazeLocationField = ({
               {gettingLocation ? <Loader2 className="w-3 h-3 animate-spin" /> : <LocateFixed className="w-3 h-3" />}
               موقعي الحالي
             </Button>
-            <div className="flex items-center gap-0.5 mr-auto">
-              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openInMap('waze')} title="Waze">
-                <Navigation className="w-3.5 h-3.5 text-primary" />
+            <div className="flex items-center gap-1 mr-auto">
+              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400" onClick={() => openInMap('mapbox')} title="Mapbox">
+                <ExternalLink className="w-2.5 h-2.5" /> Mapbox
               </Button>
-              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openInMap('google')} title="Google Maps">
-                <MapPin className="w-3.5 h-3.5 text-destructive" />
+              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400" onClick={() => openInMap('osm')} title="OpenStreetMap">
+                <ExternalLink className="w-2.5 h-2.5" /> OSM
               </Button>
-              <Button type="button" variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => openInMap('osm')} title="OpenStreetMap">
-                <Map className="w-3.5 h-3.5 text-muted-foreground" />
+              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400" onClick={() => openInMap('waze')} title="Waze">
+                <ExternalLink className="w-2.5 h-2.5" /> Waze
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400" onClick={() => openInMap('google')} title="Google Maps">
+                <ExternalLink className="w-2.5 h-2.5" /> Google
               </Button>
             </div>
           </div>
@@ -529,11 +535,21 @@ const WazeLocationField = ({
       {/* Map Section - PRIORITY: shown first */}
       {showMap && (
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="text-[10px] gap-1">
-              <MapPin className="w-3 h-3" />
-              Mapbox
-            </Badge>
+          <div className="flex items-center justify-between flex-wrap gap-1">
+            <div className="flex items-center gap-1">
+              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400" onClick={() => openInMap('mapbox')}>
+                <MapPin className="w-2.5 h-2.5" /> Mapbox
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400" onClick={() => openInMap('osm')}>
+                <Map className="w-2.5 h-2.5" /> OSM
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400" onClick={() => openInMap('waze')}>
+                <Navigation className="w-2.5 h-2.5" /> Waze
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400" onClick={() => openInMap('google')}>
+                <ExternalLink className="w-2.5 h-2.5" /> Google
+              </Button>
+            </div>
             <Button
               type="button"
               variant="ghost"
