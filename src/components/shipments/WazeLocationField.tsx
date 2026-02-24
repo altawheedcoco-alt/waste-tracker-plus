@@ -969,11 +969,27 @@ const WazeLocationField = ({
                     loading="lazy"
                     title="OpenStreetMap"
                   />
+                  {/* Clickable overlay to switch to Mapbox for selection */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMapProvider('mapbox');
+                      toast.info('📍 تم التبديل لخريطة Mapbox التفاعلية - انقر لتحديد الموقع');
+                    }}
+                    className="absolute inset-0 bg-transparent cursor-crosshair group"
+                  >
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-primary" />
+                        انقر لتحديد الموقع يدوياً
+                      </span>
+                    </div>
+                  </button>
                   <a
                     href={`https://www.openstreetmap.org/?mlat=${coordinates?.lat || mapCenter.lat}&mlon=${coordinates?.lng || mapCenter.lng}#map=16/${coordinates?.lat || mapCenter.lat}/${coordinates?.lng || mapCenter.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute bottom-1 left-1 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
+                    className="absolute bottom-1 left-1 z-10 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
                   >
                     عرض أكبر على OSM ↗
                   </a>
@@ -992,6 +1008,22 @@ const WazeLocationField = ({
                     allowFullScreen
                     title="Google Maps"
                   />
+                  {/* Clickable overlay to switch to Mapbox for selection */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMapProvider('mapbox');
+                      toast.info('📍 تم التبديل لخريطة Mapbox التفاعلية - انقر لتحديد الموقع');
+                    }}
+                    className="absolute inset-0 bg-transparent cursor-crosshair group"
+                  >
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-primary" />
+                        انقر لتحديد الموقع يدوياً
+                      </span>
+                    </div>
+                  </button>
                   <a
                     href={
                       query && query.length >= 2 && !coordinates
@@ -1000,7 +1032,7 @@ const WazeLocationField = ({
                     }
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute bottom-1 left-1 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
+                    className="absolute bottom-1 left-1 z-10 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
                   >
                     عرض أكبر على Google Maps ↗
                   </a>
