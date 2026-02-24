@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState, memo } from 'react';
-import L from 'leaflet';
-import { Loader2, MapPin } from 'lucide-react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { cn } from '@/lib/utils';
+import {
+  MAPBOX_ACCESS_TOKEN,
+  MAPBOX_STYLE,
+  EGYPT_BOUNDS,
+  MAX_ZOOM,
+  MIN_ZOOM,
+} from '@/lib/mapboxConfig';
 
-// Fix default marker icon issue with bundlers
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
 interface LeafletMapComponentProps {
   center?: { lat: number; lng: number };
@@ -25,7 +22,7 @@ interface LeafletMapComponentProps {
   }>;
   selectedPosition?: { lat: number; lng: number } | null;
   onPositionSelect?: (position: { lat: number; lng: number }, address?: string) => void;
-  onMapLoad?: (map: L.Map) => void;
+  onMapLoad?: (map: mapboxgl.Map) => void;
   clickable?: boolean;
   className?: string;
   height?: string;
@@ -38,37 +35,17 @@ const colorMap: Record<string, string> = {
   orange: '#f97316',
 };
 
-const createCircleIcon = (color: string, size = 20) => {
-  return L.divIcon({
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
-    className: '',
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-};
-
-const createPinIcon = (color: string) => {
-  return L.divIcon({
-    html: `<svg width="25" height="41" viewBox="0 0 25 41"><path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="${color}" stroke="white" stroke-width="2"/><circle cx="12.5" cy="12.5" r="5" fill="white"/></svg>`,
-    className: '',
-    iconSize: [25, 41],
-    iconAnchor: [12.5, 41],
-    popupAnchor: [0, -41],
-  });
-};
-
-const reverseGeocodeOSM = async (lat: number, lng: number): Promise<string> => {
+const reverseGeocodeMapbox = async (lat: number, lng: number): Promise<string> => {
   try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ar`);
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
+    );
     const data = await res.json();
-    return data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    return data.features?.[0]?.place_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
   } catch {
     return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
   }
 };
-
-// Egypt bounds
-const EGYPT_BOUNDS: L.LatLngBoundsExpression = [[22.0, 24.7], [31.7, 37.0]];
 
 const LeafletMapComponent = memo(({
   center = { lat: 26.8, lng: 30.8 },
@@ -82,42 +59,44 @@ const LeafletMapComponent = memo(({
   height = '400px',
 }: LeafletMapComponentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markersLayerRef = useRef<L.LayerGroup | null>(null);
-  const selectedMarkerRef = useRef<L.Marker | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const selectedMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const [ready, setReady] = useState(false);
 
   // Initialize map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = L.map(containerRef.current, {
-      center: [center.lat, center.lng],
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: MAPBOX_STYLE,
+      center: [center.lng, center.lat],
       zoom,
-      zoomControl: true,
-      maxBounds: EGYPT_BOUNDS,
-      maxBoundsViscosity: 1.0,
-      minZoom: 5,
+      maxBounds: [
+        [EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]],
+        [EGYPT_BOUNDS[2], EGYPT_BOUNDS[3]],
+      ],
+      maxZoom: MAX_ZOOM,
+      minZoom: MIN_ZOOM,
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19,
-    }).addTo(map);
-
-    markersLayerRef.current = L.layerGroup().addTo(map);
+    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
     if (clickable && onPositionSelect) {
-      map.on('click', async (e: L.LeafletMouseEvent) => {
-        const { lat, lng } = e.latlng;
-        const address = await reverseGeocodeOSM(lat, lng);
+      map.on('click', async (e) => {
+        const { lat, lng } = e.lngLat;
+        const address = await reverseGeocodeMapbox(lat, lng);
         onPositionSelect({ lat, lng }, address);
       });
     }
 
+    map.on('load', () => {
+      setReady(true);
+      onMapLoad?.(map);
+    });
+
     mapRef.current = map;
-    setReady(true);
-    onMapLoad?.(map);
 
     return () => {
       map.remove();
@@ -129,7 +108,7 @@ const LeafletMapComponent = memo(({
   // Update center
   useEffect(() => {
     if (mapRef.current && center) {
-      mapRef.current.setView([center.lat, center.lng], undefined, { animate: true });
+      mapRef.current.flyTo({ center: [center.lng, center.lat], duration: 500 });
     }
   }, [center.lat, center.lng]);
 
@@ -140,29 +119,35 @@ const LeafletMapComponent = memo(({
 
   // Update markers
   useEffect(() => {
-    if (!markersLayerRef.current) return;
-    markersLayerRef.current.clearLayers();
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
     markers.forEach(m => {
-      const icon = createCircleIcon(colorMap[m.color || 'blue']);
-      const marker = L.marker([m.position.lat, m.position.lng], { icon });
-      if (m.title) marker.bindPopup(m.title);
-      markersLayerRef.current!.addLayer(marker);
+      const color = colorMap[m.color || 'blue'];
+      const el = document.createElement('div');
+      el.innerHTML = `<div style="width:20px;height:20px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`;
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([m.position.lng, m.position.lat]);
+      if (m.title) {
+        marker.setPopup(new mapboxgl.Popup({ offset: 12 }).setText(m.title));
+      }
+      marker.addTo(mapRef.current!);
+      markersRef.current.push(marker);
     });
   }, [markers]);
 
   // Handle selected position
   useEffect(() => {
     if (!mapRef.current) return;
-    if (selectedMarkerRef.current) {
-      selectedMarkerRef.current.remove();
-      selectedMarkerRef.current = null;
-    }
+    selectedMarkerRef.current?.remove();
+    selectedMarkerRef.current = null;
+
     if (selectedPosition) {
-      selectedMarkerRef.current = L.marker(
-        [selectedPosition.lat, selectedPosition.lng],
-        { icon: createPinIcon('#ef4444') }
-      ).addTo(mapRef.current);
-      mapRef.current.setView([selectedPosition.lat, selectedPosition.lng], 15);
+      const el = document.createElement('div');
+      el.innerHTML = `<svg width="25" height="41" viewBox="0 0 25 41"><path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="#ef4444" stroke="white" stroke-width="2"/><circle cx="12.5" cy="12.5" r="5" fill="white"/></svg>`;
+      selectedMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([selectedPosition.lng, selectedPosition.lat])
+        .addTo(mapRef.current);
+      mapRef.current.flyTo({ center: [selectedPosition.lng, selectedPosition.lat], zoom: 15, duration: 500 });
     }
   }, [selectedPosition]);
 

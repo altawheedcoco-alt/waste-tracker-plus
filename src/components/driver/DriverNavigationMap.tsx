@@ -1,6 +1,15 @@
 import { useRef, useEffect, memo } from 'react';
-import L from 'leaflet';
-import { Loader2 } from 'lucide-react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import {
+  MAPBOX_ACCESS_TOKEN,
+  MAPBOX_STYLE,
+  EGYPT_BOUNDS,
+  MAX_ZOOM,
+  MIN_ZOOM,
+} from '@/lib/mapboxConfig';
+
+mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
 interface LocationState {
   lat: number;
@@ -36,16 +45,6 @@ interface DriverNavigationMapProps {
   accuracy: number | null;
 }
 
-const createCircleIcon = (color: string, label: string) => L.divIcon({
-  html: `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:12px;">${label}</div>`,
-  className: '', iconSize: [28, 28], iconAnchor: [14, 14],
-});
-
-const createDriverIcon = (heading: number | null) => L.divIcon({
-  html: `<div style="width:28px;height:28px;border-radius:50%;background:#3b82f6;border:2px solid white;box-shadow:0 2px 8px rgba(59,130,246,0.5);display:flex;align-items:center;justify-content:center;transform:rotate(${heading || 0}deg);"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></div>`,
-  className: '', iconSize: [28, 28], iconAnchor: [14, 14],
-});
-
 const DriverNavigationMap = memo(({
   driverPosition,
   driverHeading,
@@ -58,142 +57,164 @@ const DriverNavigationMap = memo(({
   accuracy,
 }: DriverNavigationMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const driverMarkerRef = useRef<L.Marker | null>(null);
-  const pickupMarkerRef = useRef<L.Marker | null>(null);
-  const deliveryMarkerRef = useRef<L.Marker | null>(null);
-  const routePolylineRef = useRef<L.Polyline | null>(null);
-  const completedPolylineRef = useRef<L.Polyline | null>(null);
-  const accuracyCircleRef = useRef<L.Circle | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const driverMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const pickupMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const deliveryMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
   // Initialize map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const defaultCenter: L.LatLngExpression = driverPosition
-      ? [driverPosition.lat, driverPosition.lng]
-      : [30.0444, 31.2357];
+    const defaultCenter: [number, number] = driverPosition
+      ? [driverPosition.lng, driverPosition.lat]
+      : [31.2357, 30.0444];
 
-    const EGYPT_BOUNDS: L.LatLngBoundsExpression = [[22.0, 24.7], [31.7, 37.0]];
-    mapRef.current = L.map(containerRef.current, {
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: MAPBOX_STYLE,
       center: defaultCenter,
       zoom: 15,
-      zoomControl: true,
-      maxBounds: EGYPT_BOUNDS,
-      maxBoundsViscosity: 1.0,
-      minZoom: 5,
+      maxBounds: [
+        [EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]],
+        [EGYPT_BOUNDS[2], EGYPT_BOUNDS[3]],
+      ],
+      maxZoom: MAX_ZOOM,
+      minZoom: MIN_ZOOM,
     });
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19,
-    }).addTo(mapRef.current);
+    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+    mapRef.current = map;
 
-    return () => {
-      mapRef.current?.remove();
-      mapRef.current = null;
-    };
+    return () => { map.remove(); mapRef.current = null; };
   }, []);
 
-  // Update pickup marker
+  // Pickup marker
   useEffect(() => {
     if (!mapRef.current || !pickupCoords) return;
-    const pos: L.LatLngExpression = [pickupCoords[0], pickupCoords[1]];
+    const lngLat: [number, number] = [pickupCoords[1], pickupCoords[0]];
     if (pickupMarkerRef.current) {
-      pickupMarkerRef.current.setLatLng(pos);
+      pickupMarkerRef.current.setLngLat(lngLat);
     } else {
-      pickupMarkerRef.current = L.marker(pos, { icon: createCircleIcon('#22c55e', 'A') })
-        .addTo(mapRef.current).bindPopup('نقطة الاستلام');
+      const el = document.createElement('div');
+      el.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:12px;">A</div>`;
+      pickupMarkerRef.current = new mapboxgl.Marker({ element: el })
+        .setLngLat(lngLat)
+        .setPopup(new mapboxgl.Popup({ offset: 15 }).setText('نقطة الاستلام'))
+        .addTo(mapRef.current);
     }
   }, [pickupCoords]);
 
-  // Update delivery marker
+  // Delivery marker
   useEffect(() => {
     if (!mapRef.current || !deliveryCoords) return;
-    const pos: L.LatLngExpression = [deliveryCoords[0], deliveryCoords[1]];
+    const lngLat: [number, number] = [deliveryCoords[1], deliveryCoords[0]];
     if (deliveryMarkerRef.current) {
-      deliveryMarkerRef.current.setLatLng(pos);
+      deliveryMarkerRef.current.setLngLat(lngLat);
     } else {
-      deliveryMarkerRef.current = L.marker(pos, { icon: createCircleIcon('#ef4444', 'B') })
-        .addTo(mapRef.current).bindPopup('نقطة التسليم');
+      const el = document.createElement('div');
+      el.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:#ef4444;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;font-size:12px;">B</div>`;
+      deliveryMarkerRef.current = new mapboxgl.Marker({ element: el })
+        .setLngLat(lngLat)
+        .setPopup(new mapboxgl.Popup({ offset: 15 }).setText('نقطة التسليم'))
+        .addTo(mapRef.current);
     }
   }, [deliveryCoords]);
 
-  // Update route polyline (remaining - gray)
+  // Route polyline (remaining - gray)
   useEffect(() => {
-    if (!mapRef.current) return;
-    if (routeCoordinates.length < 2) {
-      if (routePolylineRef.current) { routePolylineRef.current.remove(); routePolylineRef.current = null; }
-      return;
-    }
-    const path: L.LatLngExpression[] = routeCoordinates.map(c => [c[0], c[1]]);
-    if (routePolylineRef.current) {
-      routePolylineRef.current.setLatLngs(path);
-    } else {
-      routePolylineRef.current = L.polyline(path, { color: '#9ca3af', weight: 5, opacity: 0.6 }).addTo(mapRef.current);
-    }
+    const map = mapRef.current;
+    if (!map) return;
+
+    const draw = () => {
+      if (routeCoordinates.length < 2) return;
+      const coords = routeCoordinates.map(c => [c[1], c[0]] as [number, number]);
+      if (map.getSource('route-remaining')) {
+        (map.getSource('route-remaining') as mapboxgl.GeoJSONSource).setData({
+          type: 'Feature', properties: {},
+          geometry: { type: 'LineString', coordinates: coords },
+        });
+      } else {
+        map.addSource('route-remaining', {
+          type: 'geojson',
+          data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: coords } },
+        });
+        map.addLayer({
+          id: 'route-remaining', type: 'line', source: 'route-remaining',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#9ca3af', 'line-width': 5, 'line-opacity': 0.6 },
+        });
+      }
+    };
+
+    if (map.isStyleLoaded()) draw();
+    else map.on('load', draw);
   }, [routeCoordinates]);
 
-  // Update completed path (green)
+  // Completed path (green)
   useEffect(() => {
-    if (!mapRef.current) return;
-    if (completedCoordinates.length < 2) {
-      if (completedPolylineRef.current) { completedPolylineRef.current.remove(); completedPolylineRef.current = null; }
-      return;
-    }
-    const path: L.LatLngExpression[] = completedCoordinates.map(c => [c[0], c[1]]);
-    if (completedPolylineRef.current) {
-      completedPolylineRef.current.setLatLngs(path);
-    } else {
-      completedPolylineRef.current = L.polyline(path, { color: '#22c55e', weight: 5, opacity: 1 }).addTo(mapRef.current);
-    }
+    const map = mapRef.current;
+    if (!map) return;
+
+    const draw = () => {
+      if (completedCoordinates.length < 2) return;
+      const coords = completedCoordinates.map(c => [c[1], c[0]] as [number, number]);
+      if (map.getSource('route-completed')) {
+        (map.getSource('route-completed') as mapboxgl.GeoJSONSource).setData({
+          type: 'Feature', properties: {},
+          geometry: { type: 'LineString', coordinates: coords },
+        });
+      } else {
+        map.addSource('route-completed', {
+          type: 'geojson',
+          data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: coords } },
+        });
+        map.addLayer({
+          id: 'route-completed', type: 'line', source: 'route-completed',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#22c55e', 'line-width': 5, 'line-opacity': 1 },
+        });
+      }
+    };
+
+    if (map.isStyleLoaded()) draw();
+    else map.on('load', draw);
   }, [completedCoordinates]);
 
-  // Update driver marker
+  // Driver marker
   useEffect(() => {
     if (!mapRef.current || !driverPosition) return;
-    const pos: L.LatLngExpression = [driverPosition.lat, driverPosition.lng];
-    const icon = createDriverIcon(driverHeading);
+    const lngLat: [number, number] = [driverPosition.lng, driverPosition.lat];
+    const heading = driverHeading || 0;
 
     if (driverMarkerRef.current) {
-      driverMarkerRef.current.setLatLng(pos);
-      driverMarkerRef.current.setIcon(icon);
+      driverMarkerRef.current.setLngLat(lngLat);
+      const el = driverMarkerRef.current.getElement();
+      el.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:#3b82f6;border:2px solid white;box-shadow:0 2px 8px rgba(59,130,246,0.5);display:flex;align-items:center;justify-content:center;transform:rotate(${heading}deg);"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></div>`;
     } else {
-      driverMarkerRef.current = L.marker(pos, { icon, zIndexOffset: 1000 })
-        .addTo(mapRef.current).bindPopup('موقعك الحالي');
-    }
-
-    // Update accuracy circle
-    if (accuracy && accuracy > 0) {
-      if (accuracyCircleRef.current) {
-        accuracyCircleRef.current.setLatLng(pos);
-        accuracyCircleRef.current.setRadius(accuracy);
-      } else {
-        accuracyCircleRef.current = L.circle(pos, {
-          radius: accuracy,
-          fillColor: '#3b82f6',
-          fillOpacity: 0.1,
-          color: '#3b82f6',
-          opacity: 0.3,
-          weight: 1,
-        }).addTo(mapRef.current);
-      }
+      const el = document.createElement('div');
+      el.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:#3b82f6;border:2px solid white;box-shadow:0 2px 8px rgba(59,130,246,0.5);display:flex;align-items:center;justify-content:center;transform:rotate(${heading}deg);"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg></div>`;
+      driverMarkerRef.current = new mapboxgl.Marker({ element: el })
+        .setLngLat(lngLat)
+        .setPopup(new mapboxgl.Popup({ offset: 15 }).setText('موقعك الحالي'))
+        .addTo(mapRef.current);
     }
 
     if (isNavigating) {
-      mapRef.current.panTo(pos);
+      mapRef.current.panTo(lngLat);
     }
   }, [driverPosition, driverHeading, accuracy, isNavigating]);
 
   // Fit bounds when not navigating
   useEffect(() => {
     if (!mapRef.current || isNavigating) return;
-    const bounds = L.latLngBounds([]);
-    if (pickupCoords) bounds.extend([pickupCoords[0], pickupCoords[1]]);
-    if (deliveryCoords) bounds.extend([deliveryCoords[0], deliveryCoords[1]]);
-    if (driverPosition) bounds.extend([driverPosition.lat, driverPosition.lng]);
-    if (bounds.isValid()) {
-      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    const bounds = new mapboxgl.LngLatBounds();
+    let hasPoints = false;
+    if (pickupCoords) { bounds.extend([pickupCoords[1], pickupCoords[0]]); hasPoints = true; }
+    if (deliveryCoords) { bounds.extend([deliveryCoords[1], deliveryCoords[0]]); hasPoints = true; }
+    if (driverPosition) { bounds.extend([driverPosition.lng, driverPosition.lat]); hasPoints = true; }
+    if (hasPoints) {
+      mapRef.current.fitBounds(bounds, { padding: 50 });
     }
   }, [pickupCoords, deliveryCoords, driverPosition, isNavigating]);
 
