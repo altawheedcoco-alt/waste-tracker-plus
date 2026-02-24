@@ -9,6 +9,7 @@ import {
   RefreshCw, Eye, EyeOff, Maximize2, Minimize2, Navigation,
   AlertTriangle, Bell, Users, Activity, Radio, X, ChevronLeft,
   ChevronRight, Phone, MessageSquare, Clock, Zap,
+  Calendar, DollarSign, FileText, Route, Hash,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -47,7 +48,9 @@ interface RouteShipment {
   driver_id: string;
   notes: string;
   expected_delivery_date: string;
+  created_at?: string;
   driver_name?: string;
+  driver_plate?: string;
 }
 
 interface DriverLocation {
@@ -139,7 +142,7 @@ const ShipmentRoutesMap = () => {
     try {
       const { data, error } = await supabase
         .from('shipments')
-        .select('id, shipment_number, status, waste_type, quantity, unit, total_value, pickup_address, pickup_city, pickup_latitude, pickup_longitude, delivery_address, delivery_city, delivery_latitude, delivery_longitude, driver_id, notes, expected_delivery_date')
+        .select('id, shipment_number, status, waste_type, quantity, unit, total_value, pickup_address, pickup_city, pickup_latitude, pickup_longitude, delivery_address, delivery_city, delivery_latitude, delivery_longitude, driver_id, notes, expected_delivery_date, created_at')
         .eq('transporter_id', organization.id)
         .not('pickup_latitude', 'is', null)
         .not('delivery_latitude', 'is', null)
@@ -150,21 +153,27 @@ const ShipmentRoutesMap = () => {
       if (error) throw error;
 
       const driverIds = [...new Set((data || []).map(s => s.driver_id).filter(Boolean))];
-      let driverMap: Record<string, string> = {};
+      let driverMap: Record<string, { name: string; plate: string }> = {};
       if (driverIds.length > 0) {
-        const { data: drivers } = await supabase.from('drivers').select('id, profile_id').in('id', driverIds);
+        const { data: drivers } = await supabase.from('drivers').select('id, profile_id, vehicle_plate').in('id', driverIds);
         if (drivers?.length) {
           const profileIds = drivers.map(d => d.profile_id).filter(Boolean);
           const { data: profiles } = await supabase.from('profiles').select('id, full_name').in('id', profileIds);
           const profileMap: Record<string, string> = {};
           profiles?.forEach(p => { profileMap[p.id] = p.full_name || ''; });
-          drivers.forEach(d => { if (d.profile_id) driverMap[d.id] = profileMap[d.profile_id] || 'سائق'; });
+          drivers.forEach(d => { 
+            if (d.profile_id) driverMap[d.id] = { 
+              name: profileMap[d.profile_id] || 'سائق',
+              plate: d.vehicle_plate || '' 
+            }; 
+          });
         }
       }
 
       const enriched = (data || []).map(s => ({
         ...s,
-        driver_name: s.driver_id ? driverMap[s.driver_id] || 'سائق' : 'غير معين',
+        driver_name: s.driver_id ? driverMap[s.driver_id]?.name || 'سائق' : 'غير معين',
+        driver_plate: s.driver_id ? driverMap[s.driver_id]?.plate || '' : '',
       })) as RouteShipment[];
 
       setShipments(enriched);
@@ -469,13 +478,30 @@ const ShipmentRoutesMap = () => {
 
       // Pickup marker
       const pickupEl = createMarkerEl(color, '📦', isSelected);
+      const statusLabel = STATUS_MAP[s.status]?.label || s.status;
+      const wasteLabel = WASTE_MAP[s.waste_type] || s.waste_type;
+      const dist = calcDistance(s);
       const pickupMarker = new mapboxgl.Marker({ element: pickupEl })
         .setLngLat([s.pickup_longitude, s.pickup_latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 15, maxWidth: '280px' }).setHTML(
-          `<div style="direction:rtl;text-align:right;font-family:sans-serif;padding:4px;">
-            <strong style="color:${color};">📦 ${s.shipment_number}</strong><br/>
-            <span style="font-size:12px;color:#666;">🚀 نقطة الاستلام</span><br/>
-            <span style="font-size:11px;">${s.pickup_address}</span>
+        .setPopup(new mapboxgl.Popup({ offset: 15, maxWidth: '320px' }).setHTML(
+          `<div style="direction:rtl;text-align:right;font-family:sans-serif;padding:8px;line-height:1.6;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <strong style="color:${color};font-size:14px;">📦 ${s.shipment_number}</strong>
+              <span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:10px;font-size:10px;">${statusLabel}</span>
+            </div>
+            <div style="background:#f5f5f5;border-radius:8px;padding:6px 8px;margin-bottom:6px;">
+              <div style="font-size:11px;color:#388e3c;font-weight:600;">🚀 نقطة الاستلام</div>
+              <div style="font-size:12px;margin-top:2px;">${s.pickup_address}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;color:#666;">
+              <div>📦 ${wasteLabel}</div>
+              <div>⚖️ ${s.quantity?.toLocaleString()} ${s.unit}</div>
+              <div>🛣️ ${dist} كم</div>
+              <div>💰 ${s.total_value?.toLocaleString()} ج.م</div>
+              <div>🚛 ${s.driver_name || 'غير معين'}</div>
+              <div>📅 ${s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleDateString('ar-EG') : '—'}</div>
+            </div>
+            ${s.notes ? `<div style="margin-top:6px;font-size:10px;color:#888;border-top:1px solid #eee;padding-top:4px;">📝 ${s.notes}</div>` : ''}
           </div>`
         ))
         .addTo(map);
@@ -484,11 +510,25 @@ const ShipmentRoutesMap = () => {
       const deliveryEl = createMarkerEl(color, '🏭', isSelected);
       const deliveryMarker = new mapboxgl.Marker({ element: deliveryEl })
         .setLngLat([s.delivery_longitude, s.delivery_latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 15, maxWidth: '280px' }).setHTML(
-          `<div style="direction:rtl;text-align:right;font-family:sans-serif;padding:4px;">
-            <strong style="color:${color};">🏭 ${s.shipment_number}</strong><br/>
-            <span style="font-size:12px;color:#666;">📍 نقطة التسليم</span><br/>
-            <span style="font-size:11px;">${s.delivery_address}</span>
+        .setPopup(new mapboxgl.Popup({ offset: 15, maxWidth: '320px' }).setHTML(
+          `<div style="direction:rtl;text-align:right;font-family:sans-serif;padding:8px;line-height:1.6;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <strong style="color:${color};font-size:14px;">🏭 ${s.shipment_number}</strong>
+              <span style="background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:10px;font-size:10px;">${statusLabel}</span>
+            </div>
+            <div style="background:#f5f5f5;border-radius:8px;padding:6px 8px;margin-bottom:6px;">
+              <div style="font-size:11px;color:#c62828;font-weight:600;">📍 نقطة التسليم</div>
+              <div style="font-size:12px;margin-top:2px;">${s.delivery_address}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:10px;color:#666;">
+              <div>📦 ${wasteLabel}</div>
+              <div>⚖️ ${s.quantity?.toLocaleString()} ${s.unit}</div>
+              <div>🛣️ ${dist} كم</div>
+              <div>💰 ${s.total_value?.toLocaleString()} ج.م</div>
+              <div>🚛 ${s.driver_name || 'غير معين'}</div>
+              <div>📅 ${s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleDateString('ar-EG') : '—'}</div>
+            </div>
+            ${s.notes ? `<div style="margin-top:6px;font-size:10px;color:#888;border-top:1px solid #eee;padding-top:4px;">📝 ${s.notes}</div>` : ''}
           </div>`
         ))
         .addTo(map);
@@ -756,6 +796,15 @@ const ShipmentRoutesMap = () => {
                     const isVisible = visibleRoutes.has(s.id);
                     const isActive = selectedId === s.id;
 
+                    // Find driver location for this shipment
+                    const driverLoc = driverLocations.find(d => d.driver_id === s.driver_id);
+                    const isDriverOnline = driverLoc ? (Date.now() - new Date(driverLoc.recorded_at).getTime()) < 10 * 60 * 1000 : false;
+
+                    // Calculate estimated arrival
+                    const avgSpeedKmh = driverLoc?.speed && driverLoc.speed > 0 ? driverLoc.speed : 60;
+                    const estimatedHours = distance / avgSpeedKmh;
+                    const estimatedMinutes = Math.round(estimatedHours * 60);
+
                     return (
                       <Card
                         key={s.id}
@@ -763,7 +812,8 @@ const ShipmentRoutesMap = () => {
                         style={{ borderRight: `4px solid ${color}` }}
                         onClick={() => focusShipment(s)}
                       >
-                        <CardContent className="p-2.5 space-y-1.5">
+                        <CardContent className="p-3 space-y-2">
+                          {/* Header: Number + Status + Visibility */}
                           <div className="flex items-center justify-between">
                             <Button
                               variant="ghost"
@@ -778,20 +828,102 @@ const ShipmentRoutesMap = () => {
                               <span className="font-bold text-xs" style={{ color }}>{s.shipment_number}</span>
                             </div>
                           </div>
-                          <div className="space-y-0.5 text-[10px]">
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-2.5 h-2.5 text-emerald-500 flex-shrink-0" />
-                              <span className="truncate">{s.pickup_city}</span>
-                              <ArrowRight className="w-2.5 h-2.5 text-muted-foreground rotate-180 flex-shrink-0" />
-                              <MapPin className="w-2.5 h-2.5 text-red-500 flex-shrink-0" />
-                              <span className="truncate">{s.delivery_city}</span>
+
+                          {/* Route: Full addresses */}
+                          <div className="space-y-1 bg-muted/50 rounded-md p-2">
+                            <div className="flex items-start gap-1.5">
+                              <div className="flex flex-col items-center mt-0.5">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                <div className="w-px h-4 bg-muted-foreground/30" />
+                                <div className="w-2 h-2 rounded-full bg-red-500" />
+                              </div>
+                              <div className="flex-1 space-y-1 min-w-0">
+                                <div>
+                                  <p className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">نقطة الاستلام</p>
+                                  <p className="text-[10px] truncate">{s.pickup_address || s.pickup_city}</p>
+                                </div>
+                                <div>
+                                  <p className="text-[10px] font-medium text-red-700 dark:text-red-400">نقطة التسليم</p>
+                                  <p className="text-[10px] truncate">{s.delivery_address || s.delivery_city}</p>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between text-[9px] text-muted-foreground pt-1 border-t">
-                            <span>{WASTE_MAP[s.waste_type] || s.waste_type}</span>
-                            <span>{distance} كم</span>
-                            <span className="flex items-center gap-0.5"><Truck className="w-2.5 h-2.5" /> {s.driver_name}</span>
+
+                          {/* Distance & Time */}
+                          <div className="grid grid-cols-3 gap-1 text-center">
+                            <div className="bg-muted/40 rounded px-1 py-1">
+                              <Route className="w-3 h-3 mx-auto text-muted-foreground mb-0.5" />
+                              <p className="text-[10px] font-bold">{distance} كم</p>
+                              <p className="text-[8px] text-muted-foreground">المسافة</p>
+                            </div>
+                            <div className="bg-muted/40 rounded px-1 py-1">
+                              <Clock className="w-3 h-3 mx-auto text-muted-foreground mb-0.5" />
+                              <p className="text-[10px] font-bold">{estimatedMinutes > 60 ? `${Math.floor(estimatedMinutes/60)}س ${estimatedMinutes%60}د` : `${estimatedMinutes} د`}</p>
+                              <p className="text-[8px] text-muted-foreground">الوقت المتوقع</p>
+                            </div>
+                            <div className="bg-muted/40 rounded px-1 py-1">
+                              <DollarSign className="w-3 h-3 mx-auto text-muted-foreground mb-0.5" />
+                              <p className="text-[10px] font-bold">{s.total_value?.toLocaleString('ar-EG')}</p>
+                              <p className="text-[8px] text-muted-foreground">ج.م</p>
+                            </div>
                           </div>
+
+                          {/* Waste & Weight */}
+                          <div className="flex items-center justify-between text-[10px] px-1">
+                            <span className="flex items-center gap-1">
+                              <Package className="w-3 h-3 text-muted-foreground" />
+                              {WASTE_MAP[s.waste_type] || s.waste_type}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Weight className="w-3 h-3 text-muted-foreground" />
+                              {s.quantity?.toLocaleString('ar-EG')} {s.unit}
+                            </span>
+                          </div>
+
+                          {/* Driver Info */}
+                          <div className="flex items-center gap-2 bg-muted/30 rounded-md p-1.5 border border-border/50">
+                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isDriverOnline ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground'}`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-medium truncate flex items-center gap-1">
+                                <Truck className="w-3 h-3" />
+                                {s.driver_name}
+                              </p>
+                              {s.driver_plate && (
+                                <p className="text-[9px] text-muted-foreground flex items-center gap-1">
+                                  <Hash className="w-2.5 h-2.5" />
+                                  {s.driver_plate}
+                                </p>
+                              )}
+                            </div>
+                            {driverLoc && driverLoc.speed > 0 && (
+                              <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                                ⚡ {Math.round(driverLoc.speed)} كم/س
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Dates */}
+                          <div className="flex items-center justify-between text-[9px] text-muted-foreground border-t pt-1.5">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-2.5 h-2.5" />
+                              تسليم: {s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' }) : '—'}
+                            </span>
+                            {s.created_at && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-2.5 h-2.5" />
+                                إنشاء: {new Date(s.created_at).toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Notes */}
+                          {s.notes && (
+                            <div className="flex items-start gap-1 text-[9px] text-muted-foreground bg-muted/20 rounded p-1.5">
+                              <FileText className="w-2.5 h-2.5 mt-0.5 flex-shrink-0" />
+                              <span className="line-clamp-2">{s.notes}</span>
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     );
