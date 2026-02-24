@@ -640,10 +640,9 @@ const WazeLocationField = ({
 
           <div className="space-y-1">
             <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة • طبقة: {MAP_TILES[mapProvider].label}</div>
-            <div className={cn(
+           <div className={cn(
               "grid gap-2",
-              /* If there are search results, show 3 columns: map + waze + sidebar. Otherwise 2 columns */
-              (!value || focused) && showDropdown ? "grid-cols-[1fr_1fr_minmax(180px,220px)]" : "grid-cols-2"
+              (!value || focused) && showDropdown ? "grid-cols-[1fr_minmax(180px,220px)]" : "grid-cols-1"
             )}>
               {/* Interactive Map */}
               <div className={cn(
@@ -668,27 +667,7 @@ const WazeLocationField = ({
                   }}
                 />
               </div>
-              {/* Waze Live iFrame */}
-              <div className={cn(
-                "transition-all duration-300 border rounded-lg overflow-hidden relative",
-                mapExpanded ? "h-[350px]" : "h-[200px]"
-              )}>
-                <div className="absolute top-1.5 right-1.5 z-10">
-                  <Badge variant="secondary" className="text-[9px] gap-1 bg-background/90 backdrop-blur-sm shadow-sm">
-                    <Navigation className="w-2.5 h-2.5" />
-                    Waze Live
-                  </Badge>
-                </div>
-                <iframe
-                  src={`https://embed.waze.com/iframe?zoom=${mapZoom > 16 ? 16 : mapZoom}&lat=${mapCenter.lat}&lon=${mapCenter.lng}&pin=1`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  title="Waze Live Map"
-                />
-              </div>
-              {/* Sidebar for search results - appears as third column next to maps */}
+              {/* Sidebar for search results */}
               {(!value || focused) && showDropdown && (
                 <div className={cn(
                   "border rounded-lg overflow-hidden bg-background flex flex-col",
