@@ -369,6 +369,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           icon: Users, label: t('sidebar.driversGroup'), path: '#', key: 'transporter-drivers-group', children: [
             { icon: Users, label: t('sidebar.driversGroup'), path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
             { icon: MapPin, label: t('sidebar.driverTracking'), path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
+            { icon: Truck, label: language === 'ar' ? 'خريطة المسارات' : 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes' },
             { icon: Shield, label: language === 'ar' ? 'تصاريح السائقين' : 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits' },
             { icon: GraduationCap, label: language === 'ar' ? 'أكاديمية السائقين' : 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy' },
           ]
