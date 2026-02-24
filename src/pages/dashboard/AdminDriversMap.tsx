@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import DriverTrackingMap from '@/components/maps/LeafletDriverTracking';
+import DriverTrackingMap from '@/components/maps/MapboxDriverTracking';
 import DriverLocationHistory from '@/components/maps/LeafletDriverHistory';
 import BackButton from '@/components/ui/back-button';
 
