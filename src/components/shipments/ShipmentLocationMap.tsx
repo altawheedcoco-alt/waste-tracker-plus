@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed, X } from 'lucide-react';
+import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed, X, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { searchEgyptLocations } from '@/data/egyptLocations';
 import {
   MAPBOX_ACCESS_TOKEN,
@@ -29,6 +30,7 @@ interface MultiGeoResult {
 }
 
 const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
+  ai: { label: '✨ ذكاء اصطناعي', color: 'bg-violet-500/15 text-violet-700 dark:text-violet-400' },
   here: { label: 'HERE', color: 'bg-blue-500/15 text-blue-700 dark:text-blue-400' },
   locationiq: { label: 'LocationIQ', color: 'bg-purple-500/15 text-purple-700 dark:text-purple-400' },
   opencage: { label: 'OpenCage', color: 'bg-amber-500/15 text-amber-700 dark:text-amber-400' },
@@ -38,6 +40,8 @@ const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
   mapsme: { label: 'OSM', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
   tomtom: { label: 'TomTom', color: 'bg-red-500/15 text-red-700 dark:text-red-400' },
   local: { label: 'محلي', color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' },
+  google: { label: 'Google', color: 'bg-sky-500/15 text-sky-700 dark:text-sky-400' },
+  osm: { label: 'OSM', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
 };
 
 interface Coords {
@@ -98,10 +102,12 @@ const ShipmentLocationMap = ({
   const [mode, setMode] = useState<SelectionMode>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [aiSearching, setAiSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<MultiGeoResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
   const [loadingRoute, setLoadingRoute] = useState(false);
+  const [aiExpanded, setAiExpanded] = useState(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -321,12 +327,48 @@ const ShipmentLocationMap = ({
     }
   }, []);
 
-  // Auto-search with improved deduplication and parallel fetching
+  // AI-powered query expansion
+  const fetchAiExpansion = useCallback(async (q: string): Promise<string[]> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return [];
+
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-location-search`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: q }),
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.alternativeQueries || [];
+    } catch {
+      return [];
+    }
+  }, []);
+
+  // Deduplicate helper
+  const deduplicateResults = useCallback((results: MultiGeoResult[]): MultiGeoResult[] => {
+    const deduped: MultiGeoResult[] = [];
+    for (const r of results) {
+      const isDupe = deduped.some(m =>
+        (Math.abs(m.lat - r.lat) < 0.002 && Math.abs(m.lng - r.lng) < 0.002) ||
+        (m.name.toLowerCase() === r.name.toLowerCase() && Math.abs(m.lat - r.lat) < 0.01)
+      );
+      if (!isDupe && r.name) deduped.push(r);
+    }
+    return deduped;
+  }, []);
+
+  // Auto-search with AI expansion + parallel multi-source fetching
   const performSearch = useCallback((q: string) => {
     if (!q || q.length < 2) {
       setSearchResults([]);
       setShowResults(false);
       setSearching(false);
+      setAiExpanded(false);
       return;
     }
 
@@ -343,35 +385,59 @@ const ShipmentLocationMap = ({
     setSearchResults(localResults);
     setShowResults(true);
     setSearching(true);
+    setAiExpanded(false);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      // Fetch from multiple sources in parallel
+      // Phase 1: Fetch from multiple sources in parallel with original query
       const [remoteResults, mapboxResults] = await Promise.all([
         fetchMultiGeo(q),
         fetchMapboxGeo(q),
       ]);
 
-      const merged = [...localResults];
-      const allRemote = [...remoteResults, ...mapboxResults];
-
-      for (const r of allRemote) {
-        const isDupe = merged.some(m =>
-          Math.abs(m.lat - r.lat) < 0.002 && Math.abs(m.lng - r.lng) < 0.002
-        );
-        if (!isDupe && r.name) merged.push(r);
-      }
+      const merged = [...localResults, ...remoteResults, ...mapboxResults];
+      const phase1 = deduplicateResults(merged);
 
       // Sort: local first, then by source priority
-      merged.sort((a, b) => {
-        const order: Record<string, number> = { local: 0, mapbox: 1, here: 2, tomtom: 3 };
-        return (order[a.source] ?? 4) - (order[b.source] ?? 4);
+      phase1.sort((a, b) => {
+        const order: Record<string, number> = { local: 0, ai: 1, mapbox: 2, here: 3, google: 4, tomtom: 5 };
+        return (order[a.source] ?? 6) - (order[b.source] ?? 6);
       });
 
-      setSearchResults(merged.slice(0, 30));
+      setSearchResults(phase1.slice(0, 30));
       setSearching(false);
+
+      // Phase 2: AI-powered expansion (runs in background, enriches results)
+      if (q.length >= 3) {
+        setAiSearching(true);
+        const alternativeQueries = await fetchAiExpansion(q);
+
+        if (alternativeQueries.length > 0) {
+          // Search top 2 AI-suggested alternative queries in parallel
+          const aiQueries = alternativeQueries.slice(0, 2);
+          const aiSearchPromises = aiQueries.flatMap(aq => [
+            fetchMultiGeo(aq),
+            fetchMapboxGeo(aq),
+          ]);
+
+          const aiResultArrays = await Promise.all(aiSearchPromises);
+          const aiResults = aiResultArrays.flat().map(r => ({ ...r, source: r.source === 'local' ? r.source : 'ai' as string, id: `ai-${r.id}` }));
+
+          // Merge AI results with existing results
+          const allMerged = deduplicateResults([...phase1, ...aiResults]);
+
+          allMerged.sort((a, b) => {
+            const order: Record<string, number> = { local: 0, ai: 1, mapbox: 2, here: 3, google: 4, tomtom: 5 };
+            return (order[a.source] ?? 6) - (order[b.source] ?? 6);
+          });
+
+          setSearchResults(allMerged.slice(0, 30));
+          setAiExpanded(true);
+        }
+        setAiSearching(false);
+      }
     }, 200);
-  }, [fetchMultiGeo, fetchMapboxGeo]);
+  }, [fetchMultiGeo, fetchMapboxGeo, fetchAiExpansion, deduplicateResults]);
 
   const handleInputChange = useCallback((value: string) => {
     setSearchQuery(value);
@@ -466,9 +532,10 @@ const ShipmentLocationMap = ({
                 className="h-9 text-xs pr-8 pl-8"
               />
               <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                {searching && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
-                {searchQuery && !searching && (
-                  <button type="button" className="hover:text-foreground text-muted-foreground" onClick={() => { setSearchQuery(''); setSearchResults([]); setShowResults(false); }}>
+                {aiSearching && <Sparkles className="w-3.5 h-3.5 animate-pulse text-violet-500" />}
+                {searching && !aiSearching && <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />}
+                {searchQuery && !searching && !aiSearching && (
+                  <button type="button" className="hover:text-foreground text-muted-foreground" onClick={() => { setSearchQuery(''); setSearchResults([]); setShowResults(false); setAiExpanded(false); }}>
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
@@ -500,15 +567,29 @@ const ShipmentLocationMap = ({
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-primary" />
                 <span className="text-[11px] font-semibold">{searchResults.length} نتيجة</span>
+                {aiExpanded && (
+                  <Badge variant="outline" className="text-[8px] px-1 py-0 h-4 bg-violet-500/10 text-violet-600 border-violet-200">
+                    <Sparkles className="w-2.5 h-2.5 mr-0.5" />AI
+                  </Badge>
+                )}
               </div>
               <button type="button" onClick={() => setShowResults(false)} className="text-muted-foreground hover:text-foreground transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            {searching && (
+            {(searching || aiSearching) && (
               <div className="px-3 py-1.5 border-b bg-primary/5 flex items-center gap-2">
-                <Loader2 className="w-3 h-3 animate-spin text-primary" />
-                <span className="text-[10px] text-primary">جاري البحث في مصادر إضافية...</span>
+                {aiSearching ? (
+                  <>
+                    <Sparkles className="w-3 h-3 animate-pulse text-violet-500" />
+                    <span className="text-[10px] text-violet-600">الذكاء الاصطناعي يبحث عن نتائج أدق...</span>
+                  </>
+                ) : (
+                  <>
+                    <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                    <span className="text-[10px] text-primary">جاري البحث في مصادر متعددة...</span>
+                  </>
+                )}
               </div>
             )}
             <ScrollArea className="flex-1">
