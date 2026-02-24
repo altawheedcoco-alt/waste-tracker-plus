@@ -229,15 +229,89 @@ const WazeLocationField = ({
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // Detect special inputs: Plus Code, coordinates, or map links
+  const handleSmartInput = useCallback(async (q: string): Promise<boolean> => {
+    const trimmed = q.trim();
+
+    // 1. Detect map link (Google Maps, Waze, OSM, etc.)
+    if (trimmed.startsWith('http') || trimmed.includes('google.com/maps') || trimmed.includes('waze.com') || trimmed.includes('openstreetmap.org')) {
+      const coords = parseMapLink(trimmed);
+      if (coords) {
+        setLoading(true);
+        const address = await reverseGeocode(coords.lat, coords.lng);
+        onChange(address || `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`, coords);
+        setMapCenter(coords);
+        setMapZoom(16);
+        setQuery('');
+        setFocused(false);
+        setLoading(false);
+        toast.success('📍 تم تحديد الموقع من الرابط');
+        return true;
+      }
+    }
+
+    // 2. Detect coordinates (e.g. "30.0444, 31.2357" or "30.0444,31.2357")
+    const coordMatch = trimmed.match(/^(-?\d{1,3}\.\d{3,})\s*[,،]\s*(-?\d{1,3}\.\d{3,})$/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lng = parseFloat(coordMatch[2]);
+      if (lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        setLoading(true);
+        const address = await reverseGeocode(lat, lng);
+        onChange(address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`, { lat, lng });
+        setMapCenter({ lat, lng });
+        setMapZoom(16);
+        setQuery('');
+        setFocused(false);
+        setLoading(false);
+        toast.success('📍 تم تحديد الموقع من الإحداثيات');
+        return true;
+      }
+    }
+
+    // 3. Detect Plus Code (e.g. "7GXHX4HM+4P" or "X4HM+4P Cairo")
+    const plusCodeMatch = trimmed.match(/^([23456789CFGHJMPQRVWX]{4,8}\+[23456789CFGHJMPQRVWX]{2,3})(\s+.*)?$/i);
+    if (plusCodeMatch) {
+      try {
+        const olc = new OpenLocationCode();
+        const code = plusCodeMatch[1].toUpperCase();
+        if (olc.isValid(code) && olc.isFull(code)) {
+          const area = olc.decode(code);
+          const lat = area.latitudeCenter;
+          const lng = area.longitudeCenter;
+          setLoading(true);
+          const address = await reverseGeocode(lat, lng);
+          onChange(address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`, { lat, lng });
+          setMapCenter({ lat, lng });
+          setMapZoom(16);
+          setQuery('');
+          setFocused(false);
+          setLoading(false);
+          toast.success('📍 تم تحديد الموقع من Plus Code');
+          return true;
+        }
+      } catch {
+        // Not a valid plus code, continue with normal search
+      }
+    }
+
+    return false;
+  }, [onChange, setMapCenter, setMapZoom]);
+
   // Debounced search
   useEffect(() => {
     if (query.length < 2) {
       setResults([]);
       return;
     }
-    const timer = setTimeout(() => searchPlaces(query), 300);
+    const timer = setTimeout(async () => {
+      const handled = await handleSmartInput(query);
+      if (!handled) {
+        searchPlaces(query);
+      }
+    }, 300);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, handleSmartInput]);
 
   const searchPlaces = useCallback(async (q: string) => {
     setLoading(true);
@@ -651,7 +725,7 @@ const WazeLocationField = ({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => setFocused(true)}
-              placeholder={placeholder}
+              placeholder="اسم، إحداثيات، Plus Code، أو رابط خريطة..."
               className="pr-10 pl-20"
             />
             <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
