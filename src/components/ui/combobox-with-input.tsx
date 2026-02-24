@@ -108,7 +108,7 @@ export function ComboboxWithInput({
           <ChevronsUpDown className="mr-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full min-w-[300px] p-0" align="start">
+      <PopoverContent className="w-full min-w-[300px] p-0 z-[9999]" align="start" side="bottom" sideOffset={4}>
         <Command shouldFilter={false}>
           <CommandInput
             placeholder={searchPlaceholder}
@@ -116,7 +116,7 @@ export function ComboboxWithInput({
             onValueChange={setSearchValue}
             className="text-right"
           />
-          <CommandList>
+          <CommandList className="max-h-[300px] overflow-y-auto">
             <CommandEmpty>
               {allowManualInput && searchValue.trim() ? (
                 <button
