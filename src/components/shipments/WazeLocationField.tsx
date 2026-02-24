@@ -640,8 +640,12 @@ const WazeLocationField = ({
 
           <div className="space-y-1">
             <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة • طبقة: {MAP_TILES[mapProvider].label}</div>
-            <div className="grid grid-cols-2 gap-2">
-              {/* Interactive Leaflet Map */}
+            <div className={cn(
+              "grid gap-2",
+              /* If there are search results, show 3 columns: map + waze + sidebar. Otherwise 2 columns */
+              (!value || focused) && showDropdown ? "grid-cols-[1fr_1fr_minmax(180px,220px)]" : "grid-cols-2"
+            )}>
+              {/* Interactive Map */}
               <div className={cn(
                 "transition-all duration-300 border rounded-lg overflow-hidden",
                 mapExpanded ? "h-[350px]" : "h-[200px]"
@@ -684,135 +688,123 @@ const WazeLocationField = ({
                   title="Waze Live Map"
                 />
               </div>
+              {/* Sidebar for search results - appears as third column next to maps */}
+              {(!value || focused) && showDropdown && (
+                <div className={cn(
+                  "border rounded-lg overflow-hidden bg-background flex flex-col",
+                  mapExpanded ? "h-[350px]" : "h-[200px]"
+                )}>
+                  <div className="px-2.5 py-1.5 border-b bg-muted/30 flex items-center justify-between flex-shrink-0">
+                    <Badge variant="outline" className="text-[9px]">{results.length || '—'}</Badge>
+                    <span className="text-[10px] font-medium text-muted-foreground">نتائج البحث</span>
+                  </div>
+                  <ScrollArea className="flex-1">
+                    {quickLocations && (
+                      <div className="p-1.5 space-y-0.5">
+                        {organizationAddress && (
+                          <button
+                            type="button"
+                            className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
+                            onClick={useOrgPrimary}
+                          >
+                            <Building2 className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-medium truncate">{organizationName || 'المقر'}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">
+                                {organizationCity ? `${organizationAddress}, ${organizationCity}` : organizationAddress}
+                              </p>
+                            </div>
+                          </button>
+                        )}
+                        {orgLocations.slice(0, 3).map(loc => (
+                          <button
+                            key={loc.id}
+                            type="button"
+                            className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
+                            onClick={() => handleSelect({
+                              id: `org-${loc.id}`,
+                              name: loc.location_name,
+                              address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
+                              lat: loc.latitude || 0,
+                              lng: loc.longitude || 0,
+                              type: 'org',
+                            })}
+                          >
+                            <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-medium truncate">{loc.location_name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{loc.address}</p>
+                            </div>
+                          </button>
+                        ))}
+                        {savedLocations.length > 0 && (
+                          <>
+                            <div className="flex items-center gap-1.5 px-2 pt-1.5 pb-0.5">
+                              <Bookmark className="w-2.5 h-2.5 text-muted-foreground" />
+                              <span className="text-[9px] text-muted-foreground font-medium">آخر المستخدمة</span>
+                            </div>
+                            {savedLocations.slice(0, 4).map(loc => (
+                              <button
+                                key={loc.id}
+                                type="button"
+                                className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
+                                onClick={() => handleSelect({
+                                  id: `saved-${loc.id}`,
+                                  name: loc.name,
+                                  address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
+                                  lat: loc.latitude,
+                                  lng: loc.longitude,
+                                  type: 'saved',
+                                })}
+                              >
+                                <Star className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[11px] font-medium truncate">{loc.name}</p>
+                                  <p className="text-[10px] text-muted-foreground truncate">{loc.address}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </>
+                        )}
+                      </div>
+                    )}
+                    {results.length > 0 && (
+                      <div className="p-1">
+                        {results.map((result) => (
+                          <button
+                            key={result.id}
+                            type="button"
+                            className="w-full px-2 py-2 text-right hover:bg-muted/80 rounded-md flex items-start gap-2 transition-colors"
+                            onClick={() => handleSelect(result)}
+                          >
+                            <div className="mt-0.5 flex-shrink-0">
+                              {getTypeIcon(result.type)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-medium truncate">{result.name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{result.address}</p>
+                            </div>
+                            <Badge variant="outline" className="text-[8px] flex-shrink-0 mt-0.5 px-1">
+                              {getTypeLabel(result.type)}
+                            </Badge>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {!quickLocations && results.length === 0 && (
+                      <div className="p-4 text-center text-[11px] text-muted-foreground">
+                        لا توجد نتائج
+                      </div>
+                    )}
+                  </ScrollArea>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Search Results - below the map */}
-      {(!value || focused) && showDropdown && (
-        <Card className="w-full shadow-sm border rounded-lg overflow-hidden bg-background">
-          <ScrollArea className="max-h-[220px]">
-            {quickLocations && (
-              <div className="p-2 space-y-1">
-                {organizationAddress && (
-                  <button
-                    type="button"
-                    className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
-                    onClick={useOrgPrimary}
-                  >
-                    <Building2 className="w-4 h-4 text-primary flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium">{organizationName || 'المقر الرئيسي'}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">
-                        {organizationCity ? `${organizationAddress}, ${organizationCity}` : organizationAddress}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="text-[9px] flex-shrink-0">رئيسي</Badge>
-                  </button>
-                )}
 
-                {orgLocations.slice(0, 3).map(loc => (
-                  <button
-                    key={loc.id}
-                    type="button"
-                    className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
-                    onClick={() => handleSelect({
-                      id: `org-${loc.id}`,
-                      name: loc.location_name,
-                      address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
-                      lat: loc.latitude || 0,
-                      lng: loc.longitude || 0,
-                      type: 'org',
-                    })}
-                  >
-                    <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium">{loc.location_name}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{loc.address}</p>
-                    </div>
-                  </button>
-                ))}
-
-                {savedLocations.length > 0 && (
-                  <>
-                    <div className="flex items-center gap-2 px-3 pt-2 pb-1">
-                      <Bookmark className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-[10px] text-muted-foreground font-medium">آخر المستخدمة</span>
-                    </div>
-                    {savedLocations.slice(0, 4).map(loc => (
-                      <button
-                        key={loc.id}
-                        type="button"
-                        className="w-full px-3 py-2 text-right hover:bg-muted/80 rounded-md flex items-center gap-2.5 transition-colors"
-                        onClick={() => handleSelect({
-                          id: `saved-${loc.id}`,
-                          name: loc.name,
-                          address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
-                          lat: loc.latitude,
-                          lng: loc.longitude,
-                          type: 'saved',
-                        })}
-                      >
-                        <Star className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium">{loc.name}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">{loc.address}</p>
-                        </div>
-                        {loc.usage_count > 0 && (
-                          <span className="text-[9px] text-muted-foreground">{loc.usage_count}×</span>
-                        )}
-                      </button>
-                    ))}
-                  </>
-                )}
-              </div>
-            )}
-
-            {results.length > 0 && (
-              <div className="p-1">
-                {(showAllResults ? results : results.slice(0, 5)).map((result) => (
-                  <button
-                    key={result.id}
-                    type="button"
-                    className="w-full px-3 py-2.5 text-right hover:bg-muted/80 rounded-md flex items-start gap-2.5 transition-colors"
-                    onClick={() => handleSelect(result)}
-                  >
-                    <div className="mt-0.5 flex-shrink-0">
-                      {getTypeIcon(result.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{result.name}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{result.address}</p>
-                    </div>
-                    <Badge variant="outline" className="text-[9px] flex-shrink-0 mt-0.5">
-                      {getTypeLabel(result.type)}
-                    </Badge>
-                  </button>
-                ))}
-                {!showAllResults && results.length > 5 && (
-                  <button
-                    type="button"
-                    className="w-full px-3 py-2 text-center text-xs font-medium text-primary hover:bg-primary/5 rounded-md transition-colors"
-                    onClick={() => setShowAllResults(true)}
-                  >
-                    عرض الكل ({results.length} نتيجة)
-                  </button>
-                )}
-                {showAllResults && results.length > 5 && (
-                  <button
-                    type="button"
-                    className="w-full px-3 py-2 text-center text-xs font-medium text-muted-foreground hover:bg-muted/80 rounded-md transition-colors"
-                    onClick={() => setShowAllResults(false)}
-                  >
-                    عرض أقل
-                  </button>
-                )}
-              </div>
-            )}
-          </ScrollArea>
-        </Card>
-      )}
 
       {/* Map Link Input */}
       <div className="space-y-1">
