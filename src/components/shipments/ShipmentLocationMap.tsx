@@ -301,7 +301,27 @@ const ShipmentLocationMap = ({
     }
   }, []);
 
-  // Auto-search
+  // Also fetch from Mapbox Geocoding API directly for better coverage
+  const fetchMapboxGeo = useCallback(async (q: string): Promise<MultiGeoResult[]> => {
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=eg&limit=8&language=ar&types=address,place,locality,neighborhood,poi`
+      );
+      const data = await res.json();
+      return (data.features || []).map((f: any, i: number) => ({
+        id: `mapbox-${i}`,
+        name: f.text || f.place_name,
+        address: f.place_name,
+        lat: f.center[1],
+        lng: f.center[0],
+        source: 'mapbox',
+      }));
+    } catch {
+      return [];
+    }
+  }, []);
+
+  // Auto-search with improved deduplication and parallel fetching
   const performSearch = useCallback((q: string) => {
     if (!q || q.length < 2) {
       setSearchResults([]);
@@ -310,7 +330,8 @@ const ShipmentLocationMap = ({
       return;
     }
 
-    const localResults: MultiGeoResult[] = searchEgyptLocations(q).slice(0, 5).map((loc, i) => ({
+    // Instant local results
+    const localResults: MultiGeoResult[] = searchEgyptLocations(q).slice(0, 8).map((loc, i) => ({
       id: `local-${loc.id || i}`,
       name: loc.name,
       address: `${loc.name}، ${loc.governorate}`,
@@ -325,16 +346,32 @@ const ShipmentLocationMap = ({
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      const remoteResults = await fetchMultiGeo(q);
+      // Fetch from multiple sources in parallel
+      const [remoteResults, mapboxResults] = await Promise.all([
+        fetchMultiGeo(q),
+        fetchMapboxGeo(q),
+      ]);
+
       const merged = [...localResults];
-      for (const r of remoteResults) {
-        const isDupe = merged.some(m => Math.abs(m.lat - r.lat) < 0.002 && Math.abs(m.lng - r.lng) < 0.002);
+      const allRemote = [...remoteResults, ...mapboxResults];
+
+      for (const r of allRemote) {
+        const isDupe = merged.some(m =>
+          Math.abs(m.lat - r.lat) < 0.002 && Math.abs(m.lng - r.lng) < 0.002
+        );
         if (!isDupe && r.name) merged.push(r);
       }
-      setSearchResults(merged);
+
+      // Sort: local first, then by source priority
+      merged.sort((a, b) => {
+        const order: Record<string, number> = { local: 0, mapbox: 1, here: 2, tomtom: 3 };
+        return (order[a.source] ?? 4) - (order[b.source] ?? 4);
+      });
+
+      setSearchResults(merged.slice(0, 30));
       setSearching(false);
-    }, 250);
-  }, [fetchMultiGeo]);
+    }, 200);
+  }, [fetchMultiGeo, fetchMapboxGeo]);
 
   const handleInputChange = useCallback((value: string) => {
     setSearchQuery(value);
@@ -451,45 +488,61 @@ const ShipmentLocationMap = ({
         )}
       </div>
 
-      {/* Map + Sidebar layout */}
-      <div className={cn(
-        "flex",
-        showResults && searchResults.length > 0 ? "" : ""
-      )}>
+      {/* Map + Results overlay layout */}
+      <div className="relative">
         {/* Map container */}
-        <div ref={mapContainerRef} className={cn(
-          "h-[420px] transition-all duration-300",
-          showResults && searchResults.length > 0 ? "flex-1" : "w-full"
-        )} />
+        <div ref={mapContainerRef} className="h-[420px] w-full" />
 
-        {/* Results Sidebar */}
+        {/* Results overlay panel - slides in from the right */}
         {showResults && searchResults.length > 0 && (
-          <div className="w-[240px] flex-shrink-0 border-r bg-background flex flex-col h-[420px]">
-            <div className="px-3 py-2 border-b bg-muted/50 flex items-center justify-between flex-shrink-0">
-              <span className="text-[10px] text-muted-foreground font-medium">{searchResults.length} نتيجة</span>
-              <Badge variant="outline" className="text-[9px]">بحث</Badge>
+          <div className="absolute top-0 right-0 w-[280px] h-full bg-background/98 backdrop-blur-md border-l shadow-2xl z-10 flex flex-col">
+            <div className="px-3 py-2.5 border-b bg-muted/60 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Search className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[11px] font-semibold">{searchResults.length} نتيجة</span>
+              </div>
+              <button type="button" onClick={() => setShowResults(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <X className="w-4 h-4" />
+              </button>
             </div>
+            {searching && (
+              <div className="px-3 py-1.5 border-b bg-primary/5 flex items-center gap-2">
+                <Loader2 className="w-3 h-3 animate-spin text-primary" />
+                <span className="text-[10px] text-primary">جاري البحث في مصادر إضافية...</span>
+              </div>
+            )}
             <ScrollArea className="flex-1">
-              {searchResults.map((r) => {
-                const src = SOURCE_LABELS[r.source] || { label: r.source, color: 'bg-muted text-muted-foreground' };
-                return (
-                  <button
-                    key={r.id}
-                    type="button"
-                    className="w-full px-3 py-2.5 text-right hover:bg-accent transition-colors flex items-start gap-2 border-b border-border/30 last:border-0"
-                    onClick={() => handleSelectResult(r)}
-                  >
-                    <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-medium truncate">{r.name}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{r.address}</p>
-                      <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5 mt-1", src.color)}>
-                        {src.label}
-                      </Badge>
+              <div className="py-1">
+                {searchResults.map((r, idx) => {
+                  const src = SOURCE_LABELS[r.source] || { label: r.source, color: 'bg-muted text-muted-foreground' };
+                  // Show source group header
+                  const prevSource = idx > 0 ? searchResults[idx - 1].source : null;
+                  const showHeader = r.source !== prevSource;
+
+                  return (
+                    <div key={r.id}>
+                      {showHeader && (
+                        <div className="px-3 py-1 mt-1 first:mt-0">
+                          <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0.5 h-4", src.color)}>
+                            {src.label}
+                          </Badge>
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        className="w-full px-3 py-2 text-right hover:bg-accent/80 active:bg-accent transition-colors flex items-start gap-2"
+                        onClick={() => handleSelectResult(r)}
+                      >
+                        <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-medium leading-tight">{r.name}</p>
+                          <p className="text-[10px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{r.address}</p>
+                        </div>
+                      </button>
                     </div>
-                  </button>
-                );
-              })}
+                  );
+                })}
+              </div>
             </ScrollArea>
           </div>
         )}
