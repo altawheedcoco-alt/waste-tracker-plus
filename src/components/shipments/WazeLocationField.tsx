@@ -724,6 +724,19 @@ const WazeLocationField = ({
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData('text');
+                if (pasted) {
+                  e.preventDefault();
+                  setQuery(pasted);
+                  // Immediately try smart input for pasted content
+                  handleSmartInput(pasted).then(handled => {
+                    if (!handled) {
+                      // Let normal search handle it via the useEffect
+                    }
+                  });
+                }
+              }}
               onFocus={() => setFocused(true)}
               placeholder="اسم، إحداثيات، Plus Code، أو رابط خريطة..."
               className="pr-10 pl-20"
