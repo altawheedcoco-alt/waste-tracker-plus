@@ -139,6 +139,33 @@ const ShipmentRoutesMap = () => {
   useEffect(() => { fetchShipments(); }, [fetchShipments]);
 
   const [mapReady, setMapReady] = useState(false);
+  const routeCoordsCache = useRef<Record<string, [number, number][]>>({});
+
+  // Fetch road-following route from Mapbox Directions API
+  const fetchRoadRoute = useCallback(async (
+    pickupLng: number, pickupLat: number,
+    deliveryLng: number, deliveryLat: number,
+    shipmentId: string
+  ): Promise<[number, number][]> => {
+    // Return cached if available
+    if (routeCoordsCache.current[shipmentId]) {
+      return routeCoordsCache.current[shipmentId];
+    }
+    try {
+      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${pickupLng},${pickupLat};${deliveryLng},${deliveryLat}?access_token=${MAPBOX_ACCESS_TOKEN}&geometries=geojson&overview=full`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.code === 'Ok' && data.routes?.[0]) {
+        const coords = data.routes[0].geometry.coordinates as [number, number][];
+        routeCoordsCache.current[shipmentId] = coords;
+        return coords;
+      }
+    } catch (e) {
+      console.error('Directions API error:', e);
+    }
+    // Fallback to straight line
+    return [[pickupLng, pickupLat], [deliveryLng, deliveryLat]];
+  }, []);
 
   // Initialize map - depends on loading because container isn't mounted during skeleton
   useEffect(() => {
@@ -171,7 +198,7 @@ const ShipmentRoutesMap = () => {
     drawRoutes();
   }, [shipments, visibleRoutes, selectedId, mapReady]);
 
-  const drawRoutes = useCallback(() => {
+  const drawRoutes = useCallback(async () => {
     const map = mapRef.current;
     if (!map) return;
 
@@ -199,38 +226,33 @@ const ShipmentRoutesMap = () => {
       const isSelected = selectedId === s.id;
       const routeId = `route-${i}`;
 
-      // Draw route line
-      try {
-        map.addSource(routeId, {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [s.pickup_longitude, s.pickup_latitude],
-                [s.delivery_longitude, s.delivery_latitude],
-              ],
-            },
-          },
+      // Fetch road route and draw
+      fetchRoadRoute(s.pickup_longitude, s.pickup_latitude, s.delivery_longitude, s.delivery_latitude, s.id)
+        .then(coords => {
+          if (!map || !map.getCanvas()) return;
+          try {
+            map.addSource(routeId, {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: { type: 'LineString', coordinates: coords },
+              },
+            });
+            map.addLayer({
+              id: routeId,
+              type: 'line',
+              source: routeId,
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: {
+                'line-color': color,
+                'line-width': isSelected ? 5 : 3,
+                'line-opacity': isSelected ? 1 : 0.7,
+                'line-dasharray': s.status === 'approved' ? [2, 2] : [1, 0],
+              },
+            });
+          } catch (e) { /* already exists */ }
         });
-
-        map.addLayer({
-          id: routeId,
-          type: 'line',
-          source: routeId,
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-color': color,
-            'line-width': isSelected ? 5 : 3,
-            'line-opacity': isSelected ? 1 : 0.7,
-            'line-dasharray': s.status === 'approved' ? [2, 2] : [1, 0],
-          },
-        });
-      } catch (e) {
-        // Source/layer might already exist
-      }
 
       // Pickup marker
       const pickupEl = createMarkerEl(color, '📦', isSelected);
@@ -270,7 +292,7 @@ const ShipmentRoutesMap = () => {
     if (hasPoints) {
       map.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 500 });
     }
-  }, [shipments, visibleRoutes, selectedId]);
+  }, [shipments, visibleRoutes, selectedId, fetchRoadRoute]);
 
   const createMarkerEl = (color: string, emoji: string, isSelected: boolean) => {
     const el = document.createElement('div');
