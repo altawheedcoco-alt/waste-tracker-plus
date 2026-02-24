@@ -439,35 +439,6 @@ const ShipmentLocationMap = ({
             </div>
           </div>
 
-          {showResults && searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-xl z-[1000] overflow-hidden">
-              <div className="px-3 py-1.5 border-b bg-muted/50">
-                <span className="text-[10px] text-muted-foreground font-medium">{searchResults.length} نتيجة من مصادر متعددة</span>
-              </div>
-              <ScrollArea className="max-h-[250px]">
-                {searchResults.map((r) => {
-                  const src = SOURCE_LABELS[r.source] || { label: r.source, color: 'bg-muted text-muted-foreground' };
-                  return (
-                    <button
-                      key={r.id}
-                      type="button"
-                      className="w-full px-3 py-2 text-right hover:bg-accent transition-colors flex items-center gap-2 border-b border-border/30 last:border-0"
-                      onClick={() => handleSelectResult(r)}
-                    >
-                      <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium truncate">{r.name}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{r.address}</p>
-                      </div>
-                      <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0 h-4 flex-shrink-0", src.color)}>
-                        {src.label}
-                      </Badge>
-                    </button>
-                  );
-                })}
-              </ScrollArea>
-            </div>
-          )}
         </div>
 
         {mode && (
@@ -480,8 +451,49 @@ const ShipmentLocationMap = ({
         )}
       </div>
 
-      {/* Map container */}
-      <div ref={mapContainerRef} className="h-[420px] w-full" />
+      {/* Map + Sidebar layout */}
+      <div className={cn(
+        "flex",
+        showResults && searchResults.length > 0 ? "" : ""
+      )}>
+        {/* Map container */}
+        <div ref={mapContainerRef} className={cn(
+          "h-[420px] transition-all duration-300",
+          showResults && searchResults.length > 0 ? "flex-1" : "w-full"
+        )} />
+
+        {/* Results Sidebar */}
+        {showResults && searchResults.length > 0 && (
+          <div className="w-[240px] flex-shrink-0 border-r bg-background flex flex-col h-[420px]">
+            <div className="px-3 py-2 border-b bg-muted/50 flex items-center justify-between flex-shrink-0">
+              <span className="text-[10px] text-muted-foreground font-medium">{searchResults.length} نتيجة</span>
+              <Badge variant="outline" className="text-[9px]">بحث</Badge>
+            </div>
+            <ScrollArea className="flex-1">
+              {searchResults.map((r) => {
+                const src = SOURCE_LABELS[r.source] || { label: r.source, color: 'bg-muted text-muted-foreground' };
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    className="w-full px-3 py-2.5 text-right hover:bg-accent transition-colors flex items-start gap-2 border-b border-border/30 last:border-0"
+                    onClick={() => handleSelectResult(r)}
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-medium truncate">{r.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{r.address}</p>
+                      <Badge variant="outline" className={cn("text-[8px] px-1 py-0 h-3.5 mt-1", src.color)}>
+                        {src.label}
+                      </Badge>
+                    </div>
+                  </button>
+                );
+              })}
+            </ScrollArea>
+          </div>
+        )}
+      </div>
 
       {/* Route info footer */}
       {(routeInfo || loadingRoute) && (
