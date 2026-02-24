@@ -35,17 +35,19 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string | null> 
 const parseMapLink = (link: string): { lat: number; lng: number } | null => {
   try {
     // Google Maps: various formats
-    // https://www.google.com/maps?q=30.0444,31.2357
     // https://www.google.com/maps/@30.0444,31.2357,15z
-    // https://maps.google.com/maps?ll=30.0444,31.2357
-    // https://goo.gl/maps/... (short links won't work without redirect)
     let match = link.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/);
     if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
+    // https://www.google.com/maps?q=30.0444,31.2357
     match = link.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
     if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
     match = link.match(/[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+
+    // Google Maps place with data containing coordinates: !3d30.0444!4d31.2357
+    match = link.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/);
     if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
     // Waze: https://waze.com/ul?ll=30.0444,31.2357
@@ -60,6 +62,20 @@ const parseMapLink = (link: string): { lat: number; lng: number } | null => {
     match = link.match(/(-?\d{1,3}\.\d{3,})\s*,\s*(-?\d{1,3}\.\d{3,})/);
     if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Extract place name from Google Maps /place/ URL
+const extractPlaceNameFromLink = (link: string): string | null => {
+  try {
+    // https://www.google.com/maps/place/PLACE+NAME/...
+    const match = link.match(/google\.com\/maps\/place\/([^/@?]+)/);
+    if (match) {
+      return decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
     return null;
   } catch {
     return null;
@@ -246,6 +262,14 @@ const WazeLocationField = ({
         setFocused(false);
         setLoading(false);
         toast.success('📍 تم تحديد الموقع من الرابط');
+        return true;
+      }
+      // If link has no coordinates, extract place name and search for it
+      const placeName = extractPlaceNameFromLink(trimmed);
+      if (placeName) {
+        setQuery(placeName);
+        searchPlaces(placeName);
+        toast.info(`🔍 جاري البحث عن: ${placeName}`);
         return true;
       }
     }
