@@ -13,35 +13,17 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useSavedLocations } from '@/hooks/useSavedLocations';
 import { supabase } from '@/integrations/supabase/client';
-import L from 'leaflet';
-
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
-
-type MapProvider = 'osm' | 'google' | 'waze';
-
-const MAP_TILES: Record<MapProvider, { url: string; label: string }> = {
-  waze: {
-    url: 'https://worldtiles1.waze.com/tiles/{z}/{x}/{y}.png',
-    label: 'Waze',
-  },
-  google: {
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-    label: 'Google',
-  },
-  osm: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    label: 'OpenStreetMap',
-  },
-};
+import MapboxMapComponent from '@/components/maps/MapboxMapComponent';
+import { MAPBOX_ACCESS_TOKEN } from '@/lib/mapboxConfig';
 
 // Reverse geocode using Nominatim (OSM) - free, no key needed
 const reverseGeocode = async (lat: number, lng: number): Promise<string | null> => {
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar&zoom=18`
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
     );
     const data = await res.json();
-    return data.display_name || null;
+    return data.features?.[0]?.place_name || null;
   } catch {
     return null;
   }
@@ -83,78 +65,17 @@ const parseMapLink = (link: string): { lat: number; lng: number } | null => {
 };
 
 // Interactive Leaflet mini-map with switchable tile providers
-const LocationMiniMap = ({ 
-  lat, lng, zoom, onLocationSelect, provider = 'osm'
-}: { 
-  lat: number; lng: number; zoom: number;
-  onLocationSelect?: (lat: number, lng: number) => void;
-  provider?: MapProvider;
-}) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const tileLayerRef = useRef<L.TileLayer | null>(null);
-  const onSelectRef = useRef(onLocationSelect);
-  onSelectRef.current = onLocationSelect;
-
-  useEffect(() => {
-    const container = mapContainerRef.current;
-    if (!container) return;
-
-    if (mapInstanceRef.current) return;
-
-    const map = L.map(container, {
-      center: [lat, lng],
-      zoom,
-      zoomControl: false,
-      attributionControl: false,
-    });
-
-    const tile = L.tileLayer(MAP_TILES[provider].url, { maxZoom: 19 }).addTo(map);
-    tileLayerRef.current = tile;
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    const icon = L.divIcon({
-      html: `<div style="background:hsl(142,76%,36%);width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3" fill="hsl(142,76%,36%)"/></svg>
-      </div>`,
-      className: '',
-      iconSize: [24, 24],
-      iconAnchor: [12, 24],
-    });
-
-    const marker = L.marker([lat, lng], { icon }).addTo(map);
-    markerRef.current = marker;
-    mapInstanceRef.current = map;
-
-    map.on('click', (e: L.LeafletMouseEvent) => {
-      onSelectRef.current?.(e.latlng.lat, e.latlng.lng);
-    });
-
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-      markerRef.current = null;
-      tileLayerRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Switch tile layer when provider changes
-  useEffect(() => {
-    if (mapInstanceRef.current && tileLayerRef.current) {
-      tileLayerRef.current.setUrl(MAP_TILES[provider].url);
-    }
-  }, [provider]);
-
-  useEffect(() => {
-    if (mapInstanceRef.current && markerRef.current) {
-      mapInstanceRef.current.setView([lat, lng], zoom, { animate: true });
-      markerRef.current.setLatLng([lat, lng]);
-    }
-  }, [lat, lng, zoom]);
-
-  return <div ref={mapContainerRef} className="w-full h-full rounded-lg" style={{ zIndex: 0 }} />;
+// Reverse geocode using Mapbox
+const reverseGeocodeMapbox = async (lat: number, lng: number): Promise<string | null> => {
+  try {
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
+    );
+    const data = await res.json();
+    return data.features?.[0]?.place_name || null;
+  } catch {
+    return null;
+  }
 };
 
 interface SearchResult {
@@ -215,7 +136,7 @@ const WazeLocationField = ({
   const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
   const [mapZoom, setMapZoom] = useState(12);
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [mapProvider, setMapProvider] = useState<MapProvider>('waze');
+  // mapProvider removed - using Mapbox only
   const [showAllResults, setShowAllResults] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -387,7 +308,7 @@ const WazeLocationField = ({
     const applyLocation = async (latitude: number, longitude: number) => {
       try {
         const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&language=ar`
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
         );
         const data = await res.json();
         if (data.features?.[0]) {
@@ -609,23 +530,10 @@ const WazeLocationField = ({
       {showMap && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
-              {(['waze', 'google', 'osm'] as MapProvider[]).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={cn(
-                    "px-2.5 py-1 text-[10px] font-medium rounded-md transition-all",
-                    mapProvider === key 
-                      ? "bg-background text-foreground shadow-sm" 
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                  onClick={() => setMapProvider(key)}
-                >
-                  {MAP_TILES[key].label}
-                </button>
-              ))}
-            </div>
+            <Badge variant="secondary" className="text-[10px] gap-1">
+              <MapPin className="w-3 h-3" />
+              Mapbox
+            </Badge>
             <Button
               type="button"
               variant="ghost"
@@ -639,34 +547,29 @@ const WazeLocationField = ({
           </div>
 
           <div className="space-y-1">
-            <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة • طبقة: {MAP_TILES[mapProvider].label}</div>
+            <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
            <div className={cn(
               "grid gap-2",
               (!value || focused) && showDropdown ? "grid-cols-[1fr_minmax(180px,220px)]" : "grid-cols-1"
             )}>
-              {/* Interactive Map */}
-              <div className={cn(
-                "transition-all duration-300 border rounded-lg overflow-hidden",
-                mapExpanded ? "h-[350px]" : "h-[200px]"
-              )}>
-                <LocationMiniMap 
-                  lat={mapCenter.lat} 
-                  lng={mapCenter.lng} 
-                  zoom={mapZoom}
-                  provider={mapProvider}
-                  onLocationSelect={async (lat, lng) => {
-                    const address = await reverseGeocode(lat, lng);
-                    if (address) {
-                      onChange(address, { lat, lng });
-                    } else {
-                      onChange(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, { lat, lng });
-                    }
-                    setMapCenter({ lat, lng });
-                    setMapZoom(15);
-                    toast.success('📍 تم تحديد الموقع من الخريطة');
-                  }}
-                />
-              </div>
+              {/* Interactive Mapbox Map */}
+              <MapboxMapComponent
+                center={mapCenter}
+                zoom={mapZoom}
+                selectedPosition={mapCenter.lat !== 30.0444 ? mapCenter : null}
+                onPositionSelect={async (pos, address) => {
+                  if (address) {
+                    onChange(address, pos);
+                  } else {
+                    onChange(`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`, pos);
+                  }
+                  setMapCenter(pos);
+                  setMapZoom(15);
+                  toast.success('📍 تم تحديد الموقع من الخريطة');
+                }}
+                clickable={true}
+                height={mapExpanded ? '350px' : '200px'}
+              />
               {/* Sidebar for search results */}
               {(!value || focused) && showDropdown && (
                 <div className={cn(
