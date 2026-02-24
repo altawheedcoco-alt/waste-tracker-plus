@@ -43,7 +43,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
-import GoogleMapComponent from '@/components/maps/LeafletMapComponent';
+import GoogleMapComponent from '@/components/maps/MapboxMapComponent';
 
 // Real Egyptian industrial locations
 const ORIGIN = { lat: 30.4628, lng: 31.1837, name: 'مصنع نستله للمياه - بنها', city: 'بنها - القليوبية' };

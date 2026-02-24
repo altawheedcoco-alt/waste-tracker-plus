@@ -1,4 +1,4 @@
-import L from 'leaflet';
+import mapboxgl from 'mapbox-gl';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,7 +16,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import BackButton from '@/components/ui/back-button';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import GoogleMapComponent from '@/components/maps/LeafletMapComponent';
+import GoogleMapComponent from '@/components/maps/MapboxMapComponent';
 import GoogleMapsSearchBox, { type LeafletSearchResult } from '@/components/maps/LeafletSearchBox';
 
 // أنماط الخريطة المتاحة (Google Maps)
@@ -55,8 +55,8 @@ const MapExplorer = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
   const [mapZoom, setMapZoom] = useState(10);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
+  const facilityMarkersRef = useRef<mapboxgl.Marker[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<LeafletSearchResult[]>([]);
 
@@ -156,34 +156,32 @@ const MapExplorer = () => {
 
   // Update markers when facilities change
   useEffect(() => {
-    if (!mapInstanceRef.current || !showFactoryMarkers) {
-      markersLayerRef.current?.clearLayers();
-      return;
-    }
+    // Clear old markers
+    facilityMarkersRef.current.forEach(m => m.remove());
+    facilityMarkersRef.current = [];
 
-    if (!markersLayerRef.current) {
-      markersLayerRef.current = L.layerGroup().addTo(mapInstanceRef.current);
-    }
-    markersLayerRef.current.clearLayers();
+    if (!mapInstanceRef.current || !showFactoryMarkers) return;
 
     facilities.forEach(facility => {
       const color = facility.is_verified ? '#22c55e' : '#3b82f6';
-      const icon = L.divIcon({
-        html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);"></div>`,
-        className: '', iconSize: [16, 16], iconAnchor: [8, 8],
-      });
-      const marker = L.marker([facility.latitude, facility.longitude], { icon })
-        .bindPopup(`<div dir="rtl"><b>${facility.name_ar || facility.name}</b><br/>${facility.city || ''}</div>`);
-      marker.on('click', () => {
+      const el = document.createElement('div');
+      el.innerHTML = `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);cursor:pointer;"></div>`;
+      el.addEventListener('click', () => {
         setSelectedPosition({ lat: facility.latitude, lng: facility.longitude });
         setSelectedAddress(`${facility.name_ar || facility.name} - ${facility.city || ''} - ${facility.governorate || ''}`);
       });
-      markersLayerRef.current!.addLayer(marker);
+
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([facility.longitude, facility.latitude])
+        .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(`<div dir="rtl"><b>${facility.name_ar || facility.name}</b><br/>${facility.city || ''}</div>`))
+        .addTo(mapInstanceRef.current!);
+
+      facilityMarkersRef.current.push(marker);
     });
   }, [facilities, showFactoryMarkers]);
 
   // Handle map load
-  const handleMapLoad = (map: L.Map) => {
+  const handleMapLoad = (map: mapboxgl.Map) => {
     mapInstanceRef.current = map;
   };
 
