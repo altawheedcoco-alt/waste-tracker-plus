@@ -1,16 +1,23 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed, X, Zap } from 'lucide-react';
+import { MapPin, Navigation, Search, Loader2, Route, Clock, Truck, ExternalLink, LocateFixed, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { searchEgyptLocations } from '@/data/egyptLocations';
+import {
+  MAPBOX_ACCESS_TOKEN,
+  MAPBOX_STYLE,
+  EGYPT_BOUNDS,
+  MAX_ZOOM,
+  MIN_ZOOM,
+} from '@/lib/mapboxConfig';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYWx0YXdoZWVkZm9yd2FzdGUiLCJhIjoiY21sNnd6Mmp1MGdyMTNncXg0bnd5enRjNyJ9.a1QswQtzCNcEAdZrpTON9g';
+mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 
 interface MultiGeoResult {
   id: string;
@@ -49,9 +56,21 @@ interface ShipmentLocationMapProps {
 
 type SelectionMode = 'pickup' | 'delivery' | null;
 
-const createIcon = (color: string, label: string) => L.divIcon({
-  className: 'custom-marker',
-  html: `<div style="
+const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
+  try {
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar&types=address,place,locality,neighborhood`
+    );
+    const data = await res.json();
+    return data.features?.[0]?.place_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  } catch {
+    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  }
+};
+
+const createMarkerEl = (color: string, label: string) => {
+  const el = document.createElement('div');
+  el.innerHTML = `<div style="
     background: ${color};
     width: 32px; height: 32px;
     border-radius: 50% 50% 50% 0;
@@ -59,25 +78,8 @@ const createIcon = (color: string, label: string) => L.divIcon({
     border: 3px solid white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     display: flex; align-items: center; justify-content: center;
-  "><span style="transform: rotate(45deg); color: white; font-weight: bold; font-size: 12px;">${label}</span></div>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
-
-const pickupIcon = createIcon('#22c55e', 'A');
-const deliveryIcon = createIcon('#ef4444', 'B');
-
-const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-  try {
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=ar&types=address,place,locality,neighborhood`
-    );
-    const data = await res.json();
-    return data.features?.[0]?.place_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-  } catch {
-    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-  }
+  "><span style="transform: rotate(45deg); color: white; font-weight: bold; font-size: 12px;">${label}</span></div>`;
+  return el;
 };
 
 const ShipmentLocationMap = ({
@@ -88,11 +90,10 @@ const ShipmentLocationMap = ({
   pickupAddress,
   deliveryAddress,
 }: ShipmentLocationMapProps) => {
-  const mapRef = useRef<L.Map | null>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const pickupMarkerRef = useRef<L.Marker | null>(null);
-  const deliveryMarkerRef = useRef<L.Marker | null>(null);
-  const routeLineRef = useRef<L.Polyline | null>(null);
+  const pickupMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const deliveryMarkerRef = useRef<mapboxgl.Marker | null>(null);
 
   const [mode, setMode] = useState<SelectionMode>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,21 +105,49 @@ const ShipmentLocationMap = ({
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Refs for callbacks used in map click handler
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const onPickupChangeRef = useRef(onPickupChange);
+  onPickupChangeRef.current = onPickupChange;
+  const onDeliveryChangeRef = useRef(onDeliveryChange);
+  onDeliveryChangeRef.current = onDeliveryChange;
+  const deliveryCoordsRef = useRef(deliveryCoords);
+  deliveryCoordsRef.current = deliveryCoords;
+
   // Initialize map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const map = L.map(mapContainerRef.current, {
-      center: [30.0444, 31.2357],
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: MAPBOX_STYLE,
+      center: [31.2357, 30.0444],
       zoom: 10,
-      zoomControl: false,
+      maxZoom: MAX_ZOOM,
+      minZoom: MIN_ZOOM,
+      maxBounds: [
+        [EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]],
+        [EGYPT_BOUNDS[2], EGYPT_BOUNDS[3]],
+      ],
     });
 
-    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-    }).addTo(map);
+    map.on('click', async (e) => {
+      if (!modeRef.current) return;
+      const { lat, lng } = e.lngLat;
+      const address = await reverseGeocode(lat, lng);
+
+      if (modeRef.current === 'pickup') {
+        onPickupChangeRef.current(address, { lat, lng });
+        if (!deliveryCoordsRef.current) setMode('delivery');
+        else setMode(null);
+      } else {
+        onDeliveryChangeRef.current(address, { lat, lng });
+        setMode(null);
+      }
+    });
 
     mapRef.current = map;
 
@@ -128,65 +157,45 @@ const ShipmentLocationMap = ({
     };
   }, []);
 
-  // Handle map clicks
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    const handleClick = async (e: L.LeafletMouseEvent) => {
-      if (!mode) return;
-      const { lat, lng } = e.latlng;
-      const address = await reverseGeocode(lat, lng);
-
-      if (mode === 'pickup') {
-        onPickupChange(address, { lat, lng });
-        if (!deliveryCoords) setMode('delivery');
-        else setMode(null);
-      } else {
-        onDeliveryChange(address, { lat, lng });
-        setMode(null);
-      }
-    };
-
-    map.on('click', handleClick);
-    return () => { map.off('click', handleClick); };
-  }, [mode, deliveryCoords, onPickupChange, onDeliveryChange]);
-
   // Update cursor
   useEffect(() => {
-    const container = mapContainerRef.current;
-    if (container) container.style.cursor = mode ? 'crosshair' : '';
+    const canvas = mapRef.current?.getCanvas();
+    if (canvas) canvas.style.cursor = mode ? 'crosshair' : '';
   }, [mode]);
 
   // Update pickup marker
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    if (pickupMarkerRef.current) pickupMarkerRef.current.remove();
-    if (pickupCoords) {
-      pickupMarkerRef.current = L.marker([pickupCoords.lat, pickupCoords.lng], { icon: pickupIcon })
-        .addTo(map)
-        .bindPopup(`<b>📍 نقطة الاستلام</b><br/>${pickupAddress || ''}`);
-    }
+    if (pickupMarkerRef.current) { pickupMarkerRef.current.remove(); pickupMarkerRef.current = null; }
+    if (!mapRef.current || !pickupCoords) return;
+
+    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`<b>📍 نقطة الاستلام</b><br/>${pickupAddress || ''}`);
+    pickupMarkerRef.current = new mapboxgl.Marker({ element: createMarkerEl('#22c55e', 'A'), anchor: 'bottom' })
+      .setLngLat([pickupCoords.lng, pickupCoords.lat])
+      .setPopup(popup)
+      .addTo(mapRef.current);
   }, [pickupCoords, pickupAddress]);
 
   // Update delivery marker
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    if (deliveryMarkerRef.current) deliveryMarkerRef.current.remove();
-    if (deliveryCoords) {
-      deliveryMarkerRef.current = L.marker([deliveryCoords.lat, deliveryCoords.lng], { icon: deliveryIcon })
-        .addTo(map)
-        .bindPopup(`<b>🏁 نقطة التسليم</b><br/>${deliveryAddress || ''}`);
-    }
+    if (deliveryMarkerRef.current) { deliveryMarkerRef.current.remove(); deliveryMarkerRef.current = null; }
+    if (!mapRef.current || !deliveryCoords) return;
+
+    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`<b>🏁 نقطة التسليم</b><br/>${deliveryAddress || ''}`);
+    deliveryMarkerRef.current = new mapboxgl.Marker({ element: createMarkerEl('#ef4444', 'B'), anchor: 'bottom' })
+      .setLngLat([deliveryCoords.lng, deliveryCoords.lat])
+      .setPopup(popup)
+      .addTo(mapRef.current);
   }, [deliveryCoords, deliveryAddress]);
 
   // Fetch & draw route
   const fetchRoute = useCallback(async () => {
     const map = mapRef.current;
     if (!map || !pickupCoords || !deliveryCoords) {
-      if (routeLineRef.current) { routeLineRef.current.remove(); routeLineRef.current = null; }
+      // Remove route layer if exists
+      if (map?.getSource('route')) {
+        map.removeLayer('route-line');
+        map.removeSource('route');
+      }
       setRouteInfo(null);
       return;
     }
@@ -198,19 +207,39 @@ const ShipmentLocationMap = ({
       );
       const data = await res.json();
 
-      if (routeLineRef.current) { routeLineRef.current.remove(); routeLineRef.current = null; }
+      // Remove old route
+      if (map.getSource('route')) {
+        map.removeLayer('route-line');
+        map.removeSource('route');
+      }
 
       if (data.code === 'Ok' && data.routes?.[0]) {
         const route = data.routes[0];
-        const coords: L.LatLngExpression[] = route.geometry.coordinates.map(
-          (c: [number, number]) => [c[1], c[0]] as L.LatLngExpression
-        );
 
-        routeLineRef.current = L.polyline(coords, {
-          color: '#6366f1',
-          weight: 5,
-          opacity: 0.8,
-        }).addTo(map);
+        map.addSource('route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: route.geometry,
+          },
+        });
+
+        map.addLayer({
+          id: 'route-line',
+          type: 'line',
+          source: 'route',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: { 'line-color': '#6366f1', 'line-width': 5, 'line-opacity': 0.8 },
+        });
+
+        // Fit bounds to route
+        const coords = route.geometry.coordinates as [number, number][];
+        const bounds = coords.reduce(
+          (b, c) => b.extend(c as mapboxgl.LngLatLike),
+          new mapboxgl.LngLatBounds(coords[0], coords[0])
+        );
+        map.fitBounds(bounds, { padding: 50 });
 
         const distKm = (route.distance / 1000).toFixed(1);
         const durMin = Math.round(route.duration / 60);
@@ -218,8 +247,6 @@ const ShipmentLocationMap = ({
           distance: `${distKm} كم`,
           duration: durMin >= 60 ? `${Math.floor(durMin / 60)} ساعة ${durMin % 60} دقيقة` : `${durMin} دقيقة`,
         });
-
-        map.fitBounds(routeLineRef.current.getBounds(), { padding: [40, 40] });
       }
     } catch (err) {
       console.error('Route error:', err);
@@ -228,14 +255,23 @@ const ShipmentLocationMap = ({
     }
   }, [pickupCoords, deliveryCoords]);
 
-  useEffect(() => { fetchRoute(); }, [fetchRoute]);
+  useEffect(() => {
+    // Wait for map style to load before adding route
+    const map = mapRef.current;
+    if (!map) return;
+    if (map.isStyleLoaded()) {
+      fetchRoute();
+    } else {
+      map.once('load', fetchRoute);
+    }
+  }, [fetchRoute]);
 
   // Fit to single point
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    if (pickupCoords && !deliveryCoords) map.setView([pickupCoords.lat, pickupCoords.lng], 14);
-    else if (deliveryCoords && !pickupCoords) map.setView([deliveryCoords.lat, deliveryCoords.lng], 14);
+    if (pickupCoords && !deliveryCoords) map.easeTo({ center: [pickupCoords.lng, pickupCoords.lat], zoom: 14 });
+    else if (deliveryCoords && !pickupCoords) map.easeTo({ center: [deliveryCoords.lng, deliveryCoords.lat], zoom: 14 });
   }, [pickupCoords, deliveryCoords]);
 
   // Close results on outside click
@@ -265,7 +301,7 @@ const ShipmentLocationMap = ({
     }
   }, []);
 
-  // Auto-search: local results instantly, multi-source with debounce
+  // Auto-search
   const performSearch = useCallback((q: string) => {
     if (!q || q.length < 2) {
       setSearchResults([]);
@@ -274,7 +310,6 @@ const ShipmentLocationMap = ({
       return;
     }
 
-    // Instant local results
     const localResults: MultiGeoResult[] = searchEgyptLocations(q).slice(0, 5).map((loc, i) => ({
       id: `local-${loc.id || i}`,
       name: loc.name,
@@ -288,11 +323,9 @@ const ShipmentLocationMap = ({
     setShowResults(true);
     setSearching(true);
 
-    // Debounced multi-source search
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       const remoteResults = await fetchMultiGeo(q);
-      // Merge: local first, then remote (deduplicate by proximity)
       const merged = [...localResults];
       for (const r of remoteResults) {
         const isDupe = merged.some(m => Math.abs(m.lat - r.lat) < 0.002 && Math.abs(m.lng - r.lng) < 0.002);
@@ -303,21 +336,18 @@ const ShipmentLocationMap = ({
     }, 250);
   }, [fetchMultiGeo]);
 
-  // Handle input change with auto-search
   const handleInputChange = useCallback((value: string) => {
     setSearchQuery(value);
     performSearch(value);
   }, [performSearch]);
 
-  // Select a result — auto-set mode if not selected
   const handleSelectResult = useCallback((result: MultiGeoResult) => {
     const map = mapRef.current;
     if (!map) return;
     setShowResults(false);
     setSearchQuery(result.name);
-    map.setView([result.lat, result.lng], 15);
+    map.easeTo({ center: [result.lng, result.lat], zoom: 15 });
 
-    // Smart auto-mode: if no mode selected, pick the first empty slot
     const activeMode = mode || (!pickupCoords ? 'pickup' : !deliveryCoords ? 'delivery' : 'pickup');
 
     if (activeMode === 'pickup') {
@@ -335,7 +365,7 @@ const ShipmentLocationMap = ({
   const handleMyLocation = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 15),
+      (pos) => mapRef.current?.easeTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: 15 }),
       () => toast.error('تعذر تحديد موقعك'),
       { enableHighAccuracy: true }
     );
@@ -409,7 +439,6 @@ const ShipmentLocationMap = ({
             </div>
           </div>
 
-          {/* Multi-source results dropdown */}
           {showResults && searchResults.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-lg shadow-xl z-[1000] overflow-hidden">
               <div className="px-3 py-1.5 border-b bg-muted/50">
