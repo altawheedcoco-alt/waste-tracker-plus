@@ -169,7 +169,7 @@ const WazeLocationField = ({
   const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
   const [mapZoom, setMapZoom] = useState(12);
   const [mapExpanded, setMapExpanded] = useState(false);
-  // mapProvider removed - using Mapbox only
+  const [mapProvider, setMapProvider] = useState<'mapbox' | 'osm' | 'google'>('mapbox');
   const [showAllResults, setShowAllResults] = useState(false);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(getSearchHistory());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -655,30 +655,50 @@ const WazeLocationField = ({
       {showMap && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between flex-wrap gap-1">
-            <div className="flex items-center gap-1">
-              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400" onClick={() => openInMap('mapbox')}>
-                <MapPin className="w-2.5 h-2.5" /> Mapbox
+            <div className="flex items-center gap-0.5 bg-muted/50 rounded-md p-0.5">
+              <Button
+                type="button"
+                variant={mapProvider === 'mapbox' ? 'default' : 'ghost'}
+                size="sm"
+                className={cn("h-5 text-[9px] gap-0.5 px-1.5", mapProvider === 'mapbox' && 'shadow-sm')}
+                onClick={() => setMapProvider('mapbox')}
+              >
+                <Map className="w-2.5 h-2.5" /> Mapbox
               </Button>
-              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400" onClick={() => openInMap('osm')}>
-                <Map className="w-2.5 h-2.5" /> OSM
+              <Button
+                type="button"
+                variant={mapProvider === 'osm' ? 'default' : 'ghost'}
+                size="sm"
+                className={cn("h-5 text-[9px] gap-0.5 px-1.5", mapProvider === 'osm' && 'shadow-sm')}
+                onClick={() => setMapProvider('osm')}
+              >
+                <MapPin className="w-2.5 h-2.5" /> OSM
               </Button>
-              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400" onClick={() => openInMap('waze')}>
-                <Navigation className="w-2.5 h-2.5" /> Waze
-              </Button>
-              <Button type="button" variant="outline" size="sm" className="h-5 text-[9px] gap-0.5 px-1 border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400" onClick={() => openInMap('google')}>
+              <Button
+                type="button"
+                variant={mapProvider === 'google' ? 'default' : 'ghost'}
+                size="sm"
+                className={cn("h-5 text-[9px] gap-0.5 px-1.5", mapProvider === 'google' && 'shadow-sm')}
+                onClick={() => setMapProvider('google')}
+              >
                 <ExternalLink className="w-2.5 h-2.5" /> Google
               </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-5 px-1.5 text-[10px] gap-1"
-              onClick={() => setMapExpanded(!mapExpanded)}
-            >
-              <Map className="w-3 h-3" />
-              {mapExpanded ? 'تصغير' : 'تكبير'}
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button type="button" variant="ghost" size="sm" className="h-5 px-1 text-[9px] gap-0.5" onClick={() => openInMap('waze')} title="فتح في Waze">
+                <Navigation className="w-2.5 h-2.5" /> Waze
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-5 px-1.5 text-[10px] gap-1"
+                onClick={() => setMapExpanded(!mapExpanded)}
+              >
+                <Map className="w-3 h-3" />
+                {mapExpanded ? 'تصغير' : 'تكبير'}
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-1">
@@ -687,24 +707,63 @@ const WazeLocationField = ({
               "grid gap-2",
               (!value || focused) && showDropdown ? "grid-cols-[1fr_minmax(180px,220px)]" : "grid-cols-1"
             )}>
-              {/* Interactive Mapbox Map */}
-              <MapboxMapComponent
-                center={mapCenter}
-                zoom={mapZoom}
-                selectedPosition={mapCenter.lat !== 30.0444 ? mapCenter : null}
-                onPositionSelect={async (pos, address) => {
-                  if (address) {
-                    onChange(address, pos);
-                  } else {
-                    onChange(`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`, pos);
-                  }
-                  setMapCenter(pos);
-                  setMapZoom(15);
-                  toast.success('📍 تم تحديد الموقع من الخريطة');
-                }}
-                clickable={true}
-                height={mapExpanded ? '350px' : '200px'}
-              />
+              {/* Map Display based on provider */}
+              {mapProvider === 'mapbox' && (
+                <MapboxMapComponent
+                  center={mapCenter}
+                  zoom={mapZoom}
+                  selectedPosition={mapCenter.lat !== 30.0444 ? mapCenter : null}
+                  onPositionSelect={async (pos, address) => {
+                    if (address) {
+                      onChange(address, pos);
+                    } else {
+                      onChange(`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`, pos);
+                    }
+                    setMapCenter(pos);
+                    setMapZoom(15);
+                    toast.success('📍 تم تحديد الموقع من الخريطة');
+                  }}
+                  clickable={true}
+                  height={mapExpanded ? '350px' : '200px'}
+                />
+              )}
+              {mapProvider === 'osm' && (
+                <div className="relative rounded-lg overflow-hidden border" style={{ height: mapExpanded ? '350px' : '200px' }}>
+                  <iframe
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${(coordinates?.lng || mapCenter.lng) - 0.01},${(coordinates?.lat || mapCenter.lat) - 0.01},${(coordinates?.lng || mapCenter.lng) + 0.01},${(coordinates?.lat || mapCenter.lat) + 0.01}&layer=mapnik&marker=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`}
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    title="OpenStreetMap"
+                  />
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${coordinates?.lat || mapCenter.lat}&mlon=${coordinates?.lng || mapCenter.lng}#map=16/${coordinates?.lat || mapCenter.lat}/${coordinates?.lng || mapCenter.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-1 left-1 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
+                  >
+                    عرض أكبر على OSM ↗
+                  </a>
+                </div>
+              )}
+              {mapProvider === 'google' && (
+                <div className="relative rounded-lg overflow-hidden border" style={{ height: mapExpanded ? '350px' : '200px' }}>
+                  <iframe
+                    src={`https://maps.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}&z=15&output=embed`}
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    allowFullScreen
+                    title="Google Maps"
+                  />
+                  <a
+                    href={`https://www.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-1 left-1 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
+                  >
+                    عرض أكبر على Google Maps ↗
+                  </a>
+                </div>
+              )}
               {/* Sidebar for search results */}
               {(!value || focused) && showDropdown && (
                 <div className={cn(
