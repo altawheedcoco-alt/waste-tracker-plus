@@ -157,7 +157,7 @@ const WazeLocationField = ({
 
   const shareLocation = () => {
     if (!coordinates) return;
-    const text = `📍 ${value || 'موقع'}\n📌 Plus Code: ${plusCode}\n🔗 ${shareLink}`;
+    const text = `📍 ${value || 'موقع'}\n📐 إحداثيات: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}\n📌 Plus Code: ${plusCode}\n🔗 ${shareLink}`;
     if (navigator.share) {
       navigator.share({ title: 'موقع', text, url: shareLink }).catch(() => {});
     } else {
@@ -512,7 +512,18 @@ const WazeLocationField = ({
 
           {/* Plus Code + Address + Share Link */}
           {coordinates && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 p-2 bg-muted/30 rounded-lg border text-[11px]">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1.5 p-2 bg-muted/30 rounded-lg border text-[11px]">
+              {/* Coordinates */}
+              <button
+                type="button"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted transition-colors text-right"
+                onClick={() => copyToClipboard(`${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`, 'الإحداثيات')}
+                title="نسخ الإحداثيات"
+              >
+                <Navigation className="w-3.5 h-3.5 text-orange-600 flex-shrink-0" />
+                <span className="flex-1 truncate font-mono text-[10px]" dir="ltr">{`${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`}</span>
+                <Copy className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              </button>
               {/* Plus Code */}
               <button
                 type="button"
