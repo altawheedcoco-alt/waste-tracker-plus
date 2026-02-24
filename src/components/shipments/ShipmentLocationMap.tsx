@@ -500,23 +500,44 @@ const ShipmentLocationMap = ({
             {deliveryCoords ? 'تغيير التسليم' : '🏁 حدد التسليم'}
           </Button>
 
-          <div className="mr-auto flex items-center gap-1.5">
-            <Button type="button" size="sm" variant="ghost" className="h-7 text-[11px] gap-1" onClick={handleMyLocation}>
+          <div className="mr-auto flex items-center gap-1">
+            <Button type="button" size="sm" variant="ghost" className="h-7 text-[11px] gap-1 px-2" onClick={handleMyLocation}>
               <LocateFixed className="w-3 h-3" />
               موقعي
             </Button>
-            {pickupCoords && deliveryCoords && (
-              <>
-                <Button type="button" size="sm" variant="outline" className="h-7 text-[11px] gap-1"
-                  onClick={() => window.open(`https://www.waze.com/ar/live-map/directions?from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}`, '_blank')}>
-                  <ExternalLink className="w-3 h-3" /> Waze
-                </Button>
-                <Button type="button" size="sm" variant="outline" className="h-7 text-[11px] gap-1"
-                  onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&origin=${pickupCoords.lat},${pickupCoords.lng}&destination=${deliveryCoords.lat},${deliveryCoords.lng}&travelmode=driving`, '_blank')}>
-                  <ExternalLink className="w-3 h-3" /> Google
-                </Button>
-              </>
-            )}
+            {/* Map provider links - always visible */}
+            {(() => {
+              const point = pickupCoords || deliveryCoords;
+              const hasRoute = pickupCoords && deliveryCoords;
+              return (
+                <>
+                  <Button type="button" size="sm" variant="outline" className="h-6 text-[10px] gap-0.5 px-1.5 border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400"
+                    onClick={() => window.open(hasRoute
+                      ? `https://www.google.com/maps/dir/?api=1&origin=${pickupCoords.lat},${pickupCoords.lng}&destination=${deliveryCoords.lat},${deliveryCoords.lng}&travelmode=driving`
+                      : point ? `https://www.google.com/maps/@${point.lat},${point.lng},15z` : 'https://www.google.com/maps/@30.0444,31.2357,10z', '_blank')}>
+                    <ExternalLink className="w-2.5 h-2.5" /> Google
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" className="h-6 text-[10px] gap-0.5 px-1.5 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400"
+                    onClick={() => window.open(hasRoute
+                      ? `https://www.waze.com/ar/live-map/directions?from=ll.${pickupCoords.lat},${pickupCoords.lng}&to=ll.${deliveryCoords.lat},${deliveryCoords.lng}`
+                      : point ? `https://www.waze.com/ar/live-map?ll=${point.lat},${point.lng}&zoom=15` : 'https://www.waze.com/ar/live-map', '_blank')}>
+                    <ExternalLink className="w-2.5 h-2.5" /> Waze
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" className="h-6 text-[10px] gap-0.5 px-1.5 border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400"
+                    onClick={() => window.open(hasRoute
+                      ? `https://www.openstreetmap.org/directions?engine=osrm_car&route=${pickupCoords.lat},${pickupCoords.lng};${deliveryCoords.lat},${deliveryCoords.lng}`
+                      : point ? `https://www.openstreetmap.org/?mlat=${point.lat}&mlon=${point.lng}#map=15/${point.lat}/${point.lng}` : 'https://www.openstreetmap.org/#map=10/30.0444/31.2357', '_blank')}>
+                    <ExternalLink className="w-2.5 h-2.5" /> OSM
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" className="h-6 text-[10px] gap-0.5 px-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400"
+                    onClick={() => window.open(hasRoute
+                      ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#15/${pickupCoords.lat}/${pickupCoords.lng}`
+                      : point ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#15/${point.lat}/${point.lng}` : `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#10/30.0444/31.2357`, '_blank')}>
+                    <ExternalLink className="w-2.5 h-2.5" /> Mapbox
+                  </Button>
+                </>
+              );
+            })()}
           </div>
         </div>
 
