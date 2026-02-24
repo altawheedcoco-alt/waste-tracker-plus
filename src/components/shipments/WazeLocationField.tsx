@@ -272,7 +272,40 @@ const WazeLocationField = ({
       const center = coordinates || mapCenter;
       
       const searchPromises = [
-        // Waze search (primary)
+        // Google Places search (best for businesses/POIs)
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places-search`, {
+          method: 'POST',
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: q, userLat: center.lat, userLng: center.lng, radius: 50000 }),
+        })
+          .then(r => r.json())
+          .then(data => (data.results || []).map((r: any) => ({
+            id: `google-${r.id}`,
+            name: r.name,
+            address: r.address,
+            lat: r.lat,
+            lng: r.lng,
+            type: 'google' as const,
+          })))
+          .catch(() => [] as SearchResult[]),
+
+        // Mapbox Geocoding (excellent for POIs & businesses)
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar&country=eg&proximity=${center.lng},${center.lat}&types=poi,address,place&limit=10`)
+          .then(r => r.json())
+          .then(data => (data.features || []).map((f: any, i: number) => ({
+            id: `mapbox-${f.id || i}`,
+            name: f.text || f.place_name?.split(',')[0],
+            address: f.place_name || '',
+            lat: f.center?.[1] || 0,
+            lng: f.center?.[0] || 0,
+            type: 'mapbox' as const,
+          })))
+          .catch(() => [] as SearchResult[]),
+
+        // Waze search
         fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/waze-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lon=${center.lng}&lang=ar`, {
           headers: { 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
         })
@@ -316,10 +349,10 @@ const WazeLocationField = ({
           .catch(() => [] as SearchResult[]),
       ];
 
-      const [wazeResults, multiResults, osmResults] = await Promise.all(searchPromises);
+      const [googleResults, mapboxResults, wazeResults, multiResults, osmResults] = await Promise.all(searchPromises);
       
-      // Waze first, then multi-geocode results, then OSM
-      const allMapResults = [...wazeResults, ...multiResults, ...osmResults];
+      // Google first, Mapbox second (best POI data), then Waze, multi-geocode, OSM
+      const allMapResults = [...googleResults, ...mapboxResults, ...wazeResults, ...multiResults, ...osmResults];
       const deduped: SearchResult[] = [];
       for (const r of allMapResults) {
         const isDupe = deduped.some(
