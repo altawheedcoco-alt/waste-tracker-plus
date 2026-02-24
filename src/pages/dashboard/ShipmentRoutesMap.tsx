@@ -138,7 +138,9 @@ const ShipmentRoutesMap = () => {
 
   useEffect(() => { fetchShipments(); }, [fetchShipments]);
 
-  // Initialize map
+  const [mapReady, setMapReady] = useState(false);
+
+  // Initialize map - depends on loading because container isn't mounted during skeleton
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
@@ -157,21 +159,17 @@ const ShipmentRoutesMap = () => {
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-left');
     mapRef.current = map;
+    
+    map.on('load', () => setMapReady(true));
 
     return () => { map.remove(); mapRef.current = null; };
-  }, []);
+  }, [loading]);
 
   // Draw routes on map
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) {
-      // Wait for style load
-      const onLoad = () => drawRoutes();
-      map?.on('load', onLoad);
-      return () => { map?.off('load', onLoad); };
-    }
+    if (!mapReady || !mapRef.current) return;
     drawRoutes();
-  }, [shipments, visibleRoutes, selectedId]);
+  }, [shipments, visibleRoutes, selectedId, mapReady]);
 
   const drawRoutes = useCallback(() => {
     const map = mapRef.current;
