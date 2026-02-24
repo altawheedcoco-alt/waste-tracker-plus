@@ -16,6 +16,7 @@ import { useSavedLocations } from '@/hooks/useSavedLocations';
 import { supabase } from '@/integrations/supabase/client';
 import MapboxMapComponent from '@/components/maps/MapboxMapComponent';
 import { MAPBOX_ACCESS_TOKEN } from '@/lib/mapboxConfig';
+import { OpenLocationCode } from 'open-location-code';
 
 // Reverse geocode using Nominatim (OSM) - free, no key needed
 const reverseGeocode = async (lat: number, lng: number): Promise<string | null> => {
@@ -144,32 +145,9 @@ const WazeLocationField = ({
 
   const { locations: savedLocations, incrementUsage } = useSavedLocations();
 
-  // Generate Plus Code from coordinates (Open Location Code algorithm - simplified)
-  const generatePlusCode = (lat: number, lng: number): string => {
-    const ALPHABET = '23456789CFGHJMPQRVWX';
-    const PAIR_PRECISION = 5;
-    let adjustedLat = lat + 90;
-    let adjustedLng = lng + 180;
-    let code = '';
-    let latDigit, lngDigit;
-    let latPlaceValue = 20;
-    let lngPlaceValue = 20;
-    for (let i = 0; i < PAIR_PRECISION; i++) {
-      latDigit = Math.floor(adjustedLat / latPlaceValue);
-      lngDigit = Math.floor(adjustedLng / lngPlaceValue);
-      latDigit = Math.min(latDigit, ALPHABET.length - 1);
-      lngDigit = Math.min(lngDigit, ALPHABET.length - 1);
-      adjustedLat -= latDigit * latPlaceValue;
-      adjustedLng -= lngDigit * lngPlaceValue;
-      code += ALPHABET[latDigit] + ALPHABET[lngDigit];
-      latPlaceValue /= 20;
-      lngPlaceValue /= 20;
-      if (i === 3) code += '+';
-    }
-    return code;
-  };
-
-  const plusCode = coordinates ? generatePlusCode(coordinates.lat, coordinates.lng) : '';
+  // Generate Plus Code using official Open Location Code library
+  const olc = new OpenLocationCode();
+  const plusCode = coordinates ? olc.encode(coordinates.lat, coordinates.lng, 11) : '';
   const shareLink = coordinates ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}` : '';
 
   const copyToClipboard = (text: string, label: string) => {
