@@ -19,7 +19,7 @@ serve(async (req) => {
       });
     }
 
-    const GOOGLE_API_KEY = Deno.env.get("VITE_GOOGLE_MAPS_API_KEY");
+    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_MAPS_API_KEY") || Deno.env.get("VITE_GOOGLE_MAPS_API_KEY");
     if (!GOOGLE_API_KEY) {
       console.error("VITE_GOOGLE_MAPS_API_KEY is not configured");
       return new Response(JSON.stringify({ error: "API key not configured", results: [] }), {
