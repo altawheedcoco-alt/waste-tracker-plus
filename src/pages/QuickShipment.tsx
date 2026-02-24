@@ -305,7 +305,7 @@ const QuickShipment = () => {
         delivery_address: data.deliveryAddress || null,
         vehicle_plate: data.vehiclePlate || null,
         notes: data.notes || null,
-        waste_type: linkData.preset_waste_type || 'mixed',
+        waste_type: (['plastic','paper','metal','glass','electronic','organic','chemical','medical','construction','other'].includes(linkData.preset_waste_type || '') ? linkData.preset_waste_type : 'other') as string,
         shipment_link_id: linkData.id,
         is_public_submission: true,
         submitter_name: data.submitterName,
