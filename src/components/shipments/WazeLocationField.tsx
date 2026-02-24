@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, Loader2, MapPin, Navigation, X, ExternalLink,
   Bookmark, Building2, LocateFixed, Star, Map, Link2,
-  Copy, Share2, Hash,
+  Copy, Share2, Hash, Clock, Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -98,6 +98,37 @@ interface OrgLocation {
   longitude?: number | null;
 }
 
+// ==================== Search History ====================
+const SEARCH_HISTORY_KEY = 'location-search-history';
+const MAX_HISTORY = 15;
+
+interface SearchHistoryItem {
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  type: string;
+  timestamp: number;
+}
+
+function getSearchHistory(): SearchHistoryItem[] {
+  try {
+    return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || '[]');
+  } catch { return []; }
+}
+
+function saveToSearchHistory(item: Omit<SearchHistoryItem, 'timestamp'>) {
+  const history = getSearchHistory().filter(
+    h => !(Math.abs(h.lat - item.lat) < 0.0001 && Math.abs(h.lng - item.lng) < 0.0001)
+  );
+  history.unshift({ ...item, timestamp: Date.now() });
+  localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+}
+
+function clearSearchHistory() {
+  localStorage.removeItem(SEARCH_HISTORY_KEY);
+}
+
 interface WazeLocationFieldProps {
   value: string;
   onChange: (address: string, coordinates?: { lat: number; lng: number }) => void;
@@ -140,6 +171,7 @@ const WazeLocationField = ({
   const [mapExpanded, setMapExpanded] = useState(false);
   // mapProvider removed - using Mapbox only
   const [showAllResults, setShowAllResults] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(getSearchHistory());
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -322,6 +354,15 @@ const WazeLocationField = ({
     if (result.type === 'saved') {
       incrementUsage(result.id.replace('saved-', ''));
     }
+    // Save to search history
+    saveToSearchHistory({
+      name: result.name,
+      address: result.address,
+      lat: result.lat,
+      lng: result.lng,
+      type: result.type,
+    });
+    setSearchHistory(getSearchHistory());
     toast.success('✅ تم تحديد الموقع');
   };
 
@@ -742,6 +783,50 @@ const WazeLocationField = ({
                             ))}
                           </>
                         )}
+                        {/* Search History */}
+                        {searchHistory.length > 0 && (
+                          <>
+                            <div className="flex items-center justify-between px-2 pt-1.5 pb-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <Clock className="w-2.5 h-2.5 text-muted-foreground" />
+                                <span className="text-[9px] text-muted-foreground font-medium">سجل البحث</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  clearSearchHistory();
+                                  setSearchHistory([]);
+                                }}
+                                className="text-[9px] text-muted-foreground hover:text-destructive transition-colors px-1 py-0.5 rounded hover:bg-destructive/10 flex items-center gap-0.5"
+                              >
+                                <Trash2 className="w-2.5 h-2.5" />
+                                مسح
+                              </button>
+                            </div>
+                            {searchHistory.slice(0, 5).map((item, i) => (
+                              <button
+                                key={`history-${i}`}
+                                type="button"
+                                className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
+                                onClick={() => handleSelect({
+                                  id: `history-${i}`,
+                                  name: item.name,
+                                  address: item.address,
+                                  lat: item.lat,
+                                  lng: item.lng,
+                                  type: item.type as any,
+                                })}
+                              >
+                                <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[11px] font-medium truncate">{item.name}</p>
+                                  <p className="text-[10px] text-muted-foreground truncate">{item.address}</p>
+                                </div>
+                              </button>
+                            ))}
+                          </>
+                        )}
                       </div>
                     )}
                     {results.length > 0 && (
@@ -779,8 +864,6 @@ const WazeLocationField = ({
           </div>
         </div>
       )}
-
-
 
       {/* Map Link Input */}
       <div className="space-y-1">
