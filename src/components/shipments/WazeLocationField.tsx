@@ -892,14 +892,22 @@ const WazeLocationField = ({
               {mapProvider === 'google' && (
                 <div className="relative rounded-lg overflow-hidden border" style={{ height: mapExpanded ? '350px' : '200px' }}>
                   <iframe
-                    src={`https://maps.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}&z=15&output=embed`}
+                    src={
+                      query && query.length >= 2 && !coordinates
+                        ? `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed&hl=ar`
+                        : `https://maps.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}&z=15&output=embed&hl=ar`
+                    }
                     className="w-full h-full border-0"
                     loading="lazy"
                     allowFullScreen
                     title="Google Maps"
                   />
                   <a
-                    href={`https://www.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`}
+                    href={
+                      query && query.length >= 2 && !coordinates
+                        ? `https://www.google.com/maps/search/${encodeURIComponent(query)}`
+                        : `https://www.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="absolute bottom-1 left-1 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
