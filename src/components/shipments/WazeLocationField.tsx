@@ -189,6 +189,7 @@ const WazeLocationField = ({
   const [showAllResults, setShowAllResults] = useState(false);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(getSearchHistory());
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { locations: savedLocations, incrementUsage } = useSavedLocations();
@@ -237,7 +238,11 @@ const WazeLocationField = ({
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        (!dropdownRef.current || !dropdownRef.current.contains(target))
+      ) {
         setFocused(false);
       }
     };
@@ -741,7 +746,7 @@ const WazeLocationField = ({
 
       {/* Search input */}
       {(!value || focused) && (
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
@@ -753,11 +758,8 @@ const WazeLocationField = ({
                 if (pasted) {
                   e.preventDefault();
                   setQuery(pasted);
-                  // Immediately try smart input for pasted content
                   handleSmartInput(pasted).then(handled => {
-                    if (!handled) {
-                      // Let normal search handle it via the useEffect
-                    }
+                    if (!handled) {}
                   });
                 }
               }}
@@ -792,6 +794,97 @@ const WazeLocationField = ({
               </Button>
             </div>
           </div>
+
+          {/* Dropdown results directly under search input */}
+          {focused && showDropdown && (
+            <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border rounded-lg shadow-lg max-h-[300px] overflow-hidden flex flex-col">
+              <ScrollArea className="flex-1">
+                {quickLocations && (
+                  <div className="p-1.5 space-y-0.5">
+                    {organizationAddress && (
+                      <button type="button" className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors" onClick={useOrgPrimary}>
+                        <Building2 className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-medium truncate">{organizationName || 'المقر'}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{organizationCity ? `${organizationAddress}, ${organizationCity}` : organizationAddress}</p>
+                        </div>
+                      </button>
+                    )}
+                    {orgLocations.slice(0, 3).map(loc => (
+                      <button key={loc.id} type="button" className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors" onClick={() => handleSelect({ id: `org-${loc.id}`, name: loc.location_name, address: loc.city ? `${loc.address}, ${loc.city}` : loc.address, lat: loc.latitude || 0, lng: loc.longitude || 0, type: 'org' })}>
+                        <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-medium truncate">{loc.location_name}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{loc.address}</p>
+                        </div>
+                      </button>
+                    ))}
+                    {savedLocations.length > 0 && (
+                      <>
+                        <div className="flex items-center gap-1.5 px-2 pt-1.5 pb-0.5">
+                          <Bookmark className="w-2.5 h-2.5 text-muted-foreground" />
+                          <span className="text-[9px] text-muted-foreground font-medium">آخر المستخدمة</span>
+                        </div>
+                        {savedLocations.slice(0, 4).map(loc => (
+                          <button key={loc.id} type="button" className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors" onClick={() => handleSelect({ id: `saved-${loc.id}`, name: loc.name, address: loc.city ? `${loc.address}, ${loc.city}` : loc.address, lat: loc.latitude, lng: loc.longitude, type: 'saved' })}>
+                            <Star className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-medium truncate">{loc.name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{loc.address}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </>
+                    )}
+                    {searchHistory.length > 0 && (
+                      <>
+                        <div className="flex items-center justify-between px-2 pt-1.5 pb-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-2.5 h-2.5 text-muted-foreground" />
+                            <span className="text-[9px] text-muted-foreground font-medium">سجل البحث</span>
+                          </div>
+                          <button type="button" onClick={(e) => { e.stopPropagation(); clearSearchHistory(); setSearchHistory([]); }} className="text-[9px] text-muted-foreground hover:text-destructive transition-colors px-1 py-0.5 rounded hover:bg-destructive/10 flex items-center gap-0.5">
+                            <Trash2 className="w-2.5 h-2.5" />
+                            مسح
+                          </button>
+                        </div>
+                        {searchHistory.slice(0, 5).map((item, i) => (
+                          <button key={`history-${i}`} type="button" className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors" onClick={() => handleSelect({ id: `history-${i}`, name: item.name, address: item.address, lat: item.lat, lng: item.lng, type: item.type as any })}>
+                            <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-medium truncate">{item.name}</p>
+                              <p className="text-[10px] text-muted-foreground truncate">{item.address}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                )}
+                {results.length > 0 && (
+                  <div className="p-1">
+                    {quickLocations && <div className="border-t my-1" />}
+                    <div className="px-2 py-1">
+                      <span className="text-[9px] text-muted-foreground font-medium">نتائج البحث ({results.length})</span>
+                    </div>
+                    {results.map((result) => (
+                      <button key={result.id} type="button" className="w-full px-2 py-2 text-right hover:bg-muted/80 rounded-md flex items-start gap-2 transition-colors" onClick={() => handleSelect(result)}>
+                        <div className="mt-0.5 flex-shrink-0">{getTypeIcon(result.type)}</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] font-medium truncate">{result.name}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{result.address}</p>
+                        </div>
+                        <Badge variant="outline" className="text-[8px] flex-shrink-0 mt-0.5 px-1">{getTypeLabel(result.type)}</Badge>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!quickLocations && results.length === 0 && query.length >= 2 && !loading && (
+                  <div className="p-4 text-center text-[11px] text-muted-foreground">لا توجد نتائج</div>
+                )}
+              </ScrollArea>
+            </div>
+          )}
         </div>
       )}
 
@@ -846,11 +939,8 @@ const WazeLocationField = ({
           </div>
 
           <div className="space-y-1">
-            <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
-           <div className={cn(
-              "grid gap-2",
-              (!value || focused) && showDropdown ? "grid-cols-[1fr_minmax(180px,220px)]" : "grid-cols-1"
-            )}>
+           <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
+           <div className="grid grid-cols-1">
               {/* Map Display based on provider */}
               {mapProvider === 'mapbox' && (
                 <MapboxMapComponent
@@ -874,7 +964,7 @@ const WazeLocationField = ({
               {mapProvider === 'osm' && (
                 <div className="relative rounded-lg overflow-hidden border" style={{ height: mapExpanded ? '350px' : '200px' }}>
                   <iframe
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${(coordinates?.lng || mapCenter.lng) - 0.01},${(coordinates?.lat || mapCenter.lat) - 0.01},${(coordinates?.lng || mapCenter.lng) + 0.01},${(coordinates?.lat || mapCenter.lat) + 0.01}&layer=mapnik&marker=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`}
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${(coordinates?.lng || mapCenter.lng) - 0.01},${(coordinates?.lat || mapCenter.lat) - 0.008},${(coordinates?.lng || mapCenter.lng) + 0.01},${(coordinates?.lat || mapCenter.lat) + 0.008}&layer=mapnik&marker=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`}
                     className="w-full h-full border-0"
                     loading="lazy"
                     title="OpenStreetMap"
@@ -914,161 +1004,6 @@ const WazeLocationField = ({
                   >
                     عرض أكبر على Google Maps ↗
                   </a>
-                </div>
-              )}
-              {/* Sidebar for search results */}
-              {(!value || focused) && showDropdown && (
-                <div className={cn(
-                  "border rounded-lg overflow-hidden bg-background flex flex-col",
-                  mapExpanded ? "h-[350px]" : "h-[200px]"
-                )}>
-                  <div className="px-2.5 py-1.5 border-b bg-muted/30 flex items-center justify-between flex-shrink-0">
-                    <Badge variant="outline" className="text-[9px]">{results.length || '—'}</Badge>
-                    <span className="text-[10px] font-medium text-muted-foreground">نتائج البحث</span>
-                  </div>
-                  <ScrollArea className="flex-1">
-                    {quickLocations && (
-                      <div className="p-1.5 space-y-0.5">
-                        {organizationAddress && (
-                          <button
-                            type="button"
-                            className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
-                            onClick={useOrgPrimary}
-                          >
-                            <Building2 className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[11px] font-medium truncate">{organizationName || 'المقر'}</p>
-                              <p className="text-[10px] text-muted-foreground truncate">
-                                {organizationCity ? `${organizationAddress}, ${organizationCity}` : organizationAddress}
-                              </p>
-                            </div>
-                          </button>
-                        )}
-                        {orgLocations.slice(0, 3).map(loc => (
-                          <button
-                            key={loc.id}
-                            type="button"
-                            className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
-                            onClick={() => handleSelect({
-                              id: `org-${loc.id}`,
-                              name: loc.location_name,
-                              address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
-                              lat: loc.latitude || 0,
-                              lng: loc.longitude || 0,
-                              type: 'org',
-                            })}
-                          >
-                            <MapPin className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[11px] font-medium truncate">{loc.location_name}</p>
-                              <p className="text-[10px] text-muted-foreground truncate">{loc.address}</p>
-                            </div>
-                          </button>
-                        ))}
-                        {savedLocations.length > 0 && (
-                          <>
-                            <div className="flex items-center gap-1.5 px-2 pt-1.5 pb-0.5">
-                              <Bookmark className="w-2.5 h-2.5 text-muted-foreground" />
-                              <span className="text-[9px] text-muted-foreground font-medium">آخر المستخدمة</span>
-                            </div>
-                            {savedLocations.slice(0, 4).map(loc => (
-                              <button
-                                key={loc.id}
-                                type="button"
-                                className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
-                                onClick={() => handleSelect({
-                                  id: `saved-${loc.id}`,
-                                  name: loc.name,
-                                  address: loc.city ? `${loc.address}, ${loc.city}` : loc.address,
-                                  lat: loc.latitude,
-                                  lng: loc.longitude,
-                                  type: 'saved',
-                                })}
-                              >
-                                <Star className="w-3 h-3 text-amber-500 flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[11px] font-medium truncate">{loc.name}</p>
-                                  <p className="text-[10px] text-muted-foreground truncate">{loc.address}</p>
-                                </div>
-                              </button>
-                            ))}
-                          </>
-                        )}
-                        {/* Search History */}
-                        {searchHistory.length > 0 && (
-                          <>
-                            <div className="flex items-center justify-between px-2 pt-1.5 pb-0.5">
-                              <div className="flex items-center gap-1.5">
-                                <Clock className="w-2.5 h-2.5 text-muted-foreground" />
-                                <span className="text-[9px] text-muted-foreground font-medium">سجل البحث</span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  clearSearchHistory();
-                                  setSearchHistory([]);
-                                }}
-                                className="text-[9px] text-muted-foreground hover:text-destructive transition-colors px-1 py-0.5 rounded hover:bg-destructive/10 flex items-center gap-0.5"
-                              >
-                                <Trash2 className="w-2.5 h-2.5" />
-                                مسح
-                              </button>
-                            </div>
-                            {searchHistory.slice(0, 5).map((item, i) => (
-                              <button
-                                key={`history-${i}`}
-                                type="button"
-                                className="w-full px-2 py-1.5 text-right hover:bg-muted/80 rounded-md flex items-center gap-2 transition-colors"
-                                onClick={() => handleSelect({
-                                  id: `history-${i}`,
-                                  name: item.name,
-                                  address: item.address,
-                                  lat: item.lat,
-                                  lng: item.lng,
-                                  type: item.type as any,
-                                })}
-                              >
-                                <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[11px] font-medium truncate">{item.name}</p>
-                                  <p className="text-[10px] text-muted-foreground truncate">{item.address}</p>
-                                </div>
-                              </button>
-                            ))}
-                          </>
-                        )}
-                      </div>
-                    )}
-                    {results.length > 0 && (
-                      <div className="p-1">
-                        {results.map((result) => (
-                          <button
-                            key={result.id}
-                            type="button"
-                            className="w-full px-2 py-2 text-right hover:bg-muted/80 rounded-md flex items-start gap-2 transition-colors"
-                            onClick={() => handleSelect(result)}
-                          >
-                            <div className="mt-0.5 flex-shrink-0">
-                              {getTypeIcon(result.type)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[11px] font-medium truncate">{result.name}</p>
-                              <p className="text-[10px] text-muted-foreground truncate">{result.address}</p>
-                            </div>
-                            <Badge variant="outline" className="text-[8px] flex-shrink-0 mt-0.5 px-1">
-                              {getTypeLabel(result.type)}
-                            </Badge>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {!quickLocations && results.length === 0 && (
-                      <div className="p-4 text-center text-[11px] text-muted-foreground">
-                        لا توجد نتائج
-                      </div>
-                    )}
-                  </ScrollArea>
                 </div>
               )}
             </div>
