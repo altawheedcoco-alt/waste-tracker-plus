@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, Loader2, MapPin, Navigation, X, ExternalLink,
   Bookmark, Building2, LocateFixed, Star, Map, Link2,
+  Copy, Share2, Hash,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -142,6 +143,50 @@ const WazeLocationField = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { locations: savedLocations, incrementUsage } = useSavedLocations();
+
+  // Generate Plus Code from coordinates (Open Location Code algorithm - simplified)
+  const generatePlusCode = (lat: number, lng: number): string => {
+    const ALPHABET = '23456789CFGHJMPQRVWX';
+    const PAIR_PRECISION = 5;
+    let adjustedLat = lat + 90;
+    let adjustedLng = lng + 180;
+    let code = '';
+    let latDigit, lngDigit;
+    let latPlaceValue = 20;
+    let lngPlaceValue = 20;
+    for (let i = 0; i < PAIR_PRECISION; i++) {
+      latDigit = Math.floor(adjustedLat / latPlaceValue);
+      lngDigit = Math.floor(adjustedLng / lngPlaceValue);
+      latDigit = Math.min(latDigit, ALPHABET.length - 1);
+      lngDigit = Math.min(lngDigit, ALPHABET.length - 1);
+      adjustedLat -= latDigit * latPlaceValue;
+      adjustedLng -= lngDigit * lngPlaceValue;
+      code += ALPHABET[latDigit] + ALPHABET[lngDigit];
+      latPlaceValue /= 20;
+      lngPlaceValue /= 20;
+      if (i === 3) code += '+';
+    }
+    return code;
+  };
+
+  const plusCode = coordinates ? generatePlusCode(coordinates.lat, coordinates.lng) : '';
+  const shareLink = coordinates ? `https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}` : '';
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success(`تم نسخ ${label}`);
+  };
+
+  const shareLocation = () => {
+    if (!coordinates) return;
+    const text = `📍 ${value || 'موقع'}\n📌 Plus Code: ${plusCode}\n🔗 ${shareLink}`;
+    if (navigator.share) {
+      navigator.share({ title: 'موقع', text, url: shareLink }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text);
+      toast.success('تم نسخ بيانات الموقع');
+    }
+  };
 
   // Sync map center with coordinates
   useEffect(() => {
@@ -486,6 +531,50 @@ const WazeLocationField = ({
               </Button>
             </div>
           </div>
+
+          {/* Plus Code + Address + Share Link */}
+          {coordinates && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 p-2 bg-muted/30 rounded-lg border text-[11px]">
+              {/* Plus Code */}
+              <button
+                type="button"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted transition-colors text-right"
+                onClick={() => copyToClipboard(plusCode, 'Plus Code')}
+                title="نسخ Plus Code"
+              >
+                <Hash className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                <span className="flex-1 truncate font-mono text-[10px]" dir="ltr">{plusCode}</span>
+                <Copy className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              </button>
+              {/* Address */}
+              <button
+                type="button"
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted transition-colors text-right"
+                onClick={() => copyToClipboard(value, 'العنوان')}
+                title="نسخ العنوان"
+              >
+                <MapPin className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                <span className="flex-1 truncate">{value}</span>
+                <Copy className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              </button>
+              {/* Share Link */}
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded-md hover:bg-muted transition-colors text-right"
+                  onClick={() => copyToClipboard(shareLink, 'الرابط')}
+                  title="نسخ الرابط"
+                >
+                  <Link2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                  <span className="flex-1 truncate font-mono text-[10px]" dir="ltr">{`${coordinates.lat.toFixed(4)},${coordinates.lng.toFixed(4)}`}</span>
+                  <Copy className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                </button>
+                <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={shareLocation} title="مشاركة الموقع">
+                  <Share2 className="w-3.5 h-3.5 text-violet-600" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
