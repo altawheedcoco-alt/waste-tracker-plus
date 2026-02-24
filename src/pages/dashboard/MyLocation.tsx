@@ -28,7 +28,7 @@ import TripHistoryView from '@/components/driver/TripHistoryView';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 import TrackingStatsCard from '@/components/tracking/TrackingStatsCard';
 import QuickLocationButton from '@/components/tracking/QuickLocationButton';
-import GoogleMapComponent from '@/components/maps/LeafletMapComponent';
+import GoogleMapComponent from '@/components/maps/MapboxMapComponent';
 
 const defaultCenter = { lat: 30.0444, lng: 31.2357 }; // Cairo, Egypt
 

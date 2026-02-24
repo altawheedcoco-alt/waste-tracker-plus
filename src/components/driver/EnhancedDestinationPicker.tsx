@@ -47,7 +47,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 // Lazy load map component
-const InteractiveMapPicker = lazy(() => import('@/components/maps/LeafletLocationPicker'));
+const InteractiveMapPicker = lazy(() => import('@/components/maps/MapboxLocationPicker'));
 
 // Helper functions for external navigation
 const openInGoogleMaps = (address: string, coords?: { lat: number; lng: number }) => {
