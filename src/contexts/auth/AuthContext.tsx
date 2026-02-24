@@ -319,6 +319,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let initialSessionHandled = false;
     
     const initializeAuth = async () => {
       try {
@@ -339,12 +340,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Don't await - let it load in background
             fetchUserData(session.user.id).catch(console.error);
           }
+          initialSessionHandled = true;
         } else {
           // Timeout - proceed without auth
           console.warn('Auth session fetch timed out, proceeding without auth');
+          initialSessionHandled = true;
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
+        initialSessionHandled = true;
       } finally {
         if (mounted) {
           setLoading(false);
@@ -358,15 +362,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         if (!mounted) return;
         
+        // Skip INITIAL_SESSION since we already handle it in initializeAuth
+        if (event === 'INITIAL_SESSION' && initialSessionHandled) {
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setTimeout(() => {
-            if (mounted) {
-              fetchUserData(session.user.id);
-            }
-          }, 0);
+          // Only re-fetch on actual auth changes (sign in, token refresh, etc.)
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+            setTimeout(() => {
+              if (mounted) {
+                fetchUserData(session.user.id);
+              }
+            }, 0);
+          }
         } else {
           setProfile(null);
           setOrganization(null);
