@@ -32,7 +32,7 @@ const AIOperationsAssistant = lazy(() => import('@/components/ai/AIOperationsAss
 const AIChatbot = lazy(() => import('@/components/ai/AIChatbot'));
 const EnhancedChatWidget = lazy(() => import('@/components/chat/EnhancedChatWidget'));
 const UnifiedSupportWidget = lazy(() => import('@/components/ai/UnifiedSupportWidget'));
-
+const BetaBanner = lazy(() => import('@/components/BetaBanner'));
 const AccessibilityPanel = lazy(() => import('@/components/accessibility/AccessibilityPanel').then(m => ({ default: m.AccessibilityPanel })));
 const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
 const TouchOptimizations = lazy(() => import('@/components/mobile/TouchOptimizations'));
@@ -130,7 +130,7 @@ const Dashboard = () => {
                 <EnhancedChatWidget />
                 <UnifiedSupportWidget />
                 <UnifiedFloatingMenu />
-                
+                <BetaBanner />
                 <AccessibilityPanel />
               </Suspense>
             </ErrorBoundary>
