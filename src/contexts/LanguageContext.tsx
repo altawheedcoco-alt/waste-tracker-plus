@@ -1,11 +1,36 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
-import { ar } from '@/i18n/ar';
-import { en } from '@/i18n/en';
 import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ar' | 'en';
 
-type TranslationKeys = typeof ar;
+// Lazy-load translations — only the active language is imported
+const loadTranslations = async (lang: Language) => {
+  if (lang === 'ar') {
+    const { ar } = await import('@/i18n/ar');
+    return ar;
+  }
+  const { en } = await import('@/i18n/en');
+  return en;
+};
+
+// Pre-cache: load default language synchronously for instant first render
+let cachedTranslations: Record<string, any> = {};
+let cacheReady = false;
+
+// Eagerly start loading default language
+const defaultLang: Language = (() => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('irecycle-language');
+    if (saved === 'en') return 'en';
+  }
+  return 'ar';
+})();
+
+// Start loading immediately (non-blocking)
+loadTranslations(defaultLang).then(t => {
+  cachedTranslations[defaultLang] = t;
+  cacheReady = true;
+});
 
 interface LanguageContextType {
   language: Language;
@@ -14,8 +39,6 @@ interface LanguageContextType {
   dir: 'rtl' | 'ltr';
   isRTL: boolean;
 }
-
-const translations: Record<Language, TranslationKeys> = { ar, en };
 
 const STORAGE_KEY = 'irecycle-language';
 
@@ -32,17 +55,37 @@ function getNestedValue(obj: any, path: string): string {
 }
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === 'ar' || saved === 'en') return saved;
-    }
-    return 'ar';
-  });
+  const [language, setLanguageState] = useState<Language>(defaultLang);
+  const [translations, setTranslations] = useState<any>(cachedTranslations[defaultLang] || null);
 
-  // Load language preference from database only when auth state changes (not on every mount)
+  // Load translations when language changes
   useEffect(() => {
-    // Don't make DB calls if we already have a saved preference
+    if (cachedTranslations[language]) {
+      setTranslations(cachedTranslations[language]);
+      return;
+    }
+    loadTranslations(language).then(t => {
+      cachedTranslations[language] = t;
+      setTranslations(t);
+    });
+  }, [language]);
+
+  // Initial load from cache (may arrive async)
+  useEffect(() => {
+    if (!translations && cacheReady && cachedTranslations[language]) {
+      setTranslations(cachedTranslations[language]);
+    }
+    if (!translations) {
+      // Fallback: load again
+      loadTranslations(language).then(t => {
+        cachedTranslations[language] = t;
+        setTranslations(t);
+      });
+    }
+  }, []);
+
+  // Load language preference from database only when no saved preference
+  useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'ar' || saved === 'en') return;
 
@@ -62,11 +105,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem(STORAGE_KEY, profile.preferred_language);
         }
       } catch {
-        // Silently fail - localStorage preference is sufficient
+        // Silently fail
       }
     };
 
-    // Defer DB call to not block initial render
     const timer = setTimeout(loadPreference, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -75,7 +117,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEY, lang);
 
-    // Save to database for persistence across devices
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase
@@ -92,8 +133,9 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   }, [language]);
 
   const t = useCallback((key: string): string => {
-    return getNestedValue(translations[language], key);
-  }, [language]);
+    if (!translations) return key; // Return key as fallback while loading
+    return getNestedValue(translations, key);
+  }, [translations]);
 
   const value = useMemo<LanguageContextType>(() => ({
     language,

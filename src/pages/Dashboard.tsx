@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense, useState } from 'react';
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -10,8 +10,6 @@ import SubscriptionGuard from '@/components/guards/SubscriptionGuard';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { Loader2 } from 'lucide-react';
-
-
 
 // Lazy load heavy dashboard components - only one renders per user role
 const GeneratorDashboard = lazy(() => import('@/components/dashboard/GeneratorDashboard'));
@@ -25,10 +23,10 @@ const TransportOfficeDashboard = lazy(() => import('@/components/dashboard/Trans
 const ConsultantDashboard = lazy(() => import('@/components/dashboard/ConsultantDashboard'));
 const ConsultingOfficeDashboard = lazy(() => import('@/components/dashboard/ConsultingOfficeDashboard'));
 const ISOBodyDashboard = lazy(() => import('@/components/dashboard/ISOBodyDashboard'));
+
+// Deferred widgets — loaded after main dashboard renders
 const CallLogWidget = lazy(() => import('@/components/calls/CallLogWidget'));
 const AIOperationsAssistant = lazy(() => import('@/components/ai/AIOperationsAssistant'));
-
-// Global widgets - only loaded in dashboard context
 const AIChatbot = lazy(() => import('@/components/ai/AIChatbot'));
 const EnhancedChatWidget = lazy(() => import('@/components/chat/EnhancedChatWidget'));
 const UnifiedSupportWidget = lazy(() => import('@/components/ai/UnifiedSupportWidget'));
@@ -48,6 +46,19 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { requiresAcceptance, loading: termsLoading, markAsAccepted, organizationType } = useTermsAcceptance();
   const { enabled: aiAssistantEnabled } = usePlatformSetting('ai_assistant_enabled');
+
+  // Defer floating widgets to after main dashboard is interactive
+  const [showWidgets, setShowWidgets] = useState(false);
+  useEffect(() => {
+    if (loading) return;
+    const id = 'requestIdleCallback' in window
+      ? requestIdleCallback(() => setShowWidgets(true), { timeout: 3000 })
+      : setTimeout(() => setShowWidgets(true), 1500) as unknown as number;
+    return () => {
+      if ('cancelIdleCallback' in window) cancelIdleCallback(id);
+      else clearTimeout(id);
+    };
+  }, [loading]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -122,21 +133,25 @@ const Dashboard = () => {
               </DashboardLayout>
             </ErrorBoundary>
             
-            <ErrorBoundary fallbackTitle="خطأ في الأدوات المساعدة">
+            {showWidgets && (
+              <ErrorBoundary fallbackTitle="خطأ في الأدوات المساعدة">
+                <Suspense fallback={null}>
+                  <CallLogWidget />
+                  {showAIAssistant && <AIOperationsAssistant />}
+                  <AIChatbot />
+                  <EnhancedChatWidget />
+                  <UnifiedSupportWidget />
+                  <UnifiedFloatingMenu />
+                  <BetaBanner />
+                  <AccessibilityPanel />
+                </Suspense>
+              </ErrorBoundary>
+            )}
+            {showWidgets && (
               <Suspense fallback={null}>
-                <CallLogWidget />
-                {showAIAssistant && <AIOperationsAssistant />}
-                <AIChatbot />
-                <EnhancedChatWidget />
-                <UnifiedSupportWidget />
-                <UnifiedFloatingMenu />
-                <BetaBanner />
-                <AccessibilityPanel />
+                <TouchOptimizations />
               </Suspense>
-            </ErrorBoundary>
-            <Suspense fallback={null}>
-              <TouchOptimizations />
-            </Suspense>
+            )}
           </>
         </PinVerificationGate>
     </SubscriptionGuard>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, Award, ShieldCheck, ArrowLeft, BadgeCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -22,33 +22,27 @@ const typeConfig: Record<string, { label: string; icon: typeof Building2; color:
 };
 
 const FeaturedConsultants = () => {
-  const [orgs, setOrgs] = useState<FeaturedOrg[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchFeatured = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('organizations')
-          .select('id, name, organization_type, logo_url, bio, city, region')
-          .in('organization_type', ['consultant', 'consulting_office', 'iso_body'] as any[])
-          .eq('is_active', true)
-          .limit(6);
+  const { data: orgs = [], isLoading } = useQuery({
+    queryKey: ['featured-consultants'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type, logo_url, bio, city, region')
+        .in('organization_type', ['consultant', 'consulting_office', 'iso_body'] as any[])
+        .eq('is_active', true)
+        .limit(6);
 
-        if (!error && data) {
-          setOrgs((data as any[]).map(d => ({ ...d, governorate: d.region })) as FeaturedOrg[]);
-        }
-      } catch {
-        // silent fail
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFeatured();
-  }, []);
+      if (error || !data) return [];
+      return (data as any[]).map(d => ({ ...d, governorate: d.region })) as FeaturedOrg[];
+    },
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    retry: 1,
+  });
 
-  if (loading || orgs.length === 0) return null;
+  if (isLoading || orgs.length === 0) return null;
 
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-background to-muted/30">
