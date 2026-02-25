@@ -134,29 +134,69 @@ function generateBackupCodes(): string[] {
   return codes;
 }
 
-// Simple XOR encryption (for demo - in production use proper encryption)
-function encryptData(data: string, key: string): string {
-  const encoder = new TextEncoder();
-  const dataBytes = encoder.encode(data);
-  const keyBytes = encoder.encode(key);
-  
-  const encrypted = new Uint8Array(dataBytes.length);
-  for (let i = 0; i < dataBytes.length; i++) {
-    encrypted[i] = dataBytes[i] ^ keyBytes[i % keyBytes.length];
-  }
-  
-  return btoa(String.fromCharCode(...encrypted));
+// AES-256-GCM encryption using Web Crypto API
+async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  );
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
 }
 
-function decryptData(encryptedData: string, key: string): string {
+async function encryptData(data: string, key: string): Promise<string> {
+  const enc = new TextEncoder();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const cryptoKey = await deriveKey(key, salt);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    cryptoKey,
+    enc.encode(data)
+  );
+  // Format: "aesgcm:" + base64(salt + iv + ciphertext)
+  const combined = new Uint8Array(salt.length + iv.length + new Uint8Array(encrypted).length);
+  combined.set(salt, 0);
+  combined.set(iv, salt.length);
+  combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+  return "aesgcm:" + btoa(String.fromCharCode(...combined));
+}
+
+async function decryptData(encryptedData: string, key: string): Promise<string> {
+  // Handle legacy XOR-encrypted data (auto-migration)
+  if (!encryptedData.startsWith("aesgcm:")) {
+    return legacyXorDecrypt(encryptedData, key);
+  }
+  const raw = Uint8Array.from(atob(encryptedData.slice(7)), c => c.charCodeAt(0));
+  const salt = raw.slice(0, 16);
+  const iv = raw.slice(16, 28);
+  const ciphertext = raw.slice(28);
+  const cryptoKey = await deriveKey(key, salt);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    cryptoKey,
+    ciphertext
+  );
+  return new TextDecoder().decode(decrypted);
+}
+
+// Legacy XOR decrypt for backward compatibility during migration
+function legacyXorDecrypt(encryptedData: string, key: string): string {
   const encrypted = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
   const keyBytes = new TextEncoder().encode(key);
-  
   const decrypted = new Uint8Array(encrypted.length);
   for (let i = 0; i < encrypted.length; i++) {
     decrypted[i] = encrypted[i] ^ keyBytes[i % keyBytes.length];
   }
-  
   return new TextDecoder().decode(decrypted);
 }
 
@@ -213,8 +253,8 @@ serve(async (req) => {
         const backupCodes = generateBackupCodes();
         
         // Encrypt sensitive data
-        const encryptedSecret = encryptData(secret, encryptionKey);
-        const encryptedBackupCodes = encryptData(JSON.stringify(backupCodes), encryptionKey);
+        const encryptedSecret = await encryptData(secret, encryptionKey);
+        const encryptedBackupCodes = await encryptData(JSON.stringify(backupCodes), encryptionKey);
 
         // Store in database (not enabled yet)
         const { error: insertError } = await supabase
@@ -274,7 +314,19 @@ serve(async (req) => {
         }
 
         // Decrypt secret
-        const secret = decryptData(settings.secret_encrypted, encryptionKey);
+        const secret = await decryptData(settings.secret_encrypted, encryptionKey);
+        
+        // Auto-upgrade legacy XOR encryption to AES-GCM
+        if (!settings.secret_encrypted.startsWith("aesgcm:")) {
+          const reEncryptedSecret = await encryptData(secret, encryptionKey);
+          const backupCodesRaw = await decryptData(settings.backup_codes_encrypted, encryptionKey);
+          const reEncryptedBackup = await encryptData(backupCodesRaw, encryptionKey);
+          await supabase.from("user_two_factor_auth").update({
+            secret_encrypted: reEncryptedSecret,
+            backup_codes_encrypted: reEncryptedBackup,
+            updated_at: new Date().toISOString()
+          }).eq("user_id", user.id);
+        }
         
         // Verify the provided code
         const isValid = await verifyTOTP(secret, code);
@@ -340,7 +392,7 @@ serve(async (req) => {
           // Verify backup code
           attemptType = "backup_code";
           const storedCodes: string[] = JSON.parse(
-            decryptData(settings.backup_codes_encrypted, encryptionKey)
+            await decryptData(settings.backup_codes_encrypted, encryptionKey)
           );
           
           const codeIndex = storedCodes.indexOf(backupCode.toUpperCase());
@@ -348,7 +400,7 @@ serve(async (req) => {
             isValid = true;
             // Remove used backup code
             storedCodes.splice(codeIndex, 1);
-            const newEncryptedCodes = encryptData(JSON.stringify(storedCodes), encryptionKey);
+            const newEncryptedCodes = await encryptData(JSON.stringify(storedCodes), encryptionKey);
             
             await supabase
               .from("user_two_factor_auth")
@@ -361,7 +413,7 @@ serve(async (req) => {
           }
         } else if (code) {
           // Verify TOTP
-          const secret = decryptData(settings.secret_encrypted, encryptionKey);
+          const secret = await decryptData(settings.secret_encrypted, encryptionKey);
           isValid = await verifyTOTP(secret, code);
           
           if (isValid) {
@@ -404,7 +456,7 @@ serve(async (req) => {
           throw new Error("2FA is not enabled.");
         }
 
-        const secret = decryptData(settings.secret_encrypted, encryptionKey);
+        const secret = await decryptData(settings.secret_encrypted, encryptionKey);
         const isValid = await verifyTOTP(secret, code);
 
         // Log attempt
@@ -466,7 +518,7 @@ serve(async (req) => {
         }
 
         // Verify current code
-        const secret = decryptData(settings.secret_encrypted, encryptionKey);
+        const secret = await decryptData(settings.secret_encrypted, encryptionKey);
         const isValid = await verifyTOTP(secret, code);
 
         if (!isValid) {
@@ -475,7 +527,7 @@ serve(async (req) => {
 
         // Generate new backup codes
         const newBackupCodes = generateBackupCodes();
-        const encryptedBackupCodes = encryptData(JSON.stringify(newBackupCodes), encryptionKey);
+        const encryptedBackupCodes = await encryptData(JSON.stringify(newBackupCodes), encryptionKey);
 
         const { error: updateError } = await supabase
           .from("user_two_factor_auth")
