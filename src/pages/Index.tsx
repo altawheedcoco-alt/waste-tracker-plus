@@ -18,6 +18,7 @@ const FeaturedConsultants = lazy(() => import("@/components/landing/FeaturedCons
 const OmalunaSection = lazy(() => import("@/components/landing/OmalunaSection"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 
+const NationalInitiativeSection = lazy(() => import("@/components/landing/NationalInitiativeSection"));
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
 const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
 
@@ -66,6 +67,7 @@ const Index = () => {
             <LazySection><DocumentVerification /></LazySection>
             <LazySection><FeaturedConsultants /></LazySection>
             <LazySection><OmalunaSection /></LazySection>
+            <LazySection><NationalInitiativeSection /></LazySection>
             <LazySection><Stats /></LazySection>
             <LazySection><FeaturesList /></LazySection>
             <LazySection><Features /></LazySection>

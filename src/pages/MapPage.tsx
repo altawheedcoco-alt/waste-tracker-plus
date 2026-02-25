@@ -18,10 +18,32 @@ const collectionPoints = [
   { id: 3, name: 'مصنع تدوير البلاستيك - العاشر', nameEn: '10th Ramadan Plastics', lat: 30.2917, lng: 31.7500, type: 'plastic' },
   { id: 4, name: 'مجمع تدوير الورق - الإسكندرية', nameEn: 'Alexandria Paper Recycling', lat: 31.2001, lng: 29.9187, type: 'paper' },
   { id: 5, name: 'نقطة تجميع نفايات إلكترونية - المعادي', nameEn: 'Maadi E-Waste Collection', lat: 29.9602, lng: 31.2569, type: 'electronic' },
+  { id: 6, name: 'مدفن صحي - 15 مايو', nameEn: '15 May Sanitary Landfill', lat: 29.8500, lng: 31.3400, type: 'municipal' },
+  { id: 7, name: 'محطة معالجة نفايات طبية - القصر العيني', nameEn: 'Qasr El-Aini Medical Waste', lat: 30.0300, lng: 31.2300, type: 'medical' },
+  { id: 8, name: 'مصنع كمبوست - الفيوم', nameEn: 'Fayoum Compost Plant', lat: 29.3084, lng: 30.8441, type: 'agricultural' },
+  { id: 9, name: 'محطة فرز مخلفات بناء - أكتوبر', nameEn: 'October C&D Sorting', lat: 29.9600, lng: 30.9200, type: 'construction' },
+  { id: 10, name: 'مجمع تدوير عضوي - الشرقية', nameEn: 'Sharqia Organic Recycling', lat: 30.5830, lng: 31.5020, type: 'municipal' },
+  { id: 11, name: 'مركز جمع نفايات طبية - المنصورة', nameEn: 'Mansoura Medical Collection', lat: 31.0409, lng: 31.3785, type: 'medical' },
+  { id: 12, name: 'محطة تدوير إلكتروني - القاهرة الجديدة', nameEn: 'New Cairo E-Waste Center', lat: 30.0300, lng: 31.4700, type: 'electronic' },
+  { id: 13, name: 'مصنع إعادة تدوير زراعي - المنيا', nameEn: 'Minya Agri Recycling', lat: 28.1099, lng: 30.7503, type: 'agricultural' },
+  { id: 14, name: 'كسارة مخلفات هدم - السويس', nameEn: 'Suez C&D Crusher', lat: 29.9660, lng: 32.5498, type: 'construction' },
 ];
 
 const typeColors: Record<string, string> = {
   wood: '#8B4513', metal: '#708090', plastic: '#1E90FF', paper: '#DAA520', electronic: '#FF4500',
+  municipal: '#22c55e', medical: '#ef4444', agricultural: '#84cc16', construction: '#78716c',
+};
+
+const typeIcons: Record<string, string> = {
+  wood: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  metal: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  plastic: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  paper: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  electronic: '<rect x="4" y="4" width="16" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/>',
+  municipal: '<path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4h8v2"/>',
+  medical: '<path d="M12 2v20M2 12h20"/>',
+  agricultural: '<path d="M12 2L2 22h20L12 2z"/>',
+  construction: '<rect x="3" y="8" width="18" height="14" rx="1"/><path d="M7 8V5a5 5 0 0 1 10 0v3"/>',
 };
 
 const typeLabels: Record<string, { ar: string; en: string }> = {
@@ -30,6 +52,10 @@ const typeLabels: Record<string, { ar: string; en: string }> = {
   plastic: { ar: 'بلاستيك', en: 'Plastic' },
   paper: { ar: 'ورق', en: 'Paper' },
   electronic: { ar: 'إلكترونيات', en: 'Electronic' },
+  municipal: { ar: 'بلدية', en: 'Municipal' },
+  medical: { ar: 'طبية', en: 'Medical' },
+  agricultural: { ar: 'زراعية', en: 'Agricultural' },
+  construction: { ar: 'هدم وبناء', en: 'Construction' },
 };
 
 const openInNav = (lat: number, lng: number, app: 'google' | 'waze') => {
