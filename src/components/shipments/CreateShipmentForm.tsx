@@ -635,7 +635,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
           />
         </div>
 
-        {/* Interactive Leaflet Map for location selection */}
+        {/* Interactive Google Map for location selection */}
         <ShipmentLocationMap
           pickupCoords={pickupCoords}
           deliveryCoords={deliveryCoords}
