@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -11,14 +11,13 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { searchEgyptLocations } from '@/data/egyptLocations';
 import {
-  MAPBOX_ACCESS_TOKEN,
-  MAPBOX_STYLE,
+  OSM_TILE_URL,
+  OSM_ATTRIBUTION,
   EGYPT_BOUNDS,
   MAX_ZOOM,
   MIN_ZOOM,
-} from '@/lib/mapboxConfig';
-
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+  reverseGeocodeOSM,
+} from '@/lib/leafletConfig';
 
 interface MultiGeoResult {
   id: string;
@@ -61,29 +60,16 @@ interface ShipmentLocationMapProps {
 type SelectionMode = 'pickup' | 'delivery' | null;
 
 const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-  try {
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar&types=address,place,locality,neighborhood`
-    );
-    const data = await res.json();
-    return data.features?.[0]?.place_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-  } catch {
-    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-  }
+  return reverseGeocodeOSM(lat, lng);
 };
 
 const createMarkerEl = (color: string, label: string) => {
-  const el = document.createElement('div');
-  el.innerHTML = `<div style="
-    background: ${color};
-    width: 32px; height: 32px;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    border: 3px solid white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    display: flex; align-items: center; justify-content: center;
-  "><span style="transform: rotate(45deg); color: white; font-weight: bold; font-size: 12px;">${label}</span></div>`;
-  return el;
+  return L.divIcon({
+    html: `<div style="background:${color};width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);color:white;font-weight:bold;font-size:12px;">${label}</span></div>`,
+    className: '',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  });
 };
 
 const ShipmentLocationMap = ({
@@ -94,11 +80,11 @@ const ShipmentLocationMap = ({
   pickupAddress,
   deliveryAddress,
 }: ShipmentLocationMapProps) => {
-  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const pickupMarkerRef = useRef<mapboxgl.Marker | null>(null);
-  const deliveryMarkerRef = useRef<mapboxgl.Marker | null>(null);
-
+  const pickupMarkerRef = useRef<L.Marker | null>(null);
+  const deliveryMarkerRef = useRef<L.Marker | null>(null);
+  const routeLayerRef = useRef<L.Polyline | null>(null);
   const [mode, setMode] = useState<SelectionMode>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);

@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, Loader2, MapPin, X, Navigation, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { MAPBOX_ACCESS_TOKEN } from '@/lib/mapboxConfig';
+import { reverseGeocodeOSM, forwardGeocodeOSM } from '@/lib/leafletConfig';
 
 interface MapboxLocationPickerProps {
   value?: { lat: number; lng: number } | null;
@@ -21,9 +21,10 @@ interface MapboxLocationPickerProps {
 
 interface SearchResult {
   id: string;
-  place_name: string;
-  text: string;
-  center: [number, number];
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
 }
 
 const MapboxLocationPicker = ({
@@ -48,9 +49,7 @@ const MapboxLocationPicker = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) setShowResults(false);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -60,14 +59,9 @@ const MapboxLocationPicker = ({
     if (!query || query.length < 2) { setResults([]); return; }
     setIsSearching(true);
     try {
-      const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=eg&limit=6&language=ar&types=address,place,locality,neighborhood,poi`
-      );
-      const data = await res.json();
-      if (data.features) {
-        setResults(data.features);
-        setShowResults(true);
-      }
+      const osmResults = await forwardGeocodeOSM(query, 6);
+      setResults(osmResults);
+      setShowResults(true);
     } catch (e) {
       console.error('Search error:', e);
     } finally {
@@ -83,11 +77,11 @@ const MapboxLocationPicker = ({
   };
 
   const selectResult = (result: SearchResult) => {
-    const position = { lat: result.center[1], lng: result.center[0] };
-    setSearchQuery(result.text);
-    setSelectedAddress(result.place_name);
+    const position = { lat: result.lat, lng: result.lng };
+    setSearchQuery(result.name);
+    setSelectedAddress(result.address);
     setShowResults(false);
-    onChange(position, result.place_name);
+    onChange(position, result.address);
     toast.success('تم تحديد الموقع');
   };
 
@@ -103,18 +97,10 @@ const MapboxLocationPicker = ({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
-        try {
-          const res = await fetch(
-            `https://api.mapbox.com/geocoding/v5/mapbox.places/${coords.lng},${coords.lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
-          );
-          const data = await res.json();
-          const address = data.features?.[0]?.place_name || `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`;
-          setSelectedAddress(address);
-          onChange(coords, address);
-          toast.success('تم تحديد موقعك الحالي');
-        } catch {
-          onChange(coords, `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`);
-        }
+        const address = await reverseGeocodeOSM(coords.lat, coords.lng);
+        setSelectedAddress(address);
+        onChange(coords, address);
+        toast.success('تم تحديد موقعك الحالي');
         setIsGettingLocation(false);
       },
       () => { toast.error('فشل تحديد الموقع'); setIsGettingLocation(false); },
@@ -134,7 +120,7 @@ const MapboxLocationPicker = ({
       {label && <label className="text-sm font-medium flex items-center gap-2"><MapPin className="w-4 h-4" />{label}</label>}
       <div className="relative rounded-lg overflow-hidden border" style={{ height }}>
         {showSearch && (
-          <div ref={searchRef} className="absolute top-3 left-3 right-3 z-10">
+          <div ref={searchRef} className="absolute top-3 left-3 right-3 z-[1000]">
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input value={searchQuery} onChange={handleSearchChange} onFocus={() => results.length > 0 && setShowResults(true)} placeholder={placeholder} className="pr-10 pl-10 bg-background/95 backdrop-blur-sm shadow-lg" dir="rtl" />
@@ -152,8 +138,8 @@ const MapboxLocationPicker = ({
                     <button key={r.id} type="button" className="w-full px-3 py-2 text-right hover:bg-accent transition-colors flex items-center gap-2" onClick={() => selectResult(r)}>
                       <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{r.text}</p>
-                        <p className="text-xs text-muted-foreground truncate">{r.place_name}</p>
+                        <p className="text-sm font-medium truncate">{r.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{r.address}</p>
                       </div>
                     </button>
                   ))}
@@ -163,7 +149,7 @@ const MapboxLocationPicker = ({
           </div>
         )}
         {showCurrentLocation && (
-          <Button type="button" variant="secondary" size="icon" className="absolute bottom-16 right-3 z-10 h-10 w-10 rounded-full shadow-lg bg-background" onClick={getCurrentLocation} disabled={isGettingLocation}>
+          <Button type="button" variant="secondary" size="icon" className="absolute bottom-16 right-3 z-[1000] h-10 w-10 rounded-full shadow-lg bg-background" onClick={getCurrentLocation} disabled={isGettingLocation}>
             {isGettingLocation ? <Loader2 className="h-5 w-5 animate-spin" /> : <Navigation className="h-5 w-5" />}
           </Button>
         )}

@@ -1,18 +1,16 @@
-import { useEffect, useRef, useState, memo, useCallback } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useEffect, useRef, memo, useCallback } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { cn } from '@/lib/utils';
 import {
-  MAPBOX_ACCESS_TOKEN,
-  MAPBOX_STYLE,
+  OSM_TILE_URL,
+  OSM_ATTRIBUTION,
   EGYPT_BOUNDS,
-  EGYPT_CENTER,
   DEFAULT_ZOOM,
   MAX_ZOOM,
   MIN_ZOOM,
-} from '@/lib/mapboxConfig';
-
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+  reverseGeocodeOSM,
+} from '@/lib/leafletConfig';
 
 interface MapboxMapComponentProps {
   center?: { lat: number; lng: number };
@@ -24,7 +22,7 @@ interface MapboxMapComponentProps {
   }>;
   selectedPosition?: { lat: number; lng: number } | null;
   onPositionSelect?: (position: { lat: number; lng: number }, address?: string) => void;
-  onMapLoad?: (map: mapboxgl.Map) => void;
+  onMapLoad?: (map: L.Map) => void;
   clickable?: boolean;
   className?: string;
   height?: string;
@@ -35,18 +33,6 @@ const colorMap: Record<string, string> = {
   green: '#22c55e',
   red: '#ef4444',
   orange: '#f97316',
-};
-
-const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-  try {
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
-    );
-    const data = await res.json();
-    return data.features?.[0]?.place_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-  } catch {
-    return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-  }
 };
 
 const MapboxMapComponent = memo(({
@@ -61,9 +47,9 @@ const MapboxMapComponent = memo(({
   height = '400px',
 }: MapboxMapComponentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const selectedMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const selectedMarkerRef = useRef<L.Marker | null>(null);
   const onPositionSelectRef = useRef(onPositionSelect);
   onPositionSelectRef.current = onPositionSelect;
 
@@ -71,25 +57,20 @@ const MapboxMapComponent = memo(({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: MAPBOX_STYLE,
-      center: [center.lng, center.lat],
+    const map = L.map(containerRef.current, {
+      center: [center.lat, center.lng],
       zoom,
       maxZoom: MAX_ZOOM,
       minZoom: MIN_ZOOM,
-      maxBounds: [
-        [EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]],
-        [EGYPT_BOUNDS[2], EGYPT_BOUNDS[3]],
-      ],
+      maxBounds: L.latLngBounds(EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]),
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: MAX_ZOOM }).addTo(map);
 
     if (clickable) {
-      map.on('click', async (e) => {
-        const { lat, lng } = e.lngLat;
-        const address = await reverseGeocode(lat, lng);
+      map.on('click', async (e: L.LeafletMouseEvent) => {
+        const { lat, lng } = e.latlng;
+        const address = await reverseGeocodeOSM(lat, lng);
         onPositionSelectRef.current?.({ lat, lng }, address);
       });
     }
@@ -105,9 +86,7 @@ const MapboxMapComponent = memo(({
 
   // Update center
   useEffect(() => {
-    if (mapRef.current) {
-      mapRef.current.easeTo({ center: [center.lng, center.lat], duration: 300 });
-    }
+    mapRef.current?.setView([center.lat, center.lng], undefined, { animate: true });
   }, [center.lat, center.lng]);
 
   // Update zoom
@@ -117,25 +96,21 @@ const MapboxMapComponent = memo(({
 
   // Update markers
   useEffect(() => {
-    // Remove old markers
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
-
     if (!mapRef.current) return;
 
     markers.forEach(m => {
-      const el = document.createElement('div');
       const color = colorMap[m.color || 'blue'];
-      el.innerHTML = `<div style="width:20px;height:20px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`;
+      const icon = L.divIcon({
+        html: `<div style="width:20px;height:20px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`,
+        className: '',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+      });
 
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([m.position.lng, m.position.lat])
-        .addTo(mapRef.current!);
-
-      if (m.title) {
-        marker.setPopup(new mapboxgl.Popup({ offset: 10 }).setText(m.title));
-      }
-
+      const marker = L.marker([m.position.lat, m.position.lng], { icon }).addTo(mapRef.current!);
+      if (m.title) marker.bindPopup(m.title);
       markersRef.current.push(marker);
     });
   }, [markers]);
@@ -146,17 +121,17 @@ const MapboxMapComponent = memo(({
       selectedMarkerRef.current.remove();
       selectedMarkerRef.current = null;
     }
-
     if (!mapRef.current || !selectedPosition) return;
 
-    const el = document.createElement('div');
-    el.innerHTML = `<svg width="25" height="41" viewBox="0 0 25 41"><path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="#ef4444" stroke="white" stroke-width="2"/><circle cx="12.5" cy="12.5" r="5" fill="white"/></svg>`;
+    const icon = L.divIcon({
+      html: `<svg width="25" height="41" viewBox="0 0 25 41"><path d="M12.5 0C5.6 0 0 5.6 0 12.5C0 21.9 12.5 41 12.5 41S25 21.9 25 12.5C25 5.6 19.4 0 12.5 0Z" fill="#ef4444" stroke="white" stroke-width="2"/><circle cx="12.5" cy="12.5" r="5" fill="white"/></svg>`,
+      className: '',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+    });
 
-    selectedMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
-      .setLngLat([selectedPosition.lng, selectedPosition.lat])
-      .addTo(mapRef.current);
-
-    mapRef.current.easeTo({ center: [selectedPosition.lng, selectedPosition.lat], zoom: 15, duration: 500 });
+    selectedMarkerRef.current = L.marker([selectedPosition.lat, selectedPosition.lng], { icon }).addTo(mapRef.current);
+    mapRef.current.setView([selectedPosition.lat, selectedPosition.lng], 15, { animate: true });
   }, [selectedPosition]);
 
   return (
