@@ -14,20 +14,22 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useSavedLocations } from '@/hooks/useSavedLocations';
 import { supabase } from '@/integrations/supabase/client';
-import MapboxMapComponent from '@/components/maps/MapboxMapComponent';
-import { MAPBOX_ACCESS_TOKEN } from '@/lib/mapboxConfig';
+import { useGoogleMaps } from '@/hooks/useGoogleMaps';
 import { OpenLocationCode } from 'open-location-code';
 
-// Reverse geocode using Nominatim (OSM) - free, no key needed
+// Reverse geocode using Google Maps Geocoder
 const reverseGeocode = async (lat: number, lng: number): Promise<string | null> => {
   try {
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
-    );
-    const data = await res.json();
-    return data.features?.[0]?.place_name || null;
+    const geocoder = new (window as any).google.maps.Geocoder();
+    const res = await geocoder.geocode({ location: { lat, lng }, language: 'ar' });
+    return res.results?.[0]?.formatted_address || null;
   } catch {
-    return null;
+    // Fallback to Nominatim
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`);
+      const data = await res.json();
+      return data.display_name || null;
+    } catch { return null; }
   }
 };
 
@@ -82,15 +84,12 @@ const extractPlaceNameFromLink = (link: string): string | null => {
   }
 };
 
-// Interactive Leaflet mini-map with switchable tile providers
-// Reverse geocode using Mapbox
-const reverseGeocodeMapbox = async (lat: number, lng: number): Promise<string | null> => {
+// Reverse geocode using Google
+const reverseGeocodeGoogle = async (lat: number, lng: number): Promise<string | null> => {
   try {
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
-    );
-    const data = await res.json();
-    return data.features?.[0]?.place_name || null;
+    const geocoder = new (window as any).google.maps.Geocoder();
+    const res = await geocoder.geocode({ location: { lat, lng }, language: 'ar' });
+    return res.results?.[0]?.formatted_address || null;
   } catch {
     return null;
   }
@@ -160,7 +159,94 @@ interface WazeLocationFieldProps {
   icon?: 'pickup' | 'delivery';
   showMap?: boolean;
 }
+// Google Maps Mini Map Component
+const GoogleMiniMapInner = ({
+  containerRef,
+  mapInstanceRef,
+  markerRef,
+  center,
+  zoom,
+  coordinates,
+  height,
+  onPositionSelect,
+}: {
+  containerRef: React.RefObject<HTMLDivElement>;
+  mapInstanceRef: React.MutableRefObject<any>;
+  markerRef: React.MutableRefObject<any>;
+  center: { lat: number; lng: number };
+  zoom: number;
+  coordinates?: { lat: number; lng: number } | null;
+  height: string;
+  onPositionSelect: (pos: { lat: number; lng: number }) => void;
+}) => {
+  const onPositionSelectRef = useRef(onPositionSelect);
+  onPositionSelectRef.current = onPositionSelect;
 
+  useEffect(() => {
+    if (!containerRef.current || mapInstanceRef.current) return;
+    const maps = (window as any).google?.maps;
+    if (!maps) return;
+
+    const map = new maps.Map(containerRef.current, {
+      center,
+      zoom,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: true,
+      gestureHandling: 'greedy',
+    });
+
+    map.addListener('click', async (e: any) => {
+      if (!e.latLng) return;
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+      onPositionSelectRef.current({ lat, lng });
+    });
+
+    mapInstanceRef.current = map;
+    return () => { mapInstanceRef.current = null; };
+  }, []);
+
+  // Update center/zoom
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    mapInstanceRef.current.panTo(center);
+    mapInstanceRef.current.setZoom(zoom);
+  }, [center.lat, center.lng, zoom]);
+
+  // Update marker
+  useEffect(() => {
+    const maps = (window as any).google?.maps;
+    if (!maps || !mapInstanceRef.current) return;
+
+    if (markerRef.current) {
+      markerRef.current.setMap(null);
+      markerRef.current = null;
+    }
+
+    const pos = coordinates || (center.lat !== 30.0444 ? center : null);
+    if (!pos) return;
+
+    markerRef.current = new maps.Marker({
+      position: pos,
+      map: mapInstanceRef.current,
+      icon: {
+        url: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36"><path d="M14 0C6.3 0 0 6.3 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.3 21.7 0 14 0z" fill="#ef4444" stroke="white" stroke-width="2"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`),
+        scaledSize: new maps.Size(28, 36),
+        anchor: new maps.Point(14, 36),
+      },
+    });
+  }, [coordinates, center]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="rounded-lg overflow-hidden border cursor-crosshair"
+      style={{ height }}
+    />
+  );
+};
 const WazeLocationField = ({
   value,
   onChange,
@@ -185,12 +271,15 @@ const WazeLocationField = ({
   const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
   const [mapZoom, setMapZoom] = useState(12);
   const [mapExpanded, setMapExpanded] = useState(false);
-  const [mapProvider, setMapProvider] = useState<'mapbox' | 'osm' | 'google'>('mapbox');
   const [showAllResults, setShowAllResults] = useState(false);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(getSearchHistory());
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const googleMiniMapRef = useRef<HTMLDivElement>(null);
+  const googleMiniMapInstanceRef = useRef<any>(null);
+  const googleMiniMapMarkerRef = useRef<any>(null);
+  const { loaded: googleMapsLoaded } = useGoogleMaps();
 
   const { locations: savedLocations, incrementUsage } = useSavedLocations();
 
@@ -395,16 +484,16 @@ const WazeLocationField = ({
           })))
           .catch(() => [] as SearchResult[]),
 
-        // Mapbox Geocoding (excellent for POIs & businesses)
-        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar&country=eg&proximity=${center.lng},${center.lat}&types=poi,address,place&limit=10`)
+        // Nominatim search (replaces Mapbox geocoding)
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=10&accept-language=ar&viewbox=${center.lng-1},${center.lat+1},${center.lng+1},${center.lat-1}&bounded=0`)
           .then(r => r.json())
-          .then(data => (data.features || []).map((f: any, i: number) => ({
-            id: `mapbox-${f.id || i}`,
-            name: f.text || f.place_name?.split(',')[0],
-            address: f.place_name || '',
-            lat: f.center?.[1] || 0,
-            lng: f.center?.[0] || 0,
-            type: 'mapbox' as const,
+          .then(data => (data || []).map((f: any, i: number) => ({
+            id: `nominatim-${f.place_id || i}`,
+            name: f.display_name?.split(',')[0] || '',
+            address: f.display_name || '',
+            lat: parseFloat(f.lat),
+            lng: parseFloat(f.lon),
+            type: 'osm' as const,
           })))
           .catch(() => [] as SearchResult[]),
 
@@ -452,10 +541,10 @@ const WazeLocationField = ({
           .catch(() => [] as SearchResult[]),
       ];
 
-      const [googleResults, mapboxResults, wazeResults, multiResults, osmResults] = await Promise.all(searchPromises);
+      const [googleResults, nominatimResults, wazeResults, multiResults, osmResults] = await Promise.all(searchPromises);
       
-      // Google first, Mapbox second (best POI data), then Waze, multi-geocode, OSM
-      const allMapResults = [...googleResults, ...mapboxResults, ...wazeResults, ...multiResults, ...osmResults];
+      // Google first, then Nominatim, Waze, multi-geocode, OSM
+      const allMapResults = [...googleResults, ...nominatimResults, ...wazeResults, ...multiResults, ...osmResults];
       const deduped: SearchResult[] = [];
       for (const r of allMapResults) {
         const isDupe = deduped.some(
@@ -507,12 +596,9 @@ const WazeLocationField = ({
     
     const applyLocation = async (latitude: number, longitude: number) => {
       try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_ACCESS_TOKEN}&language=ar`
-        );
-        const data = await res.json();
-        if (data.features?.[0]) {
-          onChange(data.features[0].place_name, { lat: latitude, lng: longitude });
+        const address = await reverseGeocode(latitude, longitude);
+        if (address) {
+          onChange(address, { lat: latitude, lng: longitude });
           setMapCenter({ lat: latitude, lng: longitude });
           setMapZoom(15);
           toast.success('📍 تم تحديد موقعك');
@@ -595,9 +681,6 @@ const WazeLocationField = ({
       case 'osm':
         window.open(lat ? `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}` : `https://www.openstreetmap.org/search?query=${encodeURIComponent(q)}`, '_blank');
         break;
-      case 'mapbox':
-        window.open(lat ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#15/${lat}/${lng}` : `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#10/30.0444/31.2357`, '_blank');
-        break;
     }
   };
 
@@ -672,17 +755,11 @@ const WazeLocationField = ({
               موقعي الحالي
             </Button>
             <div className="flex items-center gap-1 mr-auto">
-              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400" onClick={() => openInMap('mapbox')} title="Mapbox">
-                <ExternalLink className="w-2.5 h-2.5" /> Mapbox
-              </Button>
-              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-orange-200 text-orange-700 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400" onClick={() => openInMap('osm')} title="OpenStreetMap">
-                <ExternalLink className="w-2.5 h-2.5" /> OSM
+              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400" onClick={() => openInMap('google')} title="Google Maps">
+                <ExternalLink className="w-2.5 h-2.5" /> Google
               </Button>
               <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-blue-200 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400" onClick={() => openInMap('waze')} title="Waze">
                 <ExternalLink className="w-2.5 h-2.5" /> Waze
-              </Button>
-              <Button type="button" variant="outline" size="sm" className="h-6 text-[10px] gap-0.5 px-1.5 border-sky-200 text-sky-700 hover:bg-sky-50 dark:border-sky-800 dark:text-sky-400" onClick={() => openInMap('google')} title="Google Maps">
-                <ExternalLink className="w-2.5 h-2.5" /> Google
               </Button>
             </div>
           </div>
@@ -888,42 +965,17 @@ const WazeLocationField = ({
         </div>
       )}
 
-      {/* Map Section - PRIORITY: shown first */}
-      {showMap && (
+      {/* Google Maps Interactive Section */}
+      {showMap && googleMapsLoaded && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between flex-wrap gap-1">
-            <div className="flex items-center gap-0.5 bg-muted/50 rounded-md p-0.5">
-              <Button
-                type="button"
-                variant={mapProvider === 'mapbox' ? 'default' : 'ghost'}
-                size="sm"
-                className={cn("h-5 text-[9px] gap-0.5 px-1.5", mapProvider === 'mapbox' && 'shadow-sm')}
-                onClick={() => setMapProvider('mapbox')}
-              >
-                <Map className="w-2.5 h-2.5" /> Mapbox
-              </Button>
-              <Button
-                type="button"
-                variant={mapProvider === 'osm' ? 'default' : 'ghost'}
-                size="sm"
-                className={cn("h-5 text-[9px] gap-0.5 px-1.5", mapProvider === 'osm' && 'shadow-sm')}
-                onClick={() => setMapProvider('osm')}
-              >
-                <MapPin className="w-2.5 h-2.5" /> OSM
-              </Button>
-              <Button
-                type="button"
-                variant={mapProvider === 'google' ? 'default' : 'ghost'}
-                size="sm"
-                className={cn("h-5 text-[9px] gap-0.5 px-1.5", mapProvider === 'google' && 'shadow-sm')}
-                onClick={() => setMapProvider('google')}
-              >
-                <ExternalLink className="w-2.5 h-2.5" /> Google
-              </Button>
+            <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-primary" />
+              📍 انقر على الخريطة لتحديد الموقع مباشرة
             </div>
             <div className="flex items-center gap-1">
-              <Button type="button" variant="ghost" size="sm" className="h-5 px-1 text-[9px] gap-0.5" onClick={() => openInMap('waze')} title="فتح في Waze">
-                <Navigation className="w-2.5 h-2.5" /> Waze
+              <Button type="button" variant="ghost" size="sm" className="h-5 px-1 text-[9px] gap-0.5" onClick={() => openInMap('google')} title="فتح في Google Maps">
+                <ExternalLink className="w-2.5 h-2.5" /> Google Maps
               </Button>
               <Button
                 type="button"
@@ -938,108 +990,26 @@ const WazeLocationField = ({
             </div>
           </div>
 
-          <div className="space-y-1">
-           <div className="text-[10px] text-muted-foreground">📍 انقر على الخريطة لتحديد الموقع مباشرة</div>
-           <div className="grid grid-cols-1">
-              {/* Map Display based on provider */}
-              {mapProvider === 'mapbox' && (
-                <MapboxMapComponent
-                  center={mapCenter}
-                  zoom={mapZoom}
-                  selectedPosition={mapCenter.lat !== 30.0444 ? mapCenter : null}
-                  onPositionSelect={async (pos, address) => {
-                    if (address) {
-                      onChange(address, pos);
-                    } else {
-                      onChange(`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`, pos);
-                    }
-                    setMapCenter(pos);
-                    setMapZoom(15);
-                    toast.success('📍 تم تحديد الموقع من الخريطة');
-                  }}
-                  clickable={true}
-                  height={mapExpanded ? '350px' : '200px'}
-                />
-              )}
-              {mapProvider === 'osm' && (
-                <div className="relative rounded-lg overflow-hidden border" style={{ height: mapExpanded ? '350px' : '200px' }}>
-                  <iframe
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${(coordinates?.lng || mapCenter.lng) - 0.01},${(coordinates?.lat || mapCenter.lat) - 0.008},${(coordinates?.lng || mapCenter.lng) + 0.01},${(coordinates?.lat || mapCenter.lat) + 0.008}&layer=mapnik&marker=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`}
-                    className="w-full h-full border-0"
-                    loading="lazy"
-                    title="OpenStreetMap"
-                  />
-                  {/* Clickable overlay to switch to Mapbox for selection */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMapProvider('mapbox');
-                      toast.info('📍 تم التبديل لخريطة Mapbox التفاعلية - انقر لتحديد الموقع');
-                    }}
-                    className="absolute inset-0 bg-transparent cursor-crosshair group"
-                  >
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary" />
-                        انقر لتحديد الموقع يدوياً
-                      </span>
-                    </div>
-                  </button>
-                  <a
-                    href={`https://www.openstreetmap.org/?mlat=${coordinates?.lat || mapCenter.lat}&mlon=${coordinates?.lng || mapCenter.lng}#map=16/${coordinates?.lat || mapCenter.lat}/${coordinates?.lng || mapCenter.lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute bottom-1 left-1 z-10 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
-                  >
-                    عرض أكبر على OSM ↗
-                  </a>
-                </div>
-              )}
-              {mapProvider === 'google' && (
-                <div className="relative rounded-lg overflow-hidden border" style={{ height: mapExpanded ? '350px' : '200px' }}>
-                  <iframe
-                    src={
-                      query && query.length >= 2 && !coordinates
-                        ? `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed&hl=ar`
-                        : `https://maps.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}&z=15&output=embed&hl=ar`
-                    }
-                    className="w-full h-full border-0"
-                    loading="lazy"
-                    allowFullScreen
-                    title="Google Maps"
-                  />
-                  {/* Clickable overlay to switch to Mapbox for selection */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMapProvider('mapbox');
-                      toast.info('📍 تم التبديل لخريطة Mapbox التفاعلية - انقر لتحديد الموقع');
-                    }}
-                    className="absolute inset-0 bg-transparent cursor-crosshair group"
-                  >
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/90 backdrop-blur-sm text-foreground text-xs px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-primary" />
-                        انقر لتحديد الموقع يدوياً
-                      </span>
-                    </div>
-                  </button>
-                  <a
-                    href={
-                      query && query.length >= 2 && !coordinates
-                        ? `https://www.google.com/maps/search/${encodeURIComponent(query)}`
-                        : `https://www.google.com/maps?q=${coordinates?.lat || mapCenter.lat},${coordinates?.lng || mapCenter.lng}`
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute bottom-1 left-1 z-10 text-[9px] bg-background/80 backdrop-blur-sm px-1.5 py-0.5 rounded text-primary hover:underline"
-                  >
-                    عرض أكبر على Google Maps ↗
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
+          <GoogleMiniMapInner
+            containerRef={googleMiniMapRef}
+            mapInstanceRef={googleMiniMapInstanceRef}
+            markerRef={googleMiniMapMarkerRef}
+            center={mapCenter}
+            zoom={mapZoom}
+            coordinates={coordinates}
+            height={mapExpanded ? '350px' : '200px'}
+            onPositionSelect={async (pos) => {
+              const address = await reverseGeocode(pos.lat, pos.lng);
+              if (address) {
+                onChange(address, pos);
+              } else {
+                onChange(`${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`, pos);
+              }
+              setMapCenter(pos);
+              setMapZoom(15);
+              toast.success('📍 تم تحديد الموقع من الخريطة');
+            }}
+          />
         </div>
       )}
 
