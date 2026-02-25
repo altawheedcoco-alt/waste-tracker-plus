@@ -33,7 +33,6 @@ const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
   here: { label: 'HERE', color: 'bg-blue-500/15 text-blue-700 dark:text-blue-400' },
   locationiq: { label: 'LocationIQ', color: 'bg-purple-500/15 text-purple-700 dark:text-purple-400' },
   opencage: { label: 'OpenCage', color: 'bg-amber-500/15 text-amber-700 dark:text-amber-400' },
-  mapbox: { label: 'Mapbox', color: 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-400' },
   photon: { label: 'Photon', color: 'bg-green-500/15 text-green-700 dark:text-green-400' },
   herewego: { label: 'HERE Auto', color: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400' },
   mapsme: { label: 'OSM', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
@@ -63,7 +62,7 @@ const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
   return reverseGeocodeOSM(lat, lng);
 };
 
-const createMarkerEl = (color: string, label: string) => {
+const createMarkerIcon = (color: string, label: string) => {
   return L.divIcon({
     html: `<div style="background:${color};width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);color:white;font-weight:bold;font-size:12px;">${label}</span></div>`,
     className: '',
@@ -97,7 +96,6 @@ const ShipmentLocationMap = ({
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Refs for callbacks used in map click handler
   const modeRef = useRef(mode);
   modeRef.current = mode;
   const onPickupChangeRef = useRef(onPickupChange);
@@ -107,28 +105,23 @@ const ShipmentLocationMap = ({
   const deliveryCoordsRef = useRef(deliveryCoords);
   deliveryCoordsRef.current = deliveryCoords;
 
-  // Initialize map
+  // Initialize Leaflet map
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: MAPBOX_STYLE,
-      center: [31.2357, 30.0444],
+    const map = L.map(mapContainerRef.current, {
+      center: [30.0444, 31.2357],
       zoom: 10,
       maxZoom: MAX_ZOOM,
       minZoom: MIN_ZOOM,
-      maxBounds: [
-        [EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]],
-        [EGYPT_BOUNDS[2], EGYPT_BOUNDS[3]],
-      ],
+      maxBounds: L.latLngBounds(EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]),
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: MAX_ZOOM }).addTo(map);
 
-    map.on('click', async (e) => {
+    map.on('click', async (e: L.LeafletMouseEvent) => {
       if (!modeRef.current) return;
-      const { lat, lng } = e.lngLat;
+      const { lat, lng } = e.latlng;
       const address = await reverseGeocode(lat, lng);
 
       if (modeRef.current === 'pickup') {
@@ -151,8 +144,8 @@ const ShipmentLocationMap = ({
 
   // Update cursor
   useEffect(() => {
-    const canvas = mapRef.current?.getCanvas();
-    if (canvas) canvas.style.cursor = mode ? 'crosshair' : '';
+    const container = mapRef.current?.getContainer();
+    if (container) container.style.cursor = mode ? 'crosshair' : '';
   }, [mode]);
 
   // Update pickup marker
@@ -160,10 +153,8 @@ const ShipmentLocationMap = ({
     if (pickupMarkerRef.current) { pickupMarkerRef.current.remove(); pickupMarkerRef.current = null; }
     if (!mapRef.current || !pickupCoords) return;
 
-    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`<b>📍 نقطة الاستلام</b><br/>${pickupAddress || ''}`);
-    pickupMarkerRef.current = new mapboxgl.Marker({ element: createMarkerEl('#22c55e', 'A'), anchor: 'bottom' })
-      .setLngLat([pickupCoords.lng, pickupCoords.lat])
-      .setPopup(popup)
+    pickupMarkerRef.current = L.marker([pickupCoords.lat, pickupCoords.lng], { icon: createMarkerIcon('#22c55e', 'A') })
+      .bindPopup(`<b>📍 نقطة الاستلام</b><br/>${pickupAddress || ''}`)
       .addTo(mapRef.current);
   }, [pickupCoords, pickupAddress]);
 
@@ -172,21 +163,18 @@ const ShipmentLocationMap = ({
     if (deliveryMarkerRef.current) { deliveryMarkerRef.current.remove(); deliveryMarkerRef.current = null; }
     if (!mapRef.current || !deliveryCoords) return;
 
-    const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`<b>🏁 نقطة التسليم</b><br/>${deliveryAddress || ''}`);
-    deliveryMarkerRef.current = new mapboxgl.Marker({ element: createMarkerEl('#ef4444', 'B'), anchor: 'bottom' })
-      .setLngLat([deliveryCoords.lng, deliveryCoords.lat])
-      .setPopup(popup)
+    deliveryMarkerRef.current = L.marker([deliveryCoords.lat, deliveryCoords.lng], { icon: createMarkerIcon('#ef4444', 'B') })
+      .bindPopup(`<b>🏁 نقطة التسليم</b><br/>${deliveryAddress || ''}`)
       .addTo(mapRef.current);
   }, [deliveryCoords, deliveryAddress]);
 
-  // Fetch & draw route
+  // Fetch & draw route using OSRM
   const fetchRoute = useCallback(async () => {
     const map = mapRef.current;
     if (!map || !pickupCoords || !deliveryCoords) {
-      // Remove route layer if exists
-      if (map?.getSource('route')) {
-        map.removeLayer('route-line');
-        map.removeSource('route');
+      if (routeLayerRef.current) {
+        routeLayerRef.current.remove();
+        routeLayerRef.current = null;
       }
       setRouteInfo(null);
       return;
@@ -200,38 +188,22 @@ const ShipmentLocationMap = ({
       const data = await res.json();
 
       // Remove old route
-      if (map.getSource('route')) {
-        map.removeLayer('route-line');
-        map.removeSource('route');
+      if (routeLayerRef.current) {
+        routeLayerRef.current.remove();
+        routeLayerRef.current = null;
       }
 
       if (data.code === 'Ok' && data.routes?.[0]) {
         const route = data.routes[0];
+        const coords: L.LatLngExpression[] = route.geometry.coordinates.map((c: [number, number]) => [c[1], c[0]] as [number, number]);
 
-        map.addSource('route', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: route.geometry,
-          },
-        });
+        routeLayerRef.current = L.polyline(coords, {
+          color: '#6366f1',
+          weight: 5,
+          opacity: 0.8,
+        }).addTo(map);
 
-        map.addLayer({
-          id: 'route-line',
-          type: 'line',
-          source: 'route',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: { 'line-color': '#6366f1', 'line-width': 5, 'line-opacity': 0.8 },
-        });
-
-        // Fit bounds to route
-        const coords = route.geometry.coordinates as [number, number][];
-        const bounds = coords.reduce(
-          (b, c) => b.extend(c as mapboxgl.LngLatLike),
-          new mapboxgl.LngLatBounds(coords[0], coords[0])
-        );
-        map.fitBounds(bounds, { padding: 50 });
+        map.fitBounds(routeLayerRef.current.getBounds(), { padding: [50, 50] });
 
         const distKm = (route.distance / 1000).toFixed(1);
         const durMin = Math.round(route.duration / 60);
@@ -248,22 +220,15 @@ const ShipmentLocationMap = ({
   }, [pickupCoords, deliveryCoords]);
 
   useEffect(() => {
-    // Wait for map style to load before adding route
-    const map = mapRef.current;
-    if (!map) return;
-    if (map.isStyleLoaded()) {
-      fetchRoute();
-    } else {
-      map.once('load', fetchRoute);
-    }
+    fetchRoute();
   }, [fetchRoute]);
 
   // Fit to single point
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    if (pickupCoords && !deliveryCoords) map.easeTo({ center: [pickupCoords.lng, pickupCoords.lat], zoom: 14 });
-    else if (deliveryCoords && !pickupCoords) map.easeTo({ center: [deliveryCoords.lng, deliveryCoords.lat], zoom: 14 });
+    if (pickupCoords && !deliveryCoords) map.setView([pickupCoords.lat, pickupCoords.lng], 14, { animate: true });
+    else if (deliveryCoords && !pickupCoords) map.setView([deliveryCoords.lat, deliveryCoords.lng], 14, { animate: true });
   }, [pickupCoords, deliveryCoords]);
 
   // Close results on outside click
@@ -293,20 +258,20 @@ const ShipmentLocationMap = ({
     }
   }, []);
 
-  // Also fetch from Mapbox Geocoding API directly for better coverage
-  const fetchMapboxGeo = useCallback(async (q: string): Promise<MultiGeoResult[]> => {
+  // Fetch from Nominatim (OSM) for additional coverage
+  const fetchOsmGeo = useCallback(async (q: string): Promise<MultiGeoResult[]> => {
     try {
       const res = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${MAPBOX_ACCESS_TOKEN}&country=eg&limit=8&language=ar&types=address,place,locality,neighborhood,poi`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=8&accept-language=ar`
       );
       const data = await res.json();
-      return (data.features || []).map((f: any, i: number) => ({
-        id: `mapbox-${i}`,
-        name: f.text || f.place_name,
-        address: f.place_name,
-        lat: f.center[1],
-        lng: f.center[0],
-        source: 'mapbox',
+      return (data || []).map((r: any, i: number) => ({
+        id: `osm-${r.place_id}-${i}`,
+        name: r.display_name?.split(',')[0] || '',
+        address: r.display_name || '',
+        lat: parseFloat(r.lat),
+        lng: parseFloat(r.lon),
+        source: 'osm',
       }));
     } catch {
       return [];
@@ -358,7 +323,6 @@ const ShipmentLocationMap = ({
       return;
     }
 
-    // Instant local results
     const localResults: MultiGeoResult[] = searchEgyptLocations(q).slice(0, 8).map((loc, i) => ({
       id: `local-${loc.id || i}`,
       name: loc.name,
@@ -375,45 +339,40 @@ const ShipmentLocationMap = ({
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      // Phase 1: Fetch from multiple sources in parallel with original query
-      const [remoteResults, mapboxResults] = await Promise.all([
+      const [remoteResults, osmResults] = await Promise.all([
         fetchMultiGeo(q),
-        fetchMapboxGeo(q),
+        fetchOsmGeo(q),
       ]);
 
-      const merged = [...localResults, ...remoteResults, ...mapboxResults];
+      const merged = [...localResults, ...remoteResults, ...osmResults];
       const phase1 = deduplicateResults(merged);
 
-      // Sort: local first, then by source priority
       phase1.sort((a, b) => {
-        const order: Record<string, number> = { local: 0, ai: 1, mapbox: 2, here: 3, google: 4, tomtom: 5 };
+        const order: Record<string, number> = { local: 0, ai: 1, osm: 2, here: 3, google: 4, tomtom: 5 };
         return (order[a.source] ?? 6) - (order[b.source] ?? 6);
       });
 
       setSearchResults(phase1.slice(0, 30));
       setSearching(false);
 
-      // Phase 2: AI-powered expansion (runs in background, enriches results)
       if (q.length >= 3) {
         setAiSearching(true);
         const alternativeQueries = await fetchAiExpansion(q);
 
         if (alternativeQueries.length > 0) {
-          // Search top 2 AI-suggested alternative queries in parallel
           const aiQueries = alternativeQueries.slice(0, 2);
           const aiSearchPromises = aiQueries.flatMap(aq => [
             fetchMultiGeo(aq),
-            fetchMapboxGeo(aq),
+            fetchOsmGeo(aq),
           ]);
 
           const aiResultArrays = await Promise.all(aiSearchPromises);
           const aiResults = aiResultArrays.flat().map(r => ({ ...r, source: r.source === 'local' ? r.source : 'ai' as string, id: `ai-${r.id}` }));
 
-          // Merge AI results with existing results
           const allMerged = deduplicateResults([...phase1, ...aiResults]);
 
           allMerged.sort((a, b) => {
-            const order: Record<string, number> = { local: 0, ai: 1, mapbox: 2, here: 3, google: 4, tomtom: 5 };
+            const order: Record<string, number> = { local: 0, ai: 1, osm: 2, here: 3, google: 4, tomtom: 5 };
             return (order[a.source] ?? 6) - (order[b.source] ?? 6);
           });
 
@@ -423,7 +382,7 @@ const ShipmentLocationMap = ({
         setAiSearching(false);
       }
     }, 200);
-  }, [fetchMultiGeo, fetchMapboxGeo, fetchAiExpansion, deduplicateResults]);
+  }, [fetchMultiGeo, fetchOsmGeo, fetchAiExpansion, deduplicateResults]);
 
   const handleInputChange = useCallback((value: string) => {
     setSearchQuery(value);
@@ -435,7 +394,7 @@ const ShipmentLocationMap = ({
     if (!map) return;
     setShowResults(false);
     setSearchQuery(result.name);
-    map.easeTo({ center: [result.lng, result.lat], zoom: 15 });
+    map.setView([result.lat, result.lng], 15, { animate: true });
 
     const activeMode = mode || (!pickupCoords ? 'pickup' : !deliveryCoords ? 'delivery' : 'pickup');
 
@@ -454,7 +413,7 @@ const ShipmentLocationMap = ({
   const handleMyLocation = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => mapRef.current?.easeTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: 15 }),
+      (pos) => mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 15, { animate: true }),
       () => toast.error('تعذر تحديد موقعك'),
       { enableHighAccuracy: true }
     );
@@ -491,7 +450,6 @@ const ShipmentLocationMap = ({
               <LocateFixed className="w-3 h-3" />
               موقعي
             </Button>
-            {/* Map provider links - always visible */}
             {(() => {
               const point = pickupCoords || deliveryCoords;
               const hasRoute = pickupCoords && deliveryCoords;
@@ -514,12 +472,6 @@ const ShipmentLocationMap = ({
                       ? `https://www.openstreetmap.org/directions?engine=osrm_car&route=${pickupCoords.lat},${pickupCoords.lng};${deliveryCoords.lat},${deliveryCoords.lng}`
                       : point ? `https://www.openstreetmap.org/?mlat=${point.lat}&mlon=${point.lng}#map=15/${point.lat}/${point.lng}` : 'https://www.openstreetmap.org/#map=10/30.0444/31.2357', '_blank')}>
                     <ExternalLink className="w-2.5 h-2.5" /> OSM
-                  </Button>
-                  <Button type="button" size="sm" variant="outline" className="h-6 text-[10px] gap-0.5 px-1.5 border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400"
-                    onClick={() => window.open(hasRoute
-                      ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#15/${pickupCoords.lat}/${pickupCoords.lng}`
-                      : point ? `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#15/${point.lat}/${point.lng}` : `https://api.mapbox.com/styles/v1/mapbox/streets-v12.html?title=view&access_token=${MAPBOX_ACCESS_TOKEN}#10/30.0444/31.2357`, '_blank')}>
-                    <ExternalLink className="w-2.5 h-2.5" /> Mapbox
                   </Button>
                 </>
               );
@@ -549,7 +501,6 @@ const ShipmentLocationMap = ({
               </div>
             </div>
           </div>
-
         </div>
 
         {mode && (
@@ -564,12 +515,10 @@ const ShipmentLocationMap = ({
 
       {/* Map + Results overlay layout */}
       <div className="relative">
-        {/* Map container */}
         <div ref={mapContainerRef} className="h-[420px] w-full" />
 
-        {/* Results overlay panel - slides in from the right */}
         {showResults && searchResults.length > 0 && (
-          <div className="absolute top-0 right-0 w-[280px] h-full bg-background/98 backdrop-blur-md border-l shadow-2xl z-10 flex flex-col">
+          <div className="absolute top-0 right-0 w-[280px] h-full bg-background/98 backdrop-blur-md border-l shadow-2xl z-[1000] flex flex-col">
             <div className="px-3 py-2.5 border-b bg-muted/60 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-primary" />
@@ -603,7 +552,6 @@ const ShipmentLocationMap = ({
               <div className="py-1">
                 {searchResults.map((r, idx) => {
                   const src = SOURCE_LABELS[r.source] || { label: r.source, color: 'bg-muted text-muted-foreground' };
-                  // Show source group header
                   const prevSource = idx > 0 ? searchResults[idx - 1].source : null;
                   const showHeader = r.source !== prevSource;
 
