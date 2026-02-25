@@ -27,6 +27,7 @@ const Help = lazy(() => import("@/pages/Help"));
 const MapPage = lazy(() => import("@/pages/MapPage"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const Academy = lazy(() => import("@/pages/Academy"));
+const Partnerships = lazy(() => import("@/pages/Partnerships"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
@@ -66,6 +67,7 @@ export const publicRoutes = (
     <Route path="/map" element={<MapPage />} />
     <Route path="/blog" element={<Blog />} />
     <Route path="/academy" element={<Academy />} />
+    <Route path="/partnerships" element={<Partnerships />} />
     <Route path="*" element={<NotFound />} />
   </>
 );
