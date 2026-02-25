@@ -26,6 +26,7 @@ const Privacy = lazy(() => import("@/pages/Privacy"));
 const Help = lazy(() => import("@/pages/Help"));
 const MapPage = lazy(() => import("@/pages/MapPage"));
 const Blog = lazy(() => import("@/pages/Blog"));
+const Academy = lazy(() => import("@/pages/Academy"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
@@ -64,6 +65,7 @@ export const publicRoutes = (
     <Route path="/help" element={<Help />} />
     <Route path="/map" element={<MapPage />} />
     <Route path="/blog" element={<Blog />} />
+    <Route path="/academy" element={<Academy />} />
     <Route path="*" element={<NotFound />} />
   </>
 );
