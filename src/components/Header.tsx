@@ -23,7 +23,7 @@ const Header = memo(() => {
             className="flex items-center gap-2 sm:gap-3 cursor-pointer hover:scale-105 transition-transform"
             onClick={() => navigate('/')}
           >
-            <PlatformLogo size="md" showText />
+            <PlatformLogo size="md" showText priority />
           </div>
 
           <nav className="hidden md:flex items-center gap-4 lg:gap-8">
