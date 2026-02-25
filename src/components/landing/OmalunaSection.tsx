@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Briefcase, MapPin, ArrowLeft, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -16,11 +17,6 @@ interface FeaturedJob {
   salary_max: number | null;
   created_at: string;
   organization: { name: string } | null;
-}
-
-interface PlatformStats {
-  totalJobs: number;
-  totalWorkers: number;
 }
 
 const sectorLabels: Record<string, string> = {
@@ -44,40 +40,50 @@ const typeLabels: Record<string, string> = {
 };
 
 const OmalunaSection = () => {
-  const [jobs, setJobs] = useState<FeaturedJob[]>([]);
-  const [stats, setStats] = useState<PlatformStats>({ totalJobs: 0, totalWorkers: 0 });
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [jobsRes, jobCountRes, workerCountRes] = await Promise.all([
-          supabase
-            .from('job_listings')
-            .select('id, title, city, governorate, sector, job_type, salary_min, salary_max, created_at, organization:organizations(name)')
-            .eq('status', 'active')
-            .order('created_at', { ascending: false })
-            .limit(4),
-          supabase.from('job_listings').select('id', { count: 'exact', head: true }).eq('status', 'active'),
-          supabase.from('worker_profiles').select('id', { count: 'exact', head: true }),
-        ]);
+  // Use react-query with proper caching instead of raw useEffect
+  const { data: jobs = [], isLoading } = useQuery({
+    queryKey: ['omaluna-featured-jobs'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('job_listings')
+        .select('id, title, city, governorate, sector, job_type, salary_min, salary_max, created_at, organization:organizations(name)')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(4);
+      return (data || []) as unknown as FeaturedJob[];
+    },
+    staleTime: 15 * 60 * 1000, // 15 min cache
+    gcTime: 60 * 60 * 1000,
+    retry: 1,
+  });
 
-        if (jobsRes.data) setJobs(jobsRes.data as any);
-        setStats({
+  // Use simple count from the jobs query length instead of separate HEAD requests
+  // The HEAD requests were failing (ERR_ABORTED) and blocking page load
+  const { data: stats } = useQuery({
+    queryKey: ['omaluna-stats'],
+    queryFn: async () => {
+      try {
+        // Use regular SELECT with limit 0 + count instead of HEAD which was failing
+        const [jobCountRes, workerCountRes] = await Promise.all([
+          supabase.from('job_listings').select('id', { count: 'exact' }).eq('status', 'active').limit(0),
+          supabase.from('worker_profiles').select('id', { count: 'exact' }).limit(0),
+        ]);
+        return {
           totalJobs: jobCountRes.count || 0,
           totalWorkers: workerCountRes.count || 0,
-        });
+        };
       } catch {
-        // silent
-      } finally {
-        setLoading(false);
+        return { totalJobs: 0, totalWorkers: 0 };
       }
-    };
-    fetch();
-  }, []);
+    },
+    staleTime: 30 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    retry: 1,
+  });
 
-  if (loading) return null;
+  if (isLoading) return null;
 
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-muted/20 to-background">
@@ -97,12 +103,12 @@ const OmalunaSection = () => {
 
         <div className="flex justify-center gap-8 mb-10 animate-fade-up" style={{ animationDelay: '0.1s' }}>
           <div className="text-center">
-            <div className="text-2xl font-bold text-primary">{stats.totalJobs}</div>
+            <div className="text-2xl font-bold text-primary">{stats?.totalJobs ?? 0}</div>
             <div className="text-sm text-muted-foreground">وظيفة متاحة</div>
           </div>
           <div className="h-10 w-px bg-border" />
           <div className="text-center">
-            <div className="text-2xl font-bold text-primary">{stats.totalWorkers}</div>
+            <div className="text-2xl font-bold text-primary">{stats?.totalWorkers ?? 0}</div>
             <div className="text-sm text-muted-foreground">عامل مسجل</div>
           </div>
         </div>
