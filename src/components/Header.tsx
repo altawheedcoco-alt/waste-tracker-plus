@@ -36,6 +36,7 @@ const Header = memo(() => {
         { label: language === 'ar' ? 'مركز المساعدة' : 'Help Center', href: '/help', icon: HelpCircle, desc: language === 'ar' ? 'أسئلة شائعة ودعم فني' : 'FAQ & technical support' },
         { label: language === 'ar' ? 'أكاديمية التدوير' : 'Recycling Academy', href: '/academy', icon: GraduationCap, desc: language === 'ar' ? 'تعلم تصنيف المخلفات طبقاً للقانون المصري' : 'Learn waste classification per Egyptian law' },
         { label: language === 'ar' ? 'التراخيص والتشريعات' : 'Licenses & Legislation', href: '/legislation', icon: Scale, desc: language === 'ar' ? 'الضوابط القانونية لوزارة البيئة المصرية' : 'Egyptian Ministry of Environment regulations' },
+        { label: language === 'ar' ? 'عن المنصة' : 'About Us', href: '/about', icon: Building2, desc: language === 'ar' ? 'الرؤية والمهمة والأهداف الوطنية' : 'Vision, mission & national goals' },
       ],
     },
     {
