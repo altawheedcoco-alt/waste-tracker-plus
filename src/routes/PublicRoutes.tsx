@@ -21,6 +21,11 @@ const QuickDeposit = lazy(() => import("@/pages/QuickDeposit"));
 const QuickShipment = lazy(() => import("@/pages/QuickShipment"));
 const QuickDriver = lazy(() => import("@/pages/QuickDriver"));
 const SavedLocationsPage = lazy(() => import("@/pages/SavedLocationsPage"));
+const Terms = lazy(() => import("@/pages/Terms"));
+const Privacy = lazy(() => import("@/pages/Privacy"));
+const Help = lazy(() => import("@/pages/Help"));
+const MapPage = lazy(() => import("@/pages/MapPage"));
+const Blog = lazy(() => import("@/pages/Blog"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
@@ -54,6 +59,11 @@ export const publicRoutes = (
     <Route path="/verify-signatory/:code" element={<VerifySignatory />} />
     <Route path="/consultant-portal" element={<ConsultantPortal />} />
     <Route path="/invite/:token" element={<InviteAccept />} />
+    <Route path="/terms" element={<Terms />} />
+    <Route path="/privacy" element={<Privacy />} />
+    <Route path="/help" element={<Help />} />
+    <Route path="/map" element={<MapPage />} />
+    <Route path="/blog" element={<Blog />} />
     <Route path="*" element={<NotFound />} />
   </>
 );
