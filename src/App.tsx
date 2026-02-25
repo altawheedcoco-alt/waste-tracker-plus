@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -25,31 +25,16 @@ PageLoader.displayName = 'PageLoader';
 import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
 
-// Public routes loaded statically (lightweight)
+// Routes loaded from separate files (code-split)
 import { publicRoutes } from "@/routes/PublicRoutes";
+import { dashboardRoutes } from "@/routes/DashboardRoutes";
 
-// Dashboard routes loaded lazily - only when user navigates to /dashboard/*
-const LazyDashboardRoutes = lazy(() => 
-  import("@/routes/DashboardRoutes").then(m => ({
-    default: memo(() => <>{m.dashboardRoutes}</>)
-  }))
-);
-
-const AppRoutes = memo(() => {
-  const location = useLocation();
-  const isDashboard = location.pathname.startsWith('/dashboard');
-  
-  return (
-    <Routes>
-      {publicRoutes}
-      {isDashboard && (
-        <Suspense fallback={<PageLoader />}>
-          <LazyDashboardRoutes />
-        </Suspense>
-      )}
-    </Routes>
-  );
-});
+const AppRoutes = memo(() => (
+  <Routes>
+    {publicRoutes}
+    {dashboardRoutes}
+  </Routes>
+));
 AppRoutes.displayName = 'AppRoutes';
 
 const Providers = memo(() => (

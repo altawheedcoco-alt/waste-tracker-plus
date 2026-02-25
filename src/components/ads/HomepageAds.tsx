@@ -1,18 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, ExternalLink, Megaphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const HomepageAds = () => {
-  const [ads, setAds] = useState<any[]>([]);
   const [current, setCurrent] = useState(0);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetch = async () => {
+  const { data: ads = [] } = useQuery({
+    queryKey: ['homepage-featured-ads'],
+    queryFn: async () => {
       const { data } = await supabase
         .from('advertisements')
         .select('*, ad_plans(*)')
@@ -20,14 +22,17 @@ const HomepageAds = () => {
         .eq('is_featured', true)
         .order('created_at', { ascending: false })
         .limit(10);
-      setAds(data || []);
-    };
-    fetch();
-  }, []);
+      return data || [];
+    },
+    staleTime: 15 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    retry: 1,
+  });
 
   const trackClick = useCallback(async (ad: any) => {
-    await supabase.from('ad_analytics').insert({ advertisement_id: ad.id, event_type: 'click', page_location: 'homepage' });
-    await supabase.from('advertisements').update({ clicks_count: (ad.clicks_count || 0) + 1 }).eq('id', ad.id);
+    // Fire-and-forget analytics
+    supabase.from('ad_analytics').insert({ advertisement_id: ad.id, event_type: 'click', page_location: 'homepage' });
+    supabase.from('advertisements').update({ clicks_count: (ad.clicks_count || 0) + 1 }).eq('id', ad.id);
     if (ad.external_link) window.open(ad.external_link, '_blank');
     else if (ad.cta_link) navigate(ad.cta_link);
   }, [navigate]);
@@ -38,12 +43,14 @@ const HomepageAds = () => {
     return () => clearInterval(timer);
   }, [ads.length]);
 
-  // Track impression
+  // Track impression (debounced)
   useEffect(() => {
-    if (ads[current]) {
+    if (!ads[current]) return;
+    const timer = setTimeout(() => {
       supabase.from('ad_analytics').insert({ advertisement_id: ads[current].id, event_type: 'impression', page_location: 'homepage' });
       supabase.from('advertisements').update({ impressions_count: (ads[current].impressions_count || 0) + 1 }).eq('id', ads[current].id);
-    }
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [current, ads]);
 
   if (ads.length === 0) return null;
@@ -67,7 +74,6 @@ const HomepageAds = () => {
           <Card className="overflow-hidden border-primary/20 bg-gradient-to-l from-primary/5 to-transparent">
             <CardContent className="p-0">
               <div className="flex flex-col md:flex-row items-center gap-4 p-6">
-                {/* Media */}
                 {ad.media_urls?.length > 0 && (
                   <div className="w-full md:w-1/3 shrink-0">
                     <img
@@ -78,7 +84,6 @@ const HomepageAds = () => {
                     />
                   </div>
                 )}
-                {/* Content */}
                 <div className="flex-1 text-right space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     {ad.badge_text && <Badge className="bg-amber-500 text-white">{ad.badge_text}</Badge>}
@@ -98,7 +103,6 @@ const HomepageAds = () => {
             </CardContent>
           </Card>
 
-          {/* Nav buttons */}
           {ads.length > 1 && (
             <>
               <button className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-background/80 shadow hover:bg-background" onClick={() => setCurrent(c => (c + 1) % ads.length)}>
@@ -110,7 +114,6 @@ const HomepageAds = () => {
             </>
           )}
 
-          {/* Dots */}
           {ads.length > 1 && (
             <div className="flex items-center justify-center gap-1.5 mt-3">
               {ads.map((_, i) => (
