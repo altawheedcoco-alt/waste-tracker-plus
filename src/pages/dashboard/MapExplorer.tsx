@@ -1,4 +1,4 @@
-import mapboxgl from 'mapbox-gl';
+import L from 'leaflet';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -55,8 +55,8 @@ const MapExplorer = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mapCenter, setMapCenter] = useState({ lat: 30.0444, lng: 31.2357 });
   const [mapZoom, setMapZoom] = useState(10);
-  const mapInstanceRef = useRef<mapboxgl.Map | null>(null);
-  const facilityMarkersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const facilityMarkersRef = useRef<L.Marker[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<LeafletSearchResult[]>([]);
 
@@ -164,16 +164,17 @@ const MapExplorer = () => {
 
     facilities.forEach(facility => {
       const color = facility.is_verified ? '#22c55e' : '#3b82f6';
-      const el = document.createElement('div');
-      el.innerHTML = `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);cursor:pointer;"></div>`;
-      el.addEventListener('click', () => {
-        setSelectedPosition({ lat: facility.latitude, lng: facility.longitude });
-        setSelectedAddress(`${facility.name_ar || facility.name} - ${facility.city || ''} - ${facility.governorate || ''}`);
+      const icon = L.divIcon({
+        html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);cursor:pointer;"></div>`,
+        className: '', iconSize: [16, 16], iconAnchor: [8, 8],
       });
 
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([facility.longitude, facility.latitude])
-        .setPopup(new mapboxgl.Popup({ offset: 10 }).setHTML(`<div dir="rtl"><b>${facility.name_ar || facility.name}</b><br/>${facility.city || ''}</div>`))
+      const marker = L.marker([facility.latitude, facility.longitude], { icon })
+        .bindPopup(`<div dir="rtl"><b>${facility.name_ar || facility.name}</b><br/>${facility.city || ''}</div>`)
+        .on('click', () => {
+          setSelectedPosition({ lat: facility.latitude, lng: facility.longitude });
+          setSelectedAddress(`${facility.name_ar || facility.name} - ${facility.city || ''} - ${facility.governorate || ''}`);
+        })
         .addTo(mapInstanceRef.current!);
 
       facilityMarkersRef.current.push(marker);
@@ -181,7 +182,7 @@ const MapExplorer = () => {
   }, [facilities, showFactoryMarkers]);
 
   // Handle map load
-  const handleMapLoad = (map: mapboxgl.Map) => {
+  const handleMapLoad = (map: L.Map) => {
     mapInstanceRef.current = map;
   };
 

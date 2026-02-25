@@ -1,18 +1,16 @@
-import { useRef, useEffect, memo, useCallback } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { useRef, useEffect, memo } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { cn } from '@/lib/utils';
 import { Truck } from 'lucide-react';
 import {
-  MAPBOX_ACCESS_TOKEN,
-  MAPBOX_STYLE,
+  OSM_TILE_URL,
+  OSM_ATTRIBUTION,
   EGYPT_BOUNDS,
   EGYPT_CENTER,
   MAX_ZOOM,
   MIN_ZOOM,
-} from '@/lib/mapboxConfig';
-
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+} from '@/lib/leafletConfig';
 
 interface Driver {
   id: string;
@@ -46,8 +44,8 @@ const MapboxDriverTracking = memo(({
   showHeatmap = false,
 }: MapboxDriverTrackingProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<Map<string, mapboxgl.Marker>>(new Map());
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const driversRef = useRef(drivers);
   const onSelectRef = useRef(onSelectDriver);
 
@@ -58,20 +56,15 @@ const MapboxDriverTracking = memo(({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: MAPBOX_STYLE,
+    const map = L.map(containerRef.current, {
       center: EGYPT_CENTER,
       zoom: 6,
       maxZoom: MAX_ZOOM,
       minZoom: MIN_ZOOM,
-      maxBounds: [
-        [EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]],
-        [EGYPT_BOUNDS[2], EGYPT_BOUNDS[3]],
-      ],
+      maxBounds: L.latLngBounds(EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]),
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: MAX_ZOOM }).addTo(map);
     mapRef.current = map;
 
     return () => {
@@ -99,45 +92,37 @@ const MapboxDriverTracking = memo(({
       const size = isSelected ? 34 : 28;
       const name = driver.profile?.full_name || driver.name || driver.full_name || 'سائق';
 
+      const icon = L.divIcon({
+        html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18 18.5a1.5 1.5 0 0 1-1.5-1.5 1.5 1.5 0 0 1 1.5-1.5 1.5 1.5 0 0 1 1.5 1.5 1.5 1.5 0 0 1-1.5 1.5zm1.5-9H17V12h4.46L19.5 9.5zM6 18.5A1.5 1.5 0 0 1 4.5 17 1.5 1.5 0 0 1 6 15.5 1.5 1.5 0 0 1 7.5 17 1.5 1.5 0 0 1 6 18.5zM20 8l3 4v5h-2a3 3 0 0 1-3 3 3 3 0 0 1-3-3H9a3 3 0 0 1-3 3 3 3 0 0 1-3-3H1V6c0-1.11.89-2 2-2h14v4h3z"/></svg>
+        </div>`,
+        className: '',
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+
       const existing = markersRef.current.get(driver.id);
 
       if (existing) {
-        existing.setLngLat([driver.longitude, driver.latitude]);
-        // Update element styles
-        const el = existing.getElement();
-        const circle = el.querySelector('.driver-dot') as HTMLElement;
-        if (circle) {
-          circle.style.background = color;
-          circle.style.width = `${size}px`;
-          circle.style.height = `${size}px`;
-        }
+        existing.setLatLng([driver.latitude, driver.longitude]);
+        existing.setIcon(icon);
       } else {
-        const el = document.createElement('div');
-        el.innerHTML = `
-          <div class="driver-dot" style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18 18.5a1.5 1.5 0 0 1-1.5-1.5 1.5 1.5 0 0 1 1.5-1.5 1.5 1.5 0 0 1 1.5 1.5 1.5 1.5 0 0 1-1.5 1.5zm1.5-9H17V12h4.46L19.5 9.5zM6 18.5A1.5 1.5 0 0 1 4.5 17 1.5 1.5 0 0 1 6 15.5 1.5 1.5 0 0 1 7.5 17 1.5 1.5 0 0 1 6 18.5zM20 8l3 4v5h-2a3 3 0 0 1-3 3 3 3 0 0 1-3-3H9a3 3 0 0 1-3 3 3 3 0 0 1-3-3H1V6c0-1.11.89-2 2-2h14v4h3z"/></svg>
-          </div>`;
-        el.style.cursor = 'pointer';
+        const popupContent = `<div dir="rtl" style="min-width:120px;font-family:sans-serif;">
+          <b>${name}</b><br/>
+          <span style="color:${isActive ? '#22c55e' : '#94a3b8'}">${isActive ? '🟢 متاح' : '⚪ غير متاح'}</span>
+          ${driver.vehicle_plate ? `<br/><span>🚛 ${driver.vehicle_plate}</span>` : ''}
+          ${driver.organization?.name ? `<br/><span>🏢 ${driver.organization.name}</span>` : ''}
+        </div>`;
+
+        const marker = L.marker([driver.latitude, driver.longitude], { icon })
+          .bindPopup(popupContent)
+          .addTo(map);
 
         const driverId = driver.id;
-        el.addEventListener('click', () => {
+        marker.on('click', () => {
           const d = driversRef.current.find(dr => dr.id === driverId);
           if (d) onSelectRef.current?.(d);
         });
-
-        const popup = new mapboxgl.Popup({ offset: 15, closeButton: false }).setHTML(
-          `<div dir="rtl" style="min-width:120px;font-family:sans-serif;">
-            <b>${name}</b><br/>
-            <span style="color:${isActive ? '#22c55e' : '#94a3b8'}">${isActive ? '🟢 متاح' : '⚪ غير متاح'}</span>
-            ${driver.vehicle_plate ? `<br/><span>🚛 ${driver.vehicle_plate}</span>` : ''}
-            ${driver.organization?.name ? `<br/><span>🏢 ${driver.organization.name}</span>` : ''}
-          </div>`
-        );
-
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat([driver.longitude, driver.latitude])
-          .setPopup(popup)
-          .addTo(map);
 
         markersRef.current.set(driver.id, marker);
       }
@@ -153,11 +138,7 @@ const MapboxDriverTracking = memo(({
 
     // Center on selected driver
     if (selectedDriver?.latitude && selectedDriver?.longitude) {
-      map.easeTo({
-        center: [selectedDriver.longitude, selectedDriver.latitude],
-        zoom: 14,
-        duration: 500,
-      });
+      map.setView([selectedDriver.latitude, selectedDriver.longitude], 14, { animate: true });
     }
   }, [drivers, selectedDriver]);
 
@@ -166,7 +147,7 @@ const MapboxDriverTracking = memo(({
   return (
     <div className={cn('relative rounded-lg overflow-hidden', className)} style={{ height }}>
       <div ref={containerRef} className="w-full h-full" />
-      <div className="absolute top-3 right-3 z-10">
+      <div className="absolute top-3 right-3 z-[1000]">
         <div className="bg-background/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border flex items-center gap-2">
           <Truck className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium">{driversOnMap} سائق</span>

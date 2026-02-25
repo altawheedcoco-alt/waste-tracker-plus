@@ -1,15 +1,13 @@
 import { useRef, useEffect, memo } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
-  MAPBOX_ACCESS_TOKEN,
-  MAPBOX_STYLE,
+  OSM_TILE_URL,
+  OSM_ATTRIBUTION,
   EGYPT_BOUNDS,
   MAX_ZOOM,
   MIN_ZOOM,
-} from '@/lib/mapboxConfig';
-
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+} from '@/lib/leafletConfig';
 
 interface DriverMarker {
   position: { lat: number; lng: number };
@@ -34,24 +32,19 @@ const LeafletMultiDriverMap = memo(({
   onMarkerClick,
 }: LeafletMultiDriverMapProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: MAPBOX_STYLE,
-      center: [center.lng, center.lat],
+    const map = L.map(containerRef.current, {
+      center: [center.lat, center.lng],
       zoom,
-      maxBounds: [
-        [EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]],
-        [EGYPT_BOUNDS[2], EGYPT_BOUNDS[3]],
-      ],
+      maxBounds: L.latLngBounds(EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]),
       maxZoom: MAX_ZOOM,
       minZoom: MIN_ZOOM,
     });
-    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: MAX_ZOOM }).addTo(map);
     mapRef.current = map;
     return () => { map.remove(); mapRef.current = null; };
   }, []);
@@ -64,30 +57,30 @@ const LeafletMultiDriverMap = memo(({
 
     if (markers.length === 0) return;
 
-    const bounds = new mapboxgl.LngLatBounds();
+    const bounds = L.latLngBounds([]);
 
     markers.forEach(m => {
       const isAvailable = m.label === '🟢';
-      const el = document.createElement('div');
-      el.innerHTML = `<div style="width:32px;height:32px;border-radius:50%;background:${isAvailable ? '#22c55e' : '#eab308'};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm1.5-9H17V12h4.46L19.5 9.5zM6 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM20 8l3 4v5h-2a3 3 0 1 1-6 0H9a3 3 0 1 1-6 0H1V6c0-1.11.89-2 2-2h14v4h3z"/></svg></div>`;
+      const icon = L.divIcon({
+        html: `<div style="width:32px;height:32px;border-radius:50%;background:${isAvailable ? '#22c55e' : '#eab308'};border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm1.5-9H17V12h4.46L19.5 9.5zM6 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zM20 8l3 4v5h-2a3 3 0 1 1-6 0H9a3 3 0 1 1-6 0H1V6c0-1.11.89-2 2-2h14v4h3z"/></svg></div>`,
+        className: '',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
 
-      const popup = new mapboxgl.Popup({ offset: 20, maxWidth: '200px' })
-        .setHTML(`<div style="direction:rtl;text-align:right;"><b>${m.title}</b><br/>${isAvailable ? '✅ متاح' : '🟡 في مهمة'}</div>`);
-
-      const marker = new mapboxgl.Marker({ element: el })
-        .setLngLat([m.position.lng, m.position.lat])
-        .setPopup(popup)
+      const marker = L.marker([m.position.lat, m.position.lng], { icon })
+        .bindPopup(`<div style="direction:rtl;text-align:right;"><b>${m.title}</b><br/>${isAvailable ? '✅ متاح' : '🟡 في مهمة'}</div>`)
         .addTo(mapRef.current!);
 
       if (onMarkerClick && m.id) {
-        el.addEventListener('click', () => onMarkerClick(m.id!));
+        marker.on('click', () => onMarkerClick(m.id!));
       }
 
       markersRef.current.push(marker);
-      bounds.extend([m.position.lng, m.position.lat]);
+      bounds.extend([m.position.lat, m.position.lng]);
     });
 
-    mapRef.current.fitBounds(bounds, { padding: 40, maxZoom: 14 });
+    mapRef.current.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
   }, [markers, onMarkerClick]);
 
   return (
