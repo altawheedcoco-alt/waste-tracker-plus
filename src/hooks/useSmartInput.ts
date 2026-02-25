@@ -76,5 +76,7 @@ export function useSmartInput(fieldContext: string) {
     };
   }, []);
 
-  return { suggestions, loading, search, saveInput, clearSuggestions: () => setSuggestions([]) };
+  const clearSuggestions = useCallback(() => setSuggestions([]), []);
+
+  return { suggestions, loading, search, saveInput, clearSuggestions };
 }
