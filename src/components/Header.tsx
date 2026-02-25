@@ -34,7 +34,7 @@ const Header = memo(() => {
       items: [
         { label: language === 'ar' ? 'المدونة' : 'Blog', href: '/blog', icon: BookOpen, desc: language === 'ar' ? 'مقالات ونصائح بيئية' : 'Environmental articles & tips' },
         { label: language === 'ar' ? 'مركز المساعدة' : 'Help Center', href: '/help', icon: HelpCircle, desc: language === 'ar' ? 'أسئلة شائعة ودعم فني' : 'FAQ & technical support' },
-        { label: language === 'ar' ? 'أكاديمية التدوير' : 'Recycling Academy', href: '/guide/generator', icon: GraduationCap, desc: language === 'ar' ? 'تعلم أساسيات إعادة التدوير' : 'Learn recycling fundamentals' },
+        { label: language === 'ar' ? 'أكاديمية التدوير' : 'Recycling Academy', href: '/academy', icon: GraduationCap, desc: language === 'ar' ? 'تعلم تصنيف المخلفات طبقاً للقانون المصري' : 'Learn waste classification per Egyptian law' },
       ],
     },
     {
