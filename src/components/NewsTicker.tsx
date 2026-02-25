@@ -20,7 +20,7 @@ const NewsTicker = memo(() => {
   const repeatedItems = [...newsItems, ...newsItems];
 
   return (
-    <div className="fixed top-16 sm:top-20 left-0 right-0 w-full overflow-hidden z-40" dir="rtl">
+    <div className="fixed top-16 sm:top-20 left-0 right-0 w-full overflow-hidden z-40 h-[42px]" dir="rtl">
       <div className="absolute inset-0 bg-gradient-to-l from-emerald-900 via-emerald-800 to-teal-900" />
       
       <div className="relative flex items-center">
