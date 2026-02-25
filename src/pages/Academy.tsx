@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
-import { GraduationCap, Trash2, Cpu, HardHat, HeartPulse, ArrowLeft, ArrowRight, AlertTriangle, Recycle, BookOpen } from "lucide-react";
+import { GraduationCap, Trash2, Cpu, HardHat, HeartPulse, Factory, ArrowLeft, ArrowRight, AlertTriangle, Recycle, BookOpen } from "lucide-react";
 
 const Footer = lazy(() => import("@/components/Footer"));
 
@@ -12,8 +12,6 @@ const categories = [
     color: 'from-emerald-500 to-green-600',
     bgLight: 'bg-emerald-50 dark:bg-emerald-950/30',
     borderColor: 'border-emerald-200 dark:border-emerald-800',
-    iconBg: 'bg-emerald-500/10',
-    iconColor: 'text-emerald-600',
     titleAr: 'المخلفات البلدية',
     titleEn: 'Municipal Waste',
     subtitleAr: 'نفايات منزلية وتجارية',
@@ -27,19 +25,35 @@ const categories = [
     dangerLevel: 'low',
   },
   {
+    id: 'industrial',
+    icon: Factory,
+    color: 'from-blue-500 to-indigo-600',
+    bgLight: 'bg-blue-50 dark:bg-blue-950/30',
+    borderColor: 'border-blue-200 dark:border-blue-800',
+    titleAr: 'المخلفات الصناعية',
+    titleEn: 'Industrial Waste',
+    subtitleAr: 'عوادم إنتاج وحمأة صناعية',
+    subtitleEn: 'Production waste & industrial sludge',
+    descAr: 'تشمل عوادم الإنتاج والحمأة الصناعية الناتجة عن المصانع والمنشآت الصناعية. يُلزم القانون المصري 202/2020 جميع المنشآت الصناعية بالتسجيل لدى جهاز تنظيم إدارة المخلفات (WMRA) والحصول على ترخيص تداول المخلفات الصناعية.',
+    descEn: 'Includes production waste and industrial sludge from factories. Egyptian Law 202/2020 requires all industrial facilities to register with WMRA and obtain industrial waste handling permits.',
+    itemsAr: ['حمأة صناعية ومحاليل كيماوية', 'زيوت معدنية مستعملة', 'براميل ومخلفات تعبئة', 'خبث أفران ورماد متطاير', 'قصاصات معادن وبقايا إنتاج'],
+    itemsEn: ['Industrial sludge & chemical solutions', 'Used mineral oils', 'Drums & packaging waste', 'Furnace slag & fly ash', 'Metal scrap & production residues'],
+    lawAr: 'قانون 202/2020 - الباب الثالث (المخلفات الصناعية والزراعية)',
+    lawEn: 'Law 202/2020 - Chapter 3 (Industrial & Agricultural Waste)',
+    dangerLevel: 'high',
+  },
+  {
     id: 'electronic',
     icon: Cpu,
     color: 'from-amber-500 to-orange-600',
     bgLight: 'bg-amber-50 dark:bg-amber-950/30',
     borderColor: 'border-amber-200 dark:border-amber-800',
-    iconBg: 'bg-amber-500/10',
-    iconColor: 'text-amber-600',
     titleAr: 'المخلفات الإلكترونية',
     titleEn: 'Electronic Waste (E-Waste)',
     subtitleAr: 'أجهزة تالفة ولوحات إلكترونية',
     subtitleEn: 'Damaged devices & circuit boards',
     descAr: 'تشمل الأجهزة التالفة واللوحات الإلكترونية، وتُصنف كنفايات خطرة لاحتوائها على معادن ثقيلة مثل الرصاص والزئبق والكادميوم. يتطلب التعامل معها تراخيص خاصة من جهاز شؤون البيئة (EEAA).',
-    descEn: 'Includes damaged devices and circuit boards. Classified as hazardous waste due to heavy metals like lead, mercury, and cadmium. Handling requires special permits from the Egyptian Environmental Affairs Agency (EEAA).',
+    descEn: 'Includes damaged devices and circuit boards. Classified as hazardous waste due to heavy metals like lead, mercury, and cadmium. Handling requires special permits from EEAA.',
     itemsAr: ['هواتف محمولة وأجهزة لوحية', 'حاسبات شخصية ولابتوبات', 'لوحات إلكترونية (بوردات)', 'بطاريات ليثيوم وحمضية', 'كابلات وأسلاك نحاسية'],
     itemsEn: ['Mobile phones & tablets', 'PCs & laptops', 'Circuit boards (PCBs)', 'Lithium & acid batteries', 'Copper cables & wires'],
     lawAr: 'قانون 202/2020 - الباب الخامس (المخلفات الخطرة)',
@@ -52,14 +66,12 @@ const categories = [
     color: 'from-slate-500 to-gray-700',
     bgLight: 'bg-slate-50 dark:bg-slate-950/30',
     borderColor: 'border-slate-200 dark:border-slate-800',
-    iconBg: 'bg-slate-500/10',
-    iconColor: 'text-slate-600',
     titleAr: 'مخلفات الهدم والبناء',
     titleEn: 'Construction & Demolition Waste',
     subtitleAr: 'الرَتْش ومواد البناء',
     subtitleEn: 'Rubble & building materials',
     descAr: 'تُعرف محلياً بـ "الرَتْش"، وتشمل كسر الرخام، الخرسانة، وحديد التسليح الناتج عن أعمال الترميم والهدم. يتم فرزها وإعادة تدويرها في كسارات متخصصة لإنتاج مواد بناء معاد تدويرها.',
-    descEn: 'Known locally as "Ratsh", includes marble fragments, concrete, and rebar from renovation and demolition. Sorted and recycled in specialized crushers to produce recycled building materials.',
+    descEn: 'Known locally as "Ratsh", includes marble fragments, concrete, and rebar from renovation and demolition.',
     itemsAr: ['خرسانة مكسرة (كسر خرسانة)', 'حديد تسليح (حديد سكراب)', 'كسر رخام وسيراميك', 'خشب شدات وفورم', 'أنقاض طوب أحمر وأسمنتي'],
     itemsEn: ['Crushed concrete', 'Rebar (scrap iron)', 'Marble & ceramic fragments', 'Formwork timber', 'Red & cement brick rubble'],
     lawAr: 'قانون 202/2020 - الباب الرابع (مخلفات الهدم والبناء)',
@@ -72,14 +84,12 @@ const categories = [
     color: 'from-red-500 to-rose-700',
     bgLight: 'bg-red-50 dark:bg-red-950/30',
     borderColor: 'border-red-200 dark:border-red-800',
-    iconBg: 'bg-red-500/10',
-    iconColor: 'text-red-600',
     titleAr: 'المخلفات الطبية',
     titleEn: 'Medical Waste',
     subtitleAr: 'نفايات رعاية صحية خطرة',
     subtitleEn: 'Hazardous healthcare waste',
     descAr: 'هي نفايات الرعاية الصحية الخطرة (الأكياس الحمراء) التي تتطلب معالجة خاصة بالحرق أو التعقيم بالبخار (الأوتوكلاف). تشمل الأدوات الحادة، المواد الملوثة بالدم، والأدوية منتهية الصلاحية.',
-    descEn: 'Hazardous healthcare waste (red bags) requiring special treatment by incineration or steam sterilization (autoclave). Includes sharps, blood-contaminated materials, and expired medications.',
+    descEn: 'Hazardous healthcare waste (red bags) requiring special treatment by incineration or steam sterilization (autoclave).',
     itemsAr: ['أدوات حادة (إبر، مشارط)', 'مواد ملوثة بالدم والسوائل', 'أدوية ومستحضرات منتهية الصلاحية', 'نفايات مختبرات وثقافات بكتيرية', 'مخلفات غرف العمليات'],
     itemsEn: ['Sharps (needles, scalpels)', 'Blood-contaminated materials', 'Expired medications', 'Lab waste & bacterial cultures', 'Operating room waste'],
     lawAr: 'قانون 202/2020 - الباب الخامس + قرارات وزارة الصحة',
@@ -116,15 +126,15 @@ const Academy = () => {
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-5">
             <GraduationCap className="w-4 h-4" />
-            {isAr ? 'أكاديمية التدوير' : 'iRecycle Academy'}
+            {isAr ? 'أكاديمية التدوير — مبادرة وطنية للتوعية البيئية' : 'iRecycle Academy — National Environmental Awareness Initiative'}
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 text-foreground leading-tight">
-            {isAr ? 'تعرّف على أنواع المخلفات' : 'Learn About Waste Types'}
+            {isAr ? 'تعرّف على أنواع المخلفات في مصر' : 'Learn About Waste Types in Egypt'}
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
             {isAr
-              ? 'دليل شامل لتصنيف المخلفات طبقاً للقانون المصري رقم 202 لسنة 2020 ومعايير جهاز شؤون البيئة (EEAA) واتفاقية بازل الدولية.'
-              : 'A comprehensive guide to waste classification per Egyptian Law 202/2020, EEAA standards, and the Basel Convention.'}
+              ? 'دليل وطني شامل لتصنيف المخلفات طبقاً للقانون المصري رقم 202 لسنة 2020 ومعايير جهاز شؤون البيئة (EEAA) — في خدمة كل مواطن مصري.'
+              : 'A comprehensive national guide to waste classification per Egyptian Law 202/2020 and EEAA standards — serving every Egyptian citizen.'}
           </p>
         </div>
 
@@ -135,7 +145,6 @@ const Academy = () => {
               key={cat.id}
               className={`rounded-2xl border ${cat.borderColor} ${cat.bgLight} overflow-hidden transition-shadow hover:shadow-lg`}
             >
-              {/* Header bar */}
               <div className={`bg-gradient-to-r ${cat.color} px-6 py-4 flex items-center gap-4`}>
                 <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                   <cat.icon className="w-6 h-6 text-white" />
@@ -147,20 +156,14 @@ const Academy = () => {
                 {dangerBadge(cat.dangerLevel, isAr)}
               </div>
 
-              {/* Content */}
               <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Description */}
                 <div>
-                  <p className="text-sm text-foreground/80 leading-relaxed mb-4">
-                    {isAr ? cat.descAr : cat.descEn}
-                  </p>
+                  <p className="text-sm text-foreground/80 leading-relaxed mb-4">{isAr ? cat.descAr : cat.descEn}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/60 rounded-lg px-3 py-2 border border-border/30">
                     <BookOpen className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                     <span className="font-medium">{isAr ? cat.lawAr : cat.lawEn}</span>
                   </div>
                 </div>
-
-                {/* Items list */}
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                     <Recycle className="w-4 h-4 text-primary" />

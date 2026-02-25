@@ -25,6 +25,7 @@ const Footer = () => {
   const legalLinks = [
     { label: language === 'ar' ? 'شروط الاستخدام' : 'Terms of Use', href: '/terms' },
     { label: language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy', href: '/privacy' },
+    { label: language === 'ar' ? 'التراخيص والتشريعات' : 'Licenses & Legislation', href: '/legislation' },
     { label: language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ', href: '/help' },
     { label: language === 'ar' ? 'تواصل معنا' : 'Contact Us', href: '/help' },
   ];
