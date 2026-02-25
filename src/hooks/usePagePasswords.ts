@@ -21,13 +21,15 @@ export interface RecoveryMethod {
   is_enabled: boolean;
 }
 
-// Simple hash function for page passwords (not auth passwords)
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + 'page_salt_v1');
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+// Server-side password hashing via edge function (PBKDF2-SHA-256)
+async function hashPasswordsServerSide(passwords: string[]): Promise<string[]> {
+  const { data, error } = await supabase.functions.invoke('verify-page-password', {
+    body: { action: 'hash_passwords', passwords_to_hash: passwords },
+  });
+  if (error || !data?.hashes) {
+    throw new Error('Failed to hash passwords securely');
+  }
+  return data.hashes;
 }
 
 // verifyPassword is now handled server-side via verify-page-password edge function
@@ -114,7 +116,7 @@ export function usePagePasswords() {
     if (!organization?.id) return;
 
     try {
-      const hash = await hashPassword(password);
+      const [hash] = await hashPasswordsServerSide([password]);
       
       const { data: pagePass, error } = await supabase
         .from('page_passwords')
@@ -152,10 +154,11 @@ export function usePagePasswords() {
         const codes = Array.from({ length: 8 }, () => 
           Math.random().toString(36).substring(2, 8).toUpperCase()
         );
-        const codeInserts = await Promise.all(codes.map(async (code) => ({
+        const codeHashes = await hashPasswordsServerSide(codes);
+        const codeInserts = codes.map((_, i) => ({
           page_password_id: pagePass.id,
-          code_hash: await hashPassword(code),
-        })));
+          code_hash: codeHashes[i],
+        }));
         await supabase.from('page_password_backup_codes').insert(codeInserts);
       }
 
