@@ -40,9 +40,9 @@ const Header = memo(() => {
     {
       label: t('nav.partners') || (language === 'ar' ? 'الشركاء' : 'Partners'),
       items: [
-        { label: language === 'ar' ? 'حلول للمصانع' : 'For Factories', href: '/guide/generator', icon: Factory, desc: language === 'ar' ? 'إدارة مخلفات المصانع' : 'Factory waste management' },
-        { label: language === 'ar' ? 'لجامعي الخردة' : 'For Collectors', href: '/guide/recycler', icon: Recycle, desc: language === 'ar' ? 'منصة متكاملة للجمع والتدوير' : 'Integrated collection platform' },
-        { label: language === 'ar' ? 'للشركات الناشئة' : 'For Startups', href: '/guide/transporter', icon: Rocket, desc: language === 'ar' ? 'ابدأ مشروعك في التدوير' : 'Start your recycling business' },
+        { label: language === 'ar' ? 'حلول للمصانع' : 'For Factories', href: '/partnerships', icon: Factory, desc: language === 'ar' ? 'إدارة عوادم الإنتاج والحمأة الصناعية' : 'Production waste & sludge management' },
+        { label: language === 'ar' ? 'لجامعي المخلفات' : 'For Collectors', href: '/partnerships', icon: Recycle, desc: language === 'ar' ? 'انضم كشريك لوجستي معتمد' : 'Join as certified logistics partner' },
+        { label: language === 'ar' ? 'للجهات الحكومية' : 'For Government', href: '/partnerships', icon: Rocket, desc: language === 'ar' ? 'تقارير تحليلية وبيانات جغرافية' : 'Analytics & geographic data' },
       ],
     },
     {
