@@ -3,12 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Search, MapPin, Navigation, ExternalLink, Loader2, LocateFixed } from 'lucide-react';
+import { Search, MapPin, Navigation, ExternalLink, Loader2, LocateFixed, Recycle } from 'lucide-react';
 import { geocodeAddress } from '@/lib/mapUtils';
+import { EGYPTIAN_INDUSTRIAL_DATA } from '@/data/egyptianIndustrialData';
 
-const DEFAULT_LAT = 30.0444;
-const DEFAULT_LNG = 31.2357;
-const DEFAULT_ZOOM = 12;
+const DEFAULT_LAT = 26.8;
+const DEFAULT_LNG = 30.8;
+const DEFAULT_ZOOM = 7;
 
 const WazeLiveMap = () => {
   const [lat, setLat] = useState(DEFAULT_LAT);
@@ -16,7 +17,8 @@ const WazeLiveMap = () => {
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
-  const [locationName, setLocationName] = useState('القاهرة، مصر');
+  const [locationName, setLocationName] = useState('جمهورية مصر العربية');
+  const [showPoints, setShowPoints] = useState(true);
   const [pin, setPin] = useState(false);
 
   const wazeIframeSrc = `https://embed.waze.com/iframe?zoom=${zoom}&lat=${lat}&lon=${lng}${pin ? '&pin=1' : ''}`;
@@ -68,16 +70,22 @@ const WazeLiveMap = () => {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Navigation className="w-6 h-6 text-primary" />
-            خريطة Waze المباشرة
+            خريطة التدوير الوطنية
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            حركة المرور المباشرة والملاحة عبر Waze
+            نقاط التجميع الرسمية والمناطق الصناعية المعتمدة في كافة أنحاء الجمهورية
           </p>
         </div>
-        <Button onClick={openInWaze} variant="outline" className="gap-2">
-          <ExternalLink className="w-4 h-4" />
-          فتح في Waze
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowPoints(!showPoints)} variant={showPoints ? 'default' : 'outline'} className="gap-2" size="sm">
+            <Recycle className="w-4 h-4" />
+            {showPoints ? 'إخفاء النقاط' : 'إظهار النقاط'}
+          </Button>
+          <Button onClick={openInWaze} variant="outline" className="gap-2" size="sm">
+            <ExternalLink className="w-4 h-4" />
+            فتح في Waze
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -136,18 +144,60 @@ const WazeLiveMap = () => {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
+      {/* Official Collection Points */}
+      {showPoints && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Recycle className="w-4 h-4" />
+              نقاط التجميع والمناطق الصناعية المعتمدة ({EGYPTIAN_INDUSTRIAL_DATA.length} نقطة)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-60 overflow-y-auto">
+              {EGYPTIAN_INDUSTRIAL_DATA.map((point, i) => (
+                <Button
+                  key={i}
+                  variant="ghost"
+                  size="sm"
+                  className="justify-start text-start h-auto py-2 gap-2"
+                  onClick={() => {
+                    setLat(point.lat);
+                    setLng(point.lng);
+                    setLocationName(point.name);
+                    setPin(true);
+                    setZoom(14);
+                  }}
+                >
+                  <MapPin className="w-3 h-3 text-primary flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium truncate">{point.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{point.city}</p>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Cities */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: 'القاهرة', lat: 30.0444, lng: 31.2357 },
           { label: 'الإسكندرية', lat: 31.2001, lng: 29.9187 },
           { label: 'الجيزة', lat: 30.0131, lng: 31.2089 },
           { label: '6 أكتوبر', lat: 29.9553, lng: 30.9276 },
+          { label: 'العاشر من رمضان', lat: 30.2833, lng: 31.7500 },
+          { label: 'السويس', lat: 29.9833, lng: 32.5500 },
+          { label: 'أسوان', lat: 24.0875, lng: 32.8994 },
+          { label: 'المنيا', lat: 28.1099, lng: 30.7503 },
         ].map((city) => (
           <Button
             key={city.label}
             variant="outline"
             className="gap-2"
+            size="sm"
             onClick={() => {
               setLat(city.lat);
               setLng(city.lng);
