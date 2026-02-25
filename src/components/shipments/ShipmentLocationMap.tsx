@@ -1,6 +1,5 @@
+/// <reference types="google.maps" />
 import { useState, useEffect, useRef, useCallback } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -10,14 +9,8 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { searchEgyptLocations } from '@/data/egyptLocations';
-import {
-  OSM_TILE_URL,
-  OSM_ATTRIBUTION,
-  EGYPT_BOUNDS,
-  MAX_ZOOM,
-  MIN_ZOOM,
-  reverseGeocodeOSM,
-} from '@/lib/leafletConfig';
+import { useGoogleMaps } from '@/hooks/useGoogleMaps';
+import { reverseGeocodeOSM } from '@/lib/leafletConfig';
 
 interface MultiGeoResult {
   id: string;
@@ -35,17 +28,13 @@ const SOURCE_LABELS: Record<string, { label: string; color: string }> = {
   opencage: { label: 'OpenCage', color: 'bg-amber-500/15 text-amber-700 dark:text-amber-400' },
   photon: { label: 'Photon', color: 'bg-green-500/15 text-green-700 dark:text-green-400' },
   herewego: { label: 'HERE Auto', color: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-400' },
-  mapsme: { label: 'OSM', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
   tomtom: { label: 'TomTom', color: 'bg-red-500/15 text-red-700 dark:text-red-400' },
   local: { label: 'محلي', color: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' },
   google: { label: 'Google', color: 'bg-sky-500/15 text-sky-700 dark:text-sky-400' },
   osm: { label: 'OSM', color: 'bg-orange-500/15 text-orange-700 dark:text-orange-400' },
 };
 
-interface Coords {
-  lat: number;
-  lng: number;
-}
+interface Coords { lat: number; lng: number; }
 
 interface ShipmentLocationMapProps {
   pickupCoords: Coords | null;
@@ -59,16 +48,20 @@ interface ShipmentLocationMapProps {
 type SelectionMode = 'pickup' | 'delivery' | null;
 
 const reverseGeocode = async (lat: number, lng: number): Promise<string> => {
-  return reverseGeocodeOSM(lat, lng);
+  try {
+    const geocoder = new (window as any).google.maps.Geocoder();
+    const res = await geocoder.geocode({ location: { lat, lng }, language: 'ar' });
+    return res.results?.[0]?.formatted_address || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  } catch {
+    return reverseGeocodeOSM(lat, lng);
+  }
 };
 
-const createMarkerIcon = (color: string, label: string) => {
-  return L.divIcon({
-    html: `<div style="background:${color};width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);color:white;font-weight:bold;font-size:12px;">${label}</span></div>`,
-    className: '',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-  });
+const EGYPT_BOUNDS = {
+  north: 31.7,
+  south: 22.0,
+  west: 24.7,
+  east: 37.0,
 };
 
 const ShipmentLocationMap = ({
@@ -79,11 +72,12 @@ const ShipmentLocationMap = ({
   pickupAddress,
   deliveryAddress,
 }: ShipmentLocationMapProps) => {
-  const mapRef = useRef<L.Map | null>(null);
+  const { loaded: mapsLoaded, error: mapsError } = useGoogleMaps();
+  const mapRef = useRef<any>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const pickupMarkerRef = useRef<L.Marker | null>(null);
-  const deliveryMarkerRef = useRef<L.Marker | null>(null);
-  const routeLayerRef = useRef<L.Polyline | null>(null);
+  const pickupMarkerRef = useRef<any>(null);
+  const deliveryMarkerRef = useRef<any>(null);
+  const routeRendererRef = useRef<any>(null);
   const [mode, setMode] = useState<SelectionMode>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
@@ -105,23 +99,37 @@ const ShipmentLocationMap = ({
   const deliveryCoordsRef = useRef(deliveryCoords);
   deliveryCoordsRef.current = deliveryCoords;
 
-  // Initialize Leaflet map
-  useEffect(() => {
-    if (!mapContainerRef.current || mapRef.current) return;
+  const gmaps = () => (window as any).google?.maps;
 
-    const map = L.map(mapContainerRef.current, {
-      center: [30.0444, 31.2357],
+  // Initialize Google Map
+  useEffect(() => {
+    if (!mapsLoaded || !mapContainerRef.current || mapRef.current) return;
+    const maps = gmaps();
+    if (!maps) return;
+
+    const map = new maps.Map(mapContainerRef.current, {
+      center: { lat: 30.0444, lng: 31.2357 },
       zoom: 10,
-      maxZoom: MAX_ZOOM,
-      minZoom: MIN_ZOOM,
-      maxBounds: L.latLngBounds(EGYPT_BOUNDS[0], EGYPT_BOUNDS[1]),
+      maxZoom: 19,
+      minZoom: 5,
+      restriction: {
+        latLngBounds: EGYPT_BOUNDS,
+        strictBounds: false,
+      },
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+      zoomControl: true,
+      zoomControlOptions: {
+        position: maps.ControlPosition.LEFT_BOTTOM,
+      },
+      gestureHandling: 'greedy',
     });
 
-    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: MAX_ZOOM }).addTo(map);
-
-    map.on('click', async (e: L.LeafletMouseEvent) => {
-      if (!modeRef.current) return;
-      const { lat, lng } = e.latlng;
+    map.addListener('click', async (e: any) => {
+      if (!modeRef.current || !e.latLng) return;
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
       const address = await reverseGeocode(lat, lng);
 
       if (modeRef.current === 'pickup') {
@@ -137,44 +145,84 @@ const ShipmentLocationMap = ({
     mapRef.current = map;
 
     return () => {
-      map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [mapsLoaded]);
 
   // Update cursor
   useEffect(() => {
-    const container = mapRef.current?.getContainer();
-    if (container) container.style.cursor = mode ? 'crosshair' : '';
+    if (!mapRef.current) return;
+    mapRef.current.setOptions({ draggableCursor: mode ? 'crosshair' : undefined });
   }, [mode]);
 
   // Update pickup marker
   useEffect(() => {
-    if (pickupMarkerRef.current) { pickupMarkerRef.current.remove(); pickupMarkerRef.current = null; }
-    if (!mapRef.current || !pickupCoords) return;
+    if (!mapsLoaded || !mapRef.current) return;
+    const maps = gmaps();
+    if (!maps) return;
 
-    pickupMarkerRef.current = L.marker([pickupCoords.lat, pickupCoords.lng], { icon: createMarkerIcon('#22c55e', 'A') })
-      .bindPopup(`<b>📍 نقطة الاستلام</b><br/>${pickupAddress || ''}`)
-      .addTo(mapRef.current);
-  }, [pickupCoords, pickupAddress]);
+    if (pickupMarkerRef.current) {
+      pickupMarkerRef.current.setMap(null);
+      pickupMarkerRef.current = null;
+    }
+    if (!pickupCoords) return;
+
+    const marker = new maps.Marker({
+      position: { lat: pickupCoords.lat, lng: pickupCoords.lng },
+      map: mapRef.current,
+      title: 'نقطة الاستلام',
+      icon: {
+        url: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24s16-12 16-24C32 7.2 24.8 0 16 0z" fill="#22c55e" stroke="white" stroke-width="2"/><text x="16" y="20" text-anchor="middle" fill="white" font-weight="bold" font-size="14">A</text></svg>`),
+        scaledSize: new maps.Size(32, 40),
+        anchor: new maps.Point(16, 40),
+      },
+    });
+
+    const infoWindow = new maps.InfoWindow({
+      content: `<div dir="rtl"><b>📍 نقطة الاستلام</b><br/>${pickupAddress || ''}</div>`,
+    });
+    marker.addListener('click', () => infoWindow.open(mapRef.current, marker));
+    pickupMarkerRef.current = marker;
+  }, [pickupCoords, pickupAddress, mapsLoaded]);
 
   // Update delivery marker
   useEffect(() => {
-    if (deliveryMarkerRef.current) { deliveryMarkerRef.current.remove(); deliveryMarkerRef.current = null; }
-    if (!mapRef.current || !deliveryCoords) return;
+    if (!mapsLoaded || !mapRef.current) return;
+    const maps = gmaps();
+    if (!maps) return;
 
-    deliveryMarkerRef.current = L.marker([deliveryCoords.lat, deliveryCoords.lng], { icon: createMarkerIcon('#ef4444', 'B') })
-      .bindPopup(`<b>🏁 نقطة التسليم</b><br/>${deliveryAddress || ''}`)
-      .addTo(mapRef.current);
-  }, [deliveryCoords, deliveryAddress]);
+    if (deliveryMarkerRef.current) {
+      deliveryMarkerRef.current.setMap(null);
+      deliveryMarkerRef.current = null;
+    }
+    if (!deliveryCoords) return;
 
-  // Fetch & draw route using OSRM
+    const marker = new maps.Marker({
+      position: { lat: deliveryCoords.lat, lng: deliveryCoords.lng },
+      map: mapRef.current,
+      title: 'نقطة التسليم',
+      icon: {
+        url: 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40"><path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24s16-12 16-24C32 7.2 24.8 0 16 0z" fill="#ef4444" stroke="white" stroke-width="2"/><text x="16" y="20" text-anchor="middle" fill="white" font-weight="bold" font-size="14">B</text></svg>`),
+        scaledSize: new maps.Size(32, 40),
+        anchor: new maps.Point(16, 40),
+      },
+    });
+
+    const infoWindow = new maps.InfoWindow({
+      content: `<div dir="rtl"><b>🏁 نقطة التسليم</b><br/>${deliveryAddress || ''}</div>`,
+    });
+    marker.addListener('click', () => infoWindow.open(mapRef.current, marker));
+    deliveryMarkerRef.current = marker;
+  }, [deliveryCoords, deliveryAddress, mapsLoaded]);
+
+  // Fetch & draw route
   const fetchRoute = useCallback(async () => {
     const map = mapRef.current;
-    if (!map || !pickupCoords || !deliveryCoords) {
-      if (routeLayerRef.current) {
-        routeLayerRef.current.remove();
-        routeLayerRef.current = null;
+    const maps = gmaps();
+    if (!map || !maps || !pickupCoords || !deliveryCoords || !mapsLoaded) {
+      if (routeRendererRef.current) {
+        routeRendererRef.current.setMap(null);
+        routeRendererRef.current = null;
       }
       setRouteInfo(null);
       return;
@@ -182,54 +230,74 @@ const ShipmentLocationMap = ({
 
     setLoadingRoute(true);
     try {
-      const res = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${pickupCoords.lng},${pickupCoords.lat};${deliveryCoords.lng},${deliveryCoords.lat}?overview=full&geometries=geojson`
-      );
-      const data = await res.json();
+      const directionsService = new maps.DirectionsService();
 
-      // Remove old route
-      if (routeLayerRef.current) {
-        routeLayerRef.current.remove();
-        routeLayerRef.current = null;
+      if (!routeRendererRef.current) {
+        routeRendererRef.current = new maps.DirectionsRenderer({
+          suppressMarkers: true,
+          polylineOptions: {
+            strokeColor: '#6366f1',
+            strokeWeight: 5,
+            strokeOpacity: 0.8,
+          },
+        });
       }
+      routeRendererRef.current.setMap(map);
 
-      if (data.code === 'Ok' && data.routes?.[0]) {
-        const route = data.routes[0];
-        const coords: L.LatLngExpression[] = route.geometry.coordinates.map((c: [number, number]) => [c[1], c[0]] as [number, number]);
+      const result = await directionsService.route({
+        origin: { lat: pickupCoords.lat, lng: pickupCoords.lng },
+        destination: { lat: deliveryCoords.lat, lng: deliveryCoords.lng },
+        travelMode: maps.TravelMode.DRIVING,
+        region: 'eg',
+      });
 
-        routeLayerRef.current = L.polyline(coords, {
-          color: '#6366f1',
-          weight: 5,
-          opacity: 0.8,
-        }).addTo(map);
+      routeRendererRef.current.setDirections(result);
 
-        map.fitBounds(routeLayerRef.current.getBounds(), { padding: [50, 50] });
-
-        const distKm = (route.distance / 1000).toFixed(1);
-        const durMin = Math.round(route.duration / 60);
+      const leg = result.routes[0]?.legs[0];
+      if (leg) {
+        const distKm = ((leg.distance?.value || 0) / 1000).toFixed(1);
+        const durMin = Math.round((leg.duration?.value || 0) / 60);
         setRouteInfo({
           distance: `${distKm} كم`,
           duration: durMin >= 60 ? `${Math.floor(durMin / 60)} ساعة ${durMin % 60} دقيقة` : `${durMin} دقيقة`,
         });
       }
     } catch (err) {
-      console.error('Route error:', err);
+      console.error('Google Directions error, falling back to OSRM:', err);
+      try {
+        const res = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${pickupCoords.lng},${pickupCoords.lat};${deliveryCoords.lng},${deliveryCoords.lat}?overview=full&geometries=geojson`
+        );
+        const data = await res.json();
+        if (data.code === 'Ok' && data.routes?.[0]) {
+          const route = data.routes[0];
+          const distKm = (route.distance / 1000).toFixed(1);
+          const durMin = Math.round(route.duration / 60);
+          setRouteInfo({
+            distance: `${distKm} كم`,
+            duration: durMin >= 60 ? `${Math.floor(durMin / 60)} ساعة ${durMin % 60} دقيقة` : `${durMin} دقيقة`,
+          });
+        }
+      } catch { /* ignore */ }
     } finally {
       setLoadingRoute(false);
     }
-  }, [pickupCoords, deliveryCoords]);
+  }, [pickupCoords, deliveryCoords, mapsLoaded]);
 
-  useEffect(() => {
-    fetchRoute();
-  }, [fetchRoute]);
+  useEffect(() => { fetchRoute(); }, [fetchRoute]);
 
   // Fit to single point
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
-    if (pickupCoords && !deliveryCoords) map.setView([pickupCoords.lat, pickupCoords.lng], 14, { animate: true });
-    else if (deliveryCoords && !pickupCoords) map.setView([deliveryCoords.lat, deliveryCoords.lng], 14, { animate: true });
-  }, [pickupCoords, deliveryCoords]);
+    if (!map || !mapsLoaded) return;
+    if (pickupCoords && !deliveryCoords) {
+      map.panTo({ lat: pickupCoords.lat, lng: pickupCoords.lng });
+      map.setZoom(14);
+    } else if (deliveryCoords && !pickupCoords) {
+      map.panTo({ lat: deliveryCoords.lat, lng: deliveryCoords.lng });
+      map.setZoom(14);
+    }
+  }, [pickupCoords, deliveryCoords, mapsLoaded]);
 
   // Close results on outside click
   useEffect(() => {
@@ -243,8 +311,10 @@ const ShipmentLocationMap = ({
   // Fetch from multi-geocode edge function
   const fetchMultiGeo = useCallback(async (q: string): Promise<MultiGeoResult[]> => {
     try {
-      const center = mapRef.current?.getCenter() || { lat: 30.0444, lng: 31.2357 };
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/multi-geocode-search?q=${encodeURIComponent(q)}&lat=${center.lat}&lng=${center.lng}&lang=ar`;
+      const center = mapRef.current?.getCenter();
+      const lat = center?.lat?.() || 30.0444;
+      const lng = center?.lng?.() || 31.2357;
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/multi-geocode-search?q=${encodeURIComponent(q)}&lat=${lat}&lng=${lng}&lang=ar`;
       const res = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
@@ -258,25 +328,42 @@ const ShipmentLocationMap = ({
     }
   }, []);
 
-  // Fetch from Nominatim (OSM) for additional coverage
-  const fetchOsmGeo = useCallback(async (q: string): Promise<MultiGeoResult[]> => {
+  // Google Places search
+  const fetchGooglePlaces = useCallback(async (q: string): Promise<MultiGeoResult[]> => {
+    if (!mapsLoaded || !mapRef.current) return [];
+    const maps = gmaps();
+    if (!maps) return [];
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=8&accept-language=ar`
-      );
-      const data = await res.json();
-      return (data || []).map((r: any, i: number) => ({
-        id: `osm-${r.place_id}-${i}`,
-        name: r.display_name?.split(',')[0] || '',
-        address: r.display_name || '',
-        lat: parseFloat(r.lat),
-        lng: parseFloat(r.lon),
-        source: 'osm',
-      }));
+      const service = new maps.places.PlacesService(mapRef.current);
+      return new Promise((resolve) => {
+        service.textSearch(
+          {
+            query: q,
+            region: 'eg',
+            language: 'ar',
+            location: mapRef.current?.getCenter() || undefined,
+            radius: 50000,
+          },
+          (results: any[], status: string) => {
+            if (status !== 'OK' || !results) {
+              resolve([]);
+              return;
+            }
+            resolve(results.slice(0, 8).map((r: any, i: number) => ({
+              id: `google-${r.place_id || i}`,
+              name: r.name || '',
+              address: r.formatted_address || '',
+              lat: r.geometry?.location?.lat() || 0,
+              lng: r.geometry?.location?.lng() || 0,
+              source: 'google',
+            })));
+          }
+        );
+      });
     } catch {
       return [];
     }
-  }, []);
+  }, [mapsLoaded]);
 
   // AI-powered query expansion
   const fetchAiExpansion = useCallback(async (q: string): Promise<string[]> => {
@@ -300,7 +387,6 @@ const ShipmentLocationMap = ({
     }
   }, []);
 
-  // Deduplicate helper
   const deduplicateResults = useCallback((results: MultiGeoResult[]): MultiGeoResult[] => {
     const deduped: MultiGeoResult[] = [];
     for (const r of results) {
@@ -313,7 +399,6 @@ const ShipmentLocationMap = ({
     return deduped;
   }, []);
 
-  // Auto-search with AI expansion + parallel multi-source fetching
   const performSearch = useCallback((q: string) => {
     if (!q || q.length < 2) {
       setSearchResults([]);
@@ -339,16 +424,16 @@ const ShipmentLocationMap = ({
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
-      const [remoteResults, osmResults] = await Promise.all([
+      const [remoteResults, googleResults] = await Promise.all([
         fetchMultiGeo(q),
-        fetchOsmGeo(q),
+        fetchGooglePlaces(q),
       ]);
 
-      const merged = [...localResults, ...remoteResults, ...osmResults];
+      const merged = [...localResults, ...remoteResults, ...googleResults];
       const phase1 = deduplicateResults(merged);
 
       phase1.sort((a, b) => {
-        const order: Record<string, number> = { local: 0, ai: 1, osm: 2, here: 3, google: 4, tomtom: 5 };
+        const order: Record<string, number> = { local: 0, ai: 1, google: 2, here: 3, osm: 4, tomtom: 5 };
         return (order[a.source] ?? 6) - (order[b.source] ?? 6);
       });
 
@@ -363,7 +448,7 @@ const ShipmentLocationMap = ({
           const aiQueries = alternativeQueries.slice(0, 2);
           const aiSearchPromises = aiQueries.flatMap(aq => [
             fetchMultiGeo(aq),
-            fetchOsmGeo(aq),
+            fetchGooglePlaces(aq),
           ]);
 
           const aiResultArrays = await Promise.all(aiSearchPromises);
@@ -372,7 +457,7 @@ const ShipmentLocationMap = ({
           const allMerged = deduplicateResults([...phase1, ...aiResults]);
 
           allMerged.sort((a, b) => {
-            const order: Record<string, number> = { local: 0, ai: 1, osm: 2, here: 3, google: 4, tomtom: 5 };
+            const order: Record<string, number> = { local: 0, ai: 1, google: 2, here: 3, osm: 4, tomtom: 5 };
             return (order[a.source] ?? 6) - (order[b.source] ?? 6);
           });
 
@@ -382,7 +467,7 @@ const ShipmentLocationMap = ({
         setAiSearching(false);
       }
     }, 200);
-  }, [fetchMultiGeo, fetchOsmGeo, fetchAiExpansion, deduplicateResults]);
+  }, [fetchMultiGeo, fetchGooglePlaces, fetchAiExpansion, deduplicateResults]);
 
   const handleInputChange = useCallback((value: string) => {
     setSearchQuery(value);
@@ -394,7 +479,8 @@ const ShipmentLocationMap = ({
     if (!map) return;
     setShowResults(false);
     setSearchQuery(result.name);
-    map.setView([result.lat, result.lng], 15, { animate: true });
+    map.panTo({ lat: result.lat, lng: result.lng });
+    map.setZoom(15);
 
     const activeMode = mode || (!pickupCoords ? 'pickup' : !deliveryCoords ? 'delivery' : 'pickup');
 
@@ -413,7 +499,10 @@ const ShipmentLocationMap = ({
   const handleMyLocation = useCallback(() => {
     if (!navigator.geolocation || !mapRef.current) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => mapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 15, { animate: true }),
+      (pos) => {
+        mapRef.current?.panTo({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        mapRef.current?.setZoom(15);
+      },
       () => toast.error('تعذر تحديد موقعك'),
       { enableHighAccuracy: true }
     );
@@ -424,23 +513,15 @@ const ShipmentLocationMap = ({
       {/* Toolbar */}
       <div className="p-3 bg-muted/40 border-b space-y-2.5">
         <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            type="button"
-            size="sm"
-            variant={mode === 'pickup' ? 'default' : 'outline'}
+          <Button type="button" size="sm" variant={mode === 'pickup' ? 'default' : 'outline'}
             className={cn("h-8 text-xs gap-1.5", mode === 'pickup' && "bg-green-600 hover:bg-green-700 text-white")}
-            onClick={() => setMode(mode === 'pickup' ? null : 'pickup')}
-          >
+            onClick={() => setMode(mode === 'pickup' ? null : 'pickup')}>
             <MapPin className="w-3.5 h-3.5" />
             {pickupCoords ? 'تغيير الاستلام' : '📍 حدد الاستلام'}
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant={mode === 'delivery' ? 'default' : 'outline'}
+          <Button type="button" size="sm" variant={mode === 'delivery' ? 'default' : 'outline'}
             className={cn("h-8 text-xs gap-1.5", mode === 'delivery' && "bg-red-600 hover:bg-red-700 text-white")}
-            onClick={() => setMode(mode === 'delivery' ? null : 'delivery')}
-          >
+            onClick={() => setMode(mode === 'delivery' ? null : 'delivery')}>
             <Navigation className="w-3.5 h-3.5" />
             {deliveryCoords ? 'تغيير التسليم' : '🏁 حدد التسليم'}
           </Button>
@@ -513,12 +594,27 @@ const ShipmentLocationMap = ({
         )}
       </div>
 
-      {/* Map + Results overlay layout */}
+      {/* Map + Results overlay */}
       <div className="relative">
-        <div ref={mapContainerRef} className="h-[420px] w-full" />
+        {!mapsLoaded && !mapsError && (
+          <div className="h-[420px] w-full flex items-center justify-center bg-muted/30">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">جاري تحميل خريطة Google...</span>
+            </div>
+          </div>
+        )}
+
+        {mapsError && (
+          <div className="h-[420px] w-full flex items-center justify-center bg-destructive/10">
+            <span className="text-sm text-destructive">{mapsError}</span>
+          </div>
+        )}
+
+        <div ref={mapContainerRef} className={cn("h-[420px] w-full", (!mapsLoaded || mapsError) && "hidden")} />
 
         {showResults && searchResults.length > 0 && (
-          <div className="absolute top-0 right-0 w-[280px] h-full bg-background/98 backdrop-blur-md border-l shadow-2xl z-[1000] flex flex-col">
+          <div className="absolute top-0 right-0 w-[280px] h-full bg-background/98 backdrop-blur-md border-l shadow-2xl z-10 flex flex-col">
             <div className="px-3 py-2.5 border-b bg-muted/60 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Search className="w-3.5 h-3.5 text-primary" />
