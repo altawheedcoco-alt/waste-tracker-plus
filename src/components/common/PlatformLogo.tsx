@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import irecycleLogo from '@/assets/irecycle-logo-optimized.webp';
+import irecycleLogo from '@/assets/logo.png';
 import { cn } from '@/lib/utils';
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'print';
@@ -17,6 +17,8 @@ interface PlatformLogoProps {
   printMode?: boolean;
   /** Show subtitle "Waste Management System" */
   showSubtitle?: boolean;
+  /** Prioritize loading for above-the-fold logos */
+  priority?: boolean;
 }
 
 const sizeMap: Record<LogoSize, { logoH: string; text: string; subtext: string; subtitle: string }> = {
@@ -42,6 +44,7 @@ const PlatformLogo = memo(({
   inverted = false,
   printMode = false,
   showSubtitle = false,
+  priority = false,
 }: PlatformLogoProps) => {
   const s = sizeMap[size];
 
@@ -52,7 +55,10 @@ const PlatformLogo = memo(({
           src={irecycleLogo}
           alt="iRecycle - Waste Management System"
           className="h-full w-full object-contain"
-          loading="eager"
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          // @ts-ignore - fetchpriority is a valid HTML attribute
+          {...({ fetchpriority: priority ? 'high' : 'low' } as any)}
         />
       </div>
       {showText && (

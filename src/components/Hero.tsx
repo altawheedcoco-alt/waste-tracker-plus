@@ -2,7 +2,7 @@ import { memo } from "react";
 import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog, Car, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import heroBg from "@/assets/hero-bg-compressed.webp";
+import heroBg from "@/assets/hero-bg-optimized.webp";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Hero = memo(() => {
@@ -24,7 +24,7 @@ const Hero = memo(() => {
         <img 
           src={heroBg} 
           alt={t('landing.recyclingFacilities')} 
-          className="w-full h-full object-cover animate-hero-zoom"
+          className="w-full h-full object-cover sm:animate-hero-zoom"
           loading="eager" 
           // @ts-ignore - fetchpriority is a valid HTML attribute
           {...{ fetchpriority: "high" } as any} 
