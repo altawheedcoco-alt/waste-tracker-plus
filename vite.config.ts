@@ -19,9 +19,10 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     minify: 'esbuild',
     chunkSizeWarningLimit: 600,
+    modulePreload: { polyfill: false },
     rollupOptions: {
       output: {
-      manualChunks(id) {
+        manualChunks(id) {
           if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
             return 'react-core';
           }
@@ -32,6 +33,10 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('mapbox-gl') || id.includes('leaflet')) return 'maps';
           if (id.includes('framer-motion')) return 'motion';
           if (id.includes('lucide-react')) return 'icons';
+          if (id.includes('@tanstack/')) return 'query';
+          if (id.includes('date-fns')) return 'date-utils';
+          if (id.includes('zod') || id.includes('react-hook-form') || id.includes('@hookform/')) return 'forms';
+          if (id.includes('html2canvas') || id.includes('jspdf') || id.includes('jszip')) return 'export-tools';
         },
       },
     },
