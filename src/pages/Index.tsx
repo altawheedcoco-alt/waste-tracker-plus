@@ -1,11 +1,17 @@
-import { lazy, Suspense, memo, useRef, useState, useEffect, ComponentType } from "react";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import LandingWrapper from "@/components/LandingWrapper";
-import NewsTicker from "@/components/NewsTicker";
+import { lazy, Suspense, memo, useRef, useState, useEffect } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
-// Lazy load below-fold sections
+// Critical above-fold: load eagerly but keep lightweight
+import Header from "@/components/Header";
+import Hero from "@/components/Hero";
+
+// Deferred: LandingWrapper is lightweight but not paint-critical
+const LandingWrapper = lazy(() => import("@/components/LandingWrapper"));
+
+// NewsTicker is visually secondary — defer it
+const NewsTicker = lazy(() => import("@/components/NewsTicker"));
+
+// Lazy load all below-fold sections
 const Stats = lazy(() => import("@/components/Stats"));
 const FeaturesList = lazy(() => import("@/components/FeaturesList"));
 const Features = lazy(() => import("@/components/Features"));
@@ -17,7 +23,6 @@ const HomepageAds = lazy(() => import("@/components/ads/HomepageAds"));
 const FeaturedConsultants = lazy(() => import("@/components/landing/FeaturedConsultants"));
 const OmalunaSection = lazy(() => import("@/components/landing/OmalunaSection"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
-
 const NationalInitiativeSection = lazy(() => import("@/components/landing/NationalInitiativeSection"));
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
 const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
@@ -32,16 +37,16 @@ const LazySection = memo(({ children }: { children: React.ReactNode }) => {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { rootMargin: '200px' }
+      { rootMargin: '300px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div ref={ref} style={{ minHeight: visible ? undefined : '100px' }}>
+    <div ref={ref} style={{ minHeight: visible ? undefined : '80px' }}>
       {visible ? (
-        <Suspense fallback={<div className="h-32 flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        <Suspense fallback={null}>
           {children}
         </Suspense>
       ) : null}
@@ -50,38 +55,55 @@ const LazySection = memo(({ children }: { children: React.ReactNode }) => {
 });
 LazySection.displayName = 'LazySection';
 
+/** Deferred ticker — renders after a short delay to not block FCP */
+const DeferredTicker = memo(() => {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const id = requestIdleCallback ? requestIdleCallback(() => setShow(true)) : setTimeout(() => setShow(true), 1500);
+    return () => { if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id as number); else clearTimeout(id as any); };
+  }, []);
+  if (!show) return <div className="h-[42px] sm:h-[36px]" />;
+  return (
+    <Suspense fallback={<div className="h-[42px] sm:h-[36px]" />}>
+      <NewsTicker />
+    </Suspense>
+  );
+});
+DeferredTicker.displayName = 'DeferredTicker';
+
 const Index = () => {
   return (
-    <LandingWrapper>
-      <div className="min-h-screen-safe bg-[hsl(140,20%,98%)] smooth-scroll">
-        <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
-          <Header />
-          <NewsTicker />
-        </ErrorBoundary>
-        <ErrorBoundary fallbackTitle="خطأ في تحميل القسم الرئيسي">
-          <Hero />
-        </ErrorBoundary>
-        <main>
-          <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
-            <LazySection><HomepageAds /></LazySection>
-            <LazySection><DocumentVerification /></LazySection>
-            <LazySection><FeaturedConsultants /></LazySection>
-            <LazySection><OmalunaSection /></LazySection>
-            <LazySection><NationalInitiativeSection /></LazySection>
-            <LazySection><Stats /></LazySection>
-            <LazySection><FeaturesList /></LazySection>
-            <LazySection><Features /></LazySection>
-            <LazySection><DocumentAIShowcase /></LazySection>
-            <LazySection><SmartAgentShowcase /></LazySection>
-            
-            <LazySection><TestimonialsSection /></LazySection>
-            <LazySection><Services /></LazySection>
-            <LazySection><CTA /></LazySection>
+    <Suspense fallback={null}>
+      <LandingWrapper>
+        <div className="min-h-screen-safe bg-[hsl(140,20%,98%)] smooth-scroll">
+          <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
+            <Header />
+            <DeferredTicker />
           </ErrorBoundary>
-        </main>
-        <LazySection><Footer /></LazySection>
-      </div>
-    </LandingWrapper>
+          <ErrorBoundary fallbackTitle="خطأ في تحميل القسم الرئيسي">
+            <Hero />
+          </ErrorBoundary>
+          <main>
+            <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
+              <LazySection><HomepageAds /></LazySection>
+              <LazySection><DocumentVerification /></LazySection>
+              <LazySection><FeaturedConsultants /></LazySection>
+              <LazySection><OmalunaSection /></LazySection>
+              <LazySection><NationalInitiativeSection /></LazySection>
+              <LazySection><Stats /></LazySection>
+              <LazySection><FeaturesList /></LazySection>
+              <LazySection><Features /></LazySection>
+              <LazySection><DocumentAIShowcase /></LazySection>
+              <LazySection><SmartAgentShowcase /></LazySection>
+              <LazySection><TestimonialsSection /></LazySection>
+              <LazySection><Services /></LazySection>
+              <LazySection><CTA /></LazySection>
+            </ErrorBoundary>
+          </main>
+          <LazySection><Footer /></LazySection>
+        </div>
+      </LandingWrapper>
+    </Suspense>
   );
 };
 
