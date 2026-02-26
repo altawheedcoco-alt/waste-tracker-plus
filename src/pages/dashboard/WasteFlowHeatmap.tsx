@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import L from 'leaflet';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,9 +61,6 @@ const SEVERITY_COLORS: Record<string, string> = {
 const WasteFlowHeatmap = () => {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const layerGroupRef = useRef<L.LayerGroup | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('map');
   const [wasteFilter, setWasteFilter] = useState('all');
@@ -97,57 +93,7 @@ const WasteFlowHeatmap = () => {
 
   useEffect(() => { fetchFlowData(); }, []);
 
-  // Initialize Leaflet Map
-  useEffect(() => {
-    if (!mapContainerRef.current || mapInstanceRef.current) return;
-    const map = L.map(mapContainerRef.current, { center: [30.0444, 31.2357], zoom: 6, zoomControl: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OpenStreetMap © CartoDB', maxZoom: 19,
-    }).addTo(map);
-    layerGroupRef.current = L.layerGroup().addTo(map);
-    mapInstanceRef.current = map;
-    return () => { map.remove(); mapInstanceRef.current = null; };
-  }, []);
-
-  // Draw flows on map
-  useEffect(() => {
-    if (!mapInstanceRef.current || !layerGroupRef.current || flows.length === 0) return;
-    layerGroupRef.current.clearLayers();
-
-    flows.forEach(flow => {
-      if (!flow.source_lat || !flow.destination_lat) return;
-      const color = FLOW_COLORS[flow.waste_category] || '#888';
-      const weight = Math.max(2, Math.min(8, flow.quantity_tons / 50));
-
-      L.polyline(
-        [[flow.source_lat, flow.source_lng], [flow.destination_lat, flow.destination_lng]],
-        { color, weight, opacity: 0.7 }
-      ).addTo(layerGroupRef.current!);
-
-      const srcIcon = L.divIcon({
-        html: `<div style="width:12px;height:12px;border-radius:50%;background:#3b82f6;border:1px solid white;"></div>`,
-        className: '', iconSize: [12, 12], iconAnchor: [6, 6],
-      });
-      L.marker([flow.source_lat, flow.source_lng], { icon: srcIcon })
-        .bindPopup(flow.source_region).addTo(layerGroupRef.current!);
-
-      const dstIcon = L.divIcon({
-        html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:1px solid white;"></div>`,
-        className: '', iconSize: [16, 16], iconAnchor: [8, 8],
-      });
-      L.marker([flow.destination_lat, flow.destination_lng], { icon: dstIcon })
-        .bindPopup(`${flow.destination_region} - ${flow.quantity_tons}T`).addTo(layerGroupRef.current!);
-    });
-
-    alerts.filter(a => a.is_active).forEach(alert => {
-      const alertIcon = L.divIcon({
-        html: `<div style="width:14px;height:14px;background:${alert.severity === 'critical' ? '#ef4444' : '#f97316'};border:2px solid white;border-radius:2px;transform:rotate(45deg);"></div>`,
-        className: '', iconSize: [14, 14], iconAnchor: [7, 7],
-      });
-      L.marker([alert.region_lat, alert.region_lng], { icon: alertIcon })
-        .bindPopup(alert.message).addTo(layerGroupRef.current!);
-    });
-  }, [flows, alerts]);
+  // Maps disabled - Leaflet initialization removed
 
   // Subscribe to realtime alerts
   useEffect(() => {
@@ -244,7 +190,7 @@ const WasteFlowHeatmap = () => {
         <TabsContent value="map">
           <Card>
             <CardContent className="p-0">
-              <div ref={mapContainerRef} className="w-full h-[500px] md:h-[600px] rounded-lg" />
+              <div className="w-full h-[500px] md:h-[600px] rounded-lg flex items-center justify-center bg-muted/50 text-muted-foreground"><p>الخرائط معطلة حالياً</p></div>
             </CardContent>
           </Card>
           {/* Flow Legend */}
