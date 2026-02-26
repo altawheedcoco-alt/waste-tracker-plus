@@ -77,24 +77,11 @@
       </div>
     </div>
     <script>
-      // Loader safety net for stale cached build files on published domains.
+      // Loader helper without forced redirects/reloads.
       setTimeout(function () {
         var loader = document.getElementById('initial-loader');
         var root = document.getElementById('root');
         if (loader && root && root.contains(loader)) {
-          var retryKey = '__published_hard_reload_ts';
-          var lastRetry = Number(sessionStorage.getItem(retryKey) || '0');
-          var now = Date.now();
-
-          // One automatic hard-retry every 30s max to avoid reload loops.
-          if (now - lastRetry > 30000) {
-            sessionStorage.setItem(retryKey, String(now));
-            var u = new URL(window.location.href);
-            u.searchParams.set('v', String(now));
-            window.location.replace(u.toString());
-            return;
-          }
-
           var p = document.createElement('p');
           p.style.cssText = 'direction:rtl;font-family:Cairo,sans-serif;text-align:center;color:#666;font-size:14px;';
           p.innerHTML = 'التحميل يستغرق وقتاً أطول من المتوقع...<br/><button onclick="location.reload()" style="margin-top:12px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">إعادة تحميل</button>';
