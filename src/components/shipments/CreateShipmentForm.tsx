@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { SmartInput } from '@/components/ui/smart-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles, Navigation as NavigationIcon } from 'lucide-react';
+import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles, Navigation as NavigationIcon, Camera, Upload, Check, X } from 'lucide-react';
+import { useAIAssistant } from '@/hooks/useAIAssistant';
+import { toast } from 'sonner';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
 import ShipmentLocationMap from '@/components/shipments/ShipmentLocationMap';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
@@ -112,6 +114,68 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
 
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  // AI Weight Ticket Extraction
+  const { isLoading: aiExtracting, extractWeightData } = useAIAssistant();
+  const weightFileRef = useRef<HTMLInputElement>(null);
+  const [weightPreview, setWeightPreview] = useState<string | null>(null);
+  const [weightExtracted, setWeightExtracted] = useState(false);
+
+  const handleWeightTicketUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const base64 = event.target?.result as string;
+      setWeightPreview(base64);
+      setWeightExtracted(false);
+
+      const data = await extractWeightData(base64);
+      if (data) {
+        setWeightExtracted(true);
+        setFormData(prev => ({
+          ...prev,
+          quantity: data.net_weight || prev.quantity,
+          manual_vehicle_plate: data.vehicle_number || prev.manual_vehicle_plate,
+          manual_driver_name: data.driver_name || prev.manual_driver_name,
+          pickup_date: data.date ? parseWeightDate(data.date) : prev.pickup_date,
+          notes: [
+            prev.notes,
+            data.ticket_number ? `رقم التذكرة: ${data.ticket_number}` : '',
+            data.company_name ? `الشركة: ${data.company_name}` : '',
+          ].filter(Boolean).join(' | '),
+          waste_description: data.material_type || prev.waste_description,
+        }));
+        if (data.vehicle_number || data.driver_name) {
+          setDriverInputType('manual');
+        }
+        toast.success('✅ تم استخراج بيانات الوزنة بنجاح', {
+          description: `الوزن الصافي: ${data.net_weight} ${data.unit || 'كجم'}`,
+        });
+      } else {
+        toast.error('فشل في استخراج بيانات الوزنة من الصورة');
+      }
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-uploaded
+    e.target.value = '';
+  };
+
+  const parseWeightDate = (dateStr: string): string => {
+    const ddmmyyyy = dateStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (ddmmyyyy) {
+      const [, day, month, year] = ddmmyyyy;
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    return '';
+  };
+
+  const clearWeightTicket = () => {
+    setWeightPreview(null);
+    setWeightExtracted(false);
+  };
 
   return (
     <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-5">
@@ -664,6 +728,59 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
 
       {/* ══════════ SECTION 6: Quantity, Dates & Type ══════════ */}
       <FormSection icon={Scale} title="الكمية والجدولة" subtitle="الكمية إلزامية — التواريخ ونوع النقلة اختيارية">
+        {/* AI Weight Ticket Upload */}
+        <input
+          ref={weightFileRef}
+          type="file"
+          accept="image/*"
+          onChange={handleWeightTicketUpload}
+          className="hidden"
+        />
+        <div className="space-y-3">
+          {!weightPreview ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => weightFileRef.current?.click()}
+              disabled={aiExtracting}
+              className="w-full h-12 gap-2 border-dashed border-2 hover:border-primary/50 hover:bg-primary/5 transition-all"
+            >
+              <Camera className="h-5 w-5 text-primary" />
+              <span className="text-sm">📷 رفع صورة تذكرة الميزان (اختياري) — تعبئة تلقائية بالذكاء الاصطناعي</span>
+            </Button>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30"
+            >
+              <img src={weightPreview} alt="تذكرة الميزان" className="w-20 h-14 object-cover rounded-md border" />
+              <div className="flex-1 text-right space-y-1">
+                {aiExtracting ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">جاري تحليل صورة الوزنة...</span>
+                  </div>
+                ) : weightExtracted ? (
+                  <div className="flex items-center gap-2 text-primary">
+                    <Check className="h-4 w-4" />
+                    <span className="text-sm font-medium">تم استخراج البيانات — يمكنك تعديلها أدناه</span>
+                  </div>
+                ) : (
+                  <span className="text-sm text-destructive">فشل التحليل — أدخل البيانات يدوياً</span>
+                )}
+              </div>
+              <div className="flex gap-1">
+                <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => weightFileRef.current?.click()}>
+                  <Upload className="h-3.5 w-3.5" />
+                </Button>
+                <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={clearWeightTicket}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">الكمية (كجم) *</Label>
