@@ -1,10 +1,10 @@
-import { Suspense, lazy, memo } from "react";
+import { Suspense, lazy, memo, useEffect, useState } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes } from "react-router-dom";
+import { BrowserRouter, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -25,16 +25,49 @@ PageLoader.displayName = 'PageLoader';
 import { createSmartQueryClient } from '@/lib/queryCacheConfig';
 const queryClient = createSmartQueryClient();
 
-// Routes loaded from separate files (code-split)
+// Public routes only at startup; dashboard routes loaded on demand
 import { publicRoutes } from "@/routes/PublicRoutes";
-import { dashboardRoutes } from "@/routes/DashboardRoutes";
 
-const AppRoutes = memo(() => (
-  <Routes>
-    {publicRoutes}
-    {dashboardRoutes}
-  </Routes>
-));
+const AppRoutes = memo(() => {
+  const location = useLocation();
+  const [dashboardRoutes, setDashboardRoutes] = useState<React.ReactNode>(null);
+  const [dashboardRoutesLoaded, setDashboardRoutesLoaded] = useState(false);
+
+  const needsDashboardRoutes = location.pathname.startsWith('/dashboard');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!needsDashboardRoutes || dashboardRoutesLoaded) {
+      return;
+    }
+
+    import('@/routes/DashboardRoutes')
+      .then((mod) => {
+        if (cancelled) return;
+        setDashboardRoutes(mod.dashboardRoutes);
+        setDashboardRoutesLoaded(true);
+      })
+      .catch((error) => {
+        console.error('Failed to load dashboard routes:', error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [needsDashboardRoutes, dashboardRoutesLoaded]);
+
+  if (needsDashboardRoutes && !dashboardRoutesLoaded) {
+    return <PageLoader />;
+  }
+
+  return (
+    <Routes>
+      {publicRoutes}
+      {dashboardRoutes}
+    </Routes>
+  );
+});
 AppRoutes.displayName = 'AppRoutes';
 
 const Providers = memo(() => (
@@ -72,3 +105,4 @@ const App = memo(() => (
 App.displayName = 'App';
 
 export default App;
+
