@@ -65,23 +65,22 @@ if (rootElement) {
   }
 
   if (!hasBackendEnv) {
-    console.error('Missing required backend environment variables (URL, publishable key, project id).');
-    rootElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;direction:rtl;font-family:Cairo,sans-serif;"><div style="text-align:center;"><h2>خطأ في إعدادات الاتصال</h2><p>تحقق من إعدادات البيئة ثم أعد التحميل.</p><button onclick="location.reload()" style="margin-top:16px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">تحديث</button></div></div>';
-  } else {
-    try {
-      createRoot(rootElement).render(
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
-      );
-    } catch (err) {
-      console.error('Failed to render app:', err);
-      // If it's a chunk error, try reload
-      if (err instanceof Error && isChunkError(err.message) && canAutoReload()) {
-        window.location.reload();
-      } else {
-        rootElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;direction:rtl;font-family:Cairo,sans-serif;"><div style="text-align:center;"><h2>حدث خطأ في تحميل التطبيق</h2><p>يرجى تحديث الصفحة</p><button onclick="location.reload()" style="margin-top:16px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">تحديث</button></div></div>';
-      }
+    console.warn('Missing backend environment variables at startup; app will render with graceful fallbacks.');
+  }
+
+  try {
+    createRoot(rootElement).render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  } catch (err) {
+    console.error('Failed to render app:', err);
+    // If it's a chunk error, try reload
+    if (err instanceof Error && isChunkError(err.message) && canAutoReload()) {
+      window.location.reload();
+    } else {
+      rootElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;direction:rtl;font-family:Cairo,sans-serif;"><div style="text-align:center;"><h2>حدث خطأ في تحميل التطبيق</h2><p>يرجى تحديث الصفحة</p><button onclick="location.reload()" style="margin-top:16px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">تحديث</button></div></div>';
     }
   }
 }
