@@ -4,7 +4,7 @@ import {
   FileText, Printer, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
   Eye, Download, CheckSquare, Square, CheckCircle, ArrowRight,
-  PenTool, Stamp, FileArchive, FolderOpen, FileBadge
+  PenTool, Stamp, FileArchive, FolderOpen, FileBadge, ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -251,7 +251,7 @@ const PrintCenter = () => {
       if (isAll || selectedDocTypes.includes('signing')) {
         const { data: outgoing } = await supabase
           .from('signing_requests')
-          .select('id, document_title, document_type, status, signed_at, created_at, requires_stamp, recipient_organization_id, sender_organization_id, recipient_org:organizations!signing_requests_recipient_organization_id_fkey(name), sender_org:organizations!signing_requests_sender_organization_id_fkey(name)')
+          .select('id, document_title, document_type, status, signed_at, created_at, requires_stamp, document_file_url, recipient_organization_id, sender_organization_id, recipient_org:organizations!signing_requests_recipient_organization_id_fkey(name), sender_org:organizations!signing_requests_sender_organization_id_fkey(name)')
           .or(`sender_organization_id.eq.${orgId},recipient_organization_id.eq.${orgId}`)
           .gte('created_at', fromISO)
           .lte('created_at', toISO)
@@ -336,7 +336,7 @@ const PrintCenter = () => {
       if (isAll || selectedDocTypes.includes('org_documents')) {
         const { data } = await supabase
           .from('organization_documents')
-          .select('id, document_type, file_url, verification_status, notes, created_at, organization_id')
+          .select('id, document_type, file_name, file_path, file_url, verification_status, notes, created_at, organization_id')
           .eq('organization_id', orgId!)
           .gte('created_at', fromISO)
           .lte('created_at', toISO)
@@ -849,22 +849,127 @@ const PrintCenter = () => {
                       <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                         {doc.date ? format(new Date(doc.date), 'MM/dd HH:mm') : '-'}
                       </span>
-                      {/* Download button for docs with file URLs */}
-                      {(doc.rawData.attachment_url || doc.rawData.file_url || doc.rawData.storagePath) && (
-                        <Button variant="ghost" size="icon" className="h-7 w-7" title="تحميل الملف"
-                          onClick={async () => {
-                            const url = doc.rawData.attachment_url || doc.rawData.file_url;
-                            if (url) {
-                              window.open(url, '_blank');
-                            } else if (doc.rawData.storagePath) {
-                              const { data } = await supabase.storage.from('pdf-documents').createSignedUrl(doc.rawData.storagePath, 3600);
-                              if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                              else toast.error('فشل في الحصول على رابط التحميل');
+
+                      {/* View button - navigates or opens based on type */}
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="عرض"
+                        onClick={async () => {
+                          const rawId = doc.id.replace(/^[a-z]+-/, '');
+                          try {
+                            switch (doc.type) {
+                              case 'declarations':
+                              case 'manifests':
+                                navigate(`/dashboard/shipments/${rawId}`);
+                                break;
+                              case 'invoices':
+                                navigate(`/dashboard/invoices`);
+                                break;
+                              case 'receipts':
+                                navigate(`/dashboard/shipments/${doc.rawData.shipment_id}`);
+                                break;
+                              case 'certificates':
+                                navigate(`/dashboard/shipments/${doc.rawData.shipment_id}`);
+                                break;
+                              case 'signing':
+                                navigate(`/dashboard/signing-status`);
+                                break;
+                              case 'signatures':
+                                navigate(`/dashboard/signing-status`);
+                                break;
+                              case 'contracts':
+                                if (doc.rawData.attachment_url) {
+                                  window.open(doc.rawData.attachment_url, '_blank');
+                                } else {
+                                  navigate(`/dashboard/contracts`);
+                                }
+                                break;
+                              case 'org_documents':
+                                if (doc.rawData.file_url) {
+                                  window.open(doc.rawData.file_url, '_blank');
+                                } else if (doc.rawData.file_path) {
+                                  const { data } = await supabase.storage.from('organization-documents').createSignedUrl(doc.rawData.file_path, 3600);
+                                  if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                                  else toast.error('فشل في الحصول على رابط المستند');
+                                }
+                                break;
+                              case 'stored_pdfs':
+                                if (doc.rawData.storagePath) {
+                                  const { data } = await supabase.storage.from('pdf-documents').createSignedUrl(doc.rawData.storagePath, 3600);
+                                  if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                                  else toast.error('فشل في الحصول على رابط الملف');
+                                }
+                                break;
+                              case 'entity_docs':
+                                if (doc.rawData.file_url) {
+                                  // Check if it's a storage path or full URL
+                                  if (doc.rawData.file_url.startsWith('http')) {
+                                    window.open(doc.rawData.file_url, '_blank');
+                                  } else {
+                                    const { data } = await supabase.storage.from('entity-documents').createSignedUrl(doc.rawData.file_url, 3600);
+                                    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                                    else toast.error('فشل في الحصول على رابط الملف');
+                                  }
+                                }
+                                break;
+                              case 'print_log':
+                                if (doc.rawData.file_url) {
+                                  window.open(doc.rawData.file_url, '_blank');
+                                } else if (doc.rawData.document_id) {
+                                  toast.info('يتم فتح المستند المرتبط...');
+                                }
+                                break;
+                              default:
+                                toast.info('لا يمكن عرض هذا المستند مباشرة');
                             }
-                          }}>
-                          <Download className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
+                          } catch (err) {
+                            console.error('View error:', err);
+                            toast.error('حدث خطأ أثناء فتح المستند');
+                          }
+                        }}>
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+
+                      {/* Download button - generates signed URL or direct download */}
+                      <Button variant="ghost" size="icon" className="h-7 w-7" title="تحميل"
+                        onClick={async () => {
+                          try {
+                            // Direct file URLs
+                            const directUrl = doc.rawData.attachment_url || doc.rawData.file_url;
+                            if (directUrl && directUrl.startsWith('http')) {
+                              window.open(directUrl, '_blank');
+                              return;
+                            }
+                            // Storage bucket files
+                            if (doc.rawData.storagePath) {
+                              const { data } = await supabase.storage.from('pdf-documents').createSignedUrl(doc.rawData.storagePath, 3600);
+                              if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return; }
+                            }
+                            // Entity documents bucket
+                            if (doc.type === 'entity_docs' && doc.rawData.file_url) {
+                              const bucket = 'entity-documents';
+                              const { data } = await supabase.storage.from(bucket).createSignedUrl(doc.rawData.file_url, 3600);
+                              if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return; }
+                            }
+                            // Org documents bucket
+                            if (doc.type === 'org_documents' && doc.rawData.file_path) {
+                              const { data } = await supabase.storage.from('organization-documents').createSignedUrl(doc.rawData.file_path, 3600);
+                              if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return; }
+                            }
+                            // Signing request files
+                            if (doc.type === 'signing' && doc.rawData.document_file_url) {
+                              window.open(doc.rawData.document_file_url, '_blank');
+                              return;
+                            }
+                            // Fallback: print as report
+                            printSingle(doc);
+                            toast.info('لا يوجد ملف مرفق - تم تجهيز تقرير للطباعة');
+                          } catch (err) {
+                            console.error('Download error:', err);
+                            toast.error('فشل في تحميل المستند');
+                          }
+                        }}>
+                        <Download className="h-3.5 w-3.5" />
+                      </Button>
+
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => printSingle(doc)} title="طباعة">
                         <Printer className="h-3.5 w-3.5" />
                       </Button>
