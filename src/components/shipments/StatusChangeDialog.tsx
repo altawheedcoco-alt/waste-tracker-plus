@@ -153,8 +153,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     };
   })();
 
-  // Determine if delivery button should be blocked
-  const isPhotoMissing = (requiresPhoto.pickup && !pickupPhotoUrl) || (requiresPhoto.delivery && !deliveryPhotoUrl) || (requiresPhoto.receiving && !receivingPhotoUrl);
+  // Photos are optional - no blocking
 
   const isDeliveryBlocked = (() => {
     if (!selectedStatus) return false;
@@ -189,10 +188,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
       return;
     }
 
-    if (!manualOverride && isPhotoMissing) {
-      toast.error('يجب رفع صورة إيصال الميزان للمتابعة');
-      return;
-    }
+    // Photos are optional - no blocking check
 
     // Show delivery declaration for transporter when delivering (skip in manual mode)
     const dbStatusCheck = mapToDbStatus(selectedStatus as ShipmentStatus);
@@ -562,35 +558,32 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             </div>
           )}
 
-          {/* Weighbridge Photo Upload - Pickup */}
+          {/* Weighbridge Photo Upload - Pickup (اختياري) */}
           {requiresPhoto.pickup && (
             <WeighbridgePhotoUpload
               shipmentId={shipment.id}
               type="pickup"
-              label="صورة إيصال ميزان الاستلام"
-              required
+              label="صورة إيصال ميزان الاستلام (اختياري)"
               onPhotoUploaded={(url, meta) => { setPickupPhotoUrl(url); setPickupPhotoMeta(meta); }}
             />
           )}
 
-          {/* Weighbridge Photo Upload - Delivery */}
+          {/* Weighbridge Photo Upload - Delivery (اختياري) */}
           {requiresPhoto.delivery && (
             <WeighbridgePhotoUpload
               shipmentId={shipment.id}
               type="delivery"
-              label="صورة إيصال ميزان التسليم"
-              required
+              label="صورة إيصال ميزان التسليم (اختياري)"
               onPhotoUploaded={(url, meta) => { setDeliveryPhotoUrl(url); setDeliveryPhotoMeta(meta); }}
             />
           )}
 
-          {/* Weighbridge Photo Upload - Receiving (Recycler/Disposal) */}
+          {/* Weighbridge Photo Upload - Receiving (اختياري) */}
           {requiresPhoto.receiving && (
             <WeighbridgePhotoUpload
               shipmentId={shipment.id}
               type="delivery"
-              label={organizationType === 'disposal' ? 'صورة إيصال ميزان الاستلام (التخلص النهائي)' : 'صورة إيصال ميزان الاستلام (المدوّر)'}
-              required
+              label={organizationType === 'disposal' ? 'صورة إيصال ميزان الاستلام - التخلص النهائي (اختياري)' : 'صورة إيصال ميزان الاستلام - المدوّر (اختياري)'}
               onPhotoUploaded={(url, meta) => { setReceivingPhotoUrl(url); setReceivingPhotoMeta(meta); }}
             />
           )}
@@ -598,7 +591,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
           {showRecyclerWeightInput && (
             <div className="text-right space-y-2">
               <Label htmlFor="recyclerWeight">
-                الوزن المستلم (كجم) <span className="text-destructive">*</span>
+                الوزن المستلم (كجم) - اختياري
               </Label>
               <input
                 id="recyclerWeight"
@@ -662,7 +655,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
               <Button 
                 variant="eco" 
                 onClick={handleStatusChange}
-                disabled={!selectedStatus || loading || (!manualOverride && (isDeliveryBlocked || isPhotoMissing || (showRecyclerWeightInput && !recyclerWeight)))}
+                disabled={!selectedStatus || loading || (!manualOverride && isDeliveryBlocked)}
               >
                 {loading ? (
                   <>
