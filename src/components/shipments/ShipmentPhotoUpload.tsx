@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Camera, Upload, X, Loader2, ImagePlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { compressImage } from '@/utils/imageCompression';
+import { smartUpload } from '@/utils/smartUploadPipeline';
+import { useAuth } from '@/contexts/AuthContext';
 import SecureImage from '@/components/ui/SecureImage';
 
 interface ShipmentPhotoUploadProps {
@@ -21,8 +22,10 @@ const ShipmentPhotoUpload = ({
 }: ShipmentPhotoUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [photoPaths, setPhotoPaths] = useState<string[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const { user, organization, profile } = useAuth();
 
   const handleFilesSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -39,6 +42,7 @@ const ShipmentPhotoUpload = ({
 
     try {
       const newPaths: string[] = [];
+      const newUrls: string[] = [];
 
       for (const file of filesToUpload) {
         if (!file.type.startsWith('image/')) continue;
@@ -47,41 +51,28 @@ const ShipmentPhotoUpload = ({
           continue;
         }
 
-        const compressed = await compressImage(file, { maxWidth: 1920, quality: 0.8 });
-        const finalFile = compressed.file;
-        const fileExt = finalFile.name.split('.').pop();
-        const filePath = `${shipmentId}/status_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.${fileExt}`;
+        // استخدام الـ Pipeline الذكي
+        const result = await smartUpload({
+          file,
+          context: 'shipment_photo',
+          organizationId: organization?.id || '',
+          userId: user?.id || '',
+          userRole: (profile as any)?.role,
+          shipmentId,
+          skipOCR: true, // صور الشحنات لا تحتاج OCR
+        });
 
-        const { error: uploadError } = await supabase.storage
-          .from('shipment-photos')
-          .upload(filePath, finalFile, { upsert: true });
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          toast.error(`فشل رفع ${file.name}`);
-          continue;
-        }
-
-        // Store path (not public URL) - we'll use signed URLs to display
-        newPaths.push(filePath);
-
-        // Also get public URL for saving to DB (backward compat)
-        const { data: urlData } = supabase.storage
-          .from('shipment-photos')
-          .getPublicUrl(filePath);
-        // We still pass URLs to parent for DB storage
-        onPhotosChanged([...photoPaths, ...newPaths].map(() => '').length > 0 
-          ? [...photoPaths.map(p => supabase.storage.from('shipment-photos').getPublicUrl(p).data.publicUrl), urlData.publicUrl]
-          : []);
+        newPaths.push(result.upload.path);
+        newUrls.push(result.upload.publicUrl);
       }
 
       if (newPaths.length > 0) {
-        const updated = [...photoPaths, ...newPaths];
-        setPhotoPaths(updated);
-        // Pass all public URLs to parent
-        const allUrls = updated.map(p => supabase.storage.from('shipment-photos').getPublicUrl(p).data.publicUrl);
-        onPhotosChanged(allUrls);
-        toast.success(`تم رفع ${newPaths.length} صورة بنجاح`);
+        const updatedPaths = [...photoPaths, ...newPaths];
+        const updatedUrls = [...photoUrls, ...newUrls];
+        setPhotoPaths(updatedPaths);
+        setPhotoUrls(updatedUrls);
+        onPhotosChanged(updatedUrls);
+        toast.success(`تم رفع ${newPaths.length} صورة وأرشفتها بنجاح`);
       }
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -93,10 +84,11 @@ const ShipmentPhotoUpload = ({
   };
 
   const removePhoto = (index: number) => {
-    const updated = photoPaths.filter((_, i) => i !== index);
-    setPhotoPaths(updated);
-    const allUrls = updated.map(p => supabase.storage.from('shipment-photos').getPublicUrl(p).data.publicUrl);
-    onPhotosChanged(allUrls);
+    const updatedPaths = photoPaths.filter((_, i) => i !== index);
+    const updatedUrls = photoUrls.filter((_, i) => i !== index);
+    setPhotoPaths(updatedPaths);
+    setPhotoUrls(updatedUrls);
+    onPhotosChanged(updatedUrls);
   };
 
   return (

@@ -23,6 +23,7 @@ import { mapToDbStatus, getStatusConfig, ShipmentStatus } from '@/lib/shipmentSt
 import VoiceToTextInput from './VoiceToTextInput';
 import ShipmentImageAnalyzer from './ShipmentImageAnalyzer';
 import VehiclePlateVerification from './VehiclePlateVerification';
+import { smartUpload } from '@/utils/smartUploadPipeline';
 
 interface ShipmentInfo {
   id: string;
@@ -69,31 +70,45 @@ const DriverActionUI = ({ shipment, onActionComplete, onScanQR }: DriverActionUI
   const loadingPhotoRef = useRef<HTMLInputElement>(null);
   const deliveryPhotoRef = useRef<HTMLInputElement>(null);
 
-  // === STAGE 3: Upload loading photo handler ===
+  // === STAGE 3: Upload loading photo handler (Smart Pipeline) ===
   const handleLoadingPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const fileName = `loading-${shipment.id}-${Date.now()}.jpg`;
-      await supabase.storage.from('weighbridge-photos').upload(`loading/${fileName}`, file);
-      const { data: signedData } = await supabase.storage.from('weighbridge-photos').createSignedUrl(`loading/${fileName}`, 86400);
-      setLoadingPhotoUrl(signedData?.signedUrl || '');
-      toast.success('📸 تم رفع صورة الحمولة بنجاح');
+      const result = await smartUpload({
+        file,
+        context: 'loading_photo',
+        organizationId: organization?.id || '',
+        userId: profile?.id || '',
+        userRole: (profile as any)?.role,
+        shipmentId: shipment.id,
+        skipOCR: true,
+      });
+      const { data: signedData } = await supabase.storage.from('weighbridge-photos').createSignedUrl(result.upload.path, 86400);
+      setLoadingPhotoUrl(signedData?.signedUrl || result.upload.publicUrl);
+      toast.success('📸 تم رفع وأرشفة صورة الحمولة');
     } catch {
       toast.error('فشل رفع الصورة');
     }
   };
 
-  // === STAGE 6: Upload delivery weighbridge photo handler ===
+  // === STAGE 6: Upload delivery weighbridge photo handler (Smart Pipeline) ===
   const handleDeliveryPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const fileName = `delivery-${shipment.id}-${Date.now()}.jpg`;
-      await supabase.storage.from('weighbridge-photos').upload(`delivery/${fileName}`, file);
-      const { data: signedData } = await supabase.storage.from('weighbridge-photos').createSignedUrl(`delivery/${fileName}`, 86400);
-      setDeliveryWeighbridgeUrl(signedData?.signedUrl || '');
-      toast.success('📸 تم رفع صورة ميزان الاستلام');
+      const result = await smartUpload({
+        file,
+        context: 'delivery_photo',
+        organizationId: organization?.id || '',
+        userId: profile?.id || '',
+        userRole: (profile as any)?.role,
+        shipmentId: shipment.id,
+        skipOCR: true,
+      });
+      const { data: signedData } = await supabase.storage.from('weighbridge-photos').createSignedUrl(result.upload.path, 86400);
+      setDeliveryWeighbridgeUrl(signedData?.signedUrl || result.upload.publicUrl);
+      toast.success('📸 تم رفع وأرشفة صورة ميزان الاستلام');
     } catch {
       toast.error('فشل رفع الصورة');
     }
