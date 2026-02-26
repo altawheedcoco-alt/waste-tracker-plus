@@ -1,0 +1,224 @@
+import { useState, useEffect, useRef, memo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle, X, Send, Lock, Loader2, Shield, Minimize2, Maximize2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { usePrivateChat, type DecryptedMessage } from '@/hooks/usePrivateChat';
+import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+const MiniMessageBubble = memo(({ msg, isMine }: { msg: DecryptedMessage; isMine: boolean }) => (
+  <div className={cn("flex mb-1", isMine ? "justify-start" : "justify-end")}>
+    <div className={cn(
+      "max-w-[80%] rounded-xl px-2.5 py-1.5 text-xs",
+      isMine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-muted rounded-bl-sm"
+    )}>
+      <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+      <span className={cn("text-[8px] block mt-0.5", isMine ? "text-white/60" : "text-muted-foreground")}>
+        {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
+      </span>
+    </div>
+  </div>
+));
+MiniMessageBubble.displayName = 'MiniMessageBubble';
+
+const EncryptedChatWidget = () => {
+  const { user } = useAuth();
+  const {
+    conversations, conversationsLoading,
+    fetchMessages, sendMessage, markAsRead,
+  } = usePrivateChat();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedConvoId, setSelectedConvoId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<DecryptedMessage[]>([]);
+  const [msgLoading, setMsgLoading] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [sending, setSending] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+  const selectedConvo = conversations.find(c => c.id === selectedConvoId);
+
+  // Load messages
+  useEffect(() => {
+    if (!selectedConvoId) return;
+    setMsgLoading(true);
+    fetchMessages(selectedConvoId, 30).then(msgs => {
+      setMessages(msgs);
+      setMsgLoading(false);
+      markAsRead(selectedConvoId);
+    }).catch(() => setMsgLoading(false));
+  }, [selectedConvoId, fetchMessages, markAsRead]);
+
+  // Realtime
+  useEffect(() => {
+    if (!selectedConvoId) return;
+    const ch = supabase
+      .channel(`widget-${selectedConvoId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'encrypted_messages', filter: `conversation_id=eq.${selectedConvoId}` },
+        () => { fetchMessages(selectedConvoId, 30).then(setMessages); markAsRead(selectedConvoId); }
+      ).subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [selectedConvoId, fetchMessages, markAsRead]);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const handleSend = async () => {
+    if (!inputText.trim() || !selectedConvoId || sending) return;
+    const text = inputText.trim();
+    setInputText('');
+    setSending(true);
+    try {
+      await sendMessage(selectedConvoId, text);
+      const updated = await fetchMessages(selectedConvoId, 30);
+      setMessages(updated);
+    } catch { toast.error('فشل الإرسال'); }
+    finally { setSending(false); }
+  };
+
+  if (!user) return null;
+
+  return (
+    <>
+      {/* FAB */}
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-emerald-600 text-white shadow-xl flex items-center justify-center hover:bg-emerald-700 transition-colors"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        {!isOpen && totalUnread > 0 && (
+          <Badge className="absolute -top-1 -right-1 h-5 min-w-5 rounded-full text-[10px] px-1 bg-red-500 text-white border-2 border-background">
+            {totalUnread > 9 ? '9+' : totalUnread}
+          </Badge>
+        )}
+      </motion.button>
+
+      {/* Widget Panel */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25 }}
+            className="fixed bottom-24 left-6 z-50 w-80 h-[28rem] rounded-2xl border border-border bg-background shadow-2xl flex flex-col overflow-hidden"
+          >
+            {/* Header */}
+            <div className="h-12 px-3 flex items-center justify-between bg-emerald-600 text-white shrink-0">
+              {selectedConvoId ? (
+                <>
+                  <button onClick={() => setSelectedConvoId(null)} className="text-white/80 hover:text-white">
+                    <Maximize2 className="w-4 h-4" />
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold truncate max-w-[180px]">
+                      {selectedConvo?.partner?.full_name || 'محادثة'}
+                    </span>
+                    <Lock className="w-3 h-3 text-white/60" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    <span className="text-sm font-semibold">المحادثات</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Content */}
+            {!selectedConvoId ? (
+              <ScrollArea className="flex-1">
+                {conversationsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="animate-spin text-emerald-600" size={20} />
+                  </div>
+                ) : conversations.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                    <MessageCircle className="w-8 h-8 mb-2 opacity-30" />
+                    <p className="text-xs">لا توجد محادثات</p>
+                  </div>
+                ) : (
+                  conversations.map(c => (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedConvoId(c.id)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-muted/50 text-right border-b border-border/30"
+                    >
+                      <Avatar className="w-9 h-9 shrink-0">
+                        <AvatarImage src={c.partner?.avatar_url || ''} />
+                        <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
+                          {c.partner?.full_name?.charAt(0) || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold truncate">{c.partner?.full_name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{c.partner?.organization_name}</p>
+                      </div>
+                      {(c.unread_count || 0) > 0 && (
+                        <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-emerald-600 text-white">
+                          {c.unread_count}
+                        </Badge>
+                      )}
+                    </button>
+                  ))
+                )}
+              </ScrollArea>
+            ) : (
+              <>
+                {/* Messages */}
+                <ScrollArea className="flex-1 p-2">
+                  {msgLoading ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="animate-spin text-emerald-600" size={20} />
+                    </div>
+                  ) : (
+                    <>
+                      {messages.map(msg => (
+                        <MiniMessageBubble key={msg.id} msg={msg} isMine={msg.sender_id === user?.id} />
+                      ))}
+                      <div ref={endRef} />
+                    </>
+                  )}
+                </ScrollArea>
+
+                {/* Input */}
+                <div className="p-2 border-t border-border shrink-0 flex gap-1.5">
+                  <Textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    placeholder="رسالة مشفرة..."
+                    rows={1}
+                    className="flex-1 min-h-[36px] max-h-[80px] resize-none text-xs"
+                  />
+                  <Button
+                    onClick={handleSend}
+                    disabled={!inputText.trim() || sending}
+                    size="icon"
+                    className="h-9 w-9 rounded-full bg-emerald-600 hover:bg-emerald-700 shrink-0"
+                  >
+                    {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                  </Button>
+                </div>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+export default EncryptedChatWidget;

@@ -122,6 +122,8 @@ import LiveEventToast from '@/components/notifications/LiveEventToast';
 import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomizer';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
+import { lazy, Suspense } from 'react';
+const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -1230,6 +1232,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />
+
+          {/* Encrypted Chat Widget */}
+          <Suspense fallback={null}><EncryptedChatWidget /></Suspense>
 
         </div>
       </div>
