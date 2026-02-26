@@ -3508,6 +3508,59 @@ export type Database = {
           },
         ]
       }
+      chat_history_exports: {
+        Row: {
+          completed_at: string | null
+          conversation_id: string | null
+          created_at: string | null
+          date_from: string | null
+          date_to: string | null
+          export_type: string | null
+          file_format: string | null
+          file_url: string | null
+          id: string
+          message_count: number | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          date_from?: string | null
+          date_to?: string | null
+          export_type?: string | null
+          file_format?: string | null
+          file_url?: string | null
+          id?: string
+          message_count?: number | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          conversation_id?: string | null
+          created_at?: string | null
+          date_from?: string | null
+          date_to?: string | null
+          export_type?: string | null
+          file_format?: string | null
+          file_url?: string | null
+          id?: string
+          message_count?: number | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_history_exports_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "private_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_message_reads: {
         Row: {
           id: string
@@ -9478,6 +9531,39 @@ export type Database = {
           },
         ]
       }
+      e2e_key_pairs: {
+        Row: {
+          created_at: string | null
+          device_id: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          key_type: string
+          public_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          device_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_type?: string
+          public_key: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          device_id?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          key_type?: string
+          public_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       emergency_plans: {
         Row: {
           approved_at: string | null
@@ -10012,6 +10098,87 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      encrypted_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string | null
+          deleted_at: string | null
+          delivered_at: string | null
+          edited_at: string | null
+          encrypted_content: string
+          encrypted_content_for_sender: string | null
+          file_name: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          is_deleted: boolean | null
+          is_edited: boolean | null
+          iv: string
+          message_type: string | null
+          read_at: string | null
+          reply_to_id: string | null
+          sender_id: string
+          status: string | null
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string | null
+          deleted_at?: string | null
+          delivered_at?: string | null
+          edited_at?: string | null
+          encrypted_content: string
+          encrypted_content_for_sender?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          is_edited?: boolean | null
+          iv: string
+          message_type?: string | null
+          read_at?: string | null
+          reply_to_id?: string | null
+          sender_id: string
+          status?: string | null
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string | null
+          deleted_at?: string | null
+          delivered_at?: string | null
+          edited_at?: string | null
+          encrypted_content?: string
+          encrypted_content_for_sender?: string | null
+          file_name?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_deleted?: boolean | null
+          is_edited?: boolean | null
+          iv?: string
+          message_type?: string | null
+          read_at?: string | null
+          reply_to_id?: string | null
+          sender_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encrypted_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "private_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encrypted_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "encrypted_messages"
             referencedColumns: ["id"]
           },
         ]
@@ -15635,6 +15802,35 @@ export type Database = {
         }
         Relationships: []
       }
+      message_read_receipts: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_read_receipts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "encrypted_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mro_inventory: {
         Row: {
           category: string | null
@@ -20867,6 +21063,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      private_conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_blocked_by_1: boolean | null
+          is_blocked_by_2: boolean | null
+          is_muted_by_1: boolean | null
+          is_muted_by_2: boolean | null
+          last_message_at: string | null
+          last_message_preview_encrypted: string | null
+          participant_1: string
+          participant_2: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_blocked_by_1?: boolean | null
+          is_blocked_by_2?: boolean | null
+          is_muted_by_1?: boolean | null
+          is_muted_by_2?: boolean | null
+          last_message_at?: string | null
+          last_message_preview_encrypted?: string | null
+          participant_1: string
+          participant_2: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_blocked_by_1?: boolean | null
+          is_blocked_by_2?: boolean | null
+          is_muted_by_1?: boolean | null
+          is_muted_by_2?: boolean | null
+          last_message_at?: string | null
+          last_message_preview_encrypted?: string | null
+          participant_1?: string
+          participant_2?: string
+        }
+        Relationships: []
       }
       profile_posts: {
         Row: {
@@ -30204,6 +30439,10 @@ export type Database = {
       }
       is_consultant_user: {
         Args: { _consultant_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_conversation_participant: {
+        Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
       is_current_user_admin: { Args: never; Returns: boolean }
