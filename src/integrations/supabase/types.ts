@@ -20394,6 +20394,60 @@ export type Database = {
           },
         ]
       }
+      platform_news: {
+        Row: {
+          badge: string | null
+          category: string
+          color_gradient: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          icon_name: string | null
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          link: string | null
+          published_at: string | null
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          badge?: string | null
+          category?: string
+          color_gradient?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          icon_name?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          link?: string | null
+          published_at?: string | null
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          badge?: string | null
+          category?: string
+          color_gradient?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          icon_name?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          link?: string | null
+          published_at?: string | null
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       platform_settings: {
         Row: {
           description: string | null
