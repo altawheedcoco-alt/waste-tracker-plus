@@ -63,6 +63,7 @@ export const en = {
     contact: 'Contact Us',
     employeeLogin: 'Employee Login',
     employee: 'Employee',
+    resources: 'Resources',
   },
 
   // Settings
