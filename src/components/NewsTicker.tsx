@@ -1,34 +1,40 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Newspaper, ExternalLink, Sparkles } from 'lucide-react';
 
-const newsItems = [
-  '🔥 جديد — منصة عُمالنا للتوظيف المتكامل: اعرض وظائف واستقطب كفاءات من مكان واحد!',
-  '🆕 دليل الاستشاريين البيئيين وجهات منح الأيزو — اعثر على الخبير المناسب الآن!',
-  '📢 نظام الإعلانات المدفوعة — وصّل خدماتك لآلاف العاملين في قطاع المخلفات!',
-  '✅ التحقق الرقمي من المستندات — تحقق من شهادات التخلص الآمن بلحظة!',
-  '👷 سجّل كباحث عن عمل وقدّم على الوظائف المتاحة مباشرة — تسجيل مجاني وبسيط!',
-  '🏢 سجّل شركتك كمستشار بيئي أو مكتب استشارات واحصل على ظهور مميز في الدليل!',
-  'التوحيد للخدمات البيئية وتدوير المخلفات — الطريق الجديد إلى النجاح والازدهار والتقدم',
-  'نظام iRecycle — حل برمجي متكامل لإدارة وتتبع النفايات من التوليد إلى التخلص',
-  'رقمنة كاملة لعمليات النقل والفرز والتدوير — أكثر دقة وأماناً',
-  'إصدار نماذج تتبع المخلفات وشهادات التخلص الآمن المتوافقة مع التشريعات البيئية',
-  'تتبع النفايات بشكل مبسط لضمان الامتثال للمتطلبات الحكومية والبيئية والدولية',
-];
-
 const NewsTicker = memo(() => {
-  const desktopItems = [...newsItems.slice(0, 8), ...newsItems.slice(0, 8)];
+  const { data: newsItems = [] } = useQuery({
+    queryKey: ['platform-news-ticker'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('platform_news' as any)
+        .select('title, badge')
+        .eq('is_published', true)
+        .order('sort_order', { ascending: true })
+        .limit(10);
+      return (data || []).map((item: any) => {
+        const emoji = item.badge?.includes('🔥') ? '🔥' : item.badge?.includes('جديد') ? '🆕' : item.badge?.includes('محدّث') ? '✅' : '📢';
+        return `${emoji} ${item.title}`;
+      });
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const displayItems = newsItems.length > 0 ? newsItems : ['نظام iRecycle — حل برمجي متكامل لإدارة وتتبع النفايات'];
+  const desktopItems = [...displayItems, ...displayItems];
 
   return (
     <>
-      {/* Mobile: lightweight static ticker to avoid heavy layout shifts */}
+      {/* Mobile */}
       <div className="fixed top-16 left-0 right-0 w-full overflow-hidden z-40 h-[42px] sm:hidden" dir="rtl">
         <div className="absolute inset-0 bg-gradient-to-l from-emerald-900 via-emerald-800 to-teal-900" />
         <div className="relative h-full flex items-center justify-between px-3">
           <div className="flex items-center gap-2 min-w-0">
             <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
             <Newspaper className="w-4 h-4 text-amber-300 shrink-0" />
-            <span className="text-xs font-semibold text-white/95 truncate">{newsItems[0]}</span>
+            <span className="text-xs font-semibold text-white/95 truncate">{displayItems[0]}</span>
           </div>
           <Link to="/news" className="ml-2 shrink-0 text-[11px] font-semibold text-amber-300 hover:text-white transition-colors">
             المزيد
@@ -36,7 +42,7 @@ const NewsTicker = memo(() => {
         </div>
       </div>
 
-      {/* Desktop/Tablet: animated ticker */}
+      {/* Desktop */}
       <div className="fixed top-16 sm:top-20 left-0 right-0 w-full overflow-hidden z-40 h-[42px] hidden sm:block" dir="rtl">
         <div className="absolute inset-0 bg-gradient-to-l from-emerald-900 via-emerald-800 to-teal-900" />
 
