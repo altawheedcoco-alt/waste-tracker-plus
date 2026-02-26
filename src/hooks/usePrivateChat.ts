@@ -1,0 +1,485 @@
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { encryptMessage, decryptMessage, type EncryptedPayload } from '@/lib/e2e';
+import { useE2EKeys } from './useE2EKeys';
+import { toast } from 'sonner';
+
+export interface PrivateConversation {
+  id: string;
+  participant_1: string;
+  participant_2: string;
+  last_message_at: string | null;
+  is_blocked_by_1: boolean;
+  is_blocked_by_2: boolean;
+  is_muted_by_1: boolean;
+  is_muted_by_2: boolean;
+  created_at: string;
+  partner?: {
+    user_id: string;
+    full_name: string;
+    avatar_url: string | null;
+    organization_name?: string;
+  };
+  lastDecryptedPreview?: string;
+  unread_count?: number;
+}
+
+export interface DecryptedMessage {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string; // decrypted
+  message_type: string;
+  file_url?: string;
+  file_name?: string;
+  status: string;
+  reply_to_id?: string;
+  is_edited: boolean;
+  is_deleted: boolean;
+  created_at: string;
+  sender?: {
+    full_name: string;
+    avatar_url: string | null;
+  };
+}
+
+export function usePrivateChat() {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const { getPublicKey } = useE2EKeys();
+  const publicKeyCache = useRef<Map<string, string>>(new Map());
+
+  const getCachedPublicKey = useCallback(async (userId: string) => {
+    if (publicKeyCache.current.has(userId)) return publicKeyCache.current.get(userId)!;
+    const key = await getPublicKey(userId);
+    if (key) publicKeyCache.current.set(userId, key);
+    return key;
+  }, [getPublicKey]);
+
+  // ─── Conversations List ──────────────────────────────
+  const { data: conversations = [], isLoading: conversationsLoading, refetch: refetchConversations } = useQuery({
+    queryKey: ['private-conversations', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('private_conversations')
+        .select('*')
+        .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
+        .order('last_message_at', { ascending: false, nullsFirst: false });
+
+      if (error) throw error;
+
+      // Enrich with partner profiles
+      const partnerIds = (data || []).map(c =>
+        c.participant_1 === user.id ? c.participant_2 : c.participant_1
+      );
+
+      if (!partnerIds.length) return [];
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, organization_id')
+        .in('user_id', partnerIds);
+
+      const orgIds = [...new Set((profiles || []).map(p => p.organization_id).filter(Boolean))];
+      let orgMap = new Map<string, string>();
+      if (orgIds.length) {
+        const { data: orgs } = await supabase
+          .from('organizations')
+          .select('id, name')
+          .in('id', orgIds);
+        orgMap = new Map((orgs || []).map(o => [o.id, o.name]));
+      }
+
+      const profileMap = new Map((profiles || []).map(p => [p.user_id, {
+        user_id: p.user_id,
+        full_name: p.full_name,
+        avatar_url: p.avatar_url,
+        organization_name: orgMap.get(p.organization_id || ''),
+      }]));
+
+      // Get unread counts
+      const convos: PrivateConversation[] = [];
+      for (const c of data || []) {
+        const partnerId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
+        
+        const { count } = await supabase
+          .from('encrypted_messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('conversation_id', c.id)
+          .neq('sender_id', user.id)
+          .in('status', ['sent', 'delivered']);
+
+        convos.push({
+          ...c,
+          partner: profileMap.get(partnerId),
+          unread_count: count || 0,
+        });
+      }
+
+      return convos;
+    },
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
+
+  // ─── Realtime subscription ───────────────────────────
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('private-messages-realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'encrypted_messages',
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+        queryClient.invalidateQueries({ queryKey: ['private-messages'] });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user, queryClient]);
+
+  // ─── Get or Create Conversation ──────────────────────
+  const getOrCreateConversation = useCallback(async (partnerId: string): Promise<string | null> => {
+    if (!user) return null;
+
+    const [p1, p2] = [user.id, partnerId].sort();
+
+    // Check existing
+    const { data: existing } = await supabase
+      .from('private_conversations')
+      .select('id')
+      .eq('participant_1', p1)
+      .eq('participant_2', p2)
+      .maybeSingle();
+
+    if (existing) return existing.id;
+
+    const { data: created, error } = await supabase
+      .from('private_conversations')
+      .insert({ participant_1: p1, participant_2: p2 })
+      .select('id')
+      .single();
+
+    if (error) {
+      toast.error('فشل إنشاء المحادثة');
+      return null;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+    return created.id;
+  }, [user, queryClient]);
+
+  // ─── Fetch & Decrypt Messages ────────────────────────
+  const fetchMessages = useCallback(async (
+    conversationId: string,
+    limit = 50,
+    before?: string
+  ): Promise<DecryptedMessage[]> => {
+    if (!user) return [];
+
+    let query = supabase
+      .from('encrypted_messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (before) {
+      query = query.lt('created_at', before);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    // Get conversation to find partner
+    const { data: convo } = await supabase
+      .from('private_conversations')
+      .select('participant_1, participant_2')
+      .eq('id', conversationId)
+      .single();
+
+    if (!convo) return [];
+
+    const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+    const partnerPublicKey = await getCachedPublicKey(partnerId);
+    const myPublicKey = await getCachedPublicKey(user.id);
+
+    // Get sender profiles
+    const senderIds = [...new Set((data || []).map(m => m.sender_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, avatar_url')
+      .in('user_id', senderIds);
+    const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+
+    const decrypted: DecryptedMessage[] = [];
+    for (const msg of (data || []).reverse()) {
+      let content = '[رسالة مشفرة]';
+      try {
+        if (msg.is_deleted) {
+          content = '🚫 تم حذف هذه الرسالة';
+        } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender && myPublicKey) {
+          // Decrypt sender's copy (encrypted with own key derivation isn't standard ECDH)
+          // For simplicity, sender stores their own encrypted copy using partner's key exchange
+          content = await decryptMessage(user.id, partnerPublicKey!, {
+            ciphertext: msg.encrypted_content_for_sender,
+            iv: msg.iv,
+          });
+        } else if (msg.sender_id !== user.id && partnerPublicKey) {
+          content = await decryptMessage(user.id, partnerPublicKey, {
+            ciphertext: msg.encrypted_content,
+            iv: msg.iv,
+          });
+        }
+      } catch {
+        content = '[تعذر فك التشفير]';
+      }
+
+      const profile = profileMap.get(msg.sender_id);
+      decrypted.push({
+        id: msg.id,
+        conversation_id: msg.conversation_id,
+        sender_id: msg.sender_id,
+        content,
+        message_type: msg.message_type || 'text',
+        file_url: msg.file_url || undefined,
+        file_name: msg.file_name || undefined,
+        status: msg.status || 'sent',
+        reply_to_id: msg.reply_to_id || undefined,
+        is_edited: msg.is_edited || false,
+        is_deleted: msg.is_deleted || false,
+        created_at: msg.created_at,
+        sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+      });
+    }
+
+    return decrypted;
+  }, [user, getCachedPublicKey]);
+
+  // ─── Send Encrypted Message ──────────────────────────
+  const sendMessage = useCallback(async (
+    conversationId: string,
+    plaintext: string,
+    messageType = 'text',
+    fileUrl?: string,
+    fileName?: string,
+    replyToId?: string,
+  ) => {
+    if (!user) return;
+
+    // Get conversation partner
+    const { data: convo } = await supabase
+      .from('private_conversations')
+      .select('participant_1, participant_2')
+      .eq('id', conversationId)
+      .single();
+
+    if (!convo) throw new Error('Conversation not found');
+
+    const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+    const partnerPublicKey = await getCachedPublicKey(partnerId);
+
+    if (!partnerPublicKey) {
+      toast.error('الطرف الآخر لم يُفعّل التشفير بعد');
+      return;
+    }
+
+    // Encrypt for recipient
+    const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
+
+    // Also encrypt a copy for sender (so sender can read their own messages)
+    const senderCopy = await encryptMessage(user.id, partnerPublicKey, plaintext);
+
+    const { error } = await supabase.from('encrypted_messages').insert({
+      conversation_id: conversationId,
+      sender_id: user.id,
+      encrypted_content: encrypted.ciphertext,
+      encrypted_content_for_sender: senderCopy.ciphertext,
+      iv: encrypted.iv,
+      message_type: messageType,
+      file_url: fileUrl,
+      file_name: fileName,
+      reply_to_id: replyToId,
+    });
+
+    if (error) throw error;
+
+    queryClient.invalidateQueries({ queryKey: ['private-messages', conversationId] });
+    queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+  }, [user, getCachedPublicKey, queryClient]);
+
+  // ─── Mark as Read ────────────────────────────────────
+  const markAsRead = useCallback(async (conversationId: string) => {
+    if (!user) return;
+
+    const { data: unread } = await supabase
+      .from('encrypted_messages')
+      .select('id')
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', user.id)
+      .in('status', ['sent', 'delivered']);
+
+    if (!unread?.length) return;
+
+    // Update message status
+    await supabase
+      .from('encrypted_messages')
+      .update({ status: 'read', read_at: new Date().toISOString() })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', user.id)
+      .in('status', ['sent', 'delivered']);
+
+    // Insert read receipts
+    const receipts = unread.map(m => ({
+      message_id: m.id,
+      user_id: user.id,
+    }));
+
+    await supabase.from('message_read_receipts').upsert(receipts, {
+      onConflict: 'message_id,user_id',
+      ignoreDuplicates: true,
+    });
+
+    queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+  }, [user, queryClient]);
+
+  // ─── Export Chat History ─────────────────────────────
+  const exportChatHistory = useCallback(async (
+    conversationId: string,
+    dateFrom?: string,
+    dateTo?: string
+  ): Promise<string> => {
+    if (!user) throw new Error('Not authenticated');
+
+    // Fetch all messages in range
+    let query = supabase
+      .from('encrypted_messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true });
+
+    if (dateFrom) query = query.gte('created_at', dateFrom);
+    if (dateTo) query = query.lte('created_at', dateTo);
+
+    const { data: messages } = await query;
+
+    // Decrypt all
+    const { data: convo } = await supabase
+      .from('private_conversations')
+      .select('participant_1, participant_2')
+      .eq('id', conversationId)
+      .single();
+
+    if (!convo || !messages) throw new Error('No data');
+
+    const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+    const partnerPublicKey = await getCachedPublicKey(partnerId);
+    if (!partnerPublicKey) throw new Error('No partner key');
+
+    const decryptedExport = [];
+    for (const msg of messages) {
+      let content = '[مشفر]';
+      try {
+        if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
+          content = await decryptMessage(user.id, partnerPublicKey, {
+            ciphertext: msg.encrypted_content_for_sender,
+            iv: msg.iv,
+          });
+        } else if (msg.sender_id !== user.id) {
+          content = await decryptMessage(user.id, partnerPublicKey, {
+            ciphertext: msg.encrypted_content,
+            iv: msg.iv,
+          });
+        }
+      } catch { /* keep encrypted marker */ }
+
+      decryptedExport.push({
+        timestamp: msg.created_at,
+        sender: msg.sender_id === user.id ? 'أنت' : 'الطرف الآخر',
+        content,
+        type: msg.message_type,
+      });
+    }
+
+    // Create export record
+    await supabase.from('chat_history_exports').insert({
+      user_id: user.id,
+      conversation_id: conversationId,
+      message_count: decryptedExport.length,
+      date_from: dateFrom,
+      date_to: dateTo,
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+    });
+
+    // Return as downloadable JSON
+    const blob = new Blob([JSON.stringify(decryptedExport, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat-export-${conversationId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast.success(`تم تصدير ${decryptedExport.length} رسالة بنجاح`);
+    return conversationId;
+  }, [user, getCachedPublicKey]);
+
+  // ─── Block / Mute ────────────────────────────────────
+  const toggleBlock = useCallback(async (conversationId: string) => {
+    if (!user) return;
+    const conv = conversations.find(c => c.id === conversationId);
+    if (!conv) return;
+
+    const isP1 = conv.participant_1 === user.id;
+    const field = isP1 ? 'is_blocked_by_1' : 'is_blocked_by_2';
+    const current = isP1 ? conv.is_blocked_by_1 : conv.is_blocked_by_2;
+
+    await supabase
+      .from('private_conversations')
+      .update({ [field]: !current })
+      .eq('id', conversationId);
+
+    queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+    toast.success(current ? 'تم إلغاء الحظر' : 'تم حظر المستخدم');
+  }, [user, conversations, queryClient]);
+
+  const toggleMute = useCallback(async (conversationId: string) => {
+    if (!user) return;
+    const conv = conversations.find(c => c.id === conversationId);
+    if (!conv) return;
+
+    const isP1 = conv.participant_1 === user.id;
+    const field = isP1 ? 'is_muted_by_1' : 'is_muted_by_2';
+    const current = isP1 ? conv.is_muted_by_1 : conv.is_muted_by_2;
+
+    await supabase
+      .from('private_conversations')
+      .update({ [field]: !current })
+      .eq('id', conversationId);
+
+    queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+    toast.success(current ? 'تم إلغاء كتم الصوت' : 'تم كتم المحادثة');
+  }, [user, conversations, queryClient]);
+
+  return {
+    conversations,
+    conversationsLoading,
+    refetchConversations,
+    getOrCreateConversation,
+    fetchMessages,
+    sendMessage,
+    markAsRead,
+    exportChatHistory,
+    toggleBlock,
+    toggleMute,
+  };
+}
