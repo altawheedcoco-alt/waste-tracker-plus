@@ -1,7 +1,7 @@
-import MapDisabledPlaceholder from '@/components/maps/MapDisabledPlaceholder';
+import LeafletShipmentTracking from '@/components/maps/LeafletShipmentTracking';
 
-const DriverTripTracker = (_props: any) => (
-  <MapDisabledPlaceholder height="400px" />
+const DriverTripTracker = (props: any) => (
+  <LeafletShipmentTracking height="400px" {...props} />
 );
 
 export default DriverTripTracker;

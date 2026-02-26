@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import MapDisabledPlaceholder from '@/components/maps/MapDisabledPlaceholder';
+import LeafletShipmentTracking from '@/components/maps/LeafletShipmentTracking';
 
-const VirtualRouteMap = memo((_props: any) => (
-  <MapDisabledPlaceholder height="400px" />
+const VirtualRouteMap = memo((props: any) => (
+  <LeafletShipmentTracking height="400px" {...props} />
 ));
 VirtualRouteMap.displayName = 'VirtualRouteMap';
 export default VirtualRouteMap;

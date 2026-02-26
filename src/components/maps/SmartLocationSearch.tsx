@@ -91,15 +91,38 @@ const SmartLocationSearch = ({
 
     setLoadingMapbox(true);
     try {
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=6&language=ar&types=address,place,locality,neighborhood,poi`;
-      const response = await fetch(url);
-      const data = await response.json();
+      // Search Mapbox and AI geocoding in parallel
+      const [mapboxRes, aiRes] = await Promise.all([
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_TOKEN}&country=eg&limit=6&language=ar&types=address,place,locality,neighborhood,poi`)
+          .then(r => r.json()).catch(() => ({ features: [] })),
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-geocode`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ query: searchQuery, language: 'ar' }),
+        }).then(r => r.json()).catch(() => ({ results: [] })),
+      ]);
       
-      if (data.features) {
-        setMapboxResults(data.features);
-      }
+      // Merge AI results into mapbox results (AI results first for priority)
+      const aiFeatures = (aiRes.results || [])
+        .filter((r: any) => r.source === 'ai' && r.confidence > 0.5)
+        .map((r: any) => ({
+          id: `ai-${r.lat}-${r.lng}`,
+          place_name: r.address || r.name,
+          text: r.name,
+          center: [r.lng, r.lat],
+          _source: 'ai',
+          _confidence: r.confidence,
+          _description: r.description,
+        }));
+      
+      const allFeatures = [...aiFeatures, ...(mapboxRes.features || [])];
+      setMapboxResults(allFeatures);
     } catch (error) {
-      console.error('Mapbox search error:', error);
+      console.error('Search error:', error);
       setMapboxResults([]);
     } finally {
       setLoadingMapbox(false);
@@ -373,48 +396,51 @@ const SmartLocationSearch = ({
               </div>
             )}
 
-            {/* Mapbox Results */}
+            {/* Mapbox + AI Results */}
             {hasMapboxResults && (
               <div className="border-b">
-                <div className="px-4 py-2 bg-gradient-to-r from-[#33CCFF]/5 to-sky-500/5">
+                <div className="px-4 py-2 bg-gradient-to-r from-primary/5 to-sky-500/5">
                   <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-medium text-[#33CCFF] flex items-center gap-1">
+                    <p className="text-[11px] font-medium text-primary flex items-center gap-1">
                       <Navigation className="w-3 h-3" />
-                      نتائج Waze
+                      نتائج البحث
                     </p>
                   </div>
                 </div>
-                {mapboxResults.map((result, index) => (
-                  <button
-                    key={`mapbox-${result.id}-${index}`}
-                    type="button"
-                    className="w-full px-4 py-2.5 text-right hover:bg-[#33CCFF]/5 transition-all duration-150 flex items-start gap-3 group"
-                    onClick={() => {
-                      const coords = { lat: result.center[1], lng: result.center[0] };
-                      onChange(result.place_name, coords);
-                      setQuery('');
-                      setShowResults(false);
-                      clearResults();
-                      setMapboxResults([]);
-                      toast.success('تم اختيار الموقع');
-                    }}
-                  >
-                    <div className="mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-[#33CCFF]/10 text-[#33CCFF]">
-                      <MapPin className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <span className="font-medium text-sm text-foreground group-hover:text-[#33CCFF] transition-colors block truncate">
-                        {result.text || result.place_name.split(',')[0]}
-                      </span>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {result.context?.map((c: any) => c.text).join('، ') || ''}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 border-[#33CCFF]/30 text-[#33CCFF] self-center">
-                      Waze
-                    </Badge>
-                  </button>
-                ))}
+                {mapboxResults.map((result, index) => {
+                  const isAI = result._source === 'ai';
+                  return (
+                    <button
+                      key={`mapbox-${result.id}-${index}`}
+                      type="button"
+                      className="w-full px-4 py-2.5 text-right hover:bg-primary/5 transition-all duration-150 flex items-start gap-3 group"
+                      onClick={() => {
+                        const coords = { lat: result.center[1], lng: result.center[0] };
+                        onChange(result.place_name, coords);
+                        setQuery('');
+                        setShowResults(false);
+                        clearResults();
+                        setMapboxResults([]);
+                        toast.success('تم اختيار الموقع');
+                      }}
+                    >
+                      <div className={`mt-0.5 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${isAI ? 'bg-gradient-to-br from-primary/20 to-purple-500/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                        {isAI ? <Sparkles className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors block truncate">
+                          {result.text || result.place_name.split(',')[0]}
+                        </span>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {isAI ? (result._description || result.place_name) : (result.context?.map((c: any) => c.text).join('، ') || '')}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className={`text-[9px] px-1 py-0 h-4 self-center ${isAI ? 'border-primary/30 text-primary' : 'border-muted-foreground/30 text-muted-foreground'}`}>
+                        {isAI ? '🤖 AI' : 'Mapbox'}
+                      </Badge>
+                    </button>
+                  );
+                })}
               </div>
             )}
 

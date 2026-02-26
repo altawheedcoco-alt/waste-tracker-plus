@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import MapDisabledPlaceholder from './MapDisabledPlaceholder';
+import LeafletShipmentTracking from './LeafletShipmentTracking';
 
-const MapboxDriverTracking = memo((_props: any) => (
-  <MapDisabledPlaceholder height="100%" />
+const MapboxDriverTracking = memo((props: any) => (
+  <LeafletShipmentTracking {...props} />
 ));
 MapboxDriverTracking.displayName = 'MapboxDriverTracking';
 export default MapboxDriverTracking;
