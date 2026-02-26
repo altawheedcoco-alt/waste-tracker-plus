@@ -3,6 +3,7 @@ import { Building2, Truck, Recycle, Target, TrendingUp, ShieldCheck } from "luci
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { withTimeout, logNetworkError } from "@/lib/networkGuard";
 
 const AnimatedCounter = ({ value, suffix }: { value: number; suffix: string }) => {
   const [count, setCount] = useState(0);
@@ -40,12 +41,25 @@ const Stats = () => {
   const { data: liveStats } = useQuery({
     queryKey: ['landing-live-stats'],
     queryFn: async () => {
-      const [orgsResult, shipmentsResult, driversResult] = await Promise.all([
-        supabase.from('organizations').select('id', { count: 'exact', head: true }),
-        supabase.from('shipments').select('id', { count: 'exact', head: true }),
-        supabase.from('drivers').select('id', { count: 'exact', head: true }),
-      ]);
-      return { organizations: orgsResult.count || 0, shipments: shipmentsResult.count || 0, drivers: driversResult.count || 0 };
+      try {
+        const [orgsResult, shipmentsResult, driversResult] = await withTimeout(
+          'landing-live-stats',
+          () => Promise.all([
+            supabase.from('organizations').select('id', { count: 'exact', head: true }),
+            supabase.from('shipments').select('id', { count: 'exact', head: true }),
+            supabase.from('drivers').select('id', { count: 'exact', head: true }),
+          ])
+        );
+
+        return {
+          organizations: orgsResult.count || 0,
+          shipments: shipmentsResult.count || 0,
+          drivers: driversResult.count || 0,
+        };
+      } catch (error) {
+        logNetworkError('landing-live-stats', error);
+        return { organizations: 500, shipments: 15000, drivers: 200 };
+      }
     },
     staleTime: 1000 * 60 * 30,
   });

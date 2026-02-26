@@ -5,6 +5,7 @@ import { Users, Briefcase, MapPin, ArrowLeft, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { withTimeout, logNetworkError } from '@/lib/networkGuard';
 
 interface FeaturedJob {
   id: string;
@@ -46,13 +47,22 @@ const OmalunaSection = () => {
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['omaluna-featured-jobs'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('job_listings')
-        .select('id, title, city, governorate, sector, job_type, salary_min, salary_max, created_at, organization:organizations(name)')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(4);
-      return (data || []) as unknown as FeaturedJob[];
+      try {
+        const { data, error } = await withTimeout('omaluna-featured-jobs', async () => {
+          return await supabase
+            .from('job_listings')
+            .select('id, title, city, governorate, sector, job_type, salary_min, salary_max, created_at, organization:organizations(name)')
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(4);
+        });
+
+        if (error) throw error;
+        return (data || []) as unknown as FeaturedJob[];
+      } catch (error) {
+        logNetworkError('omaluna-featured-jobs', error);
+        return [];
+      }
     },
     staleTime: 15 * 60 * 1000, // 15 min cache
     gcTime: 60 * 60 * 1000,
@@ -65,16 +75,20 @@ const OmalunaSection = () => {
     queryKey: ['omaluna-stats'],
     queryFn: async () => {
       try {
-        // Use regular SELECT with limit 0 + count instead of HEAD which was failing
-        const [jobCountRes, workerCountRes] = await Promise.all([
-          supabase.from('job_listings').select('id', { count: 'exact' }).eq('status', 'active').limit(0),
-          supabase.from('worker_profiles').select('id', { count: 'exact' }).limit(0),
-        ]);
+        const [jobCountRes, workerCountRes] = await withTimeout(
+          'omaluna-stats',
+          () =>
+            Promise.all([
+              supabase.from('job_listings').select('id', { count: 'exact' }).eq('status', 'active').limit(0),
+              supabase.from('worker_profiles').select('id', { count: 'exact' }).limit(0),
+            ])
+        );
         return {
           totalJobs: jobCountRes.count || 0,
           totalWorkers: workerCountRes.count || 0,
         };
-      } catch {
+      } catch (error) {
+        logNetworkError('omaluna-stats', error);
         return { totalJobs: 0, totalWorkers: 0 };
       }
     },

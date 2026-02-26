@@ -4,6 +4,7 @@ import { Building2, Award, ShieldCheck, ArrowLeft, BadgeCheck } from 'lucide-rea
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { withTimeout, logNetworkError } from '@/lib/networkGuard';
 
 interface FeaturedOrg {
   id: string;
@@ -27,15 +28,22 @@ const FeaturedConsultants = () => {
   const { data: orgs = [], isLoading } = useQuery({
     queryKey: ['featured-consultants'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type, logo_url, bio, city, region')
-        .in('organization_type', ['consultant', 'consulting_office', 'iso_body'] as any[])
-        .eq('is_active', true)
-        .limit(6);
+      try {
+        const { data, error } = await withTimeout('featured-consultants', async () => {
+          return await supabase
+            .from('organizations')
+            .select('id, name, organization_type, logo_url, bio, city, region')
+            .in('organization_type', ['consultant', 'consulting_office', 'iso_body'] as any[])
+            .eq('is_active', true)
+            .limit(6);
+        });
 
-      if (error || !data) return [];
-      return (data as any[]).map(d => ({ ...d, governorate: d.region })) as FeaturedOrg[];
+        if (error || !data) return [];
+        return (data as any[]).map(d => ({ ...d, governorate: d.region })) as FeaturedOrg[];
+      } catch (error) {
+        logNetworkError('featured-consultants', error);
+        return [];
+      }
     },
     staleTime: 30 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
