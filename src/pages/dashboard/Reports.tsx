@@ -291,39 +291,51 @@ const Reports = () => {
         {/* Back Button */}
         <BackButton />
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  {t('reports.officialReport')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
-                </DialogHeader>
-                <OfficialReportPrint 
-                  data={data} 
-                  period={period} 
-                  includeStamps={includeStamps}
-                  includeSignatures={includeSignatures}
-                />
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="text-right">
-            <h1 className="text-3xl font-bold">{t('reports.title')}</h1>
-            <p className="text-muted-foreground">{t('reports.subtitle')}</p>
+        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-l from-primary/5 via-background to-primary/10 p-5 sm:p-6">
+          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-primary/5 blur-3xl" />
+          <div className="flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <RegulatoryExport />
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="gap-2 rounded-xl shadow-sm">
+                    <FileText className="w-4 h-4" />
+                    {t('reports.officialReport')}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
+                  </DialogHeader>
+                  <OfficialReportPrint 
+                    data={data} 
+                    period={period} 
+                    includeStamps={includeStamps}
+                    includeSignatures={includeSignatures}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="text-right">
+              <div className="flex items-center gap-3 justify-end mb-1">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ChartBar className="w-5 h-5 text-primary" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold">{t('reports.title')}</h1>
+              </div>
+              <p className="text-muted-foreground text-sm">{t('reports.subtitle')}</p>
+            </div>
           </div>
         </div>
 
         {/* Filters Card */}
-        <Card>
+        <Card className="border-border/40 overflow-hidden">
           <CardHeader className="text-right pb-4">
             <CardTitle className="flex items-center gap-2 justify-end text-lg">
-              <Filter className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Filter className="w-4 h-4 text-primary" />
+              </div>
               {t('reports.filterCriteria')}
             </CardTitle>
             <CardDescription>{t('reports.filterCriteriaDesc')}</CardDescription>

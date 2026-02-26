@@ -547,15 +547,17 @@ const ShipmentCard = ({
   return (
     <>
       <motion.div
-        whileHover={{ scale: 1.005 }}
+        whileHover={{ scale: 1.005, y: -2 }}
         whileTap={{ scale: 0.995 }}
         className="cursor-pointer"
         onClick={handleCardClick}
       >
-        <Card className="hover:shadow-lg transition-all border-r-4 overflow-hidden"
+        <Card className="hover:shadow-lg transition-all duration-300 border-r-4 overflow-hidden group border-border/40"
           style={{ borderRightColor: currentStatusConfig ? `var(--${currentStatusConfig.key}-color, #94a3b8)` : undefined }}
         >
           <CardContent className="p-0 overflow-hidden">
+            {/* Hover accent */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/0 via-primary/40 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             {/* Main Content */}
             <div className="p-3 sm:p-4">
               <div className="flex flex-col gap-3">
