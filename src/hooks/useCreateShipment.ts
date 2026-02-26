@@ -585,8 +585,8 @@ export const useCreateShipment = () => {
       ? !formData.recycler_id 
       : !formData.disposal_facility_id;
 
-    if (!formData.generator_id || destinationFieldMissing || !formData.waste_type || !formData.quantity) {
-      toast.error('يرجى ملء جميع الحقول المطلوبة');
+    if (!formData.generator_id || destinationFieldMissing || !formData.quantity) {
+      toast.error('يرجى تحديد الجهتين والكمية على الأقل');
       return;
     }
 
@@ -669,7 +669,7 @@ export const useCreateShipment = () => {
         transporter_id: transporterId || organization?.id,
         disposal_facility_id: disposalFacilityId,
         driver_id: driverId,
-        waste_type: isValidWasteType(formData.waste_type) ? formData.waste_type : 'other',
+        waste_type: formData.waste_type && isValidWasteType(formData.waste_type) ? formData.waste_type : 'other',
         quantity: parseFloat(formData.quantity),
         unit: formData.unit,
         pickup_address: formData.pickup_address,
