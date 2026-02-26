@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, ExternalLink, Megaphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { withTimeout, logNetworkError } from '@/lib/networkGuard';
 
 const HomepageAds = () => {
   const [current, setCurrent] = useState(0);
@@ -15,14 +16,26 @@ const HomepageAds = () => {
   const { data: ads = [] } = useQuery({
     queryKey: ['homepage-featured-ads'],
     queryFn: async () => {
-      const { data } = await supabase
-        .from('advertisements')
-        .select('*, ad_plans(*)')
-        .eq('status', 'active')
-        .eq('is_featured', true)
-        .order('created_at', { ascending: false })
-        .limit(10);
-      return data || [];
+      try {
+        const { data, error } = await withTimeout(
+          'homepage-featured-ads',
+          async () => {
+            return await supabase
+              .from('advertisements')
+              .select('*, ad_plans(*)')
+              .eq('status', 'active')
+              .eq('is_featured', true)
+              .order('created_at', { ascending: false })
+              .limit(10);
+          }
+        );
+
+        if (error) throw error;
+        return data || [];
+      } catch (error) {
+        logNetworkError('homepage-featured-ads', error);
+        return [];
+      }
     },
     staleTime: 15 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
@@ -30,9 +43,15 @@ const HomepageAds = () => {
   });
 
   const trackClick = useCallback(async (ad: any) => {
-    // Fire-and-forget analytics
-    supabase.from('ad_analytics').insert({ advertisement_id: ad.id, event_type: 'click', page_location: 'homepage' });
-    supabase.from('advertisements').update({ clicks_count: (ad.clicks_count || 0) + 1 }).eq('id', ad.id);
+    try {
+      await Promise.allSettled([
+        supabase.from('ad_analytics').insert({ advertisement_id: ad.id, event_type: 'click', page_location: 'homepage' }),
+        supabase.from('advertisements').update({ clicks_count: (ad.clicks_count || 0) + 1 }).eq('id', ad.id),
+      ]);
+    } catch (error) {
+      logNetworkError('ad-click-tracking', error);
+    }
+
     if (ad.external_link) window.open(ad.external_link, '_blank');
     else if (ad.cta_link) navigate(ad.cta_link);
   }, [navigate]);
@@ -46,9 +65,15 @@ const HomepageAds = () => {
   // Track impression (debounced)
   useEffect(() => {
     if (!ads[current]) return;
-    const timer = setTimeout(() => {
-      supabase.from('ad_analytics').insert({ advertisement_id: ads[current].id, event_type: 'impression', page_location: 'homepage' });
-      supabase.from('advertisements').update({ impressions_count: (ads[current].impressions_count || 0) + 1 }).eq('id', ads[current].id);
+    const timer = setTimeout(async () => {
+      try {
+        await Promise.allSettled([
+          supabase.from('ad_analytics').insert({ advertisement_id: ads[current].id, event_type: 'impression', page_location: 'homepage' }),
+          supabase.from('advertisements').update({ impressions_count: (ads[current].impressions_count || 0) + 1 }).eq('id', ads[current].id),
+        ]);
+      } catch (error) {
+        logNetworkError('ad-impression-tracking', error);
+      }
     }, 1000);
     return () => clearTimeout(timer);
   }, [current, ads]);
