@@ -2,7 +2,7 @@ import { memo } from "react";
 import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog, Car, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import heroBg from "@/assets/hero-bg-compressed-v2.webp";
+import heroBg from "@/assets/hero-bg-light.webp";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Hero = memo(() => {
