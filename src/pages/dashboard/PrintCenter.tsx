@@ -850,18 +850,42 @@ const PrintCenter = () => {
                         {doc.date ? format(new Date(doc.date), 'MM/dd HH:mm') : '-'}
                       </span>
 
-                      {/* View button - navigates or opens based on type */}
+                      {/* View button - opens original file first, falls back to page */}
                       <Button variant="ghost" size="icon" className="h-7 w-7" title="عرض"
                         onClick={async () => {
                           const rawId = doc.id.replace(/^[a-z]+-/, '');
                           try {
+                            // Helper: try to open a file from a storage bucket
+                            const openFromBucket = async (bucket: string, path: string) => {
+                              const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 3600);
+                              if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return true; }
+                              return false;
+                            };
+                            // Helper: open a direct URL
+                            const openUrl = (url: string) => { window.open(url, '_blank'); return true; };
+
                             switch (doc.type) {
                               case 'declarations':
                               case 'manifests':
-                                navigate(`/dashboard/shipments/${rawId}`);
+                                // Try shipment photos or files first
+                                if (doc.rawData.photos_urls?.length) {
+                                  openUrl(doc.rawData.photos_urls[0]);
+                                } else {
+                                  navigate(`/dashboard/shipments/${rawId}`);
+                                }
                                 break;
                               case 'invoices':
-                                navigate(`/dashboard/invoices`);
+                                // Try invoice attachment
+                                if (doc.rawData.attachment_url) {
+                                  if (doc.rawData.attachment_url.startsWith('http')) {
+                                    openUrl(doc.rawData.attachment_url);
+                                  } else {
+                                    const opened = await openFromBucket('pdf-documents', doc.rawData.attachment_url);
+                                    if (!opened) navigate('/dashboard/invoices');
+                                  }
+                                } else {
+                                  navigate('/dashboard/invoices');
+                                }
                                 break;
                               case 'receipts':
                                 navigate(`/dashboard/shipments/${doc.rawData.shipment_id}`);
@@ -870,51 +894,82 @@ const PrintCenter = () => {
                                 navigate(`/dashboard/shipments/${doc.rawData.shipment_id}`);
                                 break;
                               case 'signing':
-                                navigate(`/dashboard/signing-status`);
+                                // Open attached file first
+                                if (doc.rawData.document_file_url) {
+                                  if (doc.rawData.document_file_url.startsWith('http')) {
+                                    openUrl(doc.rawData.document_file_url);
+                                  } else {
+                                    const opened = await openFromBucket('entity-documents', doc.rawData.document_file_url);
+                                    if (!opened) navigate('/dashboard/signing-status');
+                                  }
+                                } else {
+                                  navigate('/dashboard/signing-status');
+                                }
                                 break;
                               case 'signatures':
-                                navigate(`/dashboard/signing-status`);
+                                navigate('/dashboard/signing-status');
                                 break;
                               case 'contracts':
                                 if (doc.rawData.attachment_url) {
-                                  window.open(doc.rawData.attachment_url, '_blank');
+                                  if (doc.rawData.attachment_url.startsWith('http')) {
+                                    openUrl(doc.rawData.attachment_url);
+                                  } else {
+                                    const opened = await openFromBucket('entity-documents', doc.rawData.attachment_url);
+                                    if (!opened) navigate('/dashboard/contracts');
+                                  }
                                 } else {
-                                  navigate(`/dashboard/contracts`);
+                                  navigate('/dashboard/contracts');
                                 }
                                 break;
                               case 'org_documents':
-                                if (doc.rawData.file_url) {
-                                  window.open(doc.rawData.file_url, '_blank');
+                                if (doc.rawData.file_url && doc.rawData.file_url.startsWith('http')) {
+                                  openUrl(doc.rawData.file_url);
                                 } else if (doc.rawData.file_path) {
-                                  const { data } = await supabase.storage.from('organization-documents').createSignedUrl(doc.rawData.file_path, 3600);
-                                  if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                                  else toast.error('فشل في الحصول على رابط المستند');
+                                  const opened = await openFromBucket('organization-documents', doc.rawData.file_path);
+                                  if (!opened) toast.error('فشل في الحصول على رابط المستند');
+                                } else if (doc.rawData.file_url) {
+                                  const opened = await openFromBucket('organization-documents', doc.rawData.file_url);
+                                  if (!opened) toast.error('فشل في الحصول على رابط المستند');
                                 }
                                 break;
                               case 'stored_pdfs':
                                 if (doc.rawData.storagePath) {
-                                  const { data } = await supabase.storage.from('pdf-documents').createSignedUrl(doc.rawData.storagePath, 3600);
-                                  if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                                  else toast.error('فشل في الحصول على رابط الملف');
+                                  const opened = await openFromBucket('pdf-documents', doc.rawData.storagePath);
+                                  if (!opened) toast.error('فشل في الحصول على رابط الملف');
                                 }
                                 break;
                               case 'entity_docs':
                                 if (doc.rawData.file_url) {
-                                  // Check if it's a storage path or full URL
                                   if (doc.rawData.file_url.startsWith('http')) {
-                                    window.open(doc.rawData.file_url, '_blank');
+                                    openUrl(doc.rawData.file_url);
                                   } else {
-                                    const { data } = await supabase.storage.from('entity-documents').createSignedUrl(doc.rawData.file_url, 3600);
-                                    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                                    else toast.error('فشل في الحصول على رابط الملف');
+                                    const opened = await openFromBucket('entity-documents', doc.rawData.file_url);
+                                    if (!opened) toast.error('فشل في الحصول على رابط الملف');
                                   }
                                 }
                                 break;
                               case 'print_log':
                                 if (doc.rawData.file_url) {
-                                  window.open(doc.rawData.file_url, '_blank');
+                                  if (doc.rawData.file_url.startsWith('http')) {
+                                    openUrl(doc.rawData.file_url);
+                                  } else {
+                                    const opened = await openFromBucket('pdf-documents', doc.rawData.file_url);
+                                    if (!opened) toast.info('لا يوجد ملف مرتبط');
+                                  }
                                 } else if (doc.rawData.document_id) {
-                                  toast.info('يتم فتح المستند المرتبط...');
+                                  // Try to navigate based on document_type
+                                  const dt = doc.rawData.document_type?.toLowerCase();
+                                  if (dt?.includes('shipment') || dt?.includes('شحن') || dt?.includes('manifest') || dt?.includes('مانيفست')) {
+                                    navigate(`/dashboard/shipments/${doc.rawData.document_id}`);
+                                  } else if (dt?.includes('invoice') || dt?.includes('فاتور')) {
+                                    navigate('/dashboard/invoices');
+                                  } else if (dt?.includes('contract') || dt?.includes('عقد')) {
+                                    navigate('/dashboard/contracts');
+                                  } else {
+                                    toast.info('لا يوجد ملف مرتبط بهذا السجل');
+                                  }
+                                } else {
+                                  toast.info('لا يوجد ملف مرتبط');
                                 }
                                 break;
                               default:
