@@ -334,6 +334,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: Bell, label: t('nav.notifications'), path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
       { icon: Info, label: t('sidebar.aboutPlatform'), path: '/dashboard/about-platform', key: 'driver-about' },
       { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'driver-settings' },
+      { icon: Zap, label: language === 'ar' ? 'الإجراءات التلقائية' : 'Auto Actions', path: '/dashboard/auto-actions', key: 'driver-auto-actions' },
     ]},
   ];
 
@@ -596,6 +597,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: WifiOff, label: t('sidebar.offlineMode'), path: '/dashboard/offline-mode', key: 'offline-mode' },
       { icon: Info, label: t('sidebar.aboutPlatform'), path: '/dashboard/about-platform', key: 'about-platform' },
       { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'settings' },
+      { icon: Zap, label: language === 'ar' ? 'الإجراءات التلقائية' : 'Auto Actions', path: '/dashboard/auto-actions', key: 'auto-actions' },
     ]},
   ];
 

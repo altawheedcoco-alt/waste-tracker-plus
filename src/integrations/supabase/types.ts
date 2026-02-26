@@ -16838,6 +16838,105 @@ export type Database = {
           },
         ]
       }
+      organization_auto_actions: {
+        Row: {
+          all_actions_enabled: boolean
+          auto_archive_documents: boolean
+          auto_compliance_check: boolean
+          auto_delivery_certificate: boolean
+          auto_email_notifications: boolean
+          auto_fraud_detection: boolean
+          auto_invoice_generation: boolean
+          auto_manifest_generation: boolean
+          auto_partner_notifications: boolean
+          auto_price_calculation: boolean
+          auto_receipt_generation: boolean
+          auto_route_optimization: boolean
+          auto_shipment_notifications: boolean
+          auto_shipment_status_update: boolean
+          auto_signature_request: boolean
+          auto_status_change_alerts: boolean
+          auto_tracking_form: boolean
+          auto_waste_classification: boolean
+          auto_weight_reconciliation: boolean
+          auto_whatsapp_notifications: boolean
+          created_at: string
+          id: string
+          last_modified_by: string | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          all_actions_enabled?: boolean
+          auto_archive_documents?: boolean
+          auto_compliance_check?: boolean
+          auto_delivery_certificate?: boolean
+          auto_email_notifications?: boolean
+          auto_fraud_detection?: boolean
+          auto_invoice_generation?: boolean
+          auto_manifest_generation?: boolean
+          auto_partner_notifications?: boolean
+          auto_price_calculation?: boolean
+          auto_receipt_generation?: boolean
+          auto_route_optimization?: boolean
+          auto_shipment_notifications?: boolean
+          auto_shipment_status_update?: boolean
+          auto_signature_request?: boolean
+          auto_status_change_alerts?: boolean
+          auto_tracking_form?: boolean
+          auto_waste_classification?: boolean
+          auto_weight_reconciliation?: boolean
+          auto_whatsapp_notifications?: boolean
+          created_at?: string
+          id?: string
+          last_modified_by?: string | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          all_actions_enabled?: boolean
+          auto_archive_documents?: boolean
+          auto_compliance_check?: boolean
+          auto_delivery_certificate?: boolean
+          auto_email_notifications?: boolean
+          auto_fraud_detection?: boolean
+          auto_invoice_generation?: boolean
+          auto_manifest_generation?: boolean
+          auto_partner_notifications?: boolean
+          auto_price_calculation?: boolean
+          auto_receipt_generation?: boolean
+          auto_route_optimization?: boolean
+          auto_shipment_notifications?: boolean
+          auto_shipment_status_update?: boolean
+          auto_signature_request?: boolean
+          auto_status_change_alerts?: boolean
+          auto_tracking_form?: boolean
+          auto_waste_classification?: boolean
+          auto_weight_reconciliation?: boolean
+          auto_whatsapp_notifications?: boolean
+          created_at?: string
+          id?: string
+          last_modified_by?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_auto_actions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_auto_actions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_blocks: {
         Row: {
           blocked_by: string
