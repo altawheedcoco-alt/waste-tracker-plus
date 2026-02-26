@@ -63,6 +63,7 @@ export const ar = {
     contact: 'تواصل معنا',
     employeeLogin: 'دخول كموظف',
     employee: 'موظف',
+    resources: 'المصادر',
   },
 
   // Settings
