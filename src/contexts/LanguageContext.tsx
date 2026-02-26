@@ -3,8 +3,17 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type Language = 'ar' | 'en';
 
-// Lazy-load translations — only the active language is imported
-const loadTranslations = async (lang: Language) => {
+// Load core translations first (small ~15KB), then merge dashboard keys on demand
+const loadCoreTranslations = async (lang: Language) => {
+  if (lang === 'ar') {
+    const { arCore } = await import('@/i18n/ar-core');
+    return arCore;
+  }
+  const { en } = await import('@/i18n/en');
+  return en;
+};
+
+const loadFullTranslations = async (lang: Language) => {
   if (lang === 'ar') {
     const { ar } = await import('@/i18n/ar');
     return ar;
@@ -26,11 +35,18 @@ const defaultLang: Language = (() => {
   return 'ar';
 })();
 
-// Start loading immediately (non-blocking)
-loadTranslations(defaultLang).then(t => {
+// Start loading core translations immediately (non-blocking, small bundle)
+loadCoreTranslations(defaultLang).then(t => {
   cachedTranslations[defaultLang] = t;
   cacheReady = true;
 });
+
+// Preload full translations in background after core is ready
+setTimeout(() => {
+  loadFullTranslations(defaultLang).then(t => {
+    cachedTranslations[defaultLang] = { ...cachedTranslations[defaultLang], ...t };
+  });
+}, 3000);
 
 interface LanguageContextType {
   language: Language;
@@ -64,9 +80,14 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       setTranslations(cachedTranslations[language]);
       return;
     }
-    loadTranslations(language).then(t => {
-      cachedTranslations[language] = t;
-      setTranslations(t);
+    loadCoreTranslations(language).then(core => {
+      cachedTranslations[language] = core;
+      setTranslations(core);
+      // Then load full translations in background
+      loadFullTranslations(language).then(full => {
+        cachedTranslations[language] = { ...core, ...full };
+        setTranslations((prev: any) => ({ ...prev, ...full }));
+      });
     });
   }, [language]);
 
@@ -77,7 +98,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
     if (!translations) {
       // Fallback: load again
-      loadTranslations(language).then(t => {
+      loadCoreTranslations(language).then(t => {
         cachedTranslations[language] = t;
         setTranslations(t);
       });
