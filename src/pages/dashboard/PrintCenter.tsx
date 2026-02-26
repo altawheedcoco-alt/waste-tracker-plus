@@ -114,7 +114,7 @@ const PrintCenter = () => {
       if (isAll || selectedDocTypes.includes('declarations') || selectedDocTypes.includes('manifests')) {
         let q = supabase
           .from('shipments')
-          .select('id, shipment_number, status, waste_type, quantity, unit, weighbridge_net_weight, created_at, manual_vehicle_plate, manual_driver_name, generator_id, transporter_id, recycler_id')
+          .select('id, shipment_number, status, waste_type, quantity, unit, weighbridge_net_weight, created_at, manual_vehicle_plate, manual_driver_name, generator_id, transporter_id, recycler_id, manifest_pdf_url, weighbridge_photo_url, disposal_certificate_url, payment_proof_url')
           .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId},disposal_facility_id.eq.${orgId}`)
           .gte('created_at', fromISO)
           .lte('created_at', toISO)
@@ -157,7 +157,7 @@ const PrintCenter = () => {
       if (isAll || selectedDocTypes.includes('invoices')) {
         const { data } = await supabase
           .from('invoices')
-          .select('id, invoice_number, status, total_amount, created_at, partner_name')
+          .select('id, invoice_number, status, total_amount, created_at, partner_name, attachment_url')
           .eq('organization_id', orgId!)
           .gte('created_at', fromISO)
           .lte('created_at', toISO)
@@ -866,21 +866,43 @@ const PrintCenter = () => {
 
                             switch (doc.type) {
                               case 'declarations':
-                              case 'manifests':
-                                // Try shipment photos or files first
-                                if (doc.rawData.photos_urls?.length) {
-                                  openUrl(doc.rawData.photos_urls[0]);
+                              case 'manifests': {
+                                // Try manifest PDF first, then weighbridge photo, then navigate
+                                const manifestUrl = doc.rawData.manifest_pdf_url;
+                                const weighbridgeUrl = doc.rawData.weighbridge_photo_url;
+                                const disposalUrl = doc.rawData.disposal_certificate_url;
+                                
+                                if (manifestUrl && doc.type === 'manifests') {
+                                  if (manifestUrl.startsWith('http')) { openUrl(manifestUrl); }
+                                  else { 
+                                    const opened = await openFromBucket('pdf-documents', manifestUrl) || await openFromBucket('shipment-photos', manifestUrl);
+                                    if (!opened) navigate(`/dashboard/shipments/${rawId}`);
+                                  }
+                                } else if (weighbridgeUrl && doc.type === 'declarations') {
+                                  if (weighbridgeUrl.startsWith('http')) { openUrl(weighbridgeUrl); }
+                                  else {
+                                    const opened = await openFromBucket('weighbridge-photos', weighbridgeUrl) || await openFromBucket('shipment-photos', weighbridgeUrl);
+                                    if (!opened) navigate(`/dashboard/shipments/${rawId}`);
+                                  }
+                                } else if (disposalUrl) {
+                                  if (disposalUrl.startsWith('http')) { openUrl(disposalUrl); }
+                                  else {
+                                    const opened = await openFromBucket('entity-documents', disposalUrl);
+                                    if (!opened) navigate(`/dashboard/shipments/${rawId}`);
+                                  }
                                 } else {
                                   navigate(`/dashboard/shipments/${rawId}`);
                                 }
                                 break;
+                              }
                               case 'invoices':
                                 // Try invoice attachment
                                 if (doc.rawData.attachment_url) {
                                   if (doc.rawData.attachment_url.startsWith('http')) {
                                     openUrl(doc.rawData.attachment_url);
                                   } else {
-                                    const opened = await openFromBucket('pdf-documents', doc.rawData.attachment_url);
+                                    const opened = await openFromBucket('pdf-documents', doc.rawData.attachment_url) 
+                                      || await openFromBucket('entity-documents', doc.rawData.attachment_url);
                                     if (!opened) navigate('/dashboard/invoices');
                                   }
                                 } else {
@@ -987,32 +1009,70 @@ const PrintCenter = () => {
                       <Button variant="ghost" size="icon" className="h-7 w-7" title="تحميل"
                         onClick={async () => {
                           try {
+                            // Helper to try multiple buckets
+                            const tryBuckets = async (path: string, buckets: string[]) => {
+                              for (const bucket of buckets) {
+                                const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 3600);
+                                if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return true; }
+                              }
+                              return false;
+                            };
+
                             // Direct file URLs
-                            const directUrl = doc.rawData.attachment_url || doc.rawData.file_url;
+                            const directUrl = doc.rawData.attachment_url || doc.rawData.file_url || doc.rawData.manifest_pdf_url || doc.rawData.weighbridge_photo_url || doc.rawData.disposal_certificate_url;
                             if (directUrl && directUrl.startsWith('http')) {
                               window.open(directUrl, '_blank');
                               return;
                             }
+
+                            // Shipment-related files
+                            if (doc.type === 'manifests' && doc.rawData.manifest_pdf_url) {
+                              const opened = await tryBuckets(doc.rawData.manifest_pdf_url, ['pdf-documents', 'shipment-photos', 'entity-documents']);
+                              if (opened) return;
+                            }
+                            if (doc.type === 'declarations' && doc.rawData.weighbridge_photo_url) {
+                              const opened = await tryBuckets(doc.rawData.weighbridge_photo_url, ['weighbridge-photos', 'shipment-photos']);
+                              if (opened) return;
+                            }
+                            if (doc.rawData.disposal_certificate_url) {
+                              const opened = await tryBuckets(doc.rawData.disposal_certificate_url, ['entity-documents', 'pdf-documents']);
+                              if (opened) return;
+                            }
+
                             // Storage bucket files
                             if (doc.rawData.storagePath) {
-                              const { data } = await supabase.storage.from('pdf-documents').createSignedUrl(doc.rawData.storagePath, 3600);
-                              if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return; }
+                              const opened = await tryBuckets(doc.rawData.storagePath, ['pdf-documents']);
+                              if (opened) return;
                             }
                             // Entity documents bucket
                             if (doc.type === 'entity_docs' && doc.rawData.file_url) {
-                              const bucket = 'entity-documents';
-                              const { data } = await supabase.storage.from(bucket).createSignedUrl(doc.rawData.file_url, 3600);
-                              if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return; }
+                              const opened = await tryBuckets(doc.rawData.file_url, ['entity-documents']);
+                              if (opened) return;
                             }
                             // Org documents bucket
-                            if (doc.type === 'org_documents' && doc.rawData.file_path) {
-                              const { data } = await supabase.storage.from('organization-documents').createSignedUrl(doc.rawData.file_path, 3600);
-                              if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); return; }
+                            if (doc.type === 'org_documents' && (doc.rawData.file_path || doc.rawData.file_url)) {
+                              const path = doc.rawData.file_path || doc.rawData.file_url;
+                              const opened = await tryBuckets(path, ['organization-documents']);
+                              if (opened) return;
                             }
                             // Signing request files
                             if (doc.type === 'signing' && doc.rawData.document_file_url) {
-                              window.open(doc.rawData.document_file_url, '_blank');
-                              return;
+                              if (doc.rawData.document_file_url.startsWith('http')) {
+                                window.open(doc.rawData.document_file_url, '_blank');
+                                return;
+                              }
+                              const opened = await tryBuckets(doc.rawData.document_file_url, ['entity-documents']);
+                              if (opened) return;
+                            }
+                            // Contracts
+                            if (doc.type === 'contracts' && doc.rawData.attachment_url) {
+                              const opened = await tryBuckets(doc.rawData.attachment_url, ['entity-documents', 'pdf-documents']);
+                              if (opened) return;
+                            }
+                            // Invoices
+                            if (doc.type === 'invoices' && doc.rawData.attachment_url) {
+                              const opened = await tryBuckets(doc.rawData.attachment_url, ['pdf-documents', 'entity-documents']);
+                              if (opened) return;
                             }
                             // Fallback: print as report
                             printSingle(doc);
