@@ -27,10 +27,12 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
-type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'contracts' | 'org_documents' | 'stored_pdfs' | 'all';
+type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'contracts' | 'org_documents' | 'stored_pdfs' | 'entity_docs' | 'print_log' | 'all';
 
 const DOC_TYPES: { id: DocType; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'جميع المستندات', icon: <FileStack className="h-4 w-4" /> },
+  { id: 'entity_docs', label: 'أرشيف المستندات', icon: <FileArchive className="h-4 w-4" /> },
+  { id: 'print_log', label: 'سجل الطباعة', icon: <Printer className="h-4 w-4" /> },
   { id: 'declarations', label: 'إقرارات التسليم', icon: <ClipboardList className="h-4 w-4" /> },
   { id: 'certificates', label: 'شهادات إعادة التدوير', icon: <Award className="h-4 w-4" /> },
   { id: 'manifests', label: 'المانيفست الموحد', icon: <FileText className="h-4 w-4" /> },
@@ -382,6 +384,57 @@ const PrintCenter = () => {
         }
       }
 
+      // Entity Documents (Archive)
+      if (isAll || selectedDocTypes.includes('entity_docs')) {
+        const { data } = await supabase
+          .from('entity_documents')
+          .select('id, title, file_name, file_url, document_type, document_category, description, tags, reference_number, file_size, file_type, created_at, uploaded_by_role, shipment_id, contract_id, invoice_id, deposit_id')
+          .eq('organization_id', orgId!)
+          .gte('created_at', fromISO)
+          .lte('created_at', toISO)
+          .order('created_at', { ascending: false })
+          .limit(500);
+
+        (data || []).forEach((d: any) => {
+          const sizeKB = d.file_size ? (d.file_size / 1024).toFixed(1) : '?';
+          items.push({
+            id: `edoc-${d.id}`,
+            type: 'entity_docs',
+            typeLabel: 'أرشيف',
+            title: d.title || d.file_name || 'مستند',
+            subtitle: `${d.document_type || '-'} • ${d.document_category || '-'} • ${sizeKB} كيلوبايت • ${d.uploaded_by_role || '-'}`,
+            date: d.created_at,
+            status: 'stored',
+            rawData: d,
+          });
+        });
+      }
+
+      // Document Print Log
+      if (isAll || selectedDocTypes.includes('print_log')) {
+        const { data } = await supabase
+          .from('document_print_log')
+          .select('id, document_type, document_number, document_id, print_tracking_code, printed_by_name, action_type, description, ai_summary, file_url, created_at')
+          .eq('organization_id', orgId!)
+          .gte('created_at', fromISO)
+          .lte('created_at', toISO)
+          .order('created_at', { ascending: false })
+          .limit(500);
+
+        (data || []).forEach((d: any) => {
+          items.push({
+            id: `plog-${d.id}`,
+            type: 'print_log',
+            typeLabel: 'سجل طباعة',
+            title: `${d.document_type || 'مستند'} - ${d.document_number || d.print_tracking_code || d.id.substring(0, 8)}`,
+            subtitle: `${d.printed_by_name || '-'} • ${d.action_type || '-'} • كود: ${d.print_tracking_code || '-'}`,
+            date: d.created_at,
+            status: d.action_type === 'auto_created' ? 'stored' : 'completed',
+            rawData: d,
+          });
+        });
+      }
+
       return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     },
   });
@@ -550,6 +603,22 @@ const PrintCenter = () => {
         tablesHtml += `<h2>💾 ${label} (${items.length})</h2>
         <table><thead><tr><th>#</th><th>اسم الملف</th><th>الحجم</th><th>التاريخ</th></tr></thead><tbody>
         ${items.map((d, i) => `<tr><td>${i+1}</td><td>${d.title}</td><td>${d.subtitle}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd HH:mm') : '-'}</td></tr>`).join('')}
+        </tbody></table>`;
+      } else if (type === 'entity_docs') {
+        tablesHtml += `<h2>📂 ${label} (${items.length})</h2>
+        <table><thead><tr><th>#</th><th>العنوان</th><th>النوع</th><th>التصنيف</th><th>اسم الملف</th><th>الحجم</th><th>الرافع</th><th>التاريخ</th></tr></thead><tbody>
+        ${items.map((d, i) => {
+          const r = d.rawData;
+          return `<tr><td>${i+1}</td><td>${r.title || '-'}</td><td>${r.document_type || '-'}</td><td>${r.document_category || '-'}</td><td>${r.file_name || '-'}</td><td>${r.file_size ? (r.file_size/1024).toFixed(1) + ' KB' : '-'}</td><td>${r.uploaded_by_role || '-'}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd') : '-'}</td></tr>`;
+        }).join('')}
+        </tbody></table>`;
+      } else if (type === 'print_log') {
+        tablesHtml += `<h2>🖨️ ${label} (${items.length})</h2>
+        <table><thead><tr><th>#</th><th>النوع</th><th>رقم المستند</th><th>كود التتبع</th><th>طُبع بواسطة</th><th>نوع الإجراء</th><th>التاريخ</th></tr></thead><tbody>
+        ${items.map((d, i) => {
+          const r = d.rawData;
+          return `<tr><td>${i+1}</td><td>${r.document_type || '-'}</td><td>${r.document_number || '-'}</td><td>${r.print_tracking_code || '-'}</td><td>${r.printed_by_name || '-'}</td><td>${r.action_type || '-'}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd HH:mm') : '-'}</td></tr>`;
+        }).join('')}
         </tbody></table>`;
       }
     }
