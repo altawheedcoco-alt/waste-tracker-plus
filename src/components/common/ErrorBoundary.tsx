@@ -13,15 +13,6 @@ interface State {
   error: Error | null;
 }
 
-const isChunkError = (error: Error | null) => {
-  if (!error) return false;
-  const msg = error.message || '';
-  return msg.includes('Failed to fetch dynamically imported module') ||
-    msg.includes('Loading chunk') ||
-    msg.includes('error loading dynamically imported module') ||
-    msg.includes('ChunkLoadError') ||
-    msg.includes('Importing a module script failed');
-};
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
@@ -35,14 +26,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('ErrorBoundary caught:', error, info);
-    // Auto-reload on chunk load errors
-    if (isChunkError(error)) {
-      const lastReload = Number(sessionStorage.getItem('__chunk_reload_ts') || '0');
-      if (Date.now() - lastReload > 30000) {
-        sessionStorage.setItem('__chunk_reload_ts', String(Date.now()));
-        window.location.reload();
-      }
-    }
   }
 
   render() {
@@ -61,11 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
               variant="outline"
               size="sm"
               onClick={() => {
-                if (isChunkError(this.state.error)) {
-                  window.location.reload();
-                } else {
-                  this.setState({ hasError: false, error: null });
-                }
+                this.setState({ hasError: false, error: null });
               }}
             >
               <RefreshCw className="ml-2 h-4 w-4" />
