@@ -21114,6 +21114,270 @@ export type Database = {
         }
         Relationships: []
       }
+      quick_link_fields: {
+        Row: {
+          allowed_values: Json | null
+          created_at: string
+          default_value: string | null
+          field_label: string
+          field_mode: Database["public"]["Enums"]["quick_link_field_mode"]
+          field_name: string
+          field_type: string
+          fixed_value: string | null
+          id: string
+          is_required: boolean
+          is_visible: boolean
+          link_id: string
+          max_value: number | null
+          min_value: number | null
+          sort_order: number
+        }
+        Insert: {
+          allowed_values?: Json | null
+          created_at?: string
+          default_value?: string | null
+          field_label: string
+          field_mode?: Database["public"]["Enums"]["quick_link_field_mode"]
+          field_name: string
+          field_type?: string
+          fixed_value?: string | null
+          id?: string
+          is_required?: boolean
+          is_visible?: boolean
+          link_id: string
+          max_value?: number | null
+          min_value?: number | null
+          sort_order?: number
+        }
+        Update: {
+          allowed_values?: Json | null
+          created_at?: string
+          default_value?: string | null
+          field_label?: string
+          field_mode?: Database["public"]["Enums"]["quick_link_field_mode"]
+          field_name?: string
+          field_type?: string
+          fixed_value?: string | null
+          id?: string
+          is_required?: boolean
+          is_visible?: boolean
+          link_id?: string
+          max_value?: number | null
+          min_value?: number | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quick_link_fields_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "quick_shipment_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quick_link_submissions: {
+        Row: {
+          auto_created_profile_id: string | null
+          created_at: string
+          driver_name: string
+          driver_phone: string
+          driver_profile_id: string | null
+          form_data: Json
+          gps_lat: number | null
+          gps_lng: number | null
+          id: string
+          ip_address: string | null
+          link_id: string
+          organization_id: string
+          photo_urls: string[] | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          shipment_id: string | null
+          signature_url: string | null
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          auto_created_profile_id?: string | null
+          created_at?: string
+          driver_name: string
+          driver_phone: string
+          driver_profile_id?: string | null
+          form_data?: Json
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          organization_id: string
+          photo_urls?: string[] | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shipment_id?: string | null
+          signature_url?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Update: {
+          auto_created_profile_id?: string | null
+          created_at?: string
+          driver_name?: string
+          driver_phone?: string
+          driver_profile_id?: string | null
+          form_data?: Json
+          gps_lat?: number | null
+          gps_lng?: number | null
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          organization_id?: string
+          photo_urls?: string[] | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shipment_id?: string | null
+          signature_url?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quick_link_submissions_auto_created_profile_id_fkey"
+            columns: ["auto_created_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_link_submissions_driver_profile_id_fkey"
+            columns: ["driver_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_link_submissions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "quick_shipment_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_link_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "quick_link_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_link_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_link_submissions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quick_shipment_links: {
+        Row: {
+          assigned_driver_id: string | null
+          auto_capture_gps: boolean
+          created_at: string
+          created_by: string
+          current_uses: number
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          link_code: string
+          link_name: string
+          max_uses: number | null
+          organization_id: string
+          requires_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          assigned_driver_id?: string | null
+          auto_capture_gps?: boolean
+          created_at?: string
+          created_by: string
+          current_uses?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_code: string
+          link_name: string
+          max_uses?: number | null
+          organization_id: string
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          assigned_driver_id?: string | null
+          auto_capture_gps?: boolean
+          created_at?: string
+          created_by?: string
+          current_uses?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          link_code?: string
+          link_name?: string
+          max_uses?: number | null
+          organization_id?: string
+          requires_approval?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quick_shipment_links_assigned_driver_id_fkey"
+            columns: ["assigned_driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_shipment_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_shipment_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "quick_shipment_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recruitment_agencies: {
         Row: {
           agency_name: string
@@ -30077,6 +30341,7 @@ export type Database = {
         | "iso_body"
         | "regulator"
         | "transport_office"
+      quick_link_field_mode: "fixed" | "restricted_list" | "free_input"
       shipment_status:
         | "new"
         | "registered"
@@ -30295,6 +30560,7 @@ export const Constants = {
         "regulator",
         "transport_office",
       ],
+      quick_link_field_mode: ["fixed", "restricted_list", "free_input"],
       shipment_status: [
         "new",
         "registered",
