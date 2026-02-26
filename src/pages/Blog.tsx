@@ -1,104 +1,150 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
-import { lazy, Suspense } from "react";
-import { BookOpen, Calendar, ArrowLeft, ArrowRight } from "lucide-react";
+import Footer from "@/components/Footer";
+import { BookOpen, Calendar, ArrowLeft, ArrowRight, Clock, User, Sparkles, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const Footer = lazy(() => import("@/components/Footer"));
-
-// Static blog content (will be replaced with dynamic content from DB later)
-const articles = [
-  {
-    id: '1',
-    titleAr: 'دليل تصنيف النفايات البلدية في مصر',
-    titleEn: 'Guide to Municipal Waste Classification in Egypt',
-    excerptAr: 'تعرف على التصنيفات الرسمية للنفايات البلدية طبقًا لقانون إدارة المخلفات رقم 202 لسنة 2020 وكيفية التعامل مع كل نوع.',
-    excerptEn: 'Learn about official municipal waste classifications under Waste Management Law 202/2020 and how to handle each type.',
-    category: 'municipal',
-    categoryAr: 'نفايات بلدية',
-    categoryEn: 'Municipal Waste',
-    date: '2025-02-20',
-    color: 'bg-emerald-500/10 text-emerald-600',
-  },
-  {
-    id: '2',
-    titleAr: 'المخلفات الطبية: مخاطرها وطرق التخلص الآمن',
-    titleEn: 'Medical Waste: Risks and Safe Disposal Methods',
-    excerptAr: 'المخلفات الطبية من أخطر أنواع النفايات. نستعرض في هذا المقال الإرشادات المصرية والدولية للتعامل الآمن معها.',
-    excerptEn: 'Medical waste is among the most hazardous. This article covers Egyptian and international guidelines for safe handling.',
-    category: 'medical',
-    categoryAr: 'نفايات طبية',
-    categoryEn: 'Medical Waste',
-    date: '2025-02-15',
-    color: 'bg-red-500/10 text-red-600',
-  },
-  {
-    id: '3',
-    titleAr: 'النفايات الإلكترونية: ثروة مهدرة في مصر',
-    titleEn: 'E-Waste: A Wasted Treasure in Egypt',
-    excerptAr: 'مصر تنتج أكثر من 50 ألف طن نفايات إلكترونية سنويًا. كيف يمكن تحويلها من عبء بيئي إلى فرصة اقتصادية؟',
-    excerptEn: 'Egypt produces over 50,000 tons of e-waste annually. How can we turn this environmental burden into an economic opportunity?',
-    category: 'electronic',
-    categoryAr: 'نفايات إلكترونية',
-    categoryEn: 'E-Waste',
-    date: '2025-02-10',
-    color: 'bg-amber-500/10 text-amber-600',
-  },
-  {
-    id: '4',
-    titleAr: 'اقتصاد التدوير الدائري: مستقبل الصناعة المصرية',
-    titleEn: 'Circular Economy: The Future of Egyptian Industry',
-    excerptAr: 'كيف يمكن لمبادئ الاقتصاد الدائري أن تحول قطاع إدارة النفايات في مصر وتخلق آلاف فرص العمل الجديدة.',
-    excerptEn: 'How circular economy principles can transform Egypt\'s waste management sector and create thousands of new jobs.',
-    category: 'industry',
-    categoryAr: 'صناعة التدوير',
-    categoryEn: 'Recycling Industry',
-    date: '2025-02-05',
-    color: 'bg-blue-500/10 text-blue-600',
-  },
-];
+const formatDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 
 const Blog = () => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const isAr = language === 'ar';
 
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ['blog-posts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blog_posts' as any)
+        .select('*')
+        .eq('is_published', true)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const featured = posts.filter((p: any) => p.is_featured);
+  const regular = posts.filter((p: any) => !p.is_featured);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" dir="rtl">
       <Header />
-      <main className="container mx-auto px-4 pt-28 pb-16 max-w-5xl">
+      <main className="container mx-auto px-4 pt-32 pb-16 max-w-5xl">
+        {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3 text-foreground">{isAr ? 'مدونة iRecycle' : 'iRecycle Blog'}</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">{isAr ? 'مقالات ونصائح حول إدارة النفايات وإعادة التدوير في مصر' : 'Articles and tips on waste management and recycling in Egypt'}</p>
+          <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-bold mb-4 border border-primary/20">
+            <Sparkles className="h-4 w-4" />
+            {isAr ? 'مقالات ونصائح بيئية' : 'Environmental Articles & Tips'}
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3 text-foreground">
+            <BookOpen className="inline-block w-8 h-8 ml-2 text-primary" />
+            {isAr ? 'مدونة iRecycle' : 'iRecycle Blog'}
+          </h1>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            {isAr ? 'مقالات ونصائح حول إدارة النفايات وإعادة التدوير في مصر' : 'Articles and tips on waste management and recycling in Egypt'}
+          </p>
         </div>
 
+        {/* Loading */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64 rounded-2xl" />)}
+          </div>
+        )}
+
+        {/* Featured */}
+        {featured.length > 0 && (
+          <div className="mb-10">
+            {featured.map((article: any) => (
+              <div
+                key={article.id}
+                onClick={() => navigate(`/blog/${article.slug}`)}
+                className="group relative rounded-2xl overflow-hidden cursor-pointer hover:shadow-2xl transition-shadow"
+              >
+                <div className={`w-full h-64 sm:h-80 bg-gradient-to-br ${article.cover_gradient} flex items-center justify-center relative`}>
+                  <div className="absolute inset-0 bg-black/30" />
+                  <div className="relative z-10 text-center text-white px-6">
+                    <Badge className="bg-amber-500 text-amber-950 border-0 mb-3 gap-1">
+                      <Star className="w-3 h-3 fill-amber-950" />مقال مميز
+                    </Badge>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
+                      {isAr ? article.title : (article.title_en || article.title)}
+                    </h2>
+                    <p className="text-white/80 max-w-2xl mx-auto text-sm sm:text-base">
+                      {isAr ? article.excerpt : (article.excerpt_en || article.excerpt)}
+                    </p>
+                    <div className="flex items-center justify-center gap-4 mt-4 text-white/70 text-xs">
+                      <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{formatDate(article.published_at || article.created_at)}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{article.reading_time_minutes} د</span>
+                      <span className="flex items-center gap-1"><User className="w-3 h-3" />{article.author_name}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Regular Posts Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {articles.map((article) => (
-            <article key={article.id} className="group border border-border/50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow bg-card">
+          {regular.map((article: any) => (
+            <article
+              key={article.id}
+              onClick={() => navigate(`/blog/${article.slug}`)}
+              className="group border border-border/50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow bg-card cursor-pointer"
+            >
+              <div className={`h-32 bg-gradient-to-br ${article.cover_gradient} flex items-center justify-center`}>
+                <BookOpen className="w-10 h-10 text-white/70" />
+              </div>
               <div className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${article.color}`}>
-                    {isAr ? article.categoryAr : article.categoryEn}
-                  </span>
+                <div className="flex items-center gap-3 mb-3">
+                  <Badge variant="secondary" className="text-xs">
+                    {isAr ? article.category : (article.category_en || article.category)}
+                  </Badge>
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    {article.date}
+                    {formatDate(article.published_at || article.created_at)}
+                  </span>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {article.reading_time_minutes} د
                   </span>
                 </div>
-                <h2 className="text-lg font-bold text-foreground mb-3 group-hover:text-primary transition-colors leading-tight">
-                  {isAr ? article.titleAr : article.titleEn}
+                <h2 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors leading-tight">
+                  {isAr ? article.title : (article.title_en || article.title)}
                 </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                  {isAr ? article.excerptAr : article.excerptEn}
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2">
+                  {isAr ? article.excerpt : (article.excerpt_en || article.excerpt)}
                 </p>
-                <button className="text-sm font-medium text-primary flex items-center gap-1 hover:gap-2 transition-all">
-                  {isAr ? 'اقرأ المزيد' : 'Read More'}
-                  {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-                </button>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <User className="w-3 h-3" />{article.author_name}
+                  </span>
+                  <span className="text-sm font-medium text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                    {isAr ? 'اقرأ المزيد' : 'Read More'}
+                    {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                  </span>
+                </div>
               </div>
             </article>
           ))}
         </div>
+
+        {!isLoading && posts.length === 0 && (
+          <div className="text-center py-16 text-muted-foreground">
+            <BookOpen className="w-16 h-16 mx-auto mb-4 opacity-30" />
+            <p className="text-lg">{isAr ? 'لا توجد مقالات حالياً' : 'No articles yet'}</p>
+          </div>
+        )}
       </main>
-      <Suspense fallback={null}><Footer /></Suspense>
+      <Footer />
     </div>
   );
 };

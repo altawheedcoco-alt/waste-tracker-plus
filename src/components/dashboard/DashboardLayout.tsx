@@ -454,6 +454,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Activity, label: language === 'ar' ? 'نظرة عامة على النظام' : 'System Overview', path: '/dashboard/system-overview', key: 'system-overview' },
             { icon: Settings, label: language === 'ar' ? 'أوامر النظام' : 'System Commands', path: '/dashboard/system-commands', key: 'system-commands' },
             { icon: Newspaper, label: language === 'ar' ? 'إدارة الأخبار' : 'News Manager', path: '/dashboard/news-manager', key: 'news-manager' },
+            { icon: BookOpen, label: language === 'ar' ? 'إدارة المدونة' : 'Blog Manager', path: '/dashboard/blog-manager', key: 'blog-manager' },
             { icon: CheckSquare, label: t('sidebar.companyApprovals'), path: '/dashboard/company-approvals', badge: sectionBadges['company-approvals'], key: 'company-approvals' },
             { icon: Building2, label: language === 'ar' ? 'إدارة الشركات' : 'Company Management', path: '/dashboard/company-management', key: 'company-management' },
             { icon: UserPlus, label: t('sidebar.driverApprovals'), path: '/dashboard/driver-approvals', badge: sectionBadges['driver-approvals'], key: 'driver-approvals' },

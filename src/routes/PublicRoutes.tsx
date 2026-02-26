@@ -27,6 +27,7 @@ const Privacy = lazy(() => import("@/pages/Privacy"));
 const Help = lazy(() => import("@/pages/Help"));
 const MapPage = lazy(() => import("@/pages/MapPage"));
 const Blog = lazy(() => import("@/pages/Blog"));
+const BlogPost = lazy(() => import("@/pages/BlogPost"));
 const Academy = lazy(() => import("@/pages/Academy"));
 const Partnerships = lazy(() => import("@/pages/Partnerships"));
 const Legislation = lazy(() => import("@/pages/Legislation"));
@@ -72,6 +73,7 @@ export const publicRoutes = (
     <Route path="/help" element={<Help />} />
     <Route path="/map" element={<MapPage />} />
     <Route path="/blog" element={<Blog />} />
+    <Route path="/blog/:slug" element={<BlogPost />} />
     <Route path="/academy" element={<Academy />} />
     <Route path="/partnerships" element={<Partnerships />} />
     <Route path="/legislation" element={<Legislation />} />

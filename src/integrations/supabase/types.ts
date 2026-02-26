@@ -2305,6 +2305,90 @@ export type Database = {
           },
         ]
       }
+      blog_posts: {
+        Row: {
+          author_avatar_url: string | null
+          author_name: string | null
+          category: string
+          category_en: string | null
+          content: string
+          content_en: string | null
+          cover_gradient: string | null
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          excerpt: string
+          excerpt_en: string | null
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          published_at: string | null
+          reading_time_minutes: number | null
+          slug: string
+          sort_order: number | null
+          tags: string[] | null
+          template_style: string
+          title: string
+          title_en: string | null
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_name?: string | null
+          category?: string
+          category_en?: string | null
+          content: string
+          content_en?: string | null
+          cover_gradient?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          excerpt: string
+          excerpt_en?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          slug: string
+          sort_order?: number | null
+          tags?: string[] | null
+          template_style?: string
+          title: string
+          title_en?: string | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_name?: string | null
+          category?: string
+          category_en?: string | null
+          content?: string
+          content_en?: string | null
+          cover_gradient?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string
+          excerpt_en?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          reading_time_minutes?: number | null
+          slug?: string
+          sort_order?: number | null
+          tags?: string[] | null
+          template_style?: string
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: []
+      }
       broker_deals: {
         Row: {
           created_at: string
