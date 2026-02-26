@@ -118,12 +118,15 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
       
       {/* Progress indicator - visual only */}
       <div className="flex items-center gap-1.5 justify-center opacity-60">
-        {['وجهة', 'أطراف', 'سائق', 'مخلفات', 'مواقع', 'كمية', 'تسعير'].map((step, i) => (
+        {['أطراف *', 'كمية *', 'مخلفات', 'سائق', 'مواقع', 'تسعير'].map((step, i) => (
           <div key={step} className="flex items-center gap-1.5">
-            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center border border-primary/20">
+            <span className={cn(
+              "w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center border",
+              i < 2 ? 'bg-primary/20 text-primary border-primary/30' : 'bg-primary/10 text-primary border-primary/20'
+            )}>
               {i + 1}
             </span>
-            {i < 6 && <div className="w-3 h-px bg-border" />}
+            {i < 5 && <div className="w-3 h-px bg-border" />}
           </div>
         ))}
       </div>
@@ -193,7 +196,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
       )}
 
       {/* ══════════ SECTION 2: Parties ══════════ */}
-      <FormSection icon={User} title="أطراف الشحنة" subtitle="الشركة المولدة، الناقل، والوجهة">
+      <FormSection icon={User} title="أطراف الشحنة *" subtitle="الجهة المولدة والوجهة — إلزامي">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">الشركة المولدة *</Label>
@@ -209,7 +212,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium">شركة النقل *</Label>
+            <Label className="text-xs font-medium">شركة النقل</Label>
             {isDriver ? (
               <Input value={driverOrganization?.name || 'غير محدد'} disabled className="bg-muted" />
             ) : isAdmin ? (
@@ -347,7 +350,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
 
       {/* ══════════ SECTION 3b: Driver (non-driver input) ══════════ */}
       {!isDriver && (
-        <FormSection icon={Truck} title="بيانات السائق" subtitle="أدخل بيانات السائق يدوياً أو اختر من القائمة">
+        <FormSection icon={Truck} title="بيانات السائق (اختياري)" subtitle="أدخل بيانات السائق يدوياً أو اختر من القائمة">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">طريقة الإدخال</Label>
             <Select value={driverInputType} onValueChange={(v) => setDriverInputType(v as 'select' | 'manual')}>
@@ -423,12 +426,12 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
       {/* ══════════ SECTION 4: Waste Details ══════════ */}
       <FormSection 
         icon={Package} 
-        title="تفاصيل المخلفات" 
+        title="تفاصيل المخلفات (اختياري)" 
         subtitle="نوع وحالة وخطورة المخلفات"
         accentColor={formData.hazard_level === 'hazardous' ? 'destructive' : 'primary'}
       >
         <div className="space-y-1.5">
-          <Label className="text-xs font-medium">نوع المخلف *</Label>
+          <Label className="text-xs font-medium">نوع المخلف</Label>
           <FlexibleWasteTypeSelector
             value={formData.waste_description || ''}
             onChange={(wasteType, hazardLevel, wasteDescription) => {
@@ -537,7 +540,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
       </FormSection>
 
       {/* ══════════ SECTION 5: Locations ══════════ */}
-      <FormSection icon={MapPin} title="المواقع" subtitle="موقع الاستلام والتسليم">
+      <FormSection icon={MapPin} title="المواقع (اختياري)" subtitle="تُعبأ تلقائياً من بيانات الجهات المسجلة — يمكنك تعديلها">
         {/* Quick Actions Bar */}
         <div className="flex items-center gap-2 flex-wrap">
           {(formData.pickup_address || formData.delivery_address) && (
@@ -660,7 +663,7 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
       </FormSection>
 
       {/* ══════════ SECTION 6: Quantity, Dates & Type ══════════ */}
-      <FormSection icon={Scale} title="الكمية والجدولة" subtitle="الوزن والتواريخ ونوع النقلة">
+      <FormSection icon={Scale} title="الكمية والجدولة" subtitle="الكمية إلزامية — التواريخ ونوع النقلة اختيارية">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">الكمية (كجم) *</Label>
