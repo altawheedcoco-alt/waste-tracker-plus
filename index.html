@@ -81,10 +81,14 @@
       setTimeout(function () {
         var loader = document.getElementById('initial-loader');
         var root = document.getElementById('root');
-        if (loader && root && root.contains(loader)) {
+        var isBootstrapped = Boolean(window.__APP_BOOTSTRAPPED__);
+
+        if (!isBootstrapped && loader && root && root.contains(loader)) {
           var p = document.createElement('p');
           p.style.cssText = 'direction:rtl;font-family:Cairo,sans-serif;text-align:center;color:#666;font-size:14px;';
-          p.innerHTML = 'التحميل يستغرق وقتاً أطول من المتوقع...<br/><button onclick="location.reload()" style="margin-top:12px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">إعادة تحميل</button>';
+          p.innerHTML = 'التحميل يستغرق وقتاً أطول من المتوقع...<br/>' +
+            '<button onclick="location.reload()" style="margin-top:12px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">إعادة تحميل</button>' +
+            '<br/><button onclick="location.replace(location.pathname + \"?v=\" + Date.now())" style="margin-top:8px;padding:8px 24px;background:#065f46;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;">فتح النسخة المحدثة</button>';
           loader.appendChild(p);
         }
       }, 10000);
