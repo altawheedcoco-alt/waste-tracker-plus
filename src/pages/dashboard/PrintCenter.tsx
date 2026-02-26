@@ -4,7 +4,7 @@ import {
   FileText, Printer, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
   Eye, Download, CheckSquare, Square, CheckCircle, ArrowRight,
-  PenTool, Stamp
+  PenTool, Stamp, FileArchive, FolderOpen, FileBadge
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +27,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
-type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'all';
+type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'contracts' | 'org_documents' | 'stored_pdfs' | 'all';
 
 const DOC_TYPES: { id: DocType; label: string; icon: React.ReactNode }[] = [
   { id: 'all', label: 'جميع المستندات', icon: <FileStack className="h-4 w-4" /> },
@@ -38,6 +38,9 @@ const DOC_TYPES: { id: DocType; label: string; icon: React.ReactNode }[] = [
   { id: 'receipts', label: 'إيصالات الاستلام', icon: <Package className="h-4 w-4" /> },
   { id: 'signing', label: 'طلبات التوقيع', icon: <PenTool className="h-4 w-4" /> },
   { id: 'signatures', label: 'التوقيعات الرقمية', icon: <Stamp className="h-4 w-4" /> },
+  { id: 'contracts', label: 'العقود', icon: <FileBadge className="h-4 w-4" /> },
+  { id: 'org_documents', label: 'مستندات المنظمة', icon: <FolderOpen className="h-4 w-4" /> },
+  { id: 'stored_pdfs', label: 'ملفات PDF المخزنة', icon: <FileArchive className="h-4 w-4" /> },
 ];
 
 interface DocumentItem {
@@ -298,6 +301,87 @@ const PrintCenter = () => {
         });
       }
 
+      // Contracts
+      if (isAll || selectedDocTypes.includes('contracts')) {
+        let cq = supabase
+          .from('contracts')
+          .select('id, contract_number, title, status, value, start_date, end_date, attachment_url, created_at, organization_id, partner_organization_id, partner_org:organizations!contracts_partner_organization_id_fkey(name)')
+          .or(`organization_id.eq.${orgId},partner_organization_id.eq.${orgId}`)
+          .gte('created_at', fromISO)
+          .lte('created_at', toISO)
+          .order('created_at', { ascending: false });
+
+        if (selectedPartner !== 'all') {
+          cq = cq.or(`organization_id.eq.${selectedPartner},partner_organization_id.eq.${selectedPartner}`);
+        }
+
+        const { data } = await cq;
+        (data || []).forEach((c: any) => {
+          items.push({
+            id: `cont-${c.id}`,
+            type: 'contracts',
+            typeLabel: 'عقد',
+            title: `عقد - ${c.contract_number || c.title || c.id.substring(0, 8)}`,
+            subtitle: `${(c.partner_org as any)?.name || '-'} • ${c.value ? `${Number(c.value).toLocaleString('ar-EG')} ج.م` : '-'} • ${c.status || '-'}`,
+            date: c.created_at,
+            status: c.status || 'draft',
+            rawData: c,
+          });
+        });
+      }
+
+      // Organization Documents
+      if (isAll || selectedDocTypes.includes('org_documents')) {
+        const { data } = await supabase
+          .from('organization_documents')
+          .select('id, document_type, file_url, verification_status, notes, created_at, organization_id')
+          .eq('organization_id', orgId!)
+          .gte('created_at', fromISO)
+          .lte('created_at', toISO)
+          .order('created_at', { ascending: false });
+
+        (data || []).forEach((d: any) => {
+          items.push({
+            id: `orgdoc-${d.id}`,
+            type: 'org_documents',
+            typeLabel: 'مستند منظمة',
+            title: `${d.document_type || 'مستند'} - ${d.id.substring(0, 8)}`,
+            subtitle: `${d.notes || '-'} • حالة التحقق: ${d.verification_status || '-'}`,
+            date: d.created_at,
+            status: d.verification_status || 'pending',
+            rawData: d,
+          });
+        });
+      }
+
+      // Stored PDFs from storage bucket
+      if (isAll || selectedDocTypes.includes('stored_pdfs')) {
+        try {
+          const userId = (await supabase.auth.getUser()).data.user?.id;
+          if (userId) {
+            const folderPath = orgId ? `${userId}/${orgId}` : userId;
+            const { data: files } = await supabase.storage
+              .from('pdf-documents')
+              .list(folderPath, { sortBy: { column: 'created_at', order: 'desc' } });
+
+            (files || []).filter(f => f.name.endsWith('.pdf')).forEach((f: any) => {
+              items.push({
+                id: `pdf-${f.id || f.name}`,
+                type: 'stored_pdfs',
+                typeLabel: 'ملف PDF',
+                title: f.name.replace(/^\d+-/, '').replace(/_/g, ' '),
+                subtitle: `${(f.metadata?.size ? (f.metadata.size / 1024).toFixed(1) : '?')} كيلوبايت`,
+                date: f.created_at || new Date().toISOString(),
+                status: 'stored',
+                rawData: { ...f, storagePath: `${folderPath}/${f.name}` },
+              });
+            });
+          }
+        } catch (e) {
+          console.warn('Could not list stored PDFs:', e);
+        }
+      }
+
       return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     },
   });
@@ -312,14 +396,15 @@ const PrintCenter = () => {
       new: 'جديدة', pending: 'معلقة', approved: 'معتمدة', collecting: 'قيد الجمع',
       in_transit: 'في الطريق', delivered: 'تم التسليم', draft: 'مسودة',
       confirmed: 'مؤكدة', cancelled: 'ملغاة', completed: 'مكتملة', paid: 'مدفوعة',
-      signed: 'موقّع', rejected: 'مرفوض',
+      signed: 'موقّع', rejected: 'مرفوض', active: 'ساري', expired: 'منتهي',
+      verified: 'موثّق', stored: 'مخزّن',
     };
     return map[s] || s;
   };
 
   const statusColor = (s: string) => {
-    if (['delivered', 'confirmed', 'completed', 'paid', 'signed'].includes(s)) return 'default';
-    if (['cancelled', 'rejected'].includes(s)) return 'destructive';
+    if (['delivered', 'confirmed', 'completed', 'paid', 'signed', 'active', 'verified', 'stored'].includes(s)) return 'default';
+    if (['cancelled', 'rejected', 'expired'].includes(s)) return 'destructive';
     return 'secondary';
   };
 
@@ -448,6 +533,24 @@ const PrintCenter = () => {
           return `<tr><td>${i+1}</td><td>${r.document_type || '-'}</td><td>${r.signer_name || '-'}</td><td>${r.signer_role || '-'}</td><td>${r.signature_method || '-'}</td><td>${r.stamp_applied ? '✅ مختوم' : '—'}</td><td>${r.platform_seal_number || '—'}</td><td style="font-size:8px;font-family:monospace;">${r.document_hash ? r.document_hash.substring(0, 16) + '...' : '—'}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd HH:mm') : '-'}</td></tr>`;
         }).join('')}
         </tbody></table>`;
+      } else if (type === 'contracts') {
+        tablesHtml += `<h2>📑 ${label} (${items.length})</h2>
+        <table><thead><tr><th>#</th><th>رقم العقد</th><th>العنوان</th><th>الجهة</th><th>القيمة</th><th>بداية</th><th>نهاية</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody>
+        ${items.map((d, i) => {
+          const r = d.rawData;
+          return `<tr><td>${i+1}</td><td>${r.contract_number || '-'}</td><td>${r.title || '-'}</td><td>${r.partner_org?.name || '-'}</td><td>${r.value ? Number(r.value).toLocaleString('ar-EG') + ' ج.م' : '-'}</td><td>${r.start_date ? format(new Date(r.start_date), 'yyyy/MM/dd') : '-'}</td><td>${r.end_date ? format(new Date(r.end_date), 'yyyy/MM/dd') : '-'}</td><td><span class="badge badge-s">${statusLabel(d.status)}</span></td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd') : '-'}</td></tr>`;
+        }).join('')}
+        </tbody></table>`;
+      } else if (type === 'org_documents') {
+        tablesHtml += `<h2>📁 ${label} (${items.length})</h2>
+        <table><thead><tr><th>#</th><th>نوع المستند</th><th>ملاحظات</th><th>حالة التحقق</th><th>التاريخ</th></tr></thead><tbody>
+        ${items.map((d, i) => `<tr><td>${i+1}</td><td>${d.rawData.document_type || '-'}</td><td>${d.rawData.notes || '-'}</td><td><span class="badge badge-s">${statusLabel(d.status)}</span></td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd') : '-'}</td></tr>`).join('')}
+        </tbody></table>`;
+      } else if (type === 'stored_pdfs') {
+        tablesHtml += `<h2>💾 ${label} (${items.length})</h2>
+        <table><thead><tr><th>#</th><th>اسم الملف</th><th>الحجم</th><th>التاريخ</th></tr></thead><tbody>
+        ${items.map((d, i) => `<tr><td>${i+1}</td><td>${d.title}</td><td>${d.subtitle}</td><td>${d.date ? format(new Date(d.date), 'yyyy/MM/dd HH:mm') : '-'}</td></tr>`).join('')}
+        </tbody></table>`;
       }
     }
 
@@ -517,7 +620,7 @@ const PrintCenter = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
         {DOC_TYPES.filter(d => d.id !== 'all').map(dt => (
           <Card key={dt.id} className={`cursor-pointer transition-all ${
             selectedDocTypes.includes(dt.id) || selectedDocTypes.includes('all') ? 'ring-2 ring-primary/30' : 'opacity-60'
@@ -677,6 +780,22 @@ const PrintCenter = () => {
                       <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                         {doc.date ? format(new Date(doc.date), 'MM/dd HH:mm') : '-'}
                       </span>
+                      {/* Download button for docs with file URLs */}
+                      {(doc.rawData.attachment_url || doc.rawData.file_url || doc.rawData.storagePath) && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title="تحميل الملف"
+                          onClick={async () => {
+                            const url = doc.rawData.attachment_url || doc.rawData.file_url;
+                            if (url) {
+                              window.open(url, '_blank');
+                            } else if (doc.rawData.storagePath) {
+                              const { data } = await supabase.storage.from('pdf-documents').createSignedUrl(doc.rawData.storagePath, 3600);
+                              if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                              else toast.error('فشل في الحصول على رابط التحميل');
+                            }
+                          }}>
+                          <Download className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => printSingle(doc)} title="طباعة">
                         <Printer className="h-3.5 w-3.5" />
                       </Button>
