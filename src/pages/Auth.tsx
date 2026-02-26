@@ -660,6 +660,16 @@ const Auth = () => {
                     )}
                   </div>
 
+                  <div className="text-left">
+                    <button
+                      type="button"
+                      onClick={() => navigate('/reset-password')}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {t('auth.forgotPassword')}
+                    </button>
+                  </div>
+
                   <Button
                     type="submit"
                     variant="eco"
