@@ -1,6 +1,5 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
 import "./index.css";
 
 const hasBackendEnv = Boolean(
@@ -24,8 +23,14 @@ window.addEventListener('unhandledrejection', (event) => {
   console.error('Unhandled promise rejection:', event.reason);
 });
 
-const rootElement = document.getElementById("root");
-if (rootElement) {
+const renderFatalError = (rootElement: HTMLElement) => {
+  rootElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;direction:rtl;font-family:Cairo,sans-serif;"><div style="text-align:center;"><h2>تعذر تشغيل التطبيق</h2><p>حدث خطأ أثناء تحميل ملفات التطبيق.</p><button onclick="location.reload()" style="margin-top:16px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">تحديث</button></div></div>';
+};
+
+const bootstrapApp = async () => {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) return;
+
   const initialLoader = document.getElementById('initial-loader');
   if (initialLoader) {
     initialLoader.remove();
@@ -36,6 +41,7 @@ if (rootElement) {
   }
 
   try {
+    const { default: App } = await import("./App.tsx");
     createRoot(rootElement).render(
       <React.StrictMode>
         <App />
@@ -43,8 +49,11 @@ if (rootElement) {
     );
     (window as any).__APP_BOOTSTRAPPED__ = true;
   } catch (err) {
-    console.error('Failed to render app:', err);
-    rootElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;direction:rtl;font-family:Cairo,sans-serif;"><div style="text-align:center;"><h2>حدث خطأ في تحميل التطبيق</h2><p>يرجى تحديث الصفحة</p><button onclick="location.reload()" style="margin-top:16px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">تحديث</button></div></div>';
+    console.error('Failed to bootstrap app:', err);
+    (window as any).__APP_BOOTSTRAPPED__ = true;
+    renderFatalError(rootElement);
   }
-}
+};
+
+bootstrapApp();
 
