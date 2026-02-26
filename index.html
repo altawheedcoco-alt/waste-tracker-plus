@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>آي ريسايكل - نظام إدارة النفايات في مصر | حلول بيئية ذكية</title>
-    <!-- build v7 -->
+    <!-- build v8 -->
     <meta name="description" content="نظام متكامل لإدارة النفايات والحفاظ على البيئة في مصر. تتبع ومراقبة شحنات النفايات من المصدر إلى وجهتها النهائية مع تقارير بيئية شاملة.">
     <meta name="keywords" content="إدارة النفايات مصر, إعادة التدوير, تتبع الشحنات, البيئة, الاستدامة, النفايات الصناعية, التخلص الآمن, جهاز تنظيم إدارة المخلفات" />
     <meta name="geo.region" content="EG" />
@@ -76,6 +76,29 @@
         <div style="width:40px;height:40px;border:3px solid #10b981;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></div>
       </div>
     </div>
+    <script>
+      // Clear all browser caches on first load after deploy
+      (function() {
+        var cacheKey = 'irecycle-build-v8';
+        if (!localStorage.getItem(cacheKey)) {
+          // Clear old build markers
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.startsWith('irecycle-build-')) localStorage.removeItem(k);
+          });
+          localStorage.setItem(cacheKey, '1');
+          // Clear Cache API if available
+          if ('caches' in window) {
+            caches.keys().then(function(names) {
+              names.forEach(function(name) { caches.delete(name); });
+            });
+          }
+          // Force fresh load if this is a stale page
+          if (performance.navigation && performance.navigation.type !== 1) {
+            location.replace(location.pathname + '?v=' + Date.now());
+          }
+        }
+      })();
+    </script>
     <script>
       // Recovery: if app hasn't bootstrapped in 8s, offer cache-busted reload
       setTimeout(function () {
