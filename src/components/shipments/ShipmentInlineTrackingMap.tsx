@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import MapDisabledPlaceholder from '@/components/maps/MapDisabledPlaceholder';
+import LeafletShipmentTracking from '@/components/maps/LeafletShipmentTracking';
 
-const ShipmentInlineTrackingMap = memo((_props: any) => (
-  <MapDisabledPlaceholder height="300px" />
+const ShipmentInlineTrackingMap = memo((props: any) => (
+  <LeafletShipmentTracking height="300px" {...props} />
 ));
 ShipmentInlineTrackingMap.displayName = 'ShipmentInlineTrackingMap';
 export default ShipmentInlineTrackingMap;

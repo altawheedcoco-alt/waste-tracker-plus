@@ -1,7 +1,7 @@
-import MapDisabledPlaceholder from '@/components/maps/MapDisabledPlaceholder';
+import MapboxLocationPicker from '@/components/maps/MapboxLocationPicker';
 
-const AddLocationForm = (_props: any) => (
-  <MapDisabledPlaceholder height="300px" />
+const AddLocationForm = (props: any) => (
+  <MapboxLocationPicker height="300px" {...props} />
 );
 
 export default AddLocationForm;

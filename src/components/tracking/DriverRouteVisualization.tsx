@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import MapDisabledPlaceholder from '@/components/maps/MapDisabledPlaceholder';
+import LeafletDriverHistory from '@/components/maps/LeafletDriverHistory';
 
-const DriverRouteVisualization = memo((_props: any) => (
-  <MapDisabledPlaceholder height="400px" />
+const DriverRouteVisualization = memo((props: any) => (
+  <LeafletDriverHistory height="400px" {...props} />
 ));
 DriverRouteVisualization.displayName = 'DriverRouteVisualization';
 export default DriverRouteVisualization;

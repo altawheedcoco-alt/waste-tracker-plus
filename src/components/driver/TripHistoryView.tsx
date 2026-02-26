@@ -1,7 +1,7 @@
-import MapDisabledPlaceholder from '@/components/maps/MapDisabledPlaceholder';
+import LeafletDriverHistory from '@/components/maps/LeafletDriverHistory';
 
-const TripHistoryView = (_props: any) => (
-  <MapDisabledPlaceholder height="400px" />
+const TripHistoryView = (props: any) => (
+  <LeafletDriverHistory height="400px" {...props} />
 );
 
 export default TripHistoryView;

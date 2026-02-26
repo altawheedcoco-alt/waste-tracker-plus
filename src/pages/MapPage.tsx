@@ -1,19 +1,37 @@
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
 import Header from "@/components/Header";
-import MapDisabledPlaceholder from "@/components/maps/MapDisabledPlaceholder";
 import { Map } from "lucide-react";
+import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
 
-const MapPage = () => (
-  <div className="min-h-screen bg-background">
-    <Header />
-    <div className="container mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-        <Map className="w-7 h-7 text-primary" />
-        خريطة المجتمع التفاعلية
-      </h1>
-      <p className="text-sm text-muted-foreground">الخرائط معطلة حالياً</p>
-      <MapDisabledPlaceholder height="500px" />
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
+
+const MapPage = () => {
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const map = L.map(mapRef.current).setView(EGYPT_CENTER, DEFAULT_ZOOM);
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION }).addTo(map);
+    return () => { map.remove(); };
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container mx-auto p-4 space-y-4">
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <Map className="w-7 h-7 text-primary" />
+          خريطة المجتمع التفاعلية
+        </h1>
+        <div ref={mapRef} className="rounded-lg border border-border" style={{ height: '500px' }} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default MapPage;

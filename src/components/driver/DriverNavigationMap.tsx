@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import MapDisabledPlaceholder from '@/components/maps/MapDisabledPlaceholder';
+import LeafletShipmentTracking from '@/components/maps/LeafletShipmentTracking';
 
-const DriverNavigationMap = memo((_props: any) => (
-  <MapDisabledPlaceholder height="100%" />
+const DriverNavigationMap = memo((props: any) => (
+  <LeafletShipmentTracking height="100%" {...props} />
 ));
 DriverNavigationMap.displayName = 'DriverNavigationMap';
 export default DriverNavigationMap;
