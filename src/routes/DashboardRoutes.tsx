@@ -51,6 +51,7 @@ const MyLocation = lazy(() => import("@/pages/dashboard/MyLocation"));
 const RecyclingCertificates = lazy(() => import("@/pages/dashboard/RecyclingCertificates"));
 const IssueRecyclingCertificates = lazy(() => import("@/pages/dashboard/IssueRecyclingCertificates"));
 const Settings = lazy(() => import("@/pages/dashboard/Settings"));
+const AutoActions = lazy(() => import("@/pages/dashboard/AutoActions"));
 const PrideCertificates = lazy(() => import("@/pages/dashboard/PrideCertificates"));
 const ReportsGuide = lazy(() => import("@/pages/dashboard/ReportsGuide"));
 const AboutPlatform = lazy(() => import("@/pages/dashboard/AboutPlatform"));
@@ -215,6 +216,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/recycling-certificates" element={<RecyclingCertificates />} />
     <Route path="/dashboard/issue-recycling-certificates" element={<IssueRecyclingCertificates />} />
     <Route path="/dashboard/settings" element={<Settings />} />
+    <Route path="/dashboard/auto-actions" element={<AutoActions />} />
     <Route path="/dashboard/pride-certificates" element={<PrideCertificates />} />
     <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
     <Route path="/dashboard/offline-mode" element={<OfflineMode />} />

@@ -1,0 +1,161 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+export interface AutoActionsSettings {
+  id: string;
+  organization_id: string;
+  all_actions_enabled: boolean;
+  // Documents
+  auto_delivery_certificate: boolean;
+  auto_receipt_generation: boolean;
+  auto_manifest_generation: boolean;
+  auto_invoice_generation: boolean;
+  auto_tracking_form: boolean;
+  // Notifications
+  auto_shipment_notifications: boolean;
+  auto_status_change_alerts: boolean;
+  auto_partner_notifications: boolean;
+  auto_whatsapp_notifications: boolean;
+  auto_email_notifications: boolean;
+  // Operations
+  auto_shipment_status_update: boolean;
+  auto_weight_reconciliation: boolean;
+  auto_compliance_check: boolean;
+  auto_archive_documents: boolean;
+  auto_signature_request: boolean;
+  // AI
+  auto_waste_classification: boolean;
+  auto_route_optimization: boolean;
+  auto_fraud_detection: boolean;
+  auto_price_calculation: boolean;
+}
+
+// All toggle keys (excluding id, organization_id, metadata)
+export const AUTO_ACTION_KEYS = [
+  'auto_delivery_certificate', 'auto_receipt_generation', 'auto_manifest_generation',
+  'auto_invoice_generation', 'auto_tracking_form',
+  'auto_shipment_notifications', 'auto_status_change_alerts', 'auto_partner_notifications',
+  'auto_whatsapp_notifications', 'auto_email_notifications',
+  'auto_shipment_status_update', 'auto_weight_reconciliation', 'auto_compliance_check',
+  'auto_archive_documents', 'auto_signature_request',
+  'auto_waste_classification', 'auto_route_optimization', 'auto_fraud_detection',
+  'auto_price_calculation',
+] as const;
+
+export type AutoActionKey = typeof AUTO_ACTION_KEYS[number];
+
+export const AUTO_ACTION_LABELS: Record<AutoActionKey, { ar: string; en: string; group: string }> = {
+  auto_delivery_certificate: { ar: 'إصدار شهادات التسليم تلقائياً', en: 'Auto delivery certificates', group: 'documents' },
+  auto_receipt_generation: { ar: 'إصدار الإيصالات تلقائياً', en: 'Auto receipt generation', group: 'documents' },
+  auto_manifest_generation: { ar: 'إصدار المانيفست تلقائياً', en: 'Auto manifest generation', group: 'documents' },
+  auto_invoice_generation: { ar: 'إصدار الفواتير تلقائياً', en: 'Auto invoice generation', group: 'documents' },
+  auto_tracking_form: { ar: 'إصدار نماذج التتبع تلقائياً', en: 'Auto tracking forms', group: 'documents' },
+  auto_shipment_notifications: { ar: 'إشعارات الشحنات', en: 'Shipment notifications', group: 'notifications' },
+  auto_status_change_alerts: { ar: 'تنبيهات تغيير الحالة', en: 'Status change alerts', group: 'notifications' },
+  auto_partner_notifications: { ar: 'إشعارات الشركاء', en: 'Partner notifications', group: 'notifications' },
+  auto_whatsapp_notifications: { ar: 'إشعارات واتساب', en: 'WhatsApp notifications', group: 'notifications' },
+  auto_email_notifications: { ar: 'إشعارات البريد الإلكتروني', en: 'Email notifications', group: 'notifications' },
+  auto_shipment_status_update: { ar: 'تحديث حالات الشحنات', en: 'Shipment status updates', group: 'operations' },
+  auto_weight_reconciliation: { ar: 'مطابقة الأوزان', en: 'Weight reconciliation', group: 'operations' },
+  auto_compliance_check: { ar: 'فحص الامتثال', en: 'Compliance checks', group: 'operations' },
+  auto_archive_documents: { ar: 'أرشفة المستندات', en: 'Document archiving', group: 'operations' },
+  auto_signature_request: { ar: 'طلب التوقيعات', en: 'Signature requests', group: 'operations' },
+  auto_waste_classification: { ar: 'تصنيف المخلفات بالذكاء الاصطناعي', en: 'AI waste classification', group: 'ai' },
+  auto_route_optimization: { ar: 'تحسين المسارات', en: 'Route optimization', group: 'ai' },
+  auto_fraud_detection: { ar: 'كشف الاحتيال', en: 'Fraud detection', group: 'ai' },
+  auto_price_calculation: { ar: 'حساب الأسعار تلقائياً', en: 'Auto price calculation', group: 'ai' },
+};
+
+export const AUTO_ACTION_GROUPS = {
+  documents: { ar: 'إصدار المستندات', en: 'Document Generation', icon: 'FileText' },
+  notifications: { ar: 'الإشعارات', en: 'Notifications', icon: 'Bell' },
+  operations: { ar: 'العمليات التشغيلية', en: 'Operations', icon: 'Settings' },
+  ai: { ar: 'الذكاء الاصطناعي', en: 'AI & Smart Features', icon: 'Sparkles' },
+};
+
+export const useAutoActions = (organizationId: string | undefined) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['auto-actions', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return null;
+      const { data, error } = await supabase
+        .from('organization_auto_actions' as any)
+        .select('*')
+        .eq('organization_id', organizationId)
+        .maybeSingle();
+      if (error) throw error;
+      
+      // Auto-create if not exists
+      if (!data) {
+        const { data: newData, error: insertError } = await supabase
+          .from('organization_auto_actions' as any)
+          .insert({ organization_id: organizationId } as any)
+          .select()
+          .single();
+        if (insertError) throw insertError;
+        return newData as unknown as AutoActionsSettings;
+      }
+      return data as unknown as AutoActionsSettings;
+    },
+    enabled: !!organizationId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (updates: Partial<AutoActionsSettings>) => {
+      if (!organizationId) throw new Error('No organization');
+      const { error } = await supabase
+        .from('organization_auto_actions' as any)
+        .update({ ...updates, last_modified_by: (await supabase.auth.getUser()).data.user?.id } as any)
+        .eq('organization_id', organizationId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auto-actions', organizationId] });
+    },
+    onError: (err: any) => {
+      toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
+    },
+  });
+
+  // Check if a specific action is enabled (respects master toggle)
+  const isActionEnabled = (key: AutoActionKey): boolean => {
+    if (!settings) return true; // Default enabled if no settings
+    if (!settings.all_actions_enabled) return false; // Master toggle off = all off
+    return (settings as any)[key] ?? true;
+  };
+
+  // Toggle a single action
+  const toggleAction = (key: AutoActionKey) => {
+    if (!settings) return;
+    updateMutation.mutate({ [key]: !(settings as any)[key] });
+  };
+
+  // Toggle master switch
+  const toggleAll = (enabled: boolean) => {
+    updateMutation.mutate({ all_actions_enabled: enabled });
+  };
+
+  // Toggle entire group
+  const toggleGroup = (group: string, enabled: boolean) => {
+    const groupKeys = AUTO_ACTION_KEYS.filter(k => AUTO_ACTION_LABELS[k].group === group);
+    const updates: any = {};
+    groupKeys.forEach(k => { updates[k] = enabled; });
+    updateMutation.mutate(updates);
+  };
+
+  return {
+    settings,
+    isLoading,
+    isActionEnabled,
+    toggleAction,
+    toggleAll,
+    toggleGroup,
+    updateSettings: updateMutation.mutate,
+    isUpdating: updateMutation.isPending,
+  };
+};
