@@ -11,11 +11,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -26,12 +21,18 @@ import {
   CalendarIcon,
   Filter,
   ArrowRight,
-  CheckCircle2,
-  Truck,
-  Package,
-  Clock,
   Loader2,
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  getAvailableNextStatuses,
+  mapLegacyStatus,
+  mapToDbStatus,
+  wasteTypeLabels,
+  type ShipmentStatus,
+  type ShipmentOrganizationType,
+  type StatusConfig,
+} from '@/lib/shipmentStatusConfig';
 
 interface Shipment {
   id: string;
@@ -45,33 +46,34 @@ interface BulkStatusChangeDropdownProps {
   onStatusChange: () => void;
 }
 
-const statusOptions = [
-  { value: 'approved', label: 'معتمدة', icon: CheckCircle2, color: 'bg-green-100 text-green-800' },
-  { value: 'in_transit', label: 'قيد النقل', icon: Truck, color: 'bg-purple-100 text-purple-800' },
-  { value: 'delivered', label: 'تم التسليم', icon: Clock, color: 'bg-teal-100 text-teal-800' },
-  { value: 'confirmed', label: 'مؤكدة', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-800' },
-];
-
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'مخلفات بناء',
-  other: 'أخرى',
-};
-
 const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChangeDropdownProps) => {
+  const { organization } = useAuth();
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  const organizationType = (organization?.organization_type || 'transporter') as ShipmentOrganizationType;
+
   // Get unique waste types from shipments
   const uniqueWasteTypes = [...new Set(shipments.map(s => s.waste_type))];
+
+  // Get available target statuses based on org type — collect all possible next statuses from all shipments
+  const getAvailableTargetStatuses = (targetShipments: Shipment[]): StatusConfig[] => {
+    const seen = new Set<string>();
+    const result: StatusConfig[] = [];
+    
+    for (const s of targetShipments) {
+      const mapped = mapLegacyStatus(s.status);
+      const nextStatuses = getAvailableNextStatuses(mapped, organizationType);
+      for (const ns of nextStatuses) {
+        if (!seen.has(ns.key)) {
+          seen.add(ns.key);
+          result.push(ns);
+        }
+      }
+    }
+    return result;
+  };
 
   // Filter shipments by date
   const getShipmentsByDate = (date: Date) => {
@@ -83,24 +85,18 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
     return shipments.filter(s => s.waste_type === wasteType);
   };
 
-  // Get eligible shipments for a specific status (only apply once - sequential flow)
-  const getEligibleShipments = (targetShipments: Shipment[], targetStatus: string) => {
-    // Define which current statuses can transition to the target status (sequential flow)
-    const eligibleCurrentStatuses: Record<string, string[]> = {
-      approved: ['new'],           // Only new can become approved
-      in_transit: ['approved'],    // Only approved can become in_transit (collecting removed)
-      delivered: ['in_transit'],   // Only in_transit can become delivered
-      confirmed: ['delivered'],    // Only delivered can become confirmed
-    };
-    
-    const allowedStatuses = eligibleCurrentStatuses[targetStatus] || [];
-    return targetShipments.filter(s => allowedStatuses.includes(s.status));
+  // Get eligible shipments for a specific target status
+  const getEligibleShipments = (targetShipments: Shipment[], targetStatusKey: string) => {
+    return targetShipments.filter(s => {
+      const mapped = mapLegacyStatus(s.status);
+      const nextStatuses = getAvailableNextStatuses(mapped, organizationType);
+      return nextStatuses.some(ns => ns.key === targetStatusKey);
+    });
   };
 
   // Bulk update status
-  const handleBulkStatusChange = async (targetShipments: Shipment[], newStatus: string) => {
-    // Filter to only eligible shipments
-    const eligibleShipments = getEligibleShipments(targetShipments, newStatus);
+  const handleBulkStatusChange = async (targetShipments: Shipment[], targetStatusKey: string) => {
+    const eligibleShipments = getEligibleShipments(targetShipments, targetStatusKey);
     
     if (eligibleShipments.length === 0) {
       toast.error('لا توجد شحنات قابلة للتحديث (تم تحديثها مسبقاً أو غير جاهزة)');
@@ -110,22 +106,17 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
     setLoading(true);
     try {
       const now = new Date().toISOString();
-      const updateData: Record<string, any> = { status: newStatus };
+      const dbStatus = mapToDbStatus(targetStatusKey as ShipmentStatus);
+      const updateData: Record<string, any> = { status: dbStatus };
 
-      // Set timestamp based on status
-      switch (newStatus) {
-        case 'approved':
-          updateData.approved_at = now;
-          break;
-        case 'in_transit':
-          updateData.in_transit_at = now;
-          break;
-        case 'delivered':
-          updateData.delivered_at = now;
-          break;
-        case 'confirmed':
-          updateData.confirmed_at = now;
-          break;
+      const timestampMap: Record<string, string> = {
+        approved: 'approved_at',
+        in_transit: 'in_transit_at',
+        delivered: 'delivered_at',
+        confirmed: 'confirmed_at',
+      };
+      if (timestampMap[dbStatus]) {
+        updateData[timestampMap[dbStatus]] = now;
       }
 
       const shipmentIds = eligibleShipments.map(s => s.id);
@@ -149,7 +140,7 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
         if (profileData) {
           const logs = shipmentIds.map(id => ({
             shipment_id: id,
-            status: newStatus as any,
+            status: dbStatus as any,
             notes: `تحديث جماعي - ${eligibleShipments.length} شحنة`,
             changed_by: profileData.id,
           }));
@@ -158,8 +149,8 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
         }
       }
 
-      const statusLabel = statusOptions.find(s => s.value === newStatus)?.label || newStatus;
-      toast.success(`تم تحديث ${eligibleShipments.length} شحنة إلى "${statusLabel}"`);
+      const statusConfig = getAvailableTargetStatuses(targetShipments).find(s => s.key === targetStatusKey);
+      toast.success(`تم تحديث ${eligibleShipments.length} شحنة إلى "${statusConfig?.labelAr || targetStatusKey}"`);
       onStatusChange();
     } catch (error) {
       console.error('Error bulk updating status:', error);
@@ -171,15 +162,33 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
     }
   };
 
-  // Handle date selection for filtering
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
-    if (date) {
-      setShowDatePicker(false);
-    }
+    if (date) setShowDatePicker(false);
   };
 
   const selectedDateShipments = selectedDate ? getShipmentsByDate(selectedDate) : [];
+  const allTargetStatuses = getAvailableTargetStatuses(shipments);
+
+  if (allTargetStatuses.length === 0) return null;
+
+  const renderStatusItems = (targetShipments: Shipment[]) => {
+    const statuses = getAvailableTargetStatuses(targetShipments);
+    return statuses.map((status) => {
+      const StatusIcon = status.icon;
+      return (
+        <DropdownMenuItem
+          key={status.key}
+          onClick={() => handleBulkStatusChange(targetShipments, status.key)}
+          className="flex items-center gap-2"
+        >
+          <StatusIcon className="h-4 w-4" />
+          <span>{status.labelAr}</span>
+          <ArrowRight className="h-3 w-3 mr-auto" />
+        </DropdownMenuItem>
+      );
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -202,17 +211,7 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
             <Badge variant="secondary" className="mr-auto">{shipments.length}</Badge>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
-            {statusOptions.map((status) => (
-              <DropdownMenuItem
-                key={status.value}
-                onClick={() => handleBulkStatusChange(shipments, status.value)}
-                className="flex items-center gap-2"
-              >
-                <status.icon className="h-4 w-4" />
-                <span>{status.label}</span>
-                <ArrowRight className="h-3 w-3 mr-auto" />
-              </DropdownMenuItem>
-            ))}
+            {renderStatusItems(shipments)}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
@@ -241,18 +240,21 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
                   </p>
                   {selectedDateShipments.length > 0 ? (
                     <div className="space-y-1">
-                      {statusOptions.map((status) => (
-                        <Button
-                          key={status.value}
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start gap-2"
-                          onClick={() => handleBulkStatusChange(selectedDateShipments, status.value)}
-                        >
-                          <status.icon className="h-4 w-4" />
-                          <span>{status.label}</span>
-                        </Button>
-                      ))}
+                      {getAvailableTargetStatuses(selectedDateShipments).map((status) => {
+                        const StatusIcon = status.icon;
+                        return (
+                          <Button
+                            key={status.key}
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start gap-2"
+                            onClick={() => handleBulkStatusChange(selectedDateShipments, status.key)}
+                          >
+                            <StatusIcon className="h-4 w-4" />
+                            <span>{status.labelAr}</span>
+                          </Button>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-2">
@@ -283,17 +285,7 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
                     <Badge variant="secondary" className="mr-auto">{wasteShipments.length}</Badge>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
-                    {statusOptions.map((status) => (
-                      <DropdownMenuItem
-                        key={status.value}
-                        onClick={() => handleBulkStatusChange(wasteShipments, status.value)}
-                        className="flex items-center gap-2"
-                      >
-                        <status.icon className="h-4 w-4" />
-                        <span>{status.label}</span>
-                        <ArrowRight className="h-3 w-3 mr-auto" />
-                      </DropdownMenuItem>
-                    ))}
+                    {renderStatusItems(wasteShipments)}
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               );
