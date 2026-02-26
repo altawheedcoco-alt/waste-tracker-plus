@@ -148,7 +148,7 @@ export const arCore = {
   // Landing / Hero
   landing: {
     systemName: 'iRecycle',
-    systemNameAr: 'نظام إدارة المخلفات',
+    systemNameAr: 'Waste Management System - نظام إدارة المخلفات',
     tagline: 'حلول ذكية لبيئة نظيفة',
     heroTitle1: 'نظام متكامل',
     heroTitle2: 'لإدارة المخلفات والنفايات',
