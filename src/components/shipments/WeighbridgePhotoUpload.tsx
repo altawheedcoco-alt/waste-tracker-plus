@@ -1,11 +1,10 @@
 import { useState, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Camera, Upload, CheckCircle2, Loader2, ImageIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { compressImage, formatFileSize } from '@/utils/imageCompression';
+import { smartUpload } from '@/utils/smartUploadPipeline';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface PhotoMetadata {
   latitude: number | null;
@@ -37,6 +36,7 @@ const WeighbridgePhotoUpload = ({
   const [metadata, setMetadata] = useState<PhotoMetadata | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const { user, organization, profile } = useAuth();
 
   const captureMetadata = (): Promise<PhotoMetadata> => {
     return new Promise((resolve) => {
@@ -85,32 +85,31 @@ const WeighbridgePhotoUpload = ({
     setUploading(true);
     try {
       const photoMetadata = await captureMetadata();
-      
-      // ضغط الصورة قبل الرفع
-      const compressed = await compressImage(file, { maxWidth: 1920, quality: 0.8 });
-      if (compressed.compressionRatio > 0) {
-        console.log(`📦 تم ضغط الصورة: ${formatFileSize(compressed.originalSize)} → ${formatFileSize(compressed.compressedSize)} (${compressed.compressionRatio}%)`);
-      }
-      const finalFile = compressed.file;
 
-      const fileExt = finalFile.name.split('.').pop();
-      const fileName = `${shipmentId}/${type}_${Date.now()}.${fileExt}`;
+      // استخدام الـ Pipeline الذكي مع OCR تلقائي
+      const result = await smartUpload({
+        file,
+        context: 'weighbridge_receipt',
+        organizationId: organization?.id || '',
+        userId: user?.id || '',
+        userRole: (profile as any)?.role,
+        shipmentId,
+        customTitle: `إيصال ميزان ${type === 'pickup' ? 'الاستلام' : 'التسليم'} - شحنة ${shipmentId.substring(0, 8)}`,
+        description: photoMetadata.latitude 
+          ? `الموقع: ${photoMetadata.latitude.toFixed(5)}, ${photoMetadata.longitude?.toFixed(5)}`
+          : undefined,
+        extraTags: [type === 'pickup' ? 'استلام' : 'تسليم', 'ميزان'],
+      });
 
-      const { error: uploadError } = await supabase.storage
-        .from('weighbridge-photos')
-        .upload(fileName, finalFile, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('weighbridge-photos')
-        .getPublicUrl(fileName);
-
-      const url = urlData.publicUrl;
+      const url = result.upload.publicUrl;
       setPhotoUrl(url);
       setMetadata(photoMetadata);
       onPhotoUploaded(url, photoMetadata);
-      toast.success('تم رفع صورة إيصال الميزان بنجاح');
+      
+      const ocrMsg = result.classification 
+        ? ` | OCR: ${result.classification.document_type} (${result.classification.confidence}%)`
+        : '';
+      toast.success(`تم رفع وأرشفة صورة إيصال الميزان${ocrMsg}`);
     } catch (error: any) {
       console.error('Upload error:', error);
       toast.error(`فشل رفع الصورة: ${error.message}`);
@@ -134,7 +133,7 @@ const WeighbridgePhotoUpload = ({
           <div className="absolute bottom-0 left-0 right-0 bg-background/80 text-foreground p-2 text-xs">
             <div className="flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              <span>تم الرفع: {metadata?.timestamp ? new Date(metadata.timestamp).toLocaleString('ar-EG') : ''}</span>
+              <span>تم الرفع والأرشفة: {metadata?.timestamp ? new Date(metadata.timestamp).toLocaleString('ar-EG') : ''}</span>
             </div>
             {metadata?.latitude && (
               <span>📍 {metadata.latitude.toFixed(5)}, {metadata.longitude?.toFixed(5)}</span>

@@ -156,15 +156,24 @@ const QuickShip = () => {
 
     setSubmitting(true);
     try {
-      // Upload photos
+      // Upload photos via Smart Pipeline (auto-archive + OCR)
       const photoUrls: string[] = [];
+      const { smartUpload } = await import('@/utils/smartUploadPipeline');
       for (const [fieldName, file] of Object.entries(photos)) {
-        const ext = file.name.split('.').pop();
-        const path = `quick-submissions/${linkData.organization_id}/${Date.now()}-${fieldName}.${ext}`;
-        const { error: upErr } = await supabase.storage.from('shipment-photos').upload(path, file);
-        if (!upErr) {
-          const { data: urlData } = supabase.storage.from('shipment-photos').getPublicUrl(path);
-          photoUrls.push(urlData.publicUrl);
+        try {
+          const result = await smartUpload({
+            file,
+            context: fieldName.includes('weighbridge') ? 'weighbridge_receipt' : 'shipment_photo',
+            organizationId: linkData.organization_id,
+            userId: 'quick-link-driver',
+            userRole: 'driver',
+            customTitle: `رفع سريع - ${fieldName}`,
+            extraTags: ['quick-link', code || ''],
+            skipArchive: false,
+          });
+          photoUrls.push(result.upload.publicUrl);
+        } catch (upErr) {
+          console.error('Quick upload error:', upErr);
         }
       }
 
