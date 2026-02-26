@@ -20,6 +20,7 @@ const AuditPortalPage = lazy(() => import("@/pages/AuditPortal"));
 const QuickDeposit = lazy(() => import("@/pages/QuickDeposit"));
 const QuickShipment = lazy(() => import("@/pages/QuickShipment"));
 const QuickDriver = lazy(() => import("@/pages/QuickDriver"));
+const QuickShip = lazy(() => import("@/pages/QuickShip"));
 const SavedLocationsPage = lazy(() => import("@/pages/SavedLocationsPage"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
@@ -44,6 +45,7 @@ export const publicRoutes = (
     <Route path="/deposit/:token" element={<QuickDeposit />} />
     <Route path="/shipment/:token" element={<QuickShipment />} />
     <Route path="/driver/:token" element={<QuickDriver />} />
+    <Route path="/quick-ship/:code" element={<QuickShip />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/qr-verify" element={<QRVerify />} />
     <Route path="/scan" element={<QRVerify />} />
