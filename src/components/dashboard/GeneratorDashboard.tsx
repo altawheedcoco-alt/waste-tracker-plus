@@ -219,26 +219,27 @@ const GeneratorDashboard = () => {
       <StoryCircles />
 
       {/* Header */}
-      <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
+      <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'}`}>
         <div className={`flex items-center gap-2 flex-wrap ${isMobile ? 'order-2' : ''}`}>
           <DashboardWidgetCustomizer orgType="generator" />
           <DashboardPrintReports />
-          <Button onClick={() => setShowWorkOrder(true)} variant="default" size={isMobile ? 'sm' : 'default'} className="gap-2">
+          <Button onClick={() => setShowWorkOrder(true)} variant="default" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl shadow-sm">
             <ClipboardList className="w-4 h-4" />
             {!isMobile && t('workOrder.createNew')}
           </Button>
           <SmartRequestDialog buttonText={isMobile ? t('common.search') : t('common.search')} buttonVariant="outline" />
-          <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
+          <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl">
             <FileCheck className="w-4 h-4" />
             {!isMobile && t('docVerify.sectionBadge')}
           </Button>
-          <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2">
+          <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl">
             <Sparkles className="w-4 h-4" />
           </Button>
         </div>
         <div className={`text-right ${isMobile ? 'order-1' : ''}`}>
-          <h1 className="font-bold text-xl sm:text-2xl">مرحباً، {profile?.full_name}</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 className="font-bold text-xl sm:text-2xl bg-gradient-to-l from-foreground to-foreground/70 bg-clip-text">مرحباً، {profile?.full_name}</h1>
+          <p className="text-muted-foreground text-sm flex items-center gap-1.5 justify-end">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             {organization?.name} - الجهة المولدة
           </p>
         </div>
@@ -264,14 +265,16 @@ const GeneratorDashboard = () => {
 
       {/* ★ Tabbed Sections — same pattern as Transporter */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
-        <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap">نظرة عامة</TabsTrigger>
-          <TabsTrigger value="shipments" className="text-xs sm:text-sm whitespace-nowrap">الشحنات</TabsTrigger>
-          <TabsTrigger value="operations" className="text-xs sm:text-sm whitespace-nowrap">العمليات</TabsTrigger>
-          <TabsTrigger value="work-orders" className="text-xs sm:text-sm whitespace-nowrap">أوامر الشغل</TabsTrigger>
-          <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap">الجهات المرتبطة</TabsTrigger>
-          <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap">الامتثال القانوني</TabsTrigger>
-        </TabsList>
+        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1.5 shadow-sm">
+          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-1 h-auto p-0 scrollbar-hide">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">نظرة عامة</TabsTrigger>
+            <TabsTrigger value="shipments" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الشحنات</TabsTrigger>
+            <TabsTrigger value="operations" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">العمليات</TabsTrigger>
+            <TabsTrigger value="work-orders" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">أوامر الشغل</TabsTrigger>
+            <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الجهات المرتبطة</TabsTrigger>
+            <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الامتثال القانوني</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* ── نظرة عامة ── */}
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">

@@ -102,11 +102,17 @@ const InteractiveStatCard = ({
           <div className={cn(
             'absolute top-0 left-0 right-0 h-1 transition-all duration-500',
             gradient ? `bg-gradient-to-r ${gradient}` : bgColor,
-            'opacity-50 group-hover:opacity-100'
+            'opacity-60 group-hover:opacity-100 group-hover:h-1.5'
           )} />
 
           {/* Subtle shine effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/[0.02] group-hover:to-primary/[0.06] transition-all duration-500 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/[0.03] group-hover:to-primary/[0.08] transition-all duration-500 pointer-events-none" />
+          
+          {/* Corner decoration */}
+          <div className={cn(
+            'absolute -top-8 -left-8 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl pointer-events-none',
+            gradient ? `bg-gradient-to-br ${gradient}` : bgColor
+          )} />
 
           <CardContent className="pt-6 pb-5 relative">
             <div className="flex items-center justify-between">

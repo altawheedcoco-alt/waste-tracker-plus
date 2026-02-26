@@ -178,64 +178,64 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
 
       <Tabs defaultValue={defaultTab} className="space-y-6">
         <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pb-1">
-          <TabsList className="inline-flex w-max gap-1 h-auto p-1.5 bg-muted/50 rounded-xl">
-            <TabsTrigger value="profile" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+          <TabsList className="inline-flex w-max gap-0.5 h-auto p-1.5 bg-muted/30 backdrop-blur-sm rounded-2xl border border-border/30">
+            <TabsTrigger value="profile" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <UserCircle className="h-4 w-4" />
               <span className="hidden sm:inline">{t('nav.profile')}</span>
             </TabsTrigger>
-            <TabsTrigger value="language" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="language" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Globe className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.language')}</span>
             </TabsTrigger>
-            <TabsTrigger value="themes" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="themes" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Sparkles className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.themes')}</span>
             </TabsTrigger>
-            <TabsTrigger value="colors" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="colors" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Palette className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.colors')}</span>
             </TabsTrigger>
-            <TabsTrigger value="typography" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="typography" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Type className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.typography')}</span>
             </TabsTrigger>
-            <TabsTrigger value="display" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="display" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Eye className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.display')}</span>
             </TabsTrigger>
             {isTransporter && (
-              <TabsTrigger value="advanced-appearance" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TabsTrigger value="advanced-appearance" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
                 <Brush className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('settings.advancedAppearance')}</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="sounds" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="sounds" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Volume2 className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.sounds')}</span>
             </TabsTrigger>
-            <TabsTrigger value="automation" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="automation" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Zap className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.automation')}</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="security" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <Lock className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.security')}</span>
             </TabsTrigger>
             {isTransporter && (
-              <TabsTrigger value="visibility" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+              <TabsTrigger value="visibility" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
                 <Shield className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('settings.visibility')}</span>
               </TabsTrigger>
             )}
-            <TabsTrigger value="notifications-channels" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="notifications-channels" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <MessageSquare className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.notificationChannels')}</span>
             </TabsTrigger>
-            <TabsTrigger value="terms" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="terms" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">{t('settings.terms')}</span>
             </TabsTrigger>
-            <TabsTrigger value="document-templates" className="gap-2 rounded-lg px-3 py-2 text-xs sm:text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+            <TabsTrigger value="document-templates" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">{t('sidebar.docArchive')}</span>
             </TabsTrigger>

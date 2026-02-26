@@ -111,24 +111,26 @@ const DailyOperationsSummary = () => {
   ];
 
   return (
-    <Card>
+    <Card className="overflow-hidden border-border/40">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {trend >= 0 ? (
-              <Badge variant="secondary" className="gap-1 text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30">
+              <Badge variant="secondary" className="gap-1 text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-300 border-0">
                 <TrendingUp className="w-3 h-3" />
                 {trendPercent > 0 ? `+${trendPercent}%` : 'مستقر'}
               </Badge>
             ) : (
-              <Badge variant="secondary" className="gap-1 text-red-700 bg-red-100 dark:bg-red-900/30">
+              <Badge variant="secondary" className="gap-1 text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-300 border-0">
                 <TrendingDown className="w-3 h-3" />
                 {trendPercent}%
               </Badge>
             )}
           </div>
           <CardTitle className="flex items-center gap-2 text-base">
-            <CalendarDays className="w-5 h-5 text-primary" />
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <CalendarDays className="w-4 h-4 text-primary" />
+            </div>
             ملخص عمليات اليوم
             <span className="text-xs text-muted-foreground font-normal">
               {format(new Date(), 'EEEE d MMMM', { locale: ar })}
@@ -138,14 +140,17 @@ const DailyOperationsSummary = () => {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {metrics.map((m) => (
-            <div key={m.label} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${m.color}`}>
+          {metrics.map((m, idx) => (
+            <div
+              key={m.label}
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/40 bg-gradient-to-br from-card to-muted/20 hover:shadow-md transition-all duration-300 group"
+            >
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${m.color} group-hover:scale-110 transition-transform duration-300`}>
                 <m.icon className="w-5 h-5" />
               </div>
               <div className="min-w-0 text-right">
-                <p className="text-2xl font-bold">{m.value}</p>
-                <p className="text-xs text-muted-foreground truncate">{m.label}</p>
+                <p className="text-2xl font-bold tabular-nums">{m.value}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{m.label}</p>
               </div>
             </div>
           ))}

@@ -199,16 +199,16 @@ const TransporterDashboard = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <Tabs defaultValue="overview" className="w-full" dir="rtl">
-          <div className="relative overflow-hidden rounded-xl border border-border/50 bg-card p-1 sm:p-1.5">
-            <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 sm:gap-1 h-auto p-0">
+          <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1.5 shadow-sm">
+            <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 sm:gap-1 h-auto p-0 scrollbar-hide">
               {tabItems.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="text-[10px] sm:text-sm whitespace-nowrap gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all duration-200"
+                  className="text-[10px] sm:text-xs whitespace-nowrap gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-2 sm:py-2.5 rounded-xl text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:text-foreground hover:bg-muted/50 transition-all duration-300"
                 >
-                  <tab.icon className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden sm:inline font-medium">{tab.label}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
