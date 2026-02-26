@@ -21,11 +21,17 @@ import {
   CalendarIcon,
   Filter,
   ArrowRight,
-  CheckCircle2,
-  Package,
   Loader2,
   Recycle,
 } from 'lucide-react';
+import {
+  getAvailableNextStatuses,
+  mapLegacyStatus,
+  mapToDbStatus,
+  wasteTypeLabels,
+  type ShipmentStatus,
+  type StatusConfig,
+} from '@/lib/shipmentStatusConfig';
 
 interface Shipment {
   id: string;
@@ -39,58 +45,48 @@ interface RecyclerBulkStatusDropdownProps {
   onStatusChange: () => void;
 }
 
-// Recycler-specific status options (only delivered and confirmed)
-const statusOptions = [
-  { value: 'delivered', label: 'تم الاستلام', icon: Package, color: 'bg-teal-100 text-teal-800' },
-  { value: 'confirmed', label: 'تأكيد المعالجة', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-800' },
-];
-
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'مخلفات بناء',
-  other: 'أخرى',
-};
-
 const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkStatusDropdownProps) => {
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  // Get unique waste types from shipments
   const uniqueWasteTypes = [...new Set(shipments.map(s => s.waste_type))];
 
-  // Filter shipments by date
+  // Get available target statuses for recycler from all shipments
+  const getAvailableTargetStatuses = (targetShipments: Shipment[]): StatusConfig[] => {
+    const seen = new Set<string>();
+    const result: StatusConfig[] = [];
+    
+    for (const s of targetShipments) {
+      const mapped = mapLegacyStatus(s.status);
+      const nextStatuses = getAvailableNextStatuses(mapped, 'recycler');
+      for (const ns of nextStatuses) {
+        if (!seen.has(ns.key)) {
+          seen.add(ns.key);
+          result.push(ns);
+        }
+      }
+    }
+    return result;
+  };
+
   const getShipmentsByDate = (date: Date) => {
     return shipments.filter(s => isSameDay(new Date(s.created_at), date));
   };
 
-  // Filter shipments by waste type
   const getShipmentsByWasteType = (wasteType: string) => {
     return shipments.filter(s => s.waste_type === wasteType);
   };
 
-  // Get eligible shipments for a specific status (only apply once)
-  const getEligibleShipments = (targetShipments: Shipment[], targetStatus: string) => {
-    // Define which current statuses can transition to the target status
-    const eligibleCurrentStatuses: Record<string, string[]> = {
-      delivered: ['in_transit'], // Only in_transit can become delivered
-      confirmed: ['delivered'],  // Only delivered can become confirmed
-    };
-    
-    const allowedStatuses = eligibleCurrentStatuses[targetStatus] || [];
-    return targetShipments.filter(s => allowedStatuses.includes(s.status));
+  const getEligibleShipments = (targetShipments: Shipment[], targetStatusKey: string) => {
+    return targetShipments.filter(s => {
+      const mapped = mapLegacyStatus(s.status);
+      const nextStatuses = getAvailableNextStatuses(mapped, 'recycler');
+      return nextStatuses.some(ns => ns.key === targetStatusKey);
+    });
   };
 
-  // Bulk update status
-  const handleBulkStatusChange = async (targetShipments: Shipment[], newStatus: string) => {
-    // Filter to only eligible shipments
-    const eligibleShipments = getEligibleShipments(targetShipments, newStatus);
+  const handleBulkStatusChange = async (targetShipments: Shipment[], targetStatusKey: string) => {
+    const eligibleShipments = getEligibleShipments(targetShipments, targetStatusKey);
     
     if (eligibleShipments.length === 0) {
       toast.error('لا توجد شحنات قابلة للتحديث (تم تأكيدها مسبقاً أو غير جاهزة)');
@@ -100,16 +96,15 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
     setLoading(true);
     try {
       const now = new Date().toISOString();
-      const updateData: Record<string, any> = { status: newStatus };
+      const dbStatus = mapToDbStatus(targetStatusKey as ShipmentStatus);
+      const updateData: Record<string, any> = { status: dbStatus };
 
-      // Set timestamp based on status
-      switch (newStatus) {
-        case 'delivered':
-          updateData.delivered_at = now;
-          break;
-        case 'confirmed':
-          updateData.confirmed_at = now;
-          break;
+      const timestampMap: Record<string, string> = {
+        delivered: 'delivered_at',
+        confirmed: 'confirmed_at',
+      };
+      if (timestampMap[dbStatus]) {
+        updateData[timestampMap[dbStatus]] = now;
       }
 
       const shipmentIds = eligibleShipments.map(s => s.id);
@@ -133,7 +128,7 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
         if (profileData) {
           const logs = shipmentIds.map(id => ({
             shipment_id: id,
-            status: newStatus as any,
+            status: dbStatus as any,
             notes: `تحديث جماعي من الجهة المدورة - ${eligibleShipments.length} شحنة`,
             changed_by: profileData.id,
           }));
@@ -142,8 +137,8 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
         }
       }
 
-      const statusLabel = statusOptions.find(s => s.value === newStatus)?.label || newStatus;
-      toast.success(`تم تحديث ${eligibleShipments.length} شحنة إلى "${statusLabel}"`);
+      const statusConfig = getAvailableTargetStatuses(targetShipments).find(s => s.key === targetStatusKey);
+      toast.success(`تم تحديث ${eligibleShipments.length} شحنة إلى "${statusConfig?.labelAr || targetStatusKey}"`);
       onStatusChange();
     } catch (error) {
       console.error('Error bulk updating status:', error);
@@ -154,12 +149,32 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
     }
   };
 
-  // Handle date selection for filtering
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
   };
 
   const selectedDateShipments = selectedDate ? getShipmentsByDate(selectedDate) : [];
+  const allTargetStatuses = getAvailableTargetStatuses(shipments);
+
+  if (allTargetStatuses.length === 0) return null;
+
+  const renderStatusItems = (targetShipments: Shipment[]) => {
+    const statuses = getAvailableTargetStatuses(targetShipments);
+    return statuses.map((status) => {
+      const StatusIcon = status.icon;
+      return (
+        <DropdownMenuItem
+          key={status.key}
+          onClick={() => handleBulkStatusChange(targetShipments, status.key)}
+          className="flex items-center gap-2"
+        >
+          <StatusIcon className="h-4 w-4" />
+          <span>{status.labelAr}</span>
+          <ArrowRight className="h-3 w-3 mr-auto" />
+        </DropdownMenuItem>
+      );
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -182,17 +197,7 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
             <Badge variant="secondary" className="mr-auto">{shipments.length}</Badge>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
-            {statusOptions.map((status) => (
-              <DropdownMenuItem
-                key={status.value}
-                onClick={() => handleBulkStatusChange(shipments, status.value)}
-                className="flex items-center gap-2"
-              >
-                <status.icon className="h-4 w-4" />
-                <span>{status.label}</span>
-                <ArrowRight className="h-3 w-3 mr-auto" />
-              </DropdownMenuItem>
-            ))}
+            {renderStatusItems(shipments)}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
 
@@ -221,18 +226,21 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
                   </p>
                   {selectedDateShipments.length > 0 ? (
                     <div className="space-y-1">
-                      {statusOptions.map((status) => (
-                        <Button
-                          key={status.value}
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start gap-2"
-                          onClick={() => handleBulkStatusChange(selectedDateShipments, status.value)}
-                        >
-                          <status.icon className="h-4 w-4" />
-                          <span>{status.label}</span>
-                        </Button>
-                      ))}
+                      {getAvailableTargetStatuses(selectedDateShipments).map((status) => {
+                        const StatusIcon = status.icon;
+                        return (
+                          <Button
+                            key={status.key}
+                            variant="ghost"
+                            size="sm"
+                            className="w-full justify-start gap-2"
+                            onClick={() => handleBulkStatusChange(selectedDateShipments, status.key)}
+                          >
+                            <StatusIcon className="h-4 w-4" />
+                            <span>{status.labelAr}</span>
+                          </Button>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground text-center py-2">
@@ -263,17 +271,7 @@ const RecyclerBulkStatusDropdown = ({ shipments, onStatusChange }: RecyclerBulkS
                     <Badge variant="secondary" className="mr-auto">{wasteShipments.length}</Badge>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuSubContent>
-                    {statusOptions.map((status) => (
-                      <DropdownMenuItem
-                        key={status.value}
-                        onClick={() => handleBulkStatusChange(wasteShipments, status.value)}
-                        className="flex items-center gap-2"
-                      >
-                        <status.icon className="h-4 w-4" />
-                        <span>{status.label}</span>
-                        <ArrowRight className="h-3 w-3 mr-auto" />
-                      </DropdownMenuItem>
-                    ))}
+                    {renderStatusItems(wasteShipments)}
                   </DropdownMenuSubContent>
                 </DropdownMenuSub>
               );

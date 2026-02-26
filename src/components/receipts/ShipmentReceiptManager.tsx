@@ -45,6 +45,16 @@ interface ManagedShipment {
   generator: { name: string } | null;
 }
 
+import {
+  getAvailableNextStatuses,
+  getStatusConfig,
+  mapLegacyStatus,
+  mapToDbStatus,
+  wasteTypeLabels as centralWasteTypeLabels,
+  type ShipmentStatus,
+  type ShipmentOrganizationType,
+} from '@/lib/shipmentStatusConfig';
+
 const statusLabels: Record<string, string> = {
   new: 'جديدة',
   approved: 'معتمدة',
@@ -66,14 +76,6 @@ const statusTabs = [
   { value: 'confirmed', label: 'مؤكدة', icon: CheckCircle2 },
   { value: 'new', label: 'جديدة', icon: Clock },
 ];
-
-// Valid transitions for transporter
-const validTransitions: Record<string, string[]> = {
-  new: ['approved'],
-  approved: ['in_transit'],
-  in_transit: ['delivered'],
-  delivered: ['confirmed'],
-};
 
 interface ShipmentReceiptManagerProps {
   onReceiptsChanged?: () => void;
@@ -224,8 +226,9 @@ const ShipmentReceiptManager = ({ onReceiptsChanged }: ShipmentReceiptManagerPro
     setProcessing(true);
     let success = 0;
     for (const s of selectedShipments) {
-      const allowed = validTransitions[s.status] || [];
-      if (allowed.includes(bulkAction)) {
+      const mapped = mapLegacyStatus(s.status);
+      const allowed = getAvailableNextStatuses(mapped, 'transporter').map(st => st.key);
+      if (allowed.some(a => mapToDbStatus(a as ShipmentStatus) === bulkAction || a === bulkAction)) {
         try {
           const updateData: Record<string, any> = { status: bulkAction };
           if (bulkAction === 'delivered') updateData.delivered_at = new Date().toISOString();
@@ -248,7 +251,11 @@ const ShipmentReceiptManager = ({ onReceiptsChanged }: ShipmentReceiptManagerPro
     if (selectedShipments.length === 0) return [];
     const transitions = new Set<string>();
     selectedShipments.forEach(s => {
-      (validTransitions[s.status] || []).forEach(t => transitions.add(t));
+      const mapped = mapLegacyStatus(s.status);
+      getAvailableNextStatuses(mapped, 'transporter').forEach(st => {
+        const dbSt = mapToDbStatus(st.key);
+        transitions.add(dbSt);
+      });
     });
     return Array.from(transitions);
   }, [selectedShipments]);
@@ -352,7 +359,8 @@ const ShipmentReceiptManager = ({ onReceiptsChanged }: ShipmentReceiptManagerPro
           ) : (
             <div className="space-y-2">
               {filteredShipments.map(shipment => {
-                const nextStatuses = validTransitions[shipment.status] || [];
+                const mapped = mapLegacyStatus(shipment.status);
+                const nextStatuses = getAvailableNextStatuses(mapped, 'transporter').map(st => mapToDbStatus(st.key));
                 return (
                   <div
                     key={shipment.id}
