@@ -41,6 +41,7 @@ if (rootElement) {
         <App />
       </React.StrictMode>
     );
+    (window as any).__APP_BOOTSTRAPPED__ = true;
   } catch (err) {
     console.error('Failed to render app:', err);
     rootElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;direction:rtl;font-family:Cairo,sans-serif;"><div style="text-align:center;"><h2>حدث خطأ في تحميل التطبيق</h2><p>يرجى تحديث الصفحة</p><button onclick="location.reload()" style="margin-top:16px;padding:8px 24px;background:#10b981;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">تحديث</button></div></div>';
