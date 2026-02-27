@@ -16936,6 +16936,141 @@ export type Database = {
           },
         ]
       }
+      organization_attestations: {
+        Row: {
+          attestation_number: string
+          commercial_register: string | null
+          created_at: string
+          delegate_name: string | null
+          delegate_national_id: string | null
+          delegate_phone: string | null
+          delegate_position: string | null
+          digital_declaration_number: string | null
+          expires_at: string | null
+          id: string
+          identity_verified: boolean
+          issued_at: string
+          kyc_complete: boolean
+          licenses_valid: boolean
+          organization_address: string | null
+          organization_email: string | null
+          organization_id: string
+          organization_logo_url: string | null
+          organization_name: string
+          organization_phone: string | null
+          organization_type: string
+          platform_endorsed: boolean
+          platform_seal_url: string | null
+          requested_by: string
+          revoked_at: string | null
+          revoked_reason: string | null
+          signer_barcode_data: string | null
+          signer_qr_data: string | null
+          signer_signature_url: string | null
+          signer_stamp_url: string | null
+          status: string
+          system_seal_number: string
+          tax_number: string | null
+          terms_accepted: boolean
+          terms_version: string | null
+          updated_at: string
+          verification_code: string
+        }
+        Insert: {
+          attestation_number: string
+          commercial_register?: string | null
+          created_at?: string
+          delegate_name?: string | null
+          delegate_national_id?: string | null
+          delegate_phone?: string | null
+          delegate_position?: string | null
+          digital_declaration_number?: string | null
+          expires_at?: string | null
+          id?: string
+          identity_verified?: boolean
+          issued_at?: string
+          kyc_complete?: boolean
+          licenses_valid?: boolean
+          organization_address?: string | null
+          organization_email?: string | null
+          organization_id: string
+          organization_logo_url?: string | null
+          organization_name: string
+          organization_phone?: string | null
+          organization_type: string
+          platform_endorsed?: boolean
+          platform_seal_url?: string | null
+          requested_by: string
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          signer_barcode_data?: string | null
+          signer_qr_data?: string | null
+          signer_signature_url?: string | null
+          signer_stamp_url?: string | null
+          status?: string
+          system_seal_number: string
+          tax_number?: string | null
+          terms_accepted?: boolean
+          terms_version?: string | null
+          updated_at?: string
+          verification_code: string
+        }
+        Update: {
+          attestation_number?: string
+          commercial_register?: string | null
+          created_at?: string
+          delegate_name?: string | null
+          delegate_national_id?: string | null
+          delegate_phone?: string | null
+          delegate_position?: string | null
+          digital_declaration_number?: string | null
+          expires_at?: string | null
+          id?: string
+          identity_verified?: boolean
+          issued_at?: string
+          kyc_complete?: boolean
+          licenses_valid?: boolean
+          organization_address?: string | null
+          organization_email?: string | null
+          organization_id?: string
+          organization_logo_url?: string | null
+          organization_name?: string
+          organization_phone?: string | null
+          organization_type?: string
+          platform_endorsed?: boolean
+          platform_seal_url?: string | null
+          requested_by?: string
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          signer_barcode_data?: string | null
+          signer_qr_data?: string | null
+          signer_signature_url?: string | null
+          signer_stamp_url?: string | null
+          status?: string
+          system_seal_number?: string
+          tax_number?: string | null
+          terms_accepted?: boolean
+          terms_version?: string | null
+          updated_at?: string
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_attestations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_attestations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_auto_actions: {
         Row: {
           all_actions_enabled: boolean
