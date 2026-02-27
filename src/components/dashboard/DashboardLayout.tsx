@@ -313,29 +313,23 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     </svg>
   );
 
-  // Driver-specific menu items (simplified) - with unique keys
+  // Driver-specific menu items - focused on driver workflow
   const driverMenuItems: SidebarMenuItem[] = [
     { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard', key: 'driver-dashboard' },
-    { icon: User, label: t('sidebar.driverProfile'), path: '/dashboard/driver-profile', key: 'driver-profile' },
-    { icon: Truck, label: t('sidebar.driverData'), path: '/dashboard/driver-data', key: 'driver-data' },
     { icon: Package, label: t('sidebar.myShipments'), path: '/dashboard/transporter-shipments', badge: sectionBadges['driver-shipments'], key: 'driver-shipments' },
+    { icon: Truck, label: language === 'ar' ? 'طلبات الشحنات' : 'Shipment Offers', path: '/dashboard/driver-offers', key: 'driver-offers' },
     { icon: MapPin, label: t('sidebar.locationMaps'), path: '#', key: 'driver-location-group', children: [
       { icon: MapPin, label: t('sidebar.myLocation'), path: '/dashboard/my-location', key: 'driver-location' },
       { icon: Bookmark, label: t('sidebar.savedLocations'), path: '/dashboard/saved-locations', key: 'driver-saved-locations' },
-      { icon: Search, label: t('sidebar.map'), path: '/dashboard/map-explorer', key: 'driver-map-explorer' },
     ]},
     { icon: Send, label: t('sidebar.requestsComm'), path: '#', key: 'driver-requests-comm-group', children: [
-      { icon: Truck, label: 'طلبات الشحنات', path: '/dashboard/driver-offers', key: 'driver-offers' },
       { icon: Send, label: t('sidebar.myRequests'), path: '/dashboard/my-requests', badge: sectionBadges['my-requests'], key: 'driver-requests' },
       { icon: MessageCircle, label: t('sidebar.chatMessages'), path: '/dashboard/chat', badge: sectionBadges['chat'], key: 'driver-chat' },
-      { icon: CircleDot, label: t('sidebar.statuses'), path: '/dashboard/stories', key: 'driver-stories' },
     ]},
     { icon: Settings, label: t('sidebar.systemSupport'), path: '#', key: 'driver-system-group', badge: notificationCount, children: [
-      { icon: Headphones, label: t('sidebar.techSupport'), path: '/dashboard/support', key: 'driver-support' },
       { icon: Bell, label: t('nav.notifications'), path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
-      { icon: Info, label: t('sidebar.aboutPlatform'), path: '/dashboard/about-platform', key: 'driver-about' },
+      { icon: Headphones, label: t('sidebar.techSupport'), path: '/dashboard/support', key: 'driver-support' },
       { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'driver-settings' },
-      { icon: Zap, label: language === 'ar' ? 'الإجراءات التلقائية' : 'Auto Actions', path: '/dashboard/auto-actions', key: 'driver-auto-actions' },
     ]},
   ];
 
