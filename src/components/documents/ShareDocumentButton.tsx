@@ -13,6 +13,8 @@ interface ShareDocumentButtonProps {
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   label?: string;
+  /** Auto-attach a file (e.g. generated PDF) instead of requiring manual upload */
+  autoFile?: File | null;
 }
 
 const ShareDocumentButton = ({
@@ -24,6 +26,7 @@ const ShareDocumentButton = ({
   size = 'sm',
   className = '',
   label,
+  autoFile,
 }: ShareDocumentButtonProps) => {
   const [open, setOpen] = useState(false);
   const { t } = useLanguage();
@@ -48,6 +51,7 @@ const ShareDocumentButton = ({
         referenceType={referenceType}
         documentTitle={documentTitle}
         preSelectedOrgId={preSelectedOrgId}
+        autoFile={autoFile}
       />
     </>
   );

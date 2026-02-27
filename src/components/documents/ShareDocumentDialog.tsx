@@ -62,6 +62,8 @@ interface ShareDocumentDialogProps {
   referenceType?: string; // receipt, certificate, invoice, shipment, contract
   documentTitle?: string;
   preSelectedOrgId?: string;
+  /** Auto-attach a file (e.g. generated PDF) instead of requiring manual upload */
+  autoFile?: File | null;
 }
 
 interface PartnerOrg {
@@ -77,6 +79,7 @@ const ShareDocumentDialog = ({
   referenceType,
   documentTitle: initialTitle,
   preSelectedOrgId,
+  autoFile: externalAutoFile,
 }: ShareDocumentDialogProps) => {
   const { profile } = useAuth();
   const [partners, setPartners] = useState<PartnerOrg[]>([]);
@@ -112,8 +115,12 @@ const ShareDocumentDialog = ({
       setAutoFileUrl(null);
       setAutoFileName(null);
       setFile(null);
-      // Auto-fetch file from entity_documents if referenceId exists
-      if (referenceId) {
+
+      // If an external auto-file is provided (e.g. generated PDF), use it directly
+      if (externalAutoFile) {
+        setFile(externalAutoFile);
+      } else if (referenceId) {
+        // Auto-fetch file from entity_documents if referenceId exists
         fetchReferenceFile();
       }
     }
