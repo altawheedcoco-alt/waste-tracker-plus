@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -26,12 +26,36 @@ const AttestationDialog = ({ open, onOpenChange, existingAttestation }: Attestat
   const printRef = useRef<HTMLDivElement>(null);
   const [themeOpen, setThemeOpen] = useState(false);
   const [attestation, setAttestation] = useState<AttestationData | null>(existingAttestation || null);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const { loading, requestAttestation } = useOrganizationAttestation();
-  const { exportToPDF, printWithTheme, isExporting } = usePDFExport({
+  const { exportToPDF, printWithTheme, generatePDF, isExporting } = usePDFExport({
     filename: `attestation-${attestation?.attestation_number || 'new'}`,
     orientation: 'portrait',
     format: 'a4',
   });
+
+  // Generate PDF file for sharing when attestation is ready
+  useEffect(() => {
+    const genPdf = async () => {
+      if (attestation && printRef.current) {
+        // Wait for render
+        await new Promise(r => setTimeout(r, 500));
+        try {
+          const pdf = await generatePDF(printRef.current);
+          if (pdf) {
+            const blob = pdf.output('blob');
+            const file = new File([blob], `إفادة-${attestation.organization_name}-${attestation.attestation_number}.pdf`, {
+              type: 'application/pdf',
+            });
+            setPdfFile(file);
+          }
+        } catch (e) {
+          console.warn('Failed to pre-generate PDF for sharing:', e);
+        }
+      }
+    };
+    genPdf();
+  }, [attestation]);
 
   const handleRequest = async () => {
     const result = await requestAttestation();
@@ -69,6 +93,7 @@ const AttestationDialog = ({ open, onOpenChange, existingAttestation }: Attestat
                     referenceType="contract"
                     documentTitle={`إفادة تسجيل - ${attestation.organization_name}`}
                     size="sm"
+                    autoFile={pdfFile}
                   />
                 </>
               )}
