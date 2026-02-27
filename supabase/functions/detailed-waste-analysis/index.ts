@@ -143,17 +143,11 @@ serve(async (req) => {
 
     const messageContent: any[] = [{ type: "text", text: prompt }, ...imageContents];
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: messageContent }],
-        temperature: 0.2,
-      }),
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [{ role: "user", content: messageContent }],
+      temperature: 0.2,
     });
 
     if (!response.ok) {

@@ -119,20 +119,14 @@ ${analysisType ? `نوع التحليل المطلوب: ${analysisType}` : "تح
       });
     }
 
-    const response = await fetch(AI_GATEWAY_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userContent }
-        ],
-        temperature: 0.1,
-      }),
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    
+    const response = await callAIWithRetry(LOVABLE_API_KEY!, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userContent }
+      ],
+      temperature: 0.1,
     });
 
     if (!response.ok) {

@@ -79,14 +79,12 @@ ${JSON.stringify(marketConditions || {}, null, 2)}
 3. مقارنة مع أسعار المنافسين
 4. توصيات استراتيجية للتسعير`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }

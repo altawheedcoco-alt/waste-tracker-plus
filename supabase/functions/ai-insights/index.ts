@@ -7,17 +7,11 @@ const corsHeaders = {
 };
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-const AI_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-interface AnalysisRequest {
-  type: 'sentiment' | 'prediction' | 'recommendation' | 'risk_assessment';
-  data: any;
-  context?: string;
-}
+import { callAIWithRetry } from "../_shared/ai-retry.ts";
 
 async function callAI(systemPrompt: string, userPrompt: string, useTools = false, tools?: any[]) {
-  const body: any = {
-    model: "google/gemini-3-flash-preview",
+  const options: any = {
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
@@ -26,18 +20,11 @@ async function callAI(systemPrompt: string, userPrompt: string, useTools = false
   };
 
   if (useTools && tools) {
-    body.tools = tools;
-    body.tool_choice = { type: "function", function: { name: tools[0].function.name } };
+    options.tools = tools;
+    options.tool_choice = { type: "function", function: { name: tools[0].function.name } };
   }
 
-  const response = await fetch(AI_GATEWAY_URL, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+  const response = await callAIWithRetry(LOVABLE_API_KEY!, options);
 
   if (!response.ok) {
     const errorText = await response.text();
