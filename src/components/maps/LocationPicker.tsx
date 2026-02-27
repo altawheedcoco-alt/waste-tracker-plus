@@ -425,14 +425,34 @@ const LocationPicker = ({ value, onChange, placeholder = 'أدخل العنوا�
               style={{ height: '400px', width: '100%' }}
             />
 
-            {/* Coordinates display */}
+            {/* Coordinates display + external nav */}
             {mapCoordinates && (
-              <div className="flex items-center justify-between bg-muted/50 rounded-lg p-2 text-xs">
+              <div className="flex items-center justify-between bg-muted/50 rounded-lg p-2 text-xs gap-2 flex-wrap">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-primary" />
                   {mapCoordinates.lat.toFixed(6)}, {mapCoordinates.lng.toFixed(6)}
                 </span>
-                <Badge variant="outline" className="text-[9px]">اسحب العلامة لضبط الموقع</Badge>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button" variant="ghost" size="sm" className="h-6 text-[10px] gap-1 px-2"
+                    onClick={() => { window.open(`https://www.google.com/maps/@${mapCoordinates.lat},${mapCoordinates.lng},17z`, '_blank'); }}
+                  >
+                    Google
+                  </Button>
+                  <Button
+                    type="button" variant="ghost" size="sm" className="h-6 text-[10px] gap-1 px-2"
+                    onClick={() => { window.open(`https://waze.com/ul?ll=${mapCoordinates.lat},${mapCoordinates.lng}&z=17`, '_blank'); }}
+                  >
+                    Waze
+                  </Button>
+                  <Button
+                    type="button" variant="ghost" size="sm" className="h-6 text-[10px] gap-1 px-2"
+                    onClick={() => { window.open(`https://wego.here.com/${mapCoordinates.lat},${mapCoordinates.lng},17z`, '_blank'); }}
+                  >
+                    HERE
+                  </Button>
+                  <Badge variant="outline" className="text-[9px]">اسحب العلامة لضبط الموقع</Badge>
+                </div>
               </div>
             )}
 
