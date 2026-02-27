@@ -47,6 +47,7 @@ import BusinessProfileView from '@/components/organization/BusinessProfileView';
 import BusinessProfileSettings from '@/components/organization/BusinessProfileSettings';
 import LMSProfileCertificates from '@/components/lms/LMSProfileCertificates';
 import LegalDataSection from '@/components/organization/LegalDataSection';
+import AttestationTabContent from '@/components/attestation/AttestationTabContent';
 
 interface OrganizationDocument {
   id: string;
@@ -420,6 +421,10 @@ const OrganizationProfile = () => {
               <TabsTrigger value="certificates" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
                 <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
                 الشهادات
+              </TabsTrigger>
+              <TabsTrigger value="attestation" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                الإفادة
               </TabsTrigger>
             </TabsList>
           </div>
@@ -988,6 +993,11 @@ const OrganizationProfile = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Attestation Tab */}
+          <TabsContent value="attestation">
+            <AttestationTabContent organizationId={organization.id} />
           </TabsContent>
         </Tabs>
       </div>
