@@ -78,7 +78,8 @@
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
     --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
     --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
-    --shadow-glow: 0 0 40px hsl(142, 71%, 45%, 0.3);
+    --shadow-glow: 0 0 40px hsl(142, 71%, 45%, 0.4);
+    --shadow-hero: 0 4px 30px hsl(0 0% 0% / 0.15), 0 10px 60px hsl(142, 71%, 45%, 0.1);
 
     --sidebar-background: 140 20% 98%;
     --sidebar-foreground: 0 0% 9%;
