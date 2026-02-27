@@ -391,7 +391,7 @@ const DriverSettingsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[90vh] rounded-2xl" dir="rtl">
         <DialogHeader className="text-right">
           <DialogTitle className="flex items-center gap-2 justify-end">
             <span>إعدادات السائق</span>

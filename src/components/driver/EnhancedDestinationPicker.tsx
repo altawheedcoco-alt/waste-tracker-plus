@@ -625,7 +625,7 @@ const EnhancedDestinationPicker = ({ driverId, onDestinationAdded }: EnhancedDes
 
       {/* Map Picker Dialog */}
       <Dialog open={showMapPicker} onOpenChange={setShowMapPicker}>
-        <DialogContent className="max-w-3xl h-[85vh] flex flex-col p-0">
+        <DialogContent className="max-w-3xl h-[85vh] flex flex-col p-0 rounded-2xl" dir="rtl">
           <DialogHeader className="p-4 pb-2 border-b">
             <DialogTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-primary" />
