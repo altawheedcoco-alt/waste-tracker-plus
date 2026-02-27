@@ -59,7 +59,7 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="number" className="flex items-center gap-2">
             <Search className="w-4 h-4" />
-            رقم الوثيقة
+            رقم المستند
           </TabsTrigger>
           <TabsTrigger value="qr" className="flex items-center gap-2">
             <QrCode className="w-4 h-4" />
@@ -80,7 +80,7 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
               )}
             </Button>
             <Input
-              placeholder="أدخل رقم أي وثيقة أو كود التحقق (مثال: SHP-... أو ATT-... أو 88C9-BEAB-...)"
+              placeholder="أدخل رقم أي مستند أو كود التحقق (مثال: SHP-... أو ATT-... أو 88C9-BEAB-...)"
               value={documentNumber}
               onChange={(e) => setDocumentNumber(e.target.value)}
               onKeyPress={handleKeyPress}
@@ -89,7 +89,7 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
             />
           </div>
           <p className="text-xs text-muted-foreground text-right">
-            يدعم: الشحنات، الشهادات، الإيصالات، العقود، الفواتير، الإفادات، خطابات الترسية، وجميع وثائق المنصة
+            يدعم: الشحنات، الشهادات، الإيصالات، العقود، الفواتير، الإفادات، خطابات الترسية، وجميع مستندات المنصة
           </p>
         </TabsContent>
 
@@ -120,7 +120,7 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
               <div className="flex items-center gap-2 mb-3">
                 <FileCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
                 <span className="font-bold text-green-700 dark:text-green-300">
-                  {typeLabels[result.type] || 'وثيقة'} صحيحة ✓
+                  {typeLabels[result.type] || 'مستند'} صحيح ✓
                 </span>
                 <span className="text-sm text-green-600 dark:text-green-400 mr-auto" dir="ltr">
                   {result.reference}
@@ -150,7 +150,7 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
               <div className="flex items-center gap-2">
                 <FileX className="w-5 h-5 text-red-600 dark:text-red-400" />
                 <span className="font-bold text-red-700 dark:text-red-300">
-                  وثيقة غير موجودة ✗
+                  مستند غير موجود ✗
                 </span>
               </div>
               <p className="text-sm text-red-600 dark:text-red-400 mt-2">{result.message}</p>
@@ -171,7 +171,7 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              التحقق من صحة الوثائق
+               التحقق من صحة المستندات
             </DialogTitle>
           </DialogHeader>
           {verificationContent}
@@ -185,10 +185,10 @@ const DocumentVerificationWidget = ({ open, onOpenChange }: DocumentVerification
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-right">
           <Shield className="w-5 h-5 text-primary" />
-          التحقق من صحة الوثائق
+           التحقق من صحة المستندات
         </CardTitle>
         <CardDescription className="text-right">
-          تحقق من صحة أي وثيقة عبر إدخال رقمها أو كود التحقق
+          تحقق من صحة أي مستند عبر إدخال رقمه أو كود التحقق
         </CardDescription>
       </CardHeader>
       <CardContent>

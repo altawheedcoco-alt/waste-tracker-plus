@@ -107,7 +107,7 @@ const DeliveryDeclarationViewDialog = ({
                   {declarationTitle}
                 </h1>
                 <p style={{ color: '#374151', fontSize: '10px', margin: '2px 0', fontWeight: '600' }}>Waste Delivery & Receipt Declaration</p>
-                <p style={{ color: '#6b7280', fontSize: '9px', margin: 0 }}>وثيقة رسمية مؤمنة ومسجلة إلكترونياً — محمية ببصمة رقمية SHA-256</p>
+                <p style={{ color: '#6b7280', fontSize: '9px', margin: 0 }}>مستند رسمي مؤمن ومسجل إلكترونياً — محمي ببصمة رقمية SHA-256</p>
               </div>
 
               {/* Shipment Info - responsive grid */}
@@ -133,7 +133,7 @@ const DeliveryDeclarationViewDialog = ({
               <div style={{ padding: '8px 10px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', margin: '8px 0', fontSize: '9px', color: '#991b1b', lineHeight: '1.5', wordBreak: 'break-word' }}>
                 <p style={{ margin: 0, fontWeight: 'bold' }}>⚖️ إخلاء مسؤولية وتحذير قانوني:</p>
                 <p style={{ margin: '3px 0 0 0' }}>
-                  هذه الوثيقة ملزمة قانونياً لجميع الأطراف الموقعة والمسجلة. أي مخالفة للبيانات المذكورة أو تلاعب بمحتويات الشحنة أو إخفاء معلومات جوهرية يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 وقانون حماية البيئة رقم 4 لسنة 1994 وقانون العقوبات المصري. يخضع هذا المستند لشروط وأحكام وسياسات منصة iRecycle المعتمدة.
+                  هذا المستند ملزم قانونياً لجميع الأطراف الموقعة والمسجلة. أي مخالفة للبيانات المذكورة أو تلاعب بمحتويات الشحنة أو إخفاء معلومات جوهرية يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 وقانون حماية البيئة رقم 4 لسنة 1994 وقانون العقوبات المصري. يخضع هذا المستند لشروط وأحكام وسياسات منصة iRecycle المعتمدة.
                 </p>
               </div>
 
@@ -147,7 +147,7 @@ const DeliveryDeclarationViewDialog = ({
                   </div>
                   <div>
                     <p><strong>تاريخ الإقرار:</strong> {declaredDate}</p>
-                    <p><strong>رقم الوثيقة:</strong> DEC-{declaration.id.slice(0, 8).toUpperCase()}</p>
+                    <p><strong>رقم المستند:</strong> DEC-{declaration.id.slice(0, 8).toUpperCase()}</p>
                   </div>
                 </div>
                 <div style={{ border: '1px dashed #d1d5db', padding: '15px', textAlign: 'center', marginTop: '10px', borderRadius: '6px', color: '#9ca3af' }}>
@@ -158,7 +158,7 @@ const DeliveryDeclarationViewDialog = ({
 
               {/* Footer */}
               <div style={{ borderTop: '2px solid #e5e7eb', marginTop: '10px', paddingTop: '8px', textAlign: 'center', fontSize: '8px', color: '#6b7280' }}>
-                <p style={{ margin: 0, wordBreak: 'break-word' }}>وثيقة رسمية مؤمنة وذكية | رقم الوثيقة: DEC-{declaration.id.slice(0, 8).toUpperCase()} | الشحنة: {declaration.shipment_number} | يخضع لقانون 202/2020</p>
+                <p style={{ margin: 0, wordBreak: 'break-word' }}>مستند رسمي مؤمن وذكي | رقم المستند: DEC-{declaration.id.slice(0, 8).toUpperCase()} | الشحنة: {declaration.shipment_number} | يخضع لقانون 202/2020</p>
                 <p style={{ margin: '4px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap' }}>
                   {[
                     'الإنتاج عليك.. والدائرة المقفولة علينا. خليك',

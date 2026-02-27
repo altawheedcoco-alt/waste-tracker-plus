@@ -564,7 +564,7 @@ const TransporterReceiptCertificatePrint = ({
       <footer className="mt-2 pt-2 text-center" style={{ borderTop: '1px solid #e5e7eb', fontSize: '7pt', color: '#9ca3af' }}>
         <p style={{ margin: 0 }}>تم إصدار هذه الشهادة إلكترونياً من نظام إدارة المخلفات ونقلها | تاريخ الإصدار: {currentDate} | رقم المرجع: {shipment.shipment_number}</p>
         <p style={{ margin: '2px 0 0 0', fontSize: '6pt' }}>
-          هذه الوثيقة صالحة بدون توقيع خطي في حالة التحقق الإلكتروني عبر رمز QR
+          هذا المستند صالح بدون توقيع خطي في حالة التحقق الإلكتروني عبر رمز QR
         </p>
         <p style={{ margin: '4px 0 0 0', fontSize: '7pt', color: '#6b7280' }}>
           📅 تاريخ وصول الشحنة (أول تسجيل على المنظومة): {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : deliveryDate}

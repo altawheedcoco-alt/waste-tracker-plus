@@ -528,7 +528,7 @@ ${DECLARATION_TEXT}`;
               <div className="rounded p-1.5 mb-2" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', fontSize: '6.5pt', color: '#991b1b', lineHeight: '1.4' }}>
                 <p style={{ margin: 0, fontWeight: 'bold' }}>⚖️ إخلاء مسؤولية وتحذير قانوني:</p>
                 <p style={{ margin: '2px 0 0 0' }}>
-                  هذه الوثيقة ملزمة قانونياً. أي مخالفة أو تلاعب يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون 202/2020 وقانون العقوبات المصري. يخضع لشروط وسياسات منصة iRecycle.
+                  هذا المستند ملزم قانونياً. أي مخالفة أو تلاعب يُعرّض المخالف للمساءلة المدنية والجنائية وفقاً لقانون 202/2020 وقانون العقوبات المصري. يخضع لشروط وسياسات منصة iRecycle.
                 </p>
               </div>
 
@@ -551,7 +551,7 @@ ${DECLARATION_TEXT}`;
               {/* === FOOTER === */}
               <footer className="mt-2 pt-1.5 text-center" style={{ borderTop: '2px solid #e5e7eb', fontSize: '6pt', color: '#6b7280' }}>
                 <p style={{ margin: 0 }}>
-                  وثيقة رسمية مؤمنة وذكية | {certNumber} | {shipment.shipment_number} | {currentDate} | قانون 202/2020
+                  مستند رسمي مؤمن وذكي | {certNumber} | {shipment.shipment_number} | {currentDate} | قانون 202/2020
                 </p>
                 <p style={{ margin: '2px 0 0 0', fontStyle: 'italic', color: '#16a34a', fontWeight: 'bold', fontSize: '6.5pt', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', flexWrap: 'wrap' }}>
                   {[

@@ -80,7 +80,7 @@ const sections: GuideSection[] = [
       'تجميع شحنات متعددة',
       'فلترة حسب التاريخ والنوع',
       'عدادات الكميات الإجمالية',
-      'وثيقة رسمية بالختم والتوقيع'
+      'مستند رسمي بالختم والتوقيع'
     ],
     example: 'تقرير مجمع لجميع شحنات البلاستيك في يناير 2025 (15 شحنة بإجمالي 2.5 طن).'
   },
@@ -314,7 +314,7 @@ const ReportsGuide = () => {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-purple-500 font-bold">•</span>
-              <span><strong>التقرير المجمع:</strong> دمج عدة شحنات في وثيقة رسمية واحدة</span>
+              <span><strong>التقرير المجمع:</strong> دمج عدة شحنات في مستند رسمي واحد</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-amber-500 font-bold">•</span>
