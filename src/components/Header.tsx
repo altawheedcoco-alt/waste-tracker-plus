@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2 } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -52,6 +52,7 @@ const Header = memo(() => {
         { label: language === 'ar' ? 'أكاديمية التدوير' : 'Recycling Academy', href: '/academy', icon: GraduationCap, desc: language === 'ar' ? 'تعلم تصنيف المخلفات طبقاً للقانون المصري' : 'Learn waste classification per Egyptian law' },
         { label: language === 'ar' ? 'التراخيص والتشريعات' : 'Licenses & Legislation', href: '/legislation', icon: Scale, desc: language === 'ar' ? 'الضوابط القانونية لوزارة البيئة المصرية' : 'Egyptian Ministry of Environment regulations' },
         { label: language === 'ar' ? 'عن المنصة' : 'About Us', href: '/about', icon: Building2, desc: language === 'ar' ? 'الرؤية والمهمة والأهداف الوطنية' : 'Vision, mission & national goals' },
+        { label: language === 'ar' ? 'سياسات المنصة' : 'Platform Policies', href: '/policies', icon: ShieldCheck, desc: language === 'ar' ? 'الإطار القانوني والتنظيمي الشامل' : 'Complete legal & regulatory framework' },
       ],
     },
     {

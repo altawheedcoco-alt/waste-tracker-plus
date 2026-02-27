@@ -33,6 +33,7 @@ const Partnerships = lazy(() => import("@/pages/Partnerships"));
 const Legislation = lazy(() => import("@/pages/Legislation"));
 const About = lazy(() => import("@/pages/About"));
 const Laws = lazy(() => import("@/pages/Laws"));
+const Policies = lazy(() => import("@/pages/Policies"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
@@ -79,6 +80,7 @@ export const publicRoutes = (
     <Route path="/legislation" element={<Legislation />} />
     <Route path="/laws" element={<Laws />} />
     <Route path="/about" element={<About />} />
+    <Route path="/policies" element={<Policies />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="*" element={<NotFound />} />
   </>
