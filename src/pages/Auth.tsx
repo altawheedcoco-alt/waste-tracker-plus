@@ -54,12 +54,27 @@ type AuthMode = 'login' | 'register';
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login';
+  const initialType = searchParams.get('type');
   
+  // Map URL type param to registrationType
+  const getInitialRegistrationType = (): RegistrationType => {
+    if (initialMode !== 'register' || !initialType) return null;
+    if (['generator', 'transporter', 'recycler', 'disposal'].includes(initialType)) return 'company';
+    if (initialType === 'driver') return 'driver';
+    if (initialType === 'consultant') return 'consultant';
+    if (initialType === 'consulting_office') return 'consulting_office';
+    if (initialType === 'iso_body') return 'iso_body';
+    if (initialType === 'jobseeker') return 'jobseeker';
+    return null;
+  };
+
   const [authMode, setAuthMode] = useState<AuthMode>(initialMode);
   const [registrationType, setRegistrationType] = useState<RegistrationType>(
-    initialMode === 'register' ? null : null
+    getInitialRegistrationType()
   );
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(
+    getInitialRegistrationType() === 'company' && ['generator', 'transporter', 'recycler', 'disposal'].includes(initialType || '') ? 2 : 1
+  );
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -75,7 +90,7 @@ const Auth = () => {
     password: '',
     fullName: '',
     phone: '',
-    organizationType: '' as 'generator' | 'transporter' | 'recycler',
+    organizationType: (['generator', 'transporter', 'recycler', 'disposal'].includes(initialType || '') ? initialType : '') as 'generator' | 'transporter' | 'recycler',
     organizationName: '',
     organizationEmail: '',
     organizationPhone: '',
@@ -807,7 +822,7 @@ const Auth = () => {
                   <CompanyRegistrationForm
                     onSubmit={handleCompanySignUp}
                     onBack={() => setRegistrationType(null)}
-                    defaultOrgType={registrationType !== 'company' ? registrationType : undefined}
+                    defaultOrgType={initialType && ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office', 'iso_body'].includes(initialType) ? initialType : (registrationType !== 'company' ? registrationType || undefined : undefined)}
                   />
                 </motion.div>
               )}
