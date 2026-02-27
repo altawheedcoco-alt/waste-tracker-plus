@@ -313,24 +313,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     </svg>
   );
 
-  // Driver-specific menu items - focused on driver workflow
+  // Driver-specific menu items - only essentials for fieldwork
   const driverMenuItems: SidebarMenuItem[] = [
     { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard', key: 'driver-dashboard' },
     { icon: Package, label: t('sidebar.myShipments'), path: '/dashboard/transporter-shipments', badge: sectionBadges['driver-shipments'], key: 'driver-shipments' },
-    { icon: Truck, label: language === 'ar' ? 'طلبات الشحنات' : 'Shipment Offers', path: '/dashboard/driver-offers', key: 'driver-offers' },
-    { icon: MapPin, label: t('sidebar.locationMaps'), path: '#', key: 'driver-location-group', children: [
-      { icon: MapPin, label: t('sidebar.myLocation'), path: '/dashboard/my-location', key: 'driver-location' },
-      { icon: Bookmark, label: t('sidebar.savedLocations'), path: '/dashboard/saved-locations', key: 'driver-saved-locations' },
-    ]},
-    { icon: Send, label: t('sidebar.requestsComm'), path: '#', key: 'driver-requests-comm-group', children: [
-      { icon: Send, label: t('sidebar.myRequests'), path: '/dashboard/my-requests', badge: sectionBadges['my-requests'], key: 'driver-requests' },
-      { icon: MessageCircle, label: t('sidebar.chatMessages'), path: '/dashboard/chat', badge: sectionBadges['chat'], key: 'driver-chat' },
-    ]},
-    { icon: Settings, label: t('sidebar.systemSupport'), path: '#', key: 'driver-system-group', badge: notificationCount, children: [
-      { icon: Bell, label: t('nav.notifications'), path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
-      { icon: Headphones, label: t('sidebar.techSupport'), path: '/dashboard/support', key: 'driver-support' },
-      { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'driver-settings' },
-    ]},
+    { icon: MapPin, label: language === 'ar' ? 'موقعي' : 'My Location', path: '/dashboard/my-location', key: 'driver-location' },
+    { icon: Bell, label: t('nav.notifications'), path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
+    { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'driver-settings' },
   ];
 
   // Full menu items for organizations and admins - with unique keys (GROUPED)
