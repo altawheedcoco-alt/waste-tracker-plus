@@ -55,7 +55,7 @@ const Hero = memo(() => {
 
           {/* Main heading - bolder, more readable */}
           <h1 
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-6 leading-tight px-2 animate-fade-up"
+            className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-6 leading-snug px-2 animate-fade-up"
             style={{ 
               animationDelay: '0.2s',
               textShadow: '0 2px 20px rgba(0,0,0,0.5), 0 4px 40px rgba(0,0,0,0.3)',
@@ -67,12 +67,12 @@ const Hero = memo(() => {
             <br /><span className="text-white">{t('landing.heroTitle3')}</span>
           </h1>
 
-          <p className="text-xs sm:text-sm text-white/80 mt-1 font-semibold animate-fade-up tracking-wide" style={{ animationDelay: '0.25s', textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
+          <p className="text-[10px] sm:text-sm text-white/80 mt-1 font-semibold animate-fade-up tracking-wide px-4" style={{ animationDelay: '0.25s', textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
             {language === 'ar' ? '🇪🇬 منصة خدمية وطنية لجمهورية مصر العربية — في إطار مبادرات التحول الأخضر' : '🇪🇬 A National Service Platform for Egypt — Supporting Green Transformation'}
           </p>
 
           <p 
-            className="text-sm sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-6 sm:mb-10 px-4 leading-relaxed font-medium animate-fade-up"
+            className="text-xs sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-6 sm:mb-10 px-4 leading-relaxed font-medium animate-fade-up"
             style={{ animationDelay: '0.35s', textShadow: '0 1px 10px rgba(0,0,0,0.3)' }}
           >
             {t('landing.heroDesc')}

@@ -105,7 +105,7 @@ const Header = memo(() => {
   }, [navigate]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/30 animate-fade-in" style={{ WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}>
+    <header className="fixed top-0 left-0 right-0 z-[60] border-b border-border/30 animate-fade-in" style={{ WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}>
       {/* Gradient top accent line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-emerald-400 to-primary opacity-80" />
       
@@ -239,7 +239,7 @@ const Header = memo(() => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-background/98 backdrop-blur-xl border-t border-border/30 animate-fade-in max-h-[75vh] overflow-y-auto shadow-xl">
+        <div className="lg:hidden bg-background border-t border-border/30 animate-fade-in max-h-[75vh] overflow-y-auto shadow-2xl relative z-50">
           <div className="container mx-auto px-3 py-4">
             <nav className="flex flex-col gap-1">
               {dropdowns.map((dropdown) => (
