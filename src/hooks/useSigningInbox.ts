@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
 import { useDocumentSync } from '@/hooks/useDocumentSync';
+import { evaluateAndEndorse } from '@/services/platformAutoEndorsement';
 
 export interface SigningRequest {
   id: string;
@@ -176,6 +177,24 @@ export function useSigningInbox() {
           signedDocumentUrl,
           signatureId,
         });
+
+        // فحص الاعتماد الرقمي التلقائي من المنصة
+        // نجلب بيانات الطلب لمعرفة نوع المستند والمنظمة
+        const { data: reqData } = await supabase
+          .from('signing_requests')
+          .select('document_type, document_id, sender_organization_id, recipient_organization_id')
+          .eq('id', id)
+          .single();
+
+        if (reqData?.document_id && profile?.user_id) {
+          // نفحص باسم المنظمة المرسلة (صاحبة المستند)
+          evaluateAndEndorse({
+            documentType: reqData.document_type || 'other',
+            documentId: reqData.document_id,
+            organizationId: reqData.sender_organization_id,
+            userId: profile.user_id,
+          }).catch(err => console.warn('Auto-endorsement check failed:', err));
+        }
       }
     },
     onSuccess: () => {
