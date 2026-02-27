@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useSubscriptionStatus } from '@/hooks/useSubscriptionStatus';
+import { useDocumentSync } from '@/hooks/useDocumentSync';
 
 export interface SigningRequest {
   id: string;
@@ -44,6 +45,7 @@ export function useSigningInbox() {
   const queryClient = useQueryClient();
   const orgId = profile?.organization_id;
   const { hasActiveSubscription, isExempt } = useSubscriptionStatus();
+  const { syncAfterSigning } = useDocumentSync();
 
   // Realtime subscription
   useEffect(() => {
@@ -142,20 +144,39 @@ export function useSigningInbox() {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status, rejection_reason }: { id: string; status: string; rejection_reason?: string }) => {
+    mutationFn: async ({ id, status, rejection_reason, signedDocumentUrl, signatureId }: { 
+      id: string; 
+      status: string; 
+      rejection_reason?: string;
+      signedDocumentUrl?: string;
+      signatureId?: string;
+    }) => {
       // Block signing action if no active subscription
       if (status === 'signed' && !isExempt && !hasActiveSubscription) {
         throw new Error('يلزم اشتراك نشط للتوقيع على المستندات. يرجى تجديد اشتراكك أولاً.');
       }
       const updates: any = { status };
       if (status === 'viewed') updates.viewed_at = new Date().toISOString();
-      if (status === 'signed') updates.signed_at = new Date().toISOString();
+      if (status === 'signed') {
+        updates.signed_at = new Date().toISOString();
+        if (signedDocumentUrl) updates.signed_document_url = signedDocumentUrl;
+        if (signatureId) updates.signature_id = signatureId;
+      }
       if (status === 'rejected') {
         updates.rejected_at = new Date().toISOString();
         updates.rejection_reason = rejection_reason || null;
       }
       const { error } = await supabase.from('signing_requests').update(updates).eq('id', id);
       if (error) throw error;
+
+      // مزامنة المستند بعد التوقيع — تحديث entity_documents
+      if (status === 'signed') {
+        await syncAfterSigning({
+          signingRequestId: id,
+          signedDocumentUrl,
+          signatureId,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['signing-requests', orgId] });
