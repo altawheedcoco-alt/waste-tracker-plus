@@ -67,8 +67,15 @@ const NavigationButtonGroup = ({
     return `https://waze.com/ul?ll=${destination.lat},${destination.lng}&navigate=yes`;
   };
 
+  const buildHereWeGoUrl = (destination: string | { lat: number; lng: number }) => {
+    if (typeof destination === 'string') {
+      return `https://wego.here.com/directions/drive/mylocation/${encodeURIComponent(destination)}`;
+    }
+    return `https://wego.here.com/directions/drive/mylocation/${destination.lat},${destination.lng}`;
+  };
+
   // Navigation handlers
-  const handleNavigate = (app: 'google' | 'waze', type: 'pickup' | 'delivery') => {
+  const handleNavigate = (app: 'google' | 'waze' | 'here', type: 'pickup' | 'delivery') => {
     const destination = type === 'pickup' 
       ? (pickupCoords || pickupAddress)
       : (deliveryCoords || deliveryAddress);
@@ -78,14 +85,16 @@ const NavigationButtonGroup = ({
       return;
     }
     
-    const url = app === 'google' ? buildGoogleMapsUrl(destination) : buildWazeUrl(destination);
+    const urlMap = { google: buildGoogleMapsUrl, waze: buildWazeUrl, here: buildHereWeGoUrl };
+    const url = urlMap[app](destination);
     window.open(url, '_blank');
-    toast.success(`جاري فتح ${app === 'google' ? 'Google Maps' : 'Waze'}...`);
+    const appNames = { google: 'Google Maps', waze: 'Waze', here: 'HERE WeGo' };
+    toast.success(`جاري فتح ${appNames[app]}...`);
     setIsOpen(false);
   };
 
   // Show full route
-  const handleShowRoute = (app: 'google' | 'waze') => {
+  const handleShowRoute = (app: 'google' | 'waze' | 'here') => {
     const origin = pickupCoords 
       ? `${pickupCoords.lat},${pickupCoords.lng}` 
       : pickupAddress;
@@ -101,15 +110,17 @@ const NavigationButtonGroup = ({
     let url: string;
     if (app === 'google') {
       url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving`;
+    } else if (app === 'here') {
+      url = `https://wego.here.com/directions/drive/${encodeURIComponent(origin)}/${encodeURIComponent(destination)}`;
     } else {
-      // Waze doesn't support origin in URL, so we navigate to destination
       url = typeof destination === 'string'
         ? `https://waze.com/ul?q=${encodeURIComponent(destination)}&navigate=yes`
         : `https://waze.com/ul?ll=${deliveryCoords?.lat},${deliveryCoords?.lng}&navigate=yes`;
     }
     
     window.open(url, '_blank');
-    toast.success(`جاري عرض المسار على ${app === 'google' ? 'Google Maps' : 'Waze'}...`);
+    const appNames: Record<string, string> = { google: 'Google Maps', waze: 'Waze', here: 'HERE WeGo' };
+    toast.success(`جاري عرض المسار على ${appNames[app]}...`);
     setIsOpen(false);
   };
 
@@ -222,6 +233,53 @@ const NavigationButtonGroup = ({
           >
             <ExternalLink className="w-3 h-3" />
             التنقل عبر Waze
+          </Button>
+        </div>
+
+        <DropdownMenuSeparator />
+
+        {/* HERE WeGo Section */}
+        <div className="p-2">
+          <div className="flex items-center gap-2 px-2 py-1">
+            <div className="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center">
+              <Navigation className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="text-sm font-medium">HERE WeGo</span>
+            <Badge variant="outline" className="text-[9px] mr-auto border-emerald-300 text-emerald-600">
+              ملاحة بدون انترنت
+            </Badge>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-1 mt-1">
+            <DropdownMenuItem 
+              onClick={() => handleNavigate('here', 'pickup')} 
+              className="gap-2 cursor-pointer rounded-lg"
+            >
+              <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center">
+                <MapPin className="w-3 h-3 text-blue-600" />
+              </div>
+              <span className="text-xs">نقطة الاستلام</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem 
+              onClick={() => handleNavigate('here', 'delivery')} 
+              className="gap-2 cursor-pointer rounded-lg"
+            >
+              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center">
+                <MapPin className="w-3 h-3 text-red-600" />
+              </div>
+              <span className="text-xs">نقطة التسليم</span>
+            </DropdownMenuItem>
+          </div>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full mt-1 h-7 text-xs gap-1"
+            onClick={() => handleShowRoute('here')}
+          >
+            <ExternalLink className="w-3 h-3" />
+            عرض المسار عبر HERE WeGo
           </Button>
         </div>
 

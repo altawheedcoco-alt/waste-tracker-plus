@@ -177,15 +177,30 @@ export const getWazeNavigationUrl = (
 };
 
 /**
+ * Generate HERE WeGo navigation URL
+ */
+export const getHereWeGoNavigationUrl = (
+  destination: { lat: number; lng: number },
+  origin?: { lat: number; lng: number }
+): string => {
+  if (origin) {
+    return `https://wego.here.com/directions/drive/${origin.lat},${origin.lng}/${destination.lat},${destination.lng}`;
+  }
+  return `https://wego.here.com/directions/drive/mylocation/${destination.lat},${destination.lng}`;
+};
+
+/**
  * Open external navigation app
  */
 export const openExternalNavigation = (
-  app: 'google' | 'waze',
+  app: 'google' | 'waze' | 'here',
   destination: { lat: number; lng: number },
   origin?: { lat: number; lng: number }
 ): void => {
-  const url = app === 'google' 
-    ? getGoogleMapsNavigationUrl(destination, origin)
-    : getWazeNavigationUrl(destination, origin);
-  window.open(url, '_blank');
+  const urlMap = {
+    google: getGoogleMapsNavigationUrl(destination, origin),
+    waze: getWazeNavigationUrl(destination, origin),
+    here: getHereWeGoNavigationUrl(destination, origin),
+  };
+  window.open(urlMap[app], '_blank');
 };

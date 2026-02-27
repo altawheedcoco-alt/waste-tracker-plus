@@ -71,6 +71,29 @@ const GoogleMapsNavigationButton = ({
     }
   };
 
+  // Build HERE WeGo URL
+  const buildHereWeGoUrl = (destination: string | { lat: number; lng: number }) => {
+    if (typeof destination === 'string') {
+      return `https://wego.here.com/directions/drive/mylocation/${encodeURIComponent(destination)}`;
+    } else {
+      return `https://wego.here.com/directions/drive/mylocation/${destination.lat},${destination.lng}`;
+    }
+  };
+
+  const handleNavigateWithHere = (type: 'pickup' | 'delivery') => {
+    const destination = type === 'pickup' 
+      ? (pickupCoords || pickupAddress)
+      : (deliveryCoords || deliveryAddress);
+    if (!destination) {
+      toast.error(`عنوان ${type === 'pickup' ? 'الاستلام' : 'التسليم'} غير متاح`);
+      return;
+    }
+    const url = buildHereWeGoUrl(destination);
+    window.open(url, '_blank');
+    toast.success('جاري فتح HERE WeGo للملاحة...');
+    setIsOpen(false);
+  };
+
   // Open navigation to pickup location
   const handleNavigateToPickup = () => {
     const destination = pickupCoords || pickupAddress;
@@ -243,6 +266,24 @@ const GoogleMapsNavigationButton = ({
               onClick={() => handleNavigateWithWaze('delivery')}
             >
               Waze (تسليم)
+            </Button>
+          </div>
+          <div className="flex gap-2 mt-1">
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 text-xs h-8 border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+              onClick={() => handleNavigateWithHere('pickup')}
+            >
+              HERE (استلام)
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 text-xs h-8 border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+              onClick={() => handleNavigateWithHere('delivery')}
+            >
+              HERE (تسليم)
             </Button>
           </div>
         </div>
