@@ -12,6 +12,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 // Offline components (lightweight, keep global)
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
 const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
+const CodeProtection = lazy(() => import("./components/security/CodeProtection"));
 
 // Minimal loading component
 const PageLoader = memo(() => (
@@ -88,6 +89,7 @@ const Providers = memo(() => (
                 <Suspense fallback={null}>
                   <OfflineBanner />
                   <ScrollToTopButton />
+                  <CodeProtection />
                 </Suspense>
               </AuthProvider>
             </BrowserRouter>
