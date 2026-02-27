@@ -128,7 +128,7 @@ const DriverAssignmentAlert = () => {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleAcknowledge(); setOpen(v); }}>
-      <DialogContent className="max-w-md p-0 overflow-hidden border-2 border-amber-500/50" dir="rtl">
+      <DialogContent className="max-w-md p-0 overflow-y-auto border-2 border-amber-500/50 rounded-2xl" dir="rtl">
         {/* Urgent Header */}
         <div className="bg-gradient-to-l from-amber-500 to-orange-600 p-4 text-white">
           <DialogHeader>

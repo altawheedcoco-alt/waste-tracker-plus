@@ -102,7 +102,7 @@ const DriverSOSButton = ({ driverId, organizationId, currentShipmentId }: Driver
 
       {/* SOS Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-red-600">
               <Siren className="w-5 h-5" />

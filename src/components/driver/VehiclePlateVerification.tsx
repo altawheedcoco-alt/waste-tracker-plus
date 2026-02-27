@@ -189,7 +189,7 @@ const VehiclePlateVerification = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md" dir="rtl">
+      <DialogContent className="sm:max-w-md rounded-2xl" dir="rtl">
         <DialogHeader className="text-right">
           <DialogTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />

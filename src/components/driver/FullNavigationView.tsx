@@ -286,7 +286,7 @@ const FullNavigationView = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 gap-0" dir="rtl">
+      <DialogContent className="max-w-full max-h-full h-screen w-screen p-0 gap-0 rounded-none sm:rounded-2xl" dir="rtl">
         {/* Header */}
         <div className="absolute top-0 left-0 right-0 z-[1001] bg-gradient-to-b from-background via-background/80 to-transparent p-4">
           <div className="flex items-center justify-between">
