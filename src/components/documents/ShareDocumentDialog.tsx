@@ -238,8 +238,8 @@ const ShareDocumentDialog = ({
       }
     }
 
-    // Enforce file attachment
-    const hasFile = file || autoFileUrl;
+    // Enforce file attachment (skip if referenceId exists — document is a platform entity)
+    const hasFile = file || autoFileUrl || referenceId;
     if (!hasFile) {
       toast.error('يجب إرفاق ملف أو مستند قبل المشاركة');
       return;
