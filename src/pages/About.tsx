@@ -46,7 +46,7 @@ const About = () => {
   const values = [
     {
       icon: Leaf,
-      color: 'from-emerald-500 to-green-600',
+      color: 'from-primary to-primary/80',
       titleAr: 'المسؤولية البيئية',
       titleEn: 'Environmental Responsibility',
       descAr: 'نؤمن أن حماية بيئة مصر هي مسؤولية وطنية مشتركة بين كل مواطن ومؤسسة وجهة حكومية.',
@@ -54,7 +54,7 @@ const About = () => {
     },
     {
       icon: Brain,
-      color: 'from-blue-500 to-indigo-600',
+      color: 'from-secondary-foreground to-foreground',
       titleAr: 'الابتكار الرقمي',
       titleEn: 'Digital Innovation',
       descAr: 'استخدام أحدث تقنيات الخرائط والذكاء الاصطناعي لخدمة المواطن والبيئة وتحقيق التحول الرقمي.',
@@ -62,7 +62,7 @@ const About = () => {
     },
     {
       icon: Globe,
-      color: 'from-amber-500 to-orange-600',
+      color: 'from-primary/70 to-primary',
       titleAr: 'الخدمة العامة',
       titleEn: 'Public Service',
       descAr: 'المنصة متاحة لخدمة كافة القطاعات في الدولة دون انحياز لجهة خاصة — منصة الشعب لخدمة الشعب.',

@@ -31,8 +31,8 @@ const policySections: PolicySection[] = [
     id: 'general',
     title: 'الأحكام العامة والتعريفات',
     icon: BookOpen,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5',
     articles: [
       {
         number: '1',
@@ -60,8 +60,8 @@ const policySections: PolicySection[] = [
     id: 'generator',
     title: 'اشتراطات الجهة المولدة (GEN)',
     icon: Building2,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5',
     articles: [
       {
         number: '3',
@@ -89,8 +89,8 @@ const policySections: PolicySection[] = [
     id: 'transporter',
     title: 'اشتراطات شركات النقل (TRN)',
     icon: Truck,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50 dark:bg-amber-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-accent',
     articles: [
       {
         number: '5',
@@ -130,8 +130,8 @@ const policySections: PolicySection[] = [
     id: 'recycler',
     title: 'اشتراطات جهة التدوير (RCY)',
     icon: Recycle,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5',
     articles: [
       {
         number: '8',
@@ -159,8 +159,8 @@ const policySections: PolicySection[] = [
     id: 'disposal',
     title: 'اشتراطات التخلص الآمن (DSP)',
     icon: Flame,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50 dark:bg-red-950/30',
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/5',
     articles: [
       {
         number: '10',
@@ -179,8 +179,8 @@ const policySections: PolicySection[] = [
     id: 'consultant',
     title: 'اشتراطات الاستشاريين والمكاتب (CNS/COF)',
     icon: BadgeCheck,
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50 dark:bg-violet-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-secondary',
     articles: [
       {
         number: '11',
@@ -208,8 +208,8 @@ const policySections: PolicySection[] = [
     id: 'documents',
     title: 'نظام المستندات والتوقيعات',
     icon: FileCheck,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 dark:bg-purple-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-muted',
     articles: [
       {
         number: '13',
@@ -239,8 +239,8 @@ const policySections: PolicySection[] = [
     id: 'identity',
     title: 'التحقق من الهوية والتسجيل',
     icon: UserCheck,
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50 dark:bg-teal-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-accent',
     articles: [
       {
         number: '15',
@@ -270,8 +270,8 @@ const policySections: PolicySection[] = [
     id: 'compliance',
     title: 'الامتثال والرقابة',
     icon: Shield,
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50 dark:bg-indigo-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5',
     articles: [
       {
         number: '17',
@@ -309,8 +309,8 @@ const policySections: PolicySection[] = [
     id: 'regulator',
     title: 'الرقابة الحكومية',
     icon: Eye,
-    color: 'text-sky-600',
-    bgColor: 'bg-sky-50 dark:bg-sky-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-secondary',
     articles: [
       {
         number: '20',
@@ -338,8 +338,8 @@ const policySections: PolicySection[] = [
     id: 'contracts',
     title: 'العقود والاتفاقيات',
     icon: FileText,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50 dark:bg-orange-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-accent',
     articles: [
       {
         number: '22',
@@ -358,8 +358,8 @@ const policySections: PolicySection[] = [
     id: 'environment',
     title: 'الاستدامة البيئية',
     icon: Leaf,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50 dark:bg-green-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-primary/5',
     articles: [
       {
         number: '23',
@@ -385,8 +385,8 @@ const policySections: PolicySection[] = [
     id: 'security',
     title: 'أمن المعلومات والخصوصية',
     icon: Lock,
-    color: 'text-gray-700',
-    bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted',
     articles: [
       {
         number: '25',
@@ -414,8 +414,8 @@ const policySections: PolicySection[] = [
     id: 'omaluna',
     title: 'سياسات منصة عُمالنا للتوظيف',
     icon: Users,
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50 dark:bg-cyan-950/30',
+    color: 'text-primary',
+    bgColor: 'bg-secondary',
     articles: [
       {
         number: '27',
@@ -434,8 +434,8 @@ const policySections: PolicySection[] = [
     id: 'ads',
     title: 'سياسات الإعلانات المدفوعة',
     icon: AlertTriangle,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50 dark:bg-pink-950/30',
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/5',
     articles: [
       {
         number: '28',
@@ -454,8 +454,8 @@ const policySections: PolicySection[] = [
     id: 'final',
     title: 'أحكام ختامية',
     icon: Gavel,
-    color: 'text-gray-800 dark:text-gray-200',
-    bgColor: 'bg-gray-50 dark:bg-gray-900/30',
+    color: 'text-foreground',
+    bgColor: 'bg-muted',
     articles: [
       {
         number: '29',
