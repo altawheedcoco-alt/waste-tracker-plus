@@ -1,8 +1,14 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import L from 'leaflet';
 import Header from "@/components/Header";
-import { Map } from "lucide-react";
-import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Map, Search, Loader2, MapPin, Building2, Recycle, Truck, Factory, Sparkles, Navigation, Layers } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM, forwardGeocodeOSM } from '@/lib/leafletConfig';
+import { toast } from 'sonner';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -10,25 +16,285 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
 
+const ORG_ICONS: Record<string, { color: string; icon: string; label: string }> = {
+  generator: { color: '#f59e0b', icon: 'G', label: 'مولد نفايات' },
+  transporter: { color: '#3b82f6', icon: 'T', label: 'ناقل' },
+  recycler: { color: '#22c55e', icon: 'R', label: 'مدوّر' },
+  disposal: { color: '#ef4444', icon: 'D', label: 'تخلص نهائي' },
+  transport_office: { color: '#8b5cf6', icon: 'O', label: 'مكتب نقل' },
+  consultant: { color: '#06b6d4', icon: 'C', label: 'استشاري' },
+  iso_body: { color: '#ec4899', icon: 'I', label: 'جهة أيزو' },
+};
+
+const createOrgIcon = (type: string) => {
+  const config = ORG_ICONS[type] || { color: '#6b7280', icon: '?', label: 'أخرى' };
+  return L.divIcon({
+    html: `<div style="background:${config.color};width:28px;height:28px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:12px;">${config.icon}</div>`,
+    iconSize: [28, 28],
+    className: '',
+  });
+};
+
 const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
+  const [loading, setLoading] = useState(true);
+  const [orgs, setOrgs] = useState<any[]>([]);
+  const [stats, setStats] = useState({ total: 0, generators: 0, transporters: 0, recyclers: 0 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [aiSearchQuery, setAiSearchQuery] = useState('');
+  const [aiSearching, setAiSearching] = useState(false);
+
+  // Load organizations with locations
+  const loadOrganizations = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type, address, city, region, latitude, longitude, is_verified')
+        .eq('is_active', true)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
+
+      const orgsData = (data || []).filter((o: any) => o.latitude && o.longitude);
+      setOrgs(orgsData);
+      
+      setStats({
+        total: orgsData.length,
+        generators: orgsData.filter((o: any) => o.organization_type === 'generator').length,
+        transporters: orgsData.filter((o: any) => o.organization_type === 'transporter').length,
+        recyclers: orgsData.filter((o: any) => o.organization_type === 'recycler').length,
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadOrganizations(); }, [loadOrganizations]);
+
+  // Initialize map
   useEffect(() => {
     if (!mapRef.current) return;
-    const map = L.map(mapRef.current).setView(EGYPT_CENTER, DEFAULT_ZOOM);
-    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION }).addTo(map);
-    return () => { map.remove(); };
+    if (mapInstanceRef.current) mapInstanceRef.current.remove();
+
+    const map = L.map(mapRef.current, { zoomControl: true }).setView(EGYPT_CENTER, DEFAULT_ZOOM);
+    
+    // Multiple tile layers
+    const osmLayer = L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 });
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
+    
+    osmLayer.addTo(map);
+    L.control.layers({ 'خريطة عادية': osmLayer, 'صور أقمار صناعية': satelliteLayer }, {}, { position: 'topright' }).addTo(map);
+
+    markersLayerRef.current = L.layerGroup().addTo(map);
+    mapInstanceRef.current = map;
+
+    return () => { map.remove(); mapInstanceRef.current = null; };
   }, []);
+
+  // Render markers when orgs or filters change
+  useEffect(() => {
+    if (!mapInstanceRef.current || !markersLayerRef.current) return;
+    markersLayerRef.current.clearLayers();
+
+    const filtered = activeFilters.length > 0
+      ? orgs.filter(o => activeFilters.includes(o.organization_type))
+      : orgs;
+
+    filtered.forEach(org => {
+      const marker = L.marker([org.latitude, org.longitude], { icon: createOrgIcon(org.organization_type) })
+        .bindPopup(`
+          <div dir="rtl" style="min-width:180px">
+            <h4 style="font-weight:bold;margin-bottom:4px">${org.name}</h4>
+            <p style="font-size:11px;color:#666;margin-bottom:4px">${ORG_ICONS[org.organization_type]?.label || org.organization_type}</p>
+            ${org.address ? `<p style="font-size:11px">${org.address}</p>` : ''}
+            ${org.city ? `<p style="font-size:11px">${org.city}${org.region ? ` - ${org.region}` : ''}</p>` : ''}
+            ${org.is_verified ? '<span style="color:#22c55e;font-size:10px">✅ موثق</span>' : ''}
+          </div>
+        `);
+      marker.addTo(markersLayerRef.current!);
+    });
+  }, [orgs, activeFilters]);
+
+  // Search handler
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const results = await forwardGeocodeOSM(searchQuery);
+      if (results.length > 0 && mapInstanceRef.current) {
+        mapInstanceRef.current.setView([results[0].lat, results[0].lng], 14);
+        L.marker([results[0].lat, results[0].lng]).addTo(mapInstanceRef.current)
+          .bindPopup(`<div dir="rtl"><b>${results[0].name}</b><br/>${results[0].address}</div>`).openPopup();
+      } else {
+        toast.error('لم يتم العثور على الموقع');
+      }
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  // AI search
+  const handleAISearch = async () => {
+    if (!aiSearchQuery.trim()) return;
+    setAiSearching(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-location-resolve', {
+        body: { query: aiSearchQuery },
+      });
+      if (error) throw error;
+      if (data?.location && mapInstanceRef.current) {
+        const { latitude, longitude, name, address } = data.location;
+        mapInstanceRef.current.setView([latitude, longitude], 15);
+        L.marker([latitude, longitude]).addTo(mapInstanceRef.current)
+          .bindPopup(`<div dir="rtl"><b>🤖 ${name}</b><br/>${address}</div>`).openPopup();
+        toast.success(`📍 تم تحديد: ${name}`);
+      }
+    } catch {
+      toast.error('فشل في البحث');
+    } finally {
+      setAiSearching(false);
+    }
+  };
+
+  const toggleFilter = (type: string) => {
+    setActiveFilters(prev => prev.includes(type) ? prev.filter(f => f !== type) : [...prev, type]);
+  };
+
+  // Locate me
+  const locateMe = () => {
+    if (!navigator.geolocation || !mapInstanceRef.current) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        mapInstanceRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 15);
+        L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapInstanceRef.current!)
+          .bindPopup('<div dir="rtl"><b>📍 موقعك الحالي</b></div>').openPopup();
+      },
+      () => toast.error('فشل في تحديد الموقع')
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto p-4 space-y-4">
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Map className="w-7 h-7 text-primary" />
-          خريطة المجتمع التفاعلية
-        </h1>
-        <div ref={mapRef} className="rounded-lg border border-border" style={{ height: '500px' }} />
+        {/* Header */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Map className="w-7 h-7 text-primary" />
+              خريطة المجتمع التفاعلية
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              اكتشف المنظمات والجهات المسجلة على المنصة على الخريطة
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="gap-1"><Building2 className="w-3 h-3" />{stats.total} جهة</Badge>
+            <Badge className="bg-amber-500/10 text-amber-600 gap-1"><Factory className="w-3 h-3" />{stats.generators} مولد</Badge>
+            <Badge className="bg-blue-500/10 text-blue-600 gap-1"><Truck className="w-3 h-3" />{stats.transporters} ناقل</Badge>
+            <Badge className="bg-green-500/10 text-green-600 gap-1"><Recycle className="w-3 h-3" />{stats.recyclers} مدوّر</Badge>
+          </div>
+        </div>
+
+        {/* Search Bars */}
+        <div className="grid md:grid-cols-2 gap-3">
+          {/* AI Search */}
+          <Card>
+            <CardContent className="p-3">
+              <div className="flex gap-2">
+                <Input
+                  value={aiSearchQuery}
+                  onChange={e => setAiSearchQuery(e.target.value)}
+                  placeholder="🤖 بحث ذكي: المنطقة الصناعية بالعاشر، مصنع الحديد..."
+                  onKeyDown={e => e.key === 'Enter' && handleAISearch()}
+                />
+                <Button size="sm" onClick={handleAISearch} disabled={aiSearching} className="gap-1">
+                  {aiSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                  AI
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Regular Search */}
+          <Card>
+            <CardContent className="p-3">
+              <div className="flex gap-2">
+                <Input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="🔍 بحث عادي: القاهرة، الإسكندرية، أسيوط..."
+                  onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                />
+                <Button size="sm" variant="outline" onClick={handleSearch} disabled={searching} className="gap-1">
+                  {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  بحث
+                </Button>
+                <Button size="sm" variant="outline" onClick={locateMe} title="موقعي">
+                  <Navigation className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(ORG_ICONS).map(([type, config]) => (
+            <Button
+              key={type}
+              size="sm"
+              variant={activeFilters.includes(type) ? 'default' : 'outline'}
+              className="gap-1 text-xs"
+              onClick={() => toggleFilter(type)}
+            >
+              <div className="w-3 h-3 rounded-full" style={{ background: config.color }} />
+              {config.label}
+            </Button>
+          ))}
+          {activeFilters.length > 0 && (
+            <Button size="sm" variant="ghost" className="text-xs" onClick={() => setActiveFilters([])}>
+              إظهار الكل
+            </Button>
+          )}
+        </div>
+
+        {/* Map */}
+        <div className="relative">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 rounded-lg">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          )}
+          <div ref={mapRef} className="rounded-xl border border-border shadow-sm" style={{ height: '600px' }} />
+        </div>
+
+        {/* Legend */}
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              دليل الرموز
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {Object.entries(ORG_ICONS).map(([type, config]) => (
+                <div key={type} className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold" style={{ background: config.color }}>
+                    {config.icon}
+                  </div>
+                  <span className="text-xs">{config.label}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
