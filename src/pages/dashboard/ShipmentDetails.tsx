@@ -18,7 +18,7 @@ import RouteProgressBar from '@/components/tracking/RouteProgressBar';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 import GeneratorCompletionCard from '@/components/shipments/GeneratorCompletionCard';
-import VirtualRouteMap from '@/components/shipments/VirtualRouteMap';
+import CompletedRouteMap from '@/components/shipments/CompletedRouteMap';
 import DriverAssignmentPanel from '@/components/shipments/DriverAssignmentPanel';
 import ShipmentRatingDialog from '@/components/shipments/ShipmentRatingDialog';
 import ShipmentDisputePanel from '@/components/shipments/ShipmentDisputePanel';
@@ -307,9 +307,9 @@ const ShipmentDetailsPage = () => {
         {organization?.organization_type === 'generator' && ['delivered', 'confirmed'].includes(shipment.status) && (
           <>
             <GeneratorCompletionCard shipment={shipment} />
-            <VirtualRouteMap
-              pickupLocation={generatorLocation}
-              deliveryLocation={recyclerLocation}
+            <CompletedRouteMap
+              pickupCoords={generatorLocation}
+              deliveryCoords={recyclerLocation}
               pickupLabel={shipment.pickup_address || 'موقع المولّد'}
               deliveryLabel={shipment.delivery_address || 'موقع المدوّر'}
               shipmentNumber={shipment.shipment_number}
