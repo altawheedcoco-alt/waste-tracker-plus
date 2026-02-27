@@ -164,8 +164,11 @@ const LegalDataSection = ({ orgData, organizationType, isEditable, onUpdate }: L
             <Input value={orgData?.environmental_approval_number || ''} onChange={(e) => onUpdate({ ...orgData, environmental_approval_number: e.target.value })} disabled={!isEditable} className="h-9 text-sm" />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">رقم الإقرار الرقمي</Label>
-            <Input value={orgData?.digital_declaration_number || ''} onChange={(e) => onUpdate({ ...orgData, digital_declaration_number: e.target.value })} disabled={!isEditable} className="h-9 text-sm" placeholder="رقم الإقرار بالشروط والسياسات" />
+            <Label className="text-xs flex items-center gap-1.5">
+              رقم الإقرار الرقمي
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-primary/10 text-primary border-primary/20">تلقائي</Badge>
+            </Label>
+            <Input value={orgData?.digital_declaration_number || 'سيتم التوليد تلقائياً'} disabled className="h-9 text-sm font-mono bg-muted/50" />
           </div>
         </div>
       </div>
