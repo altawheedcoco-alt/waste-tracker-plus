@@ -55,34 +55,27 @@ serve(async (req) => {
     const mimeType = audioFile.type || "audio/webm";
 
     // Use Gemini for speech-to-text
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `Transcribe the following audio recording accurately. The audio is likely in ${language === "ar" ? "Arabic" : "English"}. 
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Transcribe the following audio recording accurately. The audio is likely in ${language === "ar" ? "Arabic" : "English"}. 
 Return ONLY the transcribed text, nothing else. If the audio contains shipment details like weight, waste type, location, or vehicle info, extract them clearly.
 If you cannot understand the audio, return "لم يتم التعرف على الصوت" for Arabic or "Could not recognize speech" for English.`,
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mimeType};base64,${base64Audio}`,
               },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64Audio}`,
-                },
-              },
-            ],
-          },
-        ],
-      }),
+            },
+          ],
+        },
+      ],
     });
 
     if (!response.ok) {

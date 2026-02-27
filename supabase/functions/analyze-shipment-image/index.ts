@@ -33,21 +33,15 @@ serve(async (req) => {
     const base64Image = btoa(binary);
     const mimeType = imageFile.type || "image/jpeg";
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `You are a waste management expert AI. Analyze this image of a shipment/waste load and extract the following information in JSON format:
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `You are a waste management expert AI. Analyze this image of a shipment/waste load and extract the following information in JSON format:
 {
   "waste_type": "نوع المخلف (بالعربية)",
   "waste_type_en": "waste type in English",
@@ -63,17 +57,16 @@ serve(async (req) => {
 
 Be as accurate as possible. If you can't determine something, use null.
 Return ONLY valid JSON, no markdown or extra text.`,
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mimeType};base64,${base64Image}`,
               },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64Image}`,
-                },
-              },
-            ],
-          },
-        ],
-      }),
+            },
+          ],
+        },
+      ],
     });
 
     if (!response.ok) {

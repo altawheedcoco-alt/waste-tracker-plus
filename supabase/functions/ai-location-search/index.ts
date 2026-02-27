@@ -62,21 +62,14 @@ serve(async (req) => {
   "correctedQuery": "الاستعلام المصحح إن وجد خطأ"
 }`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: `استعلام البحث: "${query}"` }
-        ],
-        temperature: 0.3,
-        max_tokens: 500,
-      }),
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      model: "google/gemini-2.5-flash-lite",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `استعلام البحث: "${query}"` }
+      ],
+      temperature: 0.3,
     });
 
     if (!response.ok) {

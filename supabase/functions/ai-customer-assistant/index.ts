@@ -172,60 +172,40 @@ ${contextInfo ? `\nمعلومات السياق:${contextInfo}` : ''}`;
       { role: 'user', content: message }
     ];
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages,
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "respond_to_customer",
-              description: "الرد على استفسار العميل",
-              parameters: {
-                type: "object",
-                properties: {
-                  reply: {
-                    type: "string",
-                    description: "الرد على العميل"
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const aiResponse = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages,
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "respond_to_customer",
+            description: "الرد على استفسار العميل",
+            parameters: {
+              type: "object",
+              properties: {
+                reply: { type: "string", description: "الرد على العميل" },
+                suggestions: { type: "array", items: { type: "string" }, description: "أسئلة مقترحة يمكن للعميل طرحها (2-3 أسئلة)" },
+                actions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      type: { type: "string", enum: ["navigate", "create_ticket", "track_shipment", "call_support"] },
+                      label: { type: "string" }
+                    }
                   },
-                  suggestions: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "أسئلة مقترحة يمكن للعميل طرحها (2-3 أسئلة)"
-                  },
-                  actions: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        type: { type: "string", enum: ["navigate", "create_ticket", "track_shipment", "call_support"] },
-                        label: { type: "string" }
-                      }
-                    },
-                    description: "إجراءات مقترحة"
-                  },
-                  escalateToHuman: {
-                    type: "boolean",
-                    description: "هل يحتاج تصعيد لدعم بشري"
-                  },
-                  escalationReason: {
-                    type: "string",
-                    description: "سبب التصعيد إن وجد"
-                  }
+                  description: "إجراءات مقترحة"
                 },
-                required: ["reply"]
-              }
+                escalateToHuman: { type: "boolean", description: "هل يحتاج تصعيد لدعم بشري" },
+                escalationReason: { type: "string", description: "سبب التصعيد إن وجد" }
+              },
+              required: ["reply"]
             }
           }
-        ],
-        tool_choice: { type: "function", function: { name: "respond_to_customer" } }
-      }),
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "respond_to_customer" } }
     });
 
     if (!aiResponse.ok) {

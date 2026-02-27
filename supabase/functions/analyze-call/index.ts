@@ -58,19 +58,13 @@ serve(async (req) => {
 ملاحظات المكالمة:
 ${callNotes}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        tools: [
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      tools: [
           {
             type: "function",
             function: {
@@ -79,20 +73,9 @@ ${callNotes}`;
               parameters: {
                 type: "object",
                 properties: {
-                  summary: { 
-                    type: "string", 
-                    description: "ملخص قصير للمكالمة في جملتين" 
-                  },
-                  requirements: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "قائمة متطلبات العميل"
-                  },
-                  issues: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "المشاكل أو الشكاوى المذكورة"
-                  },
+                  summary: { type: "string", description: "ملخص قصير للمكالمة في جملتين" },
+                  requirements: { type: "array", items: { type: "string" }, description: "قائمة متطلبات العميل" },
+                  issues: { type: "array", items: { type: "string" }, description: "المشاكل أو الشكاوى المذكورة" },
                   actions_required: {
                     type: "array",
                     items: {
@@ -104,39 +87,18 @@ ${callNotes}`;
                     },
                     description: "الإجراءات المطلوبة مع أولويتها"
                   },
-                  priority: {
-                    type: "string",
-                    enum: ["urgent", "medium", "low"],
-                    description: "درجة أولوية المكالمة الإجمالية"
-                  },
-                  category: {
-                    type: "string",
-                    enum: ["inquiry", "complaint", "service_request", "follow_up", "other"],
-                    description: "تصنيف المكالمة"
-                  },
-                  sentiment: {
-                    type: "string",
-                    enum: ["positive", "neutral", "negative"],
-                    description: "مشاعر العميل"
-                  },
-                  follow_up_recommendations: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "توصيات للمتابعة"
-                  },
-                  keywords: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "الكلمات المفتاحية من المكالمة"
-                  }
+                  priority: { type: "string", enum: ["urgent", "medium", "low"], description: "درجة أولوية المكالمة الإجمالية" },
+                  category: { type: "string", enum: ["inquiry", "complaint", "service_request", "follow_up", "other"], description: "تصنيف المكالمة" },
+                  sentiment: { type: "string", enum: ["positive", "neutral", "negative"], description: "مشاعر العميل" },
+                  follow_up_recommendations: { type: "array", items: { type: "string" }, description: "توصيات للمتابعة" },
+                  keywords: { type: "array", items: { type: "string" }, description: "الكلمات المفتاحية من المكالمة" }
                 },
                 required: ["summary", "requirements", "priority", "category", "sentiment"]
               }
             }
           }
         ],
-        tool_choice: { type: "function", function: { name: "analyze_call" } }
-      }),
+      tool_choice: { type: "function", function: { name: "analyze_call" } }
     });
 
     if (!response.ok) {

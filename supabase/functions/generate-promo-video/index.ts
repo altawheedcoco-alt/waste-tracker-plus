@@ -64,19 +64,12 @@ serve(async (req) => {
 
     console.log("Generating script with AI...");
     
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: "أنت خبير في إنشاء محتوى الفيديوهات. تجيب دائماً بتنسيق JSON صالح فقط بدون أي نص إضافي." },
-          { role: "user", content: scriptPrompt }
-        ],
-      }),
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const aiResponse = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: "أنت خبير في إنشاء محتوى الفيديوهات. تجيب دائماً بتنسيق JSON صالح فقط بدون أي نص إضافي." },
+        { role: "user", content: scriptPrompt }
+      ],
     });
 
     if (!aiResponse.ok) {
@@ -127,19 +120,11 @@ Ultra high resolution, marketing quality, 16:9 aspect ratio`;
     let imageUrl = null;
     
     try {
-      const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image",
-          messages: [
-            { role: "user", content: imagePrompt }
-          ],
-          modalities: ["image", "text"]
-        }),
+      const imageResponse = await callAIWithRetry(LOVABLE_API_KEY, {
+        model: "google/gemini-2.5-flash-image",
+        messages: [
+          { role: "user", content: imagePrompt }
+        ],
       });
 
       if (imageResponse.ok) {
