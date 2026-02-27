@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { ArrowRight, Calendar, Clock, User, Tag, BookOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect } from 'react';
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -56,6 +57,80 @@ const BlogPost = () => {
     enabled: !!slug,
   });
 
+  const postTitle = post ? (isAr ? post.title : (post.title_en || post.title)) : '';
+  const postContent = post ? (isAr ? post.content : (post.content_en || post.content)) : '';
+  const metaDesc = post ? (isAr ? post.meta_description : (post.meta_description_en || post.meta_description)) : null;
+
+  // Dynamic SEO meta tags - must be before any returns
+  useEffect(() => {
+    if (!post) return;
+    document.title = `${postTitle} | iRecycle Blog`;
+
+    const setMeta = (name: string, content: string | null) => {
+      if (!content) return;
+      let el = document.querySelector(`meta[name="${name}"]`) || document.querySelector(`meta[property="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        if (name.startsWith('og:') || name.startsWith('article:')) {
+          el.setAttribute('property', name);
+        } else {
+          el.setAttribute('name', name);
+        }
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    setMeta('description', metaDesc || post.excerpt);
+    setMeta('keywords', post.tags?.join(', ') || '');
+    setMeta('og:title', postTitle);
+    setMeta('og:description', metaDesc || post.excerpt);
+    setMeta('og:type', 'article');
+    setMeta('og:url', window.location.href);
+    if (post.og_image_url) setMeta('og:image', post.og_image_url);
+    setMeta('article:published_time', post.published_at || post.created_at);
+    setMeta('article:author', post.author_name);
+    if (post.focus_keyword) setMeta('news_keywords', post.focus_keyword);
+
+    // Canonical
+    if (post.canonical_url) {
+      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+      }
+      canonical.href = post.canonical_url;
+    }
+
+    // JSON-LD structured data
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: postTitle,
+      description: metaDesc || post.excerpt,
+      author: { '@type': 'Organization', name: post.author_name },
+      datePublished: post.published_at || post.created_at,
+      dateModified: post.updated_at || post.created_at,
+      publisher: { '@type': 'Organization', name: 'iRecycle' },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': window.location.href },
+    };
+    let script = document.querySelector('#blog-jsonld') as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'blog-jsonld';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(jsonLd);
+
+    return () => {
+      document.title = 'iRecycle';
+      const jsonLdEl = document.querySelector('#blog-jsonld');
+      if (jsonLdEl) jsonLdEl.remove();
+    };
+  }, [post, postTitle, metaDesc]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -83,8 +158,6 @@ const BlogPost = () => {
   }
 
   const style = TEMPLATE_CLASSES[post.template_style] || TEMPLATE_CLASSES.standard;
-  const title = isAr ? post.title : (post.title_en || post.title);
-  const content = isAr ? post.content : (post.content_en || post.content);
 
   return (
     <div className="min-h-screen bg-background" dir="rtl">
@@ -98,7 +171,8 @@ const BlogPost = () => {
           </button>
 
           {/* Cover */}
-          <div className={`w-full h-48 sm:h-64 rounded-2xl bg-gradient-to-br ${post.cover_gradient} flex items-center justify-center mb-8 shadow-lg`}>
+          <div className={`w-full h-48 sm:h-64 rounded-2xl bg-gradient-to-br ${post.cover_gradient} flex items-center justify-center mb-8 shadow-lg`}
+               role="img" aria-label={isAr ? post.cover_image_alt : (post.cover_image_alt_en || post.cover_image_alt) || post.title}>
             <BookOpen className="w-16 h-16 text-white/80" />
           </div>
 
@@ -123,7 +197,7 @@ const BlogPost = () => {
 
           {/* Title */}
           <h1 className="text-3xl md:text-4xl font-extrabold text-foreground mb-6 leading-tight">
-            {title}
+            {postTitle}
           </h1>
 
           {/* Tags */}
@@ -139,7 +213,7 @@ const BlogPost = () => {
 
           {/* Content */}
           <article className={style.prose}>
-            <ReactMarkdown>{content}</ReactMarkdown>
+            <ReactMarkdown>{postContent}</ReactMarkdown>
           </article>
 
           {/* Footer */}

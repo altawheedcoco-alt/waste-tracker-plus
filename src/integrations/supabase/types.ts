@@ -2309,23 +2309,34 @@ export type Database = {
         Row: {
           author_avatar_url: string | null
           author_name: string | null
+          canonical_url: string | null
           category: string
           category_en: string | null
           content: string
           content_en: string | null
           cover_gradient: string | null
+          cover_image_alt: string | null
+          cover_image_alt_en: string | null
           cover_image_url: string | null
           created_at: string
           created_by: string | null
           excerpt: string
           excerpt_en: string | null
+          focus_keyword: string | null
+          focus_keyword_en: string | null
           id: string
           is_featured: boolean
           is_published: boolean
+          meta_description: string | null
+          meta_description_en: string | null
+          og_image_url: string | null
           published_at: string | null
           reading_time_minutes: number | null
+          scheduled_at: string | null
+          seo_score: number | null
           slug: string
           sort_order: number | null
+          status: string
           tags: string[] | null
           template_style: string
           title: string
@@ -2336,23 +2347,34 @@ export type Database = {
         Insert: {
           author_avatar_url?: string | null
           author_name?: string | null
+          canonical_url?: string | null
           category?: string
           category_en?: string | null
           content: string
           content_en?: string | null
           cover_gradient?: string | null
+          cover_image_alt?: string | null
+          cover_image_alt_en?: string | null
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
           excerpt: string
           excerpt_en?: string | null
+          focus_keyword?: string | null
+          focus_keyword_en?: string | null
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          meta_description?: string | null
+          meta_description_en?: string | null
+          og_image_url?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
+          scheduled_at?: string | null
+          seo_score?: number | null
           slug: string
           sort_order?: number | null
+          status?: string
           tags?: string[] | null
           template_style?: string
           title: string
@@ -2363,23 +2385,34 @@ export type Database = {
         Update: {
           author_avatar_url?: string | null
           author_name?: string | null
+          canonical_url?: string | null
           category?: string
           category_en?: string | null
           content?: string
           content_en?: string | null
           cover_gradient?: string | null
+          cover_image_alt?: string | null
+          cover_image_alt_en?: string | null
           cover_image_url?: string | null
           created_at?: string
           created_by?: string | null
           excerpt?: string
           excerpt_en?: string | null
+          focus_keyword?: string | null
+          focus_keyword_en?: string | null
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          meta_description?: string | null
+          meta_description_en?: string | null
+          og_image_url?: string | null
           published_at?: string | null
           reading_time_minutes?: number | null
+          scheduled_at?: string | null
+          seo_score?: number | null
           slug?: string
           sort_order?: number | null
+          status?: string
           tags?: string[] | null
           template_style?: string
           title?: string
@@ -30545,6 +30578,7 @@ export type Database = {
           shipments_processed: number
         }[]
       }
+      auto_publish_scheduled_blog_posts: { Args: never; Returns: undefined }
       calculate_org_arrears: { Args: { org_id: string }; Returns: Json }
       calculate_org_required_seats: {
         Args: { org_id: string }
