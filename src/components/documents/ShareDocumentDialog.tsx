@@ -263,11 +263,13 @@ const ShareDocumentDialog = ({
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
+        // Use signed URL since bucket is private
+        const { data: urlData, error: urlError } = await supabase.storage
           .from('shared-documents')
-          .getPublicUrl(path);
+          .createSignedUrl(path, 60 * 60 * 24 * 30); // 30 days
 
-        fileUrl = urlData?.publicUrl || null;
+        if (urlError) throw urlError;
+        fileUrl = urlData?.signedUrl || null;
         fileName = file.name;
         fileSize = file.size;
         fileType = file.type;
@@ -362,7 +364,8 @@ const ShareDocumentDialog = ({
       }
     } catch (error: any) {
       console.error('Share error:', error);
-      toast.error('فشل في إرسال المستند');
+      const msg = error?.message || error?.error_description || 'خطأ غير معروف';
+      toast.error(`فشل في إرسال المستند: ${msg}`);
     } finally {
       setSending(false);
       setUploading(false);
