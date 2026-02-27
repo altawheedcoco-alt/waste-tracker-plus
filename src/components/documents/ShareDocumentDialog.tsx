@@ -15,6 +15,13 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Send,
   Loader2,
   Building2,
@@ -24,7 +31,22 @@ import {
   CheckCircle2,
   Upload,
   FileSignature,
+  Tag,
 } from 'lucide-react';
+
+const DOCUMENT_CATEGORIES: Record<string, string> = {
+  file: 'ملف عام',
+  receipt: 'شهادة استلام',
+  certificate: 'شهادة تدوير',
+  invoice: 'فاتورة',
+  shipment: 'شحنة',
+  contract: 'عقد',
+  report: 'تقرير',
+  weight_ticket: 'تذكرة وزن',
+  license: 'ترخيص',
+  correspondence: 'مراسلة',
+  other: 'أخرى',
+};
 
 interface ShareDocumentDialogProps {
   open: boolean;
@@ -62,6 +84,7 @@ const ShareDocumentDialog = ({
   const [uploading, setUploading] = useState(false);
   const [sent, setSent] = useState(false);
   const [requiresSignature, setRequiresSignature] = useState(false);
+  const [documentCategory, setDocumentCategory] = useState<string>(referenceType || 'file');
 
   useEffect(() => {
     if (open && profile?.organization_id) {
@@ -164,7 +187,7 @@ const ShareDocumentDialog = ({
           sender_organization_id: profile.organization_id,
           sender_user_id: profile.user_id,
           recipient_organization_id: selectedPartner,
-          document_type: referenceType || (file ? 'file' : 'file'),
+          document_type: referenceType || documentCategory,
           document_title: title.trim(),
           document_description: message.trim() || null,
           file_url: fileUrl,
@@ -256,6 +279,26 @@ const ShareDocumentDialog = ({
               dir="rtl"
             />
           </div>
+
+          {/* Document category */}
+          {!referenceType && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1">
+                <Tag className="w-3.5 h-3.5" />
+                تصنيف المستند
+              </Label>
+              <Select value={documentCategory} onValueChange={setDocumentCategory}>
+                <SelectTrigger dir="rtl">
+                  <SelectValue placeholder="اختر تصنيف..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(DOCUMENT_CATEGORIES).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Reference badge */}
           {referenceId && referenceType && (
