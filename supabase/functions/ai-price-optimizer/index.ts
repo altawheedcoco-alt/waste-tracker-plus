@@ -85,92 +85,74 @@ ${JSON.stringify(marketConditions || {}, null, 2)}
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
       ],
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "price_optimization",
-              description: "اقتراحات تحسين الأسعار",
-              parameters: {
-                type: "object",
-                properties: {
-                  optimizedPrices: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        itemId: { type: "string", description: "معرف المنتج/الخدمة" },
-                        itemName: { type: "string", description: "اسم المنتج/الخدمة" },
-                        currentPrice: { type: "number", description: "السعر الحالي" },
-                        suggestedPrice: { type: "number", description: "السعر المقترح" },
-                        minPrice: { type: "number", description: "الحد الأدنى للسعر" },
-                        maxPrice: { type: "number", description: "الحد الأقصى للسعر" },
-                        changePercent: { type: "number", description: "نسبة التغيير %" },
-                        profitMargin: { type: "number", description: "هامش الربح المتوقع %" },
-                        competitivePosition: { 
-                          type: "string", 
-                          enum: ["below_market", "at_market", "above_market"],
-                          description: "الموقع التنافسي"
-                        },
-                        rationale: { type: "string", description: "سبب التوصية" }
-                      },
-                      required: ["itemName", "currentPrice", "suggestedPrice", "changePercent", "rationale"]
-                    }
-                  },
-                  marketAnalysis: {
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "price_optimization",
+            description: "اقتراحات تحسين الأسعار",
+            parameters: {
+              type: "object",
+              properties: {
+                optimizedPrices: {
+                  type: "array",
+                  items: {
                     type: "object",
                     properties: {
-                      averageMarketPrice: { type: "number", description: "متوسط سعر السوق" },
-                      priceRange: {
-                        type: "object",
-                        properties: {
-                          min: { type: "number" },
-                          max: { type: "number" }
-                        }
-                      },
-                      competitiveIndex: { type: "number", description: "مؤشر التنافسية (0-100)" },
-                      marketPosition: { type: "string", description: "الموقع في السوق" }
-                    }
-                  },
-                  revenueImpact: {
-                    type: "object",
-                    properties: {
-                      estimatedRevenueChange: { type: "number", description: "التغيير المتوقع في الإيرادات %" },
-                      estimatedProfitChange: { type: "number", description: "التغيير المتوقع في الأرباح %" },
-                      breakEvenVolume: { type: "number", description: "حجم التعادل" },
-                      riskLevel: { type: "string", enum: ["low", "medium", "high"] }
-                    }
-                  },
-                  strategies: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        strategy: { type: "string", description: "اسم الاستراتيجية" },
-                        description: { type: "string", description: "وصف الاستراتيجية" },
-                        expectedImpact: { type: "string", description: "الأثر المتوقع" },
-                        implementation: { type: "string", description: "كيفية التطبيق" },
-                        priority: { type: "string", enum: ["low", "medium", "high"] }
-                      },
-                      required: ["strategy", "description", "priority"]
-                    }
-                  },
-                  summary: {
-                    type: "string",
-                    description: "ملخص التوصيات"
+                      itemId: { type: "string" },
+                      itemName: { type: "string" },
+                      currentPrice: { type: "number" },
+                      suggestedPrice: { type: "number" },
+                      minPrice: { type: "number" },
+                      maxPrice: { type: "number" },
+                      changePercent: { type: "number" },
+                      profitMargin: { type: "number" },
+                      competitivePosition: { type: "string", enum: ["below_market", "at_market", "above_market"] },
+                      rationale: { type: "string" }
+                    },
+                    required: ["itemName", "currentPrice", "suggestedPrice", "changePercent", "rationale"]
                   }
                 },
-                required: ["optimizedPrices", "revenueImpact", "strategies", "summary"]
-              }
+                marketAnalysis: {
+                  type: "object",
+                  properties: {
+                    averageMarketPrice: { type: "number" },
+                    priceRange: { type: "object", properties: { min: { type: "number" }, max: { type: "number" } } },
+                    competitiveIndex: { type: "number" },
+                    marketPosition: { type: "string" }
+                  }
+                },
+                revenueImpact: {
+                  type: "object",
+                  properties: {
+                    estimatedRevenueChange: { type: "number" },
+                    estimatedProfitChange: { type: "number" },
+                    breakEvenVolume: { type: "number" },
+                    riskLevel: { type: "string", enum: ["low", "medium", "high"] }
+                  }
+                },
+                strategies: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      strategy: { type: "string" },
+                      description: { type: "string" },
+                      expectedImpact: { type: "string" },
+                      implementation: { type: "string" },
+                      priority: { type: "string", enum: ["low", "medium", "high"] }
+                    },
+                    required: ["strategy", "description", "priority"]
+                  }
+                },
+                summary: { type: "string" }
+              },
+              required: ["optimizedPrices", "revenueImpact", "strategies", "summary"]
             }
           }
-        ],
-        tool_choice: { type: "function", function: { name: "price_optimization" } }
-      }),
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "price_optimization" } }
     });
 
     if (!response.ok) {
