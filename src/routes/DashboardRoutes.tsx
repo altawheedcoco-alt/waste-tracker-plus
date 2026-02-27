@@ -25,6 +25,7 @@ const Notifications = lazy(() => import("@/pages/dashboard/Notifications"));
 const OrganizationProfile = lazy(() => import("@/pages/dashboard/OrganizationProfile"));
 const OrganizationDocuments = lazy(() => import("@/pages/dashboard/OrganizationDocuments"));
 const AdminSystemOverview = lazy(() => import("@/pages/dashboard/AdminSystemOverview"));
+const AdminRevenueManagement = lazy(() => import("@/pages/dashboard/AdminRevenueManagement"));
 const NewsManager = lazy(() => import("@/pages/dashboard/NewsManager"));
 const BlogManager = lazy(() => import("@/pages/dashboard/BlogManager"));
 const TestimonialsManagement = lazy(() => import("@/pages/dashboard/TestimonialsManagement"));
@@ -197,6 +198,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/admin-attestations" element={<AdminAttestations />} />
     <Route path="/dashboard/organization-documents" element={<OrganizationDocuments />} />
     <Route path="/dashboard/system-overview" element={<AdminSystemOverview />} />
+    <Route path="/dashboard/admin-revenue" element={<AdminRevenueManagement />} />
     <Route path="/dashboard/news-manager" element={<NewsManager />} />
     <Route path="/dashboard/blog-manager" element={<BlogManager />} />
     <Route path="/dashboard/testimonials-management" element={<TestimonialsManagement />} />
