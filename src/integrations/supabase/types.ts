@@ -24002,12 +24002,18 @@ export type Database = {
           document_description: string | null
           document_title: string
           document_type: string
+          expires_at: string | null
+          external_recipient_email: string | null
+          external_recipient_name: string | null
+          external_views_count: number | null
           file_name: string | null
           file_size: number | null
           file_type: string | null
           file_url: string | null
           id: string
+          is_external_share: boolean | null
           message: string | null
+          public_access_token: string | null
           recipient_organization_id: string
           reference_id: string | null
           reference_type: string | null
@@ -24031,12 +24037,18 @@ export type Database = {
           document_description?: string | null
           document_title: string
           document_type?: string
+          expires_at?: string | null
+          external_recipient_email?: string | null
+          external_recipient_name?: string | null
+          external_views_count?: number | null
           file_name?: string | null
           file_size?: number | null
           file_type?: string | null
           file_url?: string | null
           id?: string
+          is_external_share?: boolean | null
           message?: string | null
+          public_access_token?: string | null
           recipient_organization_id: string
           reference_id?: string | null
           reference_type?: string | null
@@ -24060,12 +24072,18 @@ export type Database = {
           document_description?: string | null
           document_title?: string
           document_type?: string
+          expires_at?: string | null
+          external_recipient_email?: string | null
+          external_recipient_name?: string | null
+          external_views_count?: number | null
           file_name?: string | null
           file_size?: number | null
           file_type?: string | null
           file_url?: string | null
           id?: string
+          is_external_share?: boolean | null
           message?: string | null
+          public_access_token?: string | null
           recipient_organization_id?: string
           reference_id?: string | null
           reference_type?: string | null

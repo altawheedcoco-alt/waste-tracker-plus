@@ -32,6 +32,11 @@ import {
   Upload,
   FileSignature,
   Tag,
+  Link2,
+  Copy,
+  ExternalLink,
+  Users,
+  Globe,
 } from 'lucide-react';
 
 const DOCUMENT_CATEGORIES: Record<string, string> = {
@@ -85,6 +90,9 @@ const ShareDocumentDialog = ({
   const [sent, setSent] = useState(false);
   const [requiresSignature, setRequiresSignature] = useState(false);
   const [documentCategory, setDocumentCategory] = useState<string>(referenceType || 'file');
+  const [shareMode, setShareMode] = useState<'partner' | 'external'>('partner');
+  const [externalName, setExternalName] = useState('');
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && profile?.organization_id) {
@@ -92,6 +100,9 @@ const ShareDocumentDialog = ({
       setTitle(initialTitle || '');
       setSelectedPartner(preSelectedOrgId || null);
       setSent(false);
+      setGeneratedLink(null);
+      setShareMode('partner');
+      setExternalName('');
     }
   }, [open, profile?.organization_id]);
 
@@ -145,10 +156,24 @@ const ShareDocumentDialog = ({
     return map[type] || type;
   };
 
+  const generateToken = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let token = '';
+    for (let i = 0; i < 20; i++) token += chars[Math.floor(Math.random() * chars.length)];
+    return token;
+  };
+
   const handleSend = async () => {
-    if (!selectedPartner || !title.trim() || !profile?.organization_id || !profile?.user_id) {
-      toast.error('يرجى اختيار الجهة وعنوان المستند');
-      return;
+    if (shareMode === 'partner') {
+      if (!selectedPartner || !title.trim() || !profile?.organization_id || !profile?.user_id) {
+        toast.error('يرجى اختيار الجهة وعنوان المستند');
+        return;
+      }
+    } else {
+      if (!title.trim() || !profile?.organization_id || !profile?.user_id) {
+        toast.error('يرجى إدخال عنوان المستند');
+        return;
+      }
     }
 
     setSending(true);
@@ -161,7 +186,6 @@ const ShareDocumentDialog = ({
       // Upload file if attached
       if (file) {
         setUploading(true);
-        const ext = file.name.split('.').pop();
         const path = `${profile.organization_id}/${Date.now()}-${file.name}`;
 
         const { error: uploadError } = await supabase.storage
@@ -181,60 +205,105 @@ const ShareDocumentDialog = ({
         setUploading(false);
       }
 
-      const { error } = await supabase
-        .from('shared_documents')
-        .insert({
-          sender_organization_id: profile.organization_id,
-          sender_user_id: profile.user_id,
-          recipient_organization_id: selectedPartner,
-          document_type: referenceType || documentCategory,
-          document_title: title.trim(),
-          document_description: message.trim() || null,
-          file_url: fileUrl,
-          file_name: fileName,
-          file_size: fileSize,
-          file_type: fileType,
-          reference_id: referenceId || null,
-          reference_type: referenceType || null,
-          message: message.trim() || null,
-          requires_signature: requiresSignature,
-        });
+      if (shareMode === 'external') {
+        // External share: generate public token
+        const accessToken = generateToken();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30); // 30 days expiry
 
-      if (error) throw error;
+        const { error } = await supabase
+          .from('shared_documents')
+          .insert({
+            sender_organization_id: profile.organization_id,
+            sender_user_id: profile.user_id,
+            recipient_organization_id: profile.organization_id, // self-ref for external
+            document_type: referenceType || documentCategory,
+            document_title: title.trim(),
+            document_description: message.trim() || null,
+            file_url: fileUrl,
+            file_name: fileName,
+            file_size: fileSize,
+            file_type: fileType,
+            reference_id: referenceId || null,
+            reference_type: referenceType || null,
+            message: message.trim() || null,
+            requires_signature: false,
+            is_external_share: true,
+            public_access_token: accessToken,
+            external_recipient_name: externalName.trim() || null,
+            expires_at: expiresAt.toISOString(),
+          });
 
-      // Send notification to recipient org
-      const { data: recipientUsers } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('organization_id', selectedPartner)
-        .limit(20);
+        if (error) throw error;
 
-      if (recipientUsers && recipientUsers.length > 0) {
-        const senderOrg = await supabase
-          .from('organizations')
-          .select('name')
-          .eq('id', profile.organization_id)
-          .single();
+        const link = `${window.location.origin}/shared/${accessToken}`;
+        setGeneratedLink(link);
+        setSent(true);
+        toast.success('تم إنشاء رابط المشاركة');
+      } else {
+        // Partner share (existing logic)
+        const { error } = await supabase
+          .from('shared_documents')
+          .insert({
+            sender_organization_id: profile.organization_id,
+            sender_user_id: profile.user_id,
+            recipient_organization_id: selectedPartner!,
+            document_type: referenceType || documentCategory,
+            document_title: title.trim(),
+            document_description: message.trim() || null,
+            file_url: fileUrl,
+            file_name: fileName,
+            file_size: fileSize,
+            file_type: fileType,
+            reference_id: referenceId || null,
+            reference_type: referenceType || null,
+            message: message.trim() || null,
+            requires_signature: requiresSignature,
+          });
 
-        const notifications = recipientUsers.map((u: any) => ({
-          user_id: u.user_id,
-          title: 'مستند مشترك جديد',
-          message: `أرسلت ${senderOrg.data?.name || 'جهة'} مستنداً: ${title.trim()}`,
-          type: 'document_shared',
-          is_read: false,
-        }));
-        await supabase.from('notifications').insert(notifications);
+        if (error) throw error;
+
+        // Send notification to recipient org
+        const { data: recipientUsers } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('organization_id', selectedPartner!)
+          .limit(20);
+
+        if (recipientUsers && recipientUsers.length > 0) {
+          const senderOrg = await supabase
+            .from('organizations')
+            .select('name')
+            .eq('id', profile.organization_id)
+            .single();
+
+          const notifications = recipientUsers.map((u: any) => ({
+            user_id: u.user_id,
+            title: 'مستند مشترك جديد',
+            message: `أرسلت ${senderOrg.data?.name || 'جهة'} مستنداً: ${title.trim()}`,
+            type: 'document_shared',
+            is_read: false,
+          }));
+          await supabase.from('notifications').insert(notifications);
+        }
+
+        setSent(true);
+        toast.success('تم إرسال المستند بنجاح');
+        setTimeout(() => onOpenChange(false), 1500);
       }
-
-      setSent(true);
-      toast.success('تم إرسال المستند بنجاح');
-      setTimeout(() => onOpenChange(false), 1500);
     } catch (error: any) {
       console.error('Share error:', error);
       toast.error('فشل في إرسال المستند');
     } finally {
       setSending(false);
       setUploading(false);
+    }
+  };
+
+  const copyLink = () => {
+    if (generatedLink) {
+      navigator.clipboard.writeText(generatedLink);
+      toast.success('تم نسخ الرابط');
     }
   };
 
@@ -247,11 +316,53 @@ const ShareDocumentDialog = ({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md">
           <div className="flex flex-col items-center gap-4 py-8">
-            <CheckCircle2 className="w-16 h-16 text-green-500" />
-            <p className="text-lg font-semibold">تم الإرسال بنجاح!</p>
-            <p className="text-sm text-muted-foreground text-center">
-              تم مشاركة المستند مع الجهة المحددة
+            <CheckCircle2 className="w-16 h-16 text-primary" />
+            <p className="text-lg font-semibold">
+              {generatedLink ? 'تم إنشاء الرابط!' : 'تم الإرسال بنجاح!'}
             </p>
+            {generatedLink ? (
+              <div className="w-full space-y-3">
+                <p className="text-sm text-muted-foreground text-center">
+                  شارك هذا الرابط مع الجهة الخارجية (صالح لمدة 30 يوم)
+                </p>
+                <div className="flex items-center gap-2 p-2 bg-muted rounded-lg border">
+                  <Input
+                    value={generatedLink}
+                    readOnly
+                    className="text-xs bg-transparent border-0 h-8"
+                    dir="ltr"
+                  />
+                  <Button size="sm" variant="outline" className="shrink-0 gap-1" onClick={copyLink}>
+                    <Copy className="w-3.5 h-3.5" />
+                    نسخ
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1 gap-1 text-sm"
+                    onClick={() => {
+                      window.open(`https://wa.me/?text=${encodeURIComponent(`مستند مشترك: ${title}\n${generatedLink}`)}`, '_blank');
+                    }}
+                  >
+                    واتساب
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 gap-1 text-sm"
+                    onClick={() => {
+                      window.open(`mailto:?subject=${encodeURIComponent(`مستند مشترك: ${title}`)}&body=${encodeURIComponent(`تم مشاركة مستند معك:\n${generatedLink}`)}`, '_blank');
+                    }}
+                  >
+                    بريد إلكتروني
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center">
+                تم مشاركة المستند مع الجهة المحددة
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -269,6 +380,28 @@ const ShareDocumentDialog = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Share mode toggle */}
+          <div className="flex gap-2 p-1 bg-muted rounded-lg">
+            <button
+              onClick={() => setShareMode('partner')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                shareMode === 'partner' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              جهة مرتبطة
+            </button>
+            <button
+              onClick={() => setShareMode('external')}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                shareMode === 'external' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Globe className="w-4 h-4" />
+              رابط خارجي
+            </button>
+          </div>
+
           {/* Document title */}
           <div className="space-y-2">
             <Label>عنوان المستند *</Label>
@@ -315,54 +448,73 @@ const ShareDocumentDialog = ({
             </div>
           )}
 
-          {/* Select partner */}
-          <div className="space-y-2">
-            <Label>اختر الجهة المستلمة *</Label>
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          {/* Partner mode: Select partner */}
+          {shareMode === 'partner' && (
+            <div className="space-y-2">
+              <Label>اختر الجهة المستلمة *</Label>
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="بحث عن جهة..."
+                  className="pr-9"
+                  dir="rtl"
+                />
+              </div>
+              <ScrollArea className="max-h-40 border rounded-md">
+                {loading ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : filteredPartners.length === 0 ? (
+                  <p className="text-sm text-muted-foreground p-4 text-center">
+                    لا توجد جهات مرتبطة
+                  </p>
+                ) : (
+                  <div className="p-1 space-y-1">
+                    {filteredPartners.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedPartner(p.id)}
+                        className={`w-full flex items-center gap-2 p-2 rounded-md text-right transition-colors ${
+                          selectedPartner === p.id
+                            ? 'bg-primary/10 border border-primary/30'
+                            : 'hover:bg-muted'
+                        }`}
+                      >
+                        <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <span className="flex-1 text-sm">{p.name}</span>
+                        <Badge variant="outline" className="text-[10px]">
+                          {getOrgTypeLabel(p.organization_type)}
+                        </Badge>
+                        {selectedPartner === p.id && (
+                          <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          )}
+
+          {/* External mode: recipient name */}
+          {shareMode === 'external' && (
+            <div className="space-y-2">
+              <Label>اسم المستلم (اختياري)</Label>
               <Input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="بحث عن جهة..."
-                className="pr-9"
+                value={externalName}
+                onChange={e => setExternalName(e.target.value)}
+                placeholder="اسم الشخص أو الجهة..."
                 dir="rtl"
               />
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Link2 className="w-3 h-3" />
+                سيتم إنشاء رابط عام صالح لمدة 30 يوم
+              </p>
             </div>
-            <ScrollArea className="max-h-40 border rounded-md">
-              {loading ? (
-                <div className="flex items-center justify-center p-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
-                </div>
-              ) : filteredPartners.length === 0 ? (
-                <p className="text-sm text-muted-foreground p-4 text-center">
-                  لا توجد جهات مرتبطة
-                </p>
-              ) : (
-                <div className="p-1 space-y-1">
-                  {filteredPartners.map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => setSelectedPartner(p.id)}
-                      className={`w-full flex items-center gap-2 p-2 rounded-md text-right transition-colors ${
-                        selectedPartner === p.id
-                          ? 'bg-primary/10 border border-primary/30'
-                          : 'hover:bg-muted'
-                      }`}
-                    >
-                      <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span className="flex-1 text-sm">{p.name}</span>
-                      <Badge variant="outline" className="text-[10px]">
-                        {getOrgTypeLabel(p.organization_type)}
-                      </Badge>
-                      {selectedPartner === p.id && (
-                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
-          </div>
+          )}
 
           {/* File attachment (only if no reference) */}
           {!referenceId && (
@@ -392,21 +544,23 @@ const ShareDocumentDialog = ({
             </div>
           )}
 
-          {/* Require signature toggle */}
-          <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
-            <input
-              type="checkbox"
-              id="requiresSignature"
-              checked={requiresSignature}
-              onChange={e => setRequiresSignature(e.target.checked)}
-              className="w-4 h-4 rounded border-muted-foreground"
-            />
-            <label htmlFor="requiresSignature" className="flex-1 cursor-pointer">
-              <p className="text-sm font-medium">طلب توقيع وختم من الجهة المستلمة</p>
-              <p className="text-xs text-muted-foreground">سيُطلب من المستلم توقيع المستند إلكترونياً</p>
-            </label>
-            <FileSignature className="w-5 h-5 text-muted-foreground" />
-          </div>
+          {/* Require signature toggle (partner mode only) */}
+          {shareMode === 'partner' && (
+            <div className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+              <input
+                type="checkbox"
+                id="requiresSignature"
+                checked={requiresSignature}
+                onChange={e => setRequiresSignature(e.target.checked)}
+                className="w-4 h-4 rounded border-muted-foreground"
+              />
+              <label htmlFor="requiresSignature" className="flex-1 cursor-pointer">
+                <p className="text-sm font-medium">طلب توقيع وختم من الجهة المستلمة</p>
+                <p className="text-xs text-muted-foreground">سيُطلب من المستلم توقيع المستند إلكترونياً</p>
+              </label>
+              <FileSignature className="w-5 h-5 text-muted-foreground" />
+            </div>
+          )}
 
           {/* Message */}
           <div className="space-y-2">
@@ -424,14 +578,26 @@ const ShareDocumentDialog = ({
           <Button
             className="w-full gap-2"
             onClick={handleSend}
-            disabled={!selectedPartner || !title.trim() || sending}
+            disabled={
+              (shareMode === 'partner' && !selectedPartner) ||
+              !title.trim() ||
+              sending
+            }
           >
             {sending || uploading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
+            ) : shareMode === 'external' ? (
+              <Link2 className="w-4 h-4" />
             ) : (
               <Send className="w-4 h-4" />
             )}
-            {uploading ? 'جاري رفع الملف...' : sending ? 'جاري الإرسال...' : 'إرسال المستند'}
+            {uploading
+              ? 'جاري رفع الملف...'
+              : sending
+              ? 'جاري الإرسال...'
+              : shareMode === 'external'
+              ? 'إنشاء رابط مشاركة'
+              : 'إرسال المستند'}
           </Button>
         </div>
       </DialogContent>
