@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 const DOCUMENT_CATEGORIES: Record<string, string> = {
-  file: 'ملف عام',
+  file: 'مستند عام',
   receipt: 'شهادة استلام',
   certificate: 'شهادة تدوير',
   invoice: 'فاتورة',

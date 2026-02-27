@@ -305,7 +305,7 @@ const StationeryTemplates = () => {
                     borderStyle: selectedTemplate.border_style || 'double',
                     headerLayout: selectedTemplate.header_layout || 'centered',
                     showWatermark: true,
-                    watermarkText: selectedTemplate.watermark_text || org.name || 'وثيقة رسمية',
+                    watermarkText: selectedTemplate.watermark_text || org.name || 'مستند رسمي',
                     watermarkOpacity: selectedTemplate.watermark_opacity || 0.06,
                     showGuilloche: selectedTemplate.show_guilloche || false,
                     guillocheColor: selectedTemplate.guilloche_color || '#16a34a',

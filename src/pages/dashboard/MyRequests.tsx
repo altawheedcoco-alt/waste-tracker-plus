@@ -68,7 +68,7 @@ interface ApprovalRequest {
 const REQUEST_TYPE_LABELS: Record<string, string> = {
   company_registration: 'تسجيل جهة جديدة',
   driver_registration: 'تسجيل سائق',
-  document_upload: 'رفع وثيقة',
+  document_upload: 'رفع مستند',
   profile_update: 'تحديث بيانات',
   shipment_create: 'إنشاء شحنة',
   data_change: 'تغيير بيانات',
