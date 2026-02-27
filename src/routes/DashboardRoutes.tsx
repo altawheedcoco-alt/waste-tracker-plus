@@ -167,6 +167,7 @@ const SigningStatus = lazy(() => import("@/pages/dashboard/SigningStatus"));
 const SavedLocationsPage = lazy(() => import("@/pages/SavedLocationsPage"));
 const OrganizationAttestation = lazy(() => import("@/pages/dashboard/OrganizationAttestation"));
 const AdminAttestations = lazy(() => import("@/pages/dashboard/AdminAttestations"));
+const ScopedAccessLinks = lazy(() => import("@/pages/dashboard/ScopedAccessLinks"));
 
 export const dashboardRoutes = (
   <>
@@ -258,6 +259,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
     <Route path="/dashboard/quick-shipment-links" element={<QuickShipmentLinks />} />
     <Route path="/dashboard/quick-driver-links" element={<QuickDriverLinks />} />
+    <Route path="/dashboard/scoped-access-links" element={<ScopedAccessLinks />} />
     <Route path="/dashboard/transporter-receipts" element={<TransporterReceipts />} />
     <Route path="/dashboard/waze-live-map" element={<WazeLiveMap />} />
     <Route path="/dashboard/create-receipt" element={<CreateReceipt />} />
