@@ -23,7 +23,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
-import SmartRequestDialog from './SmartRequestDialog';
+
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
@@ -227,7 +227,7 @@ const GeneratorDashboard = () => {
             <ClipboardList className="w-4 h-4" />
             {!isMobile && t('workOrder.createNew')}
           </Button>
-          <SmartRequestDialog buttonText={isMobile ? t('common.search') : t('common.search')} buttonVariant="outline" />
+          
           <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl">
             <FileCheck className="w-4 h-4" />
             {!isMobile && t('docVerify.sectionBadge')}

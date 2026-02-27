@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Shield, Sparkles, RefreshCw } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import CreateShipmentButton from '../CreateShipmentButton';
-import SmartRequestDialog from '../SmartRequestDialog';
+
 import DashboardPrintReports from './DashboardPrintReports';
 import BulkDocumentPrintDialog from './BulkDocumentPrintDialog';
 import { useState } from 'react';
@@ -22,7 +22,7 @@ interface FacilityDashboardHeaderProps {
     facility_type?: string;
   } | null;
   showCreateShipment?: boolean;
-  showSmartRequest?: boolean;
+  
   onSmartWeightUpload?: () => void;
   onRefresh?: () => void;
 }
@@ -36,7 +36,7 @@ const FacilityDashboardHeader = ({
   iconGradient,
   facility,
   showCreateShipment = true,
-  showSmartRequest = true,
+  
   onSmartWeightUpload,
   onRefresh,
 }: FacilityDashboardHeaderProps) => {
@@ -68,7 +68,7 @@ const FacilityDashboardHeader = ({
           <BulkDocumentPrintDialog />
           <DashboardPrintReports />
           {showCreateShipment && <CreateShipmentButton onSuccess={onRefresh} />}
-          {showSmartRequest && <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />}
+          
           {onSmartWeightUpload && (
             <Button onClick={onSmartWeightUpload} variant="outline" className="gap-2">
               <Sparkles className="w-4 h-4" />

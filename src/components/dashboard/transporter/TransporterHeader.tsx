@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, FileText, Sparkles, Truck, Rocket, Signal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
-import SmartRequestDialog from '@/components/dashboard/SmartRequestDialog';
+
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import { useLanguage } from '@/contexts/LanguageContext';
 import DashboardPrintReports from '@/components/dashboard/shared/DashboardPrintReports';
@@ -89,7 +89,7 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:flex-wrap w-full overflow-hidden">
             <DashboardPrintReports />
             <AutomationSettingsDialog />
-            <SmartRequestDialog buttonText={t('transporter.requestReports')} buttonVariant="outline" />
+            
             <Button
               variant="outline"
               size="sm"
