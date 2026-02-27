@@ -86,20 +86,20 @@ const Index = () => {
           </ErrorBoundary>
           <main>
             <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
-              <LazySection><HomepageAds /></LazySection>
-              <LazySection><TrustedPartnersSection /></LazySection>
-              <LazySection><Stats /></LazySection>
-              <LazySection><DocumentVerification /></LazySection>
-              <LazySection><FeaturedConsultants /></LazySection>
-              <LazySection><NationalInitiativeSection /></LazySection>
-              <LazySection><Features /></LazySection>
-              <LazySection><FeaturesList /></LazySection>
-              <LazySection><DocumentAIShowcase /></LazySection>
-              <LazySection><SmartAgentShowcase /></LazySection>
-              <LazySection><Services /></LazySection>
-              <LazySection><OmalunaSection /></LazySection>
-              <LazySection><TestimonialsSection /></LazySection>
-              <LazySection><CTA /></LazySection>
+              <div id="ads"><LazySection><HomepageAds /></LazySection></div>
+              <div id="partners"><LazySection><TrustedPartnersSection /></LazySection></div>
+              <div id="stats"><LazySection><Stats /></LazySection></div>
+              <div id="verify"><LazySection><DocumentVerification /></LazySection></div>
+              <div id="consultants"><LazySection><FeaturedConsultants /></LazySection></div>
+              <div id="initiative"><LazySection><NationalInitiativeSection /></LazySection></div>
+              <div id="features"><LazySection><Features /></LazySection></div>
+              <div id="features-list"><LazySection><FeaturesList /></LazySection></div>
+              <div id="doc-ai"><LazySection><DocumentAIShowcase /></LazySection></div>
+              <div id="smart-agent"><LazySection><SmartAgentShowcase /></LazySection></div>
+              <div id="services"><LazySection><Services /></LazySection></div>
+              <div id="omaluna"><LazySection><OmalunaSection /></LazySection></div>
+              <div id="testimonials"><LazySection><TestimonialsSection /></LazySection></div>
+              <div id="cta"><LazySection><CTA /></LazySection></div>
             </ErrorBoundary>
           </main>
           <LazySection><Footer /></LazySection>

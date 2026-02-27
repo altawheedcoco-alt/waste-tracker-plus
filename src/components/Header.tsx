@@ -30,6 +30,21 @@ const Header = memo(() => {
 
   const dropdowns: NavDropdown[] = [
     {
+      label: language === 'ar' ? 'أقسام الصفحة' : 'Sections',
+      items: [
+        { label: language === 'ar' ? 'شركاء النجاح' : 'Trusted Partners', href: '#partners', icon: Building2, desc: language === 'ar' ? 'الجهات الرسمية الشريكة' : 'Official partner organizations' },
+        { label: language === 'ar' ? 'إحصائيات المنصة' : 'Platform Stats', href: '#stats', icon: Rocket, desc: language === 'ar' ? 'أرقام وإنجازات المنصة' : 'Platform numbers & achievements' },
+        { label: language === 'ar' ? 'التحقق من المستندات' : 'Document Verification', href: '#verify', icon: Scale, desc: language === 'ar' ? 'تحقق من صحة الشهادات' : 'Verify certificates authenticity' },
+        { label: language === 'ar' ? 'دليل الاستشاريين' : 'Consultants Directory', href: '#consultants', icon: GraduationCap, desc: language === 'ar' ? 'استشاريون ومكاتب معتمدة' : 'Certified consultants & offices' },
+        { label: language === 'ar' ? 'المبادرة الوطنية' : 'National Initiative', href: '#initiative', icon: Globe, desc: language === 'ar' ? 'رؤية مصر 2030 للتحول الأخضر' : 'Egypt Vision 2030 green transformation' },
+        { label: language === 'ar' ? 'مميزات المنصة' : 'Features', href: '#features', icon: Rocket, desc: language === 'ar' ? 'إمكانيات وأدوات المنصة' : 'Platform capabilities & tools' },
+        { label: language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Showcase', href: '#doc-ai', icon: BookOpen, desc: language === 'ar' ? 'تحليل المستندات بالذكاء الاصطناعي' : 'AI-powered document analysis' },
+        { label: language === 'ar' ? 'الخدمات' : 'Services', href: '#services', icon: Recycle, desc: language === 'ar' ? 'خدمات إدارة المخلفات' : 'Waste management services' },
+        { label: language === 'ar' ? 'منصة عُمالنا' : 'Omaluna Jobs', href: '#omaluna', icon: Factory, desc: language === 'ar' ? 'نظام التوظيف المتكامل' : 'Integrated recruitment system' },
+        { label: language === 'ar' ? 'قصص النجاح' : 'Testimonials', href: '#testimonials', icon: HelpCircle, desc: language === 'ar' ? 'تجارب العملاء الحقيقية' : 'Real customer experiences' },
+      ],
+    },
+    {
       label: t('nav.resources') || (language === 'ar' ? 'المصادر' : 'Resources'),
       items: [
         { label: language === 'ar' ? 'المدونة' : 'Blog', href: '/blog', icon: BookOpen, desc: language === 'ar' ? 'مقالات ونصائح بيئية' : 'Environmental articles & tips' },
@@ -135,8 +150,6 @@ const Header = memo(() => {
               </div>
             ))}
 
-            <NavLink href="#features" onClick={() => handleNavClick('#features')}>{t('nav.features')}</NavLink>
-            <NavLink href="#services" onClick={() => handleNavClick('#services')}>{t('nav.services')}</NavLink>
           </nav>
 
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
@@ -177,8 +190,6 @@ const Header = memo(() => {
               {dropdowns.map((dropdown) => (
                 <MobileDropdown key={dropdown.label} dropdown={dropdown} onNavigate={handleNavClick} />
               ))}
-              <a href="#features" onClick={(e) => { e.preventDefault(); handleNavClick('#features'); }} className="font-medium text-muted-foreground hover:text-primary py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors">{t('nav.features')}</a>
-              <a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('#services'); }} className="font-medium text-muted-foreground hover:text-primary py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors">{t('nav.services')}</a>
               <div className="flex flex-col gap-3 pt-4 border-t border-border/50 mt-2">
                 <button
                   onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
