@@ -64,6 +64,7 @@ export const useQRVerification = () => {
     if (upperCode.startsWith('AWL-') || upperCode.startsWith('AL-')) return { type: 'award_letter', reference: upperCode };
     if (upperCode.startsWith('LMS-CERT-')) return { type: 'lms_certificate', reference: upperCode };
     if (upperCode.startsWith('SIG-') || upperCode.startsWith('SIGNER-')) return { type: 'signer', reference: upperCode };
+    if (upperCode.startsWith('ATT-')) return { type: 'attestation', reference: upperCode };
 
     return { type: 'unknown', reference: code };
   };
@@ -353,6 +354,45 @@ export const useQRVerification = () => {
     };
   };
 
+  const verifyAttestation = async (reference: string): Promise<VerificationData> => {
+    // Try by attestation_number first, then verification_code
+    const { data: attestation, error } = await supabase
+      .from('organization_attestations')
+      .select('*')
+      .or(`attestation_number.eq.${reference},verification_code.eq.${reference}`)
+      .maybeSingle();
+
+    if (error || !attestation) {
+      await logScan('attestation', reference, 'invalid');
+      return { isValid: false, type: 'attestation', reference, message: 'لم يتم العثور على الإفادة في النظام' };
+    }
+
+    const isActive = (attestation as any).status === 'active';
+    await logScan('attestation', reference, isActive ? 'valid' : 'expired', attestation.id, attestation);
+
+    return {
+      isValid: isActive,
+      type: 'attestation',
+      reference,
+      status: (attestation as any).status,
+      data: {
+        attestation_number: (attestation as any).attestation_number,
+        organization_name: (attestation as any).organization_name,
+        organization_type: (attestation as any).organization_type,
+        system_seal_number: (attestation as any).system_seal_number,
+        terms_accepted: (attestation as any).terms_accepted,
+        identity_verified: (attestation as any).identity_verified,
+        licenses_valid: (attestation as any).licenses_valid,
+        kyc_complete: (attestation as any).kyc_complete,
+        issued_at: (attestation as any).issued_at,
+      },
+      message: isActive
+        ? 'إفادة تسجيل واعتماد رقمي سارية وصادرة رسمياً من المنصة'
+        : 'هذه الإفادة ملغاة أو منتهية الصلاحية',
+      verifiedAt: new Date().toISOString(),
+    };
+  };
+
   const verify = useCallback(async (scannedData: string) => {
     setLoading(true);
     setResult(null);
@@ -383,6 +423,7 @@ export const useQRVerification = () => {
           await logScan('entity_certificate', reference, 'valid');
           verificationResult = { isValid: true, type: 'entity_certificate', reference, message: 'شهادة الجهة صادرة رسمياً من النظام ومعتمدة', verifiedAt: new Date().toISOString() };
           break;
+        case 'attestation': verificationResult = await verifyAttestation(reference); break;
         default:
           verificationResult = await verifyShipment(reference);
           if (!verificationResult.isValid) verificationResult = await verifyCertificate(reference);
