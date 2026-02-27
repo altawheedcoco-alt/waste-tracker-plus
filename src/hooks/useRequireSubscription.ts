@@ -19,20 +19,10 @@ export const useRequireSubscription = () => {
   const navigate = useNavigate();
   const { hasActiveSubscription, isExempt, needsUpgrade, isLoading } = useSubscriptionStatus();
 
+  // Subscription enforcement is currently disabled — always allow
   const requireSubscription = useCallback((): boolean => {
-    if (isExempt) return true;
-    
-    if (!hasActiveSubscription || needsUpgrade) {
-      toast.error('يلزم اشتراك نشط لإتمام هذه العملية', {
-        description: 'سيتم تحويلك لصفحة الاشتراك',
-        duration: 3000,
-      });
-      navigate('/dashboard/subscription');
-      return false;
-    }
-    
     return true;
-  }, [hasActiveSubscription, isExempt, needsUpgrade, navigate]);
+  }, []);
 
   return { requireSubscription, isSubscriptionLoading: isLoading };
 };
