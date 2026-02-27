@@ -36,11 +36,11 @@ const Hero = memo(() => {
         <div className="absolute inset-0 bg-gradient-to-t from-[hsl(140,20%,98%)]/95 via-transparent to-transparent" />
       </div>
 
-      {/* Static decorative icons - desktop only */}
-      <div className="absolute top-32 right-20 hidden lg:block animate-float-slow">
+      {/* Static decorative icons - desktop only, lazy rendered */}
+      <div className="absolute top-32 right-20 hidden lg:block animate-float-slow" aria-hidden="true">
         <div className="w-16 h-16 rounded-2xl gradient-eco flex items-center justify-center shadow-eco-lg"><Leaf className="w-8 h-8 text-white" /></div>
       </div>
-      <div className="absolute bottom-40 left-20 hidden lg:block animate-float-delayed">
+      <div className="absolute bottom-40 left-20 hidden lg:block animate-float-delayed" aria-hidden="true">
         <div className="w-14 h-14 rounded-2xl bg-white/90 shadow-eco-md flex items-center justify-center"><Truck className="w-7 h-7 text-[hsl(160,84%,39%)]" /></div>
       </div>
 
