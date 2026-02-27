@@ -32,10 +32,13 @@ interface DashboardWidgetCustomizerProps {
 
 const categoryLabels: Record<string, { label: string; color: string }> = {
   quick_action: { label: 'إجراءات', color: 'bg-primary/10 text-primary' },
-  stats: { label: 'إحصائيات', color: 'bg-blue-500/10 text-blue-600' },
-  data: { label: 'بيانات', color: 'bg-emerald-500/10 text-emerald-600' },
-  financial: { label: 'مالية', color: 'bg-amber-500/10 text-amber-600' },
-  operations: { label: 'تشغيلية', color: 'bg-violet-500/10 text-violet-600' },
+  stats: { label: 'إحصائيات', color: 'bg-accent text-accent-foreground' },
+  data: { label: 'بيانات', color: 'bg-muted text-muted-foreground' },
+  financial: { label: 'مالية', color: 'bg-primary/10 text-primary' },
+  operations: { label: 'تشغيلية', color: 'bg-secondary text-secondary-foreground' },
+  compliance: { label: 'امتثال', color: 'bg-destructive/10 text-destructive' },
+  ai: { label: 'ذكاء اصطناعي', color: 'bg-primary/15 text-primary' },
+  advanced: { label: 'متقدمة', color: 'bg-accent text-accent-foreground' },
 };
 
 export default function DashboardWidgetCustomizer({ orgType, trigger }: DashboardWidgetCustomizerProps) {
