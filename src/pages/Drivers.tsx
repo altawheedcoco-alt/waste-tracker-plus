@@ -133,9 +133,10 @@ const Drivers = () => {
             .eq('driver_id', driver.id)
             .in('status', ['new', 'approved', 'in_transit']);
 
+          const rawProfile = driver.profile as Driver['profile'] | null;
           return {
             ...driver,
-            profile: driver.profile as Driver['profile'],
+            profile: rawProfile ?? { id: driver.id, full_name: 'سائق بدون بيانات', email: '-', phone: null, avatar_url: null },
             active_shipments: count || 0,
           };
         })
