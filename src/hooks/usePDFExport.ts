@@ -63,31 +63,42 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     };
 
     if (hasPageBreaks && children.length > 1) {
-      // Capture each top-level child as a separate page
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i];
-        const canvas = await html2canvas(child, captureOpts);
-        const imgData = canvas.toDataURL('image/jpeg', 0.92);
-        const imgWidth = contentWidth;
-        const imgHeight = (canvas.height * contentWidth) / canvas.width;
+      // Filter out empty/page-break-only children
+      const validChildren = children.filter(child => {
+        const isPageBreak = child.style.pageBreakBefore === 'always' || child.style.pageBreakAfter === 'always';
+        const isEmpty = child.offsetHeight < 5 && child.children.length === 0;
+        return !isPageBreak && !isEmpty;
+      });
 
-        if (i > 0) pdf.addPage();
+      // Capture each valid top-level child as a separate page
+      for (let i = 0; i < validChildren.length; i++) {
+        const child = validChildren[i];
+        try {
+          const canvas = await html2canvas(child, captureOpts);
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          const imgWidth = contentWidth;
+          const imgHeight = (canvas.height * contentWidth) / canvas.width;
 
-        // If content fits in one page, center it
-        if (imgHeight <= contentHeight) {
-          pdf.addImage(imgData, 'JPEG', marginMM, marginMM, imgWidth, imgHeight);
-        } else {
-          // Multi-page for this section
-          let heightLeft = imgHeight;
-          let position = 0;
-          pdf.addImage(imgData, 'JPEG', marginMM, marginMM + position, imgWidth, imgHeight);
-          heightLeft -= contentHeight;
-          while (heightLeft > 0) {
-            position = -(imgHeight - heightLeft);
-            pdf.addPage();
+          if (i > 0) pdf.addPage();
+
+          // If content fits in one page, center it
+          if (imgHeight <= contentHeight) {
+            pdf.addImage(imgData, 'JPEG', marginMM, marginMM, imgWidth, imgHeight);
+          } else {
+            // Multi-page for this section
+            let heightLeft = imgHeight;
+            let position = 0;
             pdf.addImage(imgData, 'JPEG', marginMM, marginMM + position, imgWidth, imgHeight);
             heightLeft -= contentHeight;
+            while (heightLeft > 0) {
+              position = -(imgHeight - heightLeft);
+              pdf.addPage();
+              pdf.addImage(imgData, 'JPEG', marginMM, marginMM + position, imgWidth, imgHeight);
+              heightLeft -= contentHeight;
+            }
           }
+        } catch (childError) {
+          console.warn(`Failed to capture page ${i + 1}, skipping:`, childError);
         }
       }
     } else {
