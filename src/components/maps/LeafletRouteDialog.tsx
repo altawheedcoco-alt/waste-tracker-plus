@@ -3,9 +3,16 @@ import L from 'leaflet';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Route, Loader2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Route, Loader2, Navigation, Map, Car, ChevronDown, ExternalLink } from 'lucide-react';
 import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM } from '@/lib/leafletConfig';
 import { geocodeAddress, fetchRoadRoute, formatDistance, formatDuration } from '@/lib/mapUtils';
+import { toast } from 'sonner';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -28,11 +35,45 @@ const LeafletRouteDialog = ({ isOpen, onClose, pickupAddress, deliveryAddress, s
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [loading, setLoading] = useState(false);
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null);
+  const [coords, setCoords] = useState<{ pickup: { lat: number; lng: number } | null; delivery: { lat: number; lng: number } | null }>({ pickup: null, delivery: null });
+
+  const handleNavigate = (app: 'google' | 'waze' | 'here', type: 'pickup' | 'delivery' | 'route') => {
+    const pickup = coords.pickup;
+    const delivery = coords.delivery;
+
+    if (type === 'route') {
+      const origin = pickup ? `${pickup.lat},${pickup.lng}` : encodeURIComponent(pickupAddress);
+      const dest = delivery ? `${delivery.lat},${delivery.lng}` : encodeURIComponent(deliveryAddress);
+      let url: string;
+      if (app === 'google') {
+        url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving`;
+      } else if (app === 'waze') {
+        url = delivery ? `https://waze.com/ul?ll=${delivery.lat},${delivery.lng}&navigate=yes` : `https://waze.com/ul?q=${encodeURIComponent(deliveryAddress)}&navigate=yes`;
+      } else {
+        url = `https://wego.here.com/directions/drive/${origin}/${dest}`;
+      }
+      window.open(url, '_blank');
+    } else {
+      const target = type === 'pickup' ? (pickup || pickupAddress) : (delivery || deliveryAddress);
+      let url: string;
+      if (typeof target === 'string') {
+        if (app === 'google') url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(target)}&travelmode=driving`;
+        else if (app === 'waze') url = `https://waze.com/ul?q=${encodeURIComponent(target)}&navigate=yes`;
+        else url = `https://wego.here.com/directions/drive/mylocation/${encodeURIComponent(target)}`;
+      } else {
+        if (app === 'google') url = `https://www.google.com/maps/dir/?api=1&destination=${target.lat},${target.lng}&travelmode=driving`;
+        else if (app === 'waze') url = `https://waze.com/ul?ll=${target.lat},${target.lng}&navigate=yes`;
+        else url = `https://wego.here.com/directions/drive/mylocation/${target.lat},${target.lng}`;
+      }
+      window.open(url, '_blank');
+    }
+    const appNames = { google: 'Google Maps', waze: 'Waze', here: 'HERE WeGo' };
+    toast.success(`جاري فتح ${appNames[app]}...`);
+  };
 
   useEffect(() => {
     if (!isOpen || !mapRef.current) return;
 
-    // Small delay for dialog animation
     const timeout = setTimeout(async () => {
       if (!mapRef.current) return;
       if (mapInstanceRef.current) mapInstanceRef.current.remove();
@@ -67,6 +108,11 @@ const LeafletRouteDialog = ({ isOpen, onClose, pickupAddress, deliveryAddress, s
           bounds.extend([delivery.lat, delivery.lng]);
         }
 
+        setCoords({
+          pickup: pickup.success ? { lat: pickup.lat, lng: pickup.lng } : null,
+          delivery: delivery.success ? { lat: delivery.lat, lng: delivery.lng } : null,
+        });
+
         if (pickup.success && delivery.success) {
           const route = await fetchRoadRoute(
             { lat: pickup.lat, lng: pickup.lng },
@@ -74,6 +120,17 @@ const LeafletRouteDialog = ({ isOpen, onClose, pickupAddress, deliveryAddress, s
           );
           if (route.success && route.coordinates.length > 1) {
             L.polyline(route.coordinates, { color: '#3b82f6', weight: 4, opacity: 0.8 }).addTo(map);
+            // Shadow line
+            L.polyline(route.coordinates, { color: '#1e40af', weight: 6, opacity: 0.15 }).addTo(map);
+            // Truck icon at midpoint
+            const midIdx = Math.floor(route.coordinates.length / 2);
+            if (midIdx > 0) {
+              const truckIcon = L.divIcon({
+                html: '<div style="background:#3b82f6;width:18px;height:18px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;">🚛</div>',
+                iconSize: [18, 18], className: '',
+              });
+              L.marker(route.coordinates[midIdx], { icon: truckIcon, interactive: false }).addTo(map);
+            }
           }
           setRouteInfo({ distance: formatDistance(route.distance), duration: formatDuration(route.duration) });
         }
@@ -96,7 +153,7 @@ const LeafletRouteDialog = ({ isOpen, onClose, pickupAddress, deliveryAddress, s
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="max-w-4xl h-[80vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 flex-wrap">
             <Route className="w-5 h-5 text-primary" />
             خريطة المسار {shipmentNumber && `- ${shipmentNumber}`}
             {routeInfo && (
@@ -116,7 +173,30 @@ const LeafletRouteDialog = ({ isOpen, onClose, pickupAddress, deliveryAddress, s
           )}
           <div ref={mapRef} style={{ height: '100%', width: '100%' }} />
         </div>
-        <div className="flex justify-end">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          {/* Navigation dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="gap-2 bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0 hover:from-green-600 hover:to-emerald-700">
+                <Navigation className="w-4 h-4" />
+                ابدأ الملاحة
+                <ChevronDown className="w-3 h-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <div className="p-2 border-b text-xs font-medium">المسار الكامل</div>
+              <DropdownMenuItem onClick={() => handleNavigate('google', 'route')} className="gap-2 cursor-pointer">
+                <Map className="w-4 h-4 text-red-500" /> Google Maps
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('waze', 'route')} className="gap-2 cursor-pointer">
+                <Car className="w-4 h-4 text-cyan-500" /> Waze
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleNavigate('here', 'route')} className="gap-2 cursor-pointer">
+                <Navigation className="w-4 h-4 text-emerald-500" /> HERE WeGo
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Button variant="outline" onClick={onClose}>إغلاق</Button>
         </div>
       </DialogContent>

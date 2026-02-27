@@ -3,10 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Route, Navigation, Clock, Fuel, MapPin,
-  ArrowDown, CheckCircle2, Truck, Sparkles, RotateCcw
+  ArrowDown, CheckCircle2, Truck, Sparkles, RotateCcw,
+  ChevronDown, ExternalLink, Car, Map
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 
 interface SmartRouteOptimizerProps {
   shipments: Array<{
@@ -48,8 +57,6 @@ const SmartRouteOptimizer = ({ shipments, onNavigateOptimized }: SmartRouteOptim
 
     const stops: OptimizedStop[] = [];
 
-    // For approved: need pickup first then delivery
-    // For in_transit: only delivery needed
     activeShipments.forEach(s => {
       if (s.status === 'approved') {
         stops.push({
@@ -73,7 +80,6 @@ const SmartRouteOptimizer = ({ shipments, onNavigateOptimized }: SmartRouteOptim
       });
     });
 
-    // Group pickups first then deliveries, maintaining shipment order
     const pickups = stops.filter(s => s.type === 'pickup');
     const deliveries = stops.filter(s => s.type === 'delivery');
     const ordered = [...pickups, ...deliveries].map((s, i) => ({ ...s, order: i + 1 }));
@@ -83,30 +89,59 @@ const SmartRouteOptimizer = ({ shipments, onNavigateOptimized }: SmartRouteOptim
 
   const estimatedSavings = useMemo(() => {
     const stops = optimizedRoute.length;
-    const baseFuel = stops * 12; // liters per stop (avg)
-    const optimizedFuel = Math.round(baseFuel * 0.7); // 30% savings
+    const baseFuel = stops * 12;
+    const optimizedFuel = Math.round(baseFuel * 0.7);
     const savedFuel = baseFuel - optimizedFuel;
-    const savedTime = stops * 8; // minutes saved per stop
-    const savedCO2 = Math.round(savedFuel * 2.68); // kg CO2
+    const savedTime = stops * 8;
+    const savedCO2 = Math.round(savedFuel * 2.68);
 
     return { savedFuel, savedTime, savedCO2, totalStops: stops };
   }, [optimizedRoute]);
 
-  const handleStartNavigation = () => {
-    const addresses = optimizedRoute.map(s => s.address).filter(Boolean);
+  const getAddresses = () => optimizedRoute.map(s => s.address).filter(Boolean);
+
+  const handleStartNavigation = (app: 'google' | 'waze' | 'here') => {
+    const addresses = getAddresses();
     if (addresses.length === 0) return;
 
-    // Open Google Maps with waypoints
     const origin = encodeURIComponent(addresses[0]);
     const destination = encodeURIComponent(addresses[addresses.length - 1]);
-    const waypoints = addresses.slice(1, -1).map(a => encodeURIComponent(a)).join('|');
+    const waypoints = addresses.slice(1, -1).map(a => encodeURIComponent(a));
 
-    let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
-    if (waypoints) url += `&waypoints=${waypoints}`;
-    url += '&travelmode=driving';
+    let url: string;
+    if (app === 'google') {
+      url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+      if (waypoints.length > 0) url += `&waypoints=${waypoints.join('|')}`;
+      url += '&travelmode=driving';
+    } else if (app === 'waze') {
+      // Waze only supports single destination
+      url = `https://waze.com/ul?q=${destination}&navigate=yes`;
+    } else {
+      // HERE WeGo supports multi-stop via URL
+      const allStops = addresses.map(a => encodeURIComponent(a)).join('/');
+      url = `https://wego.here.com/directions/drive/${allStops}`;
+    }
 
     window.open(url, '_blank');
+    const appNames = { google: 'Google Maps', waze: 'Waze', here: 'HERE WeGo' };
+    toast.success(`جاري فتح ${appNames[app]} بالمسار المحسّن...`);
     onNavigateOptimized?.(addresses);
+  };
+
+  // Navigate to a specific stop
+  const handleNavigateToStop = (stop: OptimizedStop, app: 'google' | 'waze' | 'here') => {
+    if (!stop.address) { toast.error('العنوان غير متاح'); return; }
+    const addr = encodeURIComponent(stop.address);
+    let url: string;
+    if (app === 'google') {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      url = isMobile ? `google.navigation:q=${addr}&mode=d` : `https://www.google.com/maps/dir/?api=1&destination=${addr}&travelmode=driving`;
+    } else if (app === 'waze') {
+      url = `https://waze.com/ul?q=${addr}&navigate=yes`;
+    } else {
+      url = `https://wego.here.com/directions/drive/mylocation/${addr}`;
+    }
+    window.open(url, '_blank');
   };
 
   if (activeShipments.length === 0) {
@@ -155,10 +190,48 @@ const SmartRouteOptimizer = ({ shipments, onNavigateOptimized }: SmartRouteOptim
             </div>
           </div>
 
-          <Button className="w-full gap-2 h-11" onClick={handleStartNavigation}>
-            <Navigation className="w-5 h-5" />
-            ابدأ المسار المحسّن ({optimizedRoute.length} محطة)
-          </Button>
+          {/* Multi-app navigation button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="w-full gap-2 h-11">
+                <Navigation className="w-5 h-5" />
+                ابدأ المسار المحسّن ({optimizedRoute.length} محطة)
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-64">
+              <div className="p-2 border-b">
+                <p className="text-xs font-medium">اختر تطبيق الملاحة</p>
+              </div>
+              <DropdownMenuItem onClick={() => handleStartNavigation('google')} className="gap-3 cursor-pointer py-3">
+                <div className="w-7 h-7 rounded bg-red-500 flex items-center justify-center">
+                  <Map className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Google Maps</p>
+                  <p className="text-[10px] text-muted-foreground">مسار كامل مع نقاط التوقف</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStartNavigation('waze')} className="gap-3 cursor-pointer py-3">
+                <div className="w-7 h-7 rounded bg-cyan-500 flex items-center justify-center">
+                  <Car className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">Waze</p>
+                  <p className="text-[10px] text-muted-foreground">ملاحة مع تنبيهات المرور</p>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleStartNavigation('here')} className="gap-3 cursor-pointer py-3">
+                <div className="w-7 h-7 rounded bg-emerald-600 flex items-center justify-center">
+                  <Navigation className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">HERE WeGo</p>
+                  <p className="text-[10px] text-muted-foreground">ملاحة بدون انترنت</p>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardContent>
       </Card>
 
@@ -203,6 +276,25 @@ const SmartRouteOptimizer = ({ shipments, onNavigateOptimized }: SmartRouteOptim
                       {stop.type === 'pickup' ? '📤 استلام' : '📥 تسليم'}
                     </Badge>
                     <span className="text-xs font-mono text-muted-foreground">{stop.shipmentNumber}</span>
+                    {/* Quick navigate to this stop */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-5 w-5 mr-auto">
+                          <Navigation className="w-3 h-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem onClick={() => handleNavigateToStop(stop, 'google')} className="text-xs gap-2 cursor-pointer">
+                          <Map className="w-3 h-3" /> Google Maps
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleNavigateToStop(stop, 'waze')} className="text-xs gap-2 cursor-pointer">
+                          <Car className="w-3 h-3" /> Waze
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleNavigateToStop(stop, 'here')} className="text-xs gap-2 cursor-pointer">
+                          <Navigation className="w-3 h-3" /> HERE WeGo
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                   <p className="text-sm font-medium mt-1">{stop.party}</p>
                   <p className="text-xs text-muted-foreground truncate">{stop.address || 'عنوان غير محدد'}</p>
