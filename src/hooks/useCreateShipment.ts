@@ -631,11 +631,67 @@ export const useCreateShipment = () => {
     const isManualRecycler = formData.recycler_id.startsWith('manual:');
     const isManualTransporter = formData.transporter_id.startsWith('manual:');
     
-    const generatorId = isManualGenerator ? null : formData.generator_id;
-    const recyclerId = isManualRecycler ? null : formData.recycler_id;
-    const manualGeneratorName = isManualGenerator ? formData.generator_id.replace('manual:', '') : null;
-    const manualRecyclerName = isManualRecycler ? formData.recycler_id.replace('manual:', '') : null;
+    // Auto-create organizations for manual entries
+    const autoCreateOrg = async (name: string, orgType: string): Promise<string | null> => {
+      try {
+        const { data, error } = await supabase.functions.invoke('auto-create-organization', {
+          body: { 
+            name, 
+            organization_type: orgType,
+            created_by_org_id: organization?.id,
+          },
+        });
+        if (error) throw error;
+        if (data?.organization_id) {
+          const statusLabel = data.already_exists ? 'موجودة مسبقاً' : 'تم إنشاء حساب جديد';
+          toast.info(`${statusLabel}: ${data.name}`, { duration: 3000 });
+          return data.organization_id;
+        }
+        return null;
+      } catch (e: any) {
+        console.error(`Auto-create org (${orgType}) error:`, e);
+        toast.error(`فشل في إنشاء حساب ${name} تلقائياً`);
+        return null;
+      }
+    };
+
+    let generatorId: string | null = isManualGenerator ? null : formData.generator_id;
+    let recyclerId: string | null = isManualRecycler ? null : formData.recycler_id;
+    let manualGeneratorName: string | null = isManualGenerator ? formData.generator_id.replace('manual:', '') : null;
+    let manualRecyclerName: string | null = isManualRecycler ? formData.recycler_id.replace('manual:', '') : null;
     const manualTransporterName = isManualTransporter ? formData.transporter_id.replace('manual:', '') : null;
+
+    // Auto-create orgs for manual parties (in parallel)
+    const autoCreatePromises: Promise<void>[] = [];
+
+    if (isManualGenerator && manualGeneratorName) {
+      autoCreatePromises.push(
+        autoCreateOrg(manualGeneratorName, 'generator').then(id => {
+          if (id) { generatorId = id; manualGeneratorName = null; }
+        })
+      );
+    }
+    if (isManualRecycler && manualRecyclerName) {
+      autoCreatePromises.push(
+        autoCreateOrg(manualRecyclerName, 'recycler').then(id => {
+          if (id) { recyclerId = id; manualRecyclerName = null; }
+        })
+      );
+    }
+    const isManualDisposalEarly = formData.disposal_facility_id.startsWith('manual:');
+    const manualDisposalNameEarly = isManualDisposalEarly ? formData.disposal_facility_id.replace('manual:', '') : null;
+    let autoDisposalId: string | null = null;
+    if (isManualDisposalEarly && manualDisposalNameEarly) {
+      autoCreatePromises.push(
+        autoCreateOrg(manualDisposalNameEarly, 'disposal').then(id => {
+          if (id) { autoDisposalId = id; }
+        })
+      );
+    }
+
+    if (autoCreatePromises.length > 0) {
+      await Promise.all(autoCreatePromises);
+    }
 
     let transporterId: string | null = null;
     let driverId: string | null = null;
@@ -659,9 +715,8 @@ export const useCreateShipment = () => {
     setLoading(true);
 
     try {
-      const isManualDisposal = formData.disposal_facility_id.startsWith('manual:');
-      const disposalFacilityId = isManualDisposal ? null : (formData.disposal_facility_id || null);
-      const manualDisposalName = isManualDisposal ? formData.disposal_facility_id.replace('manual:', '') : null;
+      const disposalFacilityId = autoDisposalId || (isManualDisposalEarly ? null : (formData.disposal_facility_id || null));
+      const manualDisposalName = (isManualDisposalEarly && !autoDisposalId) ? manualDisposalNameEarly : null;
 
       const { data: shipmentData, error } = await supabase.from('shipments').insert({
         generator_id: generatorId,
