@@ -16,6 +16,7 @@ const SUPPORTED_TYPES = [
   { label: 'خطابات ترسية', icon: '📜' },
   { label: 'إيصالات', icon: '🧾' },
   { label: 'مفوضين', icon: '✍️' },
+  { label: 'إفادات', icon: '📋' },
 ];
 
 const QRVerify = () => {

@@ -32,7 +32,8 @@ export type DocumentQRType =
   | 'delivery_cert'
   | 'transport_receipt'
   | 'operational_plan'
-  | 'lms_certificate';
+  | 'lms_certificate'
+  | 'attestation';
 
 /**
  * Generate a standardized QR verification URL for any document
@@ -64,4 +65,5 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentQRType, { ar: string; en: stri
   transport_receipt: { ar: 'إيصال نقل', en: 'Transport Receipt', icon: 'Truck' },
   operational_plan: { ar: 'خطة تشغيلية', en: 'Operational Plan', icon: 'FileText' },
   lms_certificate: { ar: 'شهادة دورة تدريبية', en: 'LMS Certificate', icon: 'GraduationCap' },
+  attestation: { ar: 'إفادة تسجيل', en: 'Registration Attestation', icon: 'FileText' },
 };

@@ -15,7 +15,7 @@ import {
 export type VerificationDocType = 
   | 'shipment' | 'certificate' | 'contract' | 'receipt' 
   | 'report' | 'invoice' | 'disposal' | 'statement' 
-  | 'award_letter' | 'entity_certificate' | 'lms_certificate' | 'signer' | 'unknown';
+  | 'award_letter' | 'entity_certificate' | 'lms_certificate' | 'signer' | 'attestation' | 'unknown';
 
 export interface SignatureInfo {
   id: string;
@@ -84,6 +84,7 @@ const typeLabels: Record<string, { label: string; icon: any }> = {
   entity_certificate: { label: 'شهادة جهة', icon: Building2 },
   lms_certificate: { label: 'شهادة تدريبية', icon: GraduationCap },
   signer: { label: 'مفوض معتمد', icon: UserCheck },
+  attestation: { label: 'إفادة تسجيل', icon: FileText },
   unknown: { label: 'مستند', icon: FileText },
 };
 
