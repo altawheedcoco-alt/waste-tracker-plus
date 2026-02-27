@@ -46,7 +46,7 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
     queryKey: ['mc-facility-detail', facilityId],
     queryFn: async () => {
       if (!facilityId) return null;
-      const { data } = await supabase.from('disposal_facilities').select('*').eq('id', facilityId).single();
+      const { data } = await supabase.from('disposal_facilities').select('*').eq('id', facilityId).maybeSingle();
       return data;
     },
     enabled: !!facilityId,

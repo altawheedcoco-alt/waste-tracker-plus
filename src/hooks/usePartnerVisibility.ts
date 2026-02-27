@@ -216,7 +216,7 @@ export const usePartnerVisibility = () => {
       .select('*')
       .eq('organization_id', transporterId)
       .eq('partner_organization_id', partnerOrgId)
-      .single();
+      .maybeSingle();
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error checking visibility:', error);
