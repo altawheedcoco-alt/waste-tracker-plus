@@ -541,6 +541,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       { icon: LinkIcon, label: t('sidebar.quickDepositLinks'), path: '/dashboard/quick-deposit-links', key: 'quick-deposit-links' },
       { icon: Zap, label: t('sidebar.quickShipmentLinks'), path: '/dashboard/quick-shipment-links', key: 'quick-shipment-links' },
       { icon: Truck, label: t('sidebar.quickDriverLinks'), path: '/dashboard/quick-driver-links', key: 'quick-driver-links' },
+      { icon: Shield, label: 'روابط الوصول المحدد', path: '/dashboard/scoped-access-links', key: 'scoped-access-links' },
     ]},
 
     // ═══════════════ التواصل ═══════════════

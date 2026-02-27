@@ -22,6 +22,7 @@ const QuickShipment = lazy(() => import("@/pages/QuickShipment"));
 const QuickDriver = lazy(() => import("@/pages/QuickDriver"));
 const QuickShip = lazy(() => import("@/pages/QuickShip"));
 const SavedLocationsPage = lazy(() => import("@/pages/SavedLocationsPage"));
+const ScopedAccessPortal = lazy(() => import("@/pages/ScopedAccessPortal"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
 const Help = lazy(() => import("@/pages/Help"));
@@ -84,6 +85,7 @@ export const publicRoutes = (
     <Route path="/policies" element={<Policies />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/shared/:token" element={<SharedDocumentView />} />
+    <Route path="/scoped/:code" element={<ScopedAccessPortal />} />
     <Route path="*" element={<NotFound />} />
   </>
 );

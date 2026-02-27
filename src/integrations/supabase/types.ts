@@ -23861,6 +23861,143 @@ export type Database = {
           },
         ]
       }
+      scoped_access_links: {
+        Row: {
+          access_pin: string | null
+          assigned_to_email: string | null
+          assigned_to_name: string
+          assigned_to_phone: string | null
+          can_create_deposits: boolean
+          can_create_shipments: boolean
+          can_view_deposits: boolean
+          can_view_invoices: boolean
+          can_view_ledger: boolean
+          can_view_shipments: boolean
+          created_at: string
+          created_by: string | null
+          current_uses: number
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_accessed_at: string | null
+          link_code: string
+          link_name: string
+          max_uses: number | null
+          organization_id: string
+          scoped_organization_ids: string[]
+          updated_at: string
+          waste_types_filter: string[] | null
+        }
+        Insert: {
+          access_pin?: string | null
+          assigned_to_email?: string | null
+          assigned_to_name: string
+          assigned_to_phone?: string | null
+          can_create_deposits?: boolean
+          can_create_shipments?: boolean
+          can_view_deposits?: boolean
+          can_view_invoices?: boolean
+          can_view_ledger?: boolean
+          can_view_shipments?: boolean
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          link_code?: string
+          link_name: string
+          max_uses?: number | null
+          organization_id: string
+          scoped_organization_ids?: string[]
+          updated_at?: string
+          waste_types_filter?: string[] | null
+        }
+        Update: {
+          access_pin?: string | null
+          assigned_to_email?: string | null
+          assigned_to_name?: string
+          assigned_to_phone?: string | null
+          can_create_deposits?: boolean
+          can_create_shipments?: boolean
+          can_view_deposits?: boolean
+          can_view_invoices?: boolean
+          can_view_ledger?: boolean
+          can_view_shipments?: boolean
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
+          link_code?: string
+          link_name?: string
+          max_uses?: number | null
+          organization_id?: string
+          scoped_organization_ids?: string[]
+          updated_at?: string
+          waste_types_filter?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scoped_access_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "scoped_access_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scoped_link_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          link_id: string
+          session_token: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          session_token?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          session_token?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scoped_link_sessions_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "scoped_access_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       security_audits: {
         Row: {
           audit_type: string
