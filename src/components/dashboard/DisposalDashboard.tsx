@@ -84,7 +84,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
     queryKey: ['disposal-facility', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return null;
-      const { data } = await supabase.from('disposal_facilities').select('*').eq('organization_id', organization.id).single();
+      const { data } = await supabase.from('disposal_facilities').select('*').eq('organization_id', organization.id).maybeSingle();
       return data;
     },
     enabled: !!organization?.id

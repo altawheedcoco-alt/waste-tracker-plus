@@ -105,7 +105,7 @@ const RecyclerDashboard = () => {
         .from('disposal_facilities')
         .select('*')
         .eq('organization_id', organization.id)
-        .single();
+        .maybeSingle();
       return data;
     },
     enabled: !!organization?.id

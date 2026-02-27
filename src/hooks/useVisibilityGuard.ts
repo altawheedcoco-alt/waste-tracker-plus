@@ -101,7 +101,7 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
         .select('*')
         .eq('organization_id', shipment.transporter_id)
         .eq('partner_organization_id', organization.id)
-        .single();
+        .maybeSingle();
 
       // Determine recycler visibility: per-shipment flag overrides global setting
       const isGenerator = shipment.generator_id === organization.id;
@@ -186,7 +186,7 @@ export function useTransporterVisibility(transporterId: string | undefined): Vis
         .select('*')
         .eq('organization_id', transporterId)
         .eq('partner_organization_id', organization.id)
-        .single();
+        .maybeSingle();
 
       if (error || !settings) {
         return { permissions: DEFAULT_PERMISSIONS, isOwner: false };
@@ -259,7 +259,7 @@ export async function checkVisibility(
     .select('*')
     .eq('organization_id', transporterId)
     .eq('partner_organization_id', organizationId)
-    .single();
+    .maybeSingle();
 
   if (error || !settings) {
     return DEFAULT_PERMISSIONS;
