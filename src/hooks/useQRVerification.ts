@@ -425,14 +425,19 @@ export const useQRVerification = () => {
           break;
         case 'attestation': verificationResult = await verifyAttestation(reference); break;
         default:
+          // Universal fallback: try ALL document types sequentially
           verificationResult = await verifyShipment(reference);
           if (!verificationResult.isValid) verificationResult = await verifyCertificate(reference);
           if (!verificationResult.isValid) verificationResult = await verifyReceipt(reference);
           if (!verificationResult.isValid) verificationResult = await verifyContract(reference);
           if (!verificationResult.isValid) verificationResult = await verifyInvoice(reference);
           if (!verificationResult.isValid) verificationResult = await verifyAwardLetter(reference);
+          if (!verificationResult.isValid) verificationResult = await verifyDisposal(reference);
+          if (!verificationResult.isValid) verificationResult = await verifyLMSCertificate(reference);
+          if (!verificationResult.isValid) verificationResult = await verifySigner(reference);
+          if (!verificationResult.isValid) verificationResult = await verifyAttestation(reference);
           if (!verificationResult.isValid) {
-            verificationResult = { isValid: false, type: 'unknown', reference, message: 'لم يتم العثور على المستند في النظام' };
+            verificationResult = { isValid: false, type: 'unknown', reference, message: 'لم يتم العثور على المستند في أي سجل بالنظام' };
           }
       }
 
