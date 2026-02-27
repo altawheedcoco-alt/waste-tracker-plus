@@ -33,6 +33,7 @@ const routeLabels: Record<string, string> = {
   'employee-management': 'إدارة الموظفين',
   'environmental-sustainability': 'الاستدامة البيئية',
   'system-overview': 'نظرة عامة على النظام',
+  'admin-revenue': 'الإيرادات والاشتراكات',
   'company-management': 'إدارة الشركات',
 };
 

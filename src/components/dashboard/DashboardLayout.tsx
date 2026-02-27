@@ -84,6 +84,7 @@ import {
   FileSignature,
   ClipboardCheck,
   Printer,
+  CreditCard,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -454,6 +455,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Shield, label: t('sidebar.smartOnboarding'), path: '/dashboard/onboarding-review', key: 'onboarding-review' },
             { icon: Activity, label: t('sidebar.systemStatus'), path: '/dashboard/system-status', key: 'system-status' },
             { icon: Activity, label: language === 'ar' ? 'نظرة عامة على النظام' : 'System Overview', path: '/dashboard/system-overview', key: 'system-overview' },
+            { icon: CreditCard, label: language === 'ar' ? 'الإيرادات والاشتراكات' : 'Revenue Management', path: '/dashboard/admin-revenue', key: 'admin-revenue' },
             { icon: Settings, label: language === 'ar' ? 'أوامر النظام' : 'System Commands', path: '/dashboard/system-commands', key: 'system-commands' },
             { icon: Newspaper, label: language === 'ar' ? 'إدارة الأخبار' : 'News Manager', path: '/dashboard/news-manager', key: 'news-manager' },
             { icon: BookOpen, label: language === 'ar' ? 'إدارة المدونة' : 'Blog Manager', path: '/dashboard/blog-manager', key: 'blog-manager' },
