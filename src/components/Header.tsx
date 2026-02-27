@@ -60,6 +60,7 @@ const Header = memo(() => {
         { label: language === 'ar' ? 'التشريعات' : 'Legislation', href: '/legislation', icon: Scale, desc: language === 'ar' ? 'الضوابط القانونية' : 'Legal regulations' },
         { label: language === 'ar' ? 'عن المنصة' : 'About Us', href: '/about', icon: Building2, desc: language === 'ar' ? 'الرؤية والمهمة' : 'Vision & mission' },
         { label: language === 'ar' ? 'سياسات المنصة' : 'Policies', href: '/policies', icon: ShieldCheck, desc: language === 'ar' ? 'الإطار القانوني الشامل' : 'Legal framework' },
+        { label: language === 'ar' ? 'الشروط والأحكام' : 'Terms & Conditions', href: '/terms', icon: Scale, desc: language === 'ar' ? 'شروط استخدام المنصة والالتزام القانوني' : 'Platform usage terms & legal compliance' },
       ],
       footer: { label: language === 'ar' ? 'عرض جميع المصادر' : 'View all resources', href: '/help', icon: BookOpen },
     },
