@@ -26,6 +26,7 @@ const TestimonialsSection = lazy(() => import("@/components/landing/Testimonials
 const NationalInitiativeSection = lazy(() => import("@/components/landing/NationalInitiativeSection"));
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
 const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
+const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
@@ -86,17 +87,18 @@ const Index = () => {
           <main>
             <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
               <LazySection><HomepageAds /></LazySection>
+              <LazySection><TrustedPartnersSection /></LazySection>
+              <LazySection><Stats /></LazySection>
               <LazySection><DocumentVerification /></LazySection>
               <LazySection><FeaturedConsultants /></LazySection>
-              <LazySection><OmalunaSection /></LazySection>
               <LazySection><NationalInitiativeSection /></LazySection>
-              <LazySection><Stats /></LazySection>
-              <LazySection><FeaturesList /></LazySection>
               <LazySection><Features /></LazySection>
+              <LazySection><FeaturesList /></LazySection>
               <LazySection><DocumentAIShowcase /></LazySection>
               <LazySection><SmartAgentShowcase /></LazySection>
-              <LazySection><TestimonialsSection /></LazySection>
               <LazySection><Services /></LazySection>
+              <LazySection><OmalunaSection /></LazySection>
+              <LazySection><TestimonialsSection /></LazySection>
               <LazySection><CTA /></LazySection>
             </ErrorBoundary>
           </main>
