@@ -10267,6 +10267,104 @@ export type Database = {
           },
         ]
       }
+      endorsement_criteria_checks: {
+        Row: {
+          all_criteria_met: boolean | null
+          all_signatures_complete: boolean | null
+          blocked_reason: string | null
+          checked_at: string
+          checked_by: string | null
+          created_at: string
+          criteria_details: Json | null
+          document_hash_intact: boolean | null
+          document_id: string
+          document_type: string
+          endorsement_id: string | null
+          endorsement_status: string
+          id: string
+          licenses_valid: boolean | null
+          no_active_violations: boolean | null
+          organization_id: string
+          signers_kyc_verified: boolean | null
+          system_endorsement_id: string | null
+          updated_at: string
+          within_time_frame: boolean | null
+        }
+        Insert: {
+          all_criteria_met?: boolean | null
+          all_signatures_complete?: boolean | null
+          blocked_reason?: string | null
+          checked_at?: string
+          checked_by?: string | null
+          created_at?: string
+          criteria_details?: Json | null
+          document_hash_intact?: boolean | null
+          document_id: string
+          document_type: string
+          endorsement_id?: string | null
+          endorsement_status?: string
+          id?: string
+          licenses_valid?: boolean | null
+          no_active_violations?: boolean | null
+          organization_id: string
+          signers_kyc_verified?: boolean | null
+          system_endorsement_id?: string | null
+          updated_at?: string
+          within_time_frame?: boolean | null
+        }
+        Update: {
+          all_criteria_met?: boolean | null
+          all_signatures_complete?: boolean | null
+          blocked_reason?: string | null
+          checked_at?: string
+          checked_by?: string | null
+          created_at?: string
+          criteria_details?: Json | null
+          document_hash_intact?: boolean | null
+          document_id?: string
+          document_type?: string
+          endorsement_id?: string | null
+          endorsement_status?: string
+          id?: string
+          licenses_valid?: boolean | null
+          no_active_violations?: boolean | null
+          organization_id?: string
+          signers_kyc_verified?: boolean | null
+          system_endorsement_id?: string | null
+          updated_at?: string
+          within_time_frame?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "endorsement_criteria_checks_endorsement_id_fkey"
+            columns: ["endorsement_id"]
+            isOneToOne: false
+            referencedRelation: "document_endorsements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "endorsement_criteria_checks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "endorsement_criteria_checks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "endorsement_criteria_checks_system_endorsement_id_fkey"
+            columns: ["system_endorsement_id"]
+            isOneToOne: false
+            referencedRelation: "system_endorsements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entity_comments: {
         Row: {
           content: string
