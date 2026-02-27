@@ -164,6 +164,8 @@ const SmartAgentDashboard = lazy(() => import("@/pages/dashboard/SmartAgentDashb
 const PrintCenter = lazy(() => import("@/pages/dashboard/PrintCenter"));
 const SigningStatus = lazy(() => import("@/pages/dashboard/SigningStatus"));
 const SavedLocationsPage = lazy(() => import("@/pages/SavedLocationsPage"));
+const OrganizationAttestation = lazy(() => import("@/pages/dashboard/OrganizationAttestation"));
+const AdminAttestations = lazy(() => import("@/pages/dashboard/AdminAttestations"));
 
 export const dashboardRoutes = (
   <>
@@ -191,6 +193,8 @@ export const dashboardRoutes = (
     <Route path="/dashboard/transporter-ai-tools" element={<TransporterAITools />} />
     <Route path="/dashboard/notifications" element={<Notifications />} />
     <Route path="/dashboard/organization-profile" element={<OrganizationProfile />} />
+    <Route path="/dashboard/organization-attestation" element={<OrganizationAttestation />} />
+    <Route path="/dashboard/admin-attestations" element={<AdminAttestations />} />
     <Route path="/dashboard/organization-documents" element={<OrganizationDocuments />} />
     <Route path="/dashboard/system-overview" element={<AdminSystemOverview />} />
     <Route path="/dashboard/news-manager" element={<NewsManager />} />

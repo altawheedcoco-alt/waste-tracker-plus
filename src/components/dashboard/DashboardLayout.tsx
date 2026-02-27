@@ -347,6 +347,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     // ═══════════════ المنظمة والهيكل ═══════════════
     { icon: Building2, label: t('sidebar.orgGroup'), path: '#', key: 'org-group', badge: sectionBadges['org-group'], children: [
       { icon: Building2, label: t('sidebar.orgProfile'), path: '/dashboard/organization-profile', key: 'org-profile' },
+      { icon: FileText, label: language === 'ar' ? 'الإفادة الرقمية' : 'Digital Attestation', path: '/dashboard/organization-attestation', key: 'org-attestation' },
       { icon: Network, label: language === 'ar' ? 'الهيكل التنظيمي' : 'Org Structure', path: '/dashboard/org-structure', key: 'org-structure' },
       { icon: Users, label: language === 'ar' ? 'إدارة الموظفين' : 'Employees', path: '/dashboard/employees', key: 'employees' },
       { icon: Users, label: t('sidebar.teamData'), path: '/dashboard/team-credentials', key: 'other-team' },
@@ -474,6 +475,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: BarChart3, label: language === 'ar' ? 'تحليلات متقدمة' : 'Advanced Analytics', path: '/dashboard/advanced-analytics', key: 'advanced-analytics' },
             { icon: Lock, label: language === 'ar' ? 'امتثال GDPR' : 'GDPR Compliance', path: '/dashboard/gdpr-compliance', key: 'gdpr-compliance' },
             { icon: BookOpen, label: language === 'ar' ? 'بروشور المنصة' : 'Platform Brochure', path: '/dashboard/platform-brochure', key: 'platform-brochure' },
+            { icon: FileText, label: language === 'ar' ? 'إدارة الإفادات' : 'Attestation Management', path: '/dashboard/admin-attestations', key: 'admin-attestations' },
           ]
         } as SidebarMenuItem]
       : []),
