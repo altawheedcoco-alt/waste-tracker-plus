@@ -19,7 +19,7 @@ const DisposalRecentOperations = () => {
       if (!organization?.id) return [];
       const { data, error } = await supabase
         .from('disposal_operations')
-        .select('id, operation_number, waste_type, waste_description, quantity, unit, status, disposal_method, created_at, completed_at')
+        .select('id, operation_number, waste_type, waste_description, quantity, unit, status, disposal_method, created_at, processing_completed_at')
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(10);
