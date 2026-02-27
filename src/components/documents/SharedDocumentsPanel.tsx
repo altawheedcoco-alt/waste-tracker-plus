@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Inbox,
   Send,
@@ -26,10 +34,29 @@ import {
   CheckCircle2,
   PenTool,
   Shield,
+  Search,
+  Filter,
+  ArrowLeftRight,
+  ArrowDown,
+  ArrowUp,
 } from 'lucide-react';
 import ShareDocumentDialog from './ShareDocumentDialog';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import { type BiometricSignatureData } from '@/components/signature/BiometricSignaturePad';
+
+const DOCUMENT_CATEGORIES: Record<string, string> = {
+  file: 'ملف عام',
+  receipt: 'شهادة استلام',
+  certificate: 'شهادة تدوير',
+  invoice: 'فاتورة',
+  shipment: 'شحنة',
+  contract: 'عقد',
+  report: 'تقرير',
+  weight_ticket: 'تذكرة وزن',
+  license: 'ترخيص',
+  correspondence: 'مراسلة',
+  other: 'أخرى',
+};
 
 const SharedDocumentsPanel = () => {
   const { profile, organization } = useAuth();
@@ -37,6 +64,8 @@ const SharedDocumentsPanel = () => {
   const [sentDocs, setSentDocs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
   useEffect(() => {
     if (profile?.organization_id) {
@@ -53,14 +82,14 @@ const SharedDocumentsPanel = () => {
         .select('*')
         .eq('recipient_organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(200);
 
       const { data: sent } = await supabase
         .from('shared_documents')
         .select('*')
         .eq('sender_organization_id', profile.organization_id)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(200);
 
       const allOrgIds = new Set<string>();
       recv?.forEach(d => allOrgIds.add(d.sender_organization_id));
@@ -75,14 +104,45 @@ const SharedDocumentsPanel = () => {
         orgs?.forEach(o => { orgMap[o.id] = o.name; });
       }
 
-      setReceived((recv || []).map(d => ({ ...d, _orgName: orgMap[d.sender_organization_id] || 'جهة غير معروفة' })));
-      setSentDocs((sent || []).map(d => ({ ...d, _orgName: orgMap[d.recipient_organization_id] || 'جهة غير معروفة' })));
+      setReceived((recv || []).map(d => ({ ...d, _orgName: orgMap[d.sender_organization_id] || 'جهة غير معروفة', _direction: 'received' as const })));
+      setSentDocs((sent || []).map(d => ({ ...d, _orgName: orgMap[d.recipient_organization_id] || 'جهة غير معروفة', _direction: 'sent' as const })));
     } catch (e) {
       console.error('Error fetching shared docs:', e);
     } finally {
       setLoading(false);
     }
   };
+
+  // Combined list for "all" tab
+  const allDocs = useMemo(() => {
+    const combined = [
+      ...received.map(d => ({ ...d, _isSent: false })),
+      ...sentDocs.map(d => ({ ...d, _isSent: true })),
+    ];
+    return combined.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [received, sentDocs]);
+
+  // Apply filters
+  const filterDocs = (docs: any[]) => {
+    let filtered = docs;
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(d => d.document_type === categoryFilter);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(d =>
+        d.document_title?.toLowerCase().includes(q) ||
+        d._orgName?.toLowerCase().includes(q) ||
+        d.message?.toLowerCase().includes(q) ||
+        d.file_name?.toLowerCase().includes(q)
+      );
+    }
+    return filtered;
+  };
+
+  const filteredReceived = useMemo(() => filterDocs(received), [received, categoryFilter, searchQuery]);
+  const filteredSent = useMemo(() => filterDocs(sentDocs), [sentDocs, categoryFilter, searchQuery]);
+  const filteredAll = useMemo(() => filterDocs(allDocs), [allDocs, categoryFilter, searchQuery]);
 
   const markAsViewed = async (docId: string) => {
     await supabase
@@ -95,8 +155,6 @@ const SharedDocumentsPanel = () => {
   const handleDocumentSigned = async (docId: string, signatureData: BiometricSignatureData) => {
     try {
       const stampUrl = (organization as any)?.stamp_url || null;
-
-      // Generate integrity hash
       const hashInput = `${docId}-${profile?.user_id}-${new Date().toISOString()}-signed`;
       let hash = 0;
       for (let i = 0; i < hashInput.length; i++) {
@@ -120,7 +178,6 @@ const SharedDocumentsPanel = () => {
         })
         .eq('id', docId);
 
-      // Notify sender
       const doc = received.find(d => d.id === docId);
       if (doc) {
         const { data: senderUsers } = await supabase
@@ -149,13 +206,7 @@ const SharedDocumentsPanel = () => {
     }
   };
 
-  const getDocTypeLabel = (type: string) => {
-    const map: Record<string, string> = {
-      file: 'ملف', receipt: 'شهادة استلام', certificate: 'شهادة تدوير',
-      invoice: 'فاتورة', shipment: 'شحنة', contract: 'عقد', report: 'تقرير',
-    };
-    return map[type] || type;
-  };
+  const getDocTypeLabel = (type: string) => DOCUMENT_CATEGORIES[type] || type;
 
   const getStatusBadge = (doc: any) => {
     if (doc.signed_at) {
@@ -178,7 +229,7 @@ const SharedDocumentsPanel = () => {
     }
   };
 
-  const DocumentRow = ({ doc, isSent }: { doc: any; isSent: boolean }) => (
+  const DocumentRow = ({ doc, isSent, showDirection = false }: { doc: any; isSent: boolean; showDirection?: boolean }) => (
     <div className="flex flex-col gap-2 p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
       <div className="flex items-start gap-3">
         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
@@ -189,6 +240,12 @@ const SharedDocumentsPanel = () => {
             <p className="font-medium text-sm truncate">{doc.document_title}</p>
             {getStatusBadge(doc)}
             <Badge variant="secondary" className="text-[10px]">{getDocTypeLabel(doc.document_type)}</Badge>
+            {showDirection && (
+              <Badge variant="outline" className="text-[10px] gap-0.5">
+                {isSent ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}
+                {isSent ? 'صادر' : 'وارد'}
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
@@ -307,6 +364,27 @@ const SharedDocumentsPanel = () => {
     </div>
   );
 
+  const renderDocList = (docs: any[], isSent: boolean, showDirection = false) => (
+    <ScrollArea className="max-h-[500px]">
+      {loading ? (
+        <div className="flex items-center justify-center p-8">
+          <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : docs.length === 0 ? (
+        <div className="text-center p-8 text-muted-foreground">
+          <FileText className="w-10 h-10 mx-auto mb-2 opacity-30" />
+          <p className="text-sm">لا توجد مستندات</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {docs.map(doc => (
+            <DocumentRow key={doc.id} doc={doc} isSent={showDirection ? doc._isSent : isSent} showDirection={showDirection} />
+          ))}
+        </div>
+      )}
+    </ScrollArea>
+  );
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -320,60 +398,60 @@ const SharedDocumentsPanel = () => {
             مشاركة مستند
           </Button>
         </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-2 mt-3">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="بحث بالعنوان أو الجهة..."
+              className="pr-9 h-9 text-sm"
+              dir="rtl"
+            />
+          </div>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-[160px] h-9 text-sm">
+              <Filter className="w-3.5 h-3.5 ml-1 text-muted-foreground" />
+              <SelectValue placeholder="تصنيف الملف" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل التصنيفات</SelectItem>
+              {Object.entries(DOCUMENT_CATEGORIES).map(([key, label]) => (
+                <SelectItem key={key} value={key}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="received" dir="rtl">
+        <Tabs defaultValue="all" dir="rtl">
           <TabsList className="w-full">
+            <TabsTrigger value="all" className="flex-1 gap-1">
+              <ArrowLeftRight className="w-4 h-4" />
+              الكل ({filteredAll.length})
+            </TabsTrigger>
             <TabsTrigger value="received" className="flex-1 gap-1">
               <Inbox className="w-4 h-4" />
-              الوارد ({received.length})
+              الوارد ({filteredReceived.length})
             </TabsTrigger>
             <TabsTrigger value="sent" className="flex-1 gap-1">
               <Send className="w-4 h-4" />
-              المُرسل ({sentDocs.length})
+              المُرسل ({filteredSent.length})
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="all">
+            {renderDocList(filteredAll, false, true)}
+          </TabsContent>
+
           <TabsContent value="received">
-            <ScrollArea className="max-h-[500px]">
-              {loading ? (
-                <div className="flex items-center justify-center p-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : received.length === 0 ? (
-                <div className="text-center p-8 text-muted-foreground">
-                  <Inbox className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">لا توجد مستندات واردة</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {received.map(doc => (
-                    <DocumentRow key={doc.id} doc={doc} isSent={false} />
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
+            {renderDocList(filteredReceived, false)}
           </TabsContent>
 
           <TabsContent value="sent">
-            <ScrollArea className="max-h-[500px]">
-              {loading ? (
-                <div className="flex items-center justify-center p-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : sentDocs.length === 0 ? (
-                <div className="text-center p-8 text-muted-foreground">
-                  <Send className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">لم ترسل أي مستندات بعد</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {sentDocs.map(doc => (
-                    <DocumentRow key={doc.id} doc={doc} isSent={true} />
-                  ))}
-                </div>
-              )}
-            </ScrollArea>
+            {renderDocList(filteredSent, true)}
           </TabsContent>
         </Tabs>
       </CardContent>
