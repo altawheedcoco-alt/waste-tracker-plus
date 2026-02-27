@@ -37,6 +37,7 @@ import {
   ExternalLink,
   Users,
   Globe,
+  AlertTriangle,
 } from 'lucide-react';
 
 const DOCUMENT_CATEGORIES: Record<string, string> = {
@@ -93,6 +94,11 @@ const ShareDocumentDialog = ({
   const [shareMode, setShareMode] = useState<'partner' | 'external'>('partner');
   const [externalName, setExternalName] = useState('');
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [autoFileUrl, setAutoFileUrl] = useState<string | null>(null);
+  const [autoFileName, setAutoFileName] = useState<string | null>(null);
+  const [autoFileSize, setAutoFileSize] = useState<number | null>(null);
+  const [autoFileType, setAutoFileType] = useState<string | null>(null);
+  const [fetchingFile, setFetchingFile] = useState(false);
 
   useEffect(() => {
     if (open && profile?.organization_id) {
@@ -103,8 +109,64 @@ const ShareDocumentDialog = ({
       setGeneratedLink(null);
       setShareMode('partner');
       setExternalName('');
+      setAutoFileUrl(null);
+      setAutoFileName(null);
+      setFile(null);
+      // Auto-fetch file from entity_documents if referenceId exists
+      if (referenceId) {
+        fetchReferenceFile();
+      }
     }
   }, [open, profile?.organization_id]);
+
+  const fetchReferenceFile = async () => {
+    if (!referenceId || !profile?.organization_id) return;
+    setFetchingFile(true);
+    try {
+      // Try to find file in entity_documents by reference
+      const refColumn = referenceType === 'invoice' ? 'invoice_id'
+        : referenceType === 'shipment' ? 'shipment_id'
+        : referenceType === 'contract' ? 'contract_id'
+        : referenceType === 'deposit' ? 'deposit_id'
+        : null;
+
+      let fileData: any = null;
+
+      if (refColumn) {
+        const { data } = await supabase
+          .from('entity_documents')
+          .select('file_url, file_name, file_type, file_size')
+          .eq(refColumn, referenceId)
+          .eq('organization_id', profile.organization_id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0) fileData = data[0];
+      }
+
+      // Fallback: search by title match
+      if (!fileData) {
+        const { data } = await supabase
+          .from('entity_documents')
+          .select('file_url, file_name, file_type, file_size')
+          .eq('organization_id', profile.organization_id)
+          .ilike('title', `%${initialTitle || ''}%`)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (data && data.length > 0) fileData = data[0];
+      }
+
+      if (fileData?.file_url) {
+        setAutoFileUrl(fileData.file_url);
+        setAutoFileName(fileData.file_name || 'document');
+        setAutoFileSize(fileData.file_size || null);
+        setAutoFileType(fileData.file_type || 'application/pdf');
+      }
+    } catch (e) {
+      console.error('Error fetching reference file:', e);
+    } finally {
+      setFetchingFile(false);
+    }
+  };
 
   const fetchPartners = async () => {
     if (!profile?.organization_id) return;
@@ -176,14 +238,21 @@ const ShareDocumentDialog = ({
       }
     }
 
+    // Enforce file attachment
+    const hasFile = file || autoFileUrl;
+    if (!hasFile) {
+      toast.error('يجب إرفاق ملف أو مستند قبل المشاركة');
+      return;
+    }
+
     setSending(true);
     try {
-      let fileUrl: string | null = null;
-      let fileName: string | null = null;
-      let fileSize: number | null = null;
-      let fileType: string | null = null;
+      let fileUrl: string | null = autoFileUrl;
+      let fileName: string | null = autoFileName;
+      let fileSize: number | null = autoFileSize;
+      let fileType: string | null = autoFileType;
 
-      // Upload file if attached
+      // Upload manual file if attached (overrides auto file)
       if (file) {
         setUploading(true);
         const path = `${profile.organization_id}/${Date.now()}-${file.name}`;
@@ -516,33 +585,62 @@ const ShareDocumentDialog = ({
             </div>
           )}
 
-          {/* File attachment (only if no reference) */}
-          {!referenceId && (
-            <div className="space-y-2">
-              <Label>إرفاق ملف (اختياري)</Label>
-              <div className="flex items-center gap-2">
-                <label className="flex-1">
-                  <div className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
-                    <Upload className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {file ? file.name : 'اختر ملف...'}
-                    </span>
-                  </div>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                    onChange={e => setFile(e.target.files?.[0] || null)}
-                  />
-                </label>
-                {file && (
-                  <Button variant="ghost" size="sm" onClick={() => setFile(null)}>
-                    ✕
-                  </Button>
-                )}
+          {/* File attachment - mandatory */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1">
+              <Paperclip className="w-3.5 h-3.5" />
+              الملف المرفق *
+            </Label>
+
+            {/* Auto-fetched file indicator */}
+            {fetchingFile && (
+              <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">جاري البحث عن الملف المرتبط...</span>
               </div>
+            )}
+
+            {autoFileUrl && !file && (
+              <div className="flex items-center gap-2 p-3 rounded-lg border border-primary/30 bg-primary/5">
+                <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{autoFileName}</p>
+                  <p className="text-xs text-muted-foreground">تم ربط الملف تلقائياً من سجل المستندات</p>
+                </div>
+              </div>
+            )}
+
+            {/* Manual file upload - always available */}
+            <div className="flex items-center gap-2">
+              <label className="flex-1">
+                <div className="flex items-center gap-2 p-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                  <Upload className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    {file ? file.name : autoFileUrl ? 'استبدال الملف التلقائي...' : 'اختر ملف... (إجباري)'}
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+                  onChange={e => setFile(e.target.files?.[0] || null)}
+                />
+              </label>
+              {file && (
+                <Button variant="ghost" size="sm" onClick={() => setFile(null)}>
+                  ✕
+                </Button>
+              )}
             </div>
-          )}
+
+            {/* Warning if no file */}
+            {!autoFileUrl && !file && !fetchingFile && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                يجب إرفاق ملف لإتمام المشاركة
+              </p>
+            )}
+          </div>
 
           {/* Require signature toggle (partner mode only) */}
           {shareMode === 'partner' && (
@@ -581,6 +679,8 @@ const ShareDocumentDialog = ({
             disabled={
               (shareMode === 'partner' && !selectedPartner) ||
               !title.trim() ||
+              (!file && !autoFileUrl) ||
+              fetchingFile ||
               sending
             }
           >
