@@ -88,6 +88,17 @@ const openInGoogleMaps = (address: string, coords?: { lat: number; lng: number }
   window.open(url, '_blank');
 };
 
+// Helper function to open location in HERE WeGo
+const openInHereWeGo = (address: string, coords?: { lat: number; lng: number } | null) => {
+  let url: string;
+  if (coords) {
+    url = `https://wego.here.com/directions/drive/mylocation/${coords.lat},${coords.lng}`;
+  } else {
+    url = `https://wego.here.com/directions/drive/mylocation/${encodeURIComponent(address)}`;
+  }
+  window.open(url, '_blank');
+};
+
 // Search functions for external apps
 const searchInGoogleMaps = (query: string) => {
   const url = `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
@@ -96,6 +107,11 @@ const searchInGoogleMaps = (query: string) => {
 
 const searchInWaze = (query: string) => {
   const url = `https://waze.com/ul?q=${encodeURIComponent(query)}`;
+  window.open(url, '_blank');
+};
+
+const searchInHereWeGo = (query: string) => {
+  const url = `https://wego.here.com/search/${encodeURIComponent(query)}`;
   window.open(url, '_blank');
 };
 
@@ -456,6 +472,12 @@ const EnhancedLocationPicker = ({
                   </svg>
                   Waze
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openInHereWeGo(value, coordinates || mapCoordinates)}>
+                  <svg className="w-4 h-4 ml-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="#48DAD0"/>
+                  </svg>
+                  HERE WeGo
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -791,6 +813,22 @@ const EnhancedLocationPicker = ({
                     <path d="M12 2C6.5 2 2 6.5 2 12c0 5.5 4.5 10 10 10s10-4.5 10-10c0-5.5-4.5-10-10-10zm-2 15c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm4 0c-.6 0-1-.4-1-1s.4-1 1-1 1 .4 1 1-.4 1-1 1zm3.5-5c-.3 0-.5-.2-.5-.5v-1c0-2.8-2.2-5-5-5s-5 2.2-5 5v1c0 .3-.2.5-.5.5s-.5-.2-.5-.5v-1c0-3.3 2.7-6 6-6s6 2.7 6 6v1c0 .3-.2.5-.5.5z" fill="#33CCFF"/>
                   </svg>
                   Waze
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="justify-center gap-2 h-12"
+                  onClick={() => {
+                    const query = prompt('أدخل اسم المكان أو العنوان للبحث في HERE WeGo:');
+                    if (query) {
+                      searchInHereWeGo(query);
+                      toast.info('سيتم فتح HERE WeGo للبحث عن الموقع');
+                    }
+                  }}
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="#48DAD0"/>
+                  </svg>
+                  HERE WeGo
                 </Button>
               </div>
 
