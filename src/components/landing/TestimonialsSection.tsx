@@ -1,7 +1,11 @@
-import { Star, Quote, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Star, Quote, ArrowLeft, ArrowRight, MessageSquarePlus } from 'lucide-react';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import TestimonialForm from './TestimonialForm';
 
-const testimonials = [
+// Static testimonials as fallback
+const staticTestimonials = [
   {
     name: 'م. أحمد سعيد',
     role: 'مدير شركة تدوير — القاهرة',
@@ -40,8 +44,46 @@ const testimonials = [
   },
 ];
 
+const gradientColors = [
+  'from-emerald-500 to-teal-500',
+  'from-amber-500 to-orange-500',
+  'from-blue-500 to-cyan-500',
+  'from-purple-500 to-violet-500',
+  'from-rose-500 to-pink-500',
+  'from-indigo-500 to-blue-500',
+];
+
 const TestimonialsSection = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Fetch approved testimonials from DB
+  const { data: dbTestimonials } = useQuery({
+    queryKey: ['approved-testimonials'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Convert DB testimonials to display format
+  const dynamicTestimonials = (dbTestimonials || []).map((t, i) => ({
+    name: t.author_name,
+    role: 'عميل منصة iRecycle',
+    text: t.comment,
+    rating: 5,
+    avatar: t.author_name?.charAt(0) || '?',
+    color: gradientColors[i % gradientColors.length],
+    metric: 'تجربة حقيقية',
+  }));
+
+  // Combine: approved DB testimonials first, then static
+  const testimonials = [...dynamicTestimonials, ...staticTestimonials];
 
   return (
     <section className="py-16 sm:py-24 px-4 relative overflow-hidden">
@@ -64,15 +106,14 @@ const TestimonialsSection = () => {
 
         {/* Desktop: Grid layout */}
         <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {testimonials.map((t, i) => (
+          {testimonials.slice(0, 8).map((t, i) => (
             <div
-              key={t.name}
+              key={`${t.name}-${i}`}
               className="relative bg-card border border-border/50 rounded-2xl p-6 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group animate-fade-up flex flex-col"
               style={{ animationDelay: `${i * 0.1}s` }}
             >
               <Quote className="absolute top-4 left-4 w-8 h-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
               
-              {/* Metric badge */}
               <div className="inline-flex self-start items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold mb-3">
                 ✓ {t.metric}
               </div>
@@ -106,27 +147,27 @@ const TestimonialsSection = () => {
             <Quote className="absolute top-4 left-4 w-8 h-8 text-primary/10" />
             
             <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold mb-3">
-              ✓ {testimonials[activeIndex].metric}
+              ✓ {testimonials[activeIndex]?.metric}
             </div>
 
             <div className="flex gap-0.5 mb-3">
-              {Array.from({ length: testimonials[activeIndex].rating }).map((_, s) => (
+              {Array.from({ length: testimonials[activeIndex]?.rating || 5 }).map((_, s) => (
                 <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               ))}
             </div>
             
             <p className="text-sm text-foreground/80 leading-relaxed mb-6">
-              "{testimonials[activeIndex].text}"
+              "{testimonials[activeIndex]?.text}"
             </p>
             
             <div className="flex items-center justify-between pt-4 border-t border-border/50">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${testimonials[activeIndex].color} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
-                  {testimonials[activeIndex].avatar}
+                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${testimonials[activeIndex]?.color} flex items-center justify-center text-white font-bold text-sm shadow-md`}>
+                  {testimonials[activeIndex]?.avatar}
                 </div>
                 <div>
-                  <p className="font-bold text-sm text-foreground">{testimonials[activeIndex].name}</p>
-                  <p className="text-[11px] text-muted-foreground">{testimonials[activeIndex].role}</p>
+                  <p className="font-bold text-sm text-foreground">{testimonials[activeIndex]?.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{testimonials[activeIndex]?.role}</p>
                 </div>
               </div>
               
@@ -143,10 +184,15 @@ const TestimonialsSection = () => {
           
           {/* Dots */}
           <div className="flex justify-center gap-1.5 mt-4">
-            {testimonials.map((_, i) => (
+            {testimonials.slice(0, 8).map((_, i) => (
               <button key={i} onClick={() => setActiveIndex(i)} className={`w-2 h-2 rounded-full transition-all ${i === activeIndex ? 'bg-primary w-6' : 'bg-muted-foreground/30'}`} />
             ))}
           </div>
+        </div>
+
+        {/* Testimonial Form */}
+        <div className="mt-16 max-w-lg mx-auto">
+          <TestimonialForm />
         </div>
       </div>
     </section>
