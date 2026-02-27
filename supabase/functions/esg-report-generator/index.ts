@@ -97,12 +97,7 @@ Generate REALISTIC data for a waste management company. Arabic content where spe
         { role: "system", content: "You are an ESG reporting analyst. Return ONLY valid JSON." },
         { role: "user", content: prompt }
       ],
-        messages: [
-          { role: "system", content: "You are an ESG reporting analyst. Return ONLY valid JSON." },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.3,
-      }),
+      temperature: 0.3,
     });
 
     if (!response.ok) {
