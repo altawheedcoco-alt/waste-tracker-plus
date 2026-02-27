@@ -2,7 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react';
 import { useDriverOffers } from '@/hooks/useDriverOffers';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,9 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Package, Truck, Mail, Phone, Settings, CheckCircle2,
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
-  Trophy, BarChart3, Wallet, Camera, FileText,
-  ClipboardCheck, Activity, PenTool, DollarSign,
-  Radiation, QrCode, GraduationCap, Route,
+  Wallet, Camera, FileText, ClipboardCheck, PenTool,
+  Radiation, QrCode, GraduationCap, Route, Wrench, User, DollarSign,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -95,21 +94,13 @@ interface Shipment {
   transporter: { name: string } | null;
 }
 
+// 5 focused tabs matching driver workflow
 const tabItems = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
-  { value: 'checklist', label: 'الفحص', icon: ClipboardCheck },
   { value: 'shipments', label: 'الشحنات', icon: Package },
-  { value: 'classify', label: 'التصنيف', icon: Radiation },
-  { value: 'manifest', label: 'المانيفست', icon: QrCode },
-  { value: 'academy', label: 'الأكاديمية', icon: GraduationCap },
-  { value: 'routes', label: 'المسارات', icon: Route },
-  { value: 'wallet', label: 'المحفظة', icon: Wallet },
-  { value: 'earnings', label: 'الأرباح', icon: DollarSign },
-  { value: 'safety', label: 'السلامة', icon: Shield },
-  { value: 'camera', label: 'الكاميرا', icon: Camera },
-  { value: 'signature', label: 'التوقيع', icon: PenTool },
-  { value: 'report', label: 'التقرير', icon: FileText },
-  { value: 'profile', label: 'الملف', icon: BarChart3 },
+  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'account', label: 'حسابي', icon: User },
 ];
 
 const DriverDashboard = () => {
@@ -125,6 +116,8 @@ const DriverDashboard = () => {
   const [selectedShipmentForMap, setSelectedShipmentForMap] = useState<Shipment | null>(null);
   const [showNavigationView, setShowNavigationView] = useState(false);
   const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<Shipment | null>(null);
+  // Field tools sub-tab
+  const [activeFieldTool, setActiveFieldTool] = useState<string>('checklist');
 
   const { pendingOffer, acceptOffer, rejectOffer, counterOffer } = useDriverOffers();
 
@@ -150,7 +143,6 @@ const DriverDashboard = () => {
   };
 
   const handleNavigateToShipment = (shipment: Shipment) => {
-    // Open Google Maps with the delivery address
     const address = shipment.status === 'approved' ? shipment.pickup_address : shipment.delivery_address;
     if (address) {
       const encoded = encodeURIComponent(address);
@@ -223,6 +215,15 @@ const DriverDashboard = () => {
       </div>
     );
   }
+
+  const fieldTools = [
+    { id: 'checklist', label: 'فحص ما قبل الرحلة', icon: ClipboardCheck },
+    { id: 'camera', label: 'توثيق بالكاميرا', icon: Camera },
+    { id: 'signature', label: 'التوقيع الإلكتروني', icon: PenTool },
+    { id: 'manifest', label: 'المانيفست الرقمي', icon: QrCode },
+    { id: 'classify', label: 'تصنيف المخلفات', icon: Radiation },
+    { id: 'routes', label: 'تحسين المسارات', icon: Route },
+  ];
 
   return (
     <div className="space-y-4">
@@ -303,7 +304,7 @@ const DriverDashboard = () => {
         driverName={profile?.full_name || 'السائق'} 
       />
 
-      {/* Tabs */}
+      {/* 5 Core Tabs */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -311,12 +312,12 @@ const DriverDashboard = () => {
       >
         <Tabs defaultValue="tasks" className="w-full" dir="rtl">
           <div className="relative overflow-x-auto rounded-xl border border-border/50 bg-card p-1 scrollbar-hide">
-            <TabsList className="w-max min-w-full justify-start bg-transparent gap-1 h-auto p-0 flex-nowrap">
+            <TabsList className="w-full justify-center bg-transparent gap-1 h-auto p-0">
               {tabItems.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="whitespace-nowrap text-xs gap-1.5 px-3 py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all"
+                  className="flex-1 whitespace-nowrap text-xs gap-1.5 px-3 py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all"
                 >
                   <tab.icon className="w-4 h-4" />
                   {tab.label}
@@ -325,7 +326,9 @@ const DriverDashboard = () => {
             </TabsList>
           </div>
 
-          {/* Tasks Tab */}
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB 1: المهام - Daily Tasks & Assignment */}
+          {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="tasks" className="mt-4">
             <DriverDailyTasks
               shipments={shipments}
@@ -334,14 +337,9 @@ const DriverDashboard = () => {
             />
           </TabsContent>
 
-          {/* Pre-Trip Checklist Tab */}
-          <TabsContent value="checklist" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              {driverInfo && <DriverPreTripChecklist driverId={driverInfo.id} />}
-            </Suspense>
-          </TabsContent>
-
-          {/* Shipments Tab */}
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB 2: الشحنات - Active & Completed Shipments */}
+          {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="shipments" className="mt-4 space-y-4">
             <div className="flex items-center justify-between">
               <CreateShipmentButton variant="eco" onSuccess={fetchDriverData} />
@@ -432,90 +430,73 @@ const DriverDashboard = () => {
             </Tabs>
           </TabsContent>
 
-          {/* AI Waste Classifier Tab */}
-          <TabsContent value="classify" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              {driverInfo && <WasteClassifierCamera driverId={driverInfo.id} />}
-            </Suspense>
-          </TabsContent>
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB 3: أدوات الميدان - Field Operations Tools */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="field" className="mt-4 space-y-4">
+            {/* Field tools selector */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {fieldTools.map((tool) => (
+                <button
+                  key={tool.id}
+                  onClick={() => setActiveFieldTool(tool.id)}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all text-center ${
+                    activeFieldTool === tool.id
+                      ? 'border-primary bg-primary/10 text-primary shadow-sm'
+                      : 'border-border/50 bg-card hover:border-primary/30 text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <tool.icon className="w-5 h-5" />
+                  <span className="text-[10px] font-medium leading-tight">{tool.label}</span>
+                </button>
+              ))}
+            </div>
 
-          {/* Digital Manifest Tab */}
-          <TabsContent value="manifest" className="mt-4">
+            {/* Active field tool content */}
             <Suspense fallback={<TabFallback />}>
-              {driverInfo && <DigitalManifest driverId={driverInfo.id} shipment={activeShipments[0] as any} />}
-            </Suspense>
-          </TabsContent>
-
-          {/* Driver Academy Tab */}
-          <TabsContent value="academy" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              {driverInfo && <DriverAcademy driverId={driverInfo.id} />}
-            </Suspense>
-          </TabsContent>
-
-          {/* Smart Route Optimizer Tab */}
-          <TabsContent value="routes" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              <SmartRouteOptimizer shipments={shipments as any} />
-            </Suspense>
-          </TabsContent>
-
-          {/* Wallet Tab */}
-          <TabsContent value="wallet" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              <DriverWalletPanel />
-              <div className="mt-4">
-                <DriverRewardsPanel />
-              </div>
-              <div className="mt-4">
-                <DriverLeaderboard />
-              </div>
-            </Suspense>
-          </TabsContent>
-
-          {/* Earnings Tab */}
-          <TabsContent value="earnings" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              <DriverEarningsDashboard />
-            </Suspense>
-          </TabsContent>
-
-          {/* Safety Tab (Fatigue Monitor) */}
-          <TabsContent value="safety" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              {driverInfo && <DriverFatigueMonitor driverId={driverInfo.id} />}
-            </Suspense>
-          </TabsContent>
-
-          {/* Smart Camera Tab */}
-          <TabsContent value="camera" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              {driverInfo && (
+              {activeFieldTool === 'checklist' && driverInfo && (
+                <DriverPreTripChecklist driverId={driverInfo.id} />
+              )}
+              {activeFieldTool === 'camera' && driverInfo && (
                 <div className="space-y-4">
                   <DriverSmartCamera driverId={driverInfo.id} type="load" />
                   <DriverSmartCamera driverId={driverInfo.id} type="scale" />
                   <DriverSmartCamera driverId={driverInfo.id} type="delivery" />
                 </div>
               )}
+              {activeFieldTool === 'signature' && driverInfo && (
+                <DriverDeliverySignature driverId={driverInfo.id} />
+              )}
+              {activeFieldTool === 'manifest' && driverInfo && (
+                <DigitalManifest driverId={driverInfo.id} shipment={activeShipments[0] as any} />
+              )}
+              {activeFieldTool === 'classify' && driverInfo && (
+                <WasteClassifierCamera driverId={driverInfo.id} />
+              )}
+              {activeFieldTool === 'routes' && (
+                <SmartRouteOptimizer shipments={shipments as any} />
+              )}
             </Suspense>
           </TabsContent>
 
-          {/* Signature Tab */}
-          <TabsContent value="signature" className="mt-4">
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB 4: المالية - Wallet, Earnings & Rewards */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="finance" className="mt-4">
             <Suspense fallback={<TabFallback />}>
-              {driverInfo && <DriverDeliverySignature driverId={driverInfo.id} />}
+              <div className="space-y-4">
+                <DriverEarningsDashboard />
+                <DriverWalletPanel />
+                <DriverRewardsPanel />
+                <DriverLeaderboard />
+              </div>
             </Suspense>
           </TabsContent>
 
-          {/* Auto Report Tab */}
-          <TabsContent value="report" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              <DriverAutoReport />
-            </Suspense>
-          </TabsContent>
-
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="mt-4 space-y-4">
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB 5: حسابي - Profile, Training & Safety */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="account" className="mt-4 space-y-4">
             {/* Profile Card */}
             <Card>
               <CardContent className="p-6">
@@ -564,6 +545,52 @@ const DriverDashboard = () => {
                 onDestinationAdded={fetchDriverData}
               />
             )}
+
+            {/* Academy & Safety Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="cursor-pointer hover:border-primary/30 transition-colors">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <GraduationCap className="w-4 h-4 text-primary" />
+                    أكاديمية السائق
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Suspense fallback={<Skeleton className="h-32 w-full rounded-lg" />}>
+                    {driverInfo && <DriverAcademy driverId={driverInfo.id} />}
+                  </Suspense>
+                </CardContent>
+              </Card>
+
+              <Card className="cursor-pointer hover:border-primary/30 transition-colors">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Shield className="w-4 h-4 text-amber-500" />
+                    مراقبة الإرهاق والسلامة
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Suspense fallback={<Skeleton className="h-32 w-full rounded-lg" />}>
+                    {driverInfo && <DriverFatigueMonitor driverId={driverInfo.id} />}
+                  </Suspense>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Daily Auto Report */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <FileText className="w-4 h-4 text-primary" />
+                  التقرير اليومي التلقائي
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <Suspense fallback={<Skeleton className="h-32 w-full rounded-lg" />}>
+                  <DriverAutoReport />
+                </Suspense>
+              </CardContent>
+            </Card>
 
             <QuickActionsGrid
               actions={quickActions}
