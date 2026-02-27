@@ -688,6 +688,14 @@ export const useCreateShipment = () => {
         })
       );
     }
+    let autoTransporterId: string | null = null;
+    if (isManualTransporter && manualTransporterName) {
+      autoCreatePromises.push(
+        autoCreateOrg(manualTransporterName, 'transporter').then(id => {
+          if (id) { autoTransporterId = id; }
+        })
+      );
+    }
 
     if (autoCreatePromises.length > 0) {
       await Promise.all(autoCreatePromises);
@@ -700,7 +708,7 @@ export const useCreateShipment = () => {
       transporterId = driverOrganization?.id || null;
       driverId = driverInfo?.id || null;
     } else if (isAdmin) {
-      transporterId = isManualTransporter ? null : (formData.transporter_id || null);
+      transporterId = autoTransporterId || (isManualTransporter ? null : (formData.transporter_id || null));
       driverId = driverInputType === 'select' ? (formData.driver_id || null) : null;
     } else {
       transporterId = organization?.id || null;
@@ -743,7 +751,7 @@ export const useCreateShipment = () => {
         manual_vehicle_plate: driverInputType === 'manual' ? formData.manual_vehicle_plate : null,
         manual_generator_name: manualGeneratorName,
         manual_recycler_name: manualRecyclerName,
-        manual_transporter_name: manualTransporterName,
+        manual_transporter_name: autoTransporterId ? null : manualTransporterName,
         manual_disposal_name: manualDisposalName,
         packaging_method: formData.packaging_method || null,
         hazard_level: formData.hazard_level || null,

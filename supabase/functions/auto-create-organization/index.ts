@@ -55,7 +55,7 @@ serve(async (req) => {
       });
     }
 
-    const validTypes = ["generator", "recycler", "disposal"];
+    const validTypes = ["generator", "recycler", "disposal", "transporter", "consultant", "consulting_office", "iso_body"];
     if (!validTypes.includes(payload.organization_type)) {
       return new Response(JSON.stringify({ error: "نوع الجهة غير صالح" }), {
         status: 400,
