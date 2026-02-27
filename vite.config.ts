@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { fileURLToPath } from "url";
 import { componentTagger } from "lovable-tagger";
 
 
@@ -56,6 +57,7 @@ export default defineConfig(({ mode }) => ({
       react: path.resolve(__dirname, "./node_modules/react"),
       "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
       "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime"),
+      "lucide-react/icons": fileURLToPath(new URL("./node_modules/lucide-react/dist/esm/icons", import.meta.url)),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
