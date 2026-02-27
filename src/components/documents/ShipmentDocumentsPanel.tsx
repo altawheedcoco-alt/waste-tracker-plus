@@ -3,17 +3,13 @@ import { useShipmentDocuments, useDocumentTemplates, ShipmentDocSignature } from
 import { useAuth } from '@/contexts/AuthContext';
 import { useMentionableUsers } from '@/hooks/useMentionableUsers';
 import { useMentionNotifier } from '@/hooks/useMentionNotifier';
-import { MentionInput } from '@/components/ui/mention-input';
+import SignaturePadDialog from './SignaturePadDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import {
   FileText,
   Plus,
@@ -30,6 +26,8 @@ import {
   Truck,
   Recycle,
   UserCheck,
+  Eye,
+  Shield,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -54,32 +52,43 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
   const { users: mentionableUsers } = useMentionableUsers();
   const { notify: notifyMentions } = useMentionNotifier();
   const [showAttach, setShowAttach] = useState(false);
-  const [showSign, setShowSign] = useState<ShipmentDocSignature | null>(null);
-  const [signerName, setSignerName] = useState('');
-  const [signerNotes, setSignerNotes] = useState('');
-  const [signerTitle, setSignerTitle] = useState('');
-  const [signerNationalId, setSignerNationalId] = useState('');
+  const [showSign, setShowSign] = useState<{ sig: ShipmentDocSignature; doc: any } | null>(null);
+  const [showPreview, setShowPreview] = useState<any>(null);
 
   const activeTemplates = templates.filter(t => t.is_active);
   const attachedTemplateIds = documents.map(d => d.template_id);
   const availableTemplates = activeTemplates.filter(t => !attachedTemplateIds.includes(t.id));
 
-  const handleSign = () => {
-    if (!showSign || !signerName.trim()) return;
+  // Find template content for a document
+  const getTemplateContent = (templateId: string | null) => {
+    if (!templateId) return null;
+    return templates.find(t => t.id === templateId)?.content_template || null;
+  };
+
+  const handleSign = (data: {
+    signerName: string;
+    signerTitle: string;
+    signerNationalId: string;
+    signatureImageUrl: string | null;
+    signatureMethod: string;
+    notes: string;
+  }) => {
+    if (!showSign) return;
     signDocument.mutate(
       {
-        signatureId: showSign.id,
-        signerName: signerName,
-        signerTitle: signerTitle || showSign.signer_title,
-        signerNationalId: signerNationalId,
-        signatureMethod: 'click_approve',
+        signatureId: showSign.sig.id,
+        signerName: data.signerName,
+        signerTitle: data.signerTitle,
+        signerNationalId: data.signerNationalId,
+        signatureImageUrl: data.signatureImageUrl || undefined,
+        signatureMethod: data.signatureMethod,
+        notes: data.notes,
       },
       {
         onSuccess: () => {
-          // Send mention notifications if any
-          if (signerNotes.trim()) {
+          if (data.notes.trim()) {
             notifyMentions({
-              text: signerNotes,
+              text: data.notes,
               users: mentionableUsers,
               context: 'توقيع مستند شحنة',
               referenceId: shipmentId,
@@ -87,10 +96,6 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
             });
           }
           setShowSign(null);
-          setSignerName('');
-          setSignerTitle('');
-          setSignerNationalId('');
-          setSignerNotes('');
         },
       }
     );
@@ -175,14 +180,23 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
                 const progress = doc.total_signatures_required > 0
                   ? (doc.completed_signatures / doc.total_signatures_required) * 100
                   : 0;
+                const content = getTemplateContent(doc.template_id);
 
                 return (
                   <div key={doc.id} className="border rounded-lg p-3 space-y-3">
                     {/* Document Header */}
                     <div className="flex items-center justify-between">
-                      <Badge className={`${getStatusColor(doc.status)} text-[10px]`}>
-                        {getStatusLabel(doc.status)}
-                      </Badge>
+                      <div className="flex items-center gap-1.5">
+                        <Badge className={`${getStatusColor(doc.status)} text-[10px]`}>
+                          {getStatusLabel(doc.status)}
+                        </Badge>
+                        {doc.status === 'completed' && (
+                          <Badge variant="outline" className="text-[9px] gap-0.5">
+                            <Shield className="w-2.5 h-2.5" />
+                            مُعتمد
+                          </Badge>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">{doc.document_name}</span>
                         {doc.is_mandatory && (
@@ -196,6 +210,17 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
                         )}
                       </div>
                     </div>
+
+                    {/* Content preview */}
+                    {content && (
+                      <button
+                        className="w-full text-right bg-muted/30 rounded p-2 text-[11px] text-muted-foreground line-clamp-2 hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => setShowPreview(doc)}
+                      >
+                        <Eye className="w-3 h-3 inline-block ml-1" />
+                        {content.substring(0, 120)}...
+                      </button>
+                    )}
 
                     {/* Progress */}
                     <div className="flex items-center gap-2">
@@ -225,25 +250,19 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
                           >
                             <div className="flex items-center gap-2">
                               {isSigned ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 text-[10px] text-green-700 dark:text-green-400"
-                                  disabled
-                                >
-                                  <CheckCircle2 className="w-3 h-3 ml-1" />
-                                  تم التوقيع
-                                </Button>
+                                <div className="flex items-center gap-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
+                                  <span className="text-[10px] text-green-700 dark:text-green-400">تم التوقيع</span>
+                                  {sig.signature_image_url && (
+                                    <img src={sig.signature_image_url} alt="توقيع" className="h-6 max-w-[60px] object-contain border rounded" />
+                                  )}
+                                </div>
                               ) : canSign ? (
                                 <Button
                                   variant="eco"
                                   size="sm"
                                   className="h-6 text-[10px]"
-                                  onClick={() => {
-                                    setSignerName(profile?.full_name || '');
-                                    setSignerTitle(sig.signer_title);
-                                    setShowSign(sig);
-                                  }}
+                                  onClick={() => setShowSign({ sig, doc })}
                                 >
                                   <PenTool className="w-3 h-3 ml-1" />
                                   توقيع
@@ -268,6 +287,11 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
                                 {isSigned && (
                                   <p className="text-[10px] text-muted-foreground">
                                     {sig.signer_name} — {sig.signed_at && format(new Date(sig.signed_at), 'dd/MM hh:mm a', { locale: ar })}
+                                    {sig.integrity_hash && (
+                                      <span className="text-[8px] text-green-600 mr-1" title={`SHA-256: ${sig.integrity_hash}`}>
+                                        🔒
+                                      </span>
+                                    )}
                                   </p>
                                 )}
                               </div>
@@ -279,6 +303,13 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
                         );
                       })}
                     </div>
+
+                    {/* Completed timestamp */}
+                    {doc.status === 'completed' && doc.completed_at && (
+                      <div className="text-[10px] text-green-700 dark:text-green-400 text-center bg-green-50 dark:bg-green-950/20 rounded p-1.5">
+                        ✅ اكتمل في {format(new Date(doc.completed_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -313,6 +344,7 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
                       <div className="flex gap-1">
                         {template.is_mandatory && <Badge variant="destructive" className="text-[9px]">إلزامي</Badge>}
                         {template.is_sequential && <Badge variant="secondary" className="text-[9px]">تسلسلي</Badge>}
+                        {template.auto_attach && <Badge variant="outline" className="text-[9px]">تلقائي</Badge>}
                       </div>
                       <span className="font-semibold text-sm">{template.name}</span>
                     </div>
@@ -338,54 +370,34 @@ const ShipmentDocumentsPanel = ({ shipmentId, shipmentStatus }: ShipmentDocument
         </DialogContent>
       </Dialog>
 
-      {/* Sign Dialog */}
-      <Dialog open={!!showSign} onOpenChange={open => { if (!open) setShowSign(null); }}>
-        <DialogContent className="max-w-sm">
+      {/* Signature Pad Dialog */}
+      {showSign && (
+        <SignaturePadDialog
+          open={!!showSign}
+          onOpenChange={(open) => { if (!open) setShowSign(null); }}
+          signerTitle={showSign.sig.signer_title}
+          documentName={showSign.doc.document_name}
+          documentContent={getTemplateContent(showSign.doc.template_id)}
+          initialName={profile?.full_name || ''}
+          initialTitle={showSign.sig.signer_title}
+          mentionableUsers={mentionableUsers}
+          isPending={signDocument.isPending}
+          onSign={handleSign}
+        />
+      )}
+
+      {/* Document Content Preview Dialog */}
+      <Dialog open={!!showPreview} onOpenChange={(open) => { if (!open) setShowPreview(null); }}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <PenTool className="w-5 h-5 text-primary" />
-              توقيع المستند
+              <Eye className="w-5 h-5 text-primary" />
+              محتوى المستند: {showPreview?.document_name}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4" dir="rtl">
-            <div className="bg-muted/50 rounded-lg p-3 text-sm text-center">
-              <p className="font-medium">{showSign?.signer_title}</p>
-            </div>
-            <div className="space-y-2">
-              <Label>الاسم الكامل *</Label>
-              <Input value={signerName} onChange={e => setSignerName(e.target.value)} dir="rtl" />
-            </div>
-            <div className="space-y-2">
-              <Label>المسمى الوظيفي</Label>
-              <Input value={signerTitle} onChange={e => setSignerTitle(e.target.value)} dir="rtl" />
-            </div>
-            <div className="space-y-2">
-              <Label>الرقم القومي (اختياري)</Label>
-              <Input value={signerNationalId} onChange={e => setSignerNationalId(e.target.value)} dir="ltr" />
-            </div>
-            <div className="space-y-2">
-              <Label>ملاحظات (يمكنك الإشارة بـ @)</Label>
-              <MentionInput
-                value={signerNotes}
-                onChange={setSignerNotes}
-                users={mentionableUsers}
-                rows={2}
-                placeholder="أضف ملاحظة أو أشر لشخص بـ @..."
-              />
-            </div>
+          <div className="bg-white dark:bg-muted/20 border rounded-lg p-4 text-sm whitespace-pre-wrap leading-relaxed">
+            {showPreview && getTemplateContent(showPreview.template_id)}
           </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowSign(null)}>إلغاء</Button>
-            <Button
-              onClick={handleSign}
-              disabled={!signerName.trim() || signDocument.isPending}
-              className="gap-2"
-            >
-              {signDocument.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-              <CheckCircle2 className="w-4 h-4" />
-              تأكيد التوقيع
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

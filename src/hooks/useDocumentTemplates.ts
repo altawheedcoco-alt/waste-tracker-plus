@@ -305,7 +305,21 @@ export function useShipmentDocuments(shipmentId: string) {
       signerNationalId?: string;
       signatureImageUrl?: string;
       signatureMethod: string;
+      notes?: string;
     }) => {
+      // Generate SHA-256 integrity hash
+      const hashPayload = JSON.stringify({
+        signatureId: data.signatureId,
+        signerName: data.signerName,
+        signedAt: new Date().toISOString(),
+        shipmentId,
+        userId: profile?.id,
+      });
+      const encoder = new TextEncoder();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(hashPayload));
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const integrityHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
       const { error } = await supabase
         .from('shipment_doc_signatures' as any)
         .update({
@@ -317,8 +331,10 @@ export function useShipmentDocuments(shipmentId: string) {
           signature_method: data.signatureMethod,
           status: 'signed',
           signed_at: new Date().toISOString(),
-          ip_address: null, // Will be set server-side ideally
+          integrity_hash: integrityHash,
+          ip_address: null,
           user_agent: navigator.userAgent,
+          notes: data.notes || null,
         } as any)
         .eq('id', data.signatureId);
       if (error) throw error;
