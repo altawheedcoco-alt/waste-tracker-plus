@@ -91,14 +91,12 @@ Return ONLY valid JSON with this structure:
 
 Generate REALISTIC data for a waste management company. Arabic content where specified. Return ONLY JSON.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: "You are an ESG reporting analyst. Return ONLY valid JSON." },
+        { role: "user", content: prompt }
+      ],
         messages: [
           { role: "system", content: "You are an ESG reporting analyst. Return ONLY valid JSON." },
           { role: "user", content: prompt }

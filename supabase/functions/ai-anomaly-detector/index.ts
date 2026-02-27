@@ -87,77 +87,70 @@ ${JSON.stringify(shipments, null, 2)}
 3. توصيات للتعامل مع كل حالة
 4. ملخص عام لحالة النظام`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "report_anomalies",
-              description: "تقرير بالشذوذات المكتشفة في بيانات الشحنات",
-              parameters: {
-                type: "object",
-                properties: {
-                  anomalies: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        shipmentId: { type: "string", description: "معرف الشحنة" },
-                        anomalyType: { 
-                          type: "string", 
-                          enum: ["weight_discrepancy", "route_anomaly", "price_anomaly", "suspicious_pattern", "data_tampering"],
-                          description: "نوع الشذوذ"
-                        },
-                        severity: { 
-                          type: "string", 
-                          enum: ["low", "medium", "high", "critical"],
-                          description: "مستوى الخطورة"
-                        },
-                        description: { type: "string", description: "وصف الشذوذ" },
-                        confidence: { type: "number", description: "نسبة الثقة في الاكتشاف (0-100)" },
-                        recommendation: { type: "string", description: "التوصية للتعامل مع الشذوذ" }
-                      },
-                      required: ["shipmentId", "anomalyType", "severity", "description", "confidence", "recommendation"]
-                    }
-                  },
-                  summary: {
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "report_anomalies",
+            description: "تقرير بالشذوذات المكتشفة في بيانات الشحنات",
+            parameters: {
+              type: "object",
+              properties: {
+                anomalies: {
+                  type: "array",
+                  items: {
                     type: "object",
                     properties: {
-                      totalAnalyzed: { type: "number", description: "إجمالي الشحنات المحللة" },
-                      totalAnomalies: { type: "number", description: "إجمالي الشذوذات المكتشفة" },
-                      criticalCount: { type: "number", description: "عدد الشذوذات الحرجة" },
-                      highCount: { type: "number", description: "عدد الشذوذات العالية الخطورة" },
-                      mediumCount: { type: "number", description: "عدد الشذوذات المتوسطة" },
-                      lowCount: { type: "number", description: "عدد الشذوذات المنخفضة" },
-                      riskScore: { type: "number", description: "درجة المخاطر الإجمالية (0-100)" },
-                      overallAssessment: { type: "string", description: "تقييم عام للوضع" }
+                      shipmentId: { type: "string", description: "معرف الشحنة" },
+                      anomalyType: { 
+                        type: "string", 
+                        enum: ["weight_discrepancy", "route_anomaly", "price_anomaly", "suspicious_pattern", "data_tampering"],
+                        description: "نوع الشذوذ"
+                      },
+                      severity: { 
+                        type: "string", 
+                        enum: ["low", "medium", "high", "critical"],
+                        description: "مستوى الخطورة"
+                      },
+                      description: { type: "string", description: "وصف الشذوذ" },
+                      confidence: { type: "number", description: "نسبة الثقة في الاكتشاف (0-100)" },
+                      recommendation: { type: "string", description: "التوصية للتعامل مع الشذوذ" }
                     },
-                    required: ["totalAnalyzed", "totalAnomalies", "riskScore", "overallAssessment"]
-                  },
-                  recommendations: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "قائمة التوصيات العامة لتحسين الأمان"
+                    required: ["shipmentId", "anomalyType", "severity", "description", "confidence", "recommendation"]
                   }
                 },
-                required: ["anomalies", "summary", "recommendations"]
-              }
+                summary: {
+                  type: "object",
+                  properties: {
+                    totalAnalyzed: { type: "number", description: "إجمالي الشحنات المحللة" },
+                    totalAnomalies: { type: "number", description: "إجمالي الشذوذات المكتشفة" },
+                    criticalCount: { type: "number", description: "عدد الشذوذات الحرجة" },
+                    highCount: { type: "number", description: "عدد الشذوذات العالية الخطورة" },
+                    mediumCount: { type: "number", description: "عدد الشذوذات المتوسطة" },
+                    lowCount: { type: "number", description: "عدد الشذوذات المنخفضة" },
+                    riskScore: { type: "number", description: "درجة المخاطر الإجمالية (0-100)" },
+                    overallAssessment: { type: "string", description: "تقييم عام للوضع" }
+                  },
+                  required: ["totalAnalyzed", "totalAnomalies", "riskScore", "overallAssessment"]
+                },
+                recommendations: {
+                  type: "array",
+                  items: { type: "string" },
+                  description: "قائمة التوصيات العامة لتحسين الأمان"
+                }
+              },
+              required: ["anomalies", "summary", "recommendations"]
             }
           }
-        ],
-        tool_choice: { type: "function", function: { name: "report_anomalies" } }
-      }),
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "report_anomalies" } }
     });
 
     if (!response.ok) {

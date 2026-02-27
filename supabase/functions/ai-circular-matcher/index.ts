@@ -95,7 +95,7 @@ ${candidates.slice(0, 10).map((c, i) => `${i + 1}. ${c.name} - ${c.city} - سع�
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            model: "google/gemini-3-flash-preview",
             messages: [
               { role: "system", content: "You are a waste management and circular economy expert. Always respond in valid JSON." },
               { role: "user", content: prompt },
