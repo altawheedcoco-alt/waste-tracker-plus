@@ -36,8 +36,8 @@ export const useQRVerification = () => {
     
     try {
       const parsed = JSON.parse(code);
-      if (parsed.code && parsed.seal) return { type: 'contract', reference: parsed.code };
       if (parsed.type && parsed.code) return { type: parsed.type, reference: parsed.code };
+      if (parsed.code && parsed.seal) return { type: 'contract', reference: parsed.code };
     } catch {}
 
     try {
