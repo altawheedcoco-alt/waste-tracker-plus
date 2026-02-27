@@ -151,32 +151,25 @@ serve(async (req) => {
     }
 
     // Use Lovable AI to extract receipt data
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `أنت خبير في قراءة إيصالات الإيداع البنكي المصرية والعربية.
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(lovableApiKey, {
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `أنت خبير في قراءة إيصالات الإيداع البنكي المصرية والعربية.
 
 **تعليمات قراءة المبلغ - مهم جداً:**
 - النظام المصري يستخدم الفاصلة (,) لفصل الآلاف والنقطة (.) للكسور
-- اقرأ كل رقم بالترتيب من اليسار لليمين: آحاد، عشرات، مئات، آلاف، عشرات آلاف، مئات آلاف، ملايين
+- اقرأ كل رقم بالترتيب من اليسار لليمين
 - أمثلة صحيحة:
   * "60,000" = 60000 (ستون ألف)
   * "150,000" = 150000 (مائة وخمسون ألف)
   * "1,500,000" = 1500000 (مليون ونصف)
-  * "25,000.50" = 25000.50 (خمسة وعشرون ألف وخمسون قرشاً)
-- لا تضرب أو تقسم - اكتب الرقم كما هو بدون الفواصل
-- احذر: "60,000" ليست 60 وليست 60000000
+  * "25,000.50" = 25000.50
 
 **المطلوب استخراجه:**
 1. amount: المبلغ كرقم (بدون فواصل الآلاف)
@@ -184,40 +177,30 @@ serve(async (req) => {
 3. bank_name: اسم البنك
 4. bank_branch: اسم الفرع
 5. account_number: رقم الحساب
-6. depositor_name: اسم المودع (من أودع)
-7. recipient_name: اسم صاحب الحساب (المستفيد)
-8. reference_number: رقم الإيصال أو المرجع
+6. depositor_name: اسم المودع
+7. recipient_name: اسم صاحب الحساب
+8. reference_number: رقم الإيصال
 9. check_number: رقم الشيك (إن وجد)
 10. payment_method: طريقة الدفع (cash/bank_transfer/check/card/other)
 
 أجب بصيغة JSON فقط:
 {
-  "amount": 0,
-  "payment_date": "",
-  "bank_name": "",
-  "bank_branch": "",
-  "account_number": "",
-  "depositor_name": "",
-  "recipient_name": "",
-  "reference_number": "",
-  "check_number": "",
-  "payment_method": "bank_transfer",
-  "confidence": 0.0,
-  "notes": ""
+  "amount": 0, "payment_date": "", "bank_name": "", "bank_branch": "",
+  "account_number": "", "depositor_name": "", "recipient_name": "",
+  "reference_number": "", "check_number": "", "payment_method": "bank_transfer",
+  "confidence": 0.0, "notes": ""
 }`
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`
-                }
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`
               }
-            ]
-          }
-        ],
-        max_tokens: 1500,
-        temperature: 0.1
-      }),
+            }
+          ]
+        }
+      ],
+      temperature: 0.1,
     });
 
     if (!response.ok) {

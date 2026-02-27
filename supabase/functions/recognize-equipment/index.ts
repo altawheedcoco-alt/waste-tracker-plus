@@ -67,22 +67,15 @@ serve(async (req) => {
   "confidence": 85
 }`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: [
-            { type: "text", text: "حلل هذه المعدة/الماكينة وقدم تقريراً تفصيلياً عنها" },
-            { type: "image_url", image_url: { url: image } },
-          ]},
-        ],
-      }),
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: [
+          { type: "text", text: "حلل هذه المعدة/الماكينة وقدم تقريراً تفصيلياً عنها" },
+          { type: "image_url", image_url: { url: image } },
+        ]},
+      ],
     });
 
     if (!response.ok) {

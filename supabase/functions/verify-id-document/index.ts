@@ -113,17 +113,10 @@ serve(async (req) => {
       }
     ];
 
-    const response = await fetch(AI_GATEWAY_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages,
-        temperature: 0.1,
-      }),
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY!, {
+      messages,
+      temperature: 0.1,
     });
 
     if (!response.ok) {

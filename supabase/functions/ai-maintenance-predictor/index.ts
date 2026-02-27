@@ -130,18 +130,12 @@ serve(async (req) => {
     // Use AI for predictions
     const prompt = buildPredictionPrompt(vehicles);
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `أنت نظام ذكاء اصطناعي للتنبؤ بصيانة المركبات. حلل بيانات المركبات وتنبأ بالأعطال المحتملة.
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const aiResponse = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        {
+          role: "system",
+          content: `أنت نظام ذكاء اصطناعي للتنبؤ بصيانة المركبات. حلل بيانات المركبات وتنبأ بالأعطال المحتملة.
 
 معايير التحليل:
 1. عمر المركبة
@@ -157,52 +151,43 @@ serve(async (req) => {
 - نظام التبريد (كل 100,000 كم)
 
 أرجع تنبؤات واقعية بناءً على البيانات.`
-          },
-          { role: "user", content: prompt }
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "predict_maintenance",
-              description: "التنبؤ بصيانة المركبات",
-              parameters: {
-                type: "object",
-                properties: {
-                  predictions: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        vehicleId: { type: "string" },
-                        riskLevel: { type: "string", enum: ["low", "medium", "high", "critical"] },
-                        predictedIssues: {
-                          type: "array",
-                          items: {
-                            type: "object",
-                            properties: {
-                              component: { type: "string" },
-                              probability: { type: "number" },
-                              daysUntilFailure: { type: "number" },
-                              action: { type: "string" }
-                            }
-                          }
-                        },
-                        nextMaintenanceDays: { type: "number" },
-                        estimatedCostEGP: { type: "number" },
-                        recommendations: { type: "array", items: { type: "string" } }
+        },
+        { role: "user", content: prompt }
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "predict_maintenance",
+            description: "التنبؤ بصيانة المركبات",
+            parameters: {
+              type: "object",
+              properties: {
+                predictions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      vehicleId: { type: "string" },
+                      riskLevel: { type: "string", enum: ["low", "medium", "high", "critical"] },
+                      predictedIssues: {
+                        type: "array",
+                        items: { type: "object", properties: { component: { type: "string" }, probability: { type: "number" }, daysUntilFailure: { type: "number" }, action: { type: "string" } } }
                       },
-                      required: ["vehicleId", "riskLevel", "predictedIssues"]
-                    }
+                      nextMaintenanceDays: { type: "number" },
+                      estimatedCostEGP: { type: "number" },
+                      recommendations: { type: "array", items: { type: "string" } }
+                    },
+                    required: ["vehicleId", "riskLevel", "predictedIssues"]
                   }
-                },
-                required: ["predictions"]
-              }
+                }
+              },
+              required: ["predictions"]
             }
           }
-        ],
-        tool_choice: { type: "function", function: { name: "predict_maintenance" } }
-      }),
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "predict_maintenance" } }
     });
 
     if (!aiResponse.ok) {

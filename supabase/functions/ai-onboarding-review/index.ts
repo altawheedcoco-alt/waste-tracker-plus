@@ -66,64 +66,31 @@ serve(async (req) => {
 ${has_delegation ? `- نوع التمثيل: ${delegation_type === 'power_of_attorney' ? 'توكيل رسمي' : 'تفويض'}` : ''}
 ${has_delegation ? `- عدد الأطراف: ${delegation_parties_count}` : ''}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: prompt },
-          { role: "user", content: "حلل هذه البيانات وأعطني تقييماً." }
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "submit_review",
-            description: "Submit the AI review results for an onboarding submission",
-            parameters: {
-              type: "object",
-              properties: {
-                overall_score: {
-                  type: "number",
-                  description: "Overall confidence score from 0 to 100"
-                },
-                checks: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      check_name: { type: "string", description: "Name of the check in Arabic" },
-                      passed: { type: "boolean" },
-                      details: { type: "string", description: "Details in Arabic" },
-                      weight: { type: "number", description: "Weight of this check (0-100)" }
-                    },
-                    required: ["check_name", "passed", "details", "weight"]
-                  }
-                },
-                summary: {
-                  type: "string",
-                  description: "Overall summary in Arabic"
-                },
-                recommendation: {
-                  type: "string",
-                  enum: ["auto_approve", "needs_review"],
-                  description: "auto_approve if score >= 80, needs_review otherwise"
-                },
-                risk_flags: {
-                  type: "array",
-                  items: { type: "string" },
-                  description: "List of risk flags in Arabic, if any"
-                }
-              },
-              required: ["overall_score", "checks", "summary", "recommendation", "risk_flags"]
-            }
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: prompt },
+        { role: "user", content: "حلل هذه البيانات وأعطني تقييماً." }
+      ],
+      tools: [{
+        type: "function",
+        function: {
+          name: "submit_review",
+          description: "Submit the AI review results for an onboarding submission",
+          parameters: {
+            type: "object",
+            properties: {
+              overall_score: { type: "number", description: "Overall confidence score from 0 to 100" },
+              checks: { type: "array", items: { type: "object", properties: { check_name: { type: "string" }, passed: { type: "boolean" }, details: { type: "string" }, weight: { type: "number" } }, required: ["check_name", "passed", "details", "weight"] } },
+              summary: { type: "string", description: "Overall summary in Arabic" },
+              recommendation: { type: "string", enum: ["auto_approve", "needs_review"] },
+              risk_flags: { type: "array", items: { type: "string" } }
+            },
+            required: ["overall_score", "checks", "summary", "recommendation", "risk_flags"]
           }
-        }],
-        tool_choice: { type: "function", function: { name: "submit_review" } }
-      }),
+        }
+      }],
+      tool_choice: { type: "function", function: { name: "submit_review" } }
     });
 
     if (!response.ok) {

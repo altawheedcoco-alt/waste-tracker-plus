@@ -92,18 +92,12 @@ serve(async (req) => {
       avoidTolls
     });
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `أنت خبير في تحسين المسارات اللوجستية. مهمتك تحليل نقاط التوصيل وإنتاج أفضل ترتيب للمسار.
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const aiResponse = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        {
+          role: "system",
+          content: `أنت خبير في تحسين المسارات اللوجستية. مهمتك تحليل نقاط التوصيل وإنتاج أفضل ترتيب للمسار.
             
 قواعد التحسين:
 1. قلل المسافة الإجمالية
@@ -113,52 +107,31 @@ serve(async (req) => {
 5. احسب توفير الوقود والانبعاثات الكربونية
 
 أجب بصيغة JSON فقط.`
-          },
-          { role: "user", content: prompt }
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "optimize_route",
-              description: "إرجاع المسار المحسّن مع التوصيات",
-              parameters: {
-                type: "object",
-                properties: {
-                  orderedStopIndices: {
-                    type: "array",
-                    items: { type: "number" },
-                    description: "ترتيب النقاط المحسّن (أرقام الفهرس)"
-                  },
-                  totalDistanceKm: {
-                    type: "number",
-                    description: "المسافة الإجمالية بالكيلومترات"
-                  },
-                  totalDurationMinutes: {
-                    type: "number",
-                    description: "الوقت الإجمالي بالدقائق"
-                  },
-                  fuelSavingsPercent: {
-                    type: "number",
-                    description: "نسبة توفير الوقود"
-                  },
-                  co2ReductionKg: {
-                    type: "number",
-                    description: "تقليل الانبعاثات الكربونية بالكيلوجرام"
-                  },
-                  recommendations: {
-                    type: "array",
-                    items: { type: "string" },
-                    description: "توصيات لتحسين الرحلة"
-                  }
-                },
-                required: ["orderedStopIndices", "totalDistanceKm", "totalDurationMinutes", "recommendations"]
-              }
+        },
+        { role: "user", content: prompt }
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "optimize_route",
+            description: "إرجاع المسار المحسّن مع التوصيات",
+            parameters: {
+              type: "object",
+              properties: {
+                orderedStopIndices: { type: "array", items: { type: "number" }, description: "ترتيب النقاط المحسّن (أرقام الفهرس)" },
+                totalDistanceKm: { type: "number", description: "المسافة الإجمالية بالكيلومترات" },
+                totalDurationMinutes: { type: "number", description: "الوقت الإجمالي بالدقائق" },
+                fuelSavingsPercent: { type: "number", description: "نسبة توفير الوقود" },
+                co2ReductionKg: { type: "number", description: "تقليل الانبعاثات الكربونية بالكيلوجرام" },
+                recommendations: { type: "array", items: { type: "string" }, description: "توصيات لتحسين الرحلة" }
+              },
+              required: ["orderedStopIndices", "totalDistanceKm", "totalDurationMinutes", "recommendations"]
             }
           }
-        ],
-        tool_choice: { type: "function", function: { name: "optimize_route" } }
-      }),
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "optimize_route" } }
     });
 
     if (!aiResponse.ok) {

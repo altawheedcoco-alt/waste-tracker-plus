@@ -175,18 +175,12 @@ serve(async (req) => {
     // Use AI for intelligent scheduling
     const prompt = buildSchedulingPrompt(drivers, shipments, { maxShipmentsPerDriver, prioritizeUrgent });
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `أنت نظام جدولة ذكي للشحنات. مهمتك توزيع الشحنات على السائقين بأفضل طريقة ممكنة.
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const aiResponse = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        {
+          role: "system",
+          content: `أنت نظام جدولة ذكي للشحنات. مهمتك توزيع الشحنات على السائقين بأفضل طريقة ممكنة.
 
 معايير التوزيع:
 1. وازن الحمل بين السائقين
@@ -196,47 +190,40 @@ serve(async (req) => {
 5. جمّع الشحنات المتقاربة جغرافياً
 
 أرجع النتيجة بصيغة JSON.`
-          },
-          { role: "user", content: prompt }
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "schedule_shipments",
-              description: "توزيع الشحنات على السائقين",
-              parameters: {
-                type: "object",
-                properties: {
-                  assignments: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        driverId: { type: "string" },
-                        shipmentIds: { type: "array", items: { type: "string" } },
-                        estimatedDurationMinutes: { type: "number" },
-                        estimatedDistanceKm: { type: "number" }
-                      },
-                      required: ["driverId", "shipmentIds"]
-                    }
-                  },
-                  unassignedShipmentIds: {
-                    type: "array",
-                    items: { type: "string" }
-                  },
-                  recommendations: {
-                    type: "array",
-                    items: { type: "string" }
+        },
+        { role: "user", content: prompt }
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "schedule_shipments",
+            description: "توزيع الشحنات على السائقين",
+            parameters: {
+              type: "object",
+              properties: {
+                assignments: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      driverId: { type: "string" },
+                      shipmentIds: { type: "array", items: { type: "string" } },
+                      estimatedDurationMinutes: { type: "number" },
+                      estimatedDistanceKm: { type: "number" }
+                    },
+                    required: ["driverId", "shipmentIds"]
                   }
                 },
-                required: ["assignments", "recommendations"]
-              }
+                unassignedShipmentIds: { type: "array", items: { type: "string" } },
+                recommendations: { type: "array", items: { type: "string" } }
+              },
+              required: ["assignments", "recommendations"]
             }
           }
-        ],
-        tool_choice: { type: "function", function: { name: "schedule_shipments" } }
-      }),
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "schedule_shipments" } }
     });
 
     if (!aiResponse.ok) {

@@ -46,21 +46,15 @@ serve(async (req) => {
     const base64Image = btoa(binary);
     const mimeType = imageFile.type || "image/jpeg";
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `You are a license plate OCR expert for Egyptian and Arabic vehicle plates. 
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `You are a license plate OCR expert for Egyptian and Arabic vehicle plates. 
 Analyze this image and extract the vehicle license plate number.
 
 IMPORTANT RULES:
@@ -80,17 +74,16 @@ Return ONLY valid JSON:
 }
 
 If you cannot read a plate clearly, set confidence to low and is_match to false.`,
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${mimeType};base64,${base64Image}`,
               },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:${mimeType};base64,${base64Image}`,
-                },
-              },
-            ],
-          },
-        ],
-      }),
+            },
+          ],
+        },
+      ],
     });
 
     if (!response.ok) {

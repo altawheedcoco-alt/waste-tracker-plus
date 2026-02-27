@@ -72,23 +72,17 @@ serve(async (req) => {
 4. إنشاء وسوم للبحث السريع
 5. كتابة ملخص موجز للمستند`;
 
-    const response = await fetch(AI_GATEWAY_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `قم بتصنيف هذا المستند واستخراج البيانات منه.
-                
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY!, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `قم بتصنيف هذا المستند واستخراج البيانات منه.
+              
 اسم الملف: ${fileName || "غير معروف"}
 نوع الملف: ${mimeType || "غير معروف"}
 
@@ -103,16 +97,15 @@ serve(async (req) => {
   "tags": ["وسم1", "وسم2"],
   "summary": "ملخص موجز للمستند"
 }`
-              },
-              {
-                type: "image_url",
-                image_url: { url: imageBase64 }
-              }
-            ]
-          }
-        ],
-        temperature: 0.2,
-      }),
+            },
+            {
+              type: "image_url",
+              image_url: { url: imageBase64 }
+            }
+          ]
+        }
+      ],
+      temperature: 0.2,
     });
 
     if (!response.ok) {

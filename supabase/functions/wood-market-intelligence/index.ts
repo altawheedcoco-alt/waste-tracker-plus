@@ -40,19 +40,13 @@ serve(async (req) => {
 4. توصيات للبيع والشراء
 5. تنبيهات ذكية للأطراف المختلفة`;
 
-      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          tools: [{
+      const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+      const response = await callAIWithRetry(LOVABLE_API_KEY, {
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        tools: [{
             type: "function",
             function: {
               name: "wood_market_analysis",
@@ -69,19 +63,7 @@ serve(async (req) => {
                       priceChangePercent: { type: "number" },
                       trend: { type: "string", enum: ["rising", "stable", "falling"] },
                       demandLevel: { type: "string", enum: ["low", "medium", "high", "very_high"] },
-                      correlatedFactors: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            factor: { type: "string" },
-                            impact: { type: "string", enum: ["positive", "negative", "neutral"] },
-                            weight: { type: "number" },
-                            description: { type: "string" }
-                          },
-                          required: ["factor", "impact", "description"]
-                        }
-                      },
+                      correlatedFactors: { type: "array", items: { type: "object", properties: { factor: { type: "string" }, impact: { type: "string", enum: ["positive", "negative", "neutral"] }, weight: { type: "number" }, description: { type: "string" } }, required: ["factor", "impact", "description"] } },
                       seasonalNote: { type: "string" }
                     },
                     required: ["currentPricePerTon", "predictedPriceNextWeek", "trend", "demandLevel"]
@@ -95,83 +77,22 @@ serve(async (req) => {
                       priceChangePercent: { type: "number" },
                       trend: { type: "string", enum: ["rising", "stable", "falling"] },
                       demandLevel: { type: "string", enum: ["low", "medium", "high", "very_high"] },
-                      correlatedFactors: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            factor: { type: "string" },
-                            impact: { type: "string", enum: ["positive", "negative", "neutral"] },
-                            weight: { type: "number" },
-                            description: { type: "string" }
-                          },
-                          required: ["factor", "impact", "description"]
-                        }
-                      },
+                      correlatedFactors: { type: "array", items: { type: "object", properties: { factor: { type: "string" }, impact: { type: "string", enum: ["positive", "negative", "neutral"] }, weight: { type: "number" }, description: { type: "string" } }, required: ["factor", "impact", "description"] } },
                       seasonalNote: { type: "string" }
                     },
                     required: ["currentPricePerUnit", "predictedPriceNextWeek", "trend", "demandLevel"]
                   },
-                  marketOverview: {
-                    type: "object",
-                    properties: {
-                      overallSentiment: { type: "string", enum: ["bullish", "neutral", "bearish"] },
-                      confidenceLevel: { type: "number" },
-                      keyInsight: { type: "string" },
-                      riskLevel: { type: "string", enum: ["low", "medium", "high"] }
-                    },
-                    required: ["overallSentiment", "confidenceLevel", "keyInsight"]
-                  },
-                  smartAlerts: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        targetAudience: { type: "string", enum: ["generator", "transporter", "recycler", "all"] },
-                        alertType: { type: "string", enum: ["sell_now", "buy_now", "prepare_capacity", "price_drop_warning", "opportunity", "seasonal"] },
-                        title: { type: "string" },
-                        message: { type: "string" },
-                        urgency: { type: "string", enum: ["low", "medium", "high", "critical"] },
-                        icon: { type: "string" }
-                      },
-                      required: ["targetAudience", "alertType", "title", "message", "urgency"]
-                    }
-                  },
-                  recommendations: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        action: { type: "string" },
-                        reason: { type: "string" },
-                        expectedImpact: { type: "string" },
-                        priority: { type: "string", enum: ["low", "medium", "high"] },
-                        timeframe: { type: "string" }
-                      },
-                      required: ["action", "reason", "priority"]
-                    }
-                  },
-                  forecast: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        period: { type: "string" },
-                        scrapPrice: { type: "number" },
-                        palletPrice: { type: "number" },
-                        confidence: { type: "number" }
-                      },
-                      required: ["period", "scrapPrice", "palletPrice", "confidence"]
-                    }
-                  },
+                  marketOverview: { type: "object", properties: { overallSentiment: { type: "string", enum: ["bullish", "neutral", "bearish"] }, confidenceLevel: { type: "number" }, keyInsight: { type: "string" }, riskLevel: { type: "string", enum: ["low", "medium", "high"] } }, required: ["overallSentiment", "confidenceLevel", "keyInsight"] },
+                  smartAlerts: { type: "array", items: { type: "object", properties: { targetAudience: { type: "string", enum: ["generator", "transporter", "recycler", "all"] }, alertType: { type: "string", enum: ["sell_now", "buy_now", "prepare_capacity", "price_drop_warning", "opportunity", "seasonal"] }, title: { type: "string" }, message: { type: "string" }, urgency: { type: "string", enum: ["low", "medium", "high", "critical"] }, icon: { type: "string" } }, required: ["targetAudience", "alertType", "title", "message", "urgency"] } },
+                  recommendations: { type: "array", items: { type: "object", properties: { action: { type: "string" }, reason: { type: "string" }, expectedImpact: { type: "string" }, priority: { type: "string", enum: ["low", "medium", "high"] }, timeframe: { type: "string" } }, required: ["action", "reason", "priority"] } },
+                  forecast: { type: "array", items: { type: "object", properties: { period: { type: "string" }, scrapPrice: { type: "number" }, palletPrice: { type: "number" }, confidence: { type: "number" } }, required: ["period", "scrapPrice", "palletPrice", "confidence"] } },
                   summary: { type: "string" }
                 },
                 required: ["scrapWood", "palletWood", "marketOverview", "smartAlerts", "recommendations", "summary"]
               }
             }
           }],
-          tool_choice: { type: "function", function: { name: "wood_market_analysis" } }
-        }),
+        tool_choice: { type: "function", function: { name: "wood_market_analysis" } }
       });
 
       if (!response.ok) {
