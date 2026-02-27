@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { EVENT_TYPE_LABELS } from '@/lib/custodyChain';
 import { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } from '@/utils/autoDeclarationCreator';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +27,10 @@ import {
   Printer,
   Download,
   Eye,
+  QrCode,
+  Paperclip,
+  CreditCard,
+  ExternalLink,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -132,6 +137,67 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
 
       if (error) {
         console.error('Error fetching receipts:', error);
+        return [] as any[];
+      }
+      return (data || []) as any[];
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // Fetch entity documents linked to this shipment
+  const { data: entityDocs = [] } = useQuery({
+    queryKey: ['shipment-entity-docs', shipment.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data, error } = await supabase
+        .from('entity_documents')
+        .select('id, title, document_type, document_category, file_name, file_url, file_type, created_at, uploaded_by, tags')
+        .eq('shipment_id', shipment.id)
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching entity docs:', error);
+        return [] as any[];
+      }
+      return (data || []) as any[];
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // Fetch custody chain events (QR handovers)
+  const { data: custodyEvents = [] } = useQuery({
+    queryKey: ['shipment-custody-events', shipment.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('custody_chain_events')
+        .select('id, event_type, created_at, actor_user_id, photo_proof_url, notes, gps_latitude, gps_longitude, actor_organization:organizations!custody_chain_events_actor_organization_id_fkey(name)')
+        .eq('shipment_id', shipment.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching custody events:', error);
+        return [] as any[];
+      }
+      return (data || []) as any[];
+    },
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // Fetch invoices linked to this shipment
+  const { data: invoices = [] } = useQuery({
+    queryKey: ['shipment-invoices', shipment.id],
+    queryFn: async () => {
+      if (!organization?.id) return [] as any[];
+      const { data, error } = await (supabase
+        .from('invoices')
+        .select('id, invoice_number, status, total_amount, created_at') as any)
+        .eq('shipment_id', shipment.id)
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching invoices:', error);
         return [] as any[];
       }
       return (data || []) as any[];
@@ -256,6 +322,42 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
       signedAt: latestReceipt?.created_at,
       data: latestReceipt,
     },
+    // Custody chain QR events
+    ...custodyEvents.map((evt: any, idx: number) => ({
+      key: `custody_${evt.id}`,
+      label: EVENT_TYPE_LABELS[evt.event_type] || evt.event_type,
+      icon: <QrCode className="w-4 h-4" />,
+      colorClass: 'orange',
+      description: `حدث سلسلة الحيازة — ${(evt.actor_organization as any)?.name || 'جهة غير معروفة'}${evt.notes ? ` — ${evt.notes}` : ''}`,
+      status: 'completed' as const,
+      signedBy: (evt.actor_organization as any)?.name,
+      signedAt: evt.created_at,
+      data: evt,
+    })),
+    // Entity documents attached to shipment
+    ...entityDocs.map((doc: any) => ({
+      key: `entity_doc_${doc.id}`,
+      label: doc.title || doc.file_name,
+      icon: <Paperclip className="w-4 h-4" />,
+      colorClass: 'cyan',
+      description: `${doc.document_category || 'مستند'} — ${doc.document_type || 'عام'}`,
+      status: 'completed' as const,
+      signedBy: undefined as string | undefined,
+      signedAt: doc.created_at,
+      data: doc,
+    })),
+    // Invoices linked to shipment
+    ...invoices.map((inv: any) => ({
+      key: `invoice_${inv.id}`,
+      label: `فاتورة ${inv.invoice_number || ''}`,
+      icon: <CreditCard className="w-4 h-4" />,
+      colorClass: 'amber',
+      description: `المبلغ: ${inv.total_amount?.toLocaleString('ar-EG') || '—'} — الحالة: ${inv.status === 'paid' ? 'مدفوعة' : inv.status === 'pending' ? 'معلقة' : inv.status}`,
+      status: 'completed' as const,
+      signedBy: undefined as string | undefined,
+      signedAt: inv.created_at,
+      data: inv,
+    })),
   ];
 
   const completedCount = steps.filter(s => s.status === 'completed').length;
@@ -450,6 +552,70 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
         </div>
       )}
 
+      {/* Custody Chain Events */}
+      {custodyEvents.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '2px solid #e2e8f0', paddingBottom: '6px' }}>
+            🔗 أحداث سلسلة الحيازة (QR)
+          </h3>
+          {custodyEvents.map((evt: any) => (
+            <div key={evt.id} style={{ marginBottom: '10px', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#fafafa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{EVENT_TYPE_LABELS[evt.event_type] || evt.event_type}</span>
+                <span style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 'bold', backgroundColor: '#dcfce7', color: '#166534' }}>✓ مسجل</span>
+              </div>
+              <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                {(evt.actor_organization as any)?.name && <div>🏢 الجهة: {(evt.actor_organization as any).name}</div>}
+                {evt.notes && <div>📝 ملاحظات: {evt.notes}</div>}
+                {evt.gps_latitude && <div>📍 الموقع: {evt.gps_latitude?.toFixed(4)}, {evt.gps_longitude?.toFixed(4)}</div>}
+                <div>📅 {format(new Date(evt.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Entity Documents */}
+      {entityDocs.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '2px solid #e2e8f0', paddingBottom: '6px' }}>
+            📎 المستندات المرفقة
+          </h3>
+          {entityDocs.map((doc: any) => (
+            <div key={doc.id} style={{ marginBottom: '10px', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#fafafa' }}>
+              <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{doc.title || doc.file_name}</div>
+              <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                <div>📂 التصنيف: {doc.document_category || 'عام'} — {doc.document_type || 'مستند'}</div>
+                <div>📅 {format(new Date(doc.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Invoices */}
+      {invoices.length > 0 && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '10px', borderBottom: '2px solid #e2e8f0', paddingBottom: '6px' }}>
+            💳 الفواتير المرتبطة
+          </h3>
+          {invoices.map((inv: any) => (
+            <div key={inv.id} style={{ marginBottom: '10px', padding: '10px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#fafafa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '13px', fontWeight: 'bold' }}>فاتورة: {inv.invoice_number || '—'}</span>
+                <span style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '10px', fontWeight: 'bold', backgroundColor: inv.status === 'paid' ? '#dcfce7' : '#fef3c7', color: inv.status === 'paid' ? '#166534' : '#92400e' }}>
+                  {inv.status === 'paid' ? 'مدفوعة' : inv.status === 'pending' ? 'معلقة' : inv.status}
+                </span>
+              </div>
+              <div style={{ fontSize: '11px', color: '#666', marginTop: '4px' }}>
+                <div>💰 المبلغ: {inv.total_amount?.toLocaleString('ar-EG') || '—'}</div>
+                <div>📅 {format(new Date(inv.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Footer */}
       <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#94a3b8' }}>
         <div>تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}</div>
@@ -587,14 +753,29 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
                             )}
                           </div>
                           <div className="flex items-center gap-1">
-                            {step.data && step.key !== 'receipt' && (
+                            {/* Declaration view */}
+                            {step.data && !step.key.startsWith('custody_') && !step.key.startsWith('entity_doc_') && !step.key.startsWith('invoice_') && step.key !== 'receipt' && (
                               <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => setShowDeclarationView(step.data)}>
                                 <FileSignature className="w-3 h-3 ml-1" />
                                 عرض
                               </Button>
                             )}
+                            {/* Entity doc: open file */}
+                            {step.key.startsWith('entity_doc_') && step.data?.file_url && (
+                              <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => window.open(step.data.file_url, '_blank')}>
+                                <ExternalLink className="w-3 h-3 ml-1" />
+                                فتح المستند
+                              </Button>
+                            )}
+                            {/* Custody event with photo proof */}
+                            {step.key.startsWith('custody_') && step.data?.photo_proof_url && (
+                              <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={() => window.open(step.data.photo_proof_url, '_blank')}>
+                                <Eye className="w-3 h-3 ml-1" />
+                                صورة الإثبات
+                              </Button>
+                            )}
                             {step.canReject && (
-                              <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setRejectingDeclaration(step.data)}>
+                              <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setRejectingDeclaration(step.data)}>
                                 <XCircle className="w-3 h-3 ml-1" />
                                 إلغاء الإقرار
                               </Button>
