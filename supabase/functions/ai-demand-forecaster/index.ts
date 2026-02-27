@@ -70,110 +70,75 @@ ${JSON.stringify(historicalData, null, 2)}
 3. أوقات الذروة المتوقعة
 4. توصيات لتوزيع الموارد`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "demand_forecast",
-              description: "تقرير التنبؤ بالطلب المستقبلي",
-              parameters: {
-                type: "object",
-                properties: {
-                  forecasts: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        period: { type: "string", description: "الفترة الزمنية (تاريخ أو نطاق)" },
-                        predictedShipments: { type: "number", description: "عدد الشحنات المتوقع" },
-                        predictedWeight: { type: "number", description: "الوزن المتوقع بالطن" },
-                        predictedRevenue: { type: "number", description: "الإيرادات المتوقعة" },
-                        confidence: { type: "number", description: "نسبة الثقة (0-100)" },
-                        isPeakPeriod: { type: "boolean", description: "هل هي فترة ذروة" }
-                      },
-                      required: ["period", "predictedShipments", "confidence"]
-                    }
-                  },
-                  trends: {
+    const { callAIWithRetry } = await import("../_shared/ai-retry.ts");
+    const response = await callAIWithRetry(LOVABLE_API_KEY, {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt }
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "demand_forecast",
+            description: "تقرير التنبؤ بالطلب المستقبلي",
+            parameters: {
+              type: "object",
+              properties: {
+                forecasts: {
+                  type: "array",
+                  items: {
                     type: "object",
                     properties: {
-                      overallTrend: { 
-                        type: "string", 
-                        enum: ["increasing", "stable", "decreasing"],
-                        description: "الاتجاه العام"
-                      },
-                      growthRate: { type: "number", description: "معدل النمو المتوقع %" },
-                      seasonalPatterns: {
-                        type: "array",
-                        items: {
-                          type: "object",
-                          properties: {
-                            pattern: { type: "string", description: "وصف النمط" },
-                            impact: { type: "string", description: "تأثير النمط" }
-                          }
-                        }
-                      }
+                      period: { type: "string" },
+                      predictedShipments: { type: "number" },
+                      predictedWeight: { type: "number" },
+                      predictedRevenue: { type: "number" },
+                      confidence: { type: "number" },
+                      isPeakPeriod: { type: "boolean" }
                     },
-                    required: ["overallTrend", "growthRate"]
-                  },
-                  peakAnalysis: {
-                    type: "object",
-                    properties: {
-                      peakDays: { 
-                        type: "array", 
-                        items: { type: "string" },
-                        description: "أيام الذروة" 
-                      },
-                      peakHours: { 
-                        type: "array", 
-                        items: { type: "string" },
-                        description: "ساعات الذروة" 
-                      },
-                      lowActivityPeriods: { 
-                        type: "array", 
-                        items: { type: "string" },
-                        description: "فترات النشاط المنخفض" 
-                      }
-                    }
-                  },
-                  resourceRecommendations: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        resource: { type: "string", description: "نوع المورد" },
-                        currentCapacity: { type: "string", description: "السعة الحالية" },
-                        recommendedCapacity: { type: "string", description: "السعة الموصى بها" },
-                        action: { type: "string", description: "الإجراء المطلوب" },
-                        priority: { type: "string", enum: ["low", "medium", "high"] }
-                      },
-                      required: ["resource", "action", "priority"]
-                    }
-                  },
-                  summary: {
-                    type: "string",
-                    description: "ملخص التنبؤات والتوصيات"
+                    required: ["period", "predictedShipments", "confidence"]
                   }
                 },
-                required: ["forecasts", "trends", "resourceRecommendations", "summary"]
-              }
+                trends: {
+                  type: "object",
+                  properties: {
+                    overallTrend: { type: "string", enum: ["increasing", "stable", "decreasing"] },
+                    growthRate: { type: "number" },
+                    seasonalPatterns: { type: "array", items: { type: "object", properties: { pattern: { type: "string" }, impact: { type: "string" } } } }
+                  },
+                  required: ["overallTrend", "growthRate"]
+                },
+                peakAnalysis: {
+                  type: "object",
+                  properties: {
+                    peakDays: { type: "array", items: { type: "string" } },
+                    peakHours: { type: "array", items: { type: "string" } },
+                    lowActivityPeriods: { type: "array", items: { type: "string" } }
+                  }
+                },
+                resourceRecommendations: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      resource: { type: "string" },
+                      currentCapacity: { type: "string" },
+                      recommendedCapacity: { type: "string" },
+                      action: { type: "string" },
+                      priority: { type: "string", enum: ["low", "medium", "high"] }
+                    },
+                    required: ["resource", "action", "priority"]
+                  }
+                },
+                summary: { type: "string" }
+              },
+              required: ["forecasts", "trends", "resourceRecommendations", "summary"]
             }
           }
-        ],
-        tool_choice: { type: "function", function: { name: "demand_forecast" } }
-      }),
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "demand_forecast" } }
     });
 
     if (!response.ok) {
