@@ -109,6 +109,8 @@ Deno.serve(async (req) => {
     for (const account of DEMO_ACCOUNTS) {
       const existing = existingUsers?.users?.find(u => u.email === account.email);
       if (existing) {
+        // Update password to ensure it matches the current DEMO_PASSWORD
+        await supabase.auth.admin.updateUserById(existing.id, { password: DEMO_PASSWORD });
         results.push({ email: account.email, label: account.fullName, status: 'exists' });
         continue;
       }

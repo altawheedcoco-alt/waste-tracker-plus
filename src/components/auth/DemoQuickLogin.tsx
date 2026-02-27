@@ -34,6 +34,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   const [seeding, setSeeding] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [accountsReady, setAccountsReady] = useState<boolean | null>(null);
+  const [actualPassword, setActualPassword] = useState<string>(DEMO_PASSWORD);
   const [pinInput, setPinInput] = useState('');
   const [pinVerified, setPinVerified] = useState(false);
   const [pinError, setPinError] = useState(false);
@@ -47,6 +48,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'فشل إنشاء الحسابات');
       
+      if (data.password) setActualPassword(data.password);
       setAccountsReady(true);
       toast({
         title: 'تم إنشاء الحسابات التجريبية ✅',
@@ -67,7 +69,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
     setLoading(email);
     onLoginStart?.();
     try {
-      const { error } = await signIn(email, DEMO_PASSWORD);
+      const { error } = await signIn(email, actualPassword);
       if (error) {
         // If login fails, accounts may not exist yet
         if (error.message?.includes('Invalid login credentials')) {
