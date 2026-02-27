@@ -51,7 +51,7 @@ const NewsTicker = memo(() => {
     <>
       {/* Mobile */}
       <div className="fixed top-16 left-0 right-0 w-full overflow-hidden z-40 h-[42px] sm:hidden" dir="rtl">
-        <div className="absolute inset-0 bg-gradient-to-l from-emerald-900 via-emerald-800 to-teal-900" />
+        <div className="absolute inset-0 bg-gradient-to-l from-[hsl(160,64%,20%)] via-[hsl(160,56%,25%)] to-[hsl(170,50%,22%)]" />
         <div className="relative h-full flex items-center justify-between px-3">
           <div className="flex items-center gap-2 min-w-0">
             <Sparkles className="w-3.5 h-3.5 text-amber-300 shrink-0" />
@@ -66,7 +66,7 @@ const NewsTicker = memo(() => {
 
       {/* Desktop */}
       <div className="fixed top-16 sm:top-20 left-0 right-0 w-full overflow-hidden z-40 h-[42px] hidden sm:block" dir="rtl">
-        <div className="absolute inset-0 bg-gradient-to-l from-emerald-900 via-emerald-800 to-teal-900" />
+        <div className="absolute inset-0 bg-gradient-to-l from-[hsl(160,64%,20%)] via-[hsl(160,56%,25%)] to-[hsl(170,50%,22%)]" />
 
         <div className="relative flex items-center">
           <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 shrink-0 z-10 shadow-lg">

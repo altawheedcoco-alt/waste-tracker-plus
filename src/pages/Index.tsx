@@ -60,8 +60,9 @@ LazySection.displayName = 'LazySection';
 const DeferredTicker = memo(() => {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const id = requestIdleCallback ? requestIdleCallback(() => setShow(true)) : setTimeout(() => setShow(true), 1500);
-    return () => { if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id as number); else clearTimeout(id as any); };
+    // Delay ticker to after FCP - don't block initial render
+    const id = setTimeout(() => setShow(true), 3000);
+    return () => clearTimeout(id);
   }, []);
   if (!show) return <div className="h-[42px] sm:h-[36px]" />;
   return (

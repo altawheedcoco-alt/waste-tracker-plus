@@ -79,7 +79,7 @@ const Providers = memo(() => (
           <TooltipProvider delayDuration={300}>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <AuthProvider>
                 <ErrorBoundary fallbackTitle="حدث خطأ في تحميل الصفحة">
                   <Suspense fallback={<PageLoader />}>

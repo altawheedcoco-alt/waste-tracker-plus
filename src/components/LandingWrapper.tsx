@@ -1,37 +1,10 @@
-import { useEffect, useRef, ReactNode, memo } from 'react';
+import { ReactNode, memo } from 'react';
 
 /**
  * Wrapper للصفحة الرئيسية العامة - محسّن للأداء
+ * يستخدم CSS variables فقط بدون تعديل DOM مباشرة
  */
 const LandingWrapper = memo(({ children }: { children: ReactNode }) => {
-  const savedRef = useRef<Record<string, string>>({});
-
-  useEffect(() => {
-    const root = document.documentElement;
-    
-    // Save current values once
-    savedRef.current = {
-      primary: root.style.getPropertyValue('--primary'),
-      ring: root.style.getPropertyValue('--ring'),
-      accent: root.style.getPropertyValue('--accent'),
-      fontSize: root.style.fontSize,
-    };
-
-    // Batch DOM writes
-    root.style.cssText += ';--primary:142 71% 45%;--ring:142 71% 45%;--accent:160 84% 39%;--eco-green:142 71% 45%;--eco-emerald:160 84% 39%;';
-    root.style.fontSize = '16px';
-    root.classList.remove('dark');
-    document.body.style.fontFamily = "'Cairo', sans-serif";
-
-    return () => {
-      const s = savedRef.current;
-      if (s.primary) root.style.setProperty('--primary', s.primary);
-      if (s.ring) root.style.setProperty('--ring', s.ring);
-      if (s.accent) root.style.setProperty('--accent', s.accent);
-      if (s.fontSize) root.style.fontSize = s.fontSize;
-    };
-  }, []);
-
   return (
     <div className="landing-page" style={{
       ['--primary' as string]: '142 71% 45%',
@@ -43,5 +16,7 @@ const LandingWrapper = memo(({ children }: { children: ReactNode }) => {
     </div>
   );
 });
+
+LandingWrapper.displayName = 'LandingWrapper';
 
 export default LandingWrapper;
