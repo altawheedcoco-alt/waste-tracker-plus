@@ -81,7 +81,7 @@ const Header = memo(() => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-card/80 backdrop-blur-xl border-b border-border/30 animate-fade-in shadow-sm" style={{ WebkitBackdropFilter: 'blur(20px) saturate(1.8)' }}>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-card/90 backdrop-blur-2xl border-b border-border/40 animate-fade-in shadow-md" style={{ WebkitBackdropFilter: 'blur(24px) saturate(2)' }}>
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-16 sm:h-20">
           <div
