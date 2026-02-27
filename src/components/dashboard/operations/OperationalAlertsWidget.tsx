@@ -73,22 +73,22 @@ const HAZARD_LABELS: Record<string, string> = {
 const SEVERITY_CONFIG = {
   critical: {
     icon: ShieldAlert,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800',
+    color: 'text-destructive',
+    bgColor: 'bg-destructive/5 border-destructive/20',
     badge: 'destructive' as const,
     label: 'حرج',
   },
   warning: {
     icon: AlertTriangle,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800',
+    color: 'text-primary',
+    bgColor: 'bg-accent border-primary/20',
     badge: 'secondary' as const,
     label: 'تحذير',
   },
   info: {
     icon: Clock,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800',
+    color: 'text-muted-foreground',
+    bgColor: 'bg-muted border-border',
     badge: 'outline' as const,
     label: 'معلومة',
   },
@@ -250,14 +250,14 @@ const ShipmentDetailCard = ({ shipment }: { shipment: ShipmentDetail }) => {
       {/* Locations */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
         <div className="flex items-start gap-1.5">
-          <MapPin className="h-3.5 w-3.5 text-emerald-600 mt-0.5 shrink-0" />
+          <MapPin className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
           <div>
             <span className="text-muted-foreground block">الاستلام:</span>
             <span className="font-medium">{shipment.pickup_address || '—'}</span>
           </div>
         </div>
         <div className="flex items-start gap-1.5">
-          <MapPin className="h-3.5 w-3.5 text-red-500 mt-0.5 shrink-0" />
+          <MapPin className="h-3.5 w-3.5 text-destructive mt-0.5 shrink-0" />
           <div>
             <span className="text-muted-foreground block">التسليم:</span>
             <span className="font-medium">{shipment.delivery_address || '—'}</span>
@@ -276,7 +276,7 @@ const ShipmentDetailCard = ({ shipment }: { shipment: ShipmentDetail }) => {
           <div className="flex items-center gap-1.5">
             <Clock className="h-3 w-3 text-muted-foreground" />
             <span className="text-muted-foreground">المتوقع:</span>
-            <span className={new Date(shipment.expected_delivery_date) < new Date() ? 'text-red-600 font-bold' : ''}>
+            <span className={new Date(shipment.expected_delivery_date) < new Date() ? 'text-destructive font-bold' : ''}>
               {format(new Date(shipment.expected_delivery_date), 'dd/MM/yyyy', { locale: ar })}
             </span>
           </div>
@@ -296,7 +296,7 @@ const ShipmentDetailCard = ({ shipment }: { shipment: ShipmentDetail }) => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
         {generator && (
           <div className="flex items-start gap-1.5">
-            <Building2 className="h-3.5 w-3.5 text-blue-500 mt-0.5 shrink-0" />
+            <Building2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
             <div>
               <span className="text-muted-foreground block">المولّد:</span>
               <span className="font-medium">{generator.name}</span>
@@ -306,7 +306,7 @@ const ShipmentDetailCard = ({ shipment }: { shipment: ShipmentDetail }) => {
         )}
         {recycler && (
           <div className="flex items-start gap-1.5">
-            <Building2 className="h-3.5 w-3.5 text-teal-500 mt-0.5 shrink-0" />
+            <Building2 className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
             <div>
               <span className="text-muted-foreground block">المدوّر:</span>
               <span className="font-medium">{recycler.name}</span>
@@ -316,7 +316,7 @@ const ShipmentDetailCard = ({ shipment }: { shipment: ShipmentDetail }) => {
         )}
         {(driver || shipment.manual_driver_name) && (
           <div className="flex items-start gap-1.5">
-            <User className="h-3.5 w-3.5 text-purple-500 mt-0.5 shrink-0" />
+            <User className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
             <div>
               <span className="text-muted-foreground block">السائق:</span>
               <span className="font-medium">{driver?.profile?.full_name || shipment.manual_driver_name || '—'}</span>
@@ -551,7 +551,7 @@ const OperationalAlertsWidget = () => {
   if (visibleAlerts.length === 0) return null;
 
   return (
-    <Card className="border-amber-200 dark:border-amber-800/50">
+    <Card className="border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -562,7 +562,7 @@ const OperationalAlertsWidget = () => {
           </div>
           <div className="flex items-center gap-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <AlertTriangle className="w-5 h-5 text-amber-600" />
+              <AlertTriangle className="w-5 h-5 text-primary" />
               تنبيهات تشغيلية
             </CardTitle>
             <div className="flex items-center gap-1.5">
@@ -607,12 +607,12 @@ const OperationalAlertsWidget = () => {
                       {/* Quick solutions preview - always visible */}
                       {alert.solutions && alert.solutions.length > 0 && !isExpanded && (
                         <div className="flex items-center gap-1.5 flex-wrap mt-1">
-                          <Sparkles className="w-3 h-3 text-emerald-500 shrink-0" />
+                          <Sparkles className="w-3 h-3 text-primary shrink-0" />
                           {alert.solutions.slice(0, 2).map((sol, idx) => (
                             <Badge
                               key={idx}
                               variant="outline"
-                              className="text-[10px] px-1.5 py-0 h-5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 cursor-default"
+                              className="text-[10px] px-1.5 py-0 h-5 bg-accent text-primary border-primary/20 cursor-default"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {sol.length > 40 ? sol.slice(0, 40) + '…' : sol}
@@ -657,26 +657,26 @@ const OperationalAlertsWidget = () => {
 
                           {/* Delay Reason */}
                           {alert.delayReason && (
-                            <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 rounded-lg p-3 text-right" dir="rtl">
+                            <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-right" dir="rtl">
                               <div className="flex items-center gap-2 mb-1.5">
-                                <Info className="h-4 w-4 text-red-600" />
-                                <span className="text-xs font-bold text-red-700 dark:text-red-400">سبب المشكلة:</span>
+                                <Info className="h-4 w-4 text-destructive" />
+                                <span className="text-xs font-bold text-destructive">سبب المشكلة:</span>
                               </div>
-                              <p className="text-xs text-red-800 dark:text-red-300 leading-relaxed">{alert.delayReason}</p>
+                              <p className="text-xs text-destructive/80 leading-relaxed">{alert.delayReason}</p>
                             </div>
                           )}
 
                           {/* Solutions */}
                           {alert.solutions && alert.solutions.length > 0 && (
-                            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded-lg p-3 text-right" dir="rtl">
+                            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-right" dir="rtl">
                               <div className="flex items-center gap-2 mb-2">
-                                <Sparkles className="h-4 w-4 text-emerald-600" />
-                                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">الحلول المقترحة:</span>
+                                <Sparkles className="h-4 w-4 text-primary" />
+                                <span className="text-xs font-bold text-primary">الحلول المقترحة:</span>
                               </div>
                               <ul className="space-y-1.5">
                                 {alert.solutions.map((solution, idx) => (
-                                  <li key={idx} className="flex items-start gap-2 text-xs text-emerald-800 dark:text-emerald-300">
-                                    <span className="bg-emerald-200 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-200 rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                                  <li key={idx} className="flex items-start gap-2 text-xs text-foreground/80">
+                                    <span className="bg-primary/20 text-primary rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
                                       {idx + 1}
                                     </span>
                                     <span className="leading-relaxed">{solution}</span>
@@ -714,7 +714,7 @@ const OperationalAlertsWidget = () => {
                             <Button
                               size="sm"
                               variant="default"
-                              className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700"
+                              className="h-7 text-xs"
                               onClick={(e) => { e.stopPropagation(); handleResolve(alert); }}
                             >
                               <CheckCircle2 className="ml-1 h-3 w-3" />
