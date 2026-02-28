@@ -118,6 +118,18 @@ export const useEnvironmentalConsultants = () => {
   // Register as consultant
   const registerConsultant = useMutation({
     mutationFn: async (data: Partial<EnvironmentalConsultant>) => {
+      // Check if already registered
+      const { data: existing } = await supabase
+        .from('environmental_consultants')
+        .select('id, consultant_code')
+        .eq('user_id', profile!.user_id)
+        .maybeSingle();
+      
+      if (existing) {
+        // Already registered, return existing profile
+        return existing;
+      }
+
       const { data: result, error } = await supabase
         .from('environmental_consultants')
         .insert({
