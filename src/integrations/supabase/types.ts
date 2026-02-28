@@ -12906,6 +12906,87 @@ export type Database = {
           },
         ]
       }
+      esg_report_snapshots: {
+        Row: {
+          carbon_saved_tons: number | null
+          certificate_number: string | null
+          created_at: string
+          diversion_rate: number | null
+          environmental_score: number | null
+          generated_by: string | null
+          governance_score: number | null
+          id: string
+          organization_id: string
+          overall_score: number | null
+          recycled_weight_tons: number | null
+          report_data: Json | null
+          report_period: string
+          report_type: string
+          sdg_data: Json | null
+          social_score: number | null
+          status: string | null
+          total_weight_tons: number | null
+          updated_at: string
+        }
+        Insert: {
+          carbon_saved_tons?: number | null
+          certificate_number?: string | null
+          created_at?: string
+          diversion_rate?: number | null
+          environmental_score?: number | null
+          generated_by?: string | null
+          governance_score?: number | null
+          id?: string
+          organization_id: string
+          overall_score?: number | null
+          recycled_weight_tons?: number | null
+          report_data?: Json | null
+          report_period: string
+          report_type?: string
+          sdg_data?: Json | null
+          social_score?: number | null
+          status?: string | null
+          total_weight_tons?: number | null
+          updated_at?: string
+        }
+        Update: {
+          carbon_saved_tons?: number | null
+          certificate_number?: string | null
+          created_at?: string
+          diversion_rate?: number | null
+          environmental_score?: number | null
+          generated_by?: string | null
+          governance_score?: number | null
+          id?: string
+          organization_id?: string
+          overall_score?: number | null
+          recycled_weight_tons?: number | null
+          report_data?: Json | null
+          report_period?: string
+          report_type?: string
+          sdg_data?: Json | null
+          social_score?: number | null
+          status?: string | null
+          total_weight_tons?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esg_report_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "esg_report_snapshots_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       esg_reports: {
         Row: {
           carbon_credit_value_usd: number | null
@@ -14005,6 +14086,82 @@ export type Database = {
           waste_type?: string | null
         }
         Relationships: []
+      }
+      geofence_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          distance_meters: number | null
+          driver_id: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          message: string | null
+          organization_id: string | null
+          resolution_notes: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          shipment_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          distance_meters?: number | null
+          driver_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          message?: string | null
+          organization_id?: string | null
+          resolution_notes?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          shipment_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          distance_meters?: number | null
+          driver_id?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          message?: string | null
+          organization_id?: string | null
+          resolution_notes?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          shipment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofence_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "geofence_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_alerts_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       government_reports: {
         Row: {
@@ -15600,6 +15757,73 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_lifecycle_gates: {
+        Row: {
+          checked_at: string | null
+          checked_by: string | null
+          created_at: string
+          gate_order: number
+          gate_status: string
+          gate_type: string
+          id: string
+          metadata: Json | null
+          notes: string | null
+          organization_id: string
+          shipment_id: string
+          updated_at: string
+        }
+        Insert: {
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          gate_order?: number
+          gate_status?: string
+          gate_type: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          organization_id: string
+          shipment_id: string
+          updated_at?: string
+        }
+        Update: {
+          checked_at?: string | null
+          checked_by?: string | null
+          created_at?: string
+          gate_order?: number
+          gate_status?: string
+          gate_type?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          organization_id?: string
+          shipment_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_lifecycle_gates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "job_lifecycle_gates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_lifecycle_gates_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
