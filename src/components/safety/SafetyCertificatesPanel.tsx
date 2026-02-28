@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useSafetyCertificates } from '@/hooks/useSafetySystem';
 import { Plus, Award, Loader2, X, Shield, QrCode, FileText, Calendar } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import LinkedPartnerSafetySelector from './LinkedPartnerSafetySelector';
 
 const CERT_TYPES = [
   { id: 'ppe_compliance', ar: 'شهادة امتثال PPE' },

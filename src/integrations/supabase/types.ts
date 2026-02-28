@@ -24347,6 +24347,82 @@ export type Database = {
           },
         ]
       }
+      safety_external_links: {
+        Row: {
+          access_count: number | null
+          allowed_modules: string[]
+          allowed_user_names: Json | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          last_accessed_at: string | null
+          link_code: string
+          link_name: string
+          organization_id: string
+          partner_org_ids: string[] | null
+          pin_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_count?: number | null
+          allowed_modules?: string[]
+          allowed_user_names?: Json | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_accessed_at?: string | null
+          link_code?: string
+          link_name: string
+          organization_id: string
+          partner_org_ids?: string[] | null
+          pin_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_count?: number | null
+          allowed_modules?: string[]
+          allowed_user_names?: Json | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_accessed_at?: string | null
+          link_code?: string
+          link_name?: string
+          organization_id?: string
+          partner_org_ids?: string[] | null
+          pin_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_external_links_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_external_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_external_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       safety_inspections: {
         Row: {
           area_inspected: string
@@ -24461,6 +24537,151 @@ export type Database = {
           {
             foreignKeyName: "safety_inspections_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safety_link_access_log: {
+        Row: {
+          accessed_at: string
+          accessed_by_name: string | null
+          accessed_by_phone: string | null
+          accessed_by_user_id: string | null
+          id: string
+          ip_address: string | null
+          link_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          accessed_at?: string
+          accessed_by_name?: string | null
+          accessed_by_phone?: string | null
+          accessed_by_user_id?: string | null
+          id?: string
+          ip_address?: string | null
+          link_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          accessed_at?: string
+          accessed_by_name?: string | null
+          accessed_by_phone?: string | null
+          accessed_by_user_id?: string | null
+          id?: string
+          ip_address?: string | null
+          link_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_link_access_log_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "safety_external_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safety_partner_permissions: {
+        Row: {
+          can_attend_toolbox_talks: boolean | null
+          can_receive_certificates: boolean | null
+          can_report_hazards: boolean | null
+          can_report_incidents: boolean | null
+          can_request_inspection: boolean | null
+          can_view_certificates: boolean | null
+          can_view_emergency_plans: boolean | null
+          can_view_hazards: boolean | null
+          can_view_incidents: boolean | null
+          can_view_inspections: boolean | null
+          can_view_jsa: boolean | null
+          can_view_ppe: boolean | null
+          can_view_safety_team: boolean | null
+          can_view_toolbox_talks: boolean | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          organization_id: string
+          partner_organization_id: string
+          restricted_to_user_ids: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          can_attend_toolbox_talks?: boolean | null
+          can_receive_certificates?: boolean | null
+          can_report_hazards?: boolean | null
+          can_report_incidents?: boolean | null
+          can_request_inspection?: boolean | null
+          can_view_certificates?: boolean | null
+          can_view_emergency_plans?: boolean | null
+          can_view_hazards?: boolean | null
+          can_view_incidents?: boolean | null
+          can_view_inspections?: boolean | null
+          can_view_jsa?: boolean | null
+          can_view_ppe?: boolean | null
+          can_view_safety_team?: boolean | null
+          can_view_toolbox_talks?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id: string
+          partner_organization_id: string
+          restricted_to_user_ids?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          can_attend_toolbox_talks?: boolean | null
+          can_receive_certificates?: boolean | null
+          can_report_hazards?: boolean | null
+          can_report_incidents?: boolean | null
+          can_request_inspection?: boolean | null
+          can_view_certificates?: boolean | null
+          can_view_emergency_plans?: boolean | null
+          can_view_hazards?: boolean | null
+          can_view_incidents?: boolean | null
+          can_view_inspections?: boolean | null
+          can_view_jsa?: boolean | null
+          can_view_ppe?: boolean | null
+          can_view_safety_team?: boolean | null
+          can_view_toolbox_talks?: boolean | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id?: string
+          partner_organization_id?: string
+          restricted_to_user_ids?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_partner_permissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_partner_permissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_partner_permissions_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_partner_permissions_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]

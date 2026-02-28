@@ -8,7 +8,7 @@ import { useSafetyStats } from '@/hooks/useSafetyManager';
 import {
   Shield, AlertTriangle, ClipboardCheck, FileWarning,
   HardHat, Siren, Users, TrendingUp, Activity, Flame, GraduationCap,
-  Search, MessageSquare, ClipboardList, Award,
+  Search, MessageSquare, ClipboardList, Award, Settings2,
 } from 'lucide-react';
 
 const EmergencyPlansPanel = lazy(() => import('./EmergencyPlansPanel'));
@@ -24,6 +24,7 @@ const JSAPanel = lazy(() => import('./JSAPanel'));
 const ToolboxTalksPanel = lazy(() => import('./ToolboxTalksPanel'));
 const SafetyInspectionsPanel = lazy(() => import('./SafetyInspectionsPanel'));
 const SafetyCertificatesPanel = lazy(() => import('./SafetyCertificatesPanel'));
+const SafetyPartnerPermissionsPanel = lazy(() => import('./SafetyPartnerPermissionsPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -59,6 +60,7 @@ const SafetyManagerDashboard = () => {
     { value: 'incidents', label: 'سجل الحوادث', icon: AlertTriangle },
     { value: 'certificates', label: 'الشهادات', icon: Award },
     { value: 'ohs', label: 'تقارير OHS', icon: ClipboardCheck },
+    { value: 'partner-perms', label: 'صلاحيات الجهات', icon: Settings2 },
   ];
 
   return (
@@ -193,6 +195,7 @@ const SafetyManagerDashboard = () => {
         <TabsContent value="incidents" className="mt-4"><Suspense fallback={<TabFallback />}><IncidentReportManager /></Suspense></TabsContent>
         <TabsContent value="certificates" className="mt-4"><Suspense fallback={<TabFallback />}><SafetyCertificatesPanel /></Suspense></TabsContent>
         <TabsContent value="ohs" className="mt-4"><Suspense fallback={<TabFallback />}><OHSReportPanel /></Suspense></TabsContent>
+        <TabsContent value="partner-perms" className="mt-4"><Suspense fallback={<TabFallback />}><SafetyPartnerPermissionsPanel /></Suspense></TabsContent>
       </Tabs>
     </div>
   );
