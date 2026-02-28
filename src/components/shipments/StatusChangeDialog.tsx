@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpactRecorder } from '@/hooks/useImpactRecorder';
 import DeliveryDeclarationDialog from './DeliveryDeclarationDialog';
 import ShipmentPhotoUpload from './ShipmentPhotoUpload';
 import {
@@ -62,6 +63,7 @@ interface StatusChangeDialogProps {
 
 const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofenceRadius = 200 }: StatusChangeDialogProps) => {
   const { profile, organization } = useAuth();
+  const { recordShipmentStatusChange } = useImpactRecorder();
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -337,6 +339,12 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
       } catch (autoError) {
         console.error('Auto document creation failed (non-blocking):', autoError);
       }
+
+      // Record impact chain event
+      recordShipmentStatusChange(shipment.id, dbStatus, {
+        shipmentNumber: shipment.shipment_number,
+        previousStatus: shipment.status,
+      });
 
       toast.success(`تم تحديث الحالة إلى "${statusConfig?.labelAr || selectedStatus}"`);
       onStatusChanged?.();
