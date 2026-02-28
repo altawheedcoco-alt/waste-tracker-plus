@@ -235,52 +235,52 @@ const MyLocation = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-3 sm:space-y-6 pb-20"
       >
         {/* Back Button */}
         <BackButton />
 
-        {/* Header */}
-        <div className="flex items-center justify-end gap-3">
+        {/* Header - compact on mobile */}
+        <div className="flex items-center justify-end gap-2 sm:gap-3">
           <div className="text-right">
-            <h1 className="text-3xl font-bold flex items-center gap-3 justify-end">
-              <MapPinned className="h-8 w-8 text-primary" />
+            <h1 className="text-lg sm:text-3xl font-bold flex items-center gap-2 sm:gap-3 justify-end">
+              <MapPinned className="h-5 w-5 sm:h-8 sm:w-8 text-primary" />
               موقعي والتتبع
             </h1>
-            <p className="text-muted-foreground">عرض موقعك وإدارة رحلات التتبع</p>
+            <p className="text-xs sm:text-base text-muted-foreground">عرض موقعك وإدارة رحلات التتبع</p>
           </div>
         </div>
 
         {/* Tabs for Location vs Trip Tracking */}
         <Tabs defaultValue="location" className="w-full" dir="rtl">
-          <TabsList className="grid w-full max-w-lg grid-cols-3">
-            <TabsTrigger value="location" className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              موقعي الحالي
+          <TabsList className="grid w-full grid-cols-3 h-9 sm:h-10">
+            <TabsTrigger value="location" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm">
+              <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">موقعي</span> الحالي
             </TabsTrigger>
-            <TabsTrigger value="tracking" className="flex items-center gap-2">
-              <Route className="h-4 w-4" />
+            <TabsTrigger value="tracking" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm">
+              <Route className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               تتبع الرحلات
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
+            <TabsTrigger value="history" className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm">
+              <History className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               السجل
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="location" className="mt-4 space-y-4">
+          <TabsContent value="location" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
             {/* Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               <Card>
-                <CardContent className="p-4 text-right">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Navigation className="w-5 h-5 text-primary" />
+                <CardContent className="p-2.5 sm:p-4 text-right">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center sm:justify-between gap-1.5">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Navigation className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">الحالة</p>
-                      <Badge variant={driverInfo.is_available ? 'default' : 'secondary'}>
-                        <Circle className={`w-2 h-2 ml-1 ${driverInfo.is_available ? 'fill-primary' : 'fill-muted-foreground'}`} />
+                    <div className="text-center sm:text-right">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">الحالة</p>
+                      <Badge variant={driverInfo.is_available ? 'default' : 'secondary'} className="text-[10px] sm:text-xs">
+                        <Circle className={`w-1.5 h-1.5 sm:w-2 sm:h-2 ml-1 ${driverInfo.is_available ? 'fill-primary' : 'fill-muted-foreground'}`} />
                         {driverInfo.is_available ? 'متاح' : 'في مهمة'}
                       </Badge>
                     </div>
@@ -289,14 +289,14 @@ const MyLocation = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-4 text-right">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Clock className="w-5 h-5 text-primary" />
+                <CardContent className="p-2.5 sm:p-4 text-right">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center sm:justify-between gap-1.5">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">آخر تحديث</p>
-                      <p className="font-medium">
+                    <div className="text-center sm:text-right">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">آخر تحديث</p>
+                      <p className="font-medium text-[10px] sm:text-sm">
                         {currentLocation 
                           ? new Date(currentLocation.recorded_at).toLocaleString('en-US', {
                               hour: '2-digit',
@@ -304,7 +304,7 @@ const MyLocation = () => {
                               day: 'numeric',
                               month: 'short',
                             })
-                          : 'لم يتم التحديد بعد'
+                          : 'لم يتم'
                         }
                       </p>
                     </div>
@@ -313,16 +313,16 @@ const MyLocation = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-4 text-right">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Satellite className="w-5 h-5 text-primary" />
+                <CardContent className="p-2.5 sm:p-4 text-right">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-center sm:justify-between gap-1.5">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Satellite className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">الدقة</p>
-                      <p className="font-medium">
+                    <div className="text-center sm:text-right">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">الدقة</p>
+                      <p className="font-medium text-[10px] sm:text-sm">
                         {currentLocation?.accuracy 
-                          ? `${Math.round(currentLocation.accuracy)} متر`
+                          ? `${Math.round(currentLocation.accuracy)} م`
                           : '-'
                         }
                       </p>
@@ -334,19 +334,19 @@ const MyLocation = () => {
 
             {/* Map */}
             <Card>
-              <CardHeader className="text-right">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+              <CardHeader className="text-right p-3 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Button
                       onClick={updateMyLocation}
                       disabled={updating}
                       size="sm"
-                      className="gap-2"
+                      className="gap-1.5 text-xs flex-1 sm:flex-initial"
                     >
                       {updating ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
-                        <Send className="h-4 w-4" />
+                        <Send className="h-3.5 w-3.5" />
                       )}
                       تحديد موقعي
                     </Button>
@@ -354,30 +354,30 @@ const MyLocation = () => {
                       onClick={toggleLiveTracking}
                       size="sm"
                       variant={liveTracking ? 'destructive' : 'outline'}
-                      className="gap-2"
+                      className="gap-1.5 text-xs flex-1 sm:flex-initial"
                     >
-                      <Radio className={`h-4 w-4 ${liveTracking ? 'animate-pulse' : ''}`} />
-                      {liveTracking ? 'إيقاف التتبع' : 'تتبع مباشر'}
+                      <Radio className={`h-3.5 w-3.5 ${liveTracking ? 'animate-pulse' : ''}`} />
+                      {liveTracking ? 'إيقاف' : 'تتبع مباشر'}
                     </Button>
                   </div>
                   <div>
-                    <CardTitle className="flex items-center gap-2 justify-end">
+                    <CardTitle className="flex items-center gap-2 justify-end text-sm sm:text-base">
                       خريطة موقعي
                       {liveTracking && (
-                        <Badge variant="default" className="bg-primary animate-pulse">
-                          <Radio className="w-3 h-3 ml-1" />
+                        <Badge variant="default" className="bg-primary animate-pulse text-[10px]">
+                          <Radio className="w-2.5 h-2.5 ml-1" />
                           مباشر
                         </Badge>
                       )}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-[10px] sm:text-sm">
                       {driverInfo.organization_name || 'شركة النقل'} • {driverInfo.vehicle_plate || 'غير محدد'}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="h-[400px] rounded-lg overflow-hidden border">
+              <CardContent className="p-2 sm:p-6 pt-0">
+                <div className="h-[250px] sm:h-[400px] rounded-lg overflow-hidden border">
                   <GoogleMapComponent
                     center={currentLocation 
                       ? { lat: currentLocation.latitude, lng: currentLocation.longitude }

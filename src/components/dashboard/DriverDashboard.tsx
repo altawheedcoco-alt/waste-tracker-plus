@@ -225,8 +225,10 @@ const DriverDashboard = () => {
     { id: 'routes', label: 'تحسين المسارات', icon: Route },
   ];
 
+  const isMobileView = window.innerWidth < 768;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 pb-20">
       {/* Smart Daily Brief */}
       <SmartDailyBrief
         role="driver"
@@ -312,15 +314,15 @@ const DriverDashboard = () => {
       >
         <Tabs defaultValue="tasks" className="w-full" dir="rtl">
           <div className="relative overflow-x-auto rounded-xl border border-border/50 bg-card p-1 scrollbar-hide">
-            <TabsList className="w-full justify-center bg-transparent gap-1 h-auto p-0">
+            <TabsList className="w-full justify-center bg-transparent gap-0.5 sm:gap-1 h-auto p-0">
               {tabItems.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="flex-1 whitespace-nowrap text-xs gap-1.5 px-3 py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all"
+                  className="flex-1 whitespace-nowrap text-[10px] sm:text-xs gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-2 sm:py-2.5 rounded-lg text-muted-foreground data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30 data-[state=active]:shadow-sm hover:text-foreground transition-all"
                 >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
+                  <tab.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline">{tab.label}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -369,37 +371,38 @@ const DriverDashboard = () => {
                   ) : (
                     activeShipments.map((shipment) => (
                       <div key={shipment.id} className="flex flex-col gap-2">
-                        <div className="flex gap-3">
-                          <div className="flex-1 min-w-0">
-                            <ShipmentCard
-                              shipment={shipment}
-                              onStatusChange={fetchDriverData}
-                              variant="full"
-                            />
-                          </div>
-                          <Card className="w-[180px] flex-shrink-0 overflow-hidden">
-                            <div className="h-full min-h-[140px] relative">
+                        <ShipmentCard
+                          shipment={shipment}
+                          onStatusChange={fetchDriverData}
+                          variant="full"
+                        />
+                        {/* Map preview - hidden on small mobile, shown on larger screens */}
+                        <div className="hidden sm:block">
+                          <Card className="overflow-hidden">
+                            <div className="h-[120px] relative">
                               <iframe
                                 src={`https://maps.google.com/maps?q=${encodeURIComponent(
                                   shipment.status === 'approved' ? shipment.pickup_address : shipment.delivery_address
                                 )}&z=14&output=embed`}
                                 width="100%"
                                 height="100%"
-                                style={{ border: 'none', minHeight: '140px' }}
+                                style={{ border: 'none' }}
                                 loading="lazy"
                                 title={`خريطة ${shipment.shipment_number}`}
                               />
-                              <button
-                                type="button"
-                                className="absolute bottom-1 left-1 bg-background/90 backdrop-blur-sm rounded-md px-2 py-1 text-[10px] font-medium flex items-center gap-1 shadow-sm border hover:bg-background transition-colors"
-                                onClick={() => handleNavigateToShipment(shipment)}
-                              >
-                                <Navigation className="w-3 h-3 text-primary" />
-                                ابدأ
-                              </button>
                             </div>
                           </Card>
                         </div>
+                        {/* Mobile: compact navigate button */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="sm:hidden w-full gap-2 text-xs"
+                          onClick={() => handleNavigateToShipment(shipment)}
+                        >
+                          <Navigation className="w-3.5 h-3.5 text-primary" />
+                          ابدأ التنقل
+                        </Button>
                       </div>
                     ))
                   )}
@@ -435,7 +438,7 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="field" className="mt-4 space-y-4">
             {/* Field tools selector */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
               {fieldTools.map((tool) => (
                 <button
                   key={tool.id}
@@ -496,7 +499,7 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB 5: حسابي - Profile, Training & Safety */}
           {/* ═══════════════════════════════════════════════ */}
-          <TabsContent value="account" className="mt-4 space-y-4">
+          <TabsContent value="account" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
             {/* Profile Card */}
             <Card>
               <CardContent className="p-6">
