@@ -112,12 +112,17 @@ const Hero = memo(() => {
             </div>
           </div>
 
-          <p 
-            className="mt-4 sm:mt-8 text-[10px] sm:text-sm text-white/60 font-medium animate-fade-up"
-            style={{ animationDelay: '0.9s', textShadow: '0 1px 6px rgba(0,0,0,0.3)' }}
-          >
-            {t('landing.joinUs')}
-          </p>
+          <div className="mt-4 sm:mt-8 animate-fade-up flex flex-col items-center gap-1" style={{ animationDelay: '0.9s' }}>
+            <p 
+              className="text-[11px] sm:text-sm font-bold tracking-wide text-gradient-eco"
+              style={{ WebkitTextFillColor: 'transparent' }}
+            >
+              {t('landing.joinUs')}
+            </p>
+            <p className="text-[10px] sm:text-xs text-amber-300/70 font-medium tracking-[0.3em]" style={{ fontFamily: 'serif', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+              𓂀 𓏏𓅓𓂋𓆑 𓇋𓏏𓂋 𓊪𓏏𓂋 𓅱𓂧𓏏 𓆓𓏏𓏤
+            </p>
+          </div>
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[hsl(140,20%,98%)] to-transparent" />
