@@ -412,22 +412,27 @@ const SystemScreenshots = () => {
             backgroundColor: '#ffffff',
           });
 
-          // Convert to blob
-          const blob = await new Promise<Blob>((res) => {
-            canvas.toBlob((b) => res(b!), 'image/png', 0.8);
-          });
+          // Convert to blob and download directly
+          canvas.toBlob((blob) => {
+            if (!blob) throw new Error('Failed to create blob');
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${screen.id}-${screen.title}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
 
-          // Upload to storage
-          const filePath = `${screen.id}.png`;
-          const { error } = await supabase.storage
-            .from(BUCKET)
-            .upload(filePath, blob, { upsert: true, contentType: 'image/png' });
-
-          if (error) throw error;
-
-          // Update local state
-          const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
-          setScreenshots(prev => ({ ...prev, [screen.id]: urlData.publicUrl + '?t=' + Date.now() }));
+            // Also upload to storage for gallery display
+            supabase.storage
+              .from(BUCKET)
+              .upload(`${screen.id}.png`, blob, { upsert: true, contentType: 'image/png' })
+              .then(() => {
+                const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(`${screen.id}.png`);
+                setScreenshots(prev => ({ ...prev, [screen.id]: urlData.publicUrl + '?t=' + Date.now() }));
+              });
+          }, 'image/png', 0.9);
           
           cleanup();
           resolve(true);
