@@ -230,6 +230,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   const isAdmin = roles.includes('admin');
   const isTransporter = organization?.organization_type === 'transporter';
   const isDisposal = (organization?.organization_type as string) === 'disposal';
+  const isConsultant = (organization?.organization_type as string) === 'consultant';
+  const isConsultingOffice = (organization?.organization_type as string) === 'consulting_office';
   const isDriver = roles.includes('driver');
 
   const getOrganizationIcon = () => {
@@ -247,6 +249,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         return Factory;
       case 'regulator':
         return Shield;
+      case 'consultant':
+        return User;
+      case 'consulting_office':
+        return Building2;
       default:
         return Building2;
     }
@@ -267,6 +273,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         return 'جهة التخلص النهائي';
       case 'regulator':
         return 'الجهة الرقابية';
+      case 'consultant':
+        return 'استشاري بيئي';
+      case 'consulting_office':
+        return 'مكتب استشارات بيئية';
       default:
         return 'جهة';
     }
@@ -290,6 +300,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         return 'جهة التخلص النهائي';
       case 'regulator':
         return 'الجهة الرقابية';
+      case 'consultant':
+        return 'استشاري بيئي';
+      case 'consulting_office':
+        return 'مكتب استشارات بيئية';
       default:
         return 'الجهة';
     }
@@ -399,6 +413,30 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Scale, label: language === 'ar' ? 'القرارات والعقوبات' : 'Penalties', path: '/dashboard/regulator', key: 'regulator-penalties' },
             { icon: Building2, label: language === 'ar' ? 'الشركات المنظمة' : 'Regulated Companies', path: '/dashboard/regulated-companies', key: 'regulated-companies' },
             { icon: MapPin, label: language === 'ar' ? 'تتبع المركبات' : 'Vehicle Tracking', path: '/dashboard/driver-tracking', key: 'regulator-tracking' },
+          ]
+        } as SidebarMenuItem]
+      : (organization?.organization_type as string) === 'consultant'
+      ? [{
+          icon: User, label: language === 'ar' ? 'خدمات الاستشارات' : 'Consulting Services', path: '#', key: 'consultant-ops-group', children: [
+            { icon: ClipboardCheck, label: language === 'ar' ? 'عمليات التدقيق' : 'Audit Sessions', path: '/dashboard/audit-sessions', key: 'consultant-audits' },
+            { icon: FileText, label: language === 'ar' ? 'التقارير البيئية' : 'Environmental Reports', path: '/dashboard/consultant-reports', key: 'consultant-reports' },
+            { icon: Shield, label: language === 'ar' ? 'تقييم الامتثال' : 'Compliance Assessment', path: '/dashboard/compliance-assessment', key: 'consultant-compliance' },
+            { icon: Building2, label: language === 'ar' ? 'العملاء' : 'Clients', path: '/dashboard/consultant-clients', key: 'consultant-clients' },
+            { icon: Award, label: language === 'ar' ? 'الشهادات والتراخيص' : 'Certifications', path: '/dashboard/consultant-certifications', key: 'consultant-certifications' },
+            { icon: BookOpen, label: language === 'ar' ? 'قاعدة المعرفة' : 'Knowledge Base', path: '/dashboard/consultant-knowledge', key: 'consultant-knowledge' },
+          ]
+        } as SidebarMenuItem]
+      : (organization?.organization_type as string) === 'consulting_office'
+      ? [{
+          icon: Building2, label: language === 'ar' ? 'إدارة المكتب' : 'Office Management', path: '#', key: 'consulting-office-ops-group', children: [
+            { icon: Users, label: language === 'ar' ? 'فريق الاستشاريين' : 'Consultants Team', path: '/dashboard/office-consultants', key: 'office-consultants' },
+            { icon: ClipboardList, label: language === 'ar' ? 'توزيع المهام' : 'Task Distribution', path: '/dashboard/office-tasks', key: 'office-tasks' },
+            { icon: ClipboardCheck, label: language === 'ar' ? 'عمليات التدقيق' : 'Audit Sessions', path: '/dashboard/audit-sessions', key: 'office-audits' },
+            { icon: FileText, label: language === 'ar' ? 'التقارير البيئية' : 'Environmental Reports', path: '/dashboard/consultant-reports', key: 'office-reports' },
+            { icon: Shield, label: language === 'ar' ? 'تقييم الامتثال' : 'Compliance Assessment', path: '/dashboard/compliance-assessment', key: 'office-compliance' },
+            { icon: Building2, label: language === 'ar' ? 'العملاء' : 'Clients', path: '/dashboard/consultant-clients', key: 'office-clients' },
+            { icon: Award, label: language === 'ar' ? 'الشهادات والتراخيص' : 'Certifications', path: '/dashboard/consultant-certifications', key: 'office-certifications' },
+            { icon: BarChart3, label: language === 'ar' ? 'أداء الفريق' : 'Team Performance', path: '/dashboard/office-performance', key: 'office-performance' },
           ]
         } as SidebarMenuItem]
       : [{
