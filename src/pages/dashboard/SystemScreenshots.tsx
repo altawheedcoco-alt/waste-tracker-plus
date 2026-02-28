@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, memo } from 'react';
+import { useState, useCallback, useRef, memo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -271,6 +271,92 @@ const screenshotCategories: ScreenCategory[] = [
   },
 ];
 
+// Lazy iframe card - only loads iframe when visible on screen
+const LazyScreenCard = memo(({ screen, categoryIcon: CatIcon, capturing, onNavigate }: {
+  screen: ScreenItem;
+  categoryIcon: any;
+  capturing: boolean;
+  onNavigate: () => void;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        obs.disconnect();
+      }
+    }, { rootMargin: '200px' });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  // Calculate scale to fit aspect-video container
+  const containerWidth = 320; // approximate card width
+  const scale = containerWidth / 1440;
+
+  return (
+    <Card
+      ref={ref}
+      className="overflow-hidden group hover:border-primary/30 hover:shadow-md transition-all cursor-pointer"
+      onClick={onNavigate}
+    >
+      <div className="relative aspect-video bg-muted/30 overflow-hidden">
+        {isVisible ? (
+          <>
+            {!iframeLoaded && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin text-primary/40" />
+                <span className="text-[9px] text-muted-foreground">جاري التحميل...</span>
+              </div>
+            )}
+            <iframe
+              src={screen.path}
+              title={screen.title}
+              className="border-0 pointer-events-none"
+              style={{
+                width: '1440px',
+                height: '900px',
+                transform: `scale(${scale})`,
+                transformOrigin: 'top right',
+              }}
+              loading="lazy"
+              sandbox="allow-same-origin allow-scripts"
+              tabIndex={-1}
+              onLoad={() => setIframeLoaded(true)}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+            <CatIcon className="w-8 h-8 text-primary/20" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors" />
+      </div>
+
+      <CardContent className="p-2.5">
+        <div className="text-right">
+          <h3 className="font-semibold text-xs">{screen.title}</h3>
+          <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">{screen.description}</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full mt-2 text-[10px] gap-1.5 h-7"
+          disabled={capturing}
+        >
+          {capturing ? <Loader2 className="w-3 h-3 animate-spin" /> : <ExternalLink className="w-3 h-3" />}
+          فتح الصفحة
+        </Button>
+      </CardContent>
+    </Card>
+  );
+});
+
 const SystemScreenshots = () => {
   const navigate = useNavigate();
   const [capturing, setCapturing] = useState<string | null>(null);
@@ -329,40 +415,13 @@ const SystemScreenshots = () => {
             <TabsContent key={category.id} value={category.id} className="mt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {category.screens.map((screen) => (
-                   <Card
+                   <LazyScreenCard
                     key={screen.id}
-                    className="overflow-hidden group hover:border-primary/30 hover:shadow-md transition-all cursor-pointer"
-                    onClick={() => handleCapture(screen.id, screen.path)}
-                  >
-                    <div className="relative aspect-video bg-gradient-to-br from-primary/5 via-muted/20 to-accent/10 flex flex-col items-center justify-center gap-2 p-4">
-                      {(() => {
-                        const Icon = category.icon;
-                        return <Icon className="w-8 h-8 text-primary/40 group-hover:text-primary/70 transition-colors" />;
-                      })()}
-                      <span className="text-[10px] text-muted-foreground/60 font-mono">{screen.path}</span>
-                    </div>
-
-                    <CardContent className="p-2.5">
-                      <div className="text-right">
-                        <h3 className="font-semibold text-xs">{screen.title}</h3>
-                        <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">{screen.description}</p>
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full mt-2 text-[10px] gap-1.5 h-7"
-                        disabled={capturing === screen.id}
-                      >
-                        {capturing === screen.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <ExternalLink className="w-3 h-3" />
-                        )}
-                        فتح الصفحة
-                      </Button>
-                    </CardContent>
-                  </Card>
+                    screen={screen}
+                    categoryIcon={category.icon}
+                    capturing={capturing === screen.id}
+                    onNavigate={() => handleCapture(screen.id, screen.path)}
+                  />
                 ))}
               </div>
             </TabsContent>
