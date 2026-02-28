@@ -20,7 +20,7 @@ export interface TermsContent {
  * Hook to fetch terms content from database
  * Falls back to static content if database fetch fails
  */
-export function useTermsContent(organizationType: 'generator' | 'transporter' | 'recycler' | 'disposal') {
+export function useTermsContent(organizationType: string) {
   return useQuery({
     queryKey: ['terms-content', organizationType],
     queryFn: async (): Promise<TermsContent | null> => {
@@ -91,7 +91,7 @@ export function useAllTermsContent() {
 /**
  * Get current terms version from database
  */
-export function useCurrentTermsVersion(organizationType: 'generator' | 'transporter' | 'recycler') {
+export function useCurrentTermsVersion(organizationType: string) {
   const { data } = useTermsContent(organizationType);
   return data?.version || '1.0';
 }
