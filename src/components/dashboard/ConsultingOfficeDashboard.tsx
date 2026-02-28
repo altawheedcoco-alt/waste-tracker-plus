@@ -30,6 +30,8 @@ const OfficeLicensesPanel = lazy(() => import('@/components/consulting-office/Of
 const OfficeFinancePanel = lazy(() => import('@/components/consulting-office/OfficeFinancePanel'));
 const OfficeSettingsPanel = lazy(() => import('@/components/consulting-office/OfficeSettingsPanel'));
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
+const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
+const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -326,10 +328,20 @@ const ConsultingOfficeDashboard = memo(() => {
           <TabsTrigger value="licenses" className="gap-1.5"><ShieldCheck className="w-4 h-4" />التراخيص</TabsTrigger>
           <TabsTrigger value="finance" className="gap-1.5"><Wallet className="w-4 h-4" />المالية</TabsTrigger>
           <TabsTrigger value="settings" className="gap-1.5"><Settings className="w-4 h-4" />الإعدادات</TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-4 h-4" />التحليلات</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-4">
+          {/* Smart Alerts */}
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantSmartAlerts
+              officeId={office?.id}
+              mode="office"
+              onNavigate={setActiveTab}
+            />
+          </Suspense>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TeamPerformance members={members} clients={clients} />
             <OfficeTaskBoard members={members} />
@@ -390,6 +402,12 @@ const ConsultingOfficeDashboard = memo(() => {
         <TabsContent value="settings" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <OfficeSettingsPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantAnalyticsPanel officeId={office?.id} mode="office" />
           </Suspense>
         </TabsContent>
 
