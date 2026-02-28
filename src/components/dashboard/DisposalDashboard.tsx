@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, Wrench, BarChart3, Users, FileText, Settings } from 'lucide-react';
+import { useState, useEffect, lazy, Suspense } from 'react';
+import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, Wrench, BarChart3, Users, FileText, Settings, Leaf } from 'lucide-react';
+
+const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
@@ -225,6 +227,9 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           <TabsTrigger value="fleet" className="gap-1 text-xs sm:text-sm">
             <Truck className="w-3.5 h-3.5" /> الأسطول
           </TabsTrigger>
+          <TabsTrigger value="esg" className="gap-1 text-xs sm:text-sm">
+            <Leaf className="w-3.5 h-3.5" /> تقارير ESG
+          </TabsTrigger>
         </TabsList>
 
         {/* Operations Tab */}
@@ -314,6 +319,13 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         <TabsContent value="fleet" className="mt-4 space-y-4">
           <VehicleComplianceManager />
           <DriverComplianceManager />
+        </TabsContent>
+
+        {/* ESG Tab */}
+        <TabsContent value="esg" className="mt-4 space-y-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <ESGReportPanel />
+          </Suspense>
         </TabsContent>
       </Tabs>
 
