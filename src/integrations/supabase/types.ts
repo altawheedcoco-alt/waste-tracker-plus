@@ -14503,6 +14503,129 @@ export type Database = {
           },
         ]
       }
+      hazard_registers: {
+        Row: {
+          control_type: string | null
+          created_at: string
+          existing_controls: string | null
+          hazard_category: string
+          hazard_description: string | null
+          hazard_title: string
+          id: string
+          likelihood: number
+          linked_entity_id: string | null
+          linked_entity_type: string | null
+          linked_shipment_id: string | null
+          location: string | null
+          location_lat: number | null
+          location_lng: number | null
+          organization_id: string
+          photo_urls: string[] | null
+          recommended_controls: string | null
+          reported_by: string | null
+          responsible_person: string | null
+          review_date: string | null
+          risk_level: string | null
+          risk_score: number | null
+          severity: number
+          status: string
+          target_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          control_type?: string | null
+          created_at?: string
+          existing_controls?: string | null
+          hazard_category: string
+          hazard_description?: string | null
+          hazard_title: string
+          id?: string
+          likelihood?: number
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          linked_shipment_id?: string | null
+          location?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          organization_id: string
+          photo_urls?: string[] | null
+          recommended_controls?: string | null
+          reported_by?: string | null
+          responsible_person?: string | null
+          review_date?: string | null
+          risk_level?: string | null
+          risk_score?: number | null
+          severity?: number
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          control_type?: string | null
+          created_at?: string
+          existing_controls?: string | null
+          hazard_category?: string
+          hazard_description?: string | null
+          hazard_title?: string
+          id?: string
+          likelihood?: number
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          linked_shipment_id?: string | null
+          location?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          organization_id?: string
+          photo_urls?: string[] | null
+          recommended_controls?: string | null
+          reported_by?: string | null
+          responsible_person?: string | null
+          review_date?: string | null
+          risk_level?: string | null
+          risk_score?: number | null
+          severity?: number
+          status?: string
+          target_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hazard_registers_linked_shipment_id_fkey"
+            columns: ["linked_shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hazard_registers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "hazard_registers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hazard_registers_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hazard_registers_responsible_person_fkey"
+            columns: ["responsible_person"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hr_attendance_policies: {
         Row: {
           break_duration_minutes: number | null
@@ -15594,6 +15717,98 @@ export type Database = {
           },
           {
             foreignKeyName: "job_listings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jsa_analyses: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          date_of_analysis: string
+          department: string | null
+          id: string
+          job_location: string | null
+          job_title: string
+          linked_entity_id: string | null
+          linked_entity_type: string | null
+          next_review_date: string | null
+          organization_id: string
+          overall_risk_level: string | null
+          review_frequency: string | null
+          status: string
+          steps: Json
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_analysis?: string
+          department?: string | null
+          id?: string
+          job_location?: string | null
+          job_title: string
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          next_review_date?: string | null
+          organization_id: string
+          overall_risk_level?: string | null
+          review_frequency?: string | null
+          status?: string
+          steps?: Json
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_of_analysis?: string
+          department?: string | null
+          id?: string
+          job_location?: string | null
+          job_title?: string
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          next_review_date?: string | null
+          organization_id?: string
+          overall_risk_level?: string | null
+          review_frequency?: string | null
+          status?: string
+          steps?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jsa_analyses_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jsa_analyses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jsa_analyses_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "jsa_analyses_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -21916,6 +22131,100 @@ export type Database = {
           },
         ]
       }
+      ppe_assignments: {
+        Row: {
+          acknowledgment_date: string | null
+          acknowledgment_signed: boolean | null
+          assigned_to: string | null
+          brand: string | null
+          condition: string | null
+          created_at: string
+          expiry_date: string | null
+          external_worker_name: string | null
+          external_worker_phone: string | null
+          id: string
+          is_registered_worker: boolean | null
+          issue_date: string
+          last_inspection_date: string | null
+          notes: string | null
+          organization_id: string
+          photo_url: string | null
+          ppe_type: string
+          ppe_type_ar: string
+          serial_number: string | null
+          size: string | null
+          updated_at: string
+        }
+        Insert: {
+          acknowledgment_date?: string | null
+          acknowledgment_signed?: boolean | null
+          assigned_to?: string | null
+          brand?: string | null
+          condition?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          external_worker_name?: string | null
+          external_worker_phone?: string | null
+          id?: string
+          is_registered_worker?: boolean | null
+          issue_date?: string
+          last_inspection_date?: string | null
+          notes?: string | null
+          organization_id: string
+          photo_url?: string | null
+          ppe_type: string
+          ppe_type_ar: string
+          serial_number?: string | null
+          size?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acknowledgment_date?: string | null
+          acknowledgment_signed?: boolean | null
+          assigned_to?: string | null
+          brand?: string | null
+          condition?: string | null
+          created_at?: string
+          expiry_date?: string | null
+          external_worker_name?: string | null
+          external_worker_phone?: string | null
+          id?: string
+          is_registered_worker?: boolean | null
+          issue_date?: string
+          last_inspection_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          photo_url?: string | null
+          ppe_type?: string
+          ppe_type_ar?: string
+          serial_number?: string | null
+          size?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ppe_assignments_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ppe_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ppe_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_calculations: {
         Row: {
           base_price: number
@@ -23915,6 +24224,249 @@ export type Database = {
           },
         ]
       }
+      safety_certificates: {
+        Row: {
+          certificate_number: string
+          certificate_type: string
+          certificate_type_ar: string
+          compliance_score: number | null
+          created_at: string
+          description: string | null
+          expiry_date: string | null
+          findings_summary: string | null
+          hash_sha256: string | null
+          id: string
+          issue_date: string
+          issued_by: string | null
+          organization_id: string
+          pdf_url: string | null
+          qr_data: string | null
+          recipient_id: string | null
+          recipient_name: string
+          recipient_org_id: string | null
+          recipient_type: string
+          revoked_reason: string | null
+          shared_with_entities: Json | null
+          source_id: string | null
+          source_type: string | null
+          status: string
+          updated_at: string
+          verification_code: string | null
+        }
+        Insert: {
+          certificate_number: string
+          certificate_type: string
+          certificate_type_ar: string
+          compliance_score?: number | null
+          created_at?: string
+          description?: string | null
+          expiry_date?: string | null
+          findings_summary?: string | null
+          hash_sha256?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          organization_id: string
+          pdf_url?: string | null
+          qr_data?: string | null
+          recipient_id?: string | null
+          recipient_name: string
+          recipient_org_id?: string | null
+          recipient_type: string
+          revoked_reason?: string | null
+          shared_with_entities?: Json | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+          verification_code?: string | null
+        }
+        Update: {
+          certificate_number?: string
+          certificate_type?: string
+          certificate_type_ar?: string
+          compliance_score?: number | null
+          created_at?: string
+          description?: string | null
+          expiry_date?: string | null
+          findings_summary?: string | null
+          hash_sha256?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          organization_id?: string
+          pdf_url?: string | null
+          qr_data?: string | null
+          recipient_id?: string | null
+          recipient_name?: string
+          recipient_org_id?: string | null
+          recipient_type?: string
+          revoked_reason?: string | null
+          shared_with_entities?: Json | null
+          source_id?: string | null
+          source_type?: string | null
+          status?: string
+          updated_at?: string
+          verification_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_certificates_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_certificates_recipient_org_id_fkey"
+            columns: ["recipient_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_certificates_recipient_org_id_fkey"
+            columns: ["recipient_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safety_inspections: {
+        Row: {
+          area_inspected: string
+          checklist: Json
+          compliance_score: number | null
+          corrective_actions: string | null
+          corrective_deadline: string | null
+          corrective_responsible: string | null
+          created_at: string
+          failed_items: number | null
+          findings: string | null
+          follow_up_inspection_id: string | null
+          id: string
+          inspection_date: string
+          inspection_type: string
+          inspection_type_ar: string | null
+          inspector_id: string | null
+          linked_driver_id: string | null
+          linked_entity_id: string | null
+          linked_entity_type: string | null
+          linked_vehicle_id: string | null
+          organization_id: string
+          passed_items: number | null
+          photo_urls: string[] | null
+          status: string
+          total_items: number | null
+          updated_at: string
+        }
+        Insert: {
+          area_inspected: string
+          checklist?: Json
+          compliance_score?: number | null
+          corrective_actions?: string | null
+          corrective_deadline?: string | null
+          corrective_responsible?: string | null
+          created_at?: string
+          failed_items?: number | null
+          findings?: string | null
+          follow_up_inspection_id?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_type: string
+          inspection_type_ar?: string | null
+          inspector_id?: string | null
+          linked_driver_id?: string | null
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          linked_vehicle_id?: string | null
+          organization_id: string
+          passed_items?: number | null
+          photo_urls?: string[] | null
+          status?: string
+          total_items?: number | null
+          updated_at?: string
+        }
+        Update: {
+          area_inspected?: string
+          checklist?: Json
+          compliance_score?: number | null
+          corrective_actions?: string | null
+          corrective_deadline?: string | null
+          corrective_responsible?: string | null
+          created_at?: string
+          failed_items?: number | null
+          findings?: string | null
+          follow_up_inspection_id?: string | null
+          id?: string
+          inspection_date?: string
+          inspection_type?: string
+          inspection_type_ar?: string | null
+          inspector_id?: string | null
+          linked_driver_id?: string | null
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          linked_vehicle_id?: string | null
+          organization_id?: string
+          passed_items?: number | null
+          photo_urls?: string[] | null
+          status?: string
+          total_items?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_inspections_corrective_responsible_fkey"
+            columns: ["corrective_responsible"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_inspections_follow_up_inspection_id_fkey"
+            columns: ["follow_up_inspection_id"]
+            isOneToOne: false
+            referencedRelation: "safety_inspections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_inspections_inspector_id_fkey"
+            columns: ["inspector_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_inspections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       safety_quiz_attempts: {
         Row: {
           answers: Json | null
@@ -24040,6 +24592,88 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safety_team_members: {
+        Row: {
+          assigned_sites: string[] | null
+          certification_expiry: string | null
+          certification_number: string | null
+          certification_photo_url: string | null
+          created_at: string
+          external_id_number: string | null
+          external_name: string | null
+          external_phone: string | null
+          id: string
+          is_active: boolean | null
+          is_registered: boolean | null
+          organization_id: string
+          profile_id: string | null
+          role: string
+          role_ar: string
+          specialization: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_sites?: string[] | null
+          certification_expiry?: string | null
+          certification_number?: string | null
+          certification_photo_url?: string | null
+          created_at?: string
+          external_id_number?: string | null
+          external_name?: string | null
+          external_phone?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_registered?: boolean | null
+          organization_id: string
+          profile_id?: string | null
+          role: string
+          role_ar: string
+          specialization?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_sites?: string[] | null
+          certification_expiry?: string | null
+          certification_number?: string | null
+          certification_photo_url?: string | null
+          created_at?: string
+          external_id_number?: string | null
+          external_name?: string | null
+          external_phone?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_registered?: boolean | null
+          organization_id?: string
+          profile_id?: string | null
+          role?: string
+          role_ar?: string
+          specialization?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_team_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "safety_team_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_team_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -28124,6 +28758,97 @@ export type Database = {
             columns: ["ticket_id"]
             isOneToOne: false
             referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      toolbox_talks: {
+        Row: {
+          attendee_count: number | null
+          attendees: Json
+          conducted_by: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          key_points: string[] | null
+          linked_entity_id: string | null
+          linked_entity_type: string | null
+          location: string | null
+          materials_urls: string[] | null
+          organization_id: string
+          photo_urls: string[] | null
+          status: string
+          talk_date: string
+          talk_time: string | null
+          topic: string
+          topic_category: string | null
+          updated_at: string
+        }
+        Insert: {
+          attendee_count?: number | null
+          attendees?: Json
+          conducted_by?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          key_points?: string[] | null
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          location?: string | null
+          materials_urls?: string[] | null
+          organization_id: string
+          photo_urls?: string[] | null
+          status?: string
+          talk_date?: string
+          talk_time?: string | null
+          topic: string
+          topic_category?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attendee_count?: number | null
+          attendees?: Json
+          conducted_by?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          key_points?: string[] | null
+          linked_entity_id?: string | null
+          linked_entity_type?: string | null
+          location?: string | null
+          materials_urls?: string[] | null
+          organization_id?: string
+          photo_urls?: string[] | null
+          status?: string
+          talk_date?: string
+          talk_time?: string | null
+          topic?: string
+          topic_category?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "toolbox_talks_conducted_by_fkey"
+            columns: ["conducted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "toolbox_talks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "toolbox_talks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
