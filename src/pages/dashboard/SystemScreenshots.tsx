@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 import {
-  Monitor, Camera, ExternalLink,
+  Camera, ExternalLink,
   Building2, Truck, Recycle, Factory,
-  Shield, User, Home, Loader2,
-  ZoomIn, X, Globe, Briefcase, FileText,
-  BookOpen, Scale, Building, Users, MapPin,
+  Shield, User, Loader2,
+  Globe, Briefcase, FileText,
+  Scale, Building, Users,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -273,7 +273,6 @@ const screenshotCategories: ScreenCategory[] = [
 
 const SystemScreenshots = () => {
   const navigate = useNavigate();
-  const [selectedImage, setSelectedImage] = useState<{ title: string; src: string } | null>(null);
   const [capturing, setCapturing] = useState<string | null>(null);
 
   const handleCapture = useCallback((screenId: string, path: string) => {
@@ -331,33 +330,20 @@ const SystemScreenshots = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {category.screens.map((screen) => (
                   <Card key={screen.id} className="overflow-hidden group hover:border-primary/30 transition-all">
-                    <div className="relative aspect-video bg-muted/50 overflow-hidden">
-                      {screen.image ? (
-                        <>
-                          <img
-                            src={screen.image}
-                            alt={screen.title}
-                            className="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
-                            loading="lazy"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity gap-1.5"
-                              onClick={() => setSelectedImage({ title: screen.title, src: screen.image! })}
-                            >
-                              <ZoomIn className="w-3.5 h-3.5" />
-                              تكبير
-                            </Button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-muted-foreground/50">
-                          <Monitor className="w-8 h-8" />
-                          <span className="text-[9px]">لم يتم التقاط بعد</span>
-                        </div>
-                      )}
+                    <div className="relative aspect-video bg-muted/30 overflow-hidden">
+                      <iframe
+                        src={screen.path}
+                        title={screen.title}
+                        className="w-[1920px] h-[1080px] origin-top-left pointer-events-none border-0"
+                        style={{ transform: 'scale(0.15)', transformOrigin: 'top left' }}
+                        loading="lazy"
+                        sandbox="allow-same-origin allow-scripts"
+                        tabIndex={-1}
+                      />
+                      <div
+                        className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors cursor-pointer"
+                        onClick={() => handleCapture(screen.id, screen.path)}
+                      />
                     </div>
 
                     <CardContent className="p-2.5">
@@ -390,32 +376,6 @@ const SystemScreenshots = () => {
           ))}
         </Tabs>
 
-        {selectedImage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <div className="relative max-w-5xl w-full" onClick={(e) => e.stopPropagation()}>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute -top-12 left-0 text-white hover:bg-white/20"
-                onClick={() => setSelectedImage(null)}
-              >
-                <X className="w-6 h-6" />
-              </Button>
-              <p className="absolute -top-12 right-0 text-white text-sm">{selectedImage.title}</p>
-              <img
-                src={selectedImage.src}
-                alt={selectedImage.title}
-                className="w-full rounded-xl shadow-2xl"
-              />
-            </div>
-          </motion.div>
-        )}
       </motion.div>
     </DashboardLayout>
   );
