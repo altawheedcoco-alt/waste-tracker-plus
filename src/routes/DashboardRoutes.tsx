@@ -169,6 +169,7 @@ const SavedLocationsPage = lazy(() => import("@/pages/SavedLocationsPage"));
 const OrganizationAttestation = lazy(() => import("@/pages/dashboard/OrganizationAttestation"));
 const AdminAttestations = lazy(() => import("@/pages/dashboard/AdminAttestations"));
 const ScopedAccessLinks = lazy(() => import("@/pages/dashboard/ScopedAccessLinks"));
+const AdminEntityCensus = lazy(() => import("@/pages/dashboard/AdminEntityCensus"));
 
 export const dashboardRoutes = (
   <>
@@ -341,6 +342,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/omaluna/job/:jobId/applications" element={<OmalunaJobApplications />} />
     <Route path="/dashboard/vehicle-marketplace" element={<VehicleMarketplace />} />
     <Route path="/dashboard/smart-agent" element={<SmartAgentDashboard />} />
+    <Route path="/dashboard/entity-census" element={<AdminEntityCensus />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
