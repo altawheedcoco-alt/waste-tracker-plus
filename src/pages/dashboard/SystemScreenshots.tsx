@@ -4,15 +4,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
 import {
   Camera, ExternalLink,
   Building2, Truck, Recycle, Factory,
   Shield, User, Loader2,
   Globe, Briefcase, FileText,
   Scale, Building, Users,
+  RefreshCw, Download, CheckCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 
@@ -21,7 +24,6 @@ interface ScreenItem {
   title: string;
   description: string;
   path: string;
-  image: string | null;
 }
 
 interface ScreenCategory {
@@ -37,21 +39,21 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'الصفحات العامة',
     icon: Globe,
     screens: [
-      { id: 'landing', title: 'الصفحة الرئيسية', description: 'صفحة الهبوط الرئيسية للمنصة', path: '/', image: '/screenshots/landing-page.png' },
-      { id: 'auth', title: 'تسجيل الدخول', description: 'صفحة تسجيل دخول المستخدمين', path: '/auth', image: '/screenshots/auth-page.png' },
-      { id: 'news', title: 'الأخبار', description: 'آخر أخبار المنصة', path: '/news', image: null },
-      { id: 'blog', title: 'المدونة', description: 'مقالات ومحتوى تعليمي', path: '/blog', image: null },
-      { id: 'academy', title: 'أكاديمية التدوير', description: 'دورات تدريبية وتعليمية', path: '/academy', image: null },
-      { id: 'map', title: 'الخريطة التفاعلية', description: 'خريطة مرافق إعادة التدوير', path: '/map', image: null },
-      { id: 'about', title: 'عن المنصة', description: 'معلومات عن المنصة', path: '/about', image: null },
-      { id: 'laws', title: 'التشريعات', description: 'القوانين والتشريعات البيئية', path: '/laws', image: null },
-      { id: 'partnerships', title: 'الشراكات', description: 'شركاء المنصة', path: '/partnerships', image: null },
-      { id: 'terms', title: 'الشروط والأحكام', description: 'شروط استخدام المنصة', path: '/terms', image: null },
-      { id: 'privacy', title: 'سياسة الخصوصية', description: 'سياسة حماية البيانات', path: '/privacy', image: null },
-      { id: 'help', title: 'المساعدة', description: 'مركز المساعدة والدعم', path: '/help', image: null },
-      { id: 'brochure', title: 'البروشور', description: 'الكتيب التعريفي للمنصة', path: '/brochure', image: null },
-      { id: 'verify', title: 'التحقق من المستندات', description: 'صفحة التحقق العامة', path: '/verify', image: null },
-      { id: 'track', title: 'تتبع الشحنات', description: 'تتبع الشحنات العام', path: '/track', image: null },
+      { id: 'landing', title: 'الصفحة الرئيسية', description: 'صفحة الهبوط الرئيسية للمنصة', path: '/' },
+      { id: 'auth', title: 'تسجيل الدخول', description: 'صفحة تسجيل دخول المستخدمين', path: '/auth' },
+      { id: 'news', title: 'الأخبار', description: 'آخر أخبار المنصة', path: '/news' },
+      { id: 'blog', title: 'المدونة', description: 'مقالات ومحتوى تعليمي', path: '/blog' },
+      { id: 'academy', title: 'أكاديمية التدوير', description: 'دورات تدريبية وتعليمية', path: '/academy' },
+      { id: 'map', title: 'الخريطة التفاعلية', description: 'خريطة مرافق إعادة التدوير', path: '/map' },
+      { id: 'about', title: 'عن المنصة', description: 'معلومات عن المنصة', path: '/about' },
+      { id: 'laws', title: 'التشريعات', description: 'القوانين والتشريعات البيئية', path: '/laws' },
+      { id: 'partnerships', title: 'الشراكات', description: 'شركاء المنصة', path: '/partnerships' },
+      { id: 'terms', title: 'الشروط والأحكام', description: 'شروط استخدام المنصة', path: '/terms' },
+      { id: 'privacy', title: 'سياسة الخصوصية', description: 'سياسة حماية البيانات', path: '/privacy' },
+      { id: 'help', title: 'المساعدة', description: 'مركز المساعدة والدعم', path: '/help' },
+      { id: 'brochure', title: 'البروشور', description: 'الكتيب التعريفي للمنصة', path: '/brochure' },
+      { id: 'verify', title: 'التحقق من المستندات', description: 'صفحة التحقق العامة', path: '/verify' },
+      { id: 'track', title: 'تتبع الشحنات', description: 'تتبع الشحنات العام', path: '/track' },
     ],
   },
   {
@@ -59,24 +61,24 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'مولد المخلفات',
     icon: Building2,
     screens: [
-      { id: 'gen-dash', title: 'لوحة تحكم المولد', description: 'ملخص العمليات والإحصائيات', path: '/dashboard', image: null },
-      { id: 'gen-shipments', title: 'إدارة الشحنات', description: 'عرض وتتبع شحنات المخلفات', path: '/dashboard/shipments', image: null },
-      { id: 'gen-create-shipment', title: 'إنشاء شحنة', description: 'نموذج إنشاء شحنة جديدة', path: '/dashboard/shipments/new', image: null },
-      { id: 'gen-reports', title: 'التقارير', description: 'تقارير الامتثال والأداء', path: '/dashboard/reports', image: null },
-      { id: 'gen-receipts', title: 'إيصالات المولد', description: 'إيصالات استلام المخلفات', path: '/dashboard/generator-receipts', image: null },
-      { id: 'gen-contracts', title: 'العقود', description: 'إدارة العقود مع الناقلين', path: '/dashboard/contracts', image: null },
-      { id: 'gen-partners', title: 'الشركاء', description: 'إدارة شركاء الأعمال', path: '/dashboard/partners', image: null },
-      { id: 'gen-partner-accounts', title: 'حسابات الشركاء', description: 'الحسابات المالية مع الشركاء', path: '/dashboard/partner-accounts', image: null },
-      { id: 'gen-employees', title: 'الموظفون', description: 'إدارة فريق العمل', path: '/dashboard/employees', image: null },
-      { id: 'gen-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'gen-org-profile', title: 'الملف التنظيمي', description: 'بيانات المنظمة', path: '/dashboard/organization-profile', image: null },
-      { id: 'gen-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
-      { id: 'gen-collection', title: 'طلبات الجمع', description: 'طلبات جمع المخلفات', path: '/dashboard/collection-requests', image: null },
-      { id: 'gen-hazardous', title: 'سجل النفايات الخطرة', description: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register', image: null },
-      { id: 'gen-nonhazardous', title: 'سجل النفايات غير الخطرة', description: 'سجل المخلفات غير الخطرة', path: '/dashboard/non-hazardous-register', image: null },
-      { id: 'gen-carbon', title: 'البصمة الكربونية', description: 'تحليل البصمة الكربونية', path: '/dashboard/carbon-footprint', image: null },
-      { id: 'gen-ai', title: 'أدوات الذكاء الاصطناعي', description: 'أدوات AI للمولد', path: '/dashboard/ai-tools', image: null },
-      { id: 'gen-stationery', title: 'القرطاسية', description: 'قوالب المطبوعات', path: '/dashboard/stationery', image: null },
+      { id: 'gen-dash', title: 'لوحة تحكم المولد', description: 'ملخص العمليات والإحصائيات', path: '/dashboard' },
+      { id: 'gen-shipments', title: 'إدارة الشحنات', description: 'عرض وتتبع شحنات المخلفات', path: '/dashboard/shipments' },
+      { id: 'gen-create-shipment', title: 'إنشاء شحنة', description: 'نموذج إنشاء شحنة جديدة', path: '/dashboard/shipments/new' },
+      { id: 'gen-reports', title: 'التقارير', description: 'تقارير الامتثال والأداء', path: '/dashboard/reports' },
+      { id: 'gen-receipts', title: 'إيصالات المولد', description: 'إيصالات استلام المخلفات', path: '/dashboard/generator-receipts' },
+      { id: 'gen-contracts', title: 'العقود', description: 'إدارة العقود مع الناقلين', path: '/dashboard/contracts' },
+      { id: 'gen-partners', title: 'الشركاء', description: 'إدارة شركاء الأعمال', path: '/dashboard/partners' },
+      { id: 'gen-partner-accounts', title: 'حسابات الشركاء', description: 'الحسابات المالية مع الشركاء', path: '/dashboard/partner-accounts' },
+      { id: 'gen-employees', title: 'الموظفون', description: 'إدارة فريق العمل', path: '/dashboard/employees' },
+      { id: 'gen-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'gen-org-profile', title: 'الملف التنظيمي', description: 'بيانات المنظمة', path: '/dashboard/organization-profile' },
+      { id: 'gen-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
+      { id: 'gen-collection', title: 'طلبات الجمع', description: 'طلبات جمع المخلفات', path: '/dashboard/collection-requests' },
+      { id: 'gen-hazardous', title: 'سجل النفايات الخطرة', description: 'سجل المخلفات الخطرة', path: '/dashboard/hazardous-register' },
+      { id: 'gen-nonhazardous', title: 'سجل النفايات غير الخطرة', description: 'سجل المخلفات غير الخطرة', path: '/dashboard/non-hazardous-register' },
+      { id: 'gen-carbon', title: 'البصمة الكربونية', description: 'تحليل البصمة الكربونية', path: '/dashboard/carbon-footprint' },
+      { id: 'gen-ai', title: 'أدوات الذكاء الاصطناعي', description: 'أدوات AI للمولد', path: '/dashboard/ai-tools' },
+      { id: 'gen-stationery', title: 'القرطاسية', description: 'قوالب المطبوعات', path: '/dashboard/stationery' },
     ],
   },
   {
@@ -84,23 +86,23 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'ناقل المخلفات',
     icon: Truck,
     screens: [
-      { id: 'trans-dash', title: 'لوحة تحكم الناقل', description: 'مركز القيادة للعمليات اللوجستية', path: '/dashboard', image: null },
-      { id: 'trans-shipments', title: 'شحنات الناقل', description: 'إدارة ومتابعة الشحنات', path: '/dashboard/transporter-shipments', image: null },
-      { id: 'trans-drivers', title: 'إدارة السائقين', description: 'متابعة السائقين والمركبات', path: '/dashboard/transporter-drivers', image: null },
-      { id: 'trans-driver-tracking', title: 'تتبع السائقين', description: 'تتبع مواقع السائقين', path: '/dashboard/driver-tracking', image: null },
-      { id: 'trans-routes', title: 'مسارات الشحنات', description: 'خريطة المسارات', path: '/dashboard/shipment-routes', image: null },
-      { id: 'trans-receipts', title: 'إيصالات الناقل', description: 'إيصالات النقل', path: '/dashboard/transporter-receipts', image: null },
-      { id: 'trans-contracts', title: 'العقود', description: 'إدارة عقود النقل', path: '/dashboard/contracts', image: null },
-      { id: 'trans-partners', title: 'الشركاء', description: 'شركاء النقل', path: '/dashboard/partners', image: null },
-      { id: 'trans-partner-accounts', title: 'حسابات الشركاء', description: 'الحسابات المالية', path: '/dashboard/partner-accounts', image: null },
-      { id: 'trans-employees', title: 'الموظفون', description: 'إدارة الموظفين', path: '/dashboard/employees', image: null },
-      { id: 'trans-reports', title: 'التقارير', description: 'تقارير النقل', path: '/dashboard/reports', image: null },
-      { id: 'trans-ai', title: 'أدوات الذكاء الاصطناعي', description: 'أدوات AI للناقل', path: '/dashboard/transporter-ai-tools', image: null },
-      { id: 'trans-gps', title: 'إعدادات GPS', description: 'إعدادات التتبع', path: '/dashboard/gps-settings', image: null },
-      { id: 'trans-quick-driver', title: 'روابط السائقين السريعة', description: 'إنشاء روابط سريعة للسائقين', path: '/dashboard/quick-driver-links', image: null },
-      { id: 'trans-waze', title: 'خريطة Waze الحية', description: 'الخريطة الحية', path: '/dashboard/waze-live-map', image: null },
-      { id: 'trans-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'trans-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'trans-dash', title: 'لوحة تحكم الناقل', description: 'مركز القيادة للعمليات اللوجستية', path: '/dashboard' },
+      { id: 'trans-shipments', title: 'شحنات الناقل', description: 'إدارة ومتابعة الشحنات', path: '/dashboard/transporter-shipments' },
+      { id: 'trans-drivers', title: 'إدارة السائقين', description: 'متابعة السائقين والمركبات', path: '/dashboard/transporter-drivers' },
+      { id: 'trans-driver-tracking', title: 'تتبع السائقين', description: 'تتبع مواقع السائقين', path: '/dashboard/driver-tracking' },
+      { id: 'trans-routes', title: 'مسارات الشحنات', description: 'خريطة المسارات', path: '/dashboard/shipment-routes' },
+      { id: 'trans-receipts', title: 'إيصالات الناقل', description: 'إيصالات النقل', path: '/dashboard/transporter-receipts' },
+      { id: 'trans-contracts', title: 'العقود', description: 'إدارة عقود النقل', path: '/dashboard/contracts' },
+      { id: 'trans-partners', title: 'الشركاء', description: 'شركاء النقل', path: '/dashboard/partners' },
+      { id: 'trans-partner-accounts', title: 'حسابات الشركاء', description: 'الحسابات المالية', path: '/dashboard/partner-accounts' },
+      { id: 'trans-employees', title: 'الموظفون', description: 'إدارة الموظفين', path: '/dashboard/employees' },
+      { id: 'trans-reports', title: 'التقارير', description: 'تقارير النقل', path: '/dashboard/reports' },
+      { id: 'trans-ai', title: 'أدوات الذكاء الاصطناعي', description: 'أدوات AI للناقل', path: '/dashboard/transporter-ai-tools' },
+      { id: 'trans-gps', title: 'إعدادات GPS', description: 'إعدادات التتبع', path: '/dashboard/gps-settings' },
+      { id: 'trans-quick-driver', title: 'روابط السائقين السريعة', description: 'إنشاء روابط سريعة للسائقين', path: '/dashboard/quick-driver-links' },
+      { id: 'trans-waze', title: 'خريطة Waze الحية', description: 'الخريطة الحية', path: '/dashboard/waze-live-map' },
+      { id: 'trans-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'trans-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -108,20 +110,20 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'معيد التدوير',
     icon: Recycle,
     screens: [
-      { id: 'rec-dash', title: 'لوحة تحكم المعيد', description: 'ملخص عمليات إعادة التدوير', path: '/dashboard', image: null },
-      { id: 'rec-shipments', title: 'الشحنات الواردة', description: 'استقبال وإدارة المواد', path: '/dashboard/shipments', image: null },
-      { id: 'rec-certs', title: 'إصدار شهادات التدوير', description: 'إصدار الشهادات البيئية', path: '/dashboard/issue-recycling-certificates', image: null },
-      { id: 'rec-my-certs', title: 'شهاداتي', description: 'الشهادات الصادرة', path: '/dashboard/recycling-certificates', image: null },
-      { id: 'rec-contracts', title: 'العقود', description: 'إدارة العقود', path: '/dashboard/contracts', image: null },
-      { id: 'rec-partners', title: 'الشركاء', description: 'إدارة الشركاء', path: '/dashboard/partners', image: null },
-      { id: 'rec-partner-accounts', title: 'حسابات الشركاء', description: 'الحسابات المالية', path: '/dashboard/partner-accounts', image: null },
-      { id: 'rec-employees', title: 'الموظفون', description: 'إدارة الموظفين', path: '/dashboard/employees', image: null },
-      { id: 'rec-reports', title: 'التقارير', description: 'تقارير إعادة التدوير', path: '/dashboard/reports', image: null },
-      { id: 'rec-ai', title: 'أدوات الذكاء الاصطناعي', description: 'أدوات AI للمعيد', path: '/dashboard/recycler-ai-tools', image: null },
-      { id: 'rec-exchange', title: 'بورصة المواد', description: 'تبادل المواد القابلة للتدوير', path: '/dashboard/waste-exchange', image: null },
-      { id: 'rec-auctions', title: 'مزادات المخلفات', description: 'مزادات شراء المواد', path: '/dashboard/waste-auctions', image: null },
-      { id: 'rec-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'rec-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'rec-dash', title: 'لوحة تحكم المعيد', description: 'ملخص عمليات إعادة التدوير', path: '/dashboard' },
+      { id: 'rec-shipments', title: 'الشحنات الواردة', description: 'استقبال وإدارة المواد', path: '/dashboard/shipments' },
+      { id: 'rec-certs', title: 'إصدار شهادات التدوير', description: 'إصدار الشهادات البيئية', path: '/dashboard/issue-recycling-certificates' },
+      { id: 'rec-my-certs', title: 'شهاداتي', description: 'الشهادات الصادرة', path: '/dashboard/recycling-certificates' },
+      { id: 'rec-contracts', title: 'العقود', description: 'إدارة العقود', path: '/dashboard/contracts' },
+      { id: 'rec-partners', title: 'الشركاء', description: 'إدارة الشركاء', path: '/dashboard/partners' },
+      { id: 'rec-partner-accounts', title: 'حسابات الشركاء', description: 'الحسابات المالية', path: '/dashboard/partner-accounts' },
+      { id: 'rec-employees', title: 'الموظفون', description: 'إدارة الموظفين', path: '/dashboard/employees' },
+      { id: 'rec-reports', title: 'التقارير', description: 'تقارير إعادة التدوير', path: '/dashboard/reports' },
+      { id: 'rec-ai', title: 'أدوات الذكاء الاصطناعي', description: 'أدوات AI للمعيد', path: '/dashboard/recycler-ai-tools' },
+      { id: 'rec-exchange', title: 'بورصة المواد', description: 'تبادل المواد القابلة للتدوير', path: '/dashboard/waste-exchange' },
+      { id: 'rec-auctions', title: 'مزادات المخلفات', description: 'مزادات شراء المواد', path: '/dashboard/waste-auctions' },
+      { id: 'rec-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'rec-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -129,16 +131,16 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'التخلص الآمن',
     icon: Factory,
     screens: [
-      { id: 'disp-dash', title: 'لوحة تحكم التخلص', description: 'إدارة مرافق التخلص الآمن', path: '/dashboard/disposal', image: null },
-      { id: 'disp-operations', title: 'عمليات التخلص', description: 'تسجيل عمليات التخلص', path: '/dashboard/disposal/operations', image: null },
-      { id: 'disp-new-op', title: 'عملية تخلص جديدة', description: 'إنشاء عملية تخلص', path: '/dashboard/disposal/operations/new', image: null },
-      { id: 'disp-incoming', title: 'الطلبات الواردة', description: 'طلبات التخلص الواردة', path: '/dashboard/disposal/incoming-requests', image: null },
-      { id: 'disp-certs', title: 'شهادات التخلص', description: 'الشهادات الصادرة', path: '/dashboard/disposal/certificates', image: null },
-      { id: 'disp-reports', title: 'تقارير التخلص', description: 'تقارير عمليات التخلص', path: '/dashboard/disposal/reports', image: null },
-      { id: 'disp-mission', title: 'غرفة العمليات', description: 'مركز التحكم بالعمليات', path: '/dashboard/disposal/mission-control', image: null },
-      { id: 'disp-shipments', title: 'الشحنات', description: 'متابعة شحنات التخلص', path: '/dashboard/shipments', image: null },
-      { id: 'disp-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'disp-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'disp-dash', title: 'لوحة تحكم التخلص', description: 'إدارة مرافق التخلص الآمن', path: '/dashboard/disposal' },
+      { id: 'disp-operations', title: 'عمليات التخلص', description: 'تسجيل عمليات التخلص', path: '/dashboard/disposal/operations' },
+      { id: 'disp-new-op', title: 'عملية تخلص جديدة', description: 'إنشاء عملية تخلص', path: '/dashboard/disposal/operations/new' },
+      { id: 'disp-incoming', title: 'الطلبات الواردة', description: 'طلبات التخلص الواردة', path: '/dashboard/disposal/incoming-requests' },
+      { id: 'disp-certs', title: 'شهادات التخلص', description: 'الشهادات الصادرة', path: '/dashboard/disposal/certificates' },
+      { id: 'disp-reports', title: 'تقارير التخلص', description: 'تقارير عمليات التخلص', path: '/dashboard/disposal/reports' },
+      { id: 'disp-mission', title: 'غرفة العمليات', description: 'مركز التحكم بالعمليات', path: '/dashboard/disposal/mission-control' },
+      { id: 'disp-shipments', title: 'الشحنات', description: 'متابعة شحنات التخلص', path: '/dashboard/shipments' },
+      { id: 'disp-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'disp-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -146,11 +148,11 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'السائق',
     icon: User,
     screens: [
-      { id: 'drv-dash', title: 'لوحة تحكم السائق', description: 'المهام اليومية وحالة الشحنات', path: '/dashboard', image: null },
-      { id: 'drv-shipments', title: 'شحنات السائق', description: 'الشحنات المسندة للسائق', path: '/dashboard/transporter-shipments', image: null },
-      { id: 'drv-location', title: 'موقعي', description: 'تتبع الموقع الحالي', path: '/dashboard/my-location', image: null },
-      { id: 'drv-notifications', title: 'الإشعارات', description: 'إشعارات المهام', path: '/dashboard/notifications', image: null },
-      { id: 'drv-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'drv-dash', title: 'لوحة تحكم السائق', description: 'المهام اليومية وحالة الشحنات', path: '/dashboard' },
+      { id: 'drv-shipments', title: 'شحنات السائق', description: 'الشحنات المسندة للسائق', path: '/dashboard/transporter-shipments' },
+      { id: 'drv-location', title: 'موقعي', description: 'تتبع الموقع الحالي', path: '/dashboard/my-location' },
+      { id: 'drv-notifications', title: 'الإشعارات', description: 'إشعارات المهام', path: '/dashboard/notifications' },
+      { id: 'drv-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -158,14 +160,14 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'مكتب النقل',
     icon: Building,
     screens: [
-      { id: 'to-dash', title: 'لوحة تحكم مكتب النقل', description: 'إدارة عمليات النقل', path: '/dashboard', image: null },
-      { id: 'to-shipments', title: 'الشحنات', description: 'إدارة جميع الشحنات', path: '/dashboard/shipments', image: null },
-      { id: 'to-drivers', title: 'السائقون', description: 'إدارة السائقين التابعين', path: '/dashboard/transporter-drivers', image: null },
-      { id: 'to-contracts', title: 'العقود', description: 'عقود النقل', path: '/dashboard/contracts', image: null },
-      { id: 'to-partners', title: 'الشركاء', description: 'شركاء مكتب النقل', path: '/dashboard/partners', image: null },
-      { id: 'to-reports', title: 'التقارير', description: 'تقارير العمليات', path: '/dashboard/reports', image: null },
-      { id: 'to-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'to-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'to-dash', title: 'لوحة تحكم مكتب النقل', description: 'إدارة عمليات النقل', path: '/dashboard' },
+      { id: 'to-shipments', title: 'الشحنات', description: 'إدارة جميع الشحنات', path: '/dashboard/shipments' },
+      { id: 'to-drivers', title: 'السائقون', description: 'إدارة السائقين التابعين', path: '/dashboard/transporter-drivers' },
+      { id: 'to-contracts', title: 'العقود', description: 'عقود النقل', path: '/dashboard/contracts' },
+      { id: 'to-partners', title: 'الشركاء', description: 'شركاء مكتب النقل', path: '/dashboard/partners' },
+      { id: 'to-reports', title: 'التقارير', description: 'تقارير العمليات', path: '/dashboard/reports' },
+      { id: 'to-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'to-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -173,12 +175,12 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'المستشار البيئي',
     icon: Briefcase,
     screens: [
-      { id: 'con-dash', title: 'لوحة تحكم المستشار', description: 'ملخص الاستشارات والمشاريع', path: '/dashboard', image: null },
-      { id: 'con-clients', title: 'العملاء', description: 'إدارة العملاء', path: '/dashboard/partners', image: null },
-      { id: 'con-reports', title: 'التقارير', description: 'تقارير الاستشارات', path: '/dashboard/reports', image: null },
-      { id: 'con-consultants', title: 'المستشارون', description: 'إدارة فريق الاستشارات', path: '/dashboard/environmental-consultants', image: null },
-      { id: 'con-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'con-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'con-dash', title: 'لوحة تحكم المستشار', description: 'ملخص الاستشارات والمشاريع', path: '/dashboard' },
+      { id: 'con-clients', title: 'العملاء', description: 'إدارة العملاء', path: '/dashboard/partners' },
+      { id: 'con-reports', title: 'التقارير', description: 'تقارير الاستشارات', path: '/dashboard/reports' },
+      { id: 'con-consultants', title: 'المستشارون', description: 'إدارة فريق الاستشارات', path: '/dashboard/environmental-consultants' },
+      { id: 'con-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'con-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -186,12 +188,12 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'مكتب الاستشارات',
     icon: FileText,
     screens: [
-      { id: 'co-dash', title: 'لوحة تحكم مكتب الاستشارات', description: 'إدارة مكتب الاستشارات', path: '/dashboard', image: null },
-      { id: 'co-clients', title: 'العملاء', description: 'إدارة العملاء', path: '/dashboard/partners', image: null },
-      { id: 'co-consultants', title: 'المستشارون', description: 'فريق المستشارين', path: '/dashboard/environmental-consultants', image: null },
-      { id: 'co-reports', title: 'التقارير', description: 'تقارير المكتب', path: '/dashboard/reports', image: null },
-      { id: 'co-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'co-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'co-dash', title: 'لوحة تحكم مكتب الاستشارات', description: 'إدارة مكتب الاستشارات', path: '/dashboard' },
+      { id: 'co-clients', title: 'العملاء', description: 'إدارة العملاء', path: '/dashboard/partners' },
+      { id: 'co-consultants', title: 'المستشارون', description: 'فريق المستشارين', path: '/dashboard/environmental-consultants' },
+      { id: 'co-reports', title: 'التقارير', description: 'تقارير المكتب', path: '/dashboard/reports' },
+      { id: 'co-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'co-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -199,11 +201,11 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'جهة ISO',
     icon: Scale,
     screens: [
-      { id: 'iso-dash', title: 'لوحة تحكم ISO', description: 'إدارة التدقيقات والشهادات', path: '/dashboard', image: null },
-      { id: 'iso-regulated', title: 'الشركات المراقبة', description: 'الشركات تحت الرقابة', path: '/dashboard/regulated-companies', image: null },
-      { id: 'iso-reports', title: 'التقارير', description: 'تقارير التدقيق', path: '/dashboard/reports', image: null },
-      { id: 'iso-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications', image: null },
-      { id: 'iso-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings', image: null },
+      { id: 'iso-dash', title: 'لوحة تحكم ISO', description: 'إدارة التدقيقات والشهادات', path: '/dashboard' },
+      { id: 'iso-regulated', title: 'الشركات المراقبة', description: 'الشركات تحت الرقابة', path: '/dashboard/regulated-companies' },
+      { id: 'iso-reports', title: 'التقارير', description: 'تقارير التدقيق', path: '/dashboard/reports' },
+      { id: 'iso-notifications', title: 'الإشعارات', description: 'مركز الإشعارات', path: '/dashboard/notifications' },
+      { id: 'iso-settings', title: 'الإعدادات', description: 'إعدادات الحساب', path: '/dashboard/settings' },
     ],
   },
   {
@@ -211,33 +213,33 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'مدير النظام',
     icon: Shield,
     screens: [
-      { id: 'adm-dash', title: 'لوحة التحكم الرئيسية', description: 'نظرة عامة على كل العمليات', path: '/dashboard', image: null },
-      { id: 'adm-companies', title: 'إدارة الشركات', description: 'قبول ومراجعة الشركات', path: '/dashboard/company-management', image: null },
-      { id: 'adm-approvals', title: 'طلبات اعتماد الشركات', description: 'مراجعة طلبات الاعتماد', path: '/dashboard/company-approvals', image: null },
-      { id: 'adm-drivers', title: 'قبول السائقين', description: 'مراجعة طلبات السائقين', path: '/dashboard/driver-approvals', image: null },
-      { id: 'adm-drivers-map', title: 'خريطة السائقين', description: 'مواقع جميع السائقين', path: '/dashboard/admin-drivers-map', image: null },
-      { id: 'adm-shipments', title: 'إدارة الشحنات', description: 'جميع شحنات النظام', path: '/dashboard/shipments', image: null },
-      { id: 'adm-system', title: 'حالة النظام', description: 'مراقبة صحة النظام', path: '/dashboard/system-status', image: null },
-      { id: 'adm-overview', title: 'نظرة عامة', description: 'إحصائيات النظام الشاملة', path: '/dashboard/system-overview', image: null },
-      { id: 'adm-revenue', title: 'إدارة الإيرادات', description: 'إيرادات المنصة', path: '/dashboard/admin-revenue', image: null },
-      { id: 'adm-insights', title: 'العين الذكية', description: 'تحليلات وتوصيات ذكية', path: '/dashboard/smart-insights', image: null },
-      { id: 'adm-analytics', title: 'التحليلات المتقدمة', description: 'تحليلات معمقة', path: '/dashboard/advanced-analytics', image: null },
-      { id: 'adm-news', title: 'إدارة الأخبار', description: 'نشر وتعديل الأخبار', path: '/dashboard/news-manager', image: null },
-      { id: 'adm-blog', title: 'إدارة المدونة', description: 'نشر المقالات', path: '/dashboard/blog-manager', image: null },
-      { id: 'adm-testimonials', title: 'إدارة الشهادات', description: 'شهادات العملاء', path: '/dashboard/testimonials-management', image: null },
-      { id: 'adm-waste-types', title: 'تصنيف النفايات', description: 'أنواع وتصنيفات النفايات', path: '/dashboard/waste-types', image: null },
-      { id: 'adm-regulatory', title: 'التحديثات التنظيمية', description: 'القوانين والتحديثات', path: '/dashboard/regulatory-updates', image: null },
-      { id: 'adm-api', title: 'إدارة API', description: 'مفاتيح وإعدادات API', path: '/dashboard/api', image: null },
-      { id: 'adm-security', title: 'اختبار الأمان', description: 'اختبارات الاختراق', path: '/dashboard/security-testing', image: null },
-      { id: 'adm-gdpr', title: 'الامتثال GDPR', description: 'حماية البيانات', path: '/dashboard/gdpr-compliance', image: null },
-      { id: 'adm-db', title: 'تحسين قواعد البيانات', description: 'أداء قاعدة البيانات', path: '/dashboard/db-optimization', image: null },
-      { id: 'adm-subscription', title: 'إدارة الاشتراكات', description: 'خطط الاشتراك', path: '/dashboard/subscription', image: null },
-      { id: 'adm-onboarding', title: 'مراجعة التسجيل', description: 'مراجعة طلبات التسجيل', path: '/dashboard/onboarding-review', image: null },
-      { id: 'adm-stamping', title: 'ختم المستندات', description: 'ختم المستندات الرسمية', path: '/dashboard/admin-document-stamping', image: null },
-      { id: 'adm-attestations', title: 'التصديقات', description: 'تصديقات المنظمات', path: '/dashboard/admin-attestations', image: null },
-      { id: 'adm-commands', title: 'أوامر النظام', description: 'تنفيذ أوامر إدارية', path: '/dashboard/system-commands', image: null },
-      { id: 'adm-activity', title: 'سجل النشاطات', description: 'سجل كل الأنشطة', path: '/dashboard/activity-log', image: null },
-      { id: 'adm-settings', title: 'الإعدادات', description: 'إعدادات النظام', path: '/dashboard/settings', image: null },
+      { id: 'adm-dash', title: 'لوحة التحكم الرئيسية', description: 'نظرة عامة على كل العمليات', path: '/dashboard' },
+      { id: 'adm-companies', title: 'إدارة الشركات', description: 'قبول ومراجعة الشركات', path: '/dashboard/company-management' },
+      { id: 'adm-approvals', title: 'طلبات اعتماد الشركات', description: 'مراجعة طلبات الاعتماد', path: '/dashboard/company-approvals' },
+      { id: 'adm-drivers', title: 'قبول السائقين', description: 'مراجعة طلبات السائقين', path: '/dashboard/driver-approvals' },
+      { id: 'adm-drivers-map', title: 'خريطة السائقين', description: 'مواقع جميع السائقين', path: '/dashboard/admin-drivers-map' },
+      { id: 'adm-shipments', title: 'إدارة الشحنات', description: 'جميع شحنات النظام', path: '/dashboard/shipments' },
+      { id: 'adm-system', title: 'حالة النظام', description: 'مراقبة صحة النظام', path: '/dashboard/system-status' },
+      { id: 'adm-overview', title: 'نظرة عامة', description: 'إحصائيات النظام الشاملة', path: '/dashboard/system-overview' },
+      { id: 'adm-revenue', title: 'إدارة الإيرادات', description: 'إيرادات المنصة', path: '/dashboard/admin-revenue' },
+      { id: 'adm-insights', title: 'العين الذكية', description: 'تحليلات وتوصيات ذكية', path: '/dashboard/smart-insights' },
+      { id: 'adm-analytics', title: 'التحليلات المتقدمة', description: 'تحليلات معمقة', path: '/dashboard/advanced-analytics' },
+      { id: 'adm-news', title: 'إدارة الأخبار', description: 'نشر وتعديل الأخبار', path: '/dashboard/news-manager' },
+      { id: 'adm-blog', title: 'إدارة المدونة', description: 'نشر المقالات', path: '/dashboard/blog-manager' },
+      { id: 'adm-testimonials', title: 'إدارة الشهادات', description: 'شهادات العملاء', path: '/dashboard/testimonials-management' },
+      { id: 'adm-waste-types', title: 'تصنيف النفايات', description: 'أنواع وتصنيفات النفايات', path: '/dashboard/waste-types' },
+      { id: 'adm-regulatory', title: 'التحديثات التنظيمية', description: 'القوانين والتحديثات', path: '/dashboard/regulatory-updates' },
+      { id: 'adm-api', title: 'إدارة API', description: 'مفاتيح وإعدادات API', path: '/dashboard/api' },
+      { id: 'adm-security', title: 'اختبار الأمان', description: 'اختبارات الاختراق', path: '/dashboard/security-testing' },
+      { id: 'adm-gdpr', title: 'الامتثال GDPR', description: 'حماية البيانات', path: '/dashboard/gdpr-compliance' },
+      { id: 'adm-db', title: 'تحسين قواعد البيانات', description: 'أداء قاعدة البيانات', path: '/dashboard/db-optimization' },
+      { id: 'adm-subscription', title: 'إدارة الاشتراكات', description: 'خطط الاشتراك', path: '/dashboard/subscription' },
+      { id: 'adm-onboarding', title: 'مراجعة التسجيل', description: 'مراجعة طلبات التسجيل', path: '/dashboard/onboarding-review' },
+      { id: 'adm-stamping', title: 'ختم المستندات', description: 'ختم المستندات الرسمية', path: '/dashboard/admin-document-stamping' },
+      { id: 'adm-attestations', title: 'التصديقات', description: 'تصديقات المنظمات', path: '/dashboard/admin-attestations' },
+      { id: 'adm-commands', title: 'أوامر النظام', description: 'تنفيذ أوامر إدارية', path: '/dashboard/system-commands' },
+      { id: 'adm-activity', title: 'سجل النشاطات', description: 'سجل كل الأنشطة', path: '/dashboard/activity-log' },
+      { id: 'adm-settings', title: 'الإعدادات', description: 'إعدادات النظام', path: '/dashboard/settings' },
     ],
   },
   {
@@ -245,94 +247,65 @@ const screenshotCategories: ScreenCategory[] = [
     label: 'صفحات مشتركة',
     icon: Users,
     screens: [
-      { id: 'sh-erp-accounting', title: 'ERP - المحاسبة', description: 'النظام المحاسبي', path: '/dashboard/erp/accounting', image: null },
-      { id: 'sh-erp-inventory', title: 'ERP - المخزون', description: 'إدارة المخزون', path: '/dashboard/erp/inventory', image: null },
-      { id: 'sh-erp-hr', title: 'ERP - الموارد البشرية', description: 'إدارة الموظفين', path: '/dashboard/erp/hr', image: null },
-      { id: 'sh-erp-sales', title: 'ERP - المشتريات والمبيعات', description: 'إدارة المبيعات', path: '/dashboard/erp/purchasing-sales', image: null },
-      { id: 'sh-erp-fin', title: 'ERP - اللوحة المالية', description: 'لوحة مالية شاملة', path: '/dashboard/erp/financial-dashboard', image: null },
-      { id: 'sh-gamification', title: 'التلعيب', description: 'نظام النقاط والمكافآت', path: '/dashboard/gamification', image: null },
-      { id: 'sh-omaluna', title: 'أمالونا للتوظيف', description: 'منصة التوظيف', path: '/dashboard/omaluna', image: null },
-      { id: 'sh-commodity', title: 'بورصة السلع', description: 'بورصة المواد القابلة للتدوير', path: '/dashboard/commodity-exchange', image: null },
-      { id: 'sh-waste-exchange', title: 'تبادل المخلفات', description: 'سوق تبادل المخلفات', path: '/dashboard/waste-exchange', image: null },
-      { id: 'sh-auctions', title: 'المزادات', description: 'مزادات المخلفات', path: '/dashboard/waste-auctions', image: null },
-      { id: 'sh-equipment', title: 'سوق المعدات', description: 'معدات إعادة التدوير', path: '/dashboard/equipment-marketplace', image: null },
-      { id: 'sh-vehicle', title: 'سوق المركبات', description: 'مركبات النقل', path: '/dashboard/vehicle-marketplace', image: null },
-      { id: 'sh-insurance', title: 'التأمين الذكي', description: 'تأمين الشحنات', path: '/dashboard/smart-insurance', image: null },
-      { id: 'sh-wallet', title: 'المحفظة الرقمية', description: 'المحفظة الإلكترونية', path: '/dashboard/digital-wallet', image: null },
-      { id: 'sh-circular', title: 'الاقتصاد الدائري', description: 'مؤشرات الاقتصاد الدائري', path: '/dashboard/circular-economy', image: null },
-      { id: 'sh-esg', title: 'تقارير ESG', description: 'تقارير الاستدامة', path: '/dashboard/esg-reports', image: null },
-      { id: 'sh-heatmap', title: 'خريطة تدفق النفايات', description: 'خريطة حرارية للتدفقات', path: '/dashboard/waste-flow-heatmap', image: null },
-      { id: 'sh-learning', title: 'مركز التعلم', description: 'دورات تدريبية', path: '/dashboard/learning-center', image: null },
-      { id: 'sh-smart-agent', title: 'الوكيل الذكي', description: 'روبوت المحادثة الذكي', path: '/dashboard/smart-agent', image: null },
-      { id: 'sh-document-archive', title: 'أرشيف المستندات', description: 'أرشفة المستندات', path: '/dashboard/document-archive', image: null },
-      { id: 'sh-chat', title: 'المحادثات', description: 'نظام المراسلة', path: '/dashboard/chat', image: null },
-      { id: 'sh-support', title: 'مركز الدعم', description: 'الدعم الفني', path: '/dashboard/support', image: null },
+      { id: 'sh-erp-accounting', title: 'ERP - المحاسبة', description: 'النظام المحاسبي', path: '/dashboard/erp/accounting' },
+      { id: 'sh-erp-inventory', title: 'ERP - المخزون', description: 'إدارة المخزون', path: '/dashboard/erp/inventory' },
+      { id: 'sh-erp-hr', title: 'ERP - الموارد البشرية', description: 'إدارة الموظفين', path: '/dashboard/erp/hr' },
+      { id: 'sh-erp-sales', title: 'ERP - المشتريات والمبيعات', description: 'إدارة المبيعات', path: '/dashboard/erp/purchasing-sales' },
+      { id: 'sh-erp-fin', title: 'ERP - اللوحة المالية', description: 'لوحة مالية شاملة', path: '/dashboard/erp/financial-dashboard' },
+      { id: 'sh-gamification', title: 'التلعيب', description: 'نظام النقاط والمكافآت', path: '/dashboard/gamification' },
+      { id: 'sh-omaluna', title: 'أمالونا للتوظيف', description: 'منصة التوظيف', path: '/dashboard/omaluna' },
+      { id: 'sh-commodity', title: 'بورصة السلع', description: 'بورصة المواد القابلة للتدوير', path: '/dashboard/commodity-exchange' },
+      { id: 'sh-waste-exchange', title: 'تبادل المخلفات', description: 'سوق تبادل المخلفات', path: '/dashboard/waste-exchange' },
+      { id: 'sh-auctions', title: 'المزادات', description: 'مزادات المخلفات', path: '/dashboard/waste-auctions' },
+      { id: 'sh-equipment', title: 'سوق المعدات', description: 'معدات إعادة التدوير', path: '/dashboard/equipment-marketplace' },
+      { id: 'sh-vehicle', title: 'سوق المركبات', description: 'مركبات النقل', path: '/dashboard/vehicle-marketplace' },
+      { id: 'sh-insurance', title: 'التأمين الذكي', description: 'تأمين الشحنات', path: '/dashboard/smart-insurance' },
+      { id: 'sh-wallet', title: 'المحفظة الرقمية', description: 'المحفظة الإلكترونية', path: '/dashboard/digital-wallet' },
+      { id: 'sh-circular', title: 'الاقتصاد الدائري', description: 'مؤشرات الاقتصاد الدائري', path: '/dashboard/circular-economy' },
+      { id: 'sh-esg', title: 'تقارير ESG', description: 'تقارير الاستدامة', path: '/dashboard/esg-reports' },
+      { id: 'sh-heatmap', title: 'خريطة تدفق النفايات', description: 'خريطة حرارية للتدفقات', path: '/dashboard/waste-flow-heatmap' },
+      { id: 'sh-learning', title: 'مركز التعلم', description: 'دورات تدريبية', path: '/dashboard/learning-center' },
+      { id: 'sh-smart-agent', title: 'الوكيل الذكي', description: 'روبوت المحادثة الذكي', path: '/dashboard/smart-agent' },
+      { id: 'sh-document-archive', title: 'أرشيف المستندات', description: 'أرشفة المستندات', path: '/dashboard/document-archive' },
+      { id: 'sh-chat', title: 'المحادثات', description: 'نظام المراسلة', path: '/dashboard/chat' },
+      { id: 'sh-support', title: 'مركز الدعم', description: 'الدعم الفني', path: '/dashboard/support' },
     ],
   },
 ];
 
-// Lazy iframe card - only loads iframe when visible on screen
-const LazyScreenCard = memo(({ screen, categoryIcon: CatIcon, capturing, onNavigate }: {
+const BUCKET = 'system-screenshots';
+
+// Screen card that shows saved screenshot or capture button
+const ScreenCard = memo(({ screen, categoryIcon: CatIcon, screenshotUrl, onCapture, onNavigate, isCapturing }: {
   screen: ScreenItem;
   categoryIcon: any;
-  capturing: boolean;
+  screenshotUrl: string | null;
+  onCapture: () => void;
   onNavigate: () => void;
+  isCapturing: boolean;
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsVisible(true);
-        obs.disconnect();
-      }
-    }, { rootMargin: '200px' });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  // Calculate scale to fit aspect-video container
-  const containerWidth = 320; // approximate card width
-  const scale = containerWidth / 1440;
-
   return (
-    <Card
-      ref={ref}
-      className="overflow-hidden group hover:border-primary/30 hover:shadow-md transition-all cursor-pointer"
-      onClick={onNavigate}
-    >
-      <div className="relative aspect-video bg-muted/30 overflow-hidden">
-        {isVisible ? (
-          <>
-            {!iframeLoaded && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin text-primary/40" />
-                <span className="text-[9px] text-muted-foreground">جاري التحميل...</span>
-              </div>
-            )}
-            <iframe
-              src={screen.path}
-              title={screen.title}
-              className="border-0 pointer-events-none"
-              style={{
-                width: '1440px',
-                height: '900px',
-                transform: `scale(${scale})`,
-                transformOrigin: 'top right',
-              }}
-              loading="lazy"
-              sandbox="allow-same-origin allow-scripts"
-              tabIndex={-1}
-              onLoad={() => setIframeLoaded(true)}
-            />
-          </>
+    <Card className="overflow-hidden group hover:border-primary/30 hover:shadow-md transition-all">
+      <div
+        className="relative aspect-video bg-muted/30 overflow-hidden cursor-pointer"
+        onClick={onNavigate}
+      >
+        {screenshotUrl ? (
+          <img
+            src={screenshotUrl}
+            alt={screen.title}
+            className="w-full h-full object-cover object-top"
+            loading="lazy"
+          />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary/5 via-muted/20 to-accent/10">
             <CatIcon className="w-8 h-8 text-primary/20" />
+            <span className="text-[9px] text-muted-foreground/50">لم يتم التقاط بعد</span>
+          </div>
+        )}
+        {screenshotUrl && (
+          <div className="absolute top-1.5 left-1.5">
+            <CheckCircle className="w-4 h-4 text-emerald-500 drop-shadow" />
           </div>
         )}
         <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors" />
@@ -343,15 +316,26 @@ const LazyScreenCard = memo(({ screen, categoryIcon: CatIcon, capturing, onNavig
           <h3 className="font-semibold text-xs">{screen.title}</h3>
           <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">{screen.description}</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full mt-2 text-[10px] gap-1.5 h-7"
-          disabled={capturing}
-        >
-          {capturing ? <Loader2 className="w-3 h-3 animate-spin" /> : <ExternalLink className="w-3 h-3" />}
-          فتح الصفحة
-        </Button>
+        <div className="flex gap-1.5 mt-2">
+          <Button
+            variant="default"
+            size="sm"
+            className="flex-1 text-[10px] gap-1 h-7"
+            onClick={onCapture}
+            disabled={isCapturing}
+          >
+            {isCapturing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
+            التقاط
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-[10px] gap-1 h-7 px-2"
+            onClick={onNavigate}
+          >
+            <ExternalLink className="w-3 h-3" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -360,14 +344,131 @@ const LazyScreenCard = memo(({ screen, categoryIcon: CatIcon, capturing, onNavig
 const SystemScreenshots = () => {
   const navigate = useNavigate();
   const [capturing, setCapturing] = useState<string | null>(null);
+  const [capturingAll, setCapturingAll] = useState(false);
+  const [screenshots, setScreenshots] = useState<Record<string, string>>({});
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [activeTab, setActiveTab] = useState('public');
 
-  const handleCapture = useCallback((screenId: string, path: string) => {
-    setCapturing(screenId);
-    setTimeout(() => {
-      navigate(path);
-      setCapturing(null);
-    }, 500);
+  // Load existing screenshots from storage
+  useEffect(() => {
+    loadScreenshots();
+  }, []);
+
+  const loadScreenshots = async () => {
+    try {
+      const { data, error } = await supabase.storage.from(BUCKET).list('', { limit: 500 });
+      if (error) throw error;
+      
+      const urls: Record<string, string> = {};
+      for (const file of data || []) {
+        const screenId = file.name.replace('.png', '');
+        const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(file.name);
+        urls[screenId] = urlData.publicUrl + '?t=' + file.updated_at;
+      }
+      setScreenshots(urls);
+    } catch (err) {
+      console.error('Failed to load screenshots:', err);
+    }
+  };
+
+  const captureScreen = useCallback(async (screen: ScreenItem): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setCapturing(screen.id);
+
+      // Create a hidden iframe to load the page
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1440px;height:900px;border:none;';
+      iframe.src = screen.path;
+      document.body.appendChild(iframe);
+
+      const timeout = setTimeout(() => {
+        cleanup();
+        resolve(false);
+      }, 15000);
+
+      const cleanup = () => {
+        clearTimeout(timeout);
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+        setCapturing(null);
+      };
+
+      iframe.onload = async () => {
+        // Wait a bit for rendering
+        await new Promise(r => setTimeout(r, 2000));
+        
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (!iframeDoc) throw new Error('Cannot access iframe');
+          
+          const canvas = await html2canvas(iframeDoc.body, {
+            width: 1440,
+            height: 900,
+            scale: 0.5,
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            backgroundColor: '#ffffff',
+          });
+
+          // Convert to blob
+          const blob = await new Promise<Blob>((res) => {
+            canvas.toBlob((b) => res(b!), 'image/png', 0.8);
+          });
+
+          // Upload to storage
+          const filePath = `${screen.id}.png`;
+          const { error } = await supabase.storage
+            .from(BUCKET)
+            .upload(filePath, blob, { upsert: true, contentType: 'image/png' });
+
+          if (error) throw error;
+
+          // Update local state
+          const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(filePath);
+          setScreenshots(prev => ({ ...prev, [screen.id]: urlData.publicUrl + '?t=' + Date.now() }));
+          
+          cleanup();
+          resolve(true);
+        } catch (err) {
+          console.error(`Failed to capture ${screen.id}:`, err);
+          cleanup();
+          resolve(false);
+        }
+      };
+
+      iframe.onerror = () => {
+        cleanup();
+        resolve(false);
+      };
+    });
+  }, []);
+
+  const captureAllInCategory = useCallback(async () => {
+    const category = screenshotCategories.find(c => c.id === activeTab);
+    if (!category) return;
+
+    setCapturingAll(true);
+    let success = 0;
+    let failed = 0;
+
+    for (const screen of category.screens) {
+      const ok = await captureScreen(screen);
+      if (ok) success++;
+      else failed++;
+    }
+
+    setCapturingAll(false);
+    toast.success(`تم التقاط ${success} صورة${failed > 0 ? ` (فشل ${failed})` : ''}`);
+  }, [activeTab, captureScreen]);
+
+  const handleNavigate = useCallback((path: string) => {
+    navigate(path);
   }, [navigate]);
+
+  const totalScreens = screenshotCategories.reduce((a, c) => a + c.screens.length, 0);
+  const capturedCount = Object.keys(screenshots).length;
 
   return (
     <DashboardLayout>
@@ -378,23 +479,44 @@ const SystemScreenshots = () => {
       >
         <BackButton />
 
-        <div className="flex items-center justify-between">
-          <div className="text-right">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="text-right flex-1">
             <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2 justify-end">
               <Camera className="h-6 w-6 text-primary" />
               سكرين شوت النظام
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              عرض شامل لكافة واجهات وصفحات المنصة لكل جهة — {screenshotCategories.reduce((a, c) => a + c.screens.length, 0)} صفحة
+              التقاط صور لكافة واجهات المنصة — {capturedCount}/{totalScreens} تم التقاطها
             </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs gap-1.5"
+              onClick={loadScreenshots}
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              تحديث
+            </Button>
+            <Button
+              size="sm"
+              className="text-xs gap-1.5"
+              onClick={captureAllInCategory}
+              disabled={capturingAll}
+            >
+              {capturingAll ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Camera className="w-3.5 h-3.5" />}
+              التقاط الكل
+            </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="public" className="w-full" dir="rtl">
+        <Tabs defaultValue="public" className="w-full" dir="rtl" onValueChange={setActiveTab}>
           <div className="w-full overflow-x-auto pb-2 scrollbar-thin" dir="rtl">
             <TabsList className="inline-flex w-max gap-1 bg-card border border-border/50 p-1 h-auto">
               {screenshotCategories.map((cat) => {
                 const Icon = cat.icon;
+                const catCaptured = cat.screens.filter(s => screenshots[s.id]).length;
                 return (
                   <TabsTrigger
                     key={cat.id}
@@ -404,7 +526,12 @@ const SystemScreenshots = () => {
                     <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     <span className="hidden sm:inline">{cat.label}</span>
                     <span className="sm:hidden">{cat.label.split(' ')[0]}</span>
-                    <Badge variant="secondary" className="text-[7px] px-1 py-0 h-3.5 mr-0.5">{cat.screens.length}</Badge>
+                    <Badge
+                      variant={catCaptured === cat.screens.length ? 'default' : 'secondary'}
+                      className="text-[7px] px-1 py-0 h-3.5 mr-0.5"
+                    >
+                      {catCaptured}/{cat.screens.length}
+                    </Badge>
                   </TabsTrigger>
                 );
               })}
@@ -415,19 +542,23 @@ const SystemScreenshots = () => {
             <TabsContent key={category.id} value={category.id} className="mt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {category.screens.map((screen) => (
-                   <LazyScreenCard
+                  <ScreenCard
                     key={screen.id}
                     screen={screen}
                     categoryIcon={category.icon}
-                    capturing={capturing === screen.id}
-                    onNavigate={() => handleCapture(screen.id, screen.path)}
+                    screenshotUrl={screenshots[screen.id] || null}
+                    onCapture={() => captureScreen(screen).then(ok => {
+                      if (ok) toast.success(`تم التقاط: ${screen.title}`);
+                      else toast.error(`فشل التقاط: ${screen.title}`);
+                    })}
+                    onNavigate={() => handleNavigate(screen.path)}
+                    isCapturing={capturing === screen.id}
                   />
                 ))}
               </div>
             </TabsContent>
           ))}
         </Tabs>
-
       </motion.div>
     </DashboardLayout>
   );
