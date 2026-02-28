@@ -374,55 +374,40 @@ const SystemScreenshots = () => {
   const captureScreen = useCallback(async (screen: ScreenItem): Promise<boolean> => {
     setCapturing(screen.id);
 
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1440px;height:900px;border:none;opacity:0;pointer-events:none;';
-    iframe.src = screen.path;
-    document.body.appendChild(iframe);
-
-    const cleanup = () => {
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
-      setCapturing(null);
-    };
-
     try {
-      // Wait for iframe to load
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Iframe load timeout')), 30000);
-        iframe.onload = () => { clearTimeout(timeout); resolve(); };
-        iframe.onerror = () => { clearTimeout(timeout); reject(new Error('Iframe load error')); };
-      });
+      // Navigate to the target page in the same window (keeps auth session)
+      navigate(screen.path);
 
-      // Wait for page to fully render and data to load
-      await new Promise(r => setTimeout(r, 5000));
+      // Wait for page to render and data to load
+      await new Promise(r => setTimeout(r, 4000));
 
-      // Additional wait: check if page has finished loading data
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) throw new Error('Cannot access iframe document');
-
-      // Wait for any loading spinners to disappear
+      // Additional wait: check for loading indicators
       let retries = 0;
-      while (retries < 10) {
-        const spinners = iframeDoc.querySelectorAll('.animate-spin, [data-loading="true"]');
-        const skeletons = iframeDoc.querySelectorAll('[class*="skeleton"], [class*="Skeleton"]');
+      while (retries < 8) {
+        const spinners = document.querySelectorAll('.animate-spin, [data-loading="true"]');
+        const skeletons = document.querySelectorAll('[class*="skeleton"], [class*="Skeleton"]');
         if (spinners.length === 0 && skeletons.length === 0) break;
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 1500));
         retries++;
       }
 
-      // Final stabilization wait
-      await new Promise(r => setTimeout(r, 1000));
+      // Final stabilization
+      await new Promise(r => setTimeout(r, 1500));
 
-      const canvas = await html2canvas(iframeDoc.body, {
-        width: 1440,
-        height: 900,
-        scale: 1,
+      // Capture the actual rendered page
+      const canvas = await html2canvas(document.body, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
         imageTimeout: 15000,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
       });
 
       // Convert to blob
@@ -451,14 +436,14 @@ const SystemScreenshots = () => {
       const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(`${screen.id}.png`);
       setScreenshots(prev => ({ ...prev, [screen.id]: urlData.publicUrl + '?t=' + Date.now() }));
 
-      cleanup();
+      setCapturing(null);
       return true;
     } catch (err) {
       console.error(`Failed to capture ${screen.id}:`, err);
-      cleanup();
+      setCapturing(null);
       return false;
     }
-  }, []);
+  }, [navigate]);
 
   const captureAllInCategory = useCallback(async () => {
     const category = screenshotCategories.find(c => c.id === activeTab);
@@ -469,7 +454,7 @@ const SystemScreenshots = () => {
     let failed = 0;
     const failedScreens: ScreenItem[] = [];
 
-    toast.info(`بدء التقاط ${category.screens.length} صفحة — يرجى الانتظار...`);
+    toast.info(`بدء التقاط ${category.screens.length} صفحة — سيتم التنقل بين الصفحات تلقائياً...`);
 
     for (let i = 0; i < category.screens.length; i++) {
       const screen = category.screens[i];
@@ -482,20 +467,21 @@ const SystemScreenshots = () => {
         failed++;
         failedScreens.push(screen);
       }
-      // Small delay between captures to let browser breathe
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 300));
     }
 
-    // Retry failed ones once
+    // Retry failed ones
     if (failedScreens.length > 0) {
       toast.loading(`إعادة محاولة ${failedScreens.length} صفحة فاشلة...`, { id: 'capture-progress' });
       for (const screen of failedScreens) {
         const ok = await captureScreen(screen);
         if (ok) { success++; failed--; }
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 300));
       }
     }
 
+    // Navigate back to screenshots page
+    navigate('/dashboard/system-screenshots');
     toast.dismiss('capture-progress');
     setCapturingAll(false);
     
@@ -504,7 +490,10 @@ const SystemScreenshots = () => {
     } else {
       toast.warning(`تم التقاط ${success} صورة — فشل ${failed}`);
     }
-  }, [activeTab, captureScreen]);
+
+    // Reload screenshots from storage
+    setTimeout(() => loadScreenshots(), 1000);
+  }, [activeTab, captureScreen, navigate]);
 
   const handleNavigate = useCallback((path: string) => {
     navigate(path);
@@ -590,10 +579,14 @@ const SystemScreenshots = () => {
                     screen={screen}
                     categoryIcon={category.icon}
                     screenshotUrl={screenshots[screen.id] || null}
-                    onCapture={() => captureScreen(screen).then(ok => {
-                      if (ok) toast.success(`تم التقاط: ${screen.title}`);
-                      else toast.error(`فشل التقاط: ${screen.title}`);
-                    })}
+                    onCapture={() => {
+                      captureScreen(screen).then(ok => {
+                        navigate('/dashboard/system-screenshots');
+                        setTimeout(() => loadScreenshots(), 500);
+                        if (ok) toast.success(`تم التقاط: ${screen.title}`);
+                        else toast.error(`فشل التقاط: ${screen.title}`);
+                      });
+                    }}
                     onNavigate={() => handleNavigate(screen.path)}
                     isCapturing={capturing === screen.id}
                   />
