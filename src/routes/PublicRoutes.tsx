@@ -37,6 +37,7 @@ const Laws = lazy(() => import("@/pages/Laws"));
 const Policies = lazy(() => import("@/pages/Policies"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const SharedDocumentView = lazy(() => import("@/pages/SharedDocumentView"));
+const RecyclingHistory = lazy(() => import("@/pages/RecyclingHistory"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
@@ -86,6 +87,7 @@ export const publicRoutes = (
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/shared/:token" element={<SharedDocumentView />} />
     <Route path="/scoped/:code" element={<ScopedAccessPortal />} />
+    <Route path="/recycling-history" element={<RecyclingHistory />} />
     <Route path="*" element={<NotFound />} />
   </>
 );

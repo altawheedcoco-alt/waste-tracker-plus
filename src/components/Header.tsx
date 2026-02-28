@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -55,6 +55,7 @@ const Header = memo(() => {
       icon: BookOpen,
       items: [
         { label: language === 'ar' ? 'المدونة' : 'Blog', href: '/blog', icon: BookOpen, desc: language === 'ar' ? 'مقالات ونصائح بيئية' : 'Environmental articles & tips' },
+        { label: language === 'ar' ? 'تاريخ التدوير' : 'Recycling History', href: '/recycling-history', icon: Landmark, desc: language === 'ar' ? 'من الفراعنة للعصر الرقمي' : 'From Pharaohs to digital age', badge: language === 'ar' ? 'جديد' : 'New' },
         { label: language === 'ar' ? 'مركز المساعدة' : 'Help Center', href: '/help', icon: HelpCircle, desc: language === 'ar' ? 'أسئلة شائعة ودعم فني' : 'FAQ & technical support' },
         { label: language === 'ar' ? 'أكاديمية التدوير' : 'Recycling Academy', href: '/academy', icon: GraduationCap, desc: language === 'ar' ? 'تعلم تصنيف المخلفات' : 'Learn waste classification' },
         { label: language === 'ar' ? 'التشريعات' : 'Legislation', href: '/legislation', icon: Scale, desc: language === 'ar' ? 'الضوابط القانونية' : 'Legal regulations' },
