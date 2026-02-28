@@ -17,7 +17,7 @@ import {
   AlertTriangle, CheckCircle2, Bot, Send,
   Sparkles, Target, UserPlus, Star, Award,
   Lightbulb, Activity, Clock, Leaf, Shield,
-  Stamp, Settings, Gavel, Scale, Bell,
+  Stamp, Settings, Gavel, Scale, Bell, Wallet,
 } from 'lucide-react';
 
 // Lazy load panels
@@ -25,6 +25,10 @@ const OfficeTeamPanel = lazy(() => import('@/components/consulting-office/Office
 const OfficeClientsPanel = lazy(() => import('@/components/consulting-office/OfficeClientsPanel'));
 const SigningPoliciesPanel = lazy(() => import('@/components/consulting-office/SigningPoliciesPanel'));
 const ApprovalQueuePanel = lazy(() => import('@/components/consulting-office/ApprovalQueuePanel'));
+const OfficeDocumentsPanel = lazy(() => import('@/components/consulting-office/OfficeDocumentsPanel'));
+const OfficeLicensesPanel = lazy(() => import('@/components/consulting-office/OfficeLicensesPanel'));
+const OfficeFinancePanel = lazy(() => import('@/components/consulting-office/OfficeFinancePanel'));
+const OfficeSettingsPanel = lazy(() => import('@/components/consulting-office/OfficeSettingsPanel'));
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
@@ -318,6 +322,10 @@ const ConsultingOfficeDashboard = memo(() => {
             )}
           </TabsTrigger>
           <TabsTrigger value="compliance" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />الامتثال</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />المستندات</TabsTrigger>
+          <TabsTrigger value="licenses" className="gap-1.5"><ShieldCheck className="w-4 h-4" />التراخيص</TabsTrigger>
+          <TabsTrigger value="finance" className="gap-1.5"><Wallet className="w-4 h-4" />المالية</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5"><Settings className="w-4 h-4" />الإعدادات</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
         </TabsList>
 
@@ -358,6 +366,30 @@ const ConsultingOfficeDashboard = memo(() => {
         <TabsContent value="compliance" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantKPIsWidget />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <OfficeDocumentsPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="licenses" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <OfficeLicensesPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="finance" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <OfficeFinancePanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="settings" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <OfficeSettingsPanel />
           </Suspense>
         </TabsContent>
 

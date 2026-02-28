@@ -17,7 +17,9 @@ import {
   Bot, Send, Sparkles, Calendar, Clock, TrendingUp,
   Target, Award, Star, Lightbulb, UserCheck,
   Scale, Leaf, Gavel, Globe, Shield, Lock,
+  Pen, ArrowLeftRight,
 } from 'lucide-react';
+import { History as HistoryIcon } from 'lucide-react';
 import OrganizationScopeSelector from '@/components/consultant/OrganizationScopeSelector';
 
 // Lazy load heavy sub-components
@@ -35,6 +37,10 @@ const ConsultantAutoReviewPanel = lazy(() => import('@/components/consultant/Con
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const OfficeMembershipsPanel = lazy(() => import('@/components/consultant/OfficeMembershipsPanel'));
 const ConsultantClientsPanel = lazy(() => import('@/components/consultant/ConsultantClientsPanel'));
+const ConsultantLicensesPanel = lazy(() => import('@/components/consultant/ConsultantLicensesPanel'));
+const ConsultantDelegationsPanel = lazy(() => import('@/components/consultant/ConsultantDelegationsPanel'));
+const ConsultantActivityLog = lazy(() => import('@/components/consultant/ConsultantActivityLog'));
+const ConsultantSigningCenter = lazy(() => import('@/components/consultant/ConsultantSigningCenter'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -325,6 +331,10 @@ const ConsultantDashboard = memo(() => {
           {!selectedOrgId && (
             <TabsTrigger value="organizations" className="gap-1.5"><Building2 className="w-4 h-4" />الجهات ({assignments.length})</TabsTrigger>
           )}
+          <TabsTrigger value="signing-center" className="gap-1.5"><Pen className="w-4 h-4" />الاعتماد والتوقيع</TabsTrigger>
+          <TabsTrigger value="licenses" className="gap-1.5"><Award className="w-4 h-4" />التراخيص</TabsTrigger>
+          <TabsTrigger value="delegations" className="gap-1.5"><ArrowLeftRight className="w-4 h-4" />التفويضات</TabsTrigger>
+          <TabsTrigger value="activity-log" className="gap-1.5"><HistoryIcon className="w-4 h-4" />سجل الأنشطة</TabsTrigger>
           <TabsTrigger value="my-clients" className="gap-1.5"><Briefcase className="w-4 h-4" />جهاتي</TabsTrigger>
           <TabsTrigger value="office-memberships" className="gap-1.5"><Building2 className="w-4 h-4" />عضويات المكاتب</TabsTrigger>
           <TabsTrigger value="green-points" className="gap-1.5"><Leaf className="w-4 h-4" />النقاط الخضراء</TabsTrigger>
@@ -498,6 +508,30 @@ const ConsultantDashboard = memo(() => {
         <TabsContent value="my-clients" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantClientsPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="signing-center" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantSigningCenter />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="licenses" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantLicensesPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="delegations" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantDelegationsPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="activity-log" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantActivityLog />
           </Suspense>
         </TabsContent>
 
