@@ -36,6 +36,22 @@ const roles = [
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
   },
+  {
+    id: "consultant",
+    title: "دليل الاستشاري",
+    description: "استشاريون بيئيون مستقلون",
+    icon: User,
+    color: "text-teal-500",
+    bgColor: "bg-teal-500/10",
+  },
+  {
+    id: "consulting_office",
+    title: "دليل مكتب الاستشارات",
+    description: "مكاتب الاستشارات البيئية",
+    icon: Factory,
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-500/10",
+  },
 ];
 
 const GuideButton = () => {

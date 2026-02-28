@@ -56,6 +56,8 @@ const MobileBottomNav = memo(() => {
     const orgIcon = orgType === 'transporter' ? Truck 
       : orgType === 'recycler' ? Recycle 
       : orgType === 'disposal' ? Factory 
+      : orgType === 'consultant' ? User
+      : orgType === 'consulting_office' ? Building2
       : Building2;
 
     return [
