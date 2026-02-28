@@ -29,9 +29,10 @@ const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
 
   // Check if this is a demo/test organization
   const isDemoOrg = !!(
-    organization?.name?.includes('تجريبية') ||
+    organization?.name?.includes('تجريبي') ||
     organization?.name?.includes('Demo') ||
-    (organization as any)?.email?.endsWith('@demo.test')
+    (organization as any)?.email?.endsWith('@demo.test') ||
+    (organization as any)?.email?.endsWith('@irecycle.test')
   );
 
   const { data: status, isLoading } = useQuery({
