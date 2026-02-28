@@ -32,6 +32,7 @@ const GreenPointsPanel = lazy(() => import('@/components/consultant/GreenPointsP
 const ConsultantDocumentWorkbench = lazy(() => import('@/components/consultant/ConsultantDocumentWorkbench'));
 const ConsultantFieldOpsPanel = lazy(() => import('@/components/consultant/ConsultantFieldOpsPanel'));
 const ConsultantAutoReviewPanel = lazy(() => import('@/components/consultant/ConsultantAutoReviewPanel'));
+const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -314,6 +315,7 @@ const ConsultantDashboard = memo(() => {
           <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />مركز المستندات</TabsTrigger>
           <TabsTrigger value="approvals" className="gap-1.5"><ShieldCheck className="w-4 h-4" />الاعتمادات</TabsTrigger>
           <TabsTrigger value="reports" className="gap-1.5"><Leaf className="w-4 h-4" />التقارير الفنية</TabsTrigger>
+          <TabsTrigger value="esg" className="gap-1.5"><TrendingUp className="w-4 h-4" />تقارير ESG</TabsTrigger>
           <TabsTrigger value="legal" className="gap-1.5"><Gavel className="w-4 h-4" />التواصل القانوني</TabsTrigger>
           <TabsTrigger value="compliance" className="gap-1.5"><Scale className="w-4 h-4" />امتثال العملاء</TabsTrigger>
           <TabsTrigger value="shipments" className="gap-1.5"><Package className="w-4 h-4" />مراجعة الشحنات</TabsTrigger>
@@ -393,6 +395,12 @@ const ConsultantDashboard = memo(() => {
         <TabsContent value="reports" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <TechnicalReportsPanel assignments={scopedAssignments} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="esg" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ESGReportPanel />
           </Suspense>
         </TabsContent>
 

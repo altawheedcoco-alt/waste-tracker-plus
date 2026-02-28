@@ -30,7 +30,12 @@ import AdminEntityList from './admin/AdminEntityList';
 import AdminCredentialControl from './admin/AdminCredentialControl';
 import DriverLinkingCode from '@/components/drivers/DriverLinkingCode';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
+import { lazy, Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
+
+const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
+const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 import { Switch } from '@/components/ui/switch';
 import { toast as sonnerToast } from 'sonner';
 import {
@@ -344,6 +349,8 @@ const AdminDashboard = () => {
           </TabsTrigger>
           <TabsTrigger value="partners">الجهات المرتبطة</TabsTrigger>
           <TabsTrigger value="tracking">تتبع السائقين</TabsTrigger>
+          <TabsTrigger value="geofence">الجيوفنس</TabsTrigger>
+          <TabsTrigger value="esg">تقارير ESG</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
@@ -384,6 +391,18 @@ const AdminDashboard = () => {
             activeDrivers={stats.activeDrivers}
             totalDrivers={stats.totalDrivers}
           />
+        </TabsContent>
+
+        <TabsContent value="geofence" className="space-y-6 mt-6">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <GeofenceAlertsPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="esg" className="space-y-6 mt-6">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <ESGReportPanel />
+          </Suspense>
         </TabsContent>
       </Tabs>
 

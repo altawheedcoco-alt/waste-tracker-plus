@@ -29,6 +29,7 @@ const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrack
 const DriverRouteVisualization = lazy(() => import('@/components/tracking/DriverRouteVisualization'));
 const TrackingModeController = lazy(() => import('@/components/tracking/TrackingModeController'));
 const ShipmentGPSTrackingPanel = lazy(() => import('@/components/tracking/ShipmentGPSTrackingPanel'));
+const JobLifecycleOrchestrator = lazy(() => import('@/components/shipments/JobLifecycleOrchestrator'));
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -302,6 +303,16 @@ const ShipmentDetailsPage = () => {
 
         {/* Status Timeline */}
         <ShipmentStatusTimeline shipment={shipment} />
+
+        {/* Job Lifecycle Gates */}
+        {organization?.id && (
+          <Suspense fallback={<div className="h-20 flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+            <JobLifecycleOrchestrator
+              shipmentId={shipment.id}
+              organizationId={organization.id}
+            />
+          </Suspense>
+        )}
 
         {/* Generator Completion Card - shown when shipment delivered/confirmed and user is generator */}
         {organization?.organization_type === 'generator' && ['delivered', 'confirmed'].includes(shipment.status) && (
