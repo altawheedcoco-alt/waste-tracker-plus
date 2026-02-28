@@ -8,6 +8,7 @@ import { fetchLinkedPartnerOrgs } from '@/hooks/useLinkedPartnerIds';
 import { useAutoChat } from '@/hooks/useAutoChat';
 import { usePinnedParties } from '@/hooks/usePinnedParties';
 import { useRequireSubscription } from '@/hooks/useRequireSubscription';
+import { useImpactRecorder } from '@/hooks/useImpactRecorder';
 import type { Database } from '@/integrations/supabase/types';
 
 export type WasteType = Database['public']['Enums']['waste_type'];
@@ -141,6 +142,7 @@ export const useCreateShipment = () => {
   const { createShipmentChatRoom } = useAutoChat();
   const { pinnedParties, isLoaded: pinnedLoaded } = usePinnedParties();
   const { requireSubscription } = useRequireSubscription();
+  const { recordShipmentCreated } = useImpactRecorder();
   const [searchParams] = useSearchParams();
 
   const [loading, setLoading] = useState(false);
@@ -788,6 +790,15 @@ export const useCreateShipment = () => {
         } catch (e) {
           console.error('Auto declaration error (non-blocking):', e);
         }
+      }
+
+      // Record impact event
+      if (shipmentData) {
+        recordShipmentCreated(shipmentData.id, {
+          wasteType: formData.waste_type,
+          quantity: formData.quantity,
+          unit: formData.unit,
+        });
       }
 
       toast.success('تم إنشاء الشحنة بنجاح');

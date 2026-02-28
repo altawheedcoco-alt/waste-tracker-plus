@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useImpactRecorder } from '@/hooks/useImpactRecorder';
 
 interface DriverSOSButtonProps {
   driverId: string;
@@ -29,6 +30,7 @@ const emergencyTypes = [
 
 const DriverSOSButton = ({ driverId, organizationId, currentShipmentId }: DriverSOSButtonProps) => {
   const { toast } = useToast();
+  const { recordEmergencySent } = useImpactRecorder();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [description, setDescription] = useState('');
@@ -52,7 +54,7 @@ const DriverSOSButton = ({ driverId, organizationId, currentShipmentId }: Driver
         // Location unavailable — proceed without it
       }
 
-      await supabase.from('driver_emergencies').insert({
+      const { data: emergencyRow } = await supabase.from('driver_emergencies').insert({
         driver_id: driverId,
         organization_id: organizationId,
         emergency_type: selectedType,
@@ -60,7 +62,15 @@ const DriverSOSButton = ({ driverId, organizationId, currentShipmentId }: Driver
         latitude: lat,
         longitude: lng,
         shipment_id: currentShipmentId || null,
-      });
+      }).select('id').single();
+
+      // Record impact event
+      if (emergencyRow) {
+        recordEmergencySent(emergencyRow.id, selectedType, {
+          shipmentId: currentShipmentId,
+          lat, lng,
+        });
+      }
 
       setIsSent(true);
       toast({
