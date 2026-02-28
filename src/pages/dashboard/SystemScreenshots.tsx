@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import {
   Monitor, Camera, ExternalLink,
   Building2, Truck, Recycle, Factory,
@@ -306,24 +306,25 @@ const SystemScreenshots = () => {
         </div>
 
         <Tabs defaultValue="public" className="w-full" dir="rtl">
-          <ScrollArea className="w-full" dir="rtl">
-            <TabsList className="inline-flex w-auto min-w-full justify-start gap-1 bg-card border border-border/50 p-1 h-auto flex-wrap">
+          <div className="w-full overflow-x-auto pb-2 scrollbar-thin" dir="rtl">
+            <TabsList className="inline-flex w-max gap-1 bg-card border border-border/50 p-1 h-auto">
               {screenshotCategories.map((cat) => {
                 const Icon = cat.icon;
                 return (
                   <TabsTrigger
                     key={cat.id}
                     value={cat.id}
-                    className="whitespace-nowrap text-[10px] sm:text-xs gap-1.5 px-2.5 py-2 rounded-lg data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30"
+                    className="whitespace-nowrap text-[10px] sm:text-xs gap-1 px-2 py-1.5 rounded-lg data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border data-[state=active]:border-primary/30"
                   >
-                    <Icon className="w-3.5 h-3.5" />
-                    {cat.label}
-                    <Badge variant="secondary" className="text-[8px] px-1 py-0 h-4 mr-1">{cat.screens.length}</Badge>
+                    <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                    <span className="hidden sm:inline">{cat.label}</span>
+                    <span className="sm:hidden">{cat.label.split(' ')[0]}</span>
+                    <Badge variant="secondary" className="text-[7px] px-1 py-0 h-3.5 mr-0.5">{cat.screens.length}</Badge>
                   </TabsTrigger>
                 );
               })}
             </TabsList>
-          </ScrollArea>
+          </div>
 
           {screenshotCategories.map((category) => (
             <TabsContent key={category.id} value={category.id} className="mt-4">
