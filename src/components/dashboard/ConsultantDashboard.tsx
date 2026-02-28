@@ -16,7 +16,7 @@ import {
   CheckCircle2, Briefcase, MapPin, Bell,
   Bot, Send, Sparkles, Calendar, Clock, TrendingUp,
   Target, Award, Star, Lightbulb, UserCheck,
-  Scale, Leaf, Gavel, Globe,
+  Scale, Leaf, Gavel, Globe, Shield, Lock,
 } from 'lucide-react';
 import OrganizationScopeSelector from '@/components/consultant/OrganizationScopeSelector';
 
@@ -30,6 +30,8 @@ const TechnicalReportsPanel = lazy(() => import('@/components/consultant/Technic
 const LegalDashboardPanel = lazy(() => import('@/components/consultant/LegalDashboardPanel'));
 const GreenPointsPanel = lazy(() => import('@/components/consultant/GreenPointsPanel'));
 const ConsultantDocumentWorkbench = lazy(() => import('@/components/consultant/ConsultantDocumentWorkbench'));
+const ConsultantFieldOpsPanel = lazy(() => import('@/components/consultant/ConsultantFieldOpsPanel'));
+const ConsultantAutoReviewPanel = lazy(() => import('@/components/consultant/ConsultantAutoReviewPanel'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -307,6 +309,8 @@ const ConsultantDashboard = memo(() => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="gap-1.5"><BarChart3 className="w-4 h-4" />نظرة عامة</TabsTrigger>
+          <TabsTrigger value="field-ops" className="gap-1.5"><Shield className="w-4 h-4" />العمليات الميدانية</TabsTrigger>
+          <TabsTrigger value="auto-review" className="gap-1.5"><Lock className="w-4 h-4" />الاعتماد الفني</TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />مركز المستندات</TabsTrigger>
           <TabsTrigger value="approvals" className="gap-1.5"><ShieldCheck className="w-4 h-4" />الاعتمادات</TabsTrigger>
           <TabsTrigger value="reports" className="gap-1.5"><Leaf className="w-4 h-4" />التقارير الفنية</TabsTrigger>
@@ -360,6 +364,18 @@ const ConsultantDashboard = memo(() => {
               <ConsultantAlertsWidget assignments={scopedAssignments} />
             </Suspense>
           </div>
+        </TabsContent>
+
+        <TabsContent value="field-ops" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantFieldOpsPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="auto-review" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantAutoReviewPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} entityType={(consultantProfile as any)?.entity_type || 'individual'} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="documents" className="mt-4">
