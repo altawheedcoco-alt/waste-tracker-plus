@@ -57,7 +57,7 @@ const ConsultantKPIsWidget = () => {
         (supabase.from('risk_register') as any).select('id, risk_level, status').eq('organization_id', orgId),
         (supabase.from('corrective_actions') as any).select('id, status, deadline').eq('organization_id', orgId),
         supabase.from('profiles').select('id').eq('organization_id', orgId),
-        supabase.from('shipments').select('id, status, compliance_score').eq('generator_id', orgId).order('created_at', { ascending: false }).limit(100),
+        supabase.from('shipments').select('id, status').eq('generator_id', orgId).order('created_at', { ascending: false }).limit(100),
         (supabase.from('audit_sessions') as any).select('id, status').eq('organization_id', orgId),
       ]);
 
@@ -83,7 +83,7 @@ const ConsultantKPIsWidget = () => {
       const carsOverdue = cars.filter((c: any) => c.deadline && isPast(new Date(c.deadline)) && c.status !== 'closed').length;
       const carsClosed = cars.filter((c: any) => c.status === 'closed').length;
 
-      const shipmentsCompliant = shipments.filter((s: any) => (s.compliance_score || 0) >= 70).length;
+      const shipmentsCompliant = shipments.filter((s: any) => s.status === 'delivered' || s.status === 'recycled' || s.status === 'completed').length;
 
       // Axis scores for readiness chart
       const docRate = docs.length > 0 ? Math.round((documentsVerified / docs.length) * 100) : 0;
