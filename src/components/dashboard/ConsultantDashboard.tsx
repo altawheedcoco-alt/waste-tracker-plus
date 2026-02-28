@@ -16,6 +16,7 @@ import {
   CheckCircle2, Briefcase, MapPin, Bell,
   Bot, Send, Sparkles, Calendar, Clock, TrendingUp,
   Target, Award, Star, Lightbulb, UserCheck,
+  Scale, Leaf, Gavel,
 } from 'lucide-react';
 
 // Lazy load heavy sub-components
@@ -23,6 +24,9 @@ const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/Consulta
 const ClientComplianceDashboard = lazy(() => import('@/components/consultant/ClientComplianceDashboard'));
 const ConsultantAlertsWidget = lazy(() => import('@/components/consultant/ConsultantAlertsWidget'));
 const ShipmentReviewPanel = lazy(() => import('@/components/consultant/ShipmentReviewPanel'));
+const ApprovalsPanel = lazy(() => import('@/components/consultant/ApprovalsPanel'));
+const TechnicalReportsPanel = lazy(() => import('@/components/consultant/TechnicalReportsPanel'));
+const LegalDashboardPanel = lazy(() => import('@/components/consultant/LegalDashboardPanel'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -246,7 +250,10 @@ const ConsultantDashboard = memo(() => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="gap-1.5"><BarChart3 className="w-4 h-4" />نظرة عامة</TabsTrigger>
-          <TabsTrigger value="compliance" className="gap-1.5"><ShieldCheck className="w-4 h-4" />امتثال العملاء</TabsTrigger>
+          <TabsTrigger value="approvals" className="gap-1.5"><ShieldCheck className="w-4 h-4" />الاعتمادات</TabsTrigger>
+          <TabsTrigger value="reports" className="gap-1.5"><Leaf className="w-4 h-4" />التقارير الفنية</TabsTrigger>
+          <TabsTrigger value="legal" className="gap-1.5"><Gavel className="w-4 h-4" />التواصل القانوني</TabsTrigger>
+          <TabsTrigger value="compliance" className="gap-1.5"><Scale className="w-4 h-4" />امتثال العملاء</TabsTrigger>
           <TabsTrigger value="shipments" className="gap-1.5"><Package className="w-4 h-4" />مراجعة الشحنات</TabsTrigger>
           <TabsTrigger value="alerts" className="gap-1.5"><Bell className="w-4 h-4" />التنبيهات</TabsTrigger>
           <TabsTrigger value="organizations" className="gap-1.5"><Building2 className="w-4 h-4" />الجهات ({assignments.length})</TabsTrigger>
@@ -289,6 +296,24 @@ const ConsultantDashboard = memo(() => {
               <ConsultantAlertsWidget assignments={assignments} />
             </Suspense>
           </div>
+        </TabsContent>
+
+        <TabsContent value="approvals" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ApprovalsPanel assignments={assignments} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="reports" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <TechnicalReportsPanel assignments={assignments} />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="legal" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <LegalDashboardPanel assignments={assignments} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="compliance" className="mt-4">
