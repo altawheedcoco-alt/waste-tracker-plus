@@ -268,64 +268,64 @@ const TransporterShipments = () => {
 
   return (
     <DashboardLayout>
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 pb-20">
       {/* Back Button */}
       <BackButton />
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">{t('shipments.management')}</h1>
-          <p className="text-muted-foreground">{t('shipments.managementDesc')}</p>
+          <h1 className="text-lg sm:text-2xl font-bold">{t('shipments.management')}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">{t('shipments.managementDesc')}</p>
         </div>
-        <Button variant="eco" onClick={() => navigate('/dashboard/shipments/new')}>
+        <Button variant="eco" size="sm" className="w-full sm:w-auto" onClick={() => navigate('/dashboard/shipments/new')}>
           <Plus className="ml-2 h-4 w-4" />
           {t('shipments.newShipment')}
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card>
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Package className="w-6 h-6 text-primary" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Package className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.total}</p>
-              <p className="text-sm text-muted-foreground">{t('shipments.totalShipments')}</p>
+              <p className="text-lg sm:text-2xl font-bold">{stats.total}</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">{t('shipments.totalShipments')}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-              <Truck className="w-6 h-6 text-amber-600" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+              <Truck className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.active}</p>
-              <p className="text-sm text-muted-foreground">{t('shipments.activeShipments')}</p>
+              <p className="text-lg sm:text-2xl font-bold">{stats.active}</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">{t('shipments.activeShipments')}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <Recycle className="w-6 h-6 text-emerald-600" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Recycle className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.completed}</p>
-              <p className="text-sm text-muted-foreground">{t('shipments.completed')}</p>
+              <p className="text-lg sm:text-2xl font-bold">{stats.completed}</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">{t('shipments.completed')}</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-              <LinkIcon className="w-6 h-6 text-primary" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+              <LinkIcon className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.linkedPartners}</p>
-              <p className="text-sm text-muted-foreground">{t('shipments.linkedEntities')}</p>
+              <p className="text-lg sm:text-2xl font-bold">{stats.linkedPartners}</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground">{t('shipments.linkedEntities')}</p>
             </div>
           </CardContent>
         </Card>
@@ -333,87 +333,90 @@ const TransporterShipments = () => {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col gap-3">
             <div className="relative flex-1">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder={t('shipments.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pr-10"
+                className="pr-10 text-sm"
               />
             </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder={t('common.status')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map(option => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* Partner Filter */}
-            <div className="flex items-center gap-2">
-              <LinkIcon className="h-4 w-4 text-primary" />
-              <Select value={partnerFilter} onValueChange={setPartnerFilter}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder={t('shipments.allEntities')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4" />
-                      {t('shipments.allEntities')}
-                    </div>
-                  </SelectItem>
-                  {linkedPartners.map(partner => (
-                    <SelectItem key={partner.id} value={partner.id}>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[160px] text-xs sm:text-sm">
+                    <SelectValue placeholder={t('common.status')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Partner Filter - hidden on small mobile */}
+              <div className="hidden sm:flex items-center gap-2 flex-1 min-w-[180px]">
+                <LinkIcon className="h-4 w-4 text-primary shrink-0" />
+                <Select value={partnerFilter} onValueChange={setPartnerFilter}>
+                  <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue placeholder={t('shipments.allEntities')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">
                       <div className="flex items-center gap-2">
-                        {partner.type === 'generator' ? (
-                          <Factory className="h-4 w-4 text-blue-600" />
-                        ) : (
-                          <Recycle className="h-4 w-4 text-emerald-600" />
-                        )}
-                        <span>{partner.name}</span>
-                        <Badge variant="secondary" className="text-[10px] mr-1">
-                          {partner.shipmentsCount}
-                        </Badge>
+                        <Building2 className="h-4 w-4" />
+                        {t('shipments.allEntities')}
                       </div>
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    {linkedPartners.map(partner => (
+                      <SelectItem key={partner.id} value={partner.id}>
+                        <div className="flex items-center gap-2">
+                          {partner.type === 'generator' ? (
+                            <Factory className="h-4 w-4 text-blue-600" />
+                          ) : (
+                            <Recycle className="h-4 w-4 text-emerald-600" />
+                          )}
+                          <span>{partner.name}</span>
+                          <Badge variant="secondary" className="text-[10px] mr-1">
+                            {partner.shipmentsCount}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Shipments Table */}
+      {/* Shipments - Mobile Cards + Desktop Table */}
       <Card>
-        <CardHeader>
-          <CardTitle>{t('shipments.shipmentList')}</CardTitle>
-          <CardDescription>
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-sm sm:text-base">{t('shipments.shipmentList')}</CardTitle>
+          <CardDescription className="text-xs">
             {filteredShipments.length} {t('shipments.title')}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0">
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
           ) : filteredShipments.length === 0 ? (
-            <div className="text-center py-8">
-              <Package className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">{t('shipments.noShipments')}</p>
+            <div className="text-center py-6">
+              <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground">{t('shipments.noShipments')}</p>
               <Button
                 variant="eco"
-                className="mt-4"
+                size="sm"
+                className="mt-3"
                 onClick={() => navigate('/dashboard/shipments/new')}
               >
                 <Plus className="ml-2 h-4 w-4" />
@@ -421,7 +424,63 @@ const TransporterShipments = () => {
               </Button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              {/* Mobile Card View */}
+              <div className="sm:hidden space-y-3">
+                {filteredShipments.map((shipment) => (
+                  <Card key={shipment.id} className="border-border/50">
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          {getStatusBadge(shipment.status)}
+                          <QuickReceiptButton 
+                            shipment={shipment} 
+                            onSuccess={fetchShipments}
+                            variant="ghost"
+                            size="sm"
+                          />
+                        </div>
+                        <span className="font-mono text-xs font-medium">{shipment.shipment_number}</span>
+                      </div>
+                      <div className="space-y-1.5 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-muted-foreground">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</span>
+                          <span className="font-medium">{shipment.quantity} {shipment.unit}</span>
+                        </div>
+                        {shipment.generator?.name && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Building2 className="w-3 h-3" />
+                            <span className="truncate">{shipment.generator.name}</span>
+                          </div>
+                        )}
+                        {shipment.recycler?.name && (
+                          <div className="flex items-center gap-1 text-muted-foreground">
+                            <Recycle className="w-3 h-3" />
+                            <span className="truncate">{shipment.recycler.name}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-border/30">
+                        <span className="text-[10px] text-muted-foreground">
+                          {format(new Date(shipment.created_at), 'dd MMM yyyy', { locale: language === 'ar' ? arLocale : undefined })}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          onClick={() => navigate(`/dashboard/s/${shipment.shipment_number}`)}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          {t('shipments.viewDetails')}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden sm:block overflow-x-auto">
                <Table>
                 <TableHeader>
                   <TableRow>
@@ -529,7 +588,8 @@ const TransporterShipments = () => {
                   ))}
                 </TableBody>
               </Table>
-            </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
