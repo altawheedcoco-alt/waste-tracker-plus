@@ -13,8 +13,9 @@ import { toast } from "sonner";
 import {
   Building2, Users, Link2, LinkIcon, Unlink, Search,
   ShieldCheck, ShieldAlert, ShieldX, Eye, Ban, CheckCircle,
-  AlertTriangle, TrendingUp, UserX, Building, Filter, ArrowLeft, ArrowRight
+  AlertTriangle, TrendingUp, UserX, Building, Filter, ArrowLeft, ArrowRight, Network
 } from "lucide-react";
+import PartnershipNetwork from '@/components/admin/PartnershipNetwork';
 import {
   Select,
   SelectContent,
@@ -341,6 +342,10 @@ const AdminEntityCensus = memo(() => {
             <Users className="w-4 h-4" />
             {isAr ? `المستخدمون (${filteredProfiles.length})` : `Users (${filteredProfiles.length})`}
           </TabsTrigger>
+          <TabsTrigger value="network" className="gap-2">
+            <Network className="w-4 h-4" />
+            {isAr ? 'شبكة الربط' : 'Network'}
+          </TabsTrigger>
         </TabsList>
 
         {/* Organizations Tab */}
@@ -472,6 +477,10 @@ const AdminEntityCensus = memo(() => {
               </Card>
             ))
           )}
+        </TabsContent>
+        {/* Network Tab */}
+        <TabsContent value="network">
+          <PartnershipNetwork />
         </TabsContent>
       </Tabs>
     </div>
