@@ -372,82 +372,92 @@ const SystemScreenshots = () => {
   };
 
   const captureScreen = useCallback(async (screen: ScreenItem): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setCapturing(screen.id);
+    setCapturing(screen.id);
 
-      // Create a hidden iframe to load the page
-      const iframe = document.createElement('iframe');
-      iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1440px;height:900px;border:none;';
-      iframe.src = screen.path;
-      document.body.appendChild(iframe);
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1440px;height:900px;border:none;opacity:0;pointer-events:none;';
+    iframe.src = screen.path;
+    document.body.appendChild(iframe);
 
-      const timeout = setTimeout(() => {
-        cleanup();
-        resolve(false);
-      }, 15000);
+    const cleanup = () => {
+      if (document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+      setCapturing(null);
+    };
 
-      const cleanup = () => {
-        clearTimeout(timeout);
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
-        setCapturing(null);
-      };
+    try {
+      // Wait for iframe to load
+      await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('Iframe load timeout')), 30000);
+        iframe.onload = () => { clearTimeout(timeout); resolve(); };
+        iframe.onerror = () => { clearTimeout(timeout); reject(new Error('Iframe load error')); };
+      });
 
-      iframe.onload = async () => {
-        // Wait a bit for rendering
-        await new Promise(r => setTimeout(r, 2000));
-        
-        try {
-          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (!iframeDoc) throw new Error('Cannot access iframe');
-          
-          const canvas = await html2canvas(iframeDoc.body, {
-            width: 1440,
-            height: 900,
-            scale: 0.5,
-            useCORS: true,
-            allowTaint: true,
-            logging: false,
-            backgroundColor: '#ffffff',
-          });
+      // Wait for page to fully render and data to load
+      await new Promise(r => setTimeout(r, 5000));
 
-          // Convert to blob and download directly
-          canvas.toBlob((blob) => {
-            if (!blob) throw new Error('Failed to create blob');
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${screen.id}-${screen.title}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+      // Additional wait: check if page has finished loading data
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) throw new Error('Cannot access iframe document');
 
-            // Also upload to storage for gallery display
-            supabase.storage
-              .from(BUCKET)
-              .upload(`${screen.id}.png`, blob, { upsert: true, contentType: 'image/png' })
-              .then(() => {
-                const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(`${screen.id}.png`);
-                setScreenshots(prev => ({ ...prev, [screen.id]: urlData.publicUrl + '?t=' + Date.now() }));
-              });
-          }, 'image/png', 0.9);
-          
-          cleanup();
-          resolve(true);
-        } catch (err) {
-          console.error(`Failed to capture ${screen.id}:`, err);
-          cleanup();
-          resolve(false);
-        }
-      };
+      // Wait for any loading spinners to disappear
+      let retries = 0;
+      while (retries < 10) {
+        const spinners = iframeDoc.querySelectorAll('.animate-spin, [data-loading="true"]');
+        const skeletons = iframeDoc.querySelectorAll('[class*="skeleton"], [class*="Skeleton"]');
+        if (spinners.length === 0 && skeletons.length === 0) break;
+        await new Promise(r => setTimeout(r, 1000));
+        retries++;
+      }
 
-      iframe.onerror = () => {
-        cleanup();
-        resolve(false);
-      };
-    });
+      // Final stabilization wait
+      await new Promise(r => setTimeout(r, 1000));
+
+      const canvas = await html2canvas(iframeDoc.body, {
+        width: 1440,
+        height: 900,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        imageTimeout: 15000,
+      });
+
+      // Convert to blob
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (b) => b ? resolve(b) : reject(new Error('Failed to create blob')),
+          'image/png'
+        );
+      });
+
+      // Download to device
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${screen.id}-${screen.title}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Upload to storage for gallery
+      await supabase.storage
+        .from(BUCKET)
+        .upload(`${screen.id}.png`, blob, { upsert: true, contentType: 'image/png' });
+
+      const { data: urlData } = supabase.storage.from(BUCKET).getPublicUrl(`${screen.id}.png`);
+      setScreenshots(prev => ({ ...prev, [screen.id]: urlData.publicUrl + '?t=' + Date.now() }));
+
+      cleanup();
+      return true;
+    } catch (err) {
+      console.error(`Failed to capture ${screen.id}:`, err);
+      cleanup();
+      return false;
+    }
   }, []);
 
   const captureAllInCategory = useCallback(async () => {
@@ -457,15 +467,43 @@ const SystemScreenshots = () => {
     setCapturingAll(true);
     let success = 0;
     let failed = 0;
+    const failedScreens: ScreenItem[] = [];
 
-    for (const screen of category.screens) {
+    toast.info(`بدء التقاط ${category.screens.length} صفحة — يرجى الانتظار...`);
+
+    for (let i = 0; i < category.screens.length; i++) {
+      const screen = category.screens[i];
+      toast.loading(`التقاط ${i + 1}/${category.screens.length}: ${screen.title}`, { id: 'capture-progress' });
+      
       const ok = await captureScreen(screen);
-      if (ok) success++;
-      else failed++;
+      if (ok) {
+        success++;
+      } else {
+        failed++;
+        failedScreens.push(screen);
+      }
+      // Small delay between captures to let browser breathe
+      await new Promise(r => setTimeout(r, 500));
     }
 
+    // Retry failed ones once
+    if (failedScreens.length > 0) {
+      toast.loading(`إعادة محاولة ${failedScreens.length} صفحة فاشلة...`, { id: 'capture-progress' });
+      for (const screen of failedScreens) {
+        const ok = await captureScreen(screen);
+        if (ok) { success++; failed--; }
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    toast.dismiss('capture-progress');
     setCapturingAll(false);
-    toast.success(`تم التقاط ${success} صورة${failed > 0 ? ` (فشل ${failed})` : ''}`);
+    
+    if (failed === 0) {
+      toast.success(`✅ تم التقاط جميع الصفحات بنجاح (${success}/${category.screens.length})`);
+    } else {
+      toast.warning(`تم التقاط ${success} صورة — فشل ${failed}`);
+    }
   }, [activeTab, captureScreen]);
 
   const handleNavigate = useCallback((path: string) => {
