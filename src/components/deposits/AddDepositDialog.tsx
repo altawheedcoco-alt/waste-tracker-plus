@@ -8,6 +8,7 @@ import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpactRecorder } from '@/hooks/useImpactRecorder';
 import {
   Dialog,
   DialogContent,
@@ -115,6 +116,7 @@ export default function AddDepositDialog({
   onSuccess,
 }: AddDepositDialogProps) {
   const { profile } = useAuth();
+  const { recordDepositCreated } = useImpactRecorder();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -423,11 +425,21 @@ export default function AddDepositDialog({
         partner_organization_id: selectedPartner?.type === 'organization' ? data.partnerId : null,
         external_partner_id: selectedPartner?.type === 'external' ? data.partnerId : null,
       };
-      const { error } = await supabase
+      const { data: depositRow, error } = await supabase
         .from('deposits')
-        .insert(insertData);
+        .insert(insertData)
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Record impact event
+      if (depositRow) {
+        recordDepositCreated(depositRow.id, parseFloat(data.amount), {
+          transferMethod: data.transferMethod,
+          partnerType: selectedPartner?.type,
+        });
+      }
 
       // Save data for future if checkbox is checked
       if (saveForFuture) {
