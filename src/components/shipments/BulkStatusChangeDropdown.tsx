@@ -24,6 +24,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useImpactRecorder } from '@/hooks/useImpactRecorder';
 import {
   getAvailableNextStatuses,
   mapLegacyStatus,
@@ -48,6 +49,7 @@ interface BulkStatusChangeDropdownProps {
 
 const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChangeDropdownProps) => {
   const { organization } = useAuth();
+  const { recordShipmentStatusChange } = useImpactRecorder();
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -150,6 +152,12 @@ const BulkStatusChangeDropdown = ({ shipments, onStatusChange }: BulkStatusChang
       }
 
       const statusConfig = getAvailableTargetStatuses(targetShipments).find(s => s.key === targetStatusKey);
+
+      // Record impact events for each shipment
+      for (const s of eligibleShipments) {
+        recordShipmentStatusChange(s.id, dbStatus, { bulk: true, previousStatus: s.status });
+      }
+
       toast.success(`تم تحديث ${eligibleShipments.length} شحنة إلى "${statusConfig?.labelAr || targetStatusKey}"`);
       onStatusChange();
     } catch (error) {
