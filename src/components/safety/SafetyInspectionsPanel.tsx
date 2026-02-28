@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { useSafetyInspections } from '@/hooks/useSafetySystem';
 import { Plus, Search, Loader2, X, CheckCircle2, XCircle, Minus, Trash2, ClipboardCheck } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import LinkedPartnerSafetySelector from './LinkedPartnerSafetySelector';
 
 const INSPECTION_TYPES = [
   { id: 'routine', label: 'دورية', ar: 'تفتيش دوري' },
@@ -99,6 +100,13 @@ const SafetyInspectionsPanel = memo(() => {
                   <div><Label>المنطقة المفتشة *</Label><Input value={form.area_inspected || ''} onChange={e => u('area_inspected', e.target.value)} placeholder="مثال: مستودع النفايات الخطرة" /></div>
                   <div><Label>التاريخ</Label><Input type="date" value={form.inspection_date || new Date().toISOString().slice(0, 10)} onChange={e => u('inspection_date', e.target.value)} /></div>
                 </div>
+
+                <LinkedPartnerSafetySelector
+                  value={form.linked_entity_id || ''}
+                  onChange={(id, type) => { u('linked_entity_id', id); u('linked_entity_type', type); }}
+                  label="ربط التفتيش بجهة"
+                  includeOwn={false}
+                />
 
                 {/* Live Compliance Score */}
                 <Card className="bg-muted/50">

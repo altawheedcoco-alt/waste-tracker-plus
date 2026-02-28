@@ -7,8 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useHazardRegister } from '@/hooks/useSafetySystem';
-import { Plus, AlertTriangle, Shield, MapPin, Loader2, X } from 'lucide-react';
+import { Plus, AlertTriangle, Shield, MapPin, Loader2, X, Link2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import LinkedPartnerSafetySelector from './LinkedPartnerSafetySelector';
 
 const CATEGORIES = [
   { id: 'physical', label: 'مخاطر فيزيائية', color: 'bg-blue-500' },
