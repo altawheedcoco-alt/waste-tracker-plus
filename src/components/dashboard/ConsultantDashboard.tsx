@@ -29,6 +29,7 @@ const ApprovalsPanel = lazy(() => import('@/components/consultant/ApprovalsPanel
 const TechnicalReportsPanel = lazy(() => import('@/components/consultant/TechnicalReportsPanel'));
 const LegalDashboardPanel = lazy(() => import('@/components/consultant/LegalDashboardPanel'));
 const GreenPointsPanel = lazy(() => import('@/components/consultant/GreenPointsPanel'));
+const ConsultantDocumentWorkbench = lazy(() => import('@/components/consultant/ConsultantDocumentWorkbench'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -306,6 +307,7 @@ const ConsultantDashboard = memo(() => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="gap-1.5"><BarChart3 className="w-4 h-4" />نظرة عامة</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />مركز المستندات</TabsTrigger>
           <TabsTrigger value="approvals" className="gap-1.5"><ShieldCheck className="w-4 h-4" />الاعتمادات</TabsTrigger>
           <TabsTrigger value="reports" className="gap-1.5"><Leaf className="w-4 h-4" />التقارير الفنية</TabsTrigger>
           <TabsTrigger value="legal" className="gap-1.5"><Gavel className="w-4 h-4" />التواصل القانوني</TabsTrigger>
@@ -358,6 +360,12 @@ const ConsultantDashboard = memo(() => {
               <ConsultantAlertsWidget assignments={scopedAssignments} />
             </Suspense>
           </div>
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantDocumentWorkbench assignments={scopedAssignments} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="approvals" className="mt-4">
