@@ -4467,6 +4467,99 @@ export type Database = {
           },
         ]
       }
+      consultant_client_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          client_organization_id: string
+          consultant_id: string | null
+          contract_end: string | null
+          contract_reference: string | null
+          contract_start: string | null
+          created_at: string | null
+          data_access_scope: Json | null
+          id: string
+          is_active: boolean | null
+          membership_id: string | null
+          office_id: string | null
+          service_type: string
+          signing_authority: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_organization_id: string
+          consultant_id?: string | null
+          contract_end?: string | null
+          contract_reference?: string | null
+          contract_start?: string | null
+          created_at?: string | null
+          data_access_scope?: Json | null
+          id?: string
+          is_active?: boolean | null
+          membership_id?: string | null
+          office_id?: string | null
+          service_type?: string
+          signing_authority?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          client_organization_id?: string
+          consultant_id?: string | null
+          contract_end?: string | null
+          contract_reference?: string | null
+          contract_start?: string | null
+          created_at?: string | null
+          data_access_scope?: Json | null
+          id?: string
+          is_active?: boolean | null
+          membership_id?: string | null
+          office_id?: string | null
+          service_type?: string
+          signing_authority?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_client_assignments_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_client_assignments_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_client_assignments_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_client_assignments_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "office_consultant_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_client_assignments_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_credentials: {
         Row: {
           consultant_id: string
@@ -4518,43 +4611,73 @@ export type Database = {
         Row: {
           consultant_id: string
           device_info: string | null
+          director_approval_status: string | null
+          director_approved_at: string | null
+          director_approved_by: string | null
+          director_notes: string | null
           document_id: string
           document_type: string
           id: string
           ip_address: string | null
+          membership_id: string | null
           notes: string | null
+          office_co_signed: boolean | null
+          office_id: string | null
+          office_stamp_applied: boolean | null
           organization_id: string
           signature_data: string | null
           signature_hash: string | null
+          signed_as_role: string | null
           signed_at: string | null
+          solidarity_statement: string | null
           stamp_applied: boolean | null
         }
         Insert: {
           consultant_id: string
           device_info?: string | null
+          director_approval_status?: string | null
+          director_approved_at?: string | null
+          director_approved_by?: string | null
+          director_notes?: string | null
           document_id: string
           document_type: string
           id?: string
           ip_address?: string | null
+          membership_id?: string | null
           notes?: string | null
+          office_co_signed?: boolean | null
+          office_id?: string | null
+          office_stamp_applied?: boolean | null
           organization_id: string
           signature_data?: string | null
           signature_hash?: string | null
+          signed_as_role?: string | null
           signed_at?: string | null
+          solidarity_statement?: string | null
           stamp_applied?: boolean | null
         }
         Update: {
           consultant_id?: string
           device_info?: string | null
+          director_approval_status?: string | null
+          director_approved_at?: string | null
+          director_approved_by?: string | null
+          director_notes?: string | null
           document_id?: string
           document_type?: string
           id?: string
           ip_address?: string | null
+          membership_id?: string | null
           notes?: string | null
+          office_co_signed?: boolean | null
+          office_id?: string | null
+          office_stamp_applied?: boolean | null
           organization_id?: string
           signature_data?: string | null
           signature_hash?: string | null
+          signed_as_role?: string | null
           signed_at?: string | null
+          solidarity_statement?: string | null
           stamp_applied?: boolean | null
         }
         Relationships: [
@@ -4563,6 +4686,20 @@ export type Database = {
             columns: ["consultant_id"]
             isOneToOne: false
             referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_document_signatures_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "office_consultant_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_document_signatures_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_offices"
             referencedColumns: ["id"]
           },
           {
@@ -5091,6 +5228,106 @@ export type Database = {
             columns: ["office_id"]
             isOneToOne: false
             referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consulting_offices: {
+        Row: {
+          accreditations: Json | null
+          address: string | null
+          commercial_register: string | null
+          created_at: string | null
+          director_consultant_id: string | null
+          director_user_id: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          license_expiry: string | null
+          license_issuer: string | null
+          license_number: string | null
+          max_consultants: number | null
+          office_name: string
+          office_name_en: string | null
+          office_signature_url: string | null
+          office_stamp_url: string | null
+          organization_id: string
+          phone: string | null
+          specializations: string[] | null
+          tax_id: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          accreditations?: Json | null
+          address?: string | null
+          commercial_register?: string | null
+          created_at?: string | null
+          director_consultant_id?: string | null
+          director_user_id?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          license_expiry?: string | null
+          license_issuer?: string | null
+          license_number?: string | null
+          max_consultants?: number | null
+          office_name: string
+          office_name_en?: string | null
+          office_signature_url?: string | null
+          office_stamp_url?: string | null
+          organization_id: string
+          phone?: string | null
+          specializations?: string[] | null
+          tax_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          accreditations?: Json | null
+          address?: string | null
+          commercial_register?: string | null
+          created_at?: string | null
+          director_consultant_id?: string | null
+          director_user_id?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          license_expiry?: string | null
+          license_issuer?: string | null
+          license_number?: string | null
+          max_consultants?: number | null
+          office_name?: string
+          office_name_en?: string | null
+          office_signature_url?: string | null
+          office_stamp_url?: string | null
+          organization_id?: string
+          phone?: string | null
+          specializations?: string[] | null
+          tax_id?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_offices_director_consultant_id_fkey"
+            columns: ["director_consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consulting_offices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "consulting_offices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -17672,6 +17909,168 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_consultant_memberships: {
+        Row: {
+          assigned_client_ids: string[] | null
+          can_sign_independently: boolean | null
+          can_view_all_clients: boolean | null
+          consultant_id: string
+          created_at: string | null
+          delegated_by: string | null
+          delegation_expires_at: string | null
+          delegation_scope: string | null
+          excluded_document_types: string[] | null
+          id: string
+          is_active: boolean | null
+          joined_at: string | null
+          membership_type: string | null
+          notes: string | null
+          office_id: string
+          requires_director_approval: boolean | null
+          role: string
+          role_title_ar: string | null
+          signing_scope: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_client_ids?: string[] | null
+          can_sign_independently?: boolean | null
+          can_view_all_clients?: boolean | null
+          consultant_id: string
+          created_at?: string | null
+          delegated_by?: string | null
+          delegation_expires_at?: string | null
+          delegation_scope?: string | null
+          excluded_document_types?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          joined_at?: string | null
+          membership_type?: string | null
+          notes?: string | null
+          office_id: string
+          requires_director_approval?: boolean | null
+          role?: string
+          role_title_ar?: string | null
+          signing_scope?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_client_ids?: string[] | null
+          can_sign_independently?: boolean | null
+          can_view_all_clients?: boolean | null
+          consultant_id?: string
+          created_at?: string | null
+          delegated_by?: string | null
+          delegation_expires_at?: string | null
+          delegation_scope?: string | null
+          excluded_document_types?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          joined_at?: string | null
+          membership_type?: string | null
+          notes?: string | null
+          office_id?: string
+          requires_director_approval?: boolean | null
+          role?: string
+          role_title_ar?: string | null
+          signing_scope?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_consultant_memberships_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "office_consultant_memberships_delegated_by_fkey"
+            columns: ["delegated_by"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "office_consultant_memberships_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_offices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      office_signing_policies: {
+        Row: {
+          co_signature_required: boolean | null
+          co_signer_role: string | null
+          created_at: string | null
+          director_modified_at: string | null
+          director_notes: string | null
+          document_type: string
+          id: string
+          is_active: boolean | null
+          min_seniority_level: string | null
+          office_id: string
+          requires_director_approval: boolean | null
+          requires_office_stamp: boolean | null
+          show_consultant_license: boolean | null
+          show_consultant_name: boolean | null
+          show_office_license: boolean | null
+          show_office_name: boolean | null
+          show_solidarity_clause: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          co_signature_required?: boolean | null
+          co_signer_role?: string | null
+          created_at?: string | null
+          director_modified_at?: string | null
+          director_notes?: string | null
+          document_type: string
+          id?: string
+          is_active?: boolean | null
+          min_seniority_level?: string | null
+          office_id: string
+          requires_director_approval?: boolean | null
+          requires_office_stamp?: boolean | null
+          show_consultant_license?: boolean | null
+          show_consultant_name?: boolean | null
+          show_office_license?: boolean | null
+          show_office_name?: boolean | null
+          show_solidarity_clause?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          co_signature_required?: boolean | null
+          co_signer_role?: string | null
+          created_at?: string | null
+          director_modified_at?: string | null
+          director_notes?: string | null
+          document_type?: string
+          id?: string
+          is_active?: boolean | null
+          min_seniority_level?: string | null
+          office_id?: string
+          requires_director_approval?: boolean | null
+          requires_office_stamp?: boolean | null
+          show_consultant_license?: boolean | null
+          show_consultant_name?: boolean | null
+          show_office_license?: boolean | null
+          show_office_name?: boolean | null
+          show_solidarity_clause?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "office_signing_policies_office_id_fkey"
+            columns: ["office_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_offices"
             referencedColumns: ["id"]
           },
         ]
