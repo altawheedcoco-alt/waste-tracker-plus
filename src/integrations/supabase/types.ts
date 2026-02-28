@@ -13975,6 +13975,222 @@ export type Database = {
           },
         ]
       }
+      green_points_balance: {
+        Row: {
+          green_level: string
+          id: string
+          last_updated: string
+          organization_id: string
+          total_co2_saved_tons: number
+          total_energy_saved_kwh: number
+          total_points: number
+          total_shipments_verified: number
+          total_trees_saved: number
+          total_water_saved_liters: number
+        }
+        Insert: {
+          green_level?: string
+          id?: string
+          last_updated?: string
+          organization_id: string
+          total_co2_saved_tons?: number
+          total_energy_saved_kwh?: number
+          total_points?: number
+          total_shipments_verified?: number
+          total_trees_saved?: number
+          total_water_saved_liters?: number
+        }
+        Update: {
+          green_level?: string
+          id?: string
+          last_updated?: string
+          organization_id?: string
+          total_co2_saved_tons?: number
+          total_energy_saved_kwh?: number
+          total_points?: number
+          total_shipments_verified?: number
+          total_trees_saved?: number
+          total_water_saved_liters?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "green_points_balance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "green_points_balance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      green_points_config: {
+        Row: {
+          consultant_id: string | null
+          created_at: string
+          description: string | null
+          energy_saved_kwh_per_ton: number
+          id: string
+          is_active: boolean
+          organization_id: string
+          points_per_ton: number
+          quality_multiplier: number
+          trees_per_ton: number
+          updated_at: string
+          waste_type: string
+          water_saved_liters_per_ton: number
+        }
+        Insert: {
+          consultant_id?: string | null
+          created_at?: string
+          description?: string | null
+          energy_saved_kwh_per_ton?: number
+          id?: string
+          is_active?: boolean
+          organization_id: string
+          points_per_ton?: number
+          quality_multiplier?: number
+          trees_per_ton?: number
+          updated_at?: string
+          waste_type: string
+          water_saved_liters_per_ton?: number
+        }
+        Update: {
+          consultant_id?: string | null
+          created_at?: string
+          description?: string | null
+          energy_saved_kwh_per_ton?: number
+          id?: string
+          is_active?: boolean
+          organization_id?: string
+          points_per_ton?: number
+          quality_multiplier?: number
+          trees_per_ton?: number
+          updated_at?: string
+          waste_type?: string
+          water_saved_liters_per_ton?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "green_points_config_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "green_points_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "green_points_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      green_points_transactions: {
+        Row: {
+          base_points: number
+          co2_saved_tons: number
+          consultant_id: string | null
+          created_at: string
+          energy_saved_kwh: number
+          final_points: number
+          id: string
+          organization_id: string
+          quality_multiplier: number
+          shipment_id: string | null
+          trees_saved: number
+          verification_notes: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+          waste_type: string
+          water_saved_liters: number
+          weight_tons: number
+        }
+        Insert: {
+          base_points?: number
+          co2_saved_tons?: number
+          consultant_id?: string | null
+          created_at?: string
+          energy_saved_kwh?: number
+          final_points?: number
+          id?: string
+          organization_id: string
+          quality_multiplier?: number
+          shipment_id?: string | null
+          trees_saved?: number
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          waste_type: string
+          water_saved_liters?: number
+          weight_tons?: number
+        }
+        Update: {
+          base_points?: number
+          co2_saved_tons?: number
+          consultant_id?: string | null
+          created_at?: string
+          energy_saved_kwh?: number
+          final_points?: number
+          id?: string
+          organization_id?: string
+          quality_multiplier?: number
+          shipment_id?: string | null
+          trees_saved?: number
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          waste_type?: string
+          water_saved_liters?: number
+          weight_tons?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "green_points_transactions_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "green_points_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "green_points_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "green_points_transactions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hr_attendance_policies: {
         Row: {
           break_duration_minutes: number | null
@@ -27971,6 +28187,70 @@ export type Database = {
           {
             foreignKeyName: "transport_office_contracts_organization_id_fkey"
             columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transporter_green_ratings: {
+        Row: {
+          compliance_score: number
+          consultant_id: string | null
+          created_at: string
+          green_badge: string | null
+          id: string
+          notes: string | null
+          overall_score: number
+          punctuality_score: number
+          rating_period: string
+          transporter_org_id: string
+          waste_handling_score: number
+        }
+        Insert: {
+          compliance_score?: number
+          consultant_id?: string | null
+          created_at?: string
+          green_badge?: string | null
+          id?: string
+          notes?: string | null
+          overall_score?: number
+          punctuality_score?: number
+          rating_period: string
+          transporter_org_id: string
+          waste_handling_score?: number
+        }
+        Update: {
+          compliance_score?: number
+          consultant_id?: string | null
+          created_at?: string
+          green_badge?: string | null
+          id?: string
+          notes?: string | null
+          overall_score?: number
+          punctuality_score?: number
+          rating_period?: string
+          transporter_org_id?: string
+          waste_handling_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transporter_green_ratings_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transporter_green_ratings_transporter_org_id_fkey"
+            columns: ["transporter_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transporter_green_ratings_transporter_org_id_fkey"
+            columns: ["transporter_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
