@@ -15131,6 +15131,180 @@ export type Database = {
           },
         ]
       }
+      impact_chain_definitions: {
+        Row: {
+          category: string
+          chain_key: string
+          chain_name_ar: string
+          chain_name_en: string | null
+          created_at: string
+          description_ar: string | null
+          id: string
+          is_active: boolean
+          steps: Json
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          chain_key: string
+          chain_name_ar: string
+          chain_name_en?: string | null
+          created_at?: string
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          steps?: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          chain_key?: string
+          chain_name_ar?: string
+          chain_name_en?: string | null
+          created_at?: string
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean
+          steps?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      impact_events: {
+        Row: {
+          action_label: string
+          actor_id: string | null
+          cascade_targets: Json | null
+          cascade_triggered: boolean | null
+          chain_key: string
+          created_at: string
+          id: string
+          impact_data: Json | null
+          impact_label: string | null
+          metadata: Json | null
+          organization_id: string
+          resource_id: string
+          resource_type: string
+          result_label: string | null
+          step_key: string
+        }
+        Insert: {
+          action_label: string
+          actor_id?: string | null
+          cascade_targets?: Json | null
+          cascade_triggered?: boolean | null
+          chain_key: string
+          created_at?: string
+          id?: string
+          impact_data?: Json | null
+          impact_label?: string | null
+          metadata?: Json | null
+          organization_id: string
+          resource_id: string
+          resource_type: string
+          result_label?: string | null
+          step_key: string
+        }
+        Update: {
+          action_label?: string
+          actor_id?: string | null
+          cascade_targets?: Json | null
+          cascade_triggered?: boolean | null
+          chain_key?: string
+          created_at?: string
+          id?: string
+          impact_data?: Json | null
+          impact_label?: string | null
+          metadata?: Json | null
+          organization_id?: string
+          resource_id?: string
+          resource_type?: string
+          result_label?: string | null
+          step_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impact_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "impact_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      impact_summaries: {
+        Row: {
+          category: string
+          compliance_summary: Json | null
+          created_at: string
+          esg_summary: Json | null
+          financial_summary: Json | null
+          id: string
+          kpi_summary: Json | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          period_type: string
+          total_cascades: number | null
+          total_events: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          compliance_summary?: Json | null
+          created_at?: string
+          esg_summary?: Json | null
+          financial_summary?: Json | null
+          id?: string
+          kpi_summary?: Json | null
+          organization_id: string
+          period_end: string
+          period_start: string
+          period_type?: string
+          total_cascades?: number | null
+          total_events?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          compliance_summary?: Json | null
+          created_at?: string
+          esg_summary?: Json | null
+          financial_summary?: Json | null
+          id?: string
+          kpi_summary?: Json | null
+          organization_id?: string
+          period_end?: string
+          period_start?: string
+          period_type?: string
+          total_cascades?: number | null
+          total_events?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impact_summaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "impact_summaries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       industrial_facilities: {
         Row: {
           address: string | null

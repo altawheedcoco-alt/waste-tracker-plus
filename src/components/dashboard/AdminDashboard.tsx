@@ -36,6 +36,7 @@ import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
+const ImpactDashboard = lazy(() => import('@/components/impact/ImpactDashboard'));
 import { Switch } from '@/components/ui/switch';
 import { toast as sonnerToast } from 'sonner';
 import {
@@ -351,6 +352,7 @@ const AdminDashboard = () => {
           <TabsTrigger value="tracking">تتبع السائقين</TabsTrigger>
           <TabsTrigger value="geofence">الجيوفنس</TabsTrigger>
           <TabsTrigger value="esg">تقارير ESG</TabsTrigger>
+          <TabsTrigger value="impact">سلسلة الأثر</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-6">
@@ -402,6 +404,12 @@ const AdminDashboard = () => {
         <TabsContent value="esg" className="space-y-6 mt-6">
           <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
             <ESGReportPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="impact" className="space-y-6 mt-6">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <ImpactDashboard />
           </Suspense>
         </TabsContent>
       </Tabs>
