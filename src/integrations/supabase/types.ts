@@ -4581,10 +4581,144 @@ export type Database = {
           },
         ]
       }
+      consultant_field_operations: {
+        Row: {
+          actual_weight: number | null
+          consultant_id: string
+          created_at: string
+          declared_weight: number | null
+          evidence_urls: string[] | null
+          ewc_code: string | null
+          ewc_description: string | null
+          hazard_classification: string | null
+          hazard_level: string | null
+          id: string
+          inspection_photos: string[] | null
+          is_hazardous: boolean | null
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
+          notes: string | null
+          operation_type: string
+          organization_id: string
+          result: string
+          shipment_id: string | null
+          un_number: string | null
+          updated_at: string
+          vehicle_id: string | null
+          vehicle_labeling_check: boolean | null
+          vehicle_permit_valid: boolean | null
+          vehicle_plate: string | null
+          vehicle_safety_check: boolean | null
+          waste_category: string | null
+          weight_match: boolean | null
+          weight_variance_pct: number | null
+        }
+        Insert: {
+          actual_weight?: number | null
+          consultant_id: string
+          created_at?: string
+          declared_weight?: number | null
+          evidence_urls?: string[] | null
+          ewc_code?: string | null
+          ewc_description?: string | null
+          hazard_classification?: string | null
+          hazard_level?: string | null
+          id?: string
+          inspection_photos?: string[] | null
+          is_hazardous?: boolean | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          operation_type: string
+          organization_id: string
+          result?: string
+          shipment_id?: string | null
+          un_number?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+          vehicle_labeling_check?: boolean | null
+          vehicle_permit_valid?: boolean | null
+          vehicle_plate?: string | null
+          vehicle_safety_check?: boolean | null
+          waste_category?: string | null
+          weight_match?: boolean | null
+          weight_variance_pct?: number | null
+        }
+        Update: {
+          actual_weight?: number | null
+          consultant_id?: string
+          created_at?: string
+          declared_weight?: number | null
+          evidence_urls?: string[] | null
+          ewc_code?: string | null
+          ewc_description?: string | null
+          hazard_classification?: string | null
+          hazard_level?: string | null
+          id?: string
+          inspection_photos?: string[] | null
+          is_hazardous?: boolean | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          operation_type?: string
+          organization_id?: string
+          result?: string
+          shipment_id?: string | null
+          un_number?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+          vehicle_labeling_check?: boolean | null
+          vehicle_permit_valid?: boolean | null
+          vehicle_plate?: string | null
+          vehicle_safety_check?: boolean | null
+          waste_category?: string | null
+          weight_match?: boolean | null
+          weight_variance_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_field_operations_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_field_operations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_field_operations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_field_operations_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consultant_organization_assignments: {
         Row: {
           assigned_at: string | null
           assigned_by: string | null
+          can_approve_technical: boolean | null
+          can_classify_waste: boolean | null
+          can_inspect_sites: boolean | null
+          can_inspect_vehicles: boolean | null
+          can_issue_certificates: boolean | null
+          can_match_loads: boolean | null
           can_sign_certificates: boolean | null
           can_sign_permits: boolean | null
           can_sign_reports: boolean | null
@@ -4611,6 +4745,12 @@ export type Database = {
         Insert: {
           assigned_at?: string | null
           assigned_by?: string | null
+          can_approve_technical?: boolean | null
+          can_classify_waste?: boolean | null
+          can_inspect_sites?: boolean | null
+          can_inspect_vehicles?: boolean | null
+          can_issue_certificates?: boolean | null
+          can_match_loads?: boolean | null
           can_sign_certificates?: boolean | null
           can_sign_permits?: boolean | null
           can_sign_reports?: boolean | null
@@ -4637,6 +4777,12 @@ export type Database = {
         Update: {
           assigned_at?: string | null
           assigned_by?: string | null
+          can_approve_technical?: boolean | null
+          can_classify_waste?: boolean | null
+          can_inspect_sites?: boolean | null
+          can_inspect_vehicles?: boolean | null
+          can_issue_certificates?: boolean | null
+          can_match_loads?: boolean | null
           can_sign_certificates?: boolean | null
           can_sign_permits?: boolean | null
           can_sign_reports?: boolean | null
@@ -4687,6 +4833,114 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_review_drafts: {
+        Row: {
+          certificate_id: string | null
+          consultant_id: string | null
+          created_at: string
+          distance_km: number | null
+          generator_name: string | null
+          id: string
+          issued_by_type: string | null
+          office_approval_status: string | null
+          office_approved_at: string | null
+          office_approved_by: string | null
+          organization_id: string
+          recycler_name: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          shipment_data: Json | null
+          shipment_id: string | null
+          status: string
+          transport_office: string | null
+          updated_at: string
+          waste_type: string | null
+          weight_tons: number | null
+        }
+        Insert: {
+          certificate_id?: string | null
+          consultant_id?: string | null
+          created_at?: string
+          distance_km?: number | null
+          generator_name?: string | null
+          id?: string
+          issued_by_type?: string | null
+          office_approval_status?: string | null
+          office_approved_at?: string | null
+          office_approved_by?: string | null
+          organization_id: string
+          recycler_name?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          shipment_data?: Json | null
+          shipment_id?: string | null
+          status?: string
+          transport_office?: string | null
+          updated_at?: string
+          waste_type?: string | null
+          weight_tons?: number | null
+        }
+        Update: {
+          certificate_id?: string | null
+          consultant_id?: string | null
+          created_at?: string
+          distance_km?: number | null
+          generator_name?: string | null
+          id?: string
+          issued_by_type?: string | null
+          office_approval_status?: string | null
+          office_approved_at?: string | null
+          office_approved_by?: string | null
+          organization_id?: string
+          recycler_name?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          shipment_data?: Json | null
+          shipment_id?: string | null
+          status?: string
+          transport_office?: string | null
+          updated_at?: string
+          waste_type?: string | null
+          weight_tons?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_review_drafts_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_review_drafts_office_approved_by_fkey"
+            columns: ["office_approved_by"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_review_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "consultant_review_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_review_drafts_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -25385,6 +25639,10 @@ export type Database = {
           collection_started_at: string | null
           compliance_verified: boolean | null
           confirmed_at: string | null
+          consultant_approval_notes: string | null
+          consultant_approved_at: string | null
+          consultant_approved_by: string | null
+          consultant_technical_approval: string | null
           created_at: string | null
           created_by: string | null
           custody_chain_complete: boolean | null
@@ -25502,6 +25760,10 @@ export type Database = {
           collection_started_at?: string | null
           compliance_verified?: boolean | null
           confirmed_at?: string | null
+          consultant_approval_notes?: string | null
+          consultant_approved_at?: string | null
+          consultant_approved_by?: string | null
+          consultant_technical_approval?: string | null
           created_at?: string | null
           created_by?: string | null
           custody_chain_complete?: boolean | null
@@ -25619,6 +25881,10 @@ export type Database = {
           collection_started_at?: string | null
           compliance_verified?: boolean | null
           confirmed_at?: string | null
+          consultant_approval_notes?: string | null
+          consultant_approved_at?: string | null
+          consultant_approved_by?: string | null
+          consultant_technical_approval?: string | null
           created_at?: string | null
           created_by?: string | null
           custody_chain_complete?: boolean | null
@@ -25735,6 +26001,13 @@ export type Database = {
             columns: ["call_log_id"]
             isOneToOne: false
             referencedRelation: "call_logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipments_consultant_approved_by_fkey"
+            columns: ["consultant_approved_by"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
             referencedColumns: ["id"]
           },
           {
