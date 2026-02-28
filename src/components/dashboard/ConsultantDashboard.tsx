@@ -1,4 +1,4 @@
-import { memo, useState, lazy, Suspense } from 'react';
+import { memo, useState, lazy, Suspense, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,8 +16,9 @@ import {
   CheckCircle2, Briefcase, MapPin, Bell,
   Bot, Send, Sparkles, Calendar, Clock, TrendingUp,
   Target, Award, Star, Lightbulb, UserCheck,
-  Scale, Leaf, Gavel,
+  Scale, Leaf, Gavel, Globe,
 } from 'lucide-react';
+import OrganizationScopeSelector from '@/components/consultant/OrganizationScopeSelector';
 
 // Lazy load heavy sub-components
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
@@ -31,26 +32,29 @@ const LegalDashboardPanel = lazy(() => import('@/components/consultant/LegalDash
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
 // ═══ AI Compliance Assistant ═══
-const AIComplianceAssistant = memo(({ consultantProfile, assignments }: { consultantProfile: any; assignments: any[] }) => {
+const AIComplianceAssistant = memo(({ consultantProfile, assignments, selectedOrgId }: { consultantProfile: any; assignments: any[]; selectedOrgId: string | null }) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  const selectedOrg = selectedOrgId ? assignments.find((a: any) => a.organization?.id === selectedOrgId)?.organization : null;
 
   const askAI = async () => {
     if (!question.trim()) return;
     setLoading(true);
     setAnswer('');
     try {
-      const clientNames = assignments.map((a: any) => a.organization?.name).filter(Boolean).join('، ');
+      const clientNames = selectedOrg ? selectedOrg.name : assignments.map((a: any) => a.organization?.name).filter(Boolean).join('، ');
       const resp = await supabase.functions.invoke('ai-consultant-assistant', {
         body: {
           question: question.trim(),
           context: {
             consultantName: consultantProfile?.full_name,
             specialization: consultantProfile?.specialization,
-            clientCount: assignments.length,
+            clientCount: selectedOrg ? 1 : assignments.length,
             clientNames,
+            selectedClient: selectedOrg?.name || null,
             mode: 'individual',
           },
         },
@@ -64,7 +68,12 @@ const AIComplianceAssistant = memo(({ consultantProfile, assignments }: { consul
     }
   };
 
-  const quickQuestions = [
+  const quickQuestions = selectedOrg ? [
+    `ما مستوى امتثال ${selectedOrg.name} للمعايير البيئية؟`,
+    `ما التراخيص المطلوبة لـ ${selectedOrg.name}؟`,
+    `اقترح خطة تدقيق بيئي لـ ${selectedOrg.name}`,
+    'ما هي المخالفات الشائعة في إدارة المخلفات؟',
+  ] : [
     'ما هي متطلبات الامتثال البيئي للمنشآت الصناعية؟',
     'كيف أعد تقرير بيئي لجهة مولدة؟',
     'ما هي المخالفات الشائعة في إدارة المخلفات؟',
@@ -77,8 +86,13 @@ const AIComplianceAssistant = memo(({ consultantProfile, assignments }: { consul
         <CardTitle className="flex items-center gap-2 text-lg">
           <Bot className="w-5 h-5 text-primary" />
           المساعد الذكي للامتثال البيئي
+          {selectedOrg && <Badge variant="outline" className="text-[10px]">{selectedOrg.name}</Badge>}
         </CardTitle>
-        <CardDescription>استشر الذكاء الاصطناعي في أي مسألة بيئية أو تنظيمية</CardDescription>
+        <CardDescription>
+          {selectedOrg
+            ? `استشر الذكاء الاصطناعي بخصوص ${selectedOrg.name}`
+            : 'استشر الذكاء الاصطناعي في أي مسألة بيئية أو تنظيمية'}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-1.5">
@@ -115,11 +129,15 @@ const AIComplianceAssistant = memo(({ consultantProfile, assignments }: { consul
 AIComplianceAssistant.displayName = 'AIComplianceAssistant';
 
 // ═══ Personal Schedule Widget ═══
-const PersonalSchedule = memo(({ assignments }: { assignments: any[] }) => {
+const PersonalSchedule = memo(({ assignments, selectedOrgId }: { assignments: any[]; selectedOrgId: string | null }) => {
+  const filteredAssignments = selectedOrgId
+    ? assignments.filter((a: any) => a.organization?.id === selectedOrgId)
+    : assignments;
+
   const upcomingTasks = [
-    { title: 'مراجعة ملف الامتثال', client: assignments[0]?.organization?.name || 'عميل', date: 'اليوم', priority: 'high' },
-    { title: 'تقرير بيئي شهري', client: assignments[1]?.organization?.name || 'عميل', date: 'غداً', priority: 'medium' },
-    { title: 'زيارة تفتيشية', client: assignments[0]?.organization?.name || 'عميل', date: 'الخميس', priority: 'low' },
+    { title: 'مراجعة ملف الامتثال', client: filteredAssignments[0]?.organization?.name || 'عميل', date: 'اليوم', priority: 'high' },
+    { title: 'تقرير بيئي شهري', client: filteredAssignments[1]?.organization?.name || filteredAssignments[0]?.organization?.name || 'عميل', date: 'غداً', priority: 'medium' },
+    { title: 'زيارة تفتيشية', client: filteredAssignments[0]?.organization?.name || 'عميل', date: 'الخميس', priority: 'low' },
   ];
 
   return (
@@ -152,9 +170,10 @@ PersonalSchedule.displayName = 'PersonalSchedule';
 
 // ═══ Main Dashboard ═══
 const ConsultantDashboard = memo(() => {
-  const { profile, organization } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
 
   const { data: consultantProfile, isLoading: loadingProfile } = useQuery({
     queryKey: ['my-consultant-profile-dash', profile?.user_id],
@@ -179,6 +198,12 @@ const ConsultantDashboard = memo(() => {
     enabled: !!consultantProfile?.id,
   });
 
+  // Scope assignments to selected org
+  const scopedAssignments = useMemo(() => {
+    if (!selectedOrgId) return assignments;
+    return assignments.filter((a: any) => a.organization?.id === selectedOrgId);
+  }, [assignments, selectedOrgId]);
+
   if (loadingProfile) {
     return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>;
   }
@@ -187,8 +212,12 @@ const ConsultantDashboard = memo(() => {
     generator: 'مولد مخلفات', transporter: 'ناقل', recycler: 'مدوّر', disposal: 'تخلص نهائي',
   };
 
+  const selectedOrg = selectedOrgId
+    ? assignments.find((a: any) => a.organization?.id === selectedOrgId)?.organization
+    : null;
+
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -247,6 +276,32 @@ const ConsultantDashboard = memo(() => {
         </Card>
       )}
 
+      {/* ═══ Organization Scope Selector ═══ */}
+      {assignments.length > 0 && (
+        <OrganizationScopeSelector
+          assignments={assignments}
+          selectedOrgId={selectedOrgId}
+          onSelectOrg={(orgId) => {
+            setSelectedOrgId(orgId);
+            // Reset to overview when switching context
+            if (activeTab === 'organizations') setActiveTab('overview');
+          }}
+        />
+      )}
+
+      {/* Scope Indicator Bar */}
+      {selectedOrg && (
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-primary/5 border border-primary/20">
+          <Eye className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">سياق العمل الحالي:</span>
+          <Badge variant="default" className="text-xs">{selectedOrg.name}</Badge>
+          <span className="text-[10px] text-muted-foreground">— جميع الأدوات أدناه تعرض بيانات هذه الجهة فقط</span>
+          <Button variant="ghost" size="sm" className="mr-auto text-[11px] h-6" onClick={() => setSelectedOrgId(null)}>
+            <Globe className="w-3 h-3 ml-1" />عرض الكل
+          </Button>
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="gap-1.5"><BarChart3 className="w-4 h-4" />نظرة عامة</TabsTrigger>
@@ -256,7 +311,9 @@ const ConsultantDashboard = memo(() => {
           <TabsTrigger value="compliance" className="gap-1.5"><Scale className="w-4 h-4" />امتثال العملاء</TabsTrigger>
           <TabsTrigger value="shipments" className="gap-1.5"><Package className="w-4 h-4" />مراجعة الشحنات</TabsTrigger>
           <TabsTrigger value="alerts" className="gap-1.5"><Bell className="w-4 h-4" />التنبيهات</TabsTrigger>
-          <TabsTrigger value="organizations" className="gap-1.5"><Building2 className="w-4 h-4" />الجهات ({assignments.length})</TabsTrigger>
+          {!selectedOrgId && (
+            <TabsTrigger value="organizations" className="gap-1.5"><Building2 className="w-4 h-4" />الجهات ({assignments.length})</TabsTrigger>
+          )}
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
           <TabsTrigger value="kpis" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />مؤشرات KPI</TabsTrigger>
         </TabsList>
@@ -264,133 +321,138 @@ const ConsultantDashboard = memo(() => {
         <TabsContent value="overview" className="space-y-6 mt-4">
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={Building2} label="الجهات المرتبطة" value={assignments.length} color="text-blue-600" />
-            <StatCard icon={Target} label="المهام النشطة" value={assignments.length > 0 ? 3 : 0} color="text-amber-600" />
+            <StatCard icon={Building2} label={selectedOrg ? 'الجهة' : 'الجهات المرتبطة'}
+              value={selectedOrg ? selectedOrg.name?.slice(0, 10) : assignments.length}
+              color="text-blue-600" isText={!!selectedOrg} />
+            <StatCard icon={Target} label="المهام النشطة" value={scopedAssignments.length > 0 ? 3 : 0} color="text-amber-600" />
             <StatCard icon={CheckCircle2} label="المراجعات المكتملة" value={0} color="text-emerald-600" />
             <StatCard icon={Star} label="التقييم" value="4.8" color="text-purple-600" isText />
           </div>
 
-          {/* Quick Actions */}
+          {/* Quick Actions — زر ← وظيفة ← نتيجة ← أثر */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { icon: ShieldCheck, label: 'امتثال العملاء', color: 'bg-emerald-500', tab: 'compliance' },
-              { icon: Package, label: 'مراجعة الشحنات', color: 'bg-indigo-500', tab: 'shipments' },
-              { icon: Bell, label: 'التنبيهات', color: 'bg-amber-500', tab: 'alerts' },
-              { icon: FileText, label: 'إعداد تقرير', color: 'bg-blue-500', path: '/dashboard/reports' },
+              { icon: ShieldCheck, label: 'اعتماد شحنة', desc: 'مطابقة قانونية', color: 'bg-emerald-500', tab: 'approvals' },
+              { icon: Package, label: 'مراجعة المانيفست', desc: 'تتبع سلسلة الحيازة', color: 'bg-indigo-500', tab: 'shipments' },
+              { icon: AlertTriangle, label: 'تقرير عدم مطابقة', desc: 'إصدار إنذار بيئي', color: 'bg-amber-500', tab: 'reports' },
+              { icon: Award, label: 'شهادة تخلص آمن', desc: 'اعتماد نهائي', color: 'bg-blue-500', tab: 'legal' },
             ].map((action, i) => (
               <motion.button key={i}
-                onClick={() => action.tab ? setActiveTab(action.tab) : navigate(action.path!)}
+                onClick={() => setActiveTab(action.tab)}
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 className="flex flex-col items-center gap-2 p-4 rounded-xl border border-border hover:border-primary/40 bg-card hover:bg-primary/5 transition-all">
                 <div className={`w-10 h-10 rounded-xl ${action.color} flex items-center justify-center shadow-sm`}>
                   <action.icon className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-xs font-medium">{action.label}</span>
+                <span className="text-[9px] text-muted-foreground">{action.desc}</span>
               </motion.button>
             ))}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PersonalSchedule assignments={assignments} />
+            <PersonalSchedule assignments={assignments} selectedOrgId={selectedOrgId} />
             <Suspense fallback={<LazyLoader />}>
-              <ConsultantAlertsWidget assignments={assignments} />
+              <ConsultantAlertsWidget assignments={scopedAssignments} />
             </Suspense>
           </div>
         </TabsContent>
 
         <TabsContent value="approvals" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
-            <ApprovalsPanel assignments={assignments} />
+            <ApprovalsPanel assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="reports" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
-            <TechnicalReportsPanel assignments={assignments} />
+            <TechnicalReportsPanel assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="legal" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
-            <LegalDashboardPanel assignments={assignments} />
+            <LegalDashboardPanel assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="compliance" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
-            <ClientComplianceDashboard assignments={assignments} />
+            <ClientComplianceDashboard assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="shipments" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
-            <ShipmentReviewPanel assignments={assignments} />
+            <ShipmentReviewPanel assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="alerts" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
-            <ConsultantAlertsWidget assignments={assignments} />
+            <ConsultantAlertsWidget assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="organizations" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5" />الجهات المرتبطة بك</CardTitle>
-              <CardDescription>الجهات التي عيّنتك كاستشاري بيئي معتمد</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingAssignments ? (
-                <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
-              ) : assignments.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Building2 className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                  <p className="font-medium">لا توجد جهات مرتبطة بعد</p>
-                  <p className="text-sm mt-1">شارك كود الاستشاري الخاص بك مع الجهات ليتم تعيينك</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {assignments.map((a: any) => (
-                    <motion.div key={a.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                      <Card className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
-                              {a.organization?.name?.charAt(0) || '?'}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold truncate">{a.organization?.name}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <Badge variant="outline" className="text-[10px]">{orgTypeLabels[a.organization?.organization_type] || a.organization?.organization_type}</Badge>
-                                {a.organization?.city && <span className="text-[10px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{a.organization.city}</span>}
+        {!selectedOrgId && (
+          <TabsContent value="organizations" className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5" />الجهات المرتبطة بك</CardTitle>
+                <CardDescription>اضغط على أي جهة للدخول لسياق عملها المستقل</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loadingAssignments ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
+                ) : assignments.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Building2 className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                    <p className="font-medium">لا توجد جهات مرتبطة بعد</p>
+                    <p className="text-sm mt-1">شارك كود الاستشاري الخاص بك مع الجهات ليتم تعيينك</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {assignments.map((a: any) => (
+                      <motion.div key={a.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                        <Card className="hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => { setSelectedOrgId(a.organization?.id); setActiveTab('overview'); }}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold">
+                                {a.organization?.name?.charAt(0) || '?'}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold truncate">{a.organization?.name}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <Badge variant="outline" className="text-[10px]">{orgTypeLabels[a.organization?.organization_type] || a.organization?.organization_type}</Badge>
+                                  {a.organization?.city && <span className="text-[10px] text-muted-foreground flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{a.organization.city}</span>}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex flex-wrap gap-1 mt-3">
-                            {a.can_view_shipments && <Badge variant="secondary" className="text-[9px]">الشحنات</Badge>}
-                            {a.can_view_documents && <Badge variant="secondary" className="text-[9px]">المستندات</Badge>}
-                            {a.can_view_compliance && <Badge variant="secondary" className="text-[9px]">الامتثال</Badge>}
-                            {a.can_view_partners && <Badge variant="secondary" className="text-[9px]">الشركاء</Badge>}
-                            {a.can_view_vehicles && <Badge variant="secondary" className="text-[9px]">المركبات</Badge>}
-                            {a.can_view_drivers && <Badge variant="secondary" className="text-[9px]">السائقين</Badge>}
-                          </div>
-                          <Button variant="outline" size="sm" className="w-full mt-3 gap-1.5"
-                            onClick={() => navigate(`/dashboard/organization/${a.organization?.id}`)}>
-                            <Eye className="w-3.5 h-3.5" />عرض بيانات الجهة
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                            <div className="flex flex-wrap gap-1 mt-3">
+                              {a.can_view_shipments && <Badge variant="secondary" className="text-[9px]">الشحنات</Badge>}
+                              {a.can_view_documents && <Badge variant="secondary" className="text-[9px]">المستندات</Badge>}
+                              {a.can_view_compliance && <Badge variant="secondary" className="text-[9px]">الامتثال</Badge>}
+                              {a.can_view_partners && <Badge variant="secondary" className="text-[9px]">الشركاء</Badge>}
+                              {a.can_view_vehicles && <Badge variant="secondary" className="text-[9px]">المركبات</Badge>}
+                              {a.can_view_drivers && <Badge variant="secondary" className="text-[9px]">السائقين</Badge>}
+                            </div>
+                            <Button variant="outline" size="sm" className="w-full mt-3 gap-1.5">
+                              <Eye className="w-3.5 h-3.5" />الدخول لسياق الجهة
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         <TabsContent value="ai-assistant" className="mt-4 space-y-6">
-          <AIComplianceAssistant consultantProfile={consultantProfile} assignments={assignments} />
+          <AIComplianceAssistant consultantProfile={consultantProfile} assignments={assignments} selectedOrgId={selectedOrgId} />
         </TabsContent>
 
         <TabsContent value="kpis" className="mt-4">
@@ -409,7 +471,7 @@ const StatCard = ({ icon: Icon, label, value, color, isText }: { icon: any; labe
       <div className="flex items-center justify-between">
         <Icon className={`w-8 h-8 ${color} opacity-60`} />
         <div>
-          <p className="text-2xl font-bold">{value}</p>
+          <p className={`${isText ? 'text-lg' : 'text-2xl'} font-bold`}>{value}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
         </div>
       </div>
