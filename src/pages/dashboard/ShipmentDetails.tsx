@@ -30,6 +30,7 @@ const DriverRouteVisualization = lazy(() => import('@/components/tracking/Driver
 const TrackingModeController = lazy(() => import('@/components/tracking/TrackingModeController'));
 const ShipmentGPSTrackingPanel = lazy(() => import('@/components/tracking/ShipmentGPSTrackingPanel'));
 const JobLifecycleOrchestrator = lazy(() => import('@/components/shipments/JobLifecycleOrchestrator'));
+const ImpactTrailWidget = lazy(() => import('@/components/impact/ImpactTrailWidget'));
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -313,6 +314,15 @@ const ShipmentDetailsPage = () => {
             />
           </Suspense>
         )}
+
+        {/* Impact Trail — سلسلة الأثر البصرية */}
+        <Suspense fallback={null}>
+          <ImpactTrailWidget
+            resourceType="shipment"
+            resourceId={shipment.id}
+            chainKey="shipment_lifecycle"
+          />
+        </Suspense>
 
         {/* Generator Completion Card - shown when shipment delivered/confirmed and user is generator */}
         {organization?.organization_type === 'generator' && ['delivered', 'confirmed'].includes(shipment.status) && (
