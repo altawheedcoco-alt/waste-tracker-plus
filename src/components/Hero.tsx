@@ -119,7 +119,7 @@ const Hero = memo(() => {
             >
               {t('landing.joinUs')}
             </p>
-            <p className="text-[10px] sm:text-xs text-amber-300/70 font-medium tracking-[0.3em]" style={{ fontFamily: 'serif', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+            <p className="text-sm sm:text-lg text-amber-400 font-bold tracking-[0.35em]" style={{ fontFamily: 'serif', textShadow: '0 0 12px rgba(251,191,36,0.5), 0 2px 8px rgba(0,0,0,0.4)' }}>
               𓂀 𓏏𓅓𓂋𓆑 𓇋𓏏𓂋 𓊪𓏏𓂋 𓅱𓂧𓏏 𓆓𓏏𓏤
             </p>
           </div>
