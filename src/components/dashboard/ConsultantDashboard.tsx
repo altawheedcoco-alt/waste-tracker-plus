@@ -41,6 +41,8 @@ const ConsultantLicensesPanel = lazy(() => import('@/components/consultant/Consu
 const ConsultantDelegationsPanel = lazy(() => import('@/components/consultant/ConsultantDelegationsPanel'));
 const ConsultantActivityLog = lazy(() => import('@/components/consultant/ConsultantActivityLog'));
 const ConsultantSigningCenter = lazy(() => import('@/components/consultant/ConsultantSigningCenter'));
+const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
+const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -339,6 +341,7 @@ const ConsultantDashboard = memo(() => {
           <TabsTrigger value="office-memberships" className="gap-1.5"><Building2 className="w-4 h-4" />عضويات المكاتب</TabsTrigger>
           <TabsTrigger value="green-points" className="gap-1.5"><Leaf className="w-4 h-4" />النقاط الخضراء</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-4 h-4" />التحليلات</TabsTrigger>
           <TabsTrigger value="kpis" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />مؤشرات KPI</TabsTrigger>
         </TabsList>
 
@@ -373,6 +376,15 @@ const ConsultantDashboard = memo(() => {
               </motion.button>
             ))}
           </div>
+
+          {/* Smart Alerts */}
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantSmartAlerts
+              consultantId={(consultantProfile as any)?.id}
+              mode="individual"
+              onNavigate={setActiveTab}
+            />
+          </Suspense>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <PersonalSchedule assignments={assignments} selectedOrgId={selectedOrgId} />
@@ -543,6 +555,12 @@ const ConsultantDashboard = memo(() => {
 
         <TabsContent value="ai-assistant" className="mt-4 space-y-6">
           <AIComplianceAssistant consultantProfile={consultantProfile} assignments={assignments} selectedOrgId={selectedOrgId} />
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantAnalyticsPanel consultantId={(consultantProfile as any)?.id} mode="individual" />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="kpis" className="mt-4">
