@@ -1,4 +1,5 @@
 import { memo, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -12,7 +13,7 @@ import { toast } from "sonner";
 import {
   Building2, Users, Link2, LinkIcon, Unlink, Search,
   ShieldCheck, ShieldAlert, ShieldX, Eye, Ban, CheckCircle,
-  AlertTriangle, TrendingUp, UserX, Building, Filter
+  AlertTriangle, TrendingUp, UserX, Building, Filter, ArrowLeft, ArrowRight
 } from "lucide-react";
 import {
   Select,
@@ -34,6 +35,7 @@ const orgTypeLabels: Record<string, { ar: string; en: string; color: string }> =
 
 const AdminEntityCensus = memo(() => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isAr = language === 'ar';
   const [search, setSearch] = useState('');
@@ -237,6 +239,10 @@ const AdminEntityCensus = memo(() => {
     <div className="min-h-screen bg-background p-4 sm:p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
+            {isAr ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
+          </Button>
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-foreground flex items-center gap-3">
             <div className="p-2 rounded-xl bg-primary/10">
@@ -247,6 +253,7 @@ const AdminEntityCensus = memo(() => {
           <p className="text-muted-foreground text-sm mt-1">
             {isAr ? 'حصر جميع المنظمات والمستخدمين وحالة ارتباطهم — مع تقييد الجهات غير المرتبطة' : 'Census of all organizations and users with linking status — restrict unlinked entities'}
           </p>
+        </div>
         </div>
         <Button variant="destructive" size="sm" onClick={handleBulkRestrict} className="gap-2">
           <Ban className="w-4 h-4" />
