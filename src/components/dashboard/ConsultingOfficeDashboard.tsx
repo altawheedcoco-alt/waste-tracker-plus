@@ -16,9 +16,10 @@ import {
   Briefcase, MapPin, ShieldCheck, ClipboardCheck, TrendingUp,
   AlertTriangle, CheckCircle2, GraduationCap, Bot, Send,
   Sparkles, Target, UserPlus, Calendar, Star, Award,
-  Lightbulb, PieChart, Activity, Zap, Clock,
+  Lightbulb, PieChart, Activity, Zap, Clock, Leaf,
 } from 'lucide-react';
 import ConsultantKPIsWidget from '@/components/compliance/ConsultantKPIsWidget';
+import OfficeTeamManager from '@/components/consultant/OfficeTeamManager';
 
 // ═══ AI Office Assistant ═══
 const OfficeAIAssistant = memo(({ organization, consultantCount, clientCount }: { organization: any; consultantCount: number; clientCount: number }) => {
@@ -194,42 +195,51 @@ const ConsultingOfficeDashboard = memo(() => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
-  const { data: officeConsultants = [], isLoading: loadingConsultants } = useQuery({
-    queryKey: ['office-consultants', organization?.id],
+  const { data: officeProfile } = useQuery({
+    queryKey: ['office-consultant-profile', profile?.user_id],
     queryFn: async () => {
-      if (!organization?.id) return [];
-      const { data: members } = await supabase
-        .from('profiles')
-        .select('id, user_id, full_name, phone, email')
-        .eq('organization_id', organization.id);
-      if (!members?.length) return [];
-      const userIds = members.map(m => m.user_id);
-      const { data: consultants } = await supabase
-        .from('environmental_consultants')
-        .select('*')
-        .in('user_id', userIds);
-      return (consultants || []).map((c: any) => ({
-        ...c,
-        memberProfile: members.find(m => m.user_id === c.user_id),
-      }));
+      if (!profile?.user_id) return null;
+      const { data } = await supabase.from('environmental_consultants')
+        .select('*').eq('user_id', profile.user_id).eq('entity_type', 'office').maybeSingle();
+      return data;
     },
-    enabled: !!organization?.id,
+    enabled: !!profile?.user_id,
   });
 
-  const { data: clientOrgs = [], isLoading: loadingClients } = useQuery({
-    queryKey: ['office-clients', officeConsultants.map((c: any) => c.id)],
+  // Fetch members via consulting_office_members table
+  const { data: officeMembers = [], isLoading: loadingConsultants } = useQuery({
+    queryKey: ['office-members-dashboard', officeProfile?.id],
     queryFn: async () => {
-      const consultantIds = officeConsultants.map((c: any) => c.id).filter(Boolean);
-      if (!consultantIds.length) return [];
+      if (!officeProfile?.id) return [];
+      const { data } = await supabase
+        .from('consulting_office_members')
+        .select('*, consultant:environmental_consultants!consulting_office_members_consultant_id_fkey(id, full_name, specialization, consultant_code, phone, email, is_active)')
+        .eq('office_id', officeProfile.id)
+        .eq('is_active', true);
+      return data || [];
+    },
+    enabled: !!officeProfile?.id,
+  });
+
+  const officeConsultants = officeMembers.map((m: any) => ({ ...m.consultant, role_in_office: m.role_in_office }));
+  const consultantIds = officeConsultants.map((c: any) => c.id).filter(Boolean);
+
+  // Also include the office itself as a consultant for assignments
+  const allConsultantIds = officeProfile ? [...consultantIds, officeProfile.id] : consultantIds;
+
+  const { data: clientOrgs = [], isLoading: loadingClients } = useQuery({
+    queryKey: ['office-clients', allConsultantIds],
+    queryFn: async () => {
+      if (!allConsultantIds.length) return [];
       const { data } = await supabase
         .from('consultant_organization_assignments')
         .select(`*, organization:organizations(id, name, organization_type, city, logo_url),
           consultant:environmental_consultants(id, full_name, consultant_code)`)
-        .in('consultant_id', consultantIds)
+        .in('consultant_id', allConsultantIds)
         .eq('is_active', true);
       return data || [];
     },
-    enabled: officeConsultants.length > 0,
+    enabled: allConsultantIds.length > 0,
   });
 
   const orgTypeLabels: Record<string, string> = {
@@ -322,10 +332,11 @@ const ConsultingOfficeDashboard = memo(() => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="w-full justify-start overflow-x-auto">
+        <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="gap-1.5"><BarChart3 className="w-4 h-4" />نظرة عامة</TabsTrigger>
-          <TabsTrigger value="team" className="gap-1.5"><Users className="w-4 h-4" />فريق الاستشاريين ({officeConsultants.length})</TabsTrigger>
+          <TabsTrigger value="team" className="gap-1.5"><Users className="w-4 h-4" />إدارة الفريق ({officeConsultants.length})</TabsTrigger>
           <TabsTrigger value="clients" className="gap-1.5"><Building2 className="w-4 h-4" />العملاء ({clientOrgs.length})</TabsTrigger>
+          <TabsTrigger value="green-points" className="gap-1.5"><Leaf className="w-4 h-4" />النقاط الخضراء</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
           <TabsTrigger value="compliance" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />الامتثال</TabsTrigger>
         </TabsList>
@@ -339,69 +350,19 @@ const ConsultingOfficeDashboard = memo(() => {
         </TabsContent>
 
         <TabsContent value="team" className="mt-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />فريق الاستشاريين</CardTitle>
-                  <CardDescription>الاستشاريون المسجلون تحت هذا المكتب — يمكنك إدارتهم وتوزيع العملاء عليهم</CardDescription>
-                </div>
-                <Button size="sm" className="gap-1.5" onClick={() => navigate('/consultant-portal')}>
-                  <UserPlus className="w-4 h-4" />إضافة استشاري
+          {officeProfile ? (
+            <OfficeTeamManager officeConsultantId={officeProfile.id} />
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-amber-500" />
+                <p>لم يتم تسجيل المكتب كجهة استشارية بعد</p>
+                <Button variant="outline" className="mt-4 gap-2" onClick={() => navigate('/consultant-portal')}>
+                  <GraduationCap className="w-4 h-4" />سجل في بوابة الاستشاريين
                 </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loadingConsultants ? (
-                <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>
-              ) : officeConsultants.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Users className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                  <p className="font-medium">لا يوجد استشاريون مسجلون</p>
-                  <p className="text-sm mt-1">يمكن لأعضاء المكتب التسجيل عبر بوابة الاستشاريين</p>
-                  <Button variant="outline" className="mt-4 gap-2" onClick={() => navigate('/consultant-portal')}>
-                    <GraduationCap className="w-4 h-4" />بوابة التسجيل
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {officeConsultants.map((c: any) => {
-                    const assignedClients = clientOrgs.filter((co: any) => co.consultant?.id === c.id).length;
-                    return (
-                      <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                        <Card className="hover:shadow-md transition-shadow">
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-bold text-lg">
-                                {c.full_name?.charAt(0) || '?'}
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-semibold">{c.full_name}</p>
-                                <p className="text-xs text-muted-foreground">{c.specialization || 'استشاري عام'}</p>
-                              </div>
-                              <Badge variant={c.is_active ? 'default' : 'secondary'} className="text-[10px]">
-                                {c.is_active ? 'نشط' : 'غير نشط'}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                              <span className="flex items-center gap-1"><Building2 className="w-3 h-3" />{assignedClients} عملاء</span>
-                              <Badge variant="outline" className="text-[10px] font-mono">{c.consultant_code}</Badge>
-                            </div>
-                            {c.license_number && (
-                              <p className="text-[11px] text-muted-foreground">ترخيص: {c.license_number}</p>
-                            )}
-                            {c.memberProfile?.phone && (
-                              <p className="text-[11px] text-muted-foreground">📱 {c.memberProfile.phone}</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="clients" className="mt-4">
@@ -456,6 +417,16 @@ const ConsultingOfficeDashboard = memo(() => {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="green-points" className="mt-4">
+          <Card>
+            <CardContent className="p-6 text-center text-muted-foreground">
+              <Leaf className="w-12 h-12 mx-auto mb-3 opacity-30 text-emerald-500" />
+              <p className="font-medium">النقاط الخضراء متاحة من لوحة الاستشاري الفردي</p>
+              <p className="text-sm mt-1">يمكن لكل استشاري في المكتب إدارة النقاط الخضراء لعملائه من لوحته الشخصية</p>
             </CardContent>
           </Card>
         </TabsContent>

@@ -4602,6 +4602,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           notes: string | null
+          office_id: string | null
           organization_id: string
           role_title: string | null
           visibility_updated_at: string | null
@@ -4627,6 +4628,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           notes?: string | null
+          office_id?: string | null
           organization_id: string
           role_title?: string | null
           visibility_updated_at?: string | null
@@ -4652,6 +4654,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           notes?: string | null
+          office_id?: string | null
           organization_id?: string
           role_title?: string | null
           visibility_updated_at?: string | null
@@ -4661,6 +4664,13 @@ export type Database = {
           {
             foreignKeyName: "consultant_organization_assignments_consultant_id_fkey"
             columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultant_organization_assignments_office_id_fkey"
+            columns: ["office_id"]
             isOneToOne: false
             referencedRelation: "environmental_consultants"
             referencedColumns: ["id"]
@@ -4777,6 +4787,54 @@ export type Database = {
           {
             foreignKeyName: "consultant_service_catalog_consultant_id_fkey"
             columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consulting_office_members: {
+        Row: {
+          consultant_id: string
+          id: string
+          invited_by: string | null
+          is_active: boolean
+          joined_at: string
+          notes: string | null
+          office_id: string
+          role_in_office: string
+        }
+        Insert: {
+          consultant_id: string
+          id?: string
+          invited_by?: string | null
+          is_active?: boolean
+          joined_at?: string
+          notes?: string | null
+          office_id: string
+          role_in_office?: string
+        }
+        Update: {
+          consultant_id?: string
+          id?: string
+          invited_by?: string | null
+          is_active?: boolean
+          joined_at?: string
+          notes?: string | null
+          office_id?: string
+          role_in_office?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_office_members_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "environmental_consultants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consulting_office_members_office_id_fkey"
+            columns: ["office_id"]
             isOneToOne: false
             referencedRelation: "environmental_consultants"
             referencedColumns: ["id"]
@@ -31421,6 +31479,10 @@ export type Database = {
         Returns: boolean
       }
       is_current_user_admin: { Args: never; Returns: boolean }
+      is_office_member: {
+        Args: { _office_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_org_subscription_valid: { Args: { org_id: string }; Returns: boolean }
       is_regulator_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_driver: {
