@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTransportOfficeData } from '@/hooks/useTransportOfficeData';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,8 +9,11 @@ import { Input } from '@/components/ui/input';
 import {
   Truck, Plus, Package, ClipboardCheck, DollarSign, AlertTriangle,
   CheckCircle2, Clock, Eye, Edit, Trash2, Search,
-  Users, Wrench, BarChart3, Shield, MapPin, CalendarDays, Building2, Loader2
+  Users, Wrench, BarChart3, Shield, MapPin, CalendarDays, Building2, Loader2, Leaf
 } from 'lucide-react';
+
+const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
+const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -175,6 +178,12 @@ const TransportOfficeDashboard = () => {
           <TabsTrigger value="contract" className="gap-1 text-xs sm:text-sm">
             <ClipboardCheck className="w-3.5 h-3.5" /> العقد
           </TabsTrigger>
+          <TabsTrigger value="geofence" className="gap-1 text-xs sm:text-sm">
+            <MapPin className="w-3.5 h-3.5" /> الجيوفنس
+          </TabsTrigger>
+          <TabsTrigger value="esg" className="gap-1 text-xs sm:text-sm">
+            <Leaf className="w-3.5 h-3.5" /> تقارير ESG
+          </TabsTrigger>
         </TabsList>
 
         {/* === Vehicles Tab === */}
@@ -260,6 +269,20 @@ const TransportOfficeDashboard = () => {
         {/* === Contract Tab === */}
         <TabsContent value="contract" className="mt-4">
           <TransportOfficeContract contract={contract} onRefresh={() => refetch()} />
+        </TabsContent>
+
+        {/* Geofence Tab */}
+        <TabsContent value="geofence" className="mt-4 space-y-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <GeofenceAlertsPanel />
+          </Suspense>
+        </TabsContent>
+
+        {/* ESG Tab */}
+        <TabsContent value="esg" className="mt-4 space-y-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <ESGReportPanel />
+          </Suspense>
         </TabsContent>
       </Tabs>
 

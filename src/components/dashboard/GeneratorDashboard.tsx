@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Clock, CheckCircle2, Truck, AlertCircle, Eye, FileCheck, Sparkles, ClipboardList, Printer } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, AlertCircle, Eye, FileCheck, Sparkles, ClipboardList, Printer, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid from './QuickActionsGrid';
@@ -55,6 +55,7 @@ const ComplianceAlertsWidget = lazy(() => import('@/components/compliance/Compli
 const RiskMatrixWidget = lazy(() => import('@/components/compliance/RiskMatrixWidget'));
 const CorrectiveActionsWidget = lazy(() => import('@/components/compliance/CorrectiveActionsWidget'));
 const AuditPortalWidget = lazy(() => import('@/components/compliance/AuditPortalWidget'));
+const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -273,6 +274,7 @@ const GeneratorDashboard = () => {
             <TabsTrigger value="work-orders" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">أوامر الشغل</TabsTrigger>
             <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الجهات المرتبطة</TabsTrigger>
             <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الامتثال القانوني</TabsTrigger>
+            <TabsTrigger value="geofence" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">تتبع الشحنات</TabsTrigger>
           </TabsList>
         </div>
 
@@ -422,6 +424,13 @@ const GeneratorDashboard = () => {
             <AuditPortalWidget />
             <LegalComplianceWidget />
             <LegalArchiveWidget />
+          </Suspense>
+        </TabsContent>
+
+        {/* ── تتبع الشحنات (جيوفنس) ── */}
+        <TabsContent value="geofence" className="space-y-4 mt-4 sm:mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <GeofenceAlertsPanel />
           </Suspense>
         </TabsContent>
       </Tabs>
