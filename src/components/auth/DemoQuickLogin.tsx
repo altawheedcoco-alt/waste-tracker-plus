@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
-const DEMO_PASSWORD = 'Demo@2026!';
+const DEMO_PASSWORD = '575757';
 
 const demoAccounts = [
   { email: 'demo-generator@irecycle.test', label: 'مولد مخلفات', desc: 'مصانع ومنشآت', icon: Factory, color: 'from-amber-500 to-orange-600' },
@@ -213,7 +213,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                 </div>
 
                 <p className="text-[10px] text-muted-foreground text-center">
-                  كلمة المرور: <span dir="ltr" className="font-mono">Demo@2026!</span>
+                  كلمة المرور: <span dir="ltr" className="font-mono">575757</span>
                 </p>
               </div>
             )}
