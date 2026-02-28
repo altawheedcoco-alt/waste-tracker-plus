@@ -85,6 +85,7 @@ import {
   ClipboardCheck,
   Printer,
   CreditCard,
+  Monitor,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import {
@@ -461,6 +462,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             { icon: Lock, label: language === 'ar' ? 'امتثال GDPR' : 'GDPR Compliance', path: '/dashboard/gdpr-compliance', key: 'gdpr-compliance' },
             { icon: BookOpen, label: language === 'ar' ? 'بروشور المنصة' : 'Platform Brochure', path: '/dashboard/platform-brochure', key: 'platform-brochure' },
             { icon: FileText, label: language === 'ar' ? 'إدارة الإفادات' : 'Attestation Management', path: '/dashboard/admin-attestations', key: 'admin-attestations' },
+            { icon: Monitor, label: language === 'ar' ? 'سكرين شوت' : 'Screenshots', path: '/dashboard/system-screenshots', key: 'system-screenshots' },
           ]
         } as SidebarMenuItem]
       : []),
