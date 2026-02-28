@@ -329,36 +329,29 @@ const SystemScreenshots = () => {
             <TabsContent key={category.id} value={category.id} className="mt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                 {category.screens.map((screen) => (
-                  <Card key={screen.id} className="overflow-hidden group hover:border-primary/30 transition-all">
-                    <div className="relative aspect-video bg-muted/30 overflow-hidden">
-                      <iframe
-                        src={screen.path}
-                        title={screen.title}
-                        className="w-[1920px] h-[1080px] origin-top-left pointer-events-none border-0"
-                        style={{ transform: 'scale(0.15)', transformOrigin: 'top left' }}
-                        loading="lazy"
-                        sandbox="allow-same-origin allow-scripts"
-                        tabIndex={-1}
-                      />
-                      <div
-                        className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors cursor-pointer"
-                        onClick={() => handleCapture(screen.id, screen.path)}
-                      />
+                   <Card
+                    key={screen.id}
+                    className="overflow-hidden group hover:border-primary/30 hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => handleCapture(screen.id, screen.path)}
+                  >
+                    <div className="relative aspect-video bg-gradient-to-br from-primary/5 via-muted/20 to-accent/10 flex flex-col items-center justify-center gap-2 p-4">
+                      {(() => {
+                        const Icon = category.icon;
+                        return <Icon className="w-8 h-8 text-primary/40 group-hover:text-primary/70 transition-colors" />;
+                      })()}
+                      <span className="text-[10px] text-muted-foreground/60 font-mono">{screen.path}</span>
                     </div>
 
                     <CardContent className="p-2.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 text-right">
-                          <h3 className="font-semibold text-xs">{screen.title}</h3>
-                          <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">{screen.description}</p>
-                        </div>
+                      <div className="text-right">
+                        <h3 className="font-semibold text-xs">{screen.title}</h3>
+                        <p className="text-[9px] text-muted-foreground mt-0.5 line-clamp-1">{screen.description}</p>
                       </div>
 
                       <Button
                         variant="outline"
                         size="sm"
                         className="w-full mt-2 text-[10px] gap-1.5 h-7"
-                        onClick={() => handleCapture(screen.id, screen.path)}
                         disabled={capturing === screen.id}
                       >
                         {capturing === screen.id ? (
