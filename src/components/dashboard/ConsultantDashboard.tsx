@@ -28,6 +28,7 @@ const ShipmentReviewPanel = lazy(() => import('@/components/consultant/ShipmentR
 const ApprovalsPanel = lazy(() => import('@/components/consultant/ApprovalsPanel'));
 const TechnicalReportsPanel = lazy(() => import('@/components/consultant/TechnicalReportsPanel'));
 const LegalDashboardPanel = lazy(() => import('@/components/consultant/LegalDashboardPanel'));
+const GreenPointsPanel = lazy(() => import('@/components/consultant/GreenPointsPanel'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -314,6 +315,7 @@ const ConsultantDashboard = memo(() => {
           {!selectedOrgId && (
             <TabsTrigger value="organizations" className="gap-1.5"><Building2 className="w-4 h-4" />الجهات ({assignments.length})</TabsTrigger>
           )}
+          <TabsTrigger value="green-points" className="gap-1.5"><Leaf className="w-4 h-4" />النقاط الخضراء</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
           <TabsTrigger value="kpis" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />مؤشرات KPI</TabsTrigger>
         </TabsList>
@@ -450,6 +452,12 @@ const ConsultantDashboard = memo(() => {
             </Card>
           </TabsContent>
         )}
+
+        <TabsContent value="green-points" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <GreenPointsPanel assignments={scopedAssignments} />
+          </Suspense>
+        </TabsContent>
 
         <TabsContent value="ai-assistant" className="mt-4 space-y-6">
           <AIComplianceAssistant consultantProfile={consultantProfile} assignments={assignments} selectedOrgId={selectedOrgId} />
