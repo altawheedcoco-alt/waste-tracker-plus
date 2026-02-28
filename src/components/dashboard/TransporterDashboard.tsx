@@ -82,6 +82,8 @@ const GovernmentReportingPanel = lazy(() => import('./transporter/GovernmentRepo
 const CarbonCreditsPanel = lazy(() => import('./transporter/CarbonCreditsPanel'));
 const IoTMonitoringPanel = lazy(() => import('./transporter/IoTMonitoringPanel'));
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
+const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
+const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -108,6 +110,8 @@ const tabItems = [
   { value: 'intelligence', label: 'الأتمتة', icon: Cpu },
   { value: 'partners', label: 'الجهات المرتبطة', icon: Handshake },
   { value: 'tracking', label: 'تتبع السائقين', icon: MapPin },
+  { value: 'geofence', label: 'الجيوفنس', icon: AlertTriangle },
+  { value: 'esg', label: 'تقارير ESG', icon: Leaf },
   { value: 'compliance', label: 'الامتثال', icon: Shield },
   { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
 ];
@@ -390,6 +394,18 @@ const TransporterDashboard = () => {
               <SignalMonitorWidget />
               <DriverLinkingCode />
               <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="geofence" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <GeofenceAlertsPanel />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="esg" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ESGReportPanel />
             </Suspense>
           </TabsContent>
 
