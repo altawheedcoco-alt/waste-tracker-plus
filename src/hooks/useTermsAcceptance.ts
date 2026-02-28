@@ -29,7 +29,7 @@ export const useTermsAcceptance = () => {
       }
 
       // All organization types require terms acceptance
-      const validOrgTypes: OrganizationType[] = ['generator', 'transporter', 'recycler'];
+      const validOrgTypes: OrganizationType[] = ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office'];
       if (!validOrgTypes.includes(organization.organization_type as OrganizationType)) {
         setLoading(false);
         setHasAcceptedTerms(true);
