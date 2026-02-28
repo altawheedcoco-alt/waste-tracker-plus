@@ -1,5 +1,5 @@
 import { memo, useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,89 +34,123 @@ const orgTypeLabels: Record<string, { ar: string; en: string; color: string }> =
 
 const AdminEntityCensus = memo(() => {
   const { language } = useLanguage();
+  const queryClient = useQueryClient();
   const isAr = language === 'ar';
   const [search, setSearch] = useState('');
   const [orgTypeFilter, setOrgTypeFilter] = useState<string>('all');
   const [linkStatusFilter, setLinkStatusFilter] = useState<string>('all');
 
   // Fetch organizations with member & partner counts
-  const { data: organizations = [], isLoading: orgsLoading } = useQuery({
+  const { data: organizations = [], isLoading: orgsLoading, error: orgsError } = useQuery({
     queryKey: ['admin-census-orgs'],
     queryFn: async () => {
-      const { data: orgs, error } = await supabase
-        .from('organizations')
-        .select('id, name, name_en, organization_type, is_active, is_verified, is_suspended, created_at, partner_code, client_code, phone, email')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-
-      // Get member counts
-      const { data: members } = await supabase
-        .from('organization_members' as any)
-        .select('organization_id, status');
-
-      // Get partner counts (external_partners are non-platform partners)
-      const { data: partners } = await supabase
-        .from('external_partners')
-        .select('organization_id');
-
-      const memberMap: Record<string, number> = {};
-      const partnerMap: Record<string, number> = {};
-
-      (members || []).forEach((m: any) => {
-        if (m.status === 'active') {
-          memberMap[m.organization_id] = (memberMap[m.organization_id] || 0) + 1;
+      try {
+        const { data: orgs, error } = await supabase
+          .from('organizations')
+          .select('id, name, name_en, organization_type, is_active, is_verified, is_suspended, created_at, partner_code, client_code, phone, email')
+          .order('created_at', { ascending: false });
+        if (error) {
+          console.error('Error fetching organizations:', error);
+          throw error;
         }
-      });
 
-      (partners || []).forEach((p: any) => {
-        partnerMap[p.organization_id] = (partnerMap[p.organization_id] || 0) + 1;
-      });
+        // Get member counts
+        const { data: members, error: membersError } = await supabase
+          .from('organization_members' as any)
+          .select('organization_id, status');
+        if (membersError) console.error('Error fetching members:', membersError);
 
-      return (orgs || []).map((org: any) => ({
-        ...org,
-        activeMembers: memberMap[org.id] || 0,
-        partnersCount: partnerMap[org.id] || 0,
-        isLinked: (memberMap[org.id] || 0) > 0 || (partnerMap[org.id] || 0) > 0,
-      }));
+        // Get partner counts (external_partners are non-platform partners)
+        const { data: partners, error: partnersError } = await supabase
+          .from('external_partners')
+          .select('organization_id');
+        if (partnersError) console.error('Error fetching partners:', partnersError);
+
+        // Get verified partnerships count
+        const { data: partnerships, error: partnershipError } = await supabase
+          .from('verified_partnerships')
+          .select('requester_org_id, partner_org_id')
+          .eq('status', 'active');
+        if (partnershipError) console.error('Error fetching partnerships:', partnershipError);
+
+        const memberMap: Record<string, number> = {};
+        const partnerMap: Record<string, number> = {};
+        const verifiedPartnerMap: Record<string, number> = {};
+
+        (members || []).forEach((m: any) => {
+          if (m.status === 'active') {
+            memberMap[m.organization_id] = (memberMap[m.organization_id] || 0) + 1;
+          }
+        });
+
+        (partners || []).forEach((p: any) => {
+          partnerMap[p.organization_id] = (partnerMap[p.organization_id] || 0) + 1;
+        });
+
+        (partnerships || []).forEach((p: any) => {
+          verifiedPartnerMap[p.requester_org_id] = (verifiedPartnerMap[p.requester_org_id] || 0) + 1;
+          verifiedPartnerMap[p.partner_org_id] = (verifiedPartnerMap[p.partner_org_id] || 0) + 1;
+        });
+
+        return (orgs || []).map((org: any) => ({
+          ...org,
+          activeMembers: memberMap[org.id] || 0,
+          partnersCount: (partnerMap[org.id] || 0) + (verifiedPartnerMap[org.id] || 0),
+          isLinked: (memberMap[org.id] || 0) > 0 || (partnerMap[org.id] || 0) > 0 || (verifiedPartnerMap[org.id] || 0) > 0,
+        }));
+      } catch (err) {
+        console.error('Census orgs query failed:', err);
+        throw err;
+      }
     },
   });
 
   // Fetch profiles with org membership
-  const { data: profiles = [], isLoading: profilesLoading } = useQuery({
+  const { data: profiles = [], isLoading: profilesLoading, error: profilesError } = useQuery({
     queryKey: ['admin-census-profiles'],
     queryFn: async () => {
-      const { data: profs, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, phone, user_id, created_at')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
+      try {
+        const { data: profs, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone, user_id, created_at')
+          .order('created_at', { ascending: false });
+        if (error) {
+          console.error('Error fetching profiles:', error);
+          throw error;
+        }
 
-      const { data: members } = await supabase
-        .from('organization_members' as any)
-        .select('user_id, organization_id, status');
+        const { data: members, error: membersError } = await supabase
+          .from('organization_members' as any)
+          .select('user_id, organization_id, status');
+        if (membersError) console.error('Error fetching member links:', membersError);
 
-      const { data: orgs } = await supabase
-        .from('organizations')
-        .select('id, name');
+        const { data: orgs, error: orgsErr } = await supabase
+          .from('organizations')
+          .select('id, name');
+        if (orgsErr) console.error('Error fetching org names:', orgsErr);
 
-      const orgMap: Record<string, string> = {};
-      (orgs || []).forEach((o: any) => { orgMap[o.id] = o.name; });
+        const orgMap: Record<string, string> = {};
+        (orgs || []).forEach((o: any) => { orgMap[o.id] = o.name; });
 
-      const userOrgMap: Record<string, { orgId: string; orgName: string; status: string }[]> = {};
-      (members || []).forEach((m: any) => {
-        if (!userOrgMap[m.user_id]) userOrgMap[m.user_id] = [];
-        userOrgMap[m.user_id].push({
-          orgId: m.organization_id,
-          orgName: orgMap[m.organization_id] || 'غير معروف',
-          status: m.status,
+        const userOrgMap: Record<string, { orgId: string; orgName: string; status: string }[]> = {};
+        (members || []).forEach((m: any) => {
+          if (!userOrgMap[m.user_id]) userOrgMap[m.user_id] = [];
+          userOrgMap[m.user_id].push({
+            orgId: m.organization_id,
+            orgName: orgMap[m.organization_id] || 'غير معروف',
+            status: m.status,
+          });
         });
-      });
 
-      return (profs || []).map((p: any) => ({
-        ...p,
-        orgs: userOrgMap[p.user_id] || [],
-        isLinked: (userOrgMap[p.user_id] || []).some((o: any) => o.status === 'active'),
-      }));
+        return (profs || []).map((p: any) => ({
+          ...p,
+          orgs: userOrgMap[p.user_id] || [],
+          isLinked: (userOrgMap[p.user_id] || []).some((o: any) => o.status === 'active'),
+        }));
+      } catch (err) {
+        console.error('Census profiles query failed:', err);
+        throw err;
+      }
     },
   });
 
@@ -173,8 +207,7 @@ const AdminEntityCensus = memo(() => {
       toast.success(!currentSuspended
         ? (isAr ? 'تم تقييد صلاحيات الجهة' : 'Entity restricted')
         : (isAr ? 'تم إلغاء التقييد' : 'Restriction removed'));
-      // Refetch
-      window.location.reload();
+      queryClient.invalidateQueries({ queryKey: ['admin-census-orgs'] });
     }
   };
 
@@ -194,10 +227,11 @@ const AdminEntityCensus = memo(() => {
     }
 
     toast.success(isAr ? `تم تقييد ${unlinkedIds.length} جهة غير مرتبطة` : `Restricted ${unlinkedIds.length} unlinked entities`);
-    window.location.reload();
+    queryClient.invalidateQueries({ queryKey: ['admin-census-orgs'] });
   };
 
   const isLoading = orgsLoading || profilesLoading;
+  const hasError = orgsError || profilesError;
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
@@ -219,6 +253,18 @@ const AdminEntityCensus = memo(() => {
           {isAr ? 'تقييد جميع غير المرتبطين' : 'Restrict All Unlinked'}
         </Button>
       </div>
+
+      {hasError && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="p-4 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-destructive" />
+            <div>
+              <p className="font-bold text-destructive">{isAr ? 'خطأ في تحميل البيانات' : 'Error loading data'}</p>
+              <p className="text-xs text-muted-foreground">{(orgsError as any)?.message || (profilesError as any)?.message}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
