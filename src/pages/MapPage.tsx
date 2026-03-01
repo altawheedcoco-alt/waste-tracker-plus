@@ -140,24 +140,78 @@ const MapPage = () => {
     }
   };
 
-  // AI search
+  const [aiResults, setAiResults] = useState<any[]>([]);
+  const aiMarkersRef = useRef<L.LayerGroup | null>(null);
+
+  // AI search - show ALL results
   const handleAISearch = async () => {
     if (!aiSearchQuery.trim()) return;
     setAiSearching(true);
+    setAiResults([]);
+    
+    // Clear previous AI markers
+    if (aiMarkersRef.current) aiMarkersRef.current.clearLayers();
+    if (!aiMarkersRef.current && mapInstanceRef.current) {
+      aiMarkersRef.current = L.layerGroup().addTo(mapInstanceRef.current);
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke('ai-location-resolve', {
         body: { query: aiSearchQuery },
       });
       if (error) throw error;
-      if (data?.location && mapInstanceRef.current) {
-        const { latitude, longitude, name, address } = data.location;
-        mapInstanceRef.current.setView([latitude, longitude], 15);
-        L.marker([latitude, longitude]).addTo(mapInstanceRef.current)
-          .bindPopup(`<div dir="rtl"><b>🤖 ${name}</b><br/>${address}</div>`).openPopup();
-        toast.success(`📍 تم تحديد: ${name}`);
+      
+      const locations = data?.all_locations || [];
+      if (locations.length === 0 && data?.location) {
+        locations.push({ ...data.location, is_primary: true });
+      }
+
+      if (locations.length > 0 && mapInstanceRef.current) {
+        setAiResults(locations);
+        const bounds = L.latLngBounds([]);
+
+        locations.forEach((loc: any, idx: number) => {
+          const isPrimary = loc.is_primary;
+          const confidenceColor = loc.confidence === 'high' ? '#22c55e' : loc.confidence === 'medium' ? '#f59e0b' : '#ef4444';
+          
+          const icon = L.divIcon({
+            html: `<div style="background:${isPrimary ? '#6366f1' : '#8b5cf6'};width:${isPrimary ? 34 : 28}px;height:${isPrimary ? 34 : 28}px;border-radius:50%;border:3px solid ${confidenceColor};box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:${isPrimary ? 14 : 11}px;">${idx + 1}</div>`,
+            iconSize: [isPrimary ? 34 : 28, isPrimary ? 34 : 28],
+            className: '',
+          });
+
+          const marker = L.marker([loc.latitude, loc.longitude], { icon })
+            .bindPopup(`
+              <div dir="rtl" style="min-width:200px">
+                <h4 style="font-weight:bold;margin-bottom:4px">🤖 ${loc.name}</h4>
+                <p style="font-size:11px;color:#666;margin-bottom:2px">${loc.address}</p>
+                ${loc.governorate ? `<p style="font-size:11px;color:#888">📍 ${loc.governorate}</p>` : ''}
+                ${loc.location_type ? `<p style="font-size:10px;color:#888">🏷️ ${loc.location_type}</p>` : ''}
+                <p style="font-size:10px;margin-top:4px">
+                  <span style="color:${confidenceColor};font-weight:bold">
+                    ${loc.confidence === 'high' ? '✅ دقة عالية' : loc.confidence === 'medium' ? '⚠️ دقة متوسطة' : '❓ تقدير تقريبي'}
+                  </span>
+                  ${isPrimary ? ' — <b>النتيجة الرئيسية</b>' : ''}
+                </p>
+              </div>
+            `);
+          
+          marker.addTo(aiMarkersRef.current!);
+          bounds.extend([loc.latitude, loc.longitude]);
+        });
+
+        if (bounds.isValid()) {
+          mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+        }
+        
+        // Open primary marker popup
+        const primaryLoc = locations.find((l: any) => l.is_primary) || locations[0];
+        toast.success(`🤖 تم العثور على ${locations.length} نتيجة لـ "${aiSearchQuery}"`);
+      } else {
+        toast.error('لم يتم العثور على نتائج');
       }
     } catch {
-      toast.error('فشل في البحث');
+      toast.error('فشل في البحث الذكي');
     } finally {
       setAiSearching(false);
     }
@@ -220,6 +274,52 @@ const MapPage = () => {
                   AI
                 </Button>
               </div>
+              {/* AI Results List */}
+              {aiResults.length > 0 && (
+                <div className="mt-2 max-h-48 overflow-y-auto space-y-1">
+                  <p className="text-xs font-semibold text-muted-foreground mb-1">🤖 {aiResults.length} نتيجة:</p>
+                  {aiResults.map((loc: any, idx: number) => (
+                    <button
+                      key={idx}
+                      className={`w-full text-right p-2 rounded-md text-xs border transition-colors hover:bg-accent/50 ${loc.is_primary ? 'border-primary/30 bg-primary/5' : 'border-border'}`}
+                      onClick={() => {
+                        if (mapInstanceRef.current) {
+                          mapInstanceRef.current.setView([loc.latitude, loc.longitude], 16);
+                          // Open popup of this marker
+                          aiMarkersRef.current?.eachLayer((layer: any) => {
+                            if (layer.getLatLng && 
+                                Math.abs(layer.getLatLng().lat - loc.latitude) < 0.0001 && 
+                                Math.abs(layer.getLatLng().lng - loc.longitude) < 0.0001) {
+                              layer.openPopup();
+                            }
+                          });
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-primary/20 text-primary flex items-center justify-center text-[10px] font-bold shrink-0">
+                          {idx + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{loc.name}</p>
+                          <p className="text-muted-foreground truncate">{loc.address}</p>
+                        </div>
+                        <span className={`text-[10px] shrink-0 ${loc.confidence === 'high' ? 'text-emerald-500' : loc.confidence === 'medium' ? 'text-amber-500' : 'text-destructive'}`}>
+                          {loc.confidence === 'high' ? '✅' : loc.confidence === 'medium' ? '⚠️' : '❓'}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="w-full text-xs" 
+                    onClick={() => { setAiResults([]); aiMarkersRef.current?.clearLayers(); }}
+                  >
+                    مسح النتائج
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 
