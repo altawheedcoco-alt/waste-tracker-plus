@@ -328,6 +328,42 @@ export type Database = {
           },
         ]
       }
+      action_execution_log: {
+        Row: {
+          action_type: string
+          action_value: string | null
+          executed_at: string
+          id: string
+          metadata: Json | null
+          organization_id: string | null
+          resource_id: string
+          resource_type: string
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          action_value?: string | null
+          executed_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          resource_id: string
+          resource_type: string
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          action_value?: string | null
+          executed_at?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          resource_id?: string
+          resource_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       activity_logs: {
         Row: {
           action: string
@@ -33551,6 +33587,16 @@ export type Database = {
         Args: { p_description?: string }
         Returns: string
       }
+      check_action_executed: {
+        Args: {
+          p_action_type: string
+          p_action_value?: string
+          p_resource_id: string
+          p_resource_type: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       check_api_rate_limit: {
         Args: { p_api_key_id: string }
         Returns: {
@@ -33930,6 +33976,18 @@ export type Database = {
           p_user_id?: string
         }
         Returns: string
+      }
+      record_action_execution: {
+        Args: {
+          p_action_type: string
+          p_action_value?: string
+          p_metadata?: Json
+          p_organization_id?: string
+          p_resource_id: string
+          p_resource_type: string
+          p_user_id: string
+        }
+        Returns: boolean
       }
       refresh_all_materialized_views: { Args: never; Returns: undefined }
       refresh_materialized_view: {
