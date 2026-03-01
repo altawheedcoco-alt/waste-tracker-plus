@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { 
   CheckCircle2, Clock, XCircle, AlertTriangle, 
   ShieldCheck, Scale, MapPin, FileText, UserCheck, Microscope,
-  ArrowLeft, Lock
+  ArrowLeft, Lock, RefreshCw
 } from 'lucide-react';
 import { useJobLifecycle, getGateLabel, isGateMandatory } from '@/hooks/useJobLifecycle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,7 +42,7 @@ const gateColors: Record<string, string> = {
 const JobLifecycleOrchestrator = memo(({ 
   shipmentId, organizationId, onAllGatesPassed, compact = false 
 }: JobLifecycleOrchestratorProps) => {
-  const { gates, isLoading, initializeGates, updateGate, progress, allPassed, canProceed, nextPendingGate } = useJobLifecycle(shipmentId);
+  const { gates, isLoading, initializeGates, updateGate, runAutoEvaluation, progress, allPassed, canProceed, nextPendingGate } = useJobLifecycle(shipmentId);
   const { user } = useAuth();
 
   // Initialize gates if none exist
@@ -106,10 +106,23 @@ const JobLifecycleOrchestrator = memo(({
     <Card className="border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <Badge variant={canProceed ? 'default' : 'outline'} className="gap-1">
-            {canProceed ? <CheckCircle2 className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-            {canProceed ? 'جاهز للفوترة' : 'بوابات الاعتماد'}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant={allPassed ? 'default' : 'outline'} className="gap-1">
+              {allPassed ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+              {allPassed ? 'مكتمل' : 'تقييم تلقائي'}
+            </Badge>
+            {!allPassed && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 px-2 text-[10px] gap-1"
+                onClick={() => runAutoEvaluation()}
+              >
+                <RefreshCw className="w-3 h-3" />
+                إعادة تقييم
+              </Button>
+            )}
+          </div>
           <CardTitle className="text-sm flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-primary" />
             دورة حياة المهمة
@@ -117,7 +130,7 @@ const JobLifecycleOrchestrator = memo(({
         </div>
         <Progress value={progress} className="h-2 mt-2" />
         <p className="text-xs text-muted-foreground text-right mt-1">
-          {gates.filter(g => g.gate_status === 'passed').length} من {gates.length} بوابات مكتملة
+          {gates.filter(g => g.gate_status === 'passed' || g.gate_status === 'bypassed').length} من {gates.length} بوابات مكتملة
         </p>
       </CardHeader>
       <CardContent className="space-y-2">
