@@ -85,12 +85,29 @@ const MapPage = () => {
 
     const map = L.map(mapRef.current, { zoomControl: true }).setView(EGYPT_CENTER, DEFAULT_ZOOM);
     
-    // Multiple tile layers
+    // All available free tile layers
     const osmLayer = L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 });
     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
+    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: 'OpenTopoMap', maxZoom: 17 });
+    const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
+    const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
+    const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
+    const osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: 'OSM HOT', maxZoom: 19 });
+    const stamenTerrain = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', { attribution: 'Stadia/Stamen', maxZoom: 18 });
+    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
     
     osmLayer.addTo(map);
-    L.control.layers({ 'خريطة عادية': osmLayer, 'صور أقمار صناعية': satelliteLayer }, {}, { position: 'topright' }).addTo(map);
+    L.control.layers({
+      '🗺️ خريطة عادية (OSM)': osmLayer,
+      '🛰️ صور أقمار صناعية': satelliteLayer,
+      '🏔️ طبوغرافية': topoLayer,
+      '🌙 داكنة (CARTO Dark)': cartoDark,
+      '☀️ فاتحة (CARTO Light)': cartoLight,
+      '🧭 Voyager (CARTO)': cartoVoyager,
+      '🔥 إنسانية (HOT)': osmHot,
+      '🏞️ تضاريس (Stamen)': stamenTerrain,
+      '🗻 Esri Topo': esriTopo,
+    }, {}, { position: 'topright', collapsed: true }).addTo(map);
 
     markersLayerRef.current = L.layerGroup().addTo(map);
     mapInstanceRef.current = map;
