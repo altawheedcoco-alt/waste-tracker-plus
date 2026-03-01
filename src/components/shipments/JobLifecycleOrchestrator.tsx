@@ -216,10 +216,10 @@ const JobLifecycleOrchestrator = memo(({
           );
         })}
 
-        {!canProceed && (
+        {!allPassed && gates.some(g => g.gate_status === 'pending') && (
           <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 text-xs text-amber-700 dark:text-amber-400">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>لا يمكن إصدار الفاتورة حتى اكتمال البوابات الإلزامية — البوابات التحذيرية يمكن تجاوزها</span>
+            <span>توجد بوابات تحذيرية قيد الانتظار — يمكن تجاوزها أو اعتمادها</span>
           </div>
         )}
       </CardContent>
