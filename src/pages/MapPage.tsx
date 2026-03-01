@@ -68,7 +68,7 @@ const MapPage = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [manualPickName, setManualPickName] = useState('');
-  const [mapMode, setMapMode] = useState<'leaflet' | 'waze' | 'both' | 'google'>('leaflet');
+  const [mapMode, setMapMode] = useState<'leaflet' | 'waze' | 'both' | 'google' | 'waze_live'>('leaflet');
   const [wazeCenter, setWazeCenter] = useState({ lat: EGYPT_CENTER[0], lng: EGYPT_CENTER[1], zoom: DEFAULT_ZOOM });
   const [googleSelectedCoords, setGoogleSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [googleSelectedAddress, setGoogleSelectedAddress] = useState('');
@@ -640,6 +640,21 @@ const MapPage = () => {
                 <MapPin className="w-3 h-3" />
                 Google Maps
               </Button>
+              <Button
+                size="sm"
+                variant={mapMode === 'waze_live' ? 'default' : 'ghost'}
+                className="rounded-none gap-1"
+                onClick={() => {
+                  setMapMode('waze_live');
+                  if (mapInstanceRef.current) {
+                    const c = mapInstanceRef.current.getCenter();
+                    setWazeCenter({ lat: c.lat, lng: c.lng, zoom: mapInstanceRef.current.getZoom() });
+                  }
+                }}
+              >
+                <Navigation className="w-3 h-3" />
+                Waze Live
+              </Button>
             </div>
             <Badge variant="outline" className="gap-1"><Building2 className="w-3 h-3" />{stats.total} جهة</Badge>
             <Badge className="bg-amber-500/10 text-amber-600 gap-1"><Factory className="w-3 h-3" />{stats.generators} مولد</Badge>
@@ -930,6 +945,93 @@ const MapPage = () => {
             </div>
           )}
 
+          {/* Waze Live Deep Links Map */}
+          {mapMode === 'waze_live' && (
+            <div className="rounded-xl border border-border shadow-sm overflow-hidden" style={{ height: '650px' }}>
+              {/* Coordinates bar */}
+              <div className="bg-primary/10 p-2 flex flex-wrap items-center justify-between gap-2 border-b border-primary/20">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold text-primary">📍 الموقع المحدد:</span>
+                  <span className="text-sm font-mono font-semibold text-foreground">
+                    {wazeCenter.lat.toFixed(6)}, {wazeCenter.lng.toFixed(6)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 text-[10px] gap-1"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${wazeCenter.lat.toFixed(6)}, ${wazeCenter.lng.toFixed(6)}`);
+                      toast.success('تم نسخ الإحداثيات');
+                    }}
+                  >
+                    📋 نسخ
+                  </Button>
+                </div>
+              </div>
+              {/* Deep Links */}
+              <div className="bg-muted/30 p-2 flex flex-wrap gap-2 border-b border-border">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 text-xs"
+                  onClick={() => window.open(`https://waze.com/ul?ll=${wazeCenter.lat},${wazeCenter.lng}&navigate=yes`, '_blank')}
+                >
+                  <Navigation className="w-3 h-3" />
+                  🚗 ابدأ الملاحة
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 text-xs"
+                  onClick={() => window.open(`https://waze.com/ul?ll=${wazeCenter.lat},${wazeCenter.lng}&z=15`, '_blank')}
+                >
+                  <MapPin className="w-3 h-3" />
+                  📍 عرض الموقع
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 text-xs"
+                  onClick={() => window.open(`https://waze.com/ul?q=${wazeCenter.lat},${wazeCenter.lng}`, '_blank')}
+                >
+                  <Search className="w-3 h-3" />
+                  🔍 بحث قريب
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 text-xs"
+                  onClick={() => window.open(`https://waze.com/livemap?lat=${wazeCenter.lat}&lon=${wazeCenter.lng}&zoom=15`, '_blank')}
+                >
+                  <Map className="w-3 h-3" />
+                  🗺️ Waze Live Map
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 text-xs"
+                  onClick={() => {
+                    const shareUrl = `https://waze.com/ul?ll=${wazeCenter.lat},${wazeCenter.lng}&navigate=yes`;
+                    navigator.clipboard.writeText(shareUrl);
+                    toast.success('تم نسخ رابط المشاركة');
+                  }}
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  📤 مشاركة الرابط
+                </Button>
+              </div>
+              <iframe
+                src={`https://www.waze.com/livemap?lat=${wazeCenter.lat}&lon=${wazeCenter.lng}&zoom=${wazeCenter.zoom}`}
+                width="100%"
+                style={{ height: 'calc(100% - 90px)', border: 0 }}
+                allowFullScreen
+                title="Waze Live Deep Links Map"
+              />
+            </div>
+          )}
           {/* Google Maps */}
           {mapMode === 'google' && (
             <div className="space-y-0 rounded-xl border border-border shadow-sm overflow-hidden" style={{ height: '650px' }}>
