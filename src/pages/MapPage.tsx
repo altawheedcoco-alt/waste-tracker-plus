@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Map, Search, Loader2, MapPin, Building2, Recycle, Truck, Factory, Sparkles, Navigation, Layers, History, Trash2, MousePointerClick, Save } from 'lucide-react';
+import { Map, Search, Loader2, MapPin, Building2, Recycle, Truck, Factory, Sparkles, Navigation, Layers, History, Trash2, MousePointerClick, Save, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM, forwardGeocodeOSM, reverseGeocodeOSM } from '@/lib/leafletConfig';
 import { toast } from 'sonner';
@@ -68,6 +68,8 @@ const MapPage = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [manualPickName, setManualPickName] = useState('');
+  const [mapMode, setMapMode] = useState<'leaflet' | 'waze'>('leaflet');
+  const [wazeCenter, setWazeCenter] = useState({ lat: EGYPT_CENTER[0], lng: EGYPT_CENTER[1], zoom: DEFAULT_ZOOM });
 
   // Load search history
   const loadSearchHistory = useCallback(async () => {
@@ -304,6 +306,7 @@ const MapPage = () => {
       const results = await forwardGeocodeOSM(searchQuery);
       if (results.length > 0 && mapInstanceRef.current) {
         mapInstanceRef.current.setView([results[0].lat, results[0].lng], 14);
+        setWazeCenter({ lat: results[0].lat, lng: results[0].lng, zoom: 14 });
         L.marker([results[0].lat, results[0].lng]).addTo(mapInstanceRef.current)
           .bindPopup(`<div dir="rtl"><b>${results[0].name}</b><br/>${results[0].address}</div>`).openPopup();
         
@@ -386,6 +389,8 @@ const MapPage = () => {
 
         if (bounds.isValid()) {
           mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+          const center = bounds.getCenter();
+          setWazeCenter({ lat: center.lat, lng: center.lng, zoom: 14 });
         }
         
         // Save primary result to history
@@ -425,6 +430,7 @@ const MapPage = () => {
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         mapInstanceRef.current?.setView([latitude, longitude], 15);
+        setWazeCenter({ lat: latitude, lng: longitude, zoom: 15 });
         L.marker([latitude, longitude]).addTo(mapInstanceRef.current!)
           .bindPopup('<div dir="rtl"><b>📍 موقعك الحالي</b></div>').openPopup();
         
@@ -445,6 +451,7 @@ const MapPage = () => {
   const goToHistoryItem = (item: SearchHistoryItem) => {
     if (!mapInstanceRef.current) return;
     mapInstanceRef.current.setView([item.latitude, item.longitude], 15);
+    setWazeCenter({ lat: item.latitude, lng: item.longitude, zoom: 15 });
     
     const typeIcon = item.search_type === 'ai' ? '🤖' : item.search_type === 'manual' ? '📌' : item.search_type === 'gps' ? '📍' : '🔍';
     L.marker([item.latitude, item.longitude])
@@ -479,6 +486,34 @@ const MapPage = () => {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            {/* Map mode toggle */}
+            <div className="flex rounded-lg border border-border overflow-hidden">
+              <Button
+                size="sm"
+                variant={mapMode === 'leaflet' ? 'default' : 'ghost'}
+                className="rounded-none gap-1"
+                onClick={() => setMapMode('leaflet')}
+              >
+                <Map className="w-3 h-3" />
+                خرائط تفاعلية
+              </Button>
+              <Button
+                size="sm"
+                variant={mapMode === 'waze' ? 'default' : 'ghost'}
+                className="rounded-none gap-1"
+                onClick={() => {
+                  setMapMode('waze');
+                  // Sync Waze center with current Leaflet view
+                  if (mapInstanceRef.current) {
+                    const c = mapInstanceRef.current.getCenter();
+                    setWazeCenter({ lat: c.lat, lng: c.lng, zoom: mapInstanceRef.current.getZoom() });
+                  }
+                }}
+              >
+                <Navigation className="w-3 h-3" />
+                Waze مباشرة
+              </Button>
+            </div>
             <Badge variant="outline" className="gap-1"><Building2 className="w-3 h-3" />{stats.total} جهة</Badge>
             <Badge className="bg-amber-500/10 text-amber-600 gap-1"><Factory className="w-3 h-3" />{stats.generators} مولد</Badge>
             <Badge className="bg-blue-500/10 text-blue-600 gap-1"><Truck className="w-3 h-3" />{stats.transporters} ناقل</Badge>
@@ -701,16 +736,49 @@ const MapPage = () => {
 
         {/* Map */}
         <div className="relative">
-          {loading && (
+          {loading && mapMode === 'leaflet' && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 rounded-lg">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           )}
+          
+          {/* Leaflet Map */}
           <div 
             ref={mapRef} 
             className={`rounded-xl border shadow-sm ${manualPickMode ? 'border-primary cursor-crosshair' : 'border-border'}`} 
-            style={{ height: '600px' }} 
+            style={{ height: '600px', display: mapMode === 'leaflet' ? 'block' : 'none' }} 
           />
+
+          {/* Waze Live Map */}
+          {mapMode === 'waze' && (
+            <div className="rounded-xl border border-border shadow-sm overflow-hidden" style={{ height: '600px' }}>
+              <div className="bg-muted/50 p-2 flex items-center justify-between border-b border-border">
+                <div className="flex items-center gap-2">
+                  <Navigation className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Waze Live Map</span>
+                  <Badge variant="secondary" className="text-[10px]">
+                    {wazeCenter.lat.toFixed(4)}, {wazeCenter.lng.toFixed(4)}
+                  </Badge>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 text-xs"
+                  onClick={() => window.open(`https://waze.com/ul?ll=${wazeCenter.lat},${wazeCenter.lng}&navigate=yes`, '_blank')}
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  فتح في Waze
+                </Button>
+              </div>
+              <iframe
+                src={`https://embed.waze.com/iframe?zoom=${wazeCenter.zoom}&lat=${wazeCenter.lat}&lon=${wazeCenter.lng}&pin=1`}
+                width="100%"
+                style={{ height: 'calc(100% - 40px)', border: 0 }}
+                allowFullScreen
+                title="Waze Live Map"
+              />
+            </div>
+          )}
         </div>
 
         {/* Legend */}
