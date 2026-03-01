@@ -210,3 +210,51 @@ supabase/
 | الأنواع | كل أنواع الموارد | شحنات + إيداعات + كشف حساب |
 | العمليات | عرض فقط (Read-only) | عرض + رفع + إجراءات |
 | المدة | قصيرة (ساعات/أيام) | طويلة (أسابيع/شهور) |
+
+---
+
+# نظام إدارة معلومات المخلفات (WMIS)
+
+## الحالة: ✅ تم التأسيس
+
+---
+
+## المعمارية
+
+### 1. ربط التراخيص بالعمليات (License-Operation Binding)
+- عمود `licensed_waste_types TEXT[]` على جدول `organizations`
+- دالة `check_waste_license_compliance()` للتحقق الآلي
+- جدول `wmis_license_checks` لتسجيل كل عملية تحقق
+- مكون `LicenseComplianceBanner` يعرض نتيجة التحقق فوراً
+- مكون `LicensedWasteTypesEditor` لإدارة أنواع المخلفات المرخصة
+
+### 2. بوابة الاستشاري الإلزامية (Consultant Approval Gate)
+- جدول `wmis_consultant_gates` لتحديد البوابات والشروط
+- مكون `ConsultantApprovalGate` يحجب الإجراء حتى موافقة الاستشاري
+- دعم الموافقة التلقائية (أقل من وزن معين)
+- تصعيد آلي بعد مهلة محددة
+- نقل المسؤولية الفنية من المنصة للاستشاري
+
+### 3. أحداث IoT/AI (WMIS Events)
+- جدول `wmis_events` لتسجيل كافة الأحداث
+- 6 مصادر: iot_sensor, ai_vision, gps_tracker, weighbridge, manual, system
+- 15 نوع حدث من تنبيهات الحرارة لخرق الجيوفنس
+- 4 مستويات خطورة: info, warning, critical, emergency
+- إشعارات تلقائية للأطراف المعنية عبر Trigger
+- Realtime مفعل للأحداث الحية
+
+### المكونات البرمجية
+```
+src/hooks/useWMIS.ts              — Hook شامل للتحقق والأحداث والبوابات
+src/components/wmis/
+├── LicenseComplianceBanner.tsx   — شريط التحقق من الترخيص
+├── LicensedWasteTypesEditor.tsx  — محرر أنواع المخلفات المرخصة
+├── WMISEventsFeed.tsx            — خلاصة الأحداث مع فلترة وحل
+├── CreateWMISEventDialog.tsx     — نافذة تسجيل حدث جديد
+└── ConsultantApprovalGate.tsx    — بوابة موافقة الاستشاري
+```
+
+### ملاحظة قانونية
+- المنصة = أداة رقابة وشفافية
+- المسؤولية على مُدخل البيانات وصاحب التوقيع (المادة 18، قانون 202/2020)
+- الختم النهائي في يد الاستشاري البيئي المعتمد

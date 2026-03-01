@@ -20193,6 +20193,9 @@ export type Database = {
           license_expiry_date: string | null
           license_number: string | null
           license_renewal_url: string | null
+          license_scope_notes: string | null
+          licensed_waste_categories: string[] | null
+          licensed_waste_types: string[] | null
           location_description: string | null
           location_lat: number | null
           location_lng: number | null
@@ -20228,6 +20231,8 @@ export type Database = {
           updated_at: string | null
           vision: string | null
           website_url: string | null
+          wmis_enrolled: boolean | null
+          wmis_enrolled_at: string | null
           wmra_license: string | null
           wmra_license_expiry_date: string | null
           wmra_license_issue_date: string | null
@@ -20285,6 +20290,9 @@ export type Database = {
           license_expiry_date?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
+          license_scope_notes?: string | null
+          licensed_waste_categories?: string[] | null
+          licensed_waste_types?: string[] | null
           location_description?: string | null
           location_lat?: number | null
           location_lng?: number | null
@@ -20320,6 +20328,8 @@ export type Database = {
           updated_at?: string | null
           vision?: string | null
           website_url?: string | null
+          wmis_enrolled?: boolean | null
+          wmis_enrolled_at?: string | null
           wmra_license?: string | null
           wmra_license_expiry_date?: string | null
           wmra_license_issue_date?: string | null
@@ -20377,6 +20387,9 @@ export type Database = {
           license_expiry_date?: string | null
           license_number?: string | null
           license_renewal_url?: string | null
+          license_scope_notes?: string | null
+          licensed_waste_categories?: string[] | null
+          licensed_waste_types?: string[] | null
           location_description?: string | null
           location_lat?: number | null
           location_lng?: number | null
@@ -20412,6 +20425,8 @@ export type Database = {
           updated_at?: string | null
           vision?: string | null
           website_url?: string | null
+          wmis_enrolled?: boolean | null
+          wmis_enrolled_at?: string | null
           wmra_license?: string | null
           wmra_license_expiry_date?: string | null
           wmra_license_issue_date?: string | null
@@ -32391,6 +32406,251 @@ export type Database = {
           },
         ]
       }
+      wmis_consultant_gates: {
+        Row: {
+          auto_approve_below_kg: number | null
+          created_at: string | null
+          default_consultant_id: string | null
+          gate_type: string
+          id: string
+          is_active: boolean | null
+          is_mandatory: boolean | null
+          max_approval_hours: number | null
+          organization_id: string
+          requires_site_visit: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_approve_below_kg?: number | null
+          created_at?: string | null
+          default_consultant_id?: string | null
+          gate_type: string
+          id?: string
+          is_active?: boolean | null
+          is_mandatory?: boolean | null
+          max_approval_hours?: number | null
+          organization_id: string
+          requires_site_visit?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_approve_below_kg?: number | null
+          created_at?: string | null
+          default_consultant_id?: string | null
+          gate_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_mandatory?: boolean | null
+          max_approval_hours?: number | null
+          organization_id?: string
+          requires_site_visit?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wmis_consultant_gates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "wmis_consultant_gates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wmis_events: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          actor_id: string | null
+          actor_name: string | null
+          created_at: string | null
+          device_id: string | null
+          device_name: string | null
+          device_type: string | null
+          event_data: Json | null
+          event_description: string | null
+          event_severity: string
+          event_source: string
+          event_title: string
+          event_type: string
+          evidence_urls: string[] | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          location_name: string | null
+          notifications_sent: boolean | null
+          notify_consultant: boolean | null
+          notify_generator: boolean | null
+          notify_recycler: boolean | null
+          notify_transporter: boolean | null
+          organization_id: string
+          resolution_notes: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          shipment_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          device_name?: string | null
+          device_type?: string | null
+          event_data?: Json | null
+          event_description?: string | null
+          event_severity?: string
+          event_source?: string
+          event_title: string
+          event_type: string
+          evidence_urls?: string[] | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          notifications_sent?: boolean | null
+          notify_consultant?: boolean | null
+          notify_generator?: boolean | null
+          notify_recycler?: boolean | null
+          notify_transporter?: boolean | null
+          organization_id: string
+          resolution_notes?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          shipment_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actor_id?: string | null
+          actor_name?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          device_name?: string | null
+          device_type?: string | null
+          event_data?: Json | null
+          event_description?: string | null
+          event_severity?: string
+          event_source?: string
+          event_title?: string
+          event_type?: string
+          evidence_urls?: string[] | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          notifications_sent?: boolean | null
+          notify_consultant?: boolean | null
+          notify_generator?: boolean | null
+          notify_recycler?: boolean | null
+          notify_transporter?: boolean | null
+          organization_id?: string
+          resolution_notes?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          shipment_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wmis_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "wmis_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wmis_events_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wmis_license_checks: {
+        Row: {
+          check_result: string
+          check_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          licensed_waste_types: string[] | null
+          organization_id: string
+          override_by: string | null
+          override_reason: string | null
+          shipment_id: string | null
+          waste_type_requested: string | null
+        }
+        Insert: {
+          check_result: string
+          check_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          licensed_waste_types?: string[] | null
+          organization_id: string
+          override_by?: string | null
+          override_reason?: string | null
+          shipment_id?: string | null
+          waste_type_requested?: string | null
+        }
+        Update: {
+          check_result?: string
+          check_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          licensed_waste_types?: string[] | null
+          organization_id?: string
+          override_by?: string | null
+          override_reason?: string | null
+          shipment_id?: string | null
+          waste_type_requested?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wmis_license_checks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "wmis_license_checks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wmis_license_checks_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_order_activity: {
         Row: {
           action: string
@@ -33314,6 +33574,14 @@ export type Database = {
       check_slot_availability: {
         Args: { p_booking_date: string; p_timeslot_id: string }
         Returns: number
+      }
+      check_waste_license_compliance: {
+        Args: {
+          p_organization_id: string
+          p_shipment_id?: string
+          p_waste_type: string
+        }
+        Returns: Json
       }
       cleanup_expired_portal_sessions: { Args: never; Returns: undefined }
       cleanup_old_api_request_logs: { Args: never; Returns: number }
