@@ -20170,6 +20170,9 @@ export type Database = {
           eeaa_license_expiry_date: string | null
           eeaa_license_issue_date: string | null
           email: string
+          env_approval_date: string | null
+          env_approval_expiry: string | null
+          env_approval_number: string | null
           environmental_approval_number: string | null
           environmental_license: string | null
           establishment_registration: string | null
@@ -20194,6 +20197,8 @@ export type Database = {
           license_number: string | null
           license_renewal_url: string | null
           license_scope_notes: string | null
+          license_source_env_approval: boolean | null
+          license_source_wmra_permit: boolean | null
           licensed_waste_categories: string[] | null
           licensed_waste_types: string[] | null
           location_description: string | null
@@ -20236,6 +20241,9 @@ export type Database = {
           wmra_license: string | null
           wmra_license_expiry_date: string | null
           wmra_license_issue_date: string | null
+          wmra_permit_date: string | null
+          wmra_permit_expiry: string | null
+          wmra_permit_number: string | null
           working_hours: Json | null
         }
         Insert: {
@@ -20267,6 +20275,9 @@ export type Database = {
           eeaa_license_expiry_date?: string | null
           eeaa_license_issue_date?: string | null
           email: string
+          env_approval_date?: string | null
+          env_approval_expiry?: string | null
+          env_approval_number?: string | null
           environmental_approval_number?: string | null
           environmental_license?: string | null
           establishment_registration?: string | null
@@ -20291,6 +20302,8 @@ export type Database = {
           license_number?: string | null
           license_renewal_url?: string | null
           license_scope_notes?: string | null
+          license_source_env_approval?: boolean | null
+          license_source_wmra_permit?: boolean | null
           licensed_waste_categories?: string[] | null
           licensed_waste_types?: string[] | null
           location_description?: string | null
@@ -20333,6 +20346,9 @@ export type Database = {
           wmra_license?: string | null
           wmra_license_expiry_date?: string | null
           wmra_license_issue_date?: string | null
+          wmra_permit_date?: string | null
+          wmra_permit_expiry?: string | null
+          wmra_permit_number?: string | null
           working_hours?: Json | null
         }
         Update: {
@@ -20364,6 +20380,9 @@ export type Database = {
           eeaa_license_expiry_date?: string | null
           eeaa_license_issue_date?: string | null
           email?: string
+          env_approval_date?: string | null
+          env_approval_expiry?: string | null
+          env_approval_number?: string | null
           environmental_approval_number?: string | null
           environmental_license?: string | null
           establishment_registration?: string | null
@@ -20388,6 +20407,8 @@ export type Database = {
           license_number?: string | null
           license_renewal_url?: string | null
           license_scope_notes?: string | null
+          license_source_env_approval?: boolean | null
+          license_source_wmra_permit?: boolean | null
           licensed_waste_categories?: string[] | null
           licensed_waste_types?: string[] | null
           location_description?: string | null
@@ -20430,6 +20451,9 @@ export type Database = {
           wmra_license?: string | null
           wmra_license_expiry_date?: string | null
           wmra_license_issue_date?: string | null
+          wmra_permit_date?: string | null
+          wmra_permit_expiry?: string | null
+          wmra_permit_number?: string | null
           working_hours?: Json | null
         }
         Relationships: []
