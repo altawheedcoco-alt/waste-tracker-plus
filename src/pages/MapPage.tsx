@@ -5,10 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Map, Search, Loader2, MapPin, Building2, Recycle, Truck, Factory, Sparkles, Navigation, Layers } from 'lucide-react';
+import { Map, Search, Loader2, MapPin, Building2, Recycle, Truck, Factory, Sparkles, Navigation, Layers, History, Trash2, MousePointerClick, Save } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM, forwardGeocodeOSM } from '@/lib/leafletConfig';
+import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM, forwardGeocodeOSM, reverseGeocodeOSM } from '@/lib/leafletConfig';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -35,10 +36,24 @@ const createOrgIcon = (type: string) => {
   });
 };
 
+interface SearchHistoryItem {
+  id: string;
+  search_query: string | null;
+  result_name: string;
+  result_address: string | null;
+  latitude: number;
+  longitude: number;
+  search_type: string;
+  confidence: string | null;
+  source_model: string | null;
+  created_at: string;
+}
+
 const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const { profile } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [orgs, setOrgs] = useState<any[]>([]);
@@ -48,6 +63,71 @@ const MapPage = () => {
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [aiSearchQuery, setAiSearchQuery] = useState('');
   const [aiSearching, setAiSearching] = useState(false);
+  const [manualPickMode, setManualPickMode] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [manualPickName, setManualPickName] = useState('');
+
+  // Load search history
+  const loadSearchHistory = useCallback(async () => {
+    if (!profile?.id) return;
+    try {
+      const { data } = await supabase
+        .from('map_search_history')
+        .select('*')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      setSearchHistory((data as unknown as SearchHistoryItem[]) || []);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [profile?.id]);
+
+  useEffect(() => { loadSearchHistory(); }, [loadSearchHistory]);
+
+  // Save to search history
+  const saveToHistory = async (entry: {
+    search_query?: string;
+    result_name: string;
+    result_address?: string;
+    latitude: number;
+    longitude: number;
+    search_type: string;
+    confidence?: string;
+    source_model?: string;
+  }) => {
+    if (!profile?.id) return;
+    try {
+      await supabase.from('map_search_history').insert({
+        user_id: profile.id,
+        organization_id: profile.organization_id || null,
+        search_query: entry.search_query || null,
+        result_name: entry.result_name,
+        result_address: entry.result_address || null,
+        latitude: entry.latitude,
+        longitude: entry.longitude,
+        search_type: entry.search_type,
+        confidence: entry.confidence || null,
+        source_model: entry.source_model || null,
+      });
+      loadSearchHistory();
+    } catch (e) {
+      console.error('Error saving to history:', e);
+    }
+  };
+
+  // Delete history item
+  const deleteHistoryItem = async (id: string) => {
+    try {
+      await supabase.from('map_search_history').delete().eq('id', id);
+      setSearchHistory(prev => prev.filter(h => h.id !== id));
+      toast.success('تم حذف العنصر');
+    } catch {
+      toast.error('فشل في الحذف');
+    }
+  };
 
   // Load organizations with locations
   const loadOrganizations = useCallback(async () => {
@@ -86,43 +166,28 @@ const MapPage = () => {
     const map = L.map(mapRef.current, { zoomControl: true }).setView(EGYPT_CENTER, DEFAULT_ZOOM);
     
     // === All available tile layers ===
-    // OpenStreetMap variants
     const osmLayer = L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 });
     const osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: 'OSM HOT', maxZoom: 19 });
     const osmCycle = L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', { attribution: 'CyclOSM', maxZoom: 19 });
-    
-    // CARTO
     const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
     const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
     const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
-    
-    // Esri
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
     const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
     const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
     const esriNatGeo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri NatGeo', maxZoom: 16 });
     const esriGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 16 });
-    
-    // Stadia / Stamen
     const stamenTerrain = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', { attribution: 'Stadia/Stamen', maxZoom: 18 });
     const stamenWatercolor = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg', { attribution: 'Stadia/Stamen', maxZoom: 16 });
     const stadiaSmooth = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', { attribution: 'Stadia', maxZoom: 20 });
     const stadiaSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', { attribution: 'Stadia', maxZoom: 20 });
     const stadiaSatellite = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg', { attribution: 'Stadia', maxZoom: 20 });
-    
-    // OpenTopoMap
     const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: 'OpenTopoMap', maxZoom: 17 });
-    
-    // Google Maps (raster tiles)
     const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { attribution: 'Google Maps', maxZoom: 20 });
     const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: 'Google Satellite', maxZoom: 20 });
     const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { attribution: 'Google Hybrid', maxZoom: 20 });
     const googleTerrain = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', { attribution: 'Google Terrain', maxZoom: 20 });
-    
-    // HERE Maps
     const hereNormal = L.tileLayer('https://1.base.maps.ls.hereapi.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?apiKey=demo', { attribution: 'HERE', maxZoom: 20 });
-    
-    // Waze-style (via Google traffic)
     const googleTraffic = L.tileLayer('https://mt1.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { attribution: 'Google Traffic', maxZoom: 20 });
 
     osmLayer.addTo(map);
@@ -158,6 +223,55 @@ const MapPage = () => {
     return () => { map.remove(); mapInstanceRef.current = null; };
   }, []);
 
+  // Manual pick mode - listen to map clicks
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const handleClick = async (e: L.LeafletMouseEvent) => {
+      if (!manualPickMode) return;
+      const { lat, lng } = e.latlng;
+      
+      // Reverse geocode
+      const address = await reverseGeocodeOSM(lat, lng);
+      
+      // Place a marker
+      const icon = L.divIcon({
+        html: '<div style="background:#6366f1;width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;">📌</div>',
+        iconSize: [30, 30],
+        className: '',
+      });
+      
+      L.marker([lat, lng], { icon })
+        .addTo(map)
+        .bindPopup(`<div dir="rtl" style="min-width:200px"><h4 style="font-weight:bold">📌 موقع محدد يدوياً</h4><p style="font-size:11px">${address}</p><p style="font-size:10px;color:#888">${lat.toFixed(6)}, ${lng.toFixed(6)}</p></div>`)
+        .openPopup();
+
+      setPendingManualPick({ lat, lng, address });
+      setManualPickName(address.split(',')[0] || 'موقع محدد يدوياً');
+      setManualPickMode(false);
+      toast.info('📌 تم تحديد الموقع - أدخل اسمًا واحفظه في السجل');
+    };
+
+    map.on('click', handleClick);
+    return () => { map.off('click', handleClick); };
+  }, [manualPickMode]);
+
+  // Save pending manual pick
+  const saveManualPick = async () => {
+    if (!pendingManualPick) return;
+    await saveToHistory({
+      result_name: manualPickName || 'موقع محدد يدوياً',
+      result_address: pendingManualPick.address,
+      latitude: pendingManualPick.lat,
+      longitude: pendingManualPick.lng,
+      search_type: 'manual',
+    });
+    toast.success('✅ تم حفظ الموقع في السجل');
+    setPendingManualPick(null);
+    setManualPickName('');
+  };
+
   // Render markers when orgs or filters change
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current) return;
@@ -192,6 +306,16 @@ const MapPage = () => {
         mapInstanceRef.current.setView([results[0].lat, results[0].lng], 14);
         L.marker([results[0].lat, results[0].lng]).addTo(mapInstanceRef.current)
           .bindPopup(`<div dir="rtl"><b>${results[0].name}</b><br/>${results[0].address}</div>`).openPopup();
+        
+        // Save to history
+        await saveToHistory({
+          search_query: searchQuery,
+          result_name: results[0].name,
+          result_address: results[0].address,
+          latitude: results[0].lat,
+          longitude: results[0].lng,
+          search_type: 'osm',
+        });
       } else {
         toast.error('لم يتم العثور على الموقع');
       }
@@ -203,13 +327,12 @@ const MapPage = () => {
   const [aiResults, setAiResults] = useState<any[]>([]);
   const aiMarkersRef = useRef<L.LayerGroup | null>(null);
 
-  // AI search - show ALL results
+  // AI search
   const handleAISearch = async () => {
     if (!aiSearchQuery.trim()) return;
     setAiSearching(true);
     setAiResults([]);
     
-    // Clear previous AI markers
     if (aiMarkersRef.current) aiMarkersRef.current.clearLayers();
     if (!aiMarkersRef.current && mapInstanceRef.current) {
       aiMarkersRef.current = L.layerGroup().addTo(mapInstanceRef.current);
@@ -265,8 +388,19 @@ const MapPage = () => {
           mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
         }
         
-        // Open primary marker popup
+        // Save primary result to history
         const primaryLoc = locations.find((l: any) => l.is_primary) || locations[0];
+        await saveToHistory({
+          search_query: aiSearchQuery,
+          result_name: primaryLoc.name,
+          result_address: primaryLoc.address,
+          latitude: primaryLoc.latitude,
+          longitude: primaryLoc.longitude,
+          search_type: 'ai',
+          confidence: primaryLoc.confidence,
+          source_model: primaryLoc.source_model,
+        });
+
         const modelsCount = data?.models_used?.length || 1;
         const rawCount = data?.total_raw_results || locations.length;
         toast.success(`🤖 ${locations.length} نتيجة فريدة (من ${rawCount} نتيجة عبر ${modelsCount} نماذج AI)`);
@@ -288,13 +422,45 @@ const MapPage = () => {
   const locateMe = () => {
     if (!navigator.geolocation || !mapInstanceRef.current) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        mapInstanceRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 15);
-        L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(mapInstanceRef.current!)
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        mapInstanceRef.current?.setView([latitude, longitude], 15);
+        L.marker([latitude, longitude]).addTo(mapInstanceRef.current!)
           .bindPopup('<div dir="rtl"><b>📍 موقعك الحالي</b></div>').openPopup();
+        
+        const address = await reverseGeocodeOSM(latitude, longitude);
+        await saveToHistory({
+          result_name: 'موقعي الحالي',
+          result_address: address,
+          latitude,
+          longitude,
+          search_type: 'gps',
+        });
       },
       () => toast.error('فشل في تحديد الموقع')
     );
+  };
+
+  // Go to history item
+  const goToHistoryItem = (item: SearchHistoryItem) => {
+    if (!mapInstanceRef.current) return;
+    mapInstanceRef.current.setView([item.latitude, item.longitude], 15);
+    
+    const typeIcon = item.search_type === 'ai' ? '🤖' : item.search_type === 'manual' ? '📌' : item.search_type === 'gps' ? '📍' : '🔍';
+    L.marker([item.latitude, item.longitude])
+      .addTo(mapInstanceRef.current)
+      .bindPopup(`<div dir="rtl"><b>${typeIcon} ${item.result_name}</b><br/><span style="font-size:11px">${item.result_address || ''}</span></div>`)
+      .openPopup();
+  };
+
+  const searchTypeLabel = (t: string) => {
+    switch (t) {
+      case 'ai': return '🤖 AI';
+      case 'osm': return '🔍 بحث';
+      case 'manual': return '📌 يدوي';
+      case 'gps': return '📍 GPS';
+      default: return t;
+    }
   };
 
   return (
@@ -348,7 +514,6 @@ const MapPage = () => {
                       onClick={() => {
                         if (mapInstanceRef.current) {
                           mapInstanceRef.current.setView([loc.latitude, loc.longitude], 16);
-                          // Open popup of this marker
                           aiMarkersRef.current?.eachLayer((layer: any) => {
                             if (layer.getLatLng && 
                                 Math.abs(layer.getLatLng().lat - loc.latitude) < 0.0001 && 
@@ -408,8 +573,33 @@ const MapPage = () => {
           </Card>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2">
+        {/* Manual Pick + History Controls */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <Button
+            size="sm"
+            variant={manualPickMode ? 'default' : 'outline'}
+            className="gap-1"
+            onClick={() => {
+              setManualPickMode(!manualPickMode);
+              setPendingManualPick(null);
+              if (!manualPickMode) toast.info('📌 انقر على الخريطة لتحديد الموقع');
+            }}
+          >
+            <MousePointerClick className="w-4 h-4" />
+            {manualPickMode ? 'إلغاء التحديد اليدوي' : 'تحديد يدوي على الخريطة'}
+          </Button>
+
+          <Button
+            size="sm"
+            variant={showHistory ? 'default' : 'outline'}
+            className="gap-1"
+            onClick={() => setShowHistory(!showHistory)}
+          >
+            <History className="w-4 h-4" />
+            سجل البحث ({searchHistory.length})
+          </Button>
+
+          {/* Filters */}
           {Object.entries(ORG_ICONS).map(([type, config]) => (
             <Button
               key={type}
@@ -429,6 +619,86 @@ const MapPage = () => {
           )}
         </div>
 
+        {/* Pending manual pick save */}
+        {pendingManualPick && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="p-3">
+              <div className="flex gap-2 items-center">
+                <MapPin className="w-5 h-5 text-primary shrink-0" />
+                <Input
+                  value={manualPickName}
+                  onChange={e => setManualPickName(e.target.value)}
+                  placeholder="اسم الموقع..."
+                  className="flex-1"
+                />
+                <Button size="sm" onClick={saveManualPick} className="gap-1">
+                  <Save className="w-4 h-4" />
+                  حفظ في السجل
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setPendingManualPick(null)}>
+                  إلغاء
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 mr-7">{pendingManualPick.address}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Search History Panel */}
+        {showHistory && (
+          <Card>
+            <CardContent className="p-3">
+              <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                <History className="w-4 h-4 text-primary" />
+                سجل عمليات البحث
+              </h3>
+              {searchHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">لا توجد عمليات بحث محفوظة بعد</p>
+              ) : (
+                <div className="max-h-64 overflow-y-auto space-y-1">
+                  {searchHistory.map(item => (
+                    <div key={item.id} className="flex items-center gap-2 p-2 rounded-md border border-border hover:bg-accent/30 transition-colors text-xs">
+                      <button
+                        className="flex-1 text-right min-w-0"
+                        onClick={() => goToHistoryItem(item)}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-[10px] shrink-0">{searchTypeLabel(item.search_type)}</Badge>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{item.result_name}</p>
+                            <p className="text-muted-foreground truncate">{item.result_address}</p>
+                          </div>
+                        </div>
+                        {item.search_query && (
+                          <p className="text-muted-foreground mt-0.5 truncate">بحث: "{item.search_query}"</p>
+                        )}
+                      </button>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {new Date(item.created_at).toLocaleDateString('ar-EG')}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 shrink-0"
+                        onClick={() => deleteHistoryItem(item.id)}
+                      >
+                        <Trash2 className="w-3 h-3 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Manual pick mode indicator */}
+        {manualPickMode && (
+          <div className="bg-primary/10 border border-primary/30 rounded-lg p-3 text-center text-sm font-medium text-primary animate-pulse">
+            📌 وضع التحديد اليدوي مفعّل — انقر على أي مكان في الخريطة لتحديد الموقع
+          </div>
+        )}
+
         {/* Map */}
         <div className="relative">
           {loading && (
@@ -436,7 +706,11 @@ const MapPage = () => {
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           )}
-          <div ref={mapRef} className="rounded-xl border border-border shadow-sm" style={{ height: '600px' }} />
+          <div 
+            ref={mapRef} 
+            className={`rounded-xl border shadow-sm ${manualPickMode ? 'border-primary cursor-crosshair' : 'border-border'}`} 
+            style={{ height: '600px' }} 
+          />
         </div>
 
         {/* Legend */}
