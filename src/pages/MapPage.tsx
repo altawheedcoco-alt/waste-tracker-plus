@@ -766,13 +766,36 @@ const MapPage = () => {
           {/* Waze Live Map */}
           {(mapMode === 'waze' || mapMode === 'both') && (
             <div className="rounded-xl border border-border shadow-sm overflow-hidden" style={{ height: mapMode === 'both' ? '400px' : '600px' }}>
+              {/* Selected location coordinates bar */}
+              <div className="bg-primary/10 p-2 flex flex-wrap items-center justify-between gap-2 border-b border-primary/20">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold text-primary">📍 الموقع المحدد:</span>
+                  <span className="text-sm font-mono font-semibold text-foreground">
+                    {wazeCenter.lat.toFixed(6)}, {wazeCenter.lng.toFixed(6)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    Zoom: {wazeCenter.zoom}
+                  </Badge>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 text-[10px] gap-1"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${wazeCenter.lat.toFixed(6)}, ${wazeCenter.lng.toFixed(6)}`);
+                      toast.success('تم نسخ الإحداثيات');
+                    }}
+                  >
+                    📋 نسخ
+                  </Button>
+                </div>
+              </div>
               <div className="bg-muted/50 p-2 flex items-center justify-between border-b border-border">
                 <div className="flex items-center gap-2">
                   <Navigation className="w-4 h-4 text-primary" />
                   <span className="text-sm font-medium">Waze Live Map</span>
-                  <Badge variant="secondary" className="text-[10px]">
-                    {wazeCenter.lat.toFixed(4)}, {wazeCenter.lng.toFixed(4)}
-                  </Badge>
                 </div>
                 <Button
                   size="sm"
@@ -787,7 +810,7 @@ const MapPage = () => {
               <iframe
                 src={`https://embed.waze.com/iframe?zoom=${wazeCenter.zoom}&lat=${wazeCenter.lat}&lon=${wazeCenter.lng}&pin=1`}
                 width="100%"
-                style={{ height: 'calc(100% - 40px)', border: 0 }}
+                style={{ height: 'calc(100% - 80px)', border: 0 }}
                 allowFullScreen
                 title="Waze Live Map"
               />
