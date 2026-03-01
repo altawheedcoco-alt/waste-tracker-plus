@@ -85,28 +85,71 @@ const MapPage = () => {
 
     const map = L.map(mapRef.current, { zoomControl: true }).setView(EGYPT_CENTER, DEFAULT_ZOOM);
     
-    // All available free tile layers
+    // === All available tile layers ===
+    // OpenStreetMap variants
     const osmLayer = L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 });
-    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
-    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: 'OpenTopoMap', maxZoom: 17 });
+    const osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: 'OSM HOT', maxZoom: 19 });
+    const osmCycle = L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', { attribution: 'CyclOSM', maxZoom: 19 });
+    
+    // CARTO
     const cartoLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
     const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
     const cartoVoyager = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
-    const osmHot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', { attribution: 'OSM HOT', maxZoom: 19 });
-    const stamenTerrain = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', { attribution: 'Stadia/Stamen', maxZoom: 18 });
-    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
     
+    // Esri
+    const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
+    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
+    const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
+    const esriNatGeo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri NatGeo', maxZoom: 16 });
+    const esriGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 16 });
+    
+    // Stadia / Stamen
+    const stamenTerrain = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_terrain/{z}/{x}/{y}{r}.png', { attribution: 'Stadia/Stamen', maxZoom: 18 });
+    const stamenWatercolor = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg', { attribution: 'Stadia/Stamen', maxZoom: 16 });
+    const stadiaSmooth = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', { attribution: 'Stadia', maxZoom: 20 });
+    const stadiaSmoothDark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', { attribution: 'Stadia', maxZoom: 20 });
+    const stadiaSatellite = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg', { attribution: 'Stadia', maxZoom: 20 });
+    
+    // OpenTopoMap
+    const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { attribution: 'OpenTopoMap', maxZoom: 17 });
+    
+    // Google Maps (raster tiles)
+    const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { attribution: 'Google Maps', maxZoom: 20 });
+    const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: 'Google Satellite', maxZoom: 20 });
+    const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { attribution: 'Google Hybrid', maxZoom: 20 });
+    const googleTerrain = L.tileLayer('https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', { attribution: 'Google Terrain', maxZoom: 20 });
+    
+    // HERE Maps
+    const hereNormal = L.tileLayer('https://1.base.maps.ls.hereapi.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?apiKey=demo', { attribution: 'HERE', maxZoom: 20 });
+    
+    // Waze-style (via Google traffic)
+    const googleTraffic = L.tileLayer('https://mt1.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { attribution: 'Google Traffic', maxZoom: 20 });
+
     osmLayer.addTo(map);
     L.control.layers({
-      '🗺️ خريطة عادية (OSM)': osmLayer,
-      '🛰️ صور أقمار صناعية': satelliteLayer,
-      '🏔️ طبوغرافية': topoLayer,
-      '🌙 داكنة (CARTO Dark)': cartoDark,
-      '☀️ فاتحة (CARTO Light)': cartoLight,
-      '🧭 Voyager (CARTO)': cartoVoyager,
-      '🔥 إنسانية (HOT)': osmHot,
-      '🏞️ تضاريس (Stamen)': stamenTerrain,
-      '🗻 Esri Topo': esriTopo,
+      '🗺️ OSM عادية': osmLayer,
+      '🔥 OSM إنسانية (HOT)': osmHot,
+      '🚲 OSM دراجات': osmCycle,
+      '☀️ CARTO فاتحة': cartoLight,
+      '🌙 CARTO داكنة': cartoDark,
+      '🧭 CARTO Voyager': cartoVoyager,
+      '🛰️ Esri أقمار صناعية': esriSatellite,
+      '🗻 Esri طبوغرافية': esriTopo,
+      '🏙️ Esri شوارع': esriStreet,
+      '🌍 Esri NatGeo': esriNatGeo,
+      '⬜ Esri رمادية': esriGray,
+      '🏞️ Stamen تضاريس': stamenTerrain,
+      '🎨 Stamen ألوان مائية': stamenWatercolor,
+      '✨ Stadia ناعمة': stadiaSmooth,
+      '🌑 Stadia ناعمة داكنة': stadiaSmoothDark,
+      '📡 Stadia أقمار': stadiaSatellite,
+      '🏔️ OpenTopoMap': topoLayer,
+      '🟢 Google شوارع': googleStreets,
+      '🛰️ Google أقمار صناعية': googleSatellite,
+      '🗺️ Google هجين': googleHybrid,
+      '⛰️ Google تضاريس': googleTerrain,
+      '🚦 Google حركة مرور': googleTraffic,
+      '🔵 HERE خرائط': hereNormal,
     }, {}, { position: 'topright', collapsed: true }).addTo(map);
 
     markersLayerRef.current = L.layerGroup().addTo(map);
