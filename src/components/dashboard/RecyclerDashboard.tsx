@@ -51,6 +51,8 @@ const SmartProductionOptimizer = lazy(() => import('@/components/recycler/SmartP
 const BatchTraceabilityPanel = lazy(() => import('@/components/recycler/BatchTraceabilityPanel'));
 const CarbonFootprintDashboard = lazy(() => import('@/components/recycler/CarbonFootprintDashboard'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
+const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
+const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 
 interface RecentShipment {
   id: string;
@@ -255,6 +257,7 @@ const RecyclerDashboard = () => {
           <TabsTrigger value="market" className="gap-1 text-xs"><BarChart3 className="w-3.5 h-3.5" />البورصة</TabsTrigger>
           <TabsTrigger value="carbon" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />البصمة الكربونية</TabsTrigger>
           <TabsTrigger value="esg" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />تقارير ESG</TabsTrigger>
+          <TabsTrigger value="wmis" className="gap-1 text-xs"><AlertCircle className="w-3.5 h-3.5" />WMIS</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-4">
@@ -422,6 +425,13 @@ const RecyclerDashboard = () => {
         <TabsContent value="esg" className="mt-4">
           <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
             <ESGReportPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="wmis" className="mt-4 space-y-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
+            <WMISEventsFeed />
           </Suspense>
         </TabsContent>
       </Tabs>
