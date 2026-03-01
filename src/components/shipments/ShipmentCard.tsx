@@ -71,6 +71,7 @@ import { toast } from 'sonner';
 import { useDeliveryDeclaration, useShipmentDeclarations } from '@/hooks/useDeliveryDeclaration';
 import DeliveryDeclarationViewDialog from './DeliveryDeclarationViewDialog';
 import CompleteShipmentDocButton from './CompleteShipmentDocButton';
+const ShipmentEndorsementButton = lazy(() => import('./ShipmentEndorsementButton'));
 
 // Lazy load the live tracking map dialog and inline map
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -1092,18 +1093,32 @@ const ShipmentCard = ({
                     size="sm"
                     className="text-[10px] h-5 px-2"
                   />
+                  <Suspense fallback={null}>
+                    <ShipmentEndorsementButton
+                      shipmentId={shipment.id}
+                      shipmentNumber={shipment.shipment_number}
+                      shipmentStatus={mappedStatus}
+                    />
+                  </Suspense>
                 </div>
               </div>
             )}
 
             {/* Complete Shipment Doc - shown even without other documents */}
-            {totalDocuments === 0 && ['confirmed', 'completed'].includes(shipment.status) && (
-              <div className="border-t px-4 py-2.5 bg-muted/30" onClick={(e) => e.stopPropagation()}>
+            {totalDocuments === 0 && ['confirmed', 'completed', 'delivered'].includes(shipment.status) && (
+              <div className="border-t px-4 py-2.5 bg-muted/30 flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                 <CompleteShipmentDocButton
                   shipmentId={shipment.id}
                   shipmentNumber={shipment.shipment_number}
                   shipmentStatus={shipment.status}
                 />
+                <Suspense fallback={null}>
+                  <ShipmentEndorsementButton
+                    shipmentId={shipment.id}
+                    shipmentNumber={shipment.shipment_number}
+                    shipmentStatus={mappedStatus}
+                  />
+                </Suspense>
               </div>
             )}
 
