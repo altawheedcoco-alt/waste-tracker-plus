@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ShareButton from '@/components/sharing/ShareButton';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,9 @@ import {
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { STATUS_CONFIG, WASTE_TYPE_LABELS, HAZARD_LEVELS } from './shipmentConstants';
+
+const LicenseComplianceBanner = lazy(() => import('@/components/wmis/LicenseComplianceBanner'));
+const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 
 interface Shipment {
   id: string;
@@ -262,6 +265,46 @@ const ShipmentDetailsDialog = memo(({
               )}
             </div>
           )}
+
+          {/* WMIS: License Compliance & Events */}
+          <Suspense fallback={null}>
+            <div className="space-y-3 border-t pt-4">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <Package className="h-4 w-4 text-primary" />
+                التحقق من تراخيص WMIS
+              </h4>
+              <div className="space-y-2">
+                {shipment.generator?.id && (
+                  <LicenseComplianceBanner
+                    organizationId={shipment.generator.id}
+                    organizationName={shipment.generator.name}
+                    wasteType={shipment.waste_type}
+                    role="generator"
+                    shipmentId={shipment.id}
+                  />
+                )}
+                {shipment.transporter?.id && (
+                  <LicenseComplianceBanner
+                    organizationId={shipment.transporter.id}
+                    organizationName={shipment.transporter.name}
+                    wasteType={shipment.waste_type}
+                    role="transporter"
+                    shipmentId={shipment.id}
+                  />
+                )}
+                {shipment.recycler?.id && (
+                  <LicenseComplianceBanner
+                    organizationId={shipment.recycler.id}
+                    organizationName={shipment.recycler.name}
+                    wasteType={shipment.waste_type}
+                    role="recycler"
+                    shipmentId={shipment.id}
+                  />
+                )}
+              </div>
+              <WMISEventsFeed shipmentId={shipment.id} compact />
+            </div>
+          </Suspense>
 
           {/* Creator Info */}
           {shipment.created_by_profile && (

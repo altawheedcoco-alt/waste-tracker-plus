@@ -1,5 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Label } from '@/components/ui/label';
+import LicenseComplianceBanner from '@/components/wmis/LicenseComplianceBanner';
+import { LicenseCheckResult } from '@/hooks/useWMIS';
 import { Input } from '@/components/ui/input';
 import { SmartInput } from '@/components/ui/smart-input';
 import { Textarea } from '@/components/ui/textarea';
@@ -120,6 +122,11 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
   const weightFileRef = useRef<HTMLInputElement>(null);
   const [weightPreview, setWeightPreview] = useState<string | null>(null);
   const [weightExtracted, setWeightExtracted] = useState(false);
+  const [complianceResults, setComplianceResults] = useState<Record<string, LicenseCheckResult>>({});
+
+  const handleComplianceResult = useCallback((party: string) => (result: LicenseCheckResult) => {
+    setComplianceResults(prev => ({ ...prev, [party]: result }));
+  }, []);
 
   const handleWeightTicketUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -343,6 +350,39 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
           </div>
         )}
       </FormSection>
+
+      {/* ══════════ WMIS: License Compliance Banners ══════════ */}
+      {formData.waste_type && (
+        <div className="space-y-2">
+          {formData.generator_id && (
+            <LicenseComplianceBanner
+              organizationId={formData.generator_id}
+              organizationName={generators.find(g => g.id === formData.generator_id)?.name || 'المولد'}
+              wasteType={formData.waste_type}
+              role="generator"
+              onResult={handleComplianceResult('generator')}
+            />
+          )}
+          {formData.transporter_id && (
+            <LicenseComplianceBanner
+              organizationId={formData.transporter_id}
+              organizationName="الناقل"
+              wasteType={formData.waste_type}
+              role="transporter"
+              onResult={handleComplianceResult('transporter')}
+            />
+          )}
+          {formData.recycler_id && formData.destination_type === 'recycling' && (
+            <LicenseComplianceBanner
+              organizationId={formData.recycler_id}
+              organizationName={recyclers.find(r => r.id === formData.recycler_id)?.name || 'المدوّر'}
+              wasteType={formData.waste_type}
+              role="recycler"
+              onResult={handleComplianceResult('recycler')}
+            />
+          )}
+        </div>
+      )}
 
       {/* ══════════ SECTION 3: Driver (if user is driver) ══════════ */}
       {isDriver && driverInfo && (

@@ -84,6 +84,8 @@ const IoTMonitoringPanel = lazy(() => import('./transporter/IoTMonitoringPanel')
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
+const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
+const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -113,6 +115,7 @@ const tabItems = [
   { value: 'geofence', label: 'الجيوفنس', icon: AlertTriangle },
   { value: 'esg', label: 'تقارير ESG', icon: Leaf },
   { value: 'compliance', label: 'الامتثال', icon: Shield },
+  { value: 'wmis', label: 'WMIS', icon: ShieldAlert },
   { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
 ];
 
@@ -416,6 +419,15 @@ const TransporterDashboard = () => {
               <VehicleComplianceManager />
               <DriverComplianceManager />
               <IncidentReportManager />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="wmis" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في نظام WMIS">
+                {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
+                <WMISEventsFeed />
+              </ErrorBoundary>
             </Suspense>
           </TabsContent>
 

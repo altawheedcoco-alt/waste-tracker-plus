@@ -43,6 +43,7 @@ const ConsultantActivityLog = lazy(() => import('@/components/consultant/Consult
 const ConsultantSigningCenter = lazy(() => import('@/components/consultant/ConsultantSigningCenter'));
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
+const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -343,6 +344,7 @@ const ConsultantDashboard = memo(() => {
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
           <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-4 h-4" />التحليلات</TabsTrigger>
           <TabsTrigger value="kpis" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />مؤشرات KPI</TabsTrigger>
+          <TabsTrigger value="wmis-events" className="gap-1.5"><AlertTriangle className="w-4 h-4" />أحداث WMIS</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-4">
@@ -566,6 +568,12 @@ const ConsultantDashboard = memo(() => {
         <TabsContent value="kpis" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantKPIsWidget />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="wmis-events" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <WMISEventsFeed />
           </Suspense>
         </TabsContent>
       </Tabs>
