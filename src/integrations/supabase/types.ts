@@ -17227,6 +17227,51 @@ export type Database = {
           },
         ]
       }
+      map_search_history: {
+        Row: {
+          confidence: string | null
+          created_at: string
+          id: string
+          latitude: number
+          longitude: number
+          organization_id: string | null
+          result_address: string | null
+          result_name: string
+          search_query: string | null
+          search_type: string
+          source_model: string | null
+          user_id: string
+        }
+        Insert: {
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          latitude: number
+          longitude: number
+          organization_id?: string | null
+          result_address?: string | null
+          result_name: string
+          search_query?: string | null
+          search_type?: string
+          source_model?: string | null
+          user_id: string
+        }
+        Update: {
+          confidence?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number
+          longitude?: number
+          organization_id?: string | null
+          result_address?: string | null
+          result_name?: string
+          search_query?: string | null
+          search_type?: string
+          source_model?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       marketplace_bids: {
         Row: {
           bidder_organization_id: string
