@@ -199,7 +199,7 @@ const MapPage = () => {
 
           const marker = L.marker([loc.latitude, loc.longitude], { icon })
             .bindPopup(`
-              <div dir="rtl" style="min-width:200px">
+              <div dir="rtl" style="min-width:220px">
                 <h4 style="font-weight:bold;margin-bottom:4px">🤖 ${loc.name}</h4>
                 <p style="font-size:11px;color:#666;margin-bottom:2px">${loc.address}</p>
                 ${loc.governorate ? `<p style="font-size:11px;color:#888">📍 ${loc.governorate}</p>` : ''}
@@ -210,6 +210,7 @@ const MapPage = () => {
                   </span>
                   ${isPrimary ? ' — <b>النتيجة الرئيسية</b>' : ''}
                 </p>
+                ${loc.source_model ? `<p style="font-size:9px;color:#aaa;margin-top:2px">🧠 ${loc.source_model}</p>` : ''}
               </div>
             `);
           
@@ -223,7 +224,9 @@ const MapPage = () => {
         
         // Open primary marker popup
         const primaryLoc = locations.find((l: any) => l.is_primary) || locations[0];
-        toast.success(`🤖 تم العثور على ${locations.length} نتيجة لـ "${aiSearchQuery}"`);
+        const modelsCount = data?.models_used?.length || 1;
+        const rawCount = data?.total_raw_results || locations.length;
+        toast.success(`🤖 ${locations.length} نتيجة فريدة (من ${rawCount} نتيجة عبر ${modelsCount} نماذج AI)`);
       } else {
         toast.error('لم يتم العثور على نتائج');
       }
