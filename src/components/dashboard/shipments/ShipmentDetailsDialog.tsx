@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ShareButton from '@/components/sharing/ShareButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,10 +66,19 @@ const ShipmentDetailsDialog = memo(({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-primary" />
-            تفاصيل الشحنة {shipment.shipment_number}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5 text-primary" />
+              تفاصيل الشحنة {shipment.shipment_number}
+            </DialogTitle>
+            <ShareButton
+              resourceType="shipment"
+              resourceId={shipment.id}
+              resourceTitle={shipment.shipment_number}
+              size="sm"
+              variant="ghost"
+            />
+          </div>
           <DialogDescription>جميع بيانات الشحنة والأطراف المعنية</DialogDescription>
         </DialogHeader>
 
