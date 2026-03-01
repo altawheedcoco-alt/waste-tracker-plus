@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ReactMarkdown from 'react-markdown';
 import { ArrowRight, Calendar, Clock, User, Tag, BookOpen } from 'lucide-react';
+import ShareButton from '@/components/sharing/ShareButton';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect } from 'react';
@@ -193,6 +194,13 @@ const BlogPost = () => {
               <User className="w-3.5 h-3.5" />
               {post.author_name}
             </span>
+            <ShareButton
+              resourceType="blog"
+              resourceId={post.id}
+              resourceTitle={postTitle}
+              size="sm"
+              variant="ghost"
+            />
           </div>
 
           {/* Title */}
