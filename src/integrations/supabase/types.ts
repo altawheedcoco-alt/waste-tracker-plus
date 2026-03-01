@@ -26483,6 +26483,119 @@ export type Database = {
           },
         ]
       }
+      shared_link_views: {
+        Row: {
+          id: string
+          shared_link_id: string | null
+          viewed_at: string | null
+          viewer_device: string | null
+          viewer_ip: string | null
+          viewer_user_id: string | null
+        }
+        Insert: {
+          id?: string
+          shared_link_id?: string | null
+          viewed_at?: string | null
+          viewer_device?: string | null
+          viewer_ip?: string | null
+          viewer_user_id?: string | null
+        }
+        Update: {
+          id?: string
+          shared_link_id?: string | null
+          viewed_at?: string | null
+          viewer_device?: string | null
+          viewer_ip?: string | null
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_link_views_shared_link_id_fkey"
+            columns: ["shared_link_id"]
+            isOneToOne: false
+            referencedRelation: "shared_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_links: {
+        Row: {
+          allowed_fields: Json | null
+          code: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          max_views: number | null
+          organization_id: string | null
+          pin_hash: string | null
+          requires_pin: boolean | null
+          resource_id: string
+          resource_type: string
+          title: string | null
+          updated_at: string | null
+          view_count: number | null
+          visibility_level: string | null
+        }
+        Insert: {
+          allowed_fields?: Json | null
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_views?: number | null
+          organization_id?: string | null
+          pin_hash?: string | null
+          requires_pin?: boolean | null
+          resource_id: string
+          resource_type: string
+          title?: string | null
+          updated_at?: string | null
+          view_count?: number | null
+          visibility_level?: string | null
+        }
+        Update: {
+          allowed_fields?: Json | null
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_views?: number | null
+          organization_id?: string | null
+          pin_hash?: string | null
+          requires_pin?: boolean | null
+          resource_id?: string
+          resource_type?: string
+          title?: string | null
+          updated_at?: string | null
+          view_count?: number | null
+          visibility_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shared_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipment_disputes: {
         Row: {
           actual_value: number | null
