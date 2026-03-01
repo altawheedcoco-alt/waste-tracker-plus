@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import IdempotentButton from '@/components/ui/IdempotentButton';
 
 interface IncomingRequest {
   id: string;
@@ -75,7 +76,7 @@ const TransporterIncomingRequests = () => {
 
     if (error) {
       toast.error('حدث خطأ أثناء قبول الشحنة');
-      return;
+      throw error; // rethrow so IdempotentButton can rollback
     }
     toast.success('تم قبول الشحنة');
     queryClient.invalidateQueries({ queryKey: ['transporter-incoming-requests'] });
@@ -113,15 +114,21 @@ const TransporterIncomingRequests = () => {
             className="flex items-center justify-between p-3 rounded-lg border bg-card"
           >
             <div className="flex items-center gap-2">
-              <Button
+              <IdempotentButton
+                actionType="accept_shipment"
+                resourceType="shipment"
+                resourceId={req.id}
+                actionValue="approved"
                 variant="default"
                 size="sm"
                 className="text-xs h-7"
-                onClick={() => handleAccept(req.id)}
+                onExecute={() => handleAccept(req.id)}
+                duplicateMessage="تم قبول هذه الشحنة مسبقاً"
+                executedLabel="تم القبول"
               >
                 <Check className="ml-1 h-3 w-3" />
                 قبول
-              </Button>
+              </IdempotentButton>
               <Button
                 variant="ghost"
                 size="sm"
