@@ -68,7 +68,7 @@ const MapPage = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [manualPickName, setManualPickName] = useState('');
-  const [mapMode, setMapMode] = useState<'leaflet' | 'waze'>('leaflet');
+  const [mapMode, setMapMode] = useState<'leaflet' | 'waze' | 'both'>('leaflet');
   const [wazeCenter, setWazeCenter] = useState({ lat: EGYPT_CENTER[0], lng: EGYPT_CENTER[1], zoom: DEFAULT_ZOOM });
 
   // Load search history
@@ -503,7 +503,6 @@ const MapPage = () => {
                 className="rounded-none gap-1"
                 onClick={() => {
                   setMapMode('waze');
-                  // Sync Waze center with current Leaflet view
                   if (mapInstanceRef.current) {
                     const c = mapInstanceRef.current.getCenter();
                     setWazeCenter({ lat: c.lat, lng: c.lng, zoom: mapInstanceRef.current.getZoom() });
@@ -512,6 +511,21 @@ const MapPage = () => {
               >
                 <Navigation className="w-3 h-3" />
                 Waze مباشرة
+              </Button>
+              <Button
+                size="sm"
+                variant={mapMode === 'both' ? 'default' : 'ghost'}
+                className="rounded-none gap-1"
+                onClick={() => {
+                  setMapMode('both');
+                  if (mapInstanceRef.current) {
+                    const c = mapInstanceRef.current.getCenter();
+                    setWazeCenter({ lat: c.lat, lng: c.lng, zoom: mapInstanceRef.current.getZoom() });
+                  }
+                }}
+              >
+                <Layers className="w-3 h-3" />
+                الكل معاً
               </Button>
             </div>
             <Badge variant="outline" className="gap-1"><Building2 className="w-3 h-3" />{stats.total} جهة</Badge>
@@ -746,12 +760,12 @@ const MapPage = () => {
           <div 
             ref={mapRef} 
             className={`rounded-xl border shadow-sm ${manualPickMode ? 'border-primary cursor-crosshair' : 'border-border'}`} 
-            style={{ height: '600px', display: mapMode === 'leaflet' ? 'block' : 'none' }} 
+            style={{ height: mapMode === 'both' ? '400px' : '600px', display: mapMode === 'waze' ? 'none' : 'block' }} 
           />
 
           {/* Waze Live Map */}
-          {mapMode === 'waze' && (
-            <div className="rounded-xl border border-border shadow-sm overflow-hidden" style={{ height: '600px' }}>
+          {(mapMode === 'waze' || mapMode === 'both') && (
+            <div className="rounded-xl border border-border shadow-sm overflow-hidden" style={{ height: mapMode === 'both' ? '400px' : '600px' }}>
               <div className="bg-muted/50 p-2 flex items-center justify-between border-b border-border">
                 <div className="flex items-center gap-2">
                   <Navigation className="w-4 h-4 text-primary" />
