@@ -9,7 +9,7 @@ import {
   ShieldCheck, Scale, MapPin, FileText, UserCheck, Microscope,
   ArrowLeft, Lock
 } from 'lucide-react';
-import { useJobLifecycle, getGateLabel } from '@/hooks/useJobLifecycle';
+import { useJobLifecycle, getGateLabel, isGateMandatory } from '@/hooks/useJobLifecycle';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -42,7 +42,7 @@ const gateColors: Record<string, string> = {
 const JobLifecycleOrchestrator = memo(({ 
   shipmentId, organizationId, onAllGatesPassed, compact = false 
 }: JobLifecycleOrchestratorProps) => {
-  const { gates, isLoading, initializeGates, updateGate, progress, allPassed, nextPendingGate } = useJobLifecycle(shipmentId);
+  const { gates, isLoading, initializeGates, updateGate, progress, allPassed, canProceed, nextPendingGate } = useJobLifecycle(shipmentId);
   const { user } = useAuth();
 
   // Initialize gates if none exist
@@ -53,8 +53,8 @@ const JobLifecycleOrchestrator = memo(({
   }, [isLoading, gates.length, shipmentId, organizationId]);
 
   useEffect(() => {
-    if (allPassed && onAllGatesPassed) onAllGatesPassed();
-  }, [allPassed, onAllGatesPassed]);
+    if (canProceed && onAllGatesPassed) onAllGatesPassed();
+  }, [canProceed, onAllGatesPassed]);
 
   if (isLoading || gates.length === 0) return null;
 
@@ -95,7 +95,7 @@ const JobLifecycleOrchestrator = memo(({
             );
           })}
         </TooltipProvider>
-        <Badge variant={allPassed ? 'default' : 'secondary'} className="text-[10px]">
+        <Badge variant={canProceed ? 'default' : 'secondary'} className="text-[10px]">
           {progress}%
         </Badge>
       </div>
@@ -106,9 +106,9 @@ const JobLifecycleOrchestrator = memo(({
     <Card className="border-primary/20">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <Badge variant={allPassed ? 'default' : 'outline'} className="gap-1">
-            {allPassed ? <CheckCircle2 className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-            {allPassed ? 'جاهز للفوترة' : 'بوابات الاعتماد'}
+          <Badge variant={canProceed ? 'default' : 'outline'} className="gap-1">
+            {canProceed ? <CheckCircle2 className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+            {canProceed ? 'جاهز للفوترة' : 'بوابات الاعتماد'}
           </Badge>
           <CardTitle className="text-sm flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-primary" />
@@ -124,6 +124,7 @@ const JobLifecycleOrchestrator = memo(({
         {gates.map((gate, i) => {
           const Icon = gateIcons[gate.gate_type] || ShieldCheck;
           const isNext = nextPendingGate?.id === gate.id;
+          const isMandatory = isGateMandatory(gate.gate_type);
 
           return (
             <motion.div
@@ -135,6 +136,7 @@ const JobLifecycleOrchestrator = memo(({
                 'flex items-center gap-3 p-3 rounded-lg border transition-all',
                 gate.gate_status === 'passed' && 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/40',
                 gate.gate_status === 'failed' && 'bg-destructive/5 border-destructive/30',
+                gate.gate_status === 'bypassed' && 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/40',
                 gate.gate_status === 'pending' && isNext && 'bg-primary/5 border-primary/30 ring-1 ring-primary/20',
                 gate.gate_status === 'pending' && !isNext && 'opacity-50',
               )}
@@ -146,11 +148,22 @@ const JobLifecycleOrchestrator = memo(({
               )}>
                 {gate.gate_status === 'passed' ? <CheckCircle2 className="w-4 h-4" /> : 
                  gate.gate_status === 'failed' ? <XCircle className="w-4 h-4" /> :
+                 gate.gate_status === 'bypassed' ? <AlertTriangle className="w-4 h-4" /> :
                  <Icon className="w-4 h-4" />}
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">{getGateLabel(gate.gate_type)}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium">{getGateLabel(gate.gate_type)}</p>
+                  {!isMandatory && (
+                    <Badge variant="outline" className="text-[9px] h-4 border-amber-300 text-amber-600 dark:text-amber-400">
+                      تحذيري
+                    </Badge>
+                  )}
+                </div>
+                {gate.gate_status === 'bypassed' && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">⚠️ تم التجاوز — المسؤولية على المُنفذ</p>
+                )}
                 {gate.checked_at && (
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(gate.checked_at), 'PPp', { locale: ar })}
@@ -167,7 +180,7 @@ const JobLifecycleOrchestrator = memo(({
               </div>
 
               {gate.gate_status === 'pending' && isNext && (
-                <div className="flex gap-1 shrink-0">
+                <div className="flex gap-1 shrink-0 flex-wrap">
                   <Button
                     size="sm"
                     variant="default"
@@ -186,16 +199,27 @@ const JobLifecycleOrchestrator = memo(({
                     <XCircle className="w-3 h-3 ml-1" />
                     رفض
                   </Button>
+                  {!isMandatory && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs h-7 px-2 border-amber-300 text-amber-600 hover:bg-amber-50"
+                      onClick={() => updateGate.mutate({ gateId: gate.id, status: 'bypassed', notes: 'تم التجاوز — بوابة تحذيرية' })}
+                    >
+                      <AlertTriangle className="w-3 h-3 ml-1" />
+                      تجاوز
+                    </Button>
+                  )}
                 </div>
               )}
             </motion.div>
           );
         })}
 
-        {!allPassed && (
+        {!canProceed && (
           <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 text-xs text-amber-700 dark:text-amber-400">
             <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>لا يمكن إصدار الفاتورة حتى اكتمال جميع البوابات</span>
+            <span>لا يمكن إصدار الفاتورة حتى اكتمال البوابات الإلزامية — البوابات التحذيرية يمكن تجاوزها</span>
           </div>
         )}
       </CardContent>
