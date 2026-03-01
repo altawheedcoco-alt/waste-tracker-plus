@@ -19,12 +19,12 @@ export interface LifecycleGate {
 }
 
 const GATE_DEFINITIONS = [
-  { gate_type: 'consultant_classification', gate_order: 1, label: 'تصنيف الاستشاري', labelEn: 'Consultant Classification', mandatory: true },
+  { gate_type: 'consultant_classification', gate_order: 1, label: 'تصنيف الاستشاري', labelEn: 'Consultant Classification', mandatory: false },
   { gate_type: 'consultant_approval', gate_order: 2, label: 'اعتماد الاستشاري', labelEn: 'Consultant Approval', mandatory: false },
   { gate_type: 'weight_verification', gate_order: 3, label: 'التحقق من الوزن', labelEn: 'Weight Verification', mandatory: false },
   { gate_type: 'geofence_verification', gate_order: 4, label: 'التحقق الجغرافي', labelEn: 'Geofence Verification', mandatory: false },
-  { gate_type: 'safety_check', gate_order: 5, label: 'فحص السلامة', labelEn: 'Safety Check', mandatory: true },
-  { gate_type: 'document_completion', gate_order: 6, label: 'اكتمال المستندات', labelEn: 'Document Completion', mandatory: true },
+  { gate_type: 'safety_check', gate_order: 5, label: 'فحص السلامة', labelEn: 'Safety Check', mandatory: false },
+  { gate_type: 'document_completion', gate_order: 6, label: 'اكتمال المستندات', labelEn: 'Document Completion', mandatory: false },
 ];
 
 export const isGateMandatory = (gateType: string) => {
