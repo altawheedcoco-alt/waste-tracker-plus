@@ -207,14 +207,23 @@ const MapPage = () => {
           navigator.geolocation.getCurrentPosition(
             async (pos) => {
               const { latitude, longitude } = pos.coords;
-              map.setView([latitude, longitude], 15);
-              const icon = L.divIcon({
-                html: '<div style="background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(59,130,246,0.6)"></div>',
-                iconSize: [16, 16],
+              map.setView([latitude, longitude], 16);
+              // Pulsing blue dot with accuracy ring
+              const pulseIcon = L.divIcon({
+                html: `
+                  <div style="position:relative;width:40px;height:40px">
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(59,130,246,0.15);border-radius:50%;animation:pulse-ring 2s ease-out infinite"></div>
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:18px;height:18px;background:#3b82f6;border-radius:50%;border:3px solid white;box-shadow:0 0 10px rgba(59,130,246,0.7)"></div>
+                    <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:16px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.3))">▼</div>
+                  </div>
+                  <style>@keyframes pulse-ring{0%{transform:translate(-50%,-50%) scale(0.5);opacity:1}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}</style>
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
                 className: '',
               });
-              L.marker([latitude, longitude], { icon }).addTo(map)
-                .bindPopup('<div dir="rtl"><b>📍 موقعك الحالي</b></div>').openPopup();
+              L.marker([latitude, longitude], { icon: pulseIcon }).addTo(map)
+                .bindPopup('<div dir="rtl"><b>📍 أنت هنا</b></div>').openPopup();
             },
             () => { /* silent fail */ }
           );
