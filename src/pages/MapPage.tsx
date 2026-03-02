@@ -137,12 +137,13 @@ const MapPage = () => {
     try {
       const { data } = await supabase
         .from('organizations')
-        .select('id, name, organization_type, address, city, region, latitude, longitude, is_verified')
+        .select('id, name, organization_type, address, city, region, location_lat, location_lng, is_verified')
         .eq('is_active', true)
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null);
+        .not('location_lat', 'is', null)
+        .not('location_lng', 'is', null);
 
-      const orgsData = (data || []).filter((o: any) => o.latitude && o.longitude);
+      const orgsData = (data || []).filter((o: any) => o.location_lat && o.location_lng)
+        .map((o: any) => ({ ...o, latitude: o.location_lat, longitude: o.location_lng }));
       setOrgs(orgsData);
       
       setStats({
