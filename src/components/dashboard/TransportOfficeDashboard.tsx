@@ -14,6 +14,7 @@ import {
 
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
+const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -88,6 +89,11 @@ const TransportOfficeDashboard = () => {
   return (
     <div className="space-y-6" dir="rtl">
       <StoryCircles />
+
+      {/* بطاقة الهوية التعريفية الرقمية */}
+      <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+        <DigitalIdentityCard />
+      </Suspense>
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

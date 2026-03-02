@@ -31,6 +31,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import DriverDailySummary from '@/components/driver/DriverDailySummary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
+const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
 
 // Lazy load heavy components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -239,6 +240,11 @@ const DriverDashboard = () => {
           total: shipments.length,
         }}
       />
+
+      {/* بطاقة الهوية التعريفية الرقمية */}
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+        <DigitalIdentityCard />
+      </Suspense>
 
       {/* Compact Header with Status */}
       <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3">

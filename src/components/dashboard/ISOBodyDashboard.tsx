@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
 
 const ISOBodyDashboard = memo(() => {
   const { profile, organization } = useAuth();
@@ -107,6 +108,11 @@ const ISOBodyDashboard = memo(() => {
           </p>
         </div>
       </div>
+
+      {/* بطاقة الهوية التعريفية الرقمية */}
+      <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+        <DigitalIdentityCard />
+      </Suspense>
 
       {/* Info Banner */}
       <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20">

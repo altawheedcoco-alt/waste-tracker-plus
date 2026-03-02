@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import StoryCircles from '@/components/stories/StoryCircles';
 import {
@@ -23,6 +24,7 @@ import EmployeeContextWidgets from './employee/EmployeeContextWidgets';
 const PendingApprovalsWidget = lazy(() => import('@/components/shipments/PendingApprovalsWidget'));
 const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
 const DriverCodeLookup = lazy(() => import('@/components/drivers/DriverCodeLookup'));
+const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
 
 const TabFallback = () => (
   <div className="flex items-center justify-center py-12">
@@ -92,6 +94,11 @@ const EmployeeDashboard = () => {
   return (
     <div className="space-y-6" dir="rtl">
       <StoryCircles />
+
+      {/* بطاقة الهوية التعريفية الرقمية */}
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+        <DigitalIdentityCard />
+      </Suspense>
 
       {/* Employee Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
