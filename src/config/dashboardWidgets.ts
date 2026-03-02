@@ -1,4 +1,4 @@
-import { LucideIcon, Package, Wallet, BarChart3, Bell, TrendingUp, Truck, Users, FileCheck, QrCode, Printer, Activity, MapPin, Scale, ClipboardList, Recycle, Factory, Leaf, Shield, Bot, Calendar, Zap, AlertTriangle, FileText, Gauge, Navigation, Radio, Wrench, BadgeCheck, Landmark, BookOpen, Briefcase, HeartPulse, FlaskConical, LayoutGrid, CreditCard, BarChart, ShieldCheck, Globe, Coins, Cpu, Brain, Star, Search, ScrollText, Lock } from 'lucide-react';
+import { LucideIcon, Package, Wallet, BarChart3, Bell, TrendingUp, Truck, Users, FileCheck, QrCode, Printer, Activity, MapPin, Scale, ClipboardList, Recycle, Factory, Leaf, Shield, Bot, Calendar, Zap, AlertTriangle, FileText, Gauge, Navigation, Radio, Wrench, BadgeCheck, Landmark, BookOpen, Briefcase, HeartPulse, FlaskConical, LayoutGrid, CreditCard, BarChart, ShieldCheck, Globe, Coins, Cpu, Brain, Star, Search, ScrollText, Lock, IdCard } from 'lucide-react';
 
 export interface DashboardWidgetConfig {
   id: string;
@@ -17,6 +17,19 @@ export interface DashboardWidgetConfig {
 }
 
 export const dashboardWidgets: DashboardWidgetConfig[] = [
+  // === بطاقة الهوية التعريفية الرقمية ===
+  {
+    id: 'digital_identity_card',
+    title: 'بطاقة الهوية التعريفية الرقمية',
+    description: 'بيانات الجهة القانونية والتشغيلية وإحصائيات الشركاء والعمالة',
+    icon: IdCard,
+    category: 'stats',
+    availableFor: ['generator', 'transporter', 'recycler', 'disposal', 'admin'],
+    defaultOrder: 0,
+    defaultPinned: true,
+    size: 'large',
+  },
+
   // === إجراءات سريعة ===
   {
     id: 'quick_actions',
