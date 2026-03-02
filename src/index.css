@@ -13,7 +13,6 @@
   :root {
     /* ========================================
        الألوان الثابتة للصفحة الرئيسية العامة
-       (لا تتأثر بإعدادات المظهر الداخلية)
        ======================================== */
     --landing-background: 140 20% 98%;
     --landing-foreground: 150 30% 15%;
@@ -28,34 +27,36 @@
     --landing-card-foreground: 150 30% 15%;
 
     /* ========================================
-       الألوان القابلة للتخصيص (لوحة التحكم)
+       التسلسل الهرمي البصري - الوضع الفاتح
+       Background (96%) < Muted (94%) < Card (100%) < Popover (100%)
+       Foreground (12%) > MutedFG (45%) — فرق واضح
        ======================================== */
-    --background: 0 0% 96%;
-    --foreground: 0 0% 9%;
+    --background: 140 8% 96%;
+    --foreground: 150 20% 12%;
 
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 150 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 150 20% 12%;
 
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 32%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 150 10% 92%;
+    --secondary-foreground: 150 20% 18%;
 
-    --muted: 0 0% 93%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 140 8% 94%;
+    --muted-foreground: 150 8% 45%;
 
     --accent: 166 76% 96%;
-    --accent-foreground: 173 80% 40%;
+    --accent-foreground: 173 80% 30%;
 
     --destructive: 0 72% 50%;
-    --destructive-foreground: 0 85% 97%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 83%;
-    --input: 0 0% 83%;
+    --border: 150 10% 85%;
+    --input: 150 10% 85%;
     --ring: 161 93% 30%;
 
     --radius: 0.75rem;
@@ -74,90 +75,95 @@
     --gradient-hero: linear-gradient(180deg, hsl(140, 20%, 98%) 0%, hsl(140, 30%, 95%) 100%);
     --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(140, 20%, 98%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    /* Shadows — أعمق قليلاً لفصل الطبقات */
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.08), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.08), 0 4px 6px -4px hsl(0 0% 0% / 0.06);
     --shadow-glow: 0 0 40px hsl(142, 71%, 45%, 0.4);
     --shadow-hero: 0 4px 30px hsl(0 0% 0% / 0.15), 0 10px 60px hsl(142, 71%, 45%, 0.1);
 
-    --sidebar-background: 140 20% 98%;
-    --sidebar-foreground: 0 0% 9%;
+    --sidebar-background: 150 15% 97%;
+    --sidebar-foreground: 150 20% 15%;
     --sidebar-primary: 161 93% 30%;
-    --sidebar-primary-foreground: 151 80% 95%;
-    --sidebar-accent: 0 0% 32%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 83%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 12% 92%;
+    --sidebar-accent-foreground: 150 20% 25%;
+    --sidebar-border: 150 10% 88%;
     --sidebar-ring: 161 93% 30%;
     --chart-1: 158 64% 51%;
     --chart-2: 141 69% 58%;
     --chart-3: 172 66% 50%;
     --chart-4: 82 77% 55%;
-    --chart-5: 0 0% 45%;
-    --sidebar: 0 0% 98%;
+    --chart-5: 0 0% 55%;
+    --sidebar: 150 15% 97%;
     --font-sans: 'Work Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
     --font-serif: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'Inconsolata', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.03);
+    --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.05);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.08), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.08), 0 8px 10px -6px hsl(0 0% 0% / 0.06);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.2);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
   }
 
   .dark {
-    --background: 0 0% 9%;
-    --foreground: 0 0% 95%;
+    /* ========================================
+       التسلسل الهرمي البصري - الوضع الداكن
+       Background (7%) < Card (11%) < Muted (16%) < Popover (14%)
+       Foreground (92%) > MutedFG (60%) — فرق واضح
+       ======================================== */
+    --background: 0 0% 7%;
+    --foreground: 0 0% 92%;
 
-    --card: 0 0% 13%;
-    --card-foreground: 0 0% 95%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 92%;
 
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 14%;
+    --popover-foreground: 0 0% 92%;
 
     --primary: 158 64% 51%;
     --primary-foreground: 165 91% 9%;
 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 85%;
 
-    --muted: 0 0% 18%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 170 50% 15%;
-    --accent-foreground: 172 66% 60%;
+    --accent: 170 40% 12%;
+    --accent-foreground: 172 50% 65%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 85% 97%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 158 64% 51%;
 
-    --sidebar-background: 150 20% 8%;
-    --sidebar-foreground: 0 0% 90%;
+    --sidebar-background: 150 15% 6%;
+    --sidebar-foreground: 0 0% 88%;
     --sidebar-primary: 158 64% 51%;
     --sidebar-primary-foreground: 165 91% 9%;
-    --sidebar-accent: 170 40% 18%;
-    --sidebar-accent-foreground: 172 50% 70%;
-    --sidebar-border: 0 0% 22%;
+    --sidebar-accent: 170 30% 14%;
+    --sidebar-accent-foreground: 172 40% 68%;
+    --sidebar-border: 0 0% 18%;
     --sidebar-ring: 158 64% 51%;
     --chart-1: 156 71% 66%;
     --chart-2: 141 76% 73%;
     --chart-3: 170 76% 64%;
     --chart-4: 81 84% 67%;
-    --chart-5: 0 0% 45%;
-    --sidebar: 0 0% 12%;
-    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.1);
-    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.1);
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.15), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
-    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 2px 4px -1px hsl(0 0% 0% / 0.15);
-    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 4px 6px -1px hsl(0 0% 0% / 0.15);
-    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 8px 10px -1px hsl(0 0% 0% / 0.15);
-    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.35);
+    --chart-5: 0 0% 50%;
+    --sidebar: 0 0% 10%;
+    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.15);
+    --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.15);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.25), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.25), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.25), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.3), 0 8px 10px -6px hsl(0 0% 0% / 0.2);
+    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.45);
   }
 }
 
