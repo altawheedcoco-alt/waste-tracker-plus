@@ -192,7 +192,7 @@ const MapPage = () => {
     const hereNormal = L.tileLayer('https://1.base.maps.ls.hereapi.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?apiKey=demo', { attribution: 'HERE', maxZoom: 20 });
     const googleTraffic = L.tileLayer('https://mt1.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { attribution: 'Google Traffic', maxZoom: 20 });
 
-    osmLayer.addTo(map);
+    cartoVoyager.addTo(map);
     L.control.layers({
       '🗺️ OSM عادية': osmLayer,
       '🔥 OSM إنسانية (HOT)': osmHot,
