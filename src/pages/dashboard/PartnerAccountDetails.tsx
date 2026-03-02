@@ -19,6 +19,7 @@ import {
   CalendarRange,
   Link as LinkIcon,
   FolderOpen,
+  Scale,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,6 +38,7 @@ import CreateInvoiceDialog from '@/components/invoices/CreateInvoiceDialog';
 import AccountPeriodsManager from '@/components/accounts/AccountPeriodsManager';
 import LinkedPartiesTab from '@/components/partners/LinkedPartiesTab';
 import { EntityProfileArchive } from '@/components/archive';
+import RecordWeightEntryDialog from '@/components/accounts/RecordWeightEntryDialog';
 
 export default function PartnerAccountDetails() {
   const { partnerId } = useParams<{ partnerId: string }>();
@@ -45,6 +47,7 @@ export default function PartnerAccountDetails() {
   const { organization } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [showCreateInvoice, setShowCreateInvoice] = useState(false);
+  const [showWeightEntry, setShowWeightEntry] = useState(false);
 
   // Fetch partner organization details
   const { data: partner, isLoading: partnerLoading } = useQuery({
@@ -143,6 +146,29 @@ export default function PartnerAccountDetails() {
     enabled: !!partnerId && !!organization?.id,
   });
 
+  // Fetch direct weight entries from accounting_ledger
+  const { data: weightEntries = [], isLoading: weightEntriesLoading } = useQuery({
+    queryKey: ['partner-weight-entries', partnerId, organization?.id],
+    queryFn: async () => {
+      if (!partnerId || !organization?.id) return [];
+      
+      let query = supabase
+        .from('accounting_ledger')
+        .select('*')
+        .eq('organization_id', organization.id)
+        .eq('entry_category', 'weight_entry')
+        .order('entry_date', { ascending: false });
+      
+      // Filter by partner type
+      query = query.eq('partner_organization_id', partnerId);
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!partnerId && !!organization?.id,
+  });
+
   // Calculate shipment totals with pricing - exclude cancelled
   const shipmentsWithPricing = useMemo(() => {
     return shipments.map(shipment => {
@@ -179,15 +205,15 @@ export default function PartnerAccountDetails() {
   const totalInvoiced = invoices.reduce((sum, inv) => sum + (Number(inv.total_amount) || 0), 0);
   const totalPaidInvoices = invoices.reduce((sum, inv) => sum + (Number(inv.paid_amount) || 0), 0);
   const totalDeposits = deposits.reduce((sum, dep) => sum + (Number(dep.amount) || 0), 0);
+  const totalWeightEntries = weightEntries.reduce((sum, we) => sum + (Number(we.amount) || 0), 0);
   const totalPaid = totalPaidInvoices + totalDeposits;
   
-  // Balance calculation depends on organization type
-  // Generator: shipment value is what they should receive, deposits are what they received
-  // Transporter/Recycler: shipment value is what they owe, deposits are what they paid
+  // Balance = shipments + weight entries - paid
   const isGeneratorOrg = organization?.organization_type === 'generator';
+  const totalOwed = totalShipmentValue + totalWeightEntries;
   const balance = isGeneratorOrg 
-    ? totalShipmentValue - totalPaid  // للمولد: القيمة المستحقة - المدفوع = الباقي لنا
-    : totalInvoiced - totalPaid;       // للناقل/المدور: المفوتر - المدفوع = الباقي علينا
+    ? totalOwed - totalPaid
+    : totalInvoiced - totalPaid;
 
   // Refresh deposits callback
   const refreshDeposits = () => {
@@ -269,9 +295,25 @@ export default function PartnerAccountDetails() {
       });
     });
 
+    // Add direct weight entries
+    weightEntries.forEach(we => {
+      const amount = Number(we.amount) || 0;
+      // Parse description to extract details
+      const desc = we.description || 'وزنة مباشرة';
+      entries.push({
+        id: `weight-${we.id}`,
+        date: we.entry_date,
+        type: 'shipment',
+        description: `⚖️ ${desc}`,
+        debit: isGenerator ? 0 : amount,
+        credit: isGenerator ? amount : 0,
+        reference: we.reference_number || '-',
+      });
+    });
+
     // Sort by date
     return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [shipmentsWithPricing, invoices, deposits, isGenerator]);
+  }, [shipmentsWithPricing, invoices, deposits, weightEntries, isGenerator]);
 
   if (partnerLoading) {
     return (
@@ -396,11 +438,21 @@ export default function PartnerAccountDetails() {
                   <BookOpen className="h-5 w-5" />
                   سجل حساب الشريك المفصل
                 </h3>
-                <DepositButton
-                  preselectedPartnerId={partnerId}
-                  preselectedPartnerType="organization"
-                  onSuccess={refreshDeposits}
-                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => setShowWeightEntry(true)}
+                  >
+                    <Scale className="h-4 w-4" />
+                    تسجيل وزنة
+                  </Button>
+                  <DepositButton
+                    preselectedPartnerId={partnerId}
+                    preselectedPartnerType="organization"
+                    onSuccess={refreshDeposits}
+                  />
+                </div>
               </div>
               <DetailedAccountLedger
                 partnerName={partner.name}
@@ -549,6 +601,17 @@ export default function PartnerAccountDetails() {
           availableShipments={shipmentsWithPricing}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['partner-invoices', partnerId] });
+          }}
+        />
+
+        {/* Record Weight Entry Dialog */}
+        <RecordWeightEntryDialog
+          open={showWeightEntry}
+          onOpenChange={setShowWeightEntry}
+          partnerId={partnerId!}
+          partnerName={partner?.name || ''}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ['partner-weight-entries', partnerId] });
           }}
         />
       </div>
