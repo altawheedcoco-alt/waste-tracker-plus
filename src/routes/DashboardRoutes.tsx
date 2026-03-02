@@ -171,6 +171,7 @@ const AdminAttestations = lazy(() => import("@/pages/dashboard/AdminAttestations
 const ScopedAccessLinks = lazy(() => import("@/pages/dashboard/ScopedAccessLinks"));
 const AdminEntityCensus = lazy(() => import("@/pages/dashboard/AdminEntityCensus"));
 const DigitalIdentityCardPage = lazy(() => import("@/pages/dashboard/DigitalIdentityCardPage"));
+const MultiSignTemplates = lazy(() => import("@/pages/dashboard/MultiSignTemplates"));
 
 export const dashboardRoutes = (
   <>
@@ -345,6 +346,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/vehicle-marketplace" element={<VehicleMarketplace />} />
     <Route path="/dashboard/smart-agent" element={<SmartAgentDashboard />} />
     <Route path="/dashboard/entity-census" element={<AdminEntityCensus />} />
+    <Route path="/dashboard/multi-sign-templates" element={<MultiSignTemplates />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );

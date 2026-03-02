@@ -251,6 +251,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileSignature, labelAr: 'طلبات التوقيع', labelEn: 'Signing Requests', path: '/dashboard/document-archive?tab=signing_request', key: 'doc-archive-signing' },
       { icon: Building2, labelAr: 'حسب الجهة', labelEn: 'By Partner', path: '/dashboard/document-archive?view=partners', key: 'doc-archive-partners' },
       { icon: FileCheck, labelAr: 'الأعمال اليدوية', labelEn: 'Manual Ops', path: '/dashboard/manual-operations', key: 'manual-operations' },
+      { icon: FileSignature, labelAr: 'قوالب التوقيع المتعدد', labelEn: 'Multi-Sign Templates', path: '/dashboard/multi-sign-templates', key: 'multi-sign-templates' },
     ],
   },
 
