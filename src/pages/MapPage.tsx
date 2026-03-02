@@ -222,8 +222,38 @@ const MapPage = () => {
                 iconAnchor: [20, 20],
                 className: '',
               });
+              // Get address & plus code
+              const { reverseGeocodeOSM } = await import('@/lib/leafletConfig');
+              const { OpenLocationCode } = await import('open-location-code');
+              const address = await reverseGeocodeOSM(latitude, longitude);
+              const plusCode = OpenLocationCode.encode(latitude, longitude, 11);
+              const googleUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
               L.marker([latitude, longitude], { icon: pulseIcon }).addTo(map)
-                .bindPopup('<div dir="rtl"><b>📍 أنت هنا</b></div>').openPopup();
+                .bindPopup(`
+                  <div dir="rtl" style="min-width:260px;font-family:Cairo,sans-serif">
+                    <h4 style="font-weight:bold;margin-bottom:8px;font-size:14px">📍 أنت هنا</h4>
+                    <div style="background:#f8fafc;padding:8px;border-radius:8px;margin-bottom:6px">
+                      <p style="font-size:12px;font-weight:600;margin-bottom:4px">📍 العنوان:</p>
+                      <p style="font-size:11px;color:#444;line-height:1.5">${address}</p>
+                    </div>
+                    <div style="background:#f0fdf4;padding:8px;border-radius:8px;margin-bottom:6px">
+                      <p style="font-size:12px;font-weight:600;margin-bottom:4px">🔢 الإحداثيات:</p>
+                      <div style="font-family:monospace;font-size:13px;direction:ltr;text-align:center;user-select:all;cursor:text;background:white;padding:4px 8px;border-radius:4px;border:1px solid #d1fae5">
+                        ${latitude.toFixed(6)}, ${longitude.toFixed(6)}
+                      </div>
+                    </div>
+                    <div style="background:#eff6ff;padding:8px;border-radius:8px;margin-bottom:6px">
+                      <p style="font-size:12px;font-weight:600;margin-bottom:4px">📎 كود بلس:</p>
+                      <div style="font-family:monospace;font-size:13px;direction:ltr;text-align:center;user-select:all;cursor:text;background:white;padding:4px 8px;border-radius:4px;border:1px solid #bfdbfe">
+                        ${plusCode}
+                      </div>
+                    </div>
+                    <div style="text-align:center;margin-top:8px">
+                      <a href="${googleUrl}" target="_blank" style="color:#3b82f6;font-size:11px;text-decoration:none">🗺️ فتح في خرائط جوجل ↗</a>
+                    </div>
+                  </div>
+                `).openPopup();
             },
             () => { /* silent fail */ }
           );
