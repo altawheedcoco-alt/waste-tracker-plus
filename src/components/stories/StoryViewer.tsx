@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import StoryViewers from './StoryViewers';
+import { useResolvedUrl } from '@/hooks/useResolvedUrl';
 
 interface StoryViewerProps {
   group: StoryGroup;
@@ -23,6 +24,7 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
   const story = group.stories[currentIndex];
   const isMyStory = group.user_id === user?.id;
   const storyDuration = story?.media_type === 'video' ? 15000 : 5000;
+  const resolvedMediaUrl = useResolvedUrl(story?.media_url);
 
   // Record view
   useEffect(() => {
@@ -157,19 +159,31 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
                 </p>
               </div>
             ) : story.media_type === 'video' ? (
-              <video
-                src={story.media_url}
-                className="w-full h-full object-cover"
-                autoPlay
-                muted
-                playsInline
-              />
+              resolvedMediaUrl ? (
+                <video
+                  src={resolvedMediaUrl}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  playsInline
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )
             ) : (
-              <img
-                src={story.media_url}
-                className="w-full h-full object-cover"
-                alt="story"
-              />
+              resolvedMediaUrl ? (
+                <img
+                  src={resolvedMediaUrl}
+                  className="w-full h-full object-cover"
+                  alt="story"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              )
             )}
           </div>
 
