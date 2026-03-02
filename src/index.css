@@ -31,7 +31,7 @@
        Background (96%) < Muted (94%) < Card (100%) < Popover (100%)
        Foreground (12%) > MutedFG (45%) — فرق واضح
        ======================================== */
-    --background: 140 8% 96%;
+    --background: 0 0% 100%;
     --foreground: 150 20% 12%;
 
     --card: 0 0% 100%;
@@ -43,20 +43,20 @@
     --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 150 10% 92%;
+    --secondary: 150 5% 95%;
     --secondary-foreground: 150 20% 18%;
 
-    --muted: 140 8% 94%;
+    --muted: 0 0% 97%;
     --muted-foreground: 150 8% 45%;
 
-    --accent: 166 76% 96%;
+    --accent: 166 30% 97%;
     --accent-foreground: 173 80% 30%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 150 10% 85%;
-    --input: 150 10% 85%;
+    --border: 0 0% 92%;
+    --input: 0 0% 92%;
     --ring: 161 93% 30%;
 
     --radius: 0.75rem;
@@ -82,20 +82,20 @@
     --shadow-glow: 0 0 40px hsl(142, 71%, 45%, 0.4);
     --shadow-hero: 0 4px 30px hsl(0 0% 0% / 0.15), 0 10px 60px hsl(142, 71%, 45%, 0.1);
 
-    --sidebar-background: 150 15% 97%;
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 150 20% 15%;
     --sidebar-primary: 161 93% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 150 12% 92%;
+    --sidebar-accent: 0 0% 96%;
     --sidebar-accent-foreground: 150 20% 25%;
-    --sidebar-border: 150 10% 88%;
+    --sidebar-border: 0 0% 92%;
     --sidebar-ring: 161 93% 30%;
     --chart-1: 158 64% 51%;
     --chart-2: 141 69% 58%;
     --chart-3: 172 66% 50%;
     --chart-4: 82 77% 55%;
     --chart-5: 0 0% 55%;
-    --sidebar: 150 15% 97%;
+    --sidebar: 0 0% 100%;
     --font-sans: 'Work Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
     --font-serif: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'Inconsolata', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
