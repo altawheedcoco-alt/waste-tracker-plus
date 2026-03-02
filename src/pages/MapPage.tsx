@@ -194,6 +194,38 @@ const MapPage = () => {
       '🚦 حركة المرور': googleTraffic,
     }, {}, { position: 'topright', collapsed: true }).addTo(map);
 
+    // GPS locate button on map
+    const LocateControl = L.Control.extend({
+      options: { position: 'topleft' as L.ControlPosition },
+      onAdd: function () {
+        const btn = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+        btn.innerHTML = '<a href="#" title="موقعي الحالي" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:white;font-size:18px;text-decoration:none;cursor:pointer" role="button">📍</a>';
+        btn.onclick = function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!navigator.geolocation) { return; }
+          navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+              const { latitude, longitude } = pos.coords;
+              map.setView([latitude, longitude], 15);
+              const icon = L.divIcon({
+                html: '<div style="background:#3b82f6;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 0 8px rgba(59,130,246,0.6)"></div>',
+                iconSize: [16, 16],
+                className: '',
+              });
+              L.marker([latitude, longitude], { icon }).addTo(map)
+                .bindPopup('<div dir="rtl"><b>📍 موقعك الحالي</b></div>').openPopup();
+            },
+            () => { /* silent fail */ }
+          );
+          return false;
+        };
+        L.DomEvent.disableClickPropagation(btn);
+        return btn;
+      },
+    });
+    new LocateControl().addTo(map);
+
     markersLayerRef.current = L.layerGroup().addTo(map);
     mapInstanceRef.current = map;
 
