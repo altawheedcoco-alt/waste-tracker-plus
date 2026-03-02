@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, Wrench, BarChart3, Users, FileText, Settings, Leaf } from 'lucide-react';
 
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
-const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
@@ -185,9 +185,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
     <div className="space-y-6" dir="rtl">
       <StoryCircles />
 
-      <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-        <DigitalIdentityCard />
-      </Suspense>
 
       {/* Mission Control Button */}
       <Button

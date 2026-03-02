@@ -170,10 +170,12 @@ const OrganizationAttestation = lazy(() => import("@/pages/dashboard/Organizatio
 const AdminAttestations = lazy(() => import("@/pages/dashboard/AdminAttestations"));
 const ScopedAccessLinks = lazy(() => import("@/pages/dashboard/ScopedAccessLinks"));
 const AdminEntityCensus = lazy(() => import("@/pages/dashboard/AdminEntityCensus"));
+const DigitalIdentityCardPage = lazy(() => import("@/pages/dashboard/DigitalIdentityCardPage"));
 
 export const dashboardRoutes = (
   <>
     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+    <Route path="/dashboard/digital-identity-card" element={<DigitalIdentityCardPage />} />
     <Route path="/dashboard/print-center" element={<PrintCenter />} />
     <Route path="/dashboard/signing-status" element={<SigningStatus />} />
     <Route path="/dashboard/drivers" element={<Drivers />} />

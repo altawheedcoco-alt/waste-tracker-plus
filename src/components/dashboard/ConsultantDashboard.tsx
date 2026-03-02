@@ -44,7 +44,7 @@ const ConsultantSigningCenter = lazy(() => import('@/components/consultant/Consu
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
-const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
+
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -256,10 +256,6 @@ const ConsultantDashboard = memo(() => {
         </div>
       </div>
 
-      {/* بطاقة الهوية التعريفية الرقمية */}
-      <Suspense fallback={<LazyLoader />}>
-        <DigitalIdentityCard />
-      </Suspense>
 
       {/* Consultant Info Card */}
       {consultantProfile && (
