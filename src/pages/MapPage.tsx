@@ -68,14 +68,8 @@ const MapPage = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string } | null>(null);
   const [manualPickName, setManualPickName] = useState('');
-  const [mapMode, setMapMode] = useState<'leaflet' | 'waze' | 'both' | 'google' | 'waze_live'>('leaflet');
+  const [mapMode, setMapMode] = useState<'leaflet' | 'waze' | 'both' | 'waze_live'>('leaflet');
   const [wazeCenter, setWazeCenter] = useState({ lat: EGYPT_CENTER[0], lng: EGYPT_CENTER[1], zoom: DEFAULT_ZOOM });
-  const [googleSelectedCoords, setGoogleSelectedCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [googleSelectedAddress, setGoogleSelectedAddress] = useState('');
-  const googleMapRef = useRef<HTMLDivElement>(null);
-  const googleMapInstanceRef = useRef<any>(null);
-  const googleMarkerRef = useRef<any>(null);
-  const GOOGLE_MAPS_KEY = 'AIzaSyA5Ent-U0vvGUDaTQIqywit-xTuMlayKqY';
 
   // Load search history
   const loadSearchHistory = useCallback(async () => {
@@ -265,103 +259,8 @@ const MapPage = () => {
     return () => { map.off('click', handleClick); };
   }, [manualPickMode]);
 
-  // Google Maps initialization
-  useEffect(() => {
-    if (mapMode !== 'google' || !googleMapRef.current) return;
-    if (googleMapInstanceRef.current) return; // already initialized
 
-    // Load Google Maps script if not loaded
-    const loadScript = () => {
-      return new Promise<void>((resolve) => {
-        if ((window as any).google?.maps) { resolve(); return; }
-        const existing = document.querySelector('script[src*="maps.googleapis.com"]');
-        if (existing) { existing.addEventListener('load', () => resolve()); return; }
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&libraries=places,geocoding&language=ar`;
-        script.async = true;
-        script.onload = () => resolve();
-        document.head.appendChild(script);
-      });
-    };
 
-    loadScript().then(() => {
-      if (!googleMapRef.current) return;
-      const gMap = new (window as any).google.maps.Map(googleMapRef.current, {
-        center: { lat: EGYPT_CENTER[0], lng: EGYPT_CENTER[1] },
-        zoom: DEFAULT_ZOOM,
-        mapTypeControl: true,
-        streetViewControl: true,
-        fullscreenControl: true,
-      });
-      googleMapInstanceRef.current = gMap;
-
-      const geocoder = new (window as any).google.maps.Geocoder();
-
-      gMap.addListener('click', (e: any) => {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        setGoogleSelectedCoords({ lat, lng });
-
-        if (googleMarkerRef.current) {
-          googleMarkerRef.current.setPosition({ lat, lng });
-        } else {
-          googleMarkerRef.current = new (window as any).google.maps.Marker({
-            position: { lat, lng },
-            map: gMap,
-            draggable: true,
-            animation: (window as any).google.maps.Animation.DROP,
-          });
-          googleMarkerRef.current.addListener('dragend', (ev: any) => {
-            const newLat = ev.latLng.lat();
-            const newLng = ev.latLng.lng();
-            setGoogleSelectedCoords({ lat: newLat, lng: newLng });
-            geocoder.geocode({ location: { lat: newLat, lng: newLng } }, (results: any, status: any) => {
-              if (status === 'OK' && results?.[0]) setGoogleSelectedAddress(results[0].formatted_address);
-            });
-          });
-        }
-
-        geocoder.geocode({ location: { lat, lng } }, (results: any, status: any) => {
-          if (status === 'OK' && results?.[0]) setGoogleSelectedAddress(results[0].formatted_address);
-          else setGoogleSelectedAddress(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        });
-      });
-
-      // Search box
-      const input = document.getElementById('google-search-input') as HTMLInputElement;
-      if (input) {
-        const searchBox = new (window as any).google.maps.places.SearchBox(input);
-        gMap.addListener('bounds_changed', () => searchBox.setBounds(gMap.getBounds()));
-        searchBox.addListener('places_changed', () => {
-          const places = searchBox.getPlaces();
-          if (!places?.length) return;
-          const place = places[0];
-          if (!place.geometry?.location) return;
-          const lat = place.geometry.location.lat();
-          const lng = place.geometry.location.lng();
-          setGoogleSelectedCoords({ lat, lng });
-          setGoogleSelectedAddress(place.formatted_address || place.name || '');
-          gMap.setCenter({ lat, lng });
-          gMap.setZoom(15);
-          if (googleMarkerRef.current) {
-            googleMarkerRef.current.setPosition({ lat, lng });
-          } else {
-            googleMarkerRef.current = new (window as any).google.maps.Marker({
-              position: { lat, lng },
-              map: gMap,
-              draggable: true,
-              animation: (window as any).google.maps.Animation.DROP,
-            });
-          }
-        });
-      }
-    });
-
-    return () => {
-      googleMapInstanceRef.current = null;
-      googleMarkerRef.current = null;
-    };
-  }, [mapMode]);
 
   // Save pending manual pick
   const saveManualPick = async () => {
@@ -633,15 +532,6 @@ const MapPage = () => {
               </Button>
               <Button
                 size="sm"
-                variant={mapMode === 'google' ? 'default' : 'ghost'}
-                className="rounded-none gap-1"
-                onClick={() => setMapMode('google')}
-              >
-                <MapPin className="w-3 h-3" />
-                Google Maps
-              </Button>
-              <Button
-                size="sm"
                 variant={mapMode === 'waze_live' ? 'default' : 'ghost'}
                 className="rounded-none gap-1"
                 onClick={() => {
@@ -888,7 +778,7 @@ const MapPage = () => {
           <div 
             ref={mapRef} 
             className={`rounded-xl border shadow-sm ${manualPickMode ? 'border-primary cursor-crosshair' : 'border-border'}`} 
-            style={{ height: mapMode === 'both' ? '400px' : '600px', display: (mapMode === 'waze' || mapMode === 'google') ? 'none' : 'block' }} 
+            style={{ height: mapMode === 'both' ? '400px' : '600px', display: (mapMode === 'waze' || mapMode === 'waze_live') ? 'none' : 'block' }} 
           />
 
           {/* Waze Live Map */}
@@ -1030,67 +920,6 @@ const MapPage = () => {
                 allowFullScreen
                 title="Waze Live Deep Links Map"
               />
-            </div>
-          )}
-          {/* Google Maps */}
-          {mapMode === 'google' && (
-            <div className="space-y-0 rounded-xl border border-border shadow-sm overflow-hidden" style={{ height: '650px' }}>
-              {/* Coordinates bar */}
-              <div className="bg-primary/10 p-2 flex flex-wrap items-center justify-between gap-2 border-b border-primary/20">
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-bold text-primary">📍 الموقع المحدد:</span>
-                  {googleSelectedCoords ? (
-                    <span className="text-sm font-mono font-semibold text-foreground">
-                      {googleSelectedCoords.lat.toFixed(6)}, {googleSelectedCoords.lng.toFixed(6)}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-muted-foreground">انقر على الخريطة أو ابحث لتحديد موقع</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {googleSelectedCoords && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 text-[10px] gap-1"
-                      onClick={() => {
-                        navigator.clipboard.writeText(`${googleSelectedCoords.lat.toFixed(6)}, ${googleSelectedCoords.lng.toFixed(6)}`);
-                        toast.success('تم نسخ الإحداثيات');
-                      }}
-                    >
-                      📋 نسخ
-                    </Button>
-                  )}
-                  {googleSelectedCoords && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-6 text-[10px] gap-1"
-                      onClick={() => window.open(`https://www.google.com/maps?q=${googleSelectedCoords.lat},${googleSelectedCoords.lng}`, '_blank')}
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      فتح في Google Maps
-                    </Button>
-                  )}
-                </div>
-              </div>
-              {googleSelectedAddress && (
-                <div className="bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground border-b border-border flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {googleSelectedAddress}
-                </div>
-              )}
-              {/* Google Search */}
-              <div className="p-2 border-b border-border bg-background">
-                <Input
-                  id="google-search-input"
-                  placeholder="🔍 ابحث في Google Maps..."
-                  className="text-sm"
-                  dir="rtl"
-                />
-              </div>
-              <div ref={googleMapRef} style={{ height: 'calc(100% - 110px)', width: '100%' }} />
             </div>
           )}
         </div>
