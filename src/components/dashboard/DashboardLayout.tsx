@@ -7,6 +7,7 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
+import { useResolvedUrl } from '@/hooks/useResolvedUrl';
 import {
   LayoutDashboard,
   Package,
@@ -157,6 +158,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     shouldCollapseSidebar,
     getResponsiveClass 
   } = useDisplayMode();
+
+  // Resolve storage URLs for avatar and logo (private bucket compatibility)
+  const resolvedAvatarUrl = useResolvedUrl(profile?.avatar_url);
+  const resolvedLogoUrl = useResolvedUrl(organization?.logo_url);
 
   // Auth guard - redirect to login if not authenticated
   useEffect(() => {
@@ -765,7 +770,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       </div>
                     ) : (
                       <Avatar className="h-7 w-7 sm:h-8 sm:w-8 ring-2 ring-primary/20">
-                        <AvatarImage src={profile?.avatar_url || ''} />
+                        <AvatarImage src={resolvedAvatarUrl || ''} />
                         <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
                           {profile?.full_name?.charAt(0) || 'U'}
                         </AvatarFallback>
@@ -779,8 +784,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   <div className="px-3 py-3 space-y-2">
                     <p className="text-xs text-muted-foreground">{getEntityTypeLabel()}</p>
                     <div className="flex items-center gap-2">
-                      {organization?.logo_url ? (
-                        <img src={organization.logo_url} alt={getEntityName()} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                      {resolvedLogoUrl ? (
+                        <img src={resolvedLogoUrl} alt={getEntityName()} className="w-8 h-8 rounded-lg object-cover shrink-0" />
                       ) : (
                         <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
                           <Building2 className="w-4 h-4 text-muted-foreground" />

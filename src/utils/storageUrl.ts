@@ -5,7 +5,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 // الباكتات العامة - لا تحتاج signed URL
-const PUBLIC_BUCKETS = new Set(['organization-posts', 'profile-media']);
+const PUBLIC_BUCKETS = new Set(['organization-posts', 'profile-media', 'public-assets']);
 
 // مدة صلاحية الرابط بالثواني (24 ساعة)
 const DEFAULT_EXPIRY = 24 * 60 * 60;

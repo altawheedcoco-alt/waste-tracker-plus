@@ -1,10 +1,11 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Upload, Trash2, Loader2, Stamp, PenTool, Eye, Image as ImageIcon } from 'lucide-react';
+import { refreshStorageUrl } from '@/utils/storageUrl';
 
 interface StampSignatureUploadProps {
   organizationId: string;
@@ -25,9 +26,28 @@ const StampSignatureUpload = ({
   const [uploadingSignature, setUploadingSignature] = useState(false);
   const [deletingStamp, setDeletingStamp] = useState(false);
   const [deletingSignature, setDeletingSignature] = useState(false);
+  const [resolvedStampUrl, setResolvedStampUrl] = useState<string | null>(null);
+  const [resolvedSignatureUrl, setResolvedSignatureUrl] = useState<string | null>(null);
   
   const stampInputRef = useRef<HTMLInputElement>(null);
   const signatureInputRef = useRef<HTMLInputElement>(null);
+
+  // Resolve signed URLs for private bucket images
+  useEffect(() => {
+    if (stampUrl) {
+      refreshStorageUrl(stampUrl).then(url => setResolvedStampUrl(url));
+    } else {
+      setResolvedStampUrl(null);
+    }
+  }, [stampUrl]);
+
+  useEffect(() => {
+    if (signatureUrl) {
+      refreshStorageUrl(signatureUrl).then(url => setResolvedSignatureUrl(url));
+    } else {
+      setResolvedSignatureUrl(null);
+    }
+  }, [signatureUrl]);
 
   const handleUpload = async (
     file: File,
@@ -168,7 +188,7 @@ const StampSignatureUpload = ({
                 <div className="space-y-3">
                   <div className="w-32 h-32 mx-auto bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                     <img
-                      src={stampUrl}
+                      src={resolvedStampUrl || stampUrl}
                       alt="ختم الجهة"
                       className="max-w-full max-h-full object-contain"
                     />
@@ -177,7 +197,7 @@ const StampSignatureUpload = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(stampUrl, '_blank')}
+                      onClick={() => window.open(resolvedStampUrl || stampUrl, '_blank')}
                       className="gap-1"
                     >
                       <Eye className="w-4 h-4" />
@@ -261,7 +281,7 @@ const StampSignatureUpload = ({
                 <div className="space-y-3">
                   <div className="w-32 h-32 mx-auto bg-muted rounded-lg overflow-hidden flex items-center justify-center">
                     <img
-                      src={signatureUrl}
+                      src={resolvedSignatureUrl || signatureUrl}
                       alt="توقيع الجهة"
                       className="max-w-full max-h-full object-contain"
                     />
@@ -270,7 +290,7 @@ const StampSignatureUpload = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => window.open(signatureUrl, '_blank')}
+                      onClick={() => window.open(resolvedSignatureUrl || signatureUrl, '_blank')}
                       className="gap-1"
                     >
                       <Eye className="w-4 h-4" />

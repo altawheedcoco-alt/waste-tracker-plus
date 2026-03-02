@@ -140,14 +140,14 @@ const DriverProfile = () => {
 
       // Upload to storage
       const { error: uploadError } = await supabase.storage
-        .from('organization-stamps')
+        .from('public-assets')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('organization-stamps')
+        .from('public-assets')
         .getPublicUrl(filePath);
 
       // Update profile
