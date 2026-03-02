@@ -54,8 +54,8 @@ export const useAdaptiveLoading = (): AdaptiveConfig & { device: DeviceCapabilit
 
     if (!isOnline) {
       return {
-        pageSize: 10,
-        enableAnimations: false,
+        pageSize: 20,
+        enableAnimations: true,
         imageQuality: 'low',
         enablePrefetch: false,
         networkTimeout: 30000,
@@ -67,11 +67,11 @@ export const useAdaptiveLoading = (): AdaptiveConfig & { device: DeviceCapabilit
 
     if (isSlow || device.isLowEnd) {
       return {
-        pageSize: 10,
-        enableAnimations: false,
+        pageSize: 15,
+        enableAnimations: true,
         imageQuality: 'low',
         enablePrefetch: false,
-        networkTimeout: 15000,
+        networkTimeout: 20000,
         queryStaleTime: 10 * 60 * 1000,
         refetchInterval: 60000,
         reduceData: true,
