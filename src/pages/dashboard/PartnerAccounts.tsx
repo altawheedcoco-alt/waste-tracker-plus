@@ -10,9 +10,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { 
   Building2, Search, Factory, Recycle, Truck, TrendingUp, TrendingDown,
   Users, UserPlus, ExternalLink, Wallet, ArrowUpRight, ArrowDownRight,
+  Filter, LayoutGrid, Eye, Receipt,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePartnerAccounts, type PartnerBalance } from '@/hooks/usePartnerAccounts';
@@ -32,6 +36,7 @@ export default function PartnerAccounts() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [createDialogType, setCreateDialogType] = useState<'generator' | 'recycler' | 'guest'>('generator');
+  const [balanceFilter, setBalanceFilter] = useState<'all' | 'receivable' | 'payable' | 'settled'>('all');
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', { minimumFractionDigits: 0 }).format(amount);
@@ -59,6 +64,40 @@ export default function PartnerAccounts() {
     }
   };
 
+  // Get ALL partners across all types for the unified view
+  const allPartners = useMemo(() => {
+    const all: PartnerBalance[] = [];
+    partnerTypes.forEach(type => {
+      all.push(...filteredBalances(type));
+    });
+    return all.sort((a, b) => 
+      (a.partner_organization?.name || '').localeCompare(b.partner_organization?.name || '')
+    );
+  }, [partnerTypes, filteredBalances]);
+
+  // Apply search and balance filters
+  const applyFilters = (partners: PartnerBalance[]) => {
+    let filtered = partners;
+    
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(b => 
+        b.partner_organization?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Balance filter
+    if (balanceFilter === 'receivable') {
+      filtered = filtered.filter(b => (b.balance || 0) > 0);
+    } else if (balanceFilter === 'payable') {
+      filtered = filtered.filter(b => (b.balance || 0) < 0);
+    } else if (balanceFilter === 'settled') {
+      filtered = filtered.filter(b => (b.balance || 0) === 0);
+    }
+    
+    return filtered;
+  };
+
   const globalTotals = useMemo(() => {
     let totalReceivables = 0, totalPayables = 0, totalPartners = 0;
     partnerTypes.forEach(type => {
@@ -78,12 +117,85 @@ export default function PartnerAccounts() {
     setCreateDialogType(type); setShowCreateDialog(true);
   };
 
-  const renderPartnerTable = (balances: PartnerBalance[], type: string) => {
-    const typeInfo = getPartnerTypeInfo(type);
+  const renderPartnerRow = (balance: PartnerBalance, index: number, showType: boolean) => {
+    const balanceAmount = balance.balance || 0;
+    const isCreditor = balanceAmount > 0;
+    const isZero = balanceAmount === 0;
+    const orgType = balance.partner_organization?.organization_type || 'guest';
+    const typeInfo = getPartnerTypeInfo(orgType);
     const Icon = typeInfo.icon;
-    const filtered = balances.filter(balance => 
-      balance.partner_organization?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+
+    return (
+      <TableRow 
+        key={balance.id}
+        className="cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={() => handleViewPartnerAccount(balance)}
+      >
+        <TableCell className="text-center text-muted-foreground font-medium">{index + 1}</TableCell>
+        <TableCell>
+          <div className="flex items-center gap-3">
+            <div className={cn('p-2 rounded-lg', typeInfo.bgColor, typeInfo.color)}>
+              <Icon className="h-4 w-4" />
+            </div>
+            <div>
+              <span className="font-medium block">{balance.partner_organization?.name || t('partnerAccounts.notDetermined')}</span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                {balance.isExternal && (
+                  <Badge variant="outline" className="text-[10px] gap-0.5 px-1.5 py-0">
+                    <ExternalLink className="h-2.5 w-2.5" />
+                    {t('partnerAccounts.external')}
+                  </Badge>
+                )}
+                {showType && (
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                    {typeInfo.label}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </TableCell>
+        <TableCell className="text-center">
+          <Badge variant="outline" className="font-medium">{balance.shipments_count || 0}</Badge>
+        </TableCell>
+        <TableCell className="text-center font-medium">
+          {formatCurrency(balance.total_shipment_value || 0)} ج.م
+        </TableCell>
+        <TableCell className="text-center text-emerald-600 font-medium">
+          {formatCurrency(balance.total_paid)} ج.م
+        </TableCell>
+        <TableCell className="text-center">
+          <div className="flex items-center justify-center gap-2">
+            <span className={cn(
+              'font-bold text-lg',
+              isCreditor ? 'text-emerald-600' : isZero ? 'text-muted-foreground' : 'text-red-600'
+            )}>
+              {formatCurrency(Math.abs(balanceAmount))}
+            </span>
+            {!isZero && (
+              <Badge variant="outline" className={cn(
+                'text-xs',
+                isCreditor 
+                  ? 'border-emerald-300 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20' 
+                  : 'border-red-300 text-red-600 bg-red-50 dark:bg-red-950/20'
+              )}>
+                {isCreditor ? t('partnerAccounts.receivable') : t('partnerAccounts.payable')}
+              </Badge>
+            )}
+          </div>
+        </TableCell>
+        <TableCell className="text-center">
+          <Button variant="ghost" size="sm" className="gap-1 text-xs h-8" onClick={(e) => { e.stopPropagation(); handleViewPartnerAccount(balance); }}>
+            <Eye className="h-3.5 w-3.5" />
+            كشف حساب
+          </Button>
+        </TableCell>
+      </TableRow>
     );
+  };
+
+  const renderTable = (partners: PartnerBalance[], showType: boolean) => {
+    const filtered = applyFilters(partners);
     const { totalReceivables, totalPayables } = calculateTotals(filtered);
 
     if (balancesLoading) {
@@ -93,12 +205,12 @@ export default function PartnerAccounts() {
     if (filtered.length === 0) {
       return (
         <div className="text-center py-12 text-muted-foreground border rounded-xl bg-muted/20">
-          <Icon className="h-16 w-16 mx-auto mb-4 opacity-30" />
-          <p className="font-medium text-lg">{t('partnerAccounts.noPartnersYet').replace('{type}', typeInfo.label)}</p>
-          <p className="text-sm mb-6 opacity-80">{t('partnerAccounts.addPartnerHint')}</p>
-          <Button onClick={() => handleCreatePartner(type as 'generator' | 'recycler' | 'guest')} className="gap-2">
+          <Users className="h-16 w-16 mx-auto mb-4 opacity-30" />
+          <p className="font-medium text-lg">لا توجد حسابات عملاء</p>
+          <p className="text-sm mb-6 opacity-80">ستظهر الحسابات تلقائياً بعد إنشاء شحنات أو إضافة عملاء</p>
+          <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
             <UserPlus className="h-4 w-4" />
-            {t('partnerAccounts.addPartner')} {typeInfo.singular}
+            إضافة عميل
           </Button>
         </div>
       );
@@ -106,6 +218,7 @@ export default function PartnerAccounts() {
 
     return (
       <div className="space-y-4">
+        {/* Receivable / Payable Summary */}
         <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
             <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
@@ -127,6 +240,7 @@ export default function PartnerAccounts() {
           </div>
         </div>
 
+        {/* Table */}
         <div className="border rounded-xl overflow-hidden">
           <Table>
             <TableHeader>
@@ -137,61 +251,24 @@ export default function PartnerAccounts() {
                 <TableHead className="text-center font-bold">{t('partnerAccounts.shipmentsValue')}</TableHead>
                 <TableHead className="text-center font-bold">{t('partnerAccounts.paid')}</TableHead>
                 <TableHead className="text-center font-bold">{t('partnerAccounts.balance')}</TableHead>
+                <TableHead className="text-center font-bold w-28">إجراء</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((balance, index) => {
-                const balanceAmount = balance.balance || 0;
-                const isCreditor = balanceAmount > 0;
-                const isZero = balanceAmount === 0;
-                return (
-                  <TableRow key={balance.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => handleViewPartnerAccount(balance)}>
-                    <TableCell className="text-center text-muted-foreground font-medium">{index + 1}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className={cn('p-2.5 rounded-lg', typeInfo.bgColor, typeInfo.color)}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <span className="font-medium block">{balance.partner_organization?.name || t('partnerAccounts.notDetermined')}</span>
-                          {balance.isExternal && (
-                            <Badge variant="outline" className="text-xs gap-1 mt-0.5">
-                              <ExternalLink className="h-3 w-3" />
-                              {t('partnerAccounts.external')}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center"><Badge variant="outline" className="font-medium">{balance.shipments_count || 0}</Badge></TableCell>
-                    <TableCell className="text-center font-medium">{formatCurrency(balance.total_shipment_value || 0)} ج.م</TableCell>
-                    <TableCell className="text-center text-emerald-600 font-medium">{formatCurrency(balance.total_paid)} ج.م</TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className={cn('font-bold text-lg', isCreditor ? 'text-emerald-600' : isZero ? 'text-muted-foreground' : 'text-red-600')}>
-                          {formatCurrency(Math.abs(balanceAmount))}
-                        </span>
-                        {!isZero && (
-                          <Badge variant="outline" className={cn('text-xs', isCreditor ? 'border-emerald-300 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20' : 'border-red-300 text-red-600 bg-red-50 dark:bg-red-950/20')}>
-                            {isCreditor ? t('partnerAccounts.receivable') : t('partnerAccounts.payable')}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {filtered.map((balance, index) => renderPartnerRow(balance, index, showType))}
             </TableBody>
           </Table>
         </div>
 
         <div className="flex items-center justify-between text-sm text-muted-foreground pt-2">
-          <span>{t('partnerAccounts.totalOf')} {typeInfo.label}: <strong>{filtered.length}</strong></span>
+          <span>إجمالي: <strong>{filtered.length}</strong> عميل</span>
           <span>({filtered.filter(b => !b.isExternal).length} {t('partnerAccounts.registered')}، {filtered.filter(b => b.isExternal).length} {t('partnerAccounts.external')})</span>
         </div>
       </div>
     );
   };
+
+  const tabsWithAll = ['all', ...partnerTypes];
 
   return (
     <DashboardLayout>
@@ -201,65 +278,100 @@ export default function PartnerAccounts() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg"><Wallet className="h-6 w-6 text-primary" /></div>
-              {getPageTitle()}
+              حسابات العملاء
             </h1>
-            <p className="text-muted-foreground mt-1">{t('partnerAccounts.subtitle')}</p>
+            <p className="text-muted-foreground mt-1">إدارة مركزية لجميع حسابات العملاء المسجلين والخارجيين</p>
           </div>
           <div className="flex gap-2 self-start lg:self-center">
             <DepositButton />
             <Button onClick={() => setShowCreateDialog(true)} variant="outline" className="gap-2">
               <UserPlus className="h-4 w-4" />
-              {t('partnerAccounts.addExternalPartner')}
+              إضافة عميل جديد
             </Button>
           </div>
         </div>
 
+        {/* Global Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <AccountSummaryCard title={t('partnerAccounts.totalPartners')} value={globalTotals.totalPartners} icon={Users} variant="info" formatValue={(v) => String(v)} />
+          <AccountSummaryCard title="إجمالي العملاء" value={globalTotals.totalPartners} icon={Users} variant="info" formatValue={(v) => String(v)} />
           <AccountSummaryCard title={t('partnerAccounts.receivable')} value={globalTotals.totalReceivables} icon={TrendingUp} variant="success" />
           <AccountSummaryCard title={t('partnerAccounts.payable')} value={globalTotals.totalPayables} icon={TrendingDown} variant="danger" />
           <AccountSummaryCard title={t('partnerAccounts.netBalance')} value={Math.abs(globalTotals.netBalance)} subtitle={globalTotals.netBalance >= 0 ? t('partnerAccounts.inOurFavor') : t('partnerAccounts.weOwe')} icon={Wallet} variant={globalTotals.netBalance >= 0 ? 'success' : 'warning'} />
         </div>
 
-        <div className="relative max-w-md">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder={t('partnerAccounts.searchPlaceholder')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pr-10 h-11" />
+        {/* Search & Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="بحث باسم العميل..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pr-10 h-11" />
+          </div>
+          <Select value={balanceFilter} onValueChange={(v) => setBalanceFilter(v as any)}>
+            <SelectTrigger className="w-48 h-11">
+              <Filter className="h-4 w-4 ml-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع الحسابات</SelectItem>
+              <SelectItem value="receivable">لهم رصيد (لنا)</SelectItem>
+              <SelectItem value="payable">عليهم رصيد (علينا)</SelectItem>
+              <SelectItem value="settled">حسابات مسوّاة</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        {partnerTypes.length > 0 && (
-          <Tabs defaultValue={partnerTypes[0]} className="w-full">
-            <TabsList className="w-full max-w-xl grid" style={{ gridTemplateColumns: `repeat(${partnerTypes.length}, 1fr)` }}>
-              {partnerTypes.map((type) => {
-                const typeInfo = getPartnerTypeInfo(type);
-                const Icon = typeInfo.icon;
-                const count = filteredBalances(type).length;
-                return (
-                  <TabsTrigger key={type} value={type} className="gap-2">
-                    <Icon className="h-4 w-4" />
-                    <span className="hidden sm:inline">{typeInfo.label}</span>
-                    {count > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">{count}</Badge>}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-            {partnerTypes.map((type) => (
-              <TabsContent key={type} value={type} className="mt-6">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      {(() => { const ti = getPartnerTypeInfo(type); const I = ti.icon; return <><I className={cn('h-5 w-5', ti.color)} />{t('partnerAccounts.accountsOf')} {ti.label}</>; })()}
-                    </CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => handleCreatePartner(type as 'generator' | 'recycler' | 'guest')} className="gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      {t('partnerAccounts.addPartner')} {getPartnerTypeInfo(type).singular}
-                    </Button>
-                  </CardHeader>
-                  <CardContent>{renderPartnerTable(filteredBalances(type), type)}</CardContent>
-                </Card>
-              </TabsContent>
-            ))}
-          </Tabs>
-        )}
+        {/* Tabs: All + Per Type */}
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="w-full max-w-2xl grid" style={{ gridTemplateColumns: `repeat(${tabsWithAll.length}, 1fr)` }}>
+            <TabsTrigger value="all" className="gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              <span className="hidden sm:inline">الكل</span>
+              {allPartners.length > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">{allPartners.length}</Badge>}
+            </TabsTrigger>
+            {partnerTypes.map((type) => {
+              const typeInfo = getPartnerTypeInfo(type);
+              const Icon = typeInfo.icon;
+              const count = filteredBalances(type).length;
+              return (
+                <TabsTrigger key={type} value={type} className="gap-2">
+                  <Icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{typeInfo.label}</span>
+                  {count > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">{count}</Badge>}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+
+          {/* All tab */}
+          <TabsContent value="all" className="mt-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <LayoutGrid className="h-5 w-5 text-primary" />
+                  جميع حسابات العملاء
+                </CardTitle>
+              </CardHeader>
+              <CardContent>{renderTable(allPartners, true)}</CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Per type tabs */}
+          {partnerTypes.map((type) => (
+            <TabsContent key={type} value={type} className="mt-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    {(() => { const ti = getPartnerTypeInfo(type); const I = ti.icon; return <><I className={cn('h-5 w-5', ti.color)} />{t('partnerAccounts.accountsOf')} {ti.label}</>; })()}
+                  </CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => handleCreatePartner(type as 'generator' | 'recycler' | 'guest')} className="gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    {t('partnerAccounts.addPartner')} {getPartnerTypeInfo(type).singular}
+                  </Button>
+                </CardHeader>
+                <CardContent>{renderTable(filteredBalances(type), false)}</CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
 
         {partnerTypes.length === 0 && (
           <Card>
