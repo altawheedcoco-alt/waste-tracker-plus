@@ -9,6 +9,8 @@ import { Map, Search, Loader2, MapPin, Building2, Recycle, Truck, Factory, Spark
 import { supabase } from '@/integrations/supabase/client';
 import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM, forwardGeocodeOSM, reverseGeocodeOSM } from '@/lib/leafletConfig';
 import { toast } from 'sonner';
+import { OpenLocationCode } from 'open-location-code';
+import { Copy, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -67,7 +69,7 @@ const MapPage = () => {
   const manualPickModeRef = useRef(false);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string } | null>(null);
+  const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string; plusCode: string } | null>(null);
   const [manualPickName, setManualPickName] = useState('');
 
   // Load search history
@@ -214,6 +216,8 @@ const MapPage = () => {
       
       toast.info(`📍 جارٍ تحديد العنوان... (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
       const address = await reverseGeocodeOSM(lat, lng);
+      const plusCode = OpenLocationCode.encode(lat, lng, 11);
+      const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
       
       const icon = L.divIcon({
         html: '<div style="background:#6366f1;width:30px;height:30px;border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;">📌</div>',
@@ -224,18 +228,32 @@ const MapPage = () => {
       L.marker([lat, lng], { icon })
         .addTo(map)
         .bindPopup(`
-          <div dir="rtl" style="min-width:220px">
-            <h4 style="font-weight:bold;margin-bottom:6px">📌 موقع محدد يدوياً</h4>
-            <p style="font-size:11px;margin-bottom:4px">${address}</p>
-            <div style="background:#f1f5f9;padding:6px 8px;border-radius:6px;margin-top:6px;font-family:monospace;font-size:12px;direction:ltr;text-align:center;user-select:all;cursor:text">
-              ${lat.toFixed(6)}, ${lng.toFixed(6)}
+          <div dir="rtl" style="min-width:260px;font-family:Cairo,sans-serif">
+            <h4 style="font-weight:bold;margin-bottom:8px;font-size:14px">📌 موقع محدد يدوياً</h4>
+            <div style="background:#f8fafc;padding:8px;border-radius:8px;margin-bottom:6px">
+              <p style="font-size:12px;font-weight:600;margin-bottom:4px">📍 العنوان:</p>
+              <p style="font-size:11px;color:#444;line-height:1.5">${address}</p>
             </div>
-            <p style="font-size:10px;color:#888;text-align:center;margin-top:4px">انقر على الإحداثيات لنسخها</p>
+            <div style="background:#f0fdf4;padding:8px;border-radius:8px;margin-bottom:6px">
+              <p style="font-size:12px;font-weight:600;margin-bottom:4px">🔢 الإحداثيات:</p>
+              <div style="font-family:monospace;font-size:13px;direction:ltr;text-align:center;user-select:all;cursor:text;background:white;padding:4px 8px;border-radius:4px;border:1px solid #d1fae5">
+                ${lat.toFixed(6)}, ${lng.toFixed(6)}
+              </div>
+            </div>
+            <div style="background:#eff6ff;padding:8px;border-radius:8px;margin-bottom:6px">
+              <p style="font-size:12px;font-weight:600;margin-bottom:4px">📎 كود بلس (Plus Code):</p>
+              <div style="font-family:monospace;font-size:13px;direction:ltr;text-align:center;user-select:all;cursor:text;background:white;padding:4px 8px;border-radius:4px;border:1px solid #bfdbfe">
+                ${plusCode}
+              </div>
+            </div>
+            <div style="text-align:center;margin-top:8px">
+              <a href="${googleMapsUrl}" target="_blank" style="color:#3b82f6;font-size:11px;text-decoration:none">🗺️ فتح في خرائط جوجل ↗</a>
+            </div>
           </div>
         `)
         .openPopup();
 
-      setPendingManualPick({ lat, lng, address });
+      setPendingManualPick({ lat, lng, address, plusCode });
       setManualPickName(address.split(',')[0] || 'موقع محدد يدوياً');
       setManualPickMode(false);
       manualPickModeRef.current = false;
@@ -604,7 +622,8 @@ const MapPage = () => {
         {/* Pending manual pick save */}
         {pendingManualPick && (
           <Card className="border-primary/30 bg-primary/5">
-            <CardContent className="p-3">
+            <CardContent className="p-4 space-y-3">
+              {/* Name input + Save */}
               <div className="flex gap-2 items-center">
                 <MapPin className="w-5 h-5 text-primary shrink-0" />
                 <Input
@@ -621,7 +640,74 @@ const MapPage = () => {
                   إلغاء
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 mr-7">{pendingManualPick.address}</p>
+
+              {/* Full location details */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mr-7">
+                {/* Address */}
+                <div className="bg-background rounded-lg border p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground mb-1">📍 العنوان</p>
+                  <p className="text-xs leading-relaxed">{pendingManualPick.address}</p>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 text-[10px] mt-1 gap-1 px-2"
+                    onClick={() => {
+                      navigator.clipboard.writeText(pendingManualPick.address);
+                      toast.success('تم نسخ العنوان');
+                    }}
+                  >
+                    <Copy className="w-3 h-3" /> نسخ
+                  </Button>
+                </div>
+
+                {/* Coordinates */}
+                <div className="bg-background rounded-lg border p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground mb-1">🔢 الإحداثيات</p>
+                  <p className="text-sm font-mono direction-ltr text-center" dir="ltr">
+                    {pendingManualPick.lat.toFixed(6)}, {pendingManualPick.lng.toFixed(6)}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-6 text-[10px] mt-1 gap-1 px-2"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${pendingManualPick.lat.toFixed(6)}, ${pendingManualPick.lng.toFixed(6)}`);
+                      toast.success('تم نسخ الإحداثيات');
+                    }}
+                  >
+                    <Copy className="w-3 h-3" /> نسخ
+                  </Button>
+                </div>
+
+                {/* Plus Code */}
+                <div className="bg-background rounded-lg border p-3">
+                  <p className="text-[10px] font-semibold text-muted-foreground mb-1">📎 كود بلس</p>
+                  <p className="text-sm font-mono direction-ltr text-center" dir="ltr">
+                    {pendingManualPick.plusCode}
+                  </p>
+                  <div className="flex gap-1 mt-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 text-[10px] gap-1 px-2"
+                      onClick={() => {
+                        navigator.clipboard.writeText(pendingManualPick.plusCode);
+                        toast.success('تم نسخ كود بلس');
+                      }}
+                    >
+                      <Copy className="w-3 h-3" /> نسخ
+                    </Button>
+                    <a
+                      href={`https://www.google.com/maps?q=${pendingManualPick.lat},${pendingManualPick.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline"
+                    >
+                      <ExternalLink className="w-3 h-3" /> خرائط جوجل
+                    </a>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}
