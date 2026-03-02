@@ -17667,6 +17667,382 @@ export type Database = {
           },
         ]
       }
+      multi_sign_comments: {
+        Row: {
+          author_id: string | null
+          content: string
+          created_at: string
+          id: string
+          is_internal: boolean | null
+          mentions: Json | null
+          parent_id: string | null
+          shipment_link_id: string | null
+          template_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean | null
+          mentions?: Json | null
+          parent_id?: string | null
+          shipment_link_id?: string | null
+          template_id: string
+        }
+        Update: {
+          author_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean | null
+          mentions?: Json | null
+          parent_id?: string | null
+          shipment_link_id?: string | null
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multi_sign_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "multi_sign_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_comments_shipment_link_id_fkey"
+            columns: ["shipment_link_id"]
+            isOneToOne: false
+            referencedRelation: "multi_sign_shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_comments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "multi_sign_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      multi_sign_records: {
+        Row: {
+          created_at: string
+          delegated_to: string | null
+          id: string
+          integrity_hash: string | null
+          ip_address: string | null
+          notes: string | null
+          rejection_reason: string | null
+          shipment_link_id: string
+          signatory_config_id: string | null
+          signature_data: string | null
+          signature_image_url: string | null
+          signed_at: string | null
+          signer_organization_id: string | null
+          signer_profile_id: string | null
+          status: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          delegated_to?: string | null
+          id?: string
+          integrity_hash?: string | null
+          ip_address?: string | null
+          notes?: string | null
+          rejection_reason?: string | null
+          shipment_link_id: string
+          signatory_config_id?: string | null
+          signature_data?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_organization_id?: string | null
+          signer_profile_id?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          delegated_to?: string | null
+          id?: string
+          integrity_hash?: string | null
+          ip_address?: string | null
+          notes?: string | null
+          rejection_reason?: string | null
+          shipment_link_id?: string
+          signatory_config_id?: string | null
+          signature_data?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_organization_id?: string | null
+          signer_profile_id?: string | null
+          status?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multi_sign_records_delegated_to_fkey"
+            columns: ["delegated_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_records_shipment_link_id_fkey"
+            columns: ["shipment_link_id"]
+            isOneToOne: false
+            referencedRelation: "multi_sign_shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_records_signatory_config_id_fkey"
+            columns: ["signatory_config_id"]
+            isOneToOne: false
+            referencedRelation: "multi_sign_signatories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_records_signer_organization_id_fkey"
+            columns: ["signer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "multi_sign_records_signer_organization_id_fkey"
+            columns: ["signer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_records_signer_profile_id_fkey"
+            columns: ["signer_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      multi_sign_shipments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          due_date: string | null
+          id: string
+          notes: string | null
+          shipment_id: string
+          status: string
+          template_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          shipment_id: string
+          status?: string
+          template_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          shipment_id?: string
+          status?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multi_sign_shipments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_shipments_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_shipments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "multi_sign_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      multi_sign_signatories: {
+        Row: {
+          can_delegate: boolean | null
+          created_at: string
+          id: string
+          is_mandatory: boolean | null
+          notes: string | null
+          organization_id: string | null
+          profile_id: string | null
+          sign_order: number | null
+          signatory_role: string
+          signatory_title: string | null
+          template_id: string
+        }
+        Insert: {
+          can_delegate?: boolean | null
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean | null
+          notes?: string | null
+          organization_id?: string | null
+          profile_id?: string | null
+          sign_order?: number | null
+          signatory_role: string
+          signatory_title?: string | null
+          template_id: string
+        }
+        Update: {
+          can_delegate?: boolean | null
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean | null
+          notes?: string | null
+          organization_id?: string | null
+          profile_id?: string | null
+          sign_order?: number | null
+          signatory_role?: string
+          signatory_title?: string | null
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multi_sign_signatories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "multi_sign_signatories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_signatories_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_signatories_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "multi_sign_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      multi_sign_templates: {
+        Row: {
+          approval_mode: string
+          auto_attach_to_shipments: boolean | null
+          category: string
+          content_template: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          organization_id: string
+          priority: string | null
+          required_signatures_count: number | null
+          tags: string[] | null
+          template_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approval_mode?: string
+          auto_attach_to_shipments?: boolean | null
+          category?: string
+          content_template?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id: string
+          priority?: string | null
+          required_signatures_count?: number | null
+          tags?: string[] | null
+          template_type?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approval_mode?: string
+          auto_attach_to_shipments?: boolean | null
+          category?: string
+          content_template?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          organization_id?: string
+          priority?: string | null
+          required_signatures_count?: number | null
+          tags?: string[] | null
+          template_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multi_sign_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multi_sign_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "multi_sign_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       note_reads: {
         Row: {
           id: string
