@@ -37,6 +37,7 @@ import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DashboardPrintReports from './shared/DashboardPrintReports';
 import SmartDailyBrief from './shared/SmartDailyBrief';
+const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
@@ -340,6 +341,13 @@ const AdminDashboard = () => {
       {/* Stories */}
       <motion.div variants={itemVariants}>
         <StoryCircles />
+      </motion.div>
+
+      {/* بطاقة الهوية التعريفية الرقمية */}
+      <motion.div variants={itemVariants}>
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+          <DigitalIdentityCard />
+        </Suspense>
       </motion.div>
 
       {/* Header */}
