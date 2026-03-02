@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import PartnerNotesDialog from '@/components/partners/PartnerNotesDialog';
 import PartnerLinkingCard from '@/components/partners/PartnerLinkingCard';
+import PartnerRestrictionManager from '@/components/partners/PartnerRestrictionManager';
 import usePartners from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
@@ -483,6 +484,7 @@ const PartnerDetailPanel = ({
           <Button variant="outline" onClick={onViewBusinessPage} className="gap-2">
             <Globe className="w-4 h-4" /> الصفحة التجارية
           </Button>
+          <PartnerRestrictionManager targetOrgId={org.id} targetOrgName={org.name} />
         </div>
 
         <Separator />
