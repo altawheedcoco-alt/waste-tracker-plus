@@ -27967,6 +27967,54 @@ export type Database = {
           },
         ]
       }
+      sidebar_preferences: {
+        Row: {
+          collapsed_groups: string[] | null
+          created_at: string
+          group_order: string[] | null
+          hidden_groups: string[] | null
+          id: string
+          organization_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          collapsed_groups?: string[] | null
+          created_at?: string
+          group_order?: string[] | null
+          hidden_groups?: string[] | null
+          id?: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          collapsed_groups?: string[] | null
+          created_at?: string
+          group_order?: string[] | null
+          hidden_groups?: string[] | null
+          id?: string
+          organization_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sidebar_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "sidebar_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signature_audit_log: {
         Row: {
           action: string
