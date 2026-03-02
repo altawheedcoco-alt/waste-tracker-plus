@@ -17,6 +17,8 @@ import {
   ClipboardList, Crown, Printer, QrCode, Download
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useResolvedUrl } from '@/hooks/useResolvedUrl';
+import { printDigitalIdentityCard } from './printTemplates/printDigitalIdentityCard';
 
 // Organization type labels
 const orgTypeLabels: Record<string, string> = {
@@ -80,6 +82,10 @@ const DigitalIdentityCard = () => {
   const [visibility, setVisibility] = useState<VisibilitySettings>(defaultVisibility);
   const [showSettings, setShowSettings] = useState(false);
 
+  const org = organization as any;
+  const resolvedLogoUrl = useResolvedUrl(org?.logo_url);
+  const resolvedCoverUrl = useResolvedUrl(org?.cover_url);
+
   const orgId = organization?.id;
 
   // Fetch stats
@@ -141,7 +147,6 @@ const DigitalIdentityCard = () => {
 
   if (!organization) return null;
 
-  const org = organization as any;
   const orgType = org.organization_type as string;
   const isVerified = org.is_verified;
   const createdAt = org.created_at ? new Date(org.created_at) : null;
@@ -205,28 +210,46 @@ const DigitalIdentityCard = () => {
               </div>
             </div>
 
-            <Dialog open={showSettings} onOpenChange={setShowSettings}>
-              <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8">
-                  <Settings2 className="w-4 h-4" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="rounded-2xl">
-                <DialogHeader>
-                  <DialogTitle>إعدادات الظهور</DialogTitle>
-                </DialogHeader>
-                <ScrollArea className="max-h-[60vh]">
-                  <div className="space-y-3 p-1">
-                    {(Object.keys(visibilityLabels) as Array<keyof VisibilitySettings>).map(key => (
-                      <div key={key} className="flex items-center justify-between gap-2">
-                        <span className="text-sm">{visibilityLabels[key]}</span>
-                        <Switch checked={visibility[key]} onCheckedChange={() => toggleVisibility(key)} />
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="shrink-0 h-8 w-8"
+                onClick={() => printDigitalIdentityCard({
+                  organization: org,
+                  stats,
+                  visibility: visibility as unknown as Record<string, boolean>,
+                  resolvedLogoUrl,
+                  resolvedCoverUrl,
+                })}
+                title="طباعة الهوية الرقمية"
+              >
+                <Printer className="w-4 h-4" />
+              </Button>
+
+              <Dialog open={showSettings} onOpenChange={setShowSettings}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8">
+                    <Settings2 className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="rounded-2xl">
+                  <DialogHeader>
+                    <DialogTitle>إعدادات الظهور</DialogTitle>
+                  </DialogHeader>
+                  <ScrollArea className="max-h-[60vh]">
+                    <div className="space-y-3 p-1">
+                      {(Object.keys(visibilityLabels) as Array<keyof VisibilitySettings>).map(key => (
+                        <div key={key} className="flex items-center justify-between gap-2">
+                          <span className="text-sm">{visibilityLabels[key]}</span>
+                          <Switch checked={visibility[key]} onCheckedChange={() => toggleVisibility(key)} />
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </CardHeader>
 
