@@ -34,6 +34,7 @@ import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load heavy tab content
+const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
 const GeneratorTrackingWidget = lazy(() => import('./generator/GeneratorTrackingWidget'));
 const DisposalRadarWidget = lazy(() => import('./generator/DisposalRadarWidget'));
 const ESGReportWidget = lazy(() => import('./generator/ESGReportWidget'));
@@ -245,6 +246,11 @@ const GeneratorDashboard = () => {
           </p>
         </div>
       </div>
+
+      {/* ★ بطاقة الهوية التعريفية الرقمية */}
+      <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+        <DigitalIdentityCard />
+      </Suspense>
 
       {/* ★ مركز القيادة */}
       <GeneratorCommandCenter />
