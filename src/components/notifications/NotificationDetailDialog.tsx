@@ -72,22 +72,35 @@ interface NotificationDetailDialogProps {
 const getNotificationIcon = (type: string | null) => {
   switch (type) {
     case 'shipment_created':
+    case 'shipment':
       return Package;
     case 'shipment_status':
+    case 'status_update':
+    case 'shipment_assigned':
+      return Truck;
+    case 'driver_assignment':
       return Truck;
     case 'shipment_approved':
     case 'shipment_delivered':
       return CheckCircle;
-    case 'shipment_assigned':
-      return Truck;
     case 'recycling_report':
+    case 'report':
+    case 'certificate':
       return CheckCircle;
     case 'document_uploaded':
-      return FileText;
-    case 'warning':
-      return AlertCircle;
+    case 'document_issued':
     case 'signing_request':
       return FileText;
+    case 'warning':
+    case 'signal_lost':
+      return AlertCircle;
+    case 'mention':
+      return User;
+    case 'partner_post':
+    case 'partner_note':
+    case 'partner_message':
+    case 'partner_linked':
+      return Building2;
     default:
       return Info;
   }
@@ -96,52 +109,80 @@ const getNotificationIcon = (type: string | null) => {
 const getNotificationColor = (type: string | null) => {
   switch (type) {
     case 'shipment_created':
+    case 'shipment':
       return 'bg-blue-500/10 text-blue-500';
     case 'shipment_status':
+    case 'status_update':
       return 'bg-amber-500/10 text-amber-500';
     case 'shipment_approved':
     case 'shipment_delivered':
       return 'bg-green-500/10 text-green-500';
     case 'shipment_assigned':
+    case 'driver_assignment':
       return 'bg-purple-500/10 text-purple-500';
     case 'recycling_report':
+    case 'report':
+    case 'certificate':
       return 'bg-emerald-500/10 text-emerald-500';
     case 'document_uploaded':
-      return 'bg-indigo-500/10 text-indigo-500';
-    case 'warning':
-      return 'bg-red-500/10 text-red-500';
+    case 'document_issued':
     case 'signing_request':
       return 'bg-indigo-500/10 text-indigo-500';
+    case 'warning':
+    case 'signal_lost':
+      return 'bg-red-500/10 text-red-500';
+    case 'mention':
+      return 'bg-teal-500/10 text-teal-500';
+    case 'partner_post':
+    case 'partner_note':
+    case 'partner_message':
+    case 'partner_linked':
+      return 'bg-purple-500/10 text-purple-500';
+    case 'invoice':
+    case 'payment':
+    case 'deposit':
+    case 'financial':
+      return 'bg-emerald-500/10 text-emerald-500';
     default:
       return 'bg-muted text-muted-foreground';
   }
 };
 
 const getNotificationBadge = (type: string | null) => {
-  switch (type) {
-    case 'shipment_created':
-      return { label: 'شحنة جديدة', variant: 'default' as const };
-    case 'shipment_status':
-      return { label: 'تحديث الحالة', variant: 'secondary' as const };
-    case 'shipment_approved':
-      return { label: 'موافقة', variant: 'default' as const };
-    case 'shipment_delivered':
-      return { label: 'تم التسليم', variant: 'default' as const };
-    case 'shipment_assigned':
-      return { label: 'إسناد شحنة', variant: 'secondary' as const };
-    case 'recycling_report':
-      return { label: 'تقرير تدوير', variant: 'default' as const };
-    case 'document_uploaded':
-      return { label: 'وثيقة جديدة', variant: 'secondary' as const };
-    case 'warning':
-      return { label: 'تحذير', variant: 'destructive' as const };
-    case 'approval_request':
-      return { label: 'طلب موافقة', variant: 'secondary' as const };
-    case 'signing_request':
-      return { label: 'طلب توقيع', variant: 'default' as const };
-    default:
-      return { label: 'إشعار', variant: 'outline' as const };
-  }
+  const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+    shipment_created: { label: 'شحنة جديدة', variant: 'default' },
+    shipment_status: { label: 'تحديث الحالة', variant: 'secondary' },
+    status_update: { label: 'تحديث حالة', variant: 'secondary' },
+    shipment_approved: { label: 'موافقة', variant: 'default' },
+    shipment_delivered: { label: 'تم التسليم', variant: 'default' },
+    shipment_assigned: { label: 'إسناد شحنة', variant: 'secondary' },
+    driver_assignment: { label: 'تعيين سائق', variant: 'secondary' },
+    shipment: { label: 'شحنة', variant: 'default' },
+    recycling_report: { label: 'تقرير تدوير', variant: 'default' },
+    report: { label: 'تقرير', variant: 'secondary' },
+    certificate: { label: 'شهادة', variant: 'default' },
+    document_uploaded: { label: 'وثيقة جديدة', variant: 'secondary' },
+    document_issued: { label: 'مستند صادر', variant: 'default' },
+    signing_request: { label: 'طلب توقيع', variant: 'default' },
+    document_signed: { label: 'تم التوقيع', variant: 'default' },
+    stamp_applied: { label: 'تم الختم', variant: 'default' },
+    warning: { label: 'تحذير', variant: 'destructive' },
+    signal_lost: { label: 'انقطاع إشارة', variant: 'destructive' },
+    approval_request: { label: 'طلب موافقة', variant: 'secondary' },
+    partner_post: { label: 'منشور شريك', variant: 'secondary' },
+    partner_note: { label: 'ملاحظة شريك', variant: 'secondary' },
+    partner_message: { label: 'رسالة شريك', variant: 'secondary' },
+    partner_linked: { label: 'ربط شريك', variant: 'default' },
+    invoice: { label: 'فاتورة', variant: 'default' },
+    payment: { label: 'دفعة مالية', variant: 'default' },
+    deposit: { label: 'إيداع', variant: 'default' },
+    financial: { label: 'مالية', variant: 'secondary' },
+    mention: { label: 'إشارة', variant: 'default' },
+    chat_message: { label: 'رسالة', variant: 'secondary' },
+    message: { label: 'رسالة', variant: 'secondary' },
+    broadcast: { label: 'بث جماعي', variant: 'secondary' },
+  };
+  return badges[type || ''] || { label: 'إشعار', variant: 'outline' as const };
 };
 
 const getOrgTypeLabel = (type: string | null) => {

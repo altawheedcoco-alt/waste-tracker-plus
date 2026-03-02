@@ -59,10 +59,12 @@ const getNotificationIcon = (type: string | null) => {
     case 'shipment_status':
     case 'status_update':
     case 'shipment_assigned': return Truck;
+    case 'driver_assignment': return Car;
     case 'shipment_approved':
     case 'shipment_delivered': return CheckCircle;
     case 'document_uploaded':
     case 'signing_request': return FileText;
+    case 'document_issued': return Send;
     case 'signature_request':
     case 'document_signed': return PenTool;
     case 'stamp_applied': return Stamp;
@@ -78,10 +80,12 @@ const getNotificationIcon = (type: string | null) => {
     case 'payment':
     case 'deposit':
     case 'financial': return Wallet;
-    case 'warning': return AlertCircle;
+    case 'warning':
+    case 'signal_lost': return AlertCircle;
     case 'chat_message':
     case 'message':
     case 'broadcast': return MessageSquare;
+    case 'mention': return User;
     case 'shipment': return Package;
     default: return Info;
   }
@@ -96,10 +100,12 @@ const getNotificationColor = (type: string | null) => {
     case 'status_update': return 'bg-amber-500/10 text-amber-500';
     case 'shipment_approved':
     case 'shipment_delivered': return 'bg-green-500/10 text-green-500';
+    case 'driver_assignment': return 'bg-orange-500/10 text-orange-500';
     case 'document_uploaded':
     case 'signing_request':
     case 'signature_request':
     case 'document_signed':
+    case 'document_issued':
     case 'stamp_applied': return 'bg-indigo-500/10 text-indigo-500';
     case 'recycling_report':
     case 'report':
@@ -113,10 +119,12 @@ const getNotificationColor = (type: string | null) => {
     case 'payment':
     case 'deposit':
     case 'financial': return 'bg-emerald-500/10 text-emerald-500';
-    case 'warning': return 'bg-red-500/10 text-red-500';
+    case 'warning':
+    case 'signal_lost': return 'bg-red-500/10 text-red-500';
     case 'chat_message':
     case 'message':
     case 'broadcast': return 'bg-pink-500/10 text-pink-500';
+    case 'mention': return 'bg-teal-500/10 text-teal-500';
     default: return 'bg-muted text-muted-foreground';
   }
 };
@@ -129,8 +137,10 @@ const getNotificationBadge = (type: string | null, t: (key: string) => string) =
     shipment_approved: { label: 'موافقة', variant: 'default' },
     shipment_delivered: { label: 'تم التسليم', variant: 'default' },
     shipment_assigned: { label: 'تعيين شحنة', variant: 'secondary' },
+    driver_assignment: { label: 'تعيين سائق', variant: 'secondary' },
     shipment: { label: 'شحنة', variant: 'default' },
     document_uploaded: { label: 'مستند جديد', variant: 'secondary' },
+    document_issued: { label: 'مستند صادر', variant: 'default' },
     signing_request: { label: 'طلب توقيع', variant: 'default' },
     signature_request: { label: 'طلب توقيع', variant: 'default' },
     document_signed: { label: 'تم التوقيع', variant: 'default' },
@@ -148,9 +158,11 @@ const getNotificationBadge = (type: string | null, t: (key: string) => string) =
     deposit: { label: 'إيداع', variant: 'default' },
     financial: { label: 'مالية', variant: 'secondary' },
     warning: { label: 'تحذير', variant: 'destructive' },
+    signal_lost: { label: 'انقطاع إشارة', variant: 'destructive' },
     chat_message: { label: 'رسالة', variant: 'secondary' },
     message: { label: 'رسالة', variant: 'secondary' },
     broadcast: { label: 'بث جماعي', variant: 'secondary' },
+    mention: { label: 'إشارة', variant: 'default' },
   };
   return badges[type || ''] || { label: 'إشعار', variant: 'outline' as const };
 };
@@ -179,9 +191,11 @@ const categorizeNotification = (type: string | null) => {
     case 'shipment_delivered':
     case 'shipment_approved':
     case 'shipment':
+    case 'driver_assignment':
       return 'shipments';
     // Documents & Signatures category
     case 'document_uploaded':
+    case 'document_issued':
     case 'signature_request':
     case 'document_signed':
     case 'stamp_applied':
@@ -215,12 +229,14 @@ const categorizeNotification = (type: string | null) => {
     case 'chat_message':
     case 'message':
     case 'broadcast':
+    case 'mention':
       return 'messages';
     // System category
     case 'warning':
     case 'system':
     case 'security':
     case 'info':
+    case 'signal_lost':
       return 'system';
     default:
       return 'other';
