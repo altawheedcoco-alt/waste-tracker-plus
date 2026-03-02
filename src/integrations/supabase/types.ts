@@ -9357,7 +9357,7 @@ export type Database = {
         Row: {
           conditions: string | null
           created_at: string
-          driver_id: string
+          driver_id: string | null
           id: string
           issued_at: string
           issued_by: string | null
@@ -9380,7 +9380,7 @@ export type Database = {
         Insert: {
           conditions?: string | null
           created_at?: string
-          driver_id: string
+          driver_id?: string | null
           id?: string
           issued_at?: string
           issued_by?: string | null
@@ -9403,7 +9403,7 @@ export type Database = {
         Update: {
           conditions?: string | null
           created_at?: string
-          driver_id?: string
+          driver_id?: string | null
           id?: string
           issued_at?: string
           issued_by?: string | null
@@ -9432,6 +9432,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "driver_permits_issued_by_fkey"
+            columns: ["issued_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "driver_permits_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -9443,6 +9450,20 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_permits_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_permits_suspended_by_fkey"
+            columns: ["suspended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
