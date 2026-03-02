@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
-const DEMO_PASSWORD = '575757';
+const DEMO_PASSWORD = '57575757';
 const ACCESS_PIN = '575757';
 
 const allAccounts = [
@@ -177,7 +177,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                 </div>
 
                 <p className="text-[10px] text-muted-foreground text-center">
-                  كلمة المرور: <span dir="ltr" className="font-mono">575757</span>
+                  كلمة المرور: <span dir="ltr" className="font-mono">57575757</span>
                 </p>
               </div>
             )}
