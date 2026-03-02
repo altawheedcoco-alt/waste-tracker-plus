@@ -34043,6 +34043,10 @@ export type Database = {
         Args: { _office_id: string; _user_id: string }
         Returns: boolean
       }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_org_subscription_valid: { Args: { org_id: string }; Returns: boolean }
       is_regulator_member: { Args: { _user_id: string }; Returns: boolean }
       is_user_driver: {
