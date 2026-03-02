@@ -10,7 +10,7 @@ const ACCESS_PIN = '575757';
 
 const allAccounts = [
   // مدير النظام
-  { email: 'altawheedco.co@gmail.com', label: 'التوحيد لتجارة مخلفات الاخشاب', desc: 'مدير النظام', icon: Shield, color: 'from-yellow-500 to-amber-700' },
+  { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'iRecycle Waste Management System', icon: Shield, color: 'from-yellow-500 to-amber-700' },
   // مولدات
   { email: 'generator@demo.com', label: 'شركة التوليد للنفايات', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
   { email: 'demo-generator@irecycle.test', label: 'شركة المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
