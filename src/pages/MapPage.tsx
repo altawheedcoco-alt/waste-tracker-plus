@@ -64,6 +64,7 @@ const MapPage = () => {
   const [aiSearchQuery, setAiSearchQuery] = useState('');
   const [aiSearching, setAiSearching] = useState(false);
   const [manualPickMode, setManualPickMode] = useState(false);
+  const manualPickModeRef = useRef(false);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [pendingManualPick, setPendingManualPick] = useState<{ lat: number; lng: number; address: string } | null>(null);
@@ -197,14 +198,21 @@ const MapPage = () => {
     return () => { map.remove(); mapInstanceRef.current = null; };
   }, []);
 
-  // Manual pick mode
+  // Keep ref in sync
+  useEffect(() => {
+    manualPickModeRef.current = manualPickMode;
+  }, [manualPickMode]);
+
+  // Manual pick mode - register click handler once
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
     const handleClick = async (e: L.LeafletMouseEvent) => {
-      if (!manualPickMode) return;
+      if (!manualPickModeRef.current) return;
       const { lat, lng } = e.latlng;
+      
+      toast.info(`📍 جارٍ تحديد العنوان... (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
       const address = await reverseGeocodeOSM(lat, lng);
       
       const icon = L.divIcon({
@@ -215,18 +223,28 @@ const MapPage = () => {
       
       L.marker([lat, lng], { icon })
         .addTo(map)
-        .bindPopup(`<div dir="rtl" style="min-width:200px"><h4 style="font-weight:bold">📌 موقع محدد يدوياً</h4><p style="font-size:11px">${address}</p><p style="font-size:10px;color:#888">${lat.toFixed(6)}, ${lng.toFixed(6)}</p></div>`)
+        .bindPopup(`
+          <div dir="rtl" style="min-width:220px">
+            <h4 style="font-weight:bold;margin-bottom:6px">📌 موقع محدد يدوياً</h4>
+            <p style="font-size:11px;margin-bottom:4px">${address}</p>
+            <div style="background:#f1f5f9;padding:6px 8px;border-radius:6px;margin-top:6px;font-family:monospace;font-size:12px;direction:ltr;text-align:center;user-select:all;cursor:text">
+              ${lat.toFixed(6)}, ${lng.toFixed(6)}
+            </div>
+            <p style="font-size:10px;color:#888;text-align:center;margin-top:4px">انقر على الإحداثيات لنسخها</p>
+          </div>
+        `)
         .openPopup();
 
       setPendingManualPick({ lat, lng, address });
       setManualPickName(address.split(',')[0] || 'موقع محدد يدوياً');
       setManualPickMode(false);
-      toast.info('📌 تم تحديد الموقع - أدخل اسمًا واحفظه في السجل');
+      manualPickModeRef.current = false;
+      toast.success(`📌 تم تحديد الموقع: ${address.split(',')[0]}`);
     };
 
     map.on('click', handleClick);
     return () => { map.off('click', handleClick); };
-  }, [manualPickMode]);
+  }, []);
 
   const saveManualPick = async () => {
     if (!pendingManualPick) return;
