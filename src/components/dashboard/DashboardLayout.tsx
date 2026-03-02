@@ -342,6 +342,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard', key: 'dashboard' },
     { icon: Printer, label: language === 'ar' ? 'مركز الطباعة' : 'Print Center', path: '/dashboard/print-center', key: 'print-center' },
     { icon: PenTool, label: language === 'ar' ? 'التوقيعات والأختام' : 'Signing Status', path: '/dashboard/signing-status', key: 'signing-status' },
+    { icon: Fingerprint, label: language === 'ar' ? 'بطاقة الهوية الرقمية' : 'Digital Identity Card', path: '/dashboard/digital-identity-card', key: 'digital-identity-card' },
     
     // ═══════════════ المنظمة والهيكل ═══════════════
     { icon: Building2, label: t('sidebar.orgGroup'), path: '#', key: 'org-group', badge: sectionBadges['org-group'], children: [

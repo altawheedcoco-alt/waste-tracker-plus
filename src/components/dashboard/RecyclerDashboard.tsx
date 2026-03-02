@@ -37,7 +37,7 @@ import IncidentReportManager from '@/components/compliance/IncidentReportManager
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import RecyclerCommandCenter from './recycler/RecyclerCommandCenter';
 
-const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
+
 const QualityInspectorPanel = lazy(() => import('@/components/recycler/QualityInspectorPanel'));
 const ProductionDashboardPanel = lazy(() => import('@/components/recycler/ProductionDashboardPanel'));
 const RecycledProductCertificate = lazy(() => import('@/components/recycler/RecycledProductCertificate'));
@@ -226,9 +226,6 @@ const RecyclerDashboard = () => {
     <div className="space-y-6">
       <StoryCircles />
 
-      <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-        <DigitalIdentityCard />
-      </Suspense>
 
       <FacilityDashboardHeader
         userName={profile?.full_name || ''}

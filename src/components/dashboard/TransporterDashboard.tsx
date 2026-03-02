@@ -47,7 +47,7 @@ import { motion } from 'framer-motion';
 import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat } from 'lucide-react';
 
 // Lazy load heavy tab content
-const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
+
 const DriverPerformancePanel = lazy(() => import('./transporter/DriverPerformancePanel'));
 const TripCostManagement = lazy(() => import('./transporter/TripCostManagement'));
 const MaintenanceScheduler = lazy(() => import('./transporter/MaintenanceScheduler'));
@@ -171,9 +171,6 @@ const TransporterDashboard = () => {
       <StoryCircles />
       <TransporterHeader organizationName={organization?.name || ''} />
       <DashboardWidgetCustomizer orgType="transporter" />
-      <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-        <DigitalIdentityCard />
-      </Suspense>
 
       <TransporterCommandCenter />
 

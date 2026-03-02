@@ -32,7 +32,7 @@ const OfficeSettingsPanel = lazy(() => import('@/components/consulting-office/Of
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
-const DigitalIdentityCard = lazy(() => import('./shared/DigitalIdentityCard'));
+
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -226,10 +226,6 @@ const ConsultingOfficeDashboard = memo(() => {
         </div>
       </div>
 
-      {/* بطاقة الهوية التعريفية الرقمية */}
-      <Suspense fallback={<LazyLoader />}>
-        <DigitalIdentityCard />
-      </Suspense>
 
       {/* Office Identity Card */}
       {office ? (
