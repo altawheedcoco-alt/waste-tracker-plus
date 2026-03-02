@@ -309,24 +309,43 @@ export const mapNotificationTypeToSound = (dbType: string | null): NotificationS
     case 'shipment_created':
       return 'shipment_created';
     case 'shipment_status':
+    case 'status_update':
       return 'shipment_status';
     case 'shipment_approved':
       return 'shipment_approved';
     case 'shipment_delivered':
       return 'shipment_delivered';
     case 'shipment_assigned':
+    case 'driver_assignment':
       return 'shipment_assigned';
     case 'recycling_report':
+    case 'report':
+    case 'certificate':
       return 'recycling_report';
     case 'document_uploaded':
+    case 'document_issued':
+    case 'signing_request':
+    case 'document_signed':
+    case 'stamp_applied':
       return 'document_uploaded';
     case 'approval_request':
       return 'approval_request';
     case 'chat_message':
     case 'message':
+    case 'broadcast':
+    case 'mention':
+    case 'partner_message':
+    case 'partner_note':
+    case 'partner_post':
       return 'chat_message';
     case 'warning':
+    case 'signal_lost':
       return 'warning';
+    case 'invoice':
+    case 'payment':
+    case 'deposit':
+    case 'financial':
+      return 'default';
     default:
       return 'default';
   }
