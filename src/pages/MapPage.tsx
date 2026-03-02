@@ -175,23 +175,23 @@ const MapPage = () => {
     const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: 'CARTO', maxZoom: 20 });
     const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
     const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri', maxZoom: 19 });
-    const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { attribution: 'Google Maps', maxZoom: 20 });
-    const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { attribution: 'Google Satellite', maxZoom: 20 });
-    const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', { attribution: 'Google Hybrid', maxZoom: 20 });
-    const googleTraffic = L.tileLayer('https://mt1.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}', { attribution: 'Google Traffic', maxZoom: 20 });
+    const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&hl=ar&x={x}&y={y}&z={z}', { attribution: 'Google Maps', maxZoom: 20 });
+    const googleSatellite = L.tileLayer('https://mt1.google.com/vt/lyrs=s&hl=ar&x={x}&y={y}&z={z}', { attribution: 'Google Satellite', maxZoom: 20 });
+    const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&hl=ar&x={x}&y={y}&z={z}', { attribution: 'Google Hybrid', maxZoom: 20 });
+    const googleTraffic = L.tileLayer('https://mt1.google.com/vt/lyrs=m,traffic&hl=ar&x={x}&y={y}&z={z}', { attribution: 'Google Traffic', maxZoom: 20 });
 
-    cartoVoyager.addTo(map);
+    googleStreets.addTo(map);
     L.control.layers({
+      '🟢 شوارع عربية': googleStreets,
+      '🗺️ هجين (صور + أسماء)': googleHybrid,
+      '🚦 حركة المرور': googleTraffic,
+      '📡 أقمار عالية الدقة': googleSatellite,
+      '🛰️ أقمار صناعية (Esri)': esriSatellite,
+      '🏙️ شوارع تفصيلية (Esri)': esriStreet,
       '🧭 خريطة واضحة (Voyager)': cartoVoyager,
       '🗺️ خريطة عامة (OSM)': osmLayer,
       '☀️ خريطة فاتحة': cartoLight,
       '🌙 خريطة داكنة': cartoDark,
-      '🛰️ أقمار صناعية': esriSatellite,
-      '🏙️ شوارع تفصيلية': esriStreet,
-      '🟢 شوارع عربية': googleStreets,
-      '📡 أقمار عالية الدقة': googleSatellite,
-      '🗺️ هجين (صور + أسماء)': googleHybrid,
-      '🚦 حركة المرور': googleTraffic,
     }, {}, { position: 'topright', collapsed: true }).addTo(map);
 
     markersLayerRef.current = L.layerGroup().addTo(map);
