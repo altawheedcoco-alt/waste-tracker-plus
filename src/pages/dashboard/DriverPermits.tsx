@@ -138,7 +138,7 @@ const DriverPermits = () => {
             const permitNumber = await generatePermitNumber();
             return {
               organization_id: organization!.id,
-              driver_id: profile!.id, // placeholder - link to org admin
+              driver_id: null, // manual entry - no linked driver
               permit_number: permitNumber,
               permit_type: formData.permit_type,
               issued_by: profile!.id,
