@@ -19,8 +19,8 @@ export const useResolvedUrl = (url: string | null | undefined): string | null =>
       return;
     }
 
-    // If it's from a public bucket (public-assets, organization-posts, profile-media), use as-is
-    if (url.includes('/public-assets/') || url.includes('/organization-posts/') || url.includes('/profile-media/')) {
+    // If the URL is already a public URL (contains /object/public/), use as-is
+    if (url.includes('/object/public/')) {
       setResolved(url);
       return;
     }
@@ -48,7 +48,7 @@ export const useResolvedUrls = (urls: (string | null | undefined)[]): (string | 
       urls.map(url => {
         if (!url) return Promise.resolve(null);
         if (!url.includes('/storage/v1/')) return Promise.resolve(url);
-        if (url.includes('/public-assets/') || url.includes('/organization-posts/') || url.includes('/profile-media/')) {
+        if (url.includes('/object/public/')) {
           return Promise.resolve(url);
         }
         return refreshStorageUrl(url);
