@@ -90,6 +90,20 @@ export function usePartnerRestrictions(restrictedOrgId?: string) {
     }) => {
       if (!user || !organization) throw new Error('Not authenticated');
 
+      // Check if target org has admin role - admins cannot be restricted
+      const { data: adminCheck } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role', 'admin')
+        .in('user_id', 
+          (await supabase.from('profiles').select('id').eq('organization_id', params.restrictedOrgId)).data?.map(p => p.id) || []
+        )
+        .limit(1);
+
+      if (adminCheck && adminCheck.length > 0) {
+        throw new Error('لا يمكن تقييد مدير النظام');
+      }
+
       const inserts = params.types.map(type => ({
         organization_id: organization.id,
         restricted_org_id: params.restrictedOrgId,
