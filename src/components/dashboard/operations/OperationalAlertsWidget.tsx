@@ -501,10 +501,13 @@ const OperationalAlertsWidget = () => {
   }, []);
 
   const handleDismissAll = useCallback(() => {
-    const ids = visibleAlerts.map(a => a.id);
-    setDismissedIds(prev => new Set([...prev, ...ids]));
+    setDismissedIds(prev => {
+      const next = new Set(prev);
+      alerts.forEach(a => next.add(a.id));
+      return next;
+    });
     toast.success('تم إخفاء جميع التنبيهات');
-  }, []);
+  }, [alerts]);
 
   const handleResolve = useCallback((alert: OperationalAlert) => {
     setResolvedIds(prev => new Set([...prev, alert.id]));
