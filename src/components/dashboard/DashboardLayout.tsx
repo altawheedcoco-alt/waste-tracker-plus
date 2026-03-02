@@ -115,7 +115,7 @@ import { supabase } from '@/integrations/supabase/client';
 import PlatformLogo from '@/components/common/PlatformLogo';
 import DepositButton from '@/components/deposits/DepositButton';
 import { getAvatarEmoji, getColorTheme } from '@/components/settings/ProfileCustomization';
-import OfflineIndicator from '@/components/offline/OfflineIndicator';
+
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
 import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
@@ -978,8 +978,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {/* Global Refresh Button - Hidden on mobile */}
               {!isMobile && <GlobalRefreshButton />}
 
-              {/* Network Status Indicator */}
-              <OfflineIndicator />
 
               {/* Focus Music Player - Hidden on mobile, shown in sidebar */}
               {!isMobile && <FocusMusicPlayer />}
