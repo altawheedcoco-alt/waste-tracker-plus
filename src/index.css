@@ -36,7 +36,7 @@
     --card: 0 0% 98%;
     --card-foreground: 0 0% 9%;
 
-    --popover: 0 0% 89%;
+    --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
 
     --primary: 160 84% 39%;
@@ -45,8 +45,8 @@
     --secondary: 0 0% 32%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 63%;
-    --muted-foreground: 0 0% 9%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 40%;
 
     --accent: 166 76% 96%;
     --accent-foreground: 173 80% 40%;
