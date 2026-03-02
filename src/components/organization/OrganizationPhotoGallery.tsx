@@ -64,12 +64,12 @@ const OrganizationPhotoGallery = ({ organizationId, isEditable }: OrganizationPh
         const filePath = `${organizationId}/gallery/${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('organization-stamps')
+          .from('public-assets')
           .upload(filePath, file, { upsert: true });
         if (uploadError) throw uploadError;
 
         const { data: urlData } = supabase.storage
-          .from('organization-stamps')
+          .from('public-assets')
           .getPublicUrl(filePath);
 
         const { error: dbError } = await supabase
@@ -96,10 +96,15 @@ const OrganizationPhotoGallery = ({ organizationId, isEditable }: OrganizationPh
 
   const handleDelete = async (photo: Photo) => {
     try {
-      // Extract storage path from URL
-      const urlParts = photo.photo_url.split('/organization-stamps/');
+      // Extract storage path from URL - check both buckets for backward compat
+      let urlParts = photo.photo_url.split('/public-assets/');
+      let bucket = 'public-assets';
+      if (!urlParts[1]) {
+        urlParts = photo.photo_url.split('/organization-stamps/');
+        bucket = 'organization-stamps';
+      }
       if (urlParts[1]) {
-        await supabase.storage.from('organization-stamps').remove([decodeURIComponent(urlParts[1])]);
+        await supabase.storage.from(bucket).remove([decodeURIComponent(urlParts[1])]);
       }
       const { error } = await supabase.from('organization_photos').delete().eq('id', photo.id);
       if (error) throw error;

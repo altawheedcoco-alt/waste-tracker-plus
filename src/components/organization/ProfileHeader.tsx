@@ -125,14 +125,14 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
 
       // Upload to storage
       const { error: uploadError } = await supabase.storage
-        .from('organization-stamps')
+        .from('public-assets')
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('organization-stamps')
+        .from('public-assets')
         .getPublicUrl(filePath);
 
       // Update organization
@@ -178,14 +178,14 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
 
       // Upload to storage
       const { error: uploadError } = await supabase.storage
-        .from('organization-stamps')
+        .from('public-assets')
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: urlData } = supabase.storage
-        .from('organization-stamps')
+        .from('public-assets')
         .getPublicUrl(filePath);
 
       // Update organization
