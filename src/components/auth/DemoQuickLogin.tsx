@@ -1,25 +1,38 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield, Loader2, ChevronDown, ChevronUp, Building2 } from 'lucide-react';
+import { Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield, Loader2, ChevronDown, ChevronUp, Building2, Briefcase, Award, ClipboardCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 const DEMO_PASSWORD = '575757';
+const ACCESS_PIN = '575757';
 
-const demoAccounts = [
-  { email: 'demo-generator@irecycle.test', label: 'مولد مخلفات', desc: 'مصانع ومنشآت', icon: Factory, color: 'from-amber-500 to-orange-600' },
-  { email: 'demo-recycler@irecycle.test', label: 'معيد تدوير', desc: 'مرافق إعادة التدوير', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
-  { email: 'demo-transporter@irecycle.test', label: 'ناقل مخلفات', desc: 'شركات نقل المخلفات', icon: Truck, color: 'from-primary to-emerald-600' },
-  { email: 'demo-transport-office@irecycle.test', label: 'مكتب نقل', desc: 'تأجير مركبات نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
-  { email: 'demo-disposal@irecycle.test', label: 'جهة تخلص آمن', desc: 'مدافن ومحارق', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
-  { email: 'demo-driver@irecycle.test', label: 'سائق', desc: 'سائقي المركبات', icon: Car, color: 'from-rose-500 to-red-600' },
-  { email: 'demo-employee@irecycle.test', label: 'موظف', desc: 'موظفي الشركات', icon: UserCog, color: 'from-slate-500 to-slate-700' },
-  { email: 'demo-admin@irecycle.test', label: 'مدير النظام', desc: 'إدارة كاملة', icon: Shield, color: 'from-yellow-500 to-amber-700' },
-  { email: 'demo-consultant@irecycle.test', label: 'استشاري بيئي', desc: 'استشارات بيئية', icon: ShieldCheck, color: 'from-teal-500 to-teal-700' },
-  { email: 'demo-consulting-office@irecycle.test', label: 'مكتب استشاري', desc: 'مكاتب استشارية', icon: Recycle, color: 'from-indigo-500 to-indigo-700' },
-  { email: 'demo-iso-body@irecycle.test', label: 'جهة مانحة للأيزو', desc: 'شهادات الأيزو', icon: Shield, color: 'from-emerald-600 to-green-800' },
+const allAccounts = [
+  // مدير النظام
+  { email: 'altawheedco.co@gmail.com', label: 'التوحيد لتجارة مخلفات الاخشاب', desc: 'مدير النظام', icon: Shield, color: 'from-yellow-500 to-amber-700' },
+  // مولدات
+  { email: 'generator@demo.com', label: 'شركة التوليد للنفايات', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+  { email: 'demo-generator@irecycle.test', label: 'شركة المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+  { email: 'generator2@demo.com', label: 'مصنع الصناعات البلاستيكية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+  // ناقلات
+  { email: 'transporter@demo.com', label: 'شركة النقل السريع', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
+  { email: 'demo-transport-office@irecycle.test', label: 'مكتب النقل التجريبي', desc: 'مكتب نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
+  // معالجات
+  { email: 'recycler@demo.com', label: 'شركة إعادة التدوير الخضراء', desc: 'معيد تدوير', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
+  { email: 'demo-recycler@irecycle.test', label: 'شركة التدوير التجريبية', desc: 'معيد تدوير', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
+  // تخلص آمن
+  { email: 'disposal@demo.com', label: 'شركة الأمان للتخلص الآمن', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
+  { email: 'demo-disposal@irecycle.test', label: 'شركة التخلص الآمن التجريبية', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
+  // استشاريون
+  { email: 'demo-consultant@irecycle.test', label: 'مكتب الاستشارات البيئية', desc: 'استشاري بيئي', icon: Briefcase, color: 'from-teal-500 to-teal-700' },
+  { email: 'demo-consulting-office@irecycle.test', label: 'المكتب الاستشاري', desc: 'مكتب استشاري', icon: ClipboardCheck, color: 'from-indigo-500 to-indigo-700' },
+  // أيزو
+  { email: 'demo-iso-body@irecycle.test', label: 'جهة الأيزو', desc: 'جهة مانحة للأيزو', icon: Award, color: 'from-emerald-600 to-green-800' },
+  // سائق وموظف
+  { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
+  { email: 'driver@demo.com', label: 'سائق التوصيل - النقل السريع', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
+  { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف شركة', icon: UserCog, color: 'from-slate-500 to-slate-700' },
 ];
 
 interface DemoQuickLoginProps {
@@ -27,65 +40,35 @@ interface DemoQuickLoginProps {
   onLoginEnd?: () => void;
 }
 
-const ACCESS_PIN = '575757';
-
 const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   const [loading, setLoading] = useState<string | null>(null);
-  const [seeding, setSeeding] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [accountsReady, setAccountsReady] = useState<boolean | null>(null);
-  const [actualPassword, setActualPassword] = useState<string>(DEMO_PASSWORD);
   const [pinInput, setPinInput] = useState('');
   const [pinVerified, setPinVerified] = useState(false);
   const [pinError, setPinError] = useState(false);
   const { signIn } = useAuth();
   const { toast } = useToast();
 
-  const handleSeedAccounts = async () => {
-    setSeeding(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('seed-demo-accounts', { body: { pin: ACCESS_PIN } });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error || 'فشل إنشاء الحسابات');
-      
-      if (data.password) setActualPassword(data.password);
-      setAccountsReady(true);
-      toast({
-        title: 'تم إنشاء الحسابات التجريبية ✅',
-        description: `${data.accounts?.length || 7} حسابات جاهزة للاستخدام`,
-      });
-    } catch (err: any) {
-      toast({
-        title: 'خطأ',
-        description: err.message || 'فشل إنشاء الحسابات التجريبية',
-        variant: 'destructive',
-      });
-    } finally {
-      setSeeding(false);
-    }
-  };
-
   const handleQuickLogin = async (email: string) => {
     setLoading(email);
     onLoginStart?.();
     try {
-      const { error } = await signIn(email, actualPassword);
+      const { error } = await signIn(email, DEMO_PASSWORD);
       if (error) {
-        // If login fails, accounts may not exist yet
         if (error.message?.includes('Invalid login credentials')) {
           toast({
-            title: 'الحساب غير موجود',
-            description: 'اضغط "تفعيل الحسابات التجريبية" أولاً لإنشاء الحسابات',
+            title: 'بيانات الدخول غير صحيحة',
+            description: 'تأكد من أن الحساب مفعل وكلمة المرور صحيحة',
             variant: 'destructive',
           });
-          setAccountsReady(false);
         } else {
           throw error;
         }
       } else {
+        const account = allAccounts.find(a => a.email === email);
         toast({
           title: 'تم الدخول بنجاح ✅',
-          description: `تم تسجيل الدخول كـ ${demoAccounts.find(a => a.email === email)?.label}`,
+          description: `تم تسجيل الدخول كـ ${account?.label || email}`,
         });
       }
     } catch (err: any) {
@@ -107,7 +90,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-2"
       >
-        <span>🧪 الدخول السريع التجريبي</span>
+        <span>🔑 الدخول السريع</span>
         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
 
@@ -162,36 +145,14 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
               </div>
             ) : (
               <div className="pt-3 space-y-3">
-                {/* Seed button */}
-                {accountsReady !== true && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs border-dashed"
-                    onClick={handleSeedAccounts}
-                    disabled={seeding}
-                  >
-                    {seeding ? (
-                      <>
-                        <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-                        جاري إنشاء الحسابات...
-                      </>
-                    ) : (
-                      '⚙️ تفعيل الحسابات التجريبية'
-                    )}
-                  </Button>
-                )}
-
-                {/* Quick login grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {demoAccounts.map((account, i) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[420px] overflow-y-auto">
+                  {allAccounts.map((account, i) => (
                     <motion.button
                       key={account.email}
                       type="button"
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.05 }}
+                      transition={{ delay: i * 0.03 }}
                       whileHover={{ scale: 1.03 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => handleQuickLogin(account.email)}
@@ -205,8 +166,11 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                           <account.icon className="w-4 h-4 text-white" />
                         )}
                       </div>
-                      <span className="text-[11px] font-medium text-foreground/80 leading-tight text-center">
+                      <span className="text-[11px] font-medium text-foreground/80 leading-tight text-center line-clamp-2">
                         {account.label}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground">
+                        {account.desc}
                       </span>
                     </motion.button>
                   ))}
