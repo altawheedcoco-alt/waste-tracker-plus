@@ -180,18 +180,18 @@ const MapPage = () => {
     const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&hl=ar&x={x}&y={y}&z={z}', { attribution: 'Google Hybrid', maxZoom: 20 });
     const googleTraffic = L.tileLayer('https://mt1.google.com/vt/lyrs=m,traffic&hl=ar&x={x}&y={y}&z={z}', { attribution: 'Google Traffic', maxZoom: 20 });
 
-    googleStreets.addTo(map);
+    osmLayer.addTo(map);
     L.control.layers({
-      '🟢 شوارع عربية': googleStreets,
-      '🗺️ هجين (صور + أسماء)': googleHybrid,
-      '🚦 حركة المرور': googleTraffic,
-      '📡 أقمار عالية الدقة': googleSatellite,
-      '🛰️ أقمار صناعية (Esri)': esriSatellite,
-      '🏙️ شوارع تفصيلية (Esri)': esriStreet,
-      '🧭 خريطة واضحة (Voyager)': cartoVoyager,
       '🗺️ خريطة عامة (OSM)': osmLayer,
+      '🧭 خريطة واضحة (Voyager)': cartoVoyager,
       '☀️ خريطة فاتحة': cartoLight,
       '🌙 خريطة داكنة': cartoDark,
+      '🛰️ أقمار صناعية (Esri)': esriSatellite,
+      '🏙️ شوارع تفصيلية (Esri)': esriStreet,
+      '🟢 شوارع عربية (Google)': googleStreets,
+      '🗺️ هجين (صور + أسماء)': googleHybrid,
+      '📡 أقمار عالية الدقة': googleSatellite,
+      '🚦 حركة المرور': googleTraffic,
     }, {}, { position: 'topright', collapsed: true }).addTo(map);
 
     markersLayerRef.current = L.layerGroup().addTo(map);
