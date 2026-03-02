@@ -15077,6 +15077,114 @@ export type Database = {
           },
         ]
       }
+      homepage_custom_blocks: {
+        Row: {
+          background_color: string | null
+          block_type: string
+          content: string | null
+          content_en: string | null
+          created_at: string
+          created_by: string | null
+          custom_position_after: string | null
+          ends_at: string | null
+          id: string
+          is_visible: boolean
+          link_text: string | null
+          link_url: string | null
+          media_url: string | null
+          position: string
+          sort_order: number
+          starts_at: string | null
+          text_color: string | null
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string | null
+          block_type?: string
+          content?: string | null
+          content_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_position_after?: string | null
+          ends_at?: string | null
+          id?: string
+          is_visible?: boolean
+          link_text?: string | null
+          link_url?: string | null
+          media_url?: string | null
+          position?: string
+          sort_order?: number
+          starts_at?: string | null
+          text_color?: string | null
+          title: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string | null
+          block_type?: string
+          content?: string | null
+          content_en?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_position_after?: string | null
+          ends_at?: string | null
+          id?: string
+          is_visible?: boolean
+          link_text?: string | null
+          link_url?: string | null
+          media_url?: string | null
+          position?: string
+          sort_order?: number
+          starts_at?: string | null
+          text_color?: string | null
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_sections: {
+        Row: {
+          custom_content: Json | null
+          custom_styles: Json | null
+          description: string | null
+          id: string
+          is_visible: boolean
+          sort_order: number
+          title: string
+          title_en: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          custom_content?: Json | null
+          custom_styles?: Json | null
+          description?: string | null
+          id: string
+          is_visible?: boolean
+          sort_order?: number
+          title: string
+          title_en?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          custom_content?: Json | null
+          custom_styles?: Json | null
+          description?: string | null
+          id?: string
+          is_visible?: boolean
+          sort_order?: number
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       hr_attendance_policies: {
         Row: {
           break_duration_minutes: number | null

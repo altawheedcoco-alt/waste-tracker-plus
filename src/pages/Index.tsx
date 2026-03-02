@@ -1,5 +1,7 @@
 import { lazy, Suspense, memo, useRef, useState, useEffect } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 // Critical above-fold: load eagerly but keep lightweight
 import Header from "@/components/Header";
@@ -27,6 +29,7 @@ const NationalInitiativeSection = lazy(() => import("@/components/landing/Nation
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
 const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
 const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
+const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
@@ -60,7 +63,6 @@ LazySection.displayName = 'LazySection';
 const DeferredTicker = memo(() => {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    // Delay ticker to after FCP - don't block initial render
     const id = setTimeout(() => setShow(true), 3000);
     return () => clearTimeout(id);
   }, []);
@@ -73,37 +75,134 @@ const DeferredTicker = memo(() => {
 });
 DeferredTicker.displayName = 'DeferredTicker';
 
+// Section component map
+const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
+  ads: <HomepageAds />,
+  partners: <TrustedPartnersSection />,
+  stats: <Stats />,
+  verify: <DocumentVerification />,
+  consultants: <FeaturedConsultants />,
+  initiative: <NationalInitiativeSection />,
+  features: <Features />,
+  'features-list': <FeaturesList />,
+  'doc-ai': <DocumentAIShowcase />,
+  'smart-agent': <SmartAgentShowcase />,
+  services: <Services />,
+  omaluna: <OmalunaSection />,
+  testimonials: <TestimonialsSection />,
+  cta: <CTA />,
+};
+
 const Index = () => {
+  // Fetch homepage section config from DB
+  const { data: sections } = useQuery({
+    queryKey: ['homepage-sections'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('homepage_sections')
+        .select('id, is_visible, sort_order')
+        .order('sort_order');
+      if (error) return null;
+      return data;
+    },
+    staleTime: 1000 * 60 * 10, // Cache 10 min
+  });
+
+  // Fetch custom blocks
+  const { data: customBlocks } = useQuery({
+    queryKey: ['homepage-custom-blocks-public'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('homepage_custom_blocks')
+        .select('*')
+        .eq('is_visible', true)
+        .order('sort_order');
+      if (error) return [];
+      // Filter by date range
+      const now = new Date().toISOString();
+      return (data || []).filter(b =>
+        (!b.starts_at || b.starts_at <= now) &&
+        (!b.ends_at || b.ends_at >= now)
+      );
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const isVisible = (sectionId: string) => {
+    if (!sections) return true; // Default visible if DB not loaded yet
+    const section = sections.find(s => s.id === sectionId);
+    return section ? section.is_visible : true;
+  };
+
+  // Sort content sections by DB order
+  const sortedSectionIds = sections
+    ? sections
+        .filter(s => s.is_visible && SECTION_COMPONENTS[s.id])
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(s => s.id)
+    : Object.keys(SECTION_COMPONENTS); // Fallback to default order
+
+  // Custom blocks by position
+  const blocksAtPosition = (pos: string) =>
+    (customBlocks || []).filter(b => b.position === pos);
+
+  const blocksAfterSection = (sectionId: string) =>
+    (customBlocks || []).filter(b => b.position === 'custom' && b.custom_position_after === sectionId);
+
   return (
     <Suspense fallback={null}>
       <LandingWrapper>
         <div className="min-h-screen-safe bg-[hsl(140,20%,98%)] smooth-scroll">
-          <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
-            <Header />
-            <DeferredTicker />
-          </ErrorBoundary>
-          <ErrorBoundary fallbackTitle="خطأ في تحميل القسم الرئيسي">
-            <Hero />
-          </ErrorBoundary>
+          {isVisible('header') && (
+            <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
+              <Header />
+              {isVisible('ticker') && <DeferredTicker />}
+            </ErrorBoundary>
+          )}
+          {isVisible('hero') && (
+            <ErrorBoundary fallbackTitle="خطأ في تحميل القسم الرئيسي">
+              <Hero />
+            </ErrorBoundary>
+          )}
+
+          {/* Custom blocks: top position */}
+          {blocksAtPosition('top').map(block => (
+            <LazySection key={block.id}>
+              <HomepageCustomBlockRenderer block={block} />
+            </LazySection>
+          ))}
+
+          {/* Custom blocks: after_hero position */}
+          {blocksAtPosition('after_hero').map(block => (
+            <LazySection key={block.id}>
+              <HomepageCustomBlockRenderer block={block} />
+            </LazySection>
+          ))}
+
           <main>
             <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
-              <div id="ads"><LazySection><HomepageAds /></LazySection></div>
-              <div id="partners"><LazySection><TrustedPartnersSection /></LazySection></div>
-              <div id="stats"><LazySection><Stats /></LazySection></div>
-              <div id="verify"><LazySection><DocumentVerification /></LazySection></div>
-              <div id="consultants"><LazySection><FeaturedConsultants /></LazySection></div>
-              <div id="initiative"><LazySection><NationalInitiativeSection /></LazySection></div>
-              <div id="features"><LazySection><Features /></LazySection></div>
-              <div id="features-list"><LazySection><FeaturesList /></LazySection></div>
-              <div id="doc-ai"><LazySection><DocumentAIShowcase /></LazySection></div>
-              <div id="smart-agent"><LazySection><SmartAgentShowcase /></LazySection></div>
-              <div id="services"><LazySection><Services /></LazySection></div>
-              <div id="omaluna"><LazySection><OmalunaSection /></LazySection></div>
-              <div id="testimonials"><LazySection><TestimonialsSection /></LazySection></div>
-              <div id="cta"><LazySection><CTA /></LazySection></div>
+              {sortedSectionIds.map(sectionId => (
+                <div key={sectionId} id={sectionId}>
+                  <LazySection>{SECTION_COMPONENTS[sectionId]}</LazySection>
+                  {/* Custom blocks after this section */}
+                  {blocksAfterSection(sectionId).map(block => (
+                    <LazySection key={block.id}>
+                      <HomepageCustomBlockRenderer block={block} />
+                    </LazySection>
+                  ))}
+                </div>
+              ))}
             </ErrorBoundary>
           </main>
-          <LazySection><Footer /></LazySection>
+
+          {/* Custom blocks: before_footer position */}
+          {blocksAtPosition('before_footer').map(block => (
+            <LazySection key={block.id}>
+              <HomepageCustomBlockRenderer block={block} />
+            </LazySection>
+          ))}
+
+          {isVisible('footer') && <LazySection><Footer /></LazySection>}
         </div>
       </LandingWrapper>
     </Suspense>
