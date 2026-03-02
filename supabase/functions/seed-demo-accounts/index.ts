@@ -92,8 +92,18 @@ Deno.serve(async (req) => {
       for (const account of DEMO_ACCOUNTS) {
         const demoUser = existingUsers?.users?.find(u => u.email === account.email);
         if (demoUser) {
-          await supabase.auth.admin.deleteUser(demoUser.id);
-          deleted++;
+          // Clean up ALL references to avoid FK constraints
+          await supabase.from('activity_logs').delete().eq('user_id', demoUser.id);
+          await supabase.from('notifications').delete().eq('user_id', demoUser.id);
+          await supabase.from('chat_messages').delete().eq('sender_id', demoUser.id);
+          await supabase.from('user_organizations').delete().eq('user_id', demoUser.id);
+          await supabase.from('drivers').delete().eq('profile_id', demoUser.id);
+          await supabase.from('employee_permissions').delete().eq('user_id', demoUser.id);
+          await supabase.from('user_roles').delete().eq('user_id', demoUser.id);
+          await supabase.from('profiles').delete().eq('user_id', demoUser.id);
+          const { error: delErr } = await supabase.auth.admin.deleteUser(demoUser.id);
+          if (!delErr) deleted++;
+          else console.log(`Failed to delete ${account.email}: ${delErr.message}`);
         }
       }
       return new Response(
