@@ -33,7 +33,8 @@ import {
   Target,
   Briefcase,
   Award,
-  Globe
+  Globe,
+  Share2
 } from 'lucide-react';
 import OrganizationPosts from '@/components/organization/OrganizationPosts';
 import StampSignatureUpload from '@/components/organization/StampSignatureUpload';
@@ -50,6 +51,7 @@ import LMSProfileCertificates from '@/components/lms/LMSProfileCertificates';
 import LegalDataSection from '@/components/organization/LegalDataSection';
 import AttestationTabContent from '@/components/attestation/AttestationTabContent';
 import BusinessPagePreview from '@/components/organization/BusinessPagePreview';
+import OrgPublicProfileSettings from '@/components/org-structure/OrgPublicProfileSettings';
 
 interface OrganizationDocument {
   id: string;
@@ -432,6 +434,10 @@ const OrganizationProfile = () => {
                 <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
                 الإفادة
               </TabsTrigger>
+              <TabsTrigger value="sharing" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                إعدادات المشاركة
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -443,6 +449,11 @@ const OrganizationProfile = () => {
               orgData={orgData}
               isOwnPage={true}
             />
+          </TabsContent>
+
+          {/* Sharing Settings Tab */}
+          <TabsContent value="sharing">
+            <OrgPublicProfileSettings />
           </TabsContent>
 
           {/* Portfolio Tab */}
