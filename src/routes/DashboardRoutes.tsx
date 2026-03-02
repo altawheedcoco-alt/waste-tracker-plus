@@ -172,6 +172,12 @@ const ScopedAccessLinks = lazy(() => import("@/pages/dashboard/ScopedAccessLinks
 const AdminEntityCensus = lazy(() => import("@/pages/dashboard/AdminEntityCensus"));
 const DigitalIdentityCardPage = lazy(() => import("@/pages/dashboard/DigitalIdentityCardPage"));
 const MultiSignTemplates = lazy(() => import("@/pages/dashboard/MultiSignTemplates"));
+const HRPayroll = lazy(() => import("@/pages/dashboard/hr/HRPayroll"));
+const HRPerformance = lazy(() => import("@/pages/dashboard/hr/HRPerformance"));
+const HRShifts = lazy(() => import("@/pages/dashboard/hr/HRShifts"));
+const HROrgChart = lazy(() => import("@/pages/dashboard/hr/HROrgChart"));
+const HREndOfService = lazy(() => import("@/pages/dashboard/hr/HREndOfService"));
+const HRSelfService = lazy(() => import("@/pages/dashboard/hr/HRSelfService"));
 
 export const dashboardRoutes = (
   <>
@@ -347,6 +353,12 @@ export const dashboardRoutes = (
     <Route path="/dashboard/smart-agent" element={<SmartAgentDashboard />} />
     <Route path="/dashboard/entity-census" element={<AdminEntityCensus />} />
     <Route path="/dashboard/multi-sign-templates" element={<MultiSignTemplates />} />
+    <Route path="/dashboard/hr/payroll" element={<HRPayroll />} />
+    <Route path="/dashboard/hr/performance" element={<HRPerformance />} />
+    <Route path="/dashboard/hr/shifts" element={<HRShifts />} />
+    <Route path="/dashboard/hr/org-chart" element={<HROrgChart />} />
+    <Route path="/dashboard/hr/end-of-service" element={<HREndOfService />} />
+    <Route path="/dashboard/hr/self-service" element={<HRSelfService />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
