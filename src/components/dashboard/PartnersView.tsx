@@ -9,17 +9,19 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
   Building2, Factory, Recycle, Truck, Trash2, Search, Eye, Phone, Mail,
   MapPin, User, FileText, Download, Loader2, StickyNote, Info, Package,
-  Users, ChevronLeft, ExternalLink,
+  Users, ChevronLeft, ExternalLink, Globe,
 } from 'lucide-react';
 import PartnerNotesDialog from '@/components/partners/PartnerNotesDialog';
 import PartnerLinkingCard from '@/components/partners/PartnerLinkingCard';
 import usePartners from '@/hooks/usePartners';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery } from '@tanstack/react-query';
+import BusinessPagePreview from '@/components/organization/BusinessPagePreview';
 
 interface Organization {
   id: string;
@@ -83,6 +85,7 @@ const PartnersView = () => {
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [showNotesDialog, setShowNotesDialog] = useState(false);
   const [notesPartner, setNotesPartner] = useState<{ id: string; name: string } | null>(null);
+  const [businessPageOrg, setBusinessPageOrg] = useState<Organization | null>(null);
 
   // Fetch documents for selected org
   const { data: orgDocuments = [], isLoading: loadingDocs } = useQuery({
@@ -98,6 +101,22 @@ const PartnersView = () => {
       return data || [];
     },
     enabled: !!selectedOrg?.id,
+  });
+
+  // Fetch full org data for business page preview
+  const { data: businessPageOrgData } = useQuery({
+    queryKey: ['business-page-org-data', businessPageOrg?.id],
+    queryFn: async () => {
+      if (!businessPageOrg?.id) return null;
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('id', businessPageOrg.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!businessPageOrg?.id,
   });
 
   // Fetch stats for selected org
@@ -332,6 +351,7 @@ const PartnersView = () => {
                     onDownloadDoc={handleDownloadDocument}
                     getDocTypeLabel={getDocumentTypeLabel}
                     onViewProfile={() => navigate(`/dashboard/organization/${selectedOrg.id}`)}
+                    onViewBusinessPage={() => setBusinessPageOrg(selectedOrg)}
                     onOpenNotes={() => {
                       setNotesPartner({ id: selectedOrg.id, name: selectedOrg.name });
                       setShowNotesDialog(true);
@@ -364,6 +384,33 @@ const PartnersView = () => {
           partnerName={notesPartner.name}
         />
       )}
+
+      {/* Business Page Preview Dialog */}
+      <Dialog open={!!businessPageOrg} onOpenChange={(open) => !open && setBusinessPageOrg(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="p-4 pb-0">
+            <DialogTitle className="flex items-center gap-2 justify-end">
+              <span>الصفحة التجارية - {businessPageOrg?.name}</span>
+              <Globe className="w-5 h-5 text-primary" />
+            </DialogTitle>
+          </DialogHeader>
+          {businessPageOrg && businessPageOrgData && (
+            <div className="p-4 pt-0">
+              <BusinessPagePreview
+                organizationId={businessPageOrg.id}
+                organizationName={businessPageOrg.name}
+                orgData={businessPageOrgData}
+                isOwnPage={false}
+              />
+            </div>
+          )}
+          {businessPageOrg && !businessPageOrgData && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -377,11 +424,12 @@ interface PartnerDetailPanelProps {
   onDownloadDoc: (doc: Document) => void;
   getDocTypeLabel: (type: string) => string;
   onViewProfile: () => void;
+  onViewBusinessPage: () => void;
   onOpenNotes: () => void;
 }
 
 const PartnerDetailPanel = ({
-  org, stats, documents, loadingDocs, onDownloadDoc, getDocTypeLabel, onViewProfile, onOpenNotes,
+  org, stats, documents, loadingDocs, onDownloadDoc, getDocTypeLabel, onViewProfile, onViewBusinessPage, onOpenNotes,
 }: PartnerDetailPanelProps) => {
   const config = typeConfig[org.organization_type] || typeConfig.generator;
   const Icon = config.icon;
@@ -432,8 +480,8 @@ const PartnerDetailPanel = ({
           <Button variant="secondary" onClick={onOpenNotes} className="gap-2">
             <StickyNote className="w-4 h-4" /> الملاحظات
           </Button>
-          <Button variant="outline" onClick={() => window.open(`/organization/${org.id}`, '_blank')} className="gap-2">
-            <ExternalLink className="w-4 h-4" /> الصفحة العامة
+          <Button variant="outline" onClick={onViewBusinessPage} className="gap-2">
+            <Globe className="w-4 h-4" /> الصفحة التجارية
           </Button>
         </div>
 
